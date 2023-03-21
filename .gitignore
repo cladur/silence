@@ -1,0 +1,6 @@
+# CLion stuff
+cmake-build-debug
+.idea
+
+# Mac stuff
+.DS_Store

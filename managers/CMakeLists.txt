@@ -1,0 +1,28 @@
+set(RENDER_SERVER_NAME "silence_render_manager")
+set(DISPLAY_SERVER_NAME "silence_display_manager")
+
+add_library(${RENDER_SERVER_NAME} STATIC render_manager.cpp render_manager.h rendering/vk_initializers.cpp rendering/vk_initializers.h)
+add_library(${DISPLAY_SERVER_NAME} STATIC display_manager.cpp display_manager.h)
+
+target_include_directories(${RENDER_SERVER_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
+target_include_directories(${DISPLAY_SERVER_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
+
+find_package(spdlog CONFIG REQUIRED)
+target_link_libraries(${RENDER_SERVER_NAME} PRIVATE spdlog::spdlog spdlog::spdlog_header_only)
+
+find_package(glfw3 CONFIG REQUIRED)
+target_link_libraries(${DISPLAY_SERVER_NAME} PUBLIC glfw)
+
+find_package(Vulkan REQUIRED)
+target_link_libraries(${RENDER_SERVER_NAME} PUBLIC Vulkan::Vulkan)
+target_link_libraries(${DISPLAY_SERVER_NAME} PUBLIC Vulkan::Vulkan)
+
+include(FetchContent)
+FetchContent_Declare(
+        fetch_vk_bootstrap
+        GIT_REPOSITORY https://github.com/charles-lunarg/vk-bootstrap
+        GIT_TAG v0.7 #suggest using a tag so the library doesn't update whenever new commits are pushed to a branch
+)
+FetchContent_MakeAvailable(fetch_vk_bootstrap)
+target_link_libraries(${RENDER_SERVER_NAME} PUBLIC vk-bootstrap::vk-bootstrap)
+target_link_libraries(${DISPLAY_SERVER_NAME} PUBLIC vk-bootstrap::vk-bootstrap)
