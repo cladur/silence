@@ -5,13 +5,13 @@
 #include <VkBootstrap.h>
 #include <spdlog/spdlog.h>
 
-#define VK_CHECK(x)                                         \
-	do {                                                    \
-		VkResult err = x;                                   \
-		if (err) {                                          \
-			SPDLOG_ERROR("Detected Vulkan error: {}", err); \
-			abort();                                        \
-		}                                                   \
+#define VK_CHECK(x)                                                                                                    \
+	do {                                                                                                               \
+		VkResult err = x;                                                                                              \
+		if (err) {                                                                                                     \
+			SPDLOG_ERROR("Detected Vulkan error: {}", err);                                                            \
+			abort();                                                                                                   \
+		}                                                                                                              \
 	} while (false)
 
 void RenderManager::init_vulkan(DisplayManager &display_manager) {
@@ -34,10 +34,7 @@ void RenderManager::init_vulkan(DisplayManager &display_manager) {
 	surface = display_manager.create_surface(vkb_inst.instance);
 
 	vkb::PhysicalDeviceSelector selector{ vkb_inst };
-	auto physical_device_ret = selector
-									   .set_minimum_version(1, 1)
-									   .set_surface(surface)
-									   .select();
+	auto physical_device_ret = selector.set_minimum_version(1, 1).set_surface(surface).select();
 
 	if (!physical_device_ret) {
 		SPDLOG_ERROR("Failed to find a suitable GPU. Error: {}", physical_device_ret.error().message());
@@ -78,7 +75,8 @@ void RenderManager::init_swapchain(DisplayManager &display_manager) {
 	auto temp_swapchain_images = vkbSwapchain.get_images().value();
 	swapchain_images = std::vector<vk::Image>(temp_swapchain_images.begin(), temp_swapchain_images.end());
 	auto temp_swapchain_image_views = vkbSwapchain.get_image_views().value();
-	swapchain_image_views = std::vector<vk::ImageView>(temp_swapchain_image_views.begin(), temp_swapchain_image_views.end());
+	swapchain_image_views =
+			std::vector<vk::ImageView>(temp_swapchain_image_views.begin(), temp_swapchain_image_views.end());
 
 	swapchain_image_format = static_cast<vk::Format>(vkbSwapchain.image_format);
 }
@@ -86,8 +84,7 @@ void RenderManager::init_swapchain(DisplayManager &display_manager) {
 void RenderManager::init_commands() {
 	//create a command pool for commands submitted to the graphics queue.
 	vk::CommandPoolCreateInfo command_pool_info = vk_init::command_pool_create_info(
-			graphics_queue_family,
-			vk::CommandPoolCreateFlagBits::eResetCommandBuffer);
+			graphics_queue_family, vk::CommandPoolCreateFlagBits::eResetCommandBuffer);
 
 	auto command_pool_res = device.createCommandPool(command_pool_info);
 

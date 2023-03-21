@@ -14,7 +14,8 @@ int main() {
 	if (dm_ret == DisplayManager::Status::Ok) {
 		SPDLOG_INFO("Initialized display manager");
 	} else {
-		SPDLOG_ERROR("Failed to initialize the display manager. Status: ({}) {}", magic_enum::enum_integer(dm_ret), magic_enum::enum_name(dm_ret));
+		SPDLOG_ERROR("Failed to initialize the display manager. Status: ({}) {}", magic_enum::enum_integer(dm_ret),
+				magic_enum::enum_name(dm_ret));
 		return -1;
 	}
 
@@ -22,7 +23,8 @@ int main() {
 	if (rm_ret == RenderManager::Status::Ok) {
 		SPDLOG_INFO("Initialized render manager");
 	} else {
-		SPDLOG_ERROR("Failed to initialize the render manager. Status: ({}) {}", magic_enum::enum_integer(rm_ret), magic_enum::enum_name(rm_ret));
+		SPDLOG_ERROR("Failed to initialize the render manager. Status: ({}) {}", magic_enum::enum_integer(rm_ret),
+				magic_enum::enum_name(rm_ret));
 		return -1;
 	}
 
