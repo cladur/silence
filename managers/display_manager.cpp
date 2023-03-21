@@ -1,6 +1,6 @@
 #include "display_manager.h"
 
-#include <assert.h>
+#include <cassert>
 
 DisplayManager::Status DisplayManager::startup() {
 	if (!glfwInit()) {

@@ -61,24 +61,24 @@ void RenderManager::init_swapchain(DisplayManager &display_manager) {
 
 	vkb::SwapchainBuilder swapchain_builder{ chosen_gpu, device, surface };
 
-	auto vkbSwapchain = swapchain_builder
-								.use_default_format_selection()
-								// We use VSync present mode for now
-								// TODO: make this configurable if we want to uncap FPS in future
-								.set_desired_present_mode(VK_PRESENT_MODE_FIFO_KHR)
-								.set_desired_extent(window_size.first, window_size.second)
-								.build()
-								.value();
+	auto vkb_swapchain = swapchain_builder
+								 .use_default_format_selection()
+								 // We use VSync present mode for now
+								 // TODO: make this configurable if we want to uncap FPS in future
+								 .set_desired_present_mode(VK_PRESENT_MODE_FIFO_KHR)
+								 .set_desired_extent(window_size.first, window_size.second)
+								 .build()
+								 .value();
 
 	//store swapchain and its related images
-	swapchain = vkbSwapchain.swapchain;
-	auto temp_swapchain_images = vkbSwapchain.get_images().value();
+	swapchain = vkb_swapchain.swapchain;
+	auto temp_swapchain_images = vkb_swapchain.get_images().value();
 	swapchain_images = std::vector<vk::Image>(temp_swapchain_images.begin(), temp_swapchain_images.end());
-	auto temp_swapchain_image_views = vkbSwapchain.get_image_views().value();
+	auto temp_swapchain_image_views = vkb_swapchain.get_image_views().value();
 	swapchain_image_views =
 			std::vector<vk::ImageView>(temp_swapchain_image_views.begin(), temp_swapchain_image_views.end());
 
-	swapchain_image_format = static_cast<vk::Format>(vkbSwapchain.image_format);
+	swapchain_image_format = static_cast<vk::Format>(vkb_swapchain.image_format);
 }
 
 void RenderManager::init_commands() {
@@ -96,9 +96,9 @@ void RenderManager::init_commands() {
 	command_pool = command_pool_res.value;
 
 	//allocate the default command buffer that we will use for rendering
-	vk::CommandBufferAllocateInfo cmdAllocInfo = vk_init::command_buffer_allocate_info(command_pool, 1);
+	vk::CommandBufferAllocateInfo cmd_alloc_info = vk_init::command_buffer_allocate_info(command_pool, 1);
 
-	auto main_command_buffer_res = device.allocateCommandBuffers(cmdAllocInfo);
+	auto main_command_buffer_res = device.allocateCommandBuffers(cmd_alloc_info);
 
 	if (main_command_buffer_res.result != vk::Result::eSuccess) {
 		SPDLOG_ERROR("Failed to allocate command buffer");
