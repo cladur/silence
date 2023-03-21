@@ -29,8 +29,12 @@ class RenderManager {
 	vk::Queue graphics_queue; // queue we will submit to
 	uint32_t graphics_queue_family; // family of that queue
 
-	VkCommandPool command_pool; //the command pool for our commands
-	VkCommandBuffer main_command_buffer; //the buffer we will record into
+	vk::CommandPool command_pool; //the command pool for our commands
+	vk::CommandBuffer main_command_buffer; //the buffer we will record into
+
+	// RENDERPASS
+	vk::RenderPass render_pass;
+	std::vector<vk::Framebuffer> framebuffers;
 
 	void init_vulkan(DisplayManager &display_manager);
 	void init_swapchain(DisplayManager &display_manager);

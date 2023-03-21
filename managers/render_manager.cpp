@@ -34,11 +34,11 @@ void RenderManager::init_vulkan(DisplayManager &display_manager) {
 	surface = display_manager.create_surface(vkb_inst.instance);
 
 	vkb::PhysicalDeviceSelector selector{ vkb_inst };
-	auto physical_device = selector
-								   .set_minimum_version(1, 1)
-								   .set_surface(surface)
-								   .select()
-								   .value();
+	vkb::PhysicalDevice physical_device = selector
+												  .set_minimum_version(1, 1)
+												  .set_surface(surface)
+												  .select()
+												  .value();
 
 	//create the final Vulkan device
 	vkb::DeviceBuilder device_builder{ physical_device };
