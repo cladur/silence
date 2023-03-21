@@ -7,33 +7,42 @@
 RenderManager render_manager;
 DisplayManager display_manager;
 
-int main() {
+int main()
+{
 	SPDLOG_INFO("Starting up engine systems...");
 
 	auto dm_ret = display_manager.startup();
-	if (dm_ret == DisplayManager::Status::Ok) {
+	if (dm_ret == DisplayManager::Status::Ok)
+	{
 		SPDLOG_INFO("Initialized display manager");
-	} else {
+	}
+	else
+	{
 		SPDLOG_ERROR("Failed to initialize the display manager. Status: ({}) {}", magic_enum::enum_integer(dm_ret), magic_enum::enum_name(dm_ret));
 		return -1;
 	}
 
 	auto rm_ret = render_manager.startup(display_manager);
-	if (rm_ret == RenderManager::Status::Ok) {
+	if (rm_ret == RenderManager::Status::Ok)
+	{
 		SPDLOG_INFO("Initialized render manager");
-	} else {
+	}
+	else
+	{
 		SPDLOG_ERROR("Failed to initialize the render manager. Status: ({}) {}", magic_enum::enum_integer(rm_ret), magic_enum::enum_name(rm_ret));
 		return -1;
 	}
 
 	// Run the game.
 	bool should_run = true;
-	while (should_run) {
+	while (should_run)
+	{
 		// GAME LOGIC
 
 		display_manager.poll_events();
 
-		if (display_manager.window_should_close()) {
+		if (display_manager.window_should_close())
+		{
 			should_run = false;
 		}
 	}

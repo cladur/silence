@@ -52,7 +52,7 @@ AllowAllParametersOfDeclarationOnNextLine: false
 #   SplitEmptyNamespace: true
 # BreakBeforeBinaryOperators: None
 # BreakBeforeConceptDeclarations: true
-# BreakBeforeBraces: Attach
+BreakBeforeBraces: Allman
 # BreakBeforeInheritanceComma: false
 # BreakInheritanceList: BeforeColon
 # BreakBeforeTernaryOperators: true

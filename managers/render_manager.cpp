@@ -6,21 +6,25 @@
 #include <spdlog/spdlog.h>
 
 #define VK_CHECK(x)                                         \
-	do {                                                    \
+	do                                                      \
+	{                                                       \
 		VkResult err = x;                                   \
-		if (err) {                                          \
+		if (err)                                            \
+		{                                                   \
 			SPDLOG_ERROR("Detected Vulkan error: {}", err); \
 			abort();                                        \
 		}                                                   \
 	} while (false)
 
-void RenderManager::init_vulkan(DisplayManager &display_manager) {
+void RenderManager::init_vulkan(DisplayManager &display_manager)
+{
 	vkb::InstanceBuilder builder;
 	auto inst_ret = builder.set_app_name("Silence Vulkan Application")
 							.request_validation_layers()
 							.use_default_debug_messenger()
 							.build();
-	if (!inst_ret) {
+	if (!inst_ret)
+	{
 		SPDLOG_ERROR("Failed to create Vulkan Instance. Error: {}", inst_ret.error().message());
 	}
 
@@ -54,7 +58,8 @@ void RenderManager::init_vulkan(DisplayManager &display_manager) {
 	graphics_queue_family = vkb_device.get_queue_index(vkb::QueueType::graphics).value();
 }
 
-void RenderManager::init_swapchain(DisplayManager &display_manager) {
+void RenderManager::init_swapchain(DisplayManager &display_manager)
+{
 	auto window_size = display_manager.get_window_size();
 
 	vkb::SwapchainBuilder swapchain_builder{ chosen_gpu, device, surface };
@@ -78,7 +83,8 @@ void RenderManager::init_swapchain(DisplayManager &display_manager) {
 	swapchain_image_format = static_cast<vk::Format>(vkbSwapchain.image_format);
 }
 
-void RenderManager::init_commands() {
+void RenderManager::init_commands()
+{
 	//create a command pool for commands submitted to the graphics queue.
 	vk::CommandPoolCreateInfo command_pool_info = vk_init::command_pool_create_info(
 			graphics_queue_family,
@@ -86,7 +92,8 @@ void RenderManager::init_commands() {
 
 	auto command_pool_res = device.createCommandPool(command_pool_info);
 
-	if (command_pool_res.result != vk::Result::eSuccess) {
+	if (command_pool_res.result != vk::Result::eSuccess)
+	{
 		SPDLOG_ERROR("Failed to create command pool");
 		assert(false);
 	}
@@ -98,7 +105,8 @@ void RenderManager::init_commands() {
 
 	auto main_command_buffer_res = device.allocateCommandBuffers(cmdAllocInfo);
 
-	if (main_command_buffer_res.result != vk::Result::eSuccess) {
+	if (main_command_buffer_res.result != vk::Result::eSuccess)
+	{
 		SPDLOG_ERROR("Failed to allocate command buffer");
 		assert(false);
 	}
@@ -106,7 +114,8 @@ void RenderManager::init_commands() {
 	main_command_buffer = main_command_buffer_res.value[0];
 }
 
-RenderManager::Status RenderManager::startup(DisplayManager &display_manager) {
+RenderManager::Status RenderManager::startup(DisplayManager &display_manager)
+{
 	// TODO: Handle failures
 	init_vulkan(display_manager);
 	init_swapchain(display_manager);
@@ -115,14 +124,16 @@ RenderManager::Status RenderManager::startup(DisplayManager &display_manager) {
 	return Status::Ok;
 }
 
-void RenderManager::shutdown() {
+void RenderManager::shutdown()
+{
 	device.destroyCommandPool(command_pool);
 
 	// Destroy swapchain using Vulkan-hpp
 	device.destroySwapchainKHR(swapchain);
 
 	//destroy swapchain resources
-	for (auto &swapchain_image_view : swapchain_image_views) {
+	for (auto &swapchain_image_view : swapchain_image_views)
+	{
 		device.destroyImageView(swapchain_image_view);
 	}
 
