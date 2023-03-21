@@ -34,11 +34,16 @@ void RenderManager::init_vulkan(DisplayManager &display_manager) {
 	surface = display_manager.create_surface(vkb_inst.instance);
 
 	vkb::PhysicalDeviceSelector selector{ vkb_inst };
-	vkb::PhysicalDevice physical_device = selector
-												  .set_minimum_version(1, 1)
-												  .set_surface(surface)
-												  .select()
-												  .value();
+	auto physical_device_ret = selector
+									   .set_minimum_version(1, 1)
+									   .set_surface(surface)
+									   .select();
+
+	if (!physical_device_ret) {
+		SPDLOG_ERROR("Failed to find a suitable GPU. Error: {}", physical_device_ret.error().message());
+	}
+
+	vkb::PhysicalDevice physical_device = physical_device_ret.value();
 
 	//create the final Vulkan device
 	vkb::DeviceBuilder device_builder{ physical_device };
