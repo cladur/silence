@@ -10,7 +10,7 @@ file(GLOB_RECURSE HEADER_FILES
         *.h
         *.hpp)
 
-add_library(${CORE_LIB_NAME} STATIC ${HEADER_FILES} ${SOURCE_FILES} input/Input.cpp input/input.h input/input.cpp input/input.h)
+add_library(${CORE_LIB_NAME} STATIC ${HEADER_FILES} ${SOURCE_FILES} input/Input.cpp input/input.h input/input.cpp input/input.h types.h)
 
 target_include_directories(${CORE_LIB_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 

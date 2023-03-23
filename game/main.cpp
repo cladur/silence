@@ -40,6 +40,7 @@ int main() {
 		}
 	}
 
+
 	// Shut everything down, in reverse order.
 	SPDLOG_INFO("Shutting down engine subsystems...");
 	render_manager.shutdown();
