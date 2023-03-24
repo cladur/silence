@@ -12,6 +12,8 @@
 
 #include "vulkan-memory-allocator-hpp/vk_mem_alloc.hpp"
 
+#include "rendering/vk_mesh.h"
+
 struct DeletionQueue {
 	std::deque<std::function<void()>> deletors;
 
@@ -61,6 +63,9 @@ class RenderManager {
 	vk::PipelineLayout triangle_pipeline_layout;
 	vk::Pipeline triangle_pipeline;
 	vk::Pipeline red_triangle_pipeline;
+	vk::Pipeline mesh_pipeline;
+
+	Mesh triangle_mesh;
 
 	vma::Allocator allocator;
 
@@ -81,6 +86,9 @@ class RenderManager {
 
 	//loads a shader module from a spir-v file. Returns false if it errors
 	bool load_shader_module(const char *file_path, vk::ShaderModule *out_shader_module);
+
+	void load_meshes();
+	void upload_mesh(Mesh &mesh);
 
 public:
 	vk::Semaphore present_semaphore, render_semaphore;

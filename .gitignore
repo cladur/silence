@@ -4,6 +4,7 @@ cmake-build-debug
 
 # Mac stuff
 .DS_Store
+build_xcode
 
 .vscode
 .cache

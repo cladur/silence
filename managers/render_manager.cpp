@@ -6,6 +6,7 @@
 #include "magic_enum.hpp"
 
 #define VMA_IMPLEMENTATION
+#include "vma/vk_mem_alloc.h"
 #include "vulkan-memory-allocator-hpp/vk_mem_alloc.hpp"
 
 #include "rendering/pipeline_builder.h"
@@ -64,6 +65,15 @@ void RenderManager::init_vulkan(DisplayManager &display_manager) {
 	// use vkbootstrap to get a Graphics queue
 	graphics_queue = vkb_device.get_queue(vkb::QueueType::graphics).value();
 	graphics_queue_family = vkb_device.get_queue_index(vkb::QueueType::graphics).value();
+
+	//initialize the memory allocator
+	vma::AllocatorCreateInfo allocator_info = {};
+	allocator_info.physicalDevice = chosen_gpu;
+	allocator_info.device = device;
+	allocator_info.instance = instance;
+	VK_CHECK(vma::createAllocator(&allocator_info, &allocator));
+
+	main_deletion_queue.push_function([=, this]() { allocator.destroy(); });
 }
 
 void RenderManager::init_swapchain(DisplayManager &display_manager) {
@@ -160,7 +170,6 @@ void RenderManager::init_default_renderpass() {
 	render_pass_info.subpassCount = 1;
 	render_pass_info.pSubpasses = &subpass;
 
-	// VK_CHECK(vkCreateRenderPass(_device, &render_pass_info, nullptr, &_renderPass));
 	VK_CHECK(device.createRenderPass(&render_pass_info, nullptr, &render_pass));
 
 	main_deletion_queue.push_function([=, this]() { device.destroyRenderPass(render_pass); });
@@ -233,14 +242,23 @@ void RenderManager::init_pipelines() {
 	vk::ShaderModule red_triangle_frag_shader;
 	if (!load_shader_module("resources/shaders/triangle.frag.spv", &red_triangle_frag_shader)) {
 		SPDLOG_ERROR("Error when building the triangle fragment shader module");
+		abort();
 	} else {
 		SPDLOG_INFO("Triangle fragment shader successfully loaded");
 	}
 
 	vk::ShaderModule red_triangle_vertex_shader;
 	if (!load_shader_module("resources/shaders/triangle.vert.spv", &red_triangle_vertex_shader)) {
-		SPDLOG_ERROR("Error when building the triangle vertex shader module");
+		SPDLOG_ERROR("Error when building the red triangle vertex shader module");
+		abort();
+	} else {
+		SPDLOG_INFO("Triangle vertex shader successfully loaded");
+	}
 
+	vk::ShaderModule mesh_vertex_shader;
+	if (!load_shader_module("resources/shaders/tri_mesh.vert.spv", &mesh_vertex_shader)) {
+		SPDLOG_ERROR("Error when building the mesh vertex shader module");
+		abort();
 	} else {
 		SPDLOG_INFO("Triangle vertex shader successfully loaded");
 	}
@@ -307,6 +325,31 @@ void RenderManager::init_pipelines() {
 	//build the red triangle pipeline
 	red_triangle_pipeline = pipeline_builder.build_pipeline(device, render_pass);
 
+	//build the mesh pipeline
+	VertexInputDescription vertex_description = Vertex::get_vertex_description();
+
+	//connect the pipeline builder vertex input info to the one we get from Vertex
+	pipeline_builder.vertex_input_info.pVertexAttributeDescriptions = vertex_description.attributes.data();
+	pipeline_builder.vertex_input_info.vertexAttributeDescriptionCount = vertex_description.attributes.size();
+
+	pipeline_builder.vertex_input_info.pVertexBindingDescriptions = vertex_description.bindings.data();
+	pipeline_builder.vertex_input_info.vertexBindingDescriptionCount = vertex_description.bindings.size();
+
+	//clear the shader stages for the builder
+	pipeline_builder.shader_stages.clear();
+
+	//add the other shaders
+	pipeline_builder.shader_stages.push_back(
+			vk_init::pipeline_shader_stage_create_info(vk::ShaderStageFlagBits::eVertex, mesh_vertex_shader));
+
+	//make sure that triangle_frag_shader is holding the compiled colored_triangle.frag
+	pipeline_builder.shader_stages.push_back(
+			vk_init::pipeline_shader_stage_create_info(vk::ShaderStageFlagBits::eFragment, triangle_frag_shader));
+
+	//build the mesh triangle pipeline
+	mesh_pipeline = pipeline_builder.build_pipeline(device, render_pass);
+
+	device.destroyShaderModule(mesh_vertex_shader, nullptr);
 	device.destroyShaderModule(red_triangle_vertex_shader, nullptr);
 	device.destroyShaderModule(red_triangle_frag_shader, nullptr);
 	device.destroyShaderModule(triangle_vertex_shader, nullptr);
@@ -315,148 +358,57 @@ void RenderManager::init_pipelines() {
 	main_deletion_queue.push_function([=, this]() {
 		device.destroyPipeline(triangle_pipeline);
 		device.destroyPipeline(red_triangle_pipeline);
+		device.destroyPipeline(mesh_pipeline);
 		device.destroyPipelineLayout(triangle_pipeline_layout);
 	});
 }
 
-RenderManager::Status RenderManager::startup(DisplayManager &display_manager) {
-	// TODO: Handle failures
-	init_vulkan(display_manager);
-	init_swapchain(display_manager);
-	init_commands();
-	init_default_renderpass();
-	init_framebuffers();
-	init_sync_structures();
-	init_pipelines();
+void RenderManager::load_meshes() {
+	triangle_mesh.vertices.resize(3);
 
-	return Status::Ok;
+	//vertex positions
+	triangle_mesh.vertices[0].position = { 1.f, 1.f, 0.0f };
+	triangle_mesh.vertices[1].position = { -1.f, 1.f, 0.0f };
+	triangle_mesh.vertices[2].position = { 0.f, -1.f, 0.0f };
+
+	//vertex colors, all green
+	triangle_mesh.vertices[0].color = { 0.f, 1.f, 0.0f }; //pure green
+	triangle_mesh.vertices[1].color = { 0.f, 1.f, 0.0f }; //pure green
+	triangle_mesh.vertices[2].color = { 0.f, 1.f, 0.0f }; //pure green
+
+	//we don't care about the vertex normals
+
+	upload_mesh(triangle_mesh);
 }
 
-void RenderManager::shutdown() {
-	//make sure the GPU has stopped doing its things
-	VK_CHECK(device.waitIdle());
+void RenderManager::upload_mesh(Mesh &mesh) {
+	//allocate vertex buffer
+	vk::BufferCreateInfo bufferInfo = {};
+	bufferInfo.sType = vk::StructureType::eBufferCreateInfo;
+	//this is the total size, in bytes, of the buffer we are allocating
+	bufferInfo.size = mesh.vertices.size() * sizeof(Vertex);
+	//this buffer is going to be used as a Vertex Buffer
+	bufferInfo.usage = vk::BufferUsageFlagBits::eVertexBuffer;
 
-	main_deletion_queue.flush();
+	//let the VMA library know that this data should be writeable by CPU, but also readable by GPU
+	vma::AllocationCreateInfo vmaallocInfo = {};
+	vmaallocInfo.usage = vma::MemoryUsage::eCpuToGpu;
 
-	device.destroy();
-	instance.destroySurfaceKHR(surface);
-	vkb::destroy_debug_utils_messenger(instance, debug_messenger);
-	instance.destroy();
-}
+	//allocate the buffer
+	VK_CHECK(allocator.createBuffer(
+			&bufferInfo, &vmaallocInfo, &mesh.vertex_buffer.buffer, &mesh.vertex_buffer.allocation, nullptr));
 
-void RenderManager::draw() {
-	//wait until the GPU has finished rendering the last frame. Timeout of 1 second
-	VK_CHECK(device.waitForFences(1, &render_fence, true, 1000000000));
-	VK_CHECK(device.resetFences(1, &render_fence));
+	//add the destruction of triangle mesh buffer to the deletion queue
+	main_deletion_queue.push_function(
+			[=, this]() { allocator.destroyBuffer(mesh.vertex_buffer.buffer, mesh.vertex_buffer.allocation); });
 
-	//request image from the swapchain, one second timeout
-	uint32_t swapchain_image_index;
-	VK_CHECK(device.acquireNextImageKHR(swapchain, 1000000000, present_semaphore, nullptr, &swapchain_image_index));
+	//copy vertex data
+	void *data;
+	VK_CHECK(allocator.mapMemory(mesh.vertex_buffer.allocation, &data));
 
-	//now that we are sure that the commands finished executing, we can safely reset the command buffer to begin
-	//recording again.
-	VK_CHECK(main_command_buffer.reset());
+	memcpy(data, mesh.vertices.data(), mesh.vertices.size() * sizeof(Vertex));
 
-	//naming it cmd for shorter writing
-	vk::CommandBuffer cmd = main_command_buffer;
-
-	//begin the command buffer recording. We will use this command buffer exactly once, so we want to let Vulkan know
-	//that
-	vk::CommandBufferBeginInfo cmd_begin_info = {};
-	cmd_begin_info.sType = vk::StructureType::eCommandBufferBeginInfo;
-	cmd_begin_info.pNext = nullptr;
-
-	cmd_begin_info.pInheritanceInfo = nullptr;
-	cmd_begin_info.flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit;
-
-	VK_CHECK(cmd.begin(&cmd_begin_info));
-
-	static int frame_number = 0;
-	frame_number++;
-	if (frame_number % 60 == 0) {
-		selected_shader++;
-		if (selected_shader > 1) {
-			selected_shader = 0;
-		}
-	}
-
-	//make a clear-color from frame number. This will flash with a 120*pi frame period.
-	vk::ClearValue clear_value;
-	float flash = abs(sin((float)frame_number / 15.f));
-	clear_value.color.setFloat32({ 0.0f, 0.0f, flash, 1.0f });
-
-	//start the main renderpass.
-	//We will use the clear color from above, and the framebuffer of the index the swapchain gave us
-	vk::RenderPassBeginInfo rp_info = {};
-	rp_info.sType = vk::StructureType::eRenderPassBeginInfo;
-	rp_info.pNext = nullptr;
-
-	rp_info.renderPass = render_pass;
-	rp_info.renderArea.offset.x = 0;
-	rp_info.renderArea.offset.y = 0;
-	rp_info.renderArea.extent = window_extent;
-	rp_info.framebuffer = framebuffers[swapchain_image_index];
-
-	//connect clear values
-	rp_info.clearValueCount = 1;
-	rp_info.pClearValues = &clear_value;
-
-	cmd.beginRenderPass(&rp_info, vk::SubpassContents::eInline);
-	//once we start adding rendering commands, they will go here
-
-	if (selected_shader == 0) {
-		cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, triangle_pipeline);
-	} else {
-		cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, red_triangle_pipeline);
-	}
-	cmd.draw(3, 1, 0, 0);
-
-	//finalize the render pass
-	cmd.endRenderPass();
-	//finalize the command buffer (we can no longer add commands, but it can now be executed)
-	VK_CHECK(cmd.end());
-
-	//prepare the submission to the queue.
-	//we want to wait on the _present_semaphore, as that semaphore is signaled when the swapchain is ready
-	//we will signal the render_semaphore, to signal that rendering has finished
-
-	vk::SubmitInfo submit = {};
-	submit.sType = vk::StructureType::eSubmitInfo;
-	submit.pNext = nullptr;
-
-	vk::PipelineStageFlags wait_stage = vk::PipelineStageFlagBits::eColorAttachmentOutput;
-
-	submit.pWaitDstStageMask = &wait_stage;
-
-	submit.waitSemaphoreCount = 1;
-	submit.pWaitSemaphores = &present_semaphore;
-
-	submit.signalSemaphoreCount = 1;
-	submit.pSignalSemaphores = &render_semaphore;
-
-	submit.commandBufferCount = 1;
-	submit.pCommandBuffers = &cmd;
-
-	//submit command buffer to the queue and execute it.
-	// render_fence will now block until the graphic commands finish execution
-	VK_CHECK(graphics_queue.submit(1, &submit, render_fence));
-
-	// this will put the image we just rendered into the visible window.
-	// we want to wait on the _renderSemaphore for that,
-	// as it's necessary that drawing commands have finished before the image is displayed to the user
-	vk::PresentInfoKHR present_info = {};
-	present_info.sType = vk::StructureType::ePresentInfoKHR;
-	present_info.pNext = nullptr;
-
-	present_info.pSwapchains = &swapchain;
-	present_info.swapchainCount = 1;
-
-	present_info.pWaitSemaphores = &render_semaphore;
-	present_info.waitSemaphoreCount = 1;
-
-	present_info.pImageIndices = &swapchain_image_index;
-
-	VK_CHECK(graphics_queue.presentKHR(&present_info));
+	allocator.unmapMemory(mesh.vertex_buffer.allocation);
 }
 
 bool RenderManager::load_shader_module(const char *file_path, vk::ShaderModule *out_shader_module) {
@@ -501,4 +453,148 @@ bool RenderManager::load_shader_module(const char *file_path, vk::ShaderModule *
 	*out_shader_module = shader_module;
 
 	return true;
+}
+
+RenderManager::Status RenderManager::startup(DisplayManager &display_manager) {
+	// TODO: Handle failures
+	init_vulkan(display_manager);
+	init_swapchain(display_manager);
+	init_commands();
+	init_default_renderpass();
+	init_framebuffers();
+	init_sync_structures();
+	init_pipelines();
+
+	load_meshes();
+
+	return Status::Ok;
+}
+
+void RenderManager::shutdown() {
+	//make sure the GPU has stopped doing its things
+	VK_CHECK(device.waitIdle());
+
+	main_deletion_queue.flush();
+
+	device.destroy();
+	instance.destroySurfaceKHR(surface);
+	vkb::destroy_debug_utils_messenger(instance, debug_messenger);
+	instance.destroy();
+}
+
+void RenderManager::draw() {
+	//wait until the GPU has finished rendering the last frame. Timeout of 1 second
+	VK_CHECK(device.waitForFences(1, &render_fence, true, 1000000000));
+	VK_CHECK(device.resetFences(1, &render_fence));
+
+	//request image from the swapchain, one second timeout
+	uint32_t swapchain_image_index;
+	VK_CHECK(device.acquireNextImageKHR(swapchain, 1000000000, present_semaphore, nullptr, &swapchain_image_index));
+
+	//now that we are sure that the commands finished executing, we can safely reset the command buffer to begin
+	//recording again.
+	VK_CHECK(main_command_buffer.reset());
+
+	//naming it cmd for shorter writing
+	vk::CommandBuffer cmd = main_command_buffer;
+
+	//begin the command buffer recording. We will use this command buffer exactly once, so we want to let Vulkan
+	//know that
+	vk::CommandBufferBeginInfo cmd_begin_info = {};
+	cmd_begin_info.sType = vk::StructureType::eCommandBufferBeginInfo;
+	cmd_begin_info.pNext = nullptr;
+
+	cmd_begin_info.pInheritanceInfo = nullptr;
+	cmd_begin_info.flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit;
+
+	VK_CHECK(cmd.begin(&cmd_begin_info));
+
+	static int frame_number = 0;
+	frame_number++;
+	if (frame_number % 60 == 0) {
+		selected_shader++;
+		if (selected_shader > 1) {
+			selected_shader = 0;
+		}
+	}
+
+	//make a clear-color from frame number. This will flash with a 120*pi frame period.
+	vk::ClearValue clear_value;
+	float flash = abs(sin((float)frame_number / 15.f));
+	clear_value.color.setFloat32({ 0.0f, 0.0f, flash, 1.0f });
+
+	//start the main renderpass.
+	//We will use the clear color from above, and the framebuffer of the index the swapchain gave us
+	vk::RenderPassBeginInfo rp_info = {};
+	rp_info.sType = vk::StructureType::eRenderPassBeginInfo;
+	rp_info.pNext = nullptr;
+
+	rp_info.renderPass = render_pass;
+	rp_info.renderArea.offset.x = 0;
+	rp_info.renderArea.offset.y = 0;
+	rp_info.renderArea.extent = window_extent;
+	rp_info.framebuffer = framebuffers[swapchain_image_index];
+
+	//connect clear values
+	rp_info.clearValueCount = 1;
+	rp_info.pClearValues = &clear_value;
+
+	cmd.beginRenderPass(&rp_info, vk::SubpassContents::eInline);
+	//once we start adding rendering commands, they will go here
+
+	if (selected_shader == 0) {
+		cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, mesh_pipeline);
+		vk::DeviceSize offset = 0;
+		cmd.bindVertexBuffers(0, 1, &triangle_mesh.vertex_buffer.buffer, &offset);
+	} else {
+		cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, red_triangle_pipeline);
+	}
+	cmd.draw(3, 1, 0, 0);
+
+	//finalize the render pass
+	cmd.endRenderPass();
+	//finalize the command buffer (we can no longer add commands, but it can now be executed)
+	VK_CHECK(cmd.end());
+
+	//prepare the submission to the queue.
+	//we want to wait on the _present_semaphore, as that semaphore is signaled when the swapchain is ready
+	//we will signal the render_semaphore, to signal that rendering has finished
+
+	vk::SubmitInfo submit = {};
+	submit.sType = vk::StructureType::eSubmitInfo;
+	submit.pNext = nullptr;
+
+	vk::PipelineStageFlags wait_stage = vk::PipelineStageFlagBits::eColorAttachmentOutput;
+
+	submit.pWaitDstStageMask = &wait_stage;
+
+	submit.waitSemaphoreCount = 1;
+	submit.pWaitSemaphores = &present_semaphore;
+
+	submit.signalSemaphoreCount = 1;
+	submit.pSignalSemaphores = &render_semaphore;
+
+	submit.commandBufferCount = 1;
+	submit.pCommandBuffers = &cmd;
+
+	//submit command buffer to the queue and execute it.
+	// render_fence will now block until the graphic commands finish execution
+	VK_CHECK(graphics_queue.submit(1, &submit, render_fence));
+
+	// this will put the image we just rendered into the visible window.
+	// we want to wait on the render_semaphore for that,
+	// as it's necessary that drawing commands have finished before the image is displayed to the user
+	vk::PresentInfoKHR present_info = {};
+	present_info.sType = vk::StructureType::ePresentInfoKHR;
+	present_info.pNext = nullptr;
+
+	present_info.pSwapchains = &swapchain;
+	present_info.swapchainCount = 1;
+
+	present_info.pWaitSemaphores = &render_semaphore;
+	present_info.waitSemaphoreCount = 1;
+
+	present_info.pImageIndices = &swapchain_image_index;
+
+	VK_CHECK(graphics_queue.presentKHR(&present_info));
 }
