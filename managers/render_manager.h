@@ -1,12 +1,33 @@
 #ifndef SILENCE_RENDER_MANAGER_H
 #define SILENCE_RENDER_MANAGER_H
 
+#include <deque>
+#include <functional>
 #include <vector>
 
 #include "display_manager.h"
 
 #define VULKAN_HPP_NO_EXCEPTIONS
 #include "vulkan/vulkan.hpp"
+
+#include "vulkan-memory-allocator-hpp/vk_mem_alloc.hpp"
+
+struct DeletionQueue {
+	std::deque<std::function<void()>> deletors;
+
+	void push_function(std::function<void()> &&function) {
+		deletors.push_back(function);
+	}
+
+	void flush() {
+		// reverse iterate the deletion queue to execute all the functions
+		for (auto it = deletors.rbegin(); it != deletors.rend(); it++) {
+			(*it)(); //call the function
+		}
+
+		deletors.clear();
+	}
+};
 
 class RenderManager {
 	// INITIALIZATION
@@ -36,11 +57,35 @@ class RenderManager {
 	vk::RenderPass render_pass;
 	std::vector<vk::Framebuffer> framebuffers;
 
+	// PIPELINE
+	vk::PipelineLayout triangle_pipeline_layout;
+	vk::Pipeline triangle_pipeline;
+	vk::Pipeline red_triangle_pipeline;
+
+	vma::Allocator allocator;
+
+	DeletionQueue main_deletion_queue;
+
+	int selected_shader = 0;
+
+	// WindowExtent window_extent;
+	vk::Extent2D window_extent;
+
 	void init_vulkan(DisplayManager &display_manager);
 	void init_swapchain(DisplayManager &display_manager);
 	void init_commands();
+	void init_default_renderpass();
+	void init_framebuffers();
+	void init_sync_structures();
+	void init_pipelines();
+
+	//loads a shader module from a spir-v file. Returns false if it errors
+	bool load_shader_module(const char *file_path, vk::ShaderModule *out_shader_module);
 
 public:
+	vk::Semaphore present_semaphore, render_semaphore;
+	vk::Fence render_fence;
+
 	enum class Status {
 		Ok,
 		FailedToInitializeVulkan,
@@ -48,6 +93,8 @@ public:
 
 	Status startup(DisplayManager &display_manager);
 	void shutdown();
+
+	void draw();
 };
 
 #endif //SILENCE_RENDER_MANAGER_H

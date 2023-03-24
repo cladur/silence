@@ -1,21 +1,25 @@
-set(RENDER_SERVER_NAME "silence_render_manager")
-set(DISPLAY_SERVER_NAME "silence_display_manager")
+set(RENDER_MANAGER_NAME "silence_render_manager")
+set(DISPLAY_MANAGER_NAME "silence_display_manager")
 
-add_library(${RENDER_SERVER_NAME} STATIC render_manager.cpp render_manager.h rendering/vk_initializers.cpp rendering/vk_initializers.h)
-add_library(${DISPLAY_SERVER_NAME} STATIC display_manager.cpp display_manager.h)
+add_library(${RENDER_MANAGER_NAME} STATIC render_manager.cpp render_manager.h rendering/vk_initializers.cpp rendering/vk_initializers.h rendering/pipeline_builder.cpp rendering/pipeline_builder.h)
+add_library(${DISPLAY_MANAGER_NAME} STATIC display_manager.cpp display_manager.h)
 
-target_include_directories(${RENDER_SERVER_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
-target_include_directories(${DISPLAY_SERVER_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
+target_include_directories(${RENDER_MANAGER_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
+target_include_directories(${DISPLAY_MANAGER_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 
 find_package(spdlog CONFIG REQUIRED)
-target_link_libraries(${RENDER_SERVER_NAME} PRIVATE spdlog::spdlog spdlog::spdlog_header_only)
+target_link_libraries(${RENDER_MANAGER_NAME} PRIVATE spdlog::spdlog spdlog::spdlog_header_only)
 
 find_package(glfw3 CONFIG REQUIRED)
-target_link_libraries(${DISPLAY_SERVER_NAME} PUBLIC glfw)
+target_link_libraries(${DISPLAY_MANAGER_NAME} PUBLIC glfw)
 
 find_package(Vulkan REQUIRED)
-target_link_libraries(${RENDER_SERVER_NAME} PUBLIC Vulkan::Vulkan)
-target_link_libraries(${DISPLAY_SERVER_NAME} PUBLIC Vulkan::Vulkan)
+target_link_libraries(${RENDER_MANAGER_NAME} PUBLIC Vulkan::Vulkan)
+target_link_libraries(${DISPLAY_MANAGER_NAME} PUBLIC Vulkan::Vulkan)
+
+find_package(unofficial-vulkan-memory-allocator-hpp CONFIG REQUIRED)
+target_link_libraries(${RENDER_MANAGER_NAME} PUBLIC unofficial::VulkanMemoryAllocator-Hpp::VulkanMemoryAllocator-Hpp)
+
 
 include(FetchContent)
 FetchContent_Declare(
@@ -24,5 +28,5 @@ FetchContent_Declare(
         GIT_TAG v0.7 #suggest using a tag so the library doesn't update whenever new commits are pushed to a branch
 )
 FetchContent_MakeAvailable(fetch_vk_bootstrap)
-target_link_libraries(${RENDER_SERVER_NAME} PUBLIC vk-bootstrap::vk-bootstrap)
-target_link_libraries(${DISPLAY_SERVER_NAME} PUBLIC vk-bootstrap::vk-bootstrap)
+target_link_libraries(${RENDER_MANAGER_NAME} PUBLIC vk-bootstrap::vk-bootstrap)
+target_link_libraries(${DISPLAY_MANAGER_NAME} PUBLIC vk-bootstrap::vk-bootstrap)

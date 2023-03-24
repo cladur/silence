@@ -38,6 +38,8 @@ int main() {
 		if (display_manager.window_should_close()) {
 			should_run = false;
 		}
+
+		render_manager.draw();
 	}
 
 	// Shut everything down, in reverse order.
