@@ -28,5 +28,8 @@
     "name" : "vulkan-memory-allocator",
     "version>=" : "3.0.1",
     "$comment" : "    # this is heuristically generated, and may not be correct\n\n    find_package(unofficial-vulkan-memory-allocator CONFIG REQUIRED)\n\n    target_link_libraries(main PRIVATE unofficial::vulkan-memory-allocator::vulkan-memory-allocator)\n"
+  }, {
+    "name" : "tinygltf",
+    "version>=" : "2.8.4"
   } ]
 }

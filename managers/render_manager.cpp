@@ -397,9 +397,14 @@ void RenderManager::load_meshes() {
 	triangle_mesh.vertices[1].color = { 0.f, 1.f, 0.0f }; //pure green
 	triangle_mesh.vertices[2].color = { 0.f, 1.f, 0.0f }; //pure green
 
+	triangle_mesh.indices = { 0, 1, 2 };
+
 	//we don't care about the vertex normals
 
+	monkey_mesh.load_from_gltf("resources/models/monkey.gltf");
+
 	upload_mesh(triangle_mesh);
+	upload_mesh(monkey_mesh);
 }
 
 void RenderManager::upload_mesh(Mesh &mesh) {
@@ -430,6 +435,23 @@ void RenderManager::upload_mesh(Mesh &mesh) {
 	memcpy(data, mesh.vertices.data(), mesh.vertices.size() * sizeof(Vertex));
 
 	allocator.unmapMemory(mesh.vertex_buffer.allocation);
+
+	//allocate index buffer
+	bufferInfo.size = mesh.indices.size() * sizeof(uint32_t);
+	bufferInfo.usage = vk::BufferUsageFlagBits::eIndexBuffer;
+	VK_CHECK(allocator.createBuffer(
+			&bufferInfo, &vmaallocInfo, &mesh.index_buffer.buffer, &mesh.index_buffer.allocation, nullptr));
+
+	//add the destruction of triangle mesh buffer to the deletion queue
+	main_deletion_queue.push_function(
+			[=, this]() { allocator.destroyBuffer(mesh.index_buffer.buffer, mesh.index_buffer.allocation); });
+
+	//copy index data
+	VK_CHECK(allocator.mapMemory(mesh.index_buffer.allocation, &data));
+
+	memcpy(data, mesh.indices.data(), mesh.indices.size() * sizeof(uint32_t));
+
+	allocator.unmapMemory(mesh.index_buffer.allocation);
 }
 
 bool RenderManager::load_shader_module(const char *file_path, vk::ShaderModule *out_shader_module) {
@@ -578,7 +600,15 @@ void RenderManager::draw() {
 	cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, mesh_pipeline);
 	vk::DeviceSize offset = 0;
 	cmd.bindVertexBuffers(0, 1, &triangle_mesh.vertex_buffer.buffer, &offset);
-	cmd.draw(3, 1, 0, 0);
+	cmd.bindIndexBuffer(triangle_mesh.index_buffer.buffer, 0, vk::IndexType::eUint32);
+	cmd.drawIndexed(triangle_mesh.indices.size(), 1, 0, 0, 0);
+
+	// //bind the mesh vertex buffer with offset 0
+	cmd.bindVertexBuffers(0, 1, &monkey_mesh.vertex_buffer.buffer, &offset);
+	cmd.bindIndexBuffer(monkey_mesh.index_buffer.buffer, 0, vk::IndexType::eUint32);
+
+	//we can now draw the mesh
+	cmd.drawIndexed(monkey_mesh.indices.size(), 1, 0, 0, 0);
 
 	//finalize the render pass
 	cmd.endRenderPass();

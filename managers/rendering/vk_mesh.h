@@ -26,8 +26,12 @@ struct Vertex {
 
 struct Mesh {
 	std::vector<Vertex> vertices;
+	std::vector<uint32_t> indices;
 
 	AllocatedBuffer vertex_buffer;
+	AllocatedBuffer index_buffer;
+
+	bool load_from_gltf(const char *filename);
 };
 
 #endif //SILENCE_VK_MESH_H

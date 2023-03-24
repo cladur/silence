@@ -74,6 +74,7 @@ class RenderManager {
 	vk::Pipeline mesh_pipeline;
 
 	Mesh triangle_mesh;
+	Mesh monkey_mesh;
 
 	vma::Allocator allocator;
 
