@@ -14,7 +14,7 @@ private:
 	uint32_t living_entities_count{};
 
 public:
-	bool startup();
+	void startup();
 	void shutdown();
 
 	Entity create_entity();

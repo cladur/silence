@@ -15,6 +15,5 @@ using Entity = std::uint32_t;
 using ComponentType = std::uint8_t;
 const ComponentType MAX_COMPONENTS = 32;
 
-// Signature = bitset (bit 1 = component active on gameObject, bit 0 = component inactive)
 using Signature = std::bitset<MAX_COMPONENTS>;
 const Entity MAX_ENTITIES = 5000;
