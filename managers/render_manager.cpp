@@ -4,6 +4,7 @@
 #include <fstream>
 
 #include "magic_enum.hpp"
+#include <glm/gtx/transform.hpp>
 
 #define VMA_IMPLEMENTATION
 #include "vma/vk_mem_alloc.h"
@@ -326,6 +327,25 @@ void RenderManager::init_pipelines() {
 	red_triangle_pipeline = pipeline_builder.build_pipeline(device, render_pass);
 
 	//build the mesh pipeline
+	//we start from just the default empty pipeline layout info
+	vk::PipelineLayoutCreateInfo mesh_pipeline_layout_info = vk_init::pipeline_layout_create_info();
+
+	//setup push constants
+	vk::PushConstantRange push_constant;
+	//this push constant range starts at the beginning
+	push_constant.offset = 0;
+	//this push constant range takes up the size of a MeshPushConstants struct
+	push_constant.size = sizeof(MeshPushConstants);
+	//this push constant range is accessible only in the vertex shader
+	push_constant.stageFlags = vk::ShaderStageFlagBits::eVertex;
+
+	mesh_pipeline_layout_info.pPushConstantRanges = &push_constant;
+	mesh_pipeline_layout_info.pushConstantRangeCount = 1;
+
+	VK_CHECK(device.createPipelineLayout(&mesh_pipeline_layout_info, nullptr, &mesh_pipeline_layout));
+
+	pipeline_builder.pipeline_layout = mesh_pipeline_layout;
+
 	VertexInputDescription vertex_description = Vertex::get_vertex_description();
 
 	//connect the pipeline builder vertex input info to the one we get from Vertex
@@ -360,6 +380,7 @@ void RenderManager::init_pipelines() {
 		device.destroyPipeline(red_triangle_pipeline);
 		device.destroyPipeline(mesh_pipeline);
 		device.destroyPipelineLayout(triangle_pipeline_layout);
+		device.destroyPipelineLayout(mesh_pipeline_layout);
 	});
 }
 
@@ -511,12 +532,6 @@ void RenderManager::draw() {
 
 	static int frame_number = 0;
 	frame_number++;
-	if (frame_number % 60 == 0) {
-		selected_shader++;
-		if (selected_shader > 1) {
-			selected_shader = 0;
-		}
-	}
 
 	//make a clear-color from frame number. This will flash with a 120*pi frame period.
 	vk::ClearValue clear_value;
@@ -542,13 +557,27 @@ void RenderManager::draw() {
 	cmd.beginRenderPass(&rp_info, vk::SubpassContents::eInline);
 	//once we start adding rendering commands, they will go here
 
-	if (selected_shader == 0) {
-		cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, mesh_pipeline);
-		vk::DeviceSize offset = 0;
-		cmd.bindVertexBuffers(0, 1, &triangle_mesh.vertex_buffer.buffer, &offset);
-	} else {
-		cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, red_triangle_pipeline);
-	}
+	glm::vec3 cam_pos = { 0.f, 0.f, -2.f };
+
+	glm::mat4 view = glm::translate(glm::mat4(1.f), cam_pos);
+	//camera projection
+	float aspect = (float)window_extent.width / (float)window_extent.height;
+	glm::mat4 projection = glm::perspective(glm::radians(70.f), aspect, 0.1f, 200.0f);
+	//model rotation
+	glm::mat4 model = glm::rotate(glm::mat4{ 1.0f }, glm::radians(frame_number * 0.4f), glm::vec3(0, 1, 0));
+
+	//calculate final mesh matrix
+	glm::mat4 mesh_matrix = projection * view * model;
+
+	MeshPushConstants constants;
+	constants.render_matrix = mesh_matrix;
+
+	//upload the matrix to the GPU via push constants
+	cmd.pushConstants(mesh_pipeline_layout, vk::ShaderStageFlagBits::eVertex, 0, sizeof(MeshPushConstants), &constants);
+
+	cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, mesh_pipeline);
+	vk::DeviceSize offset = 0;
+	cmd.bindVertexBuffers(0, 1, &triangle_mesh.vertex_buffer.buffer, &offset);
 	cmd.draw(3, 1, 0, 0);
 
 	//finalize the render pass

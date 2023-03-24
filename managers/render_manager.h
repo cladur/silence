@@ -5,6 +5,8 @@
 #include <functional>
 #include <vector>
 
+#include <glm/glm.hpp>
+
 #include "display_manager.h"
 
 #define VULKAN_HPP_NO_EXCEPTIONS
@@ -13,6 +15,11 @@
 #include "vulkan-memory-allocator-hpp/vk_mem_alloc.hpp"
 
 #include "rendering/vk_mesh.h"
+
+struct MeshPushConstants {
+	glm::vec4 data;
+	glm::mat4 render_matrix;
+};
 
 struct DeletionQueue {
 	std::deque<std::function<void()>> deletors;
@@ -61,6 +68,7 @@ class RenderManager {
 
 	// PIPELINE
 	vk::PipelineLayout triangle_pipeline_layout;
+	vk::PipelineLayout mesh_pipeline_layout;
 	vk::Pipeline triangle_pipeline;
 	vk::Pipeline red_triangle_pipeline;
 	vk::Pipeline mesh_pipeline;
@@ -71,9 +79,6 @@ class RenderManager {
 
 	DeletionQueue main_deletion_queue;
 
-	int selected_shader = 0;
-
-	// WindowExtent window_extent;
 	vk::Extent2D window_extent;
 
 	void init_vulkan(DisplayManager &display_manager);
