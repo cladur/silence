@@ -17,8 +17,8 @@ public:
 	bool startup();
 	void shutdown();
 
-	Entity createEntity();
-	void destroyEntity(Entity entity);
-	void setSignature(Entity entity, Signature signature);
-	Signature getSignature(Entity entity);
+	Entity create_entity();
+	void destroy_entity(Entity entity);
+	void set_signature(Entity entity, Signature signature);
+	Signature get_signature(Entity entity);
 };

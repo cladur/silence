@@ -10,7 +10,7 @@ bool EntityManager::startup() {
 void EntityManager::shutdown() {
 }
 
-Entity EntityManager::createEntity() {
+Entity EntityManager::create_entity() {
 	assert(living_entities_count < MAX_ENTITIES && "Too many entities alive");
 
 	// Take id of first entity and then remove it from the queue
@@ -22,7 +22,7 @@ Entity EntityManager::createEntity() {
 	return createdEntity;
 }
 
-void EntityManager::destroyEntity(Entity entity) {
+void EntityManager::destroy_entity(Entity entity) {
 	assert(entity < MAX_ENTITIES && "Entity bigger than max value");
 
 	// Reset signature of entity
@@ -33,15 +33,15 @@ void EntityManager::destroyEntity(Entity entity) {
 	living_entities_count--;
 }
 
-void EntityManager::setSignature(Entity entity, Signature signature) {
+void EntityManager::set_signature(Entity entity, Signature signature) {
 	assert(entity < MAX_ENTITIES && "Entity bigger than max value");
 
 	// Set signature for entity (signature = bitset representing which components are on gameObject)
 	signatures[entity] = signature;
 }
 
-Signature EntityManager::getSignature(Entity entity) {
+Signature EntityManager::get_signature(Entity entity) {
 	assert(entity < MAX_ENTITIES && "Entity bigger than max value");
-	
+
 	return signatures[entity];
 }
