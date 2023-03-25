@@ -73,8 +73,14 @@ class RenderManager {
 	vk::Pipeline red_triangle_pipeline;
 	vk::Pipeline mesh_pipeline;
 
+	// MESHES
 	Mesh triangle_mesh;
 	Mesh monkey_mesh;
+
+	// DEPTH
+	vk::ImageView depth_image_view;
+	AllocatedImage depth_image;
+	vk::Format depth_format;
 
 	vma::Allocator allocator;
 

@@ -104,6 +104,36 @@ void RenderManager::init_swapchain(DisplayManager &display_manager) {
 	swapchain_image_format = static_cast<vk::Format>(vkb_swapchain.image_format);
 
 	main_deletion_queue.push_function([=, this]() { device.destroySwapchainKHR(swapchain); });
+
+	//depth image size will match the window
+	vk::Extent3D depth_image_extent = { window_extent.width, window_extent.height, 1 };
+
+	//hardcoding the depth format to 32-bit float
+	depth_format = vk::Format::eD32Sfloat;
+
+	//the depth image will be an image with the format we selected and Depth Attachment usage flag
+	vk::ImageCreateInfo dimg_info = vk_init::image_create_info(
+			depth_format, vk::ImageUsageFlagBits::eDepthStencilAttachment, depth_image_extent);
+
+	//for the depth image, we want to allocate it from GPU local memory
+	vma::AllocationCreateInfo dimg_allocinfo = {};
+	dimg_allocinfo.usage = vma::MemoryUsage::eGpuOnly;
+	dimg_allocinfo.requiredFlags = vk::MemoryPropertyFlags(vk::MemoryPropertyFlagBits::eDeviceLocal);
+
+	//allocate and create the image
+	VK_CHECK(allocator.createImage(&dimg_info, &dimg_allocinfo, &depth_image.image, &depth_image.allocation, nullptr));
+
+	//build an image-view for the depth image to use for rendering
+	vk::ImageViewCreateInfo dview_info =
+			vk_init::image_view_create_info(depth_format, depth_image.image, vk::ImageAspectFlagBits::eDepth);
+
+	VK_CHECK(device.createImageView(&dview_info, nullptr, &depth_image_view));
+
+	//add to deletion queues
+	main_deletion_queue.push_function([=]() {
+		device.destroyImageView(depth_image_view);
+		allocator.destroyImage(depth_image.image, depth_image.allocation);
+	});
 }
 
 void RenderManager::init_commands() {
@@ -155,21 +185,60 @@ void RenderManager::init_default_renderpass() {
 	color_attachment_ref.attachment = 0;
 	color_attachment_ref.layout = vk::ImageLayout::eColorAttachmentOptimal;
 
+	vk::AttachmentDescription depth_attachment = {};
+	// Depth attachment
+	depth_attachment.format = depth_format;
+	depth_attachment.samples = vk::SampleCountFlagBits::e1;
+	depth_attachment.loadOp = vk::AttachmentLoadOp::eClear;
+	depth_attachment.storeOp = vk::AttachmentStoreOp::eStore;
+	depth_attachment.stencilLoadOp = vk::AttachmentLoadOp::eClear;
+	depth_attachment.stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
+	depth_attachment.initialLayout = vk::ImageLayout::eUndefined;
+	depth_attachment.finalLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal;
+
+	vk::AttachmentReference depth_attachment_ref = {};
+	depth_attachment_ref.attachment = 1;
+	depth_attachment_ref.layout = vk::ImageLayout::eDepthStencilAttachmentOptimal;
+
 	//we are going to create 1 subpass, which is the minimum you can do
 	vk::SubpassDescription subpass = {};
 	subpass.pipelineBindPoint = vk::PipelineBindPoint::eGraphics;
 	subpass.colorAttachmentCount = 1;
 	subpass.pColorAttachments = &color_attachment_ref;
+	subpass.pDepthStencilAttachment = &depth_attachment_ref;
+
+	vk::SubpassDependency color_dependency = {};
+	color_dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+	color_dependency.dstSubpass = 0;
+	color_dependency.srcStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput;
+	color_dependency.srcAccessMask = {};
+	color_dependency.dstStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput;
+	color_dependency.dstAccessMask = vk::AccessFlagBits::eColorAttachmentWrite;
+
+	vk::SubpassDependency depth_dependency = {};
+	depth_dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+	depth_dependency.dstSubpass = 0;
+	depth_dependency.srcStageMask =
+			vk::PipelineStageFlagBits::eEarlyFragmentTests | vk::PipelineStageFlagBits::eLateFragmentTests;
+	depth_dependency.srcAccessMask = {};
+	depth_dependency.dstStageMask =
+			vk::PipelineStageFlagBits::eEarlyFragmentTests | vk::PipelineStageFlagBits::eLateFragmentTests;
+	depth_dependency.dstAccessMask = vk::AccessFlagBits::eDepthStencilAttachmentWrite;
+
+	vk::AttachmentDescription attachments[2] = { color_attachment, depth_attachment };
+	vk::SubpassDependency dependencies[2] = { color_dependency, depth_dependency };
 
 	vk::RenderPassCreateInfo render_pass_info = {};
 	render_pass_info.sType = vk::StructureType::eRenderPassCreateInfo;
-
-	//connect the color attachment to the info
-	render_pass_info.attachmentCount = 1;
-	render_pass_info.pAttachments = &color_attachment;
+	//connect the color and depth attachments to the info
+	render_pass_info.attachmentCount = 2;
+	render_pass_info.pAttachments = &attachments[0];
 	//connect the subpass to the info
 	render_pass_info.subpassCount = 1;
 	render_pass_info.pSubpasses = &subpass;
+	// connect the dependencies to the info
+	render_pass_info.dependencyCount = 2;
+	render_pass_info.pDependencies = &dependencies[0];
 
 	VK_CHECK(device.createRenderPass(&render_pass_info, nullptr, &render_pass));
 
@@ -194,7 +263,11 @@ void RenderManager::init_framebuffers() {
 
 	//create framebuffers for each of the swapchain image views
 	for (int i = 0; i < swapchain_imagecount; i++) {
-		fb_info.pAttachments = &swapchain_image_views[i];
+		// We're reusing the same depth image view for all framebuffers, since we're only drawing one frame at a time
+		vk::ImageView attachments[2] = { swapchain_image_views[i], depth_image_view };
+
+		fb_info.pAttachments = &attachments[0];
+		fb_info.attachmentCount = 2;
 		VK_CHECK(device.createFramebuffer(&fb_info, nullptr, &framebuffers[i]));
 
 		main_deletion_queue.push_function([=, this]() {
@@ -309,6 +382,9 @@ void RenderManager::init_pipelines() {
 
 	//use the triangle layout we created
 	pipeline_builder.pipeline_layout = triangle_pipeline_layout;
+
+	//default depthtesting
+	pipeline_builder.depth_stencil = vk_init::depth_stencil_create_info(true, true, vk::CompareOp::eLessOrEqual);
 
 	//finally build the pipeline
 	triangle_pipeline = pipeline_builder.build_pipeline(device, render_pass);
@@ -556,15 +632,22 @@ void RenderManager::draw() {
 	frame_number++;
 
 	//make a clear-color from frame number. This will flash with a 120*pi frame period.
-	vk::ClearValue clear_value;
+	vk::ClearValue color_clear_value;
 	float flash = abs(sin((float)frame_number / 15.f));
-	clear_value.color.setFloat32({ 0.0f, 0.0f, flash, 1.0f });
+	color_clear_value.color.setFloat32({ 0.0f, 0.0f, flash, 1.0f });
+
+	vk::ClearValue depth_clear_value;
+	depth_clear_value.depthStencil.setDepth(1.0f);
+
+	vk::ClearValue clear_values[] = { color_clear_value, depth_clear_value };
 
 	//start the main renderpass.
 	//We will use the clear color from above, and the framebuffer of the index the swapchain gave us
 	vk::RenderPassBeginInfo rp_info = {};
 	rp_info.sType = vk::StructureType::eRenderPassBeginInfo;
 	rp_info.pNext = nullptr;
+
+	// connect clear values
 
 	rp_info.renderPass = render_pass;
 	rp_info.renderArea.offset.x = 0;
@@ -573,8 +656,8 @@ void RenderManager::draw() {
 	rp_info.framebuffer = framebuffers[swapchain_image_index];
 
 	//connect clear values
-	rp_info.clearValueCount = 1;
-	rp_info.pClearValues = &clear_value;
+	rp_info.clearValueCount = 2;
+	rp_info.pClearValues = &clear_values[0];
 
 	cmd.beginRenderPass(&rp_info, vk::SubpassContents::eInline);
 	//once we start adding rendering commands, they will go here

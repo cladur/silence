@@ -26,7 +26,15 @@ vk::PipelineColorBlendAttachmentState color_blend_attachment_state();
 vk::PipelineLayoutCreateInfo pipeline_layout_create_info();
 
 vk::FenceCreateInfo fence_create_info(vk::FenceCreateFlags flags = {});
+
 vk::SemaphoreCreateInfo semaphore_create_info(vk::SemaphoreCreateFlags flags = {});
+
+vk::ImageCreateInfo image_create_info(vk::Format format, vk::ImageUsageFlags usage_flags, vk::Extent3D extent);
+
+vk::ImageViewCreateInfo image_view_create_info(vk::Format format, vk::Image image, vk::ImageAspectFlags aspect_flags);
+
+vk::PipelineDepthStencilStateCreateInfo depth_stencil_create_info(
+		bool depth_test, bool depth_write, vk::CompareOp compare_op);
 
 } //namespace vk_init
 

@@ -8,4 +8,9 @@ struct AllocatedBuffer {
 	vma::Allocation allocation;
 };
 
+struct AllocatedImage {
+	vk::Image image;
+	vma::Allocation allocation;
+};
+
 #endif //SILENCE_VK_TYPES_H

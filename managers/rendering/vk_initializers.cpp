@@ -132,3 +132,58 @@ vk::SemaphoreCreateInfo vk_init::semaphore_create_info(vk::SemaphoreCreateFlags 
 	semCreateInfo.flags = flags;
 	return semCreateInfo;
 }
+
+vk::ImageCreateInfo vk_init::image_create_info(
+		vk::Format format, vk::ImageUsageFlags usage_flags, vk::Extent3D extent) {
+	vk::ImageCreateInfo info = {};
+	info.sType = vk::StructureType::eImageCreateInfo;
+	info.pNext = nullptr;
+
+	info.imageType = vk::ImageType::e2D;
+
+	info.format = format;
+	info.extent = extent;
+
+	info.mipLevels = 1;
+	info.arrayLayers = 1;
+	info.samples = vk::SampleCountFlagBits::e1;
+	info.tiling = vk::ImageTiling::eOptimal;
+	info.usage = usage_flags;
+
+	return info;
+}
+
+vk::ImageViewCreateInfo vk_init::image_view_create_info(
+		vk::Format format, vk::Image image, vk::ImageAspectFlags aspect_flags) {
+	//build a image-view for the depth image to use for rendering
+	vk::ImageViewCreateInfo info = {};
+	info.sType = vk::StructureType::eImageViewCreateInfo;
+	info.pNext = nullptr;
+
+	info.viewType = vk::ImageViewType::e2D;
+	info.image = image;
+	info.format = format;
+	info.subresourceRange.baseMipLevel = 0;
+	info.subresourceRange.levelCount = 1;
+	info.subresourceRange.baseArrayLayer = 0;
+	info.subresourceRange.layerCount = 1;
+	info.subresourceRange.aspectMask = aspect_flags;
+
+	return info;
+}
+vk::PipelineDepthStencilStateCreateInfo vk_init::depth_stencil_create_info(
+		bool depth_test, bool depth_write, vk::CompareOp compare_op) {
+	vk::PipelineDepthStencilStateCreateInfo info = {};
+	info.sType = vk::StructureType::ePipelineDepthStencilStateCreateInfo;
+	info.pNext = nullptr;
+
+	info.depthTestEnable = depth_test ? VK_TRUE : VK_FALSE;
+	info.depthWriteEnable = depth_write ? VK_TRUE : VK_FALSE;
+	info.depthCompareOp = depth_test ? compare_op : vk::CompareOp::eAlways;
+	info.depthBoundsTestEnable = VK_FALSE;
+	info.minDepthBounds = 0.0f; // Optional
+	info.maxDepthBounds = 1.0f; // Optional
+	info.stencilTestEnable = VK_FALSE;
+
+	return info;
+}
