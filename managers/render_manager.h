@@ -18,6 +18,8 @@
 
 #include "rendering/vk_mesh.h"
 
+constexpr unsigned int FRAME_OVERLAP = 2;
+
 struct MeshPushConstants {
 	glm::vec4 data;
 	glm::mat4 render_matrix;
@@ -51,6 +53,14 @@ struct RenderObject {
 	glm::mat4 transformMatrix;
 };
 
+struct FrameData {
+	vk::Semaphore present_semaphore, render_semaphore;
+	vk::Fence render_fence;
+
+	vk::CommandPool command_pool; //the command pool for our commands
+	vk::CommandBuffer main_command_buffer; //the buffer we will record into
+};
+
 class RenderManager {
 	// INITIALIZATION
 	vk::Instance instance;
@@ -68,12 +78,9 @@ class RenderManager {
 	//array of image-views from the swapchain
 	std::vector<vk::ImageView> swapchain_image_views;
 
-	// COMMAND POOL
+	// GRAPHICS QUEUE
 	vk::Queue graphics_queue; // queue we will submit to
 	uint32_t graphics_queue_family; // family of that queue
-
-	vk::CommandPool command_pool; //the command pool for our commands
-	vk::CommandBuffer main_command_buffer; //the buffer we will record into
 
 	// RENDERPASS
 	vk::RenderPass render_pass;
@@ -120,8 +127,10 @@ public:
 		FailedToInitializeVulkan,
 	};
 
-	vk::Semaphore present_semaphore, render_semaphore;
-	vk::Fence render_fence;
+	// Frame storage
+	FrameData frames[2];
+	// TODO: get frame_number from some global getter instead of storing it here
+	unsigned int frame_number = 0;
 
 	//default array of renderable objects
 	std::vector<RenderObject> renderables;
@@ -130,6 +139,9 @@ public:
 
 	Status startup(DisplayManager &display_manager);
 	void shutdown();
+
+	//getter for the frame we are rendering to right now.
+	FrameData &get_current_frame();
 
 	//create material and add it to the map
 	Material *create_material(vk::Pipeline pipeline, vk::PipelineLayout layout, const std::string &name);

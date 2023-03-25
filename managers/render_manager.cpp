@@ -145,22 +145,24 @@ void RenderManager::init_commands() {
 	vk::CommandPoolCreateInfo command_pool_info = vk_init::command_pool_create_info(
 			graphics_queue_family, vk::CommandPoolCreateFlagBits::eResetCommandBuffer);
 
-	auto command_pool_res = device.createCommandPool(command_pool_info);
+	for (auto &frame : frames) {
+		auto command_pool_res = device.createCommandPool(command_pool_info);
 
-	VK_CHECK(command_pool_res.result);
+		VK_CHECK(command_pool_res.result);
 
-	command_pool = command_pool_res.value;
+		frame.command_pool = command_pool_res.value;
 
-	//allocate the default command buffer that we will use for rendering
-	vk::CommandBufferAllocateInfo cmd_alloc_info = vk_init::command_buffer_allocate_info(command_pool, 1);
+		//allocate the default command buffer that we will use for rendering
+		vk::CommandBufferAllocateInfo cmd_alloc_info = vk_init::command_buffer_allocate_info(frame.command_pool, 1);
 
-	auto main_command_buffer_res = device.allocateCommandBuffers(cmd_alloc_info);
+		auto main_command_buffer_res = device.allocateCommandBuffers(cmd_alloc_info);
 
-	VK_CHECK(main_command_buffer_res.result);
+		VK_CHECK(main_command_buffer_res.result);
 
-	main_command_buffer = main_command_buffer_res.value[0];
+		frame.main_command_buffer = main_command_buffer_res.value[0];
 
-	main_deletion_queue.push_function([=, this]() { device.destroyCommandPool(command_pool); });
+		main_deletion_queue.push_function([=, this]() { device.destroyCommandPool(frame.command_pool); });
+	}
 }
 
 void RenderManager::init_default_renderpass() {
@@ -250,7 +252,8 @@ void RenderManager::init_default_renderpass() {
 }
 
 void RenderManager::init_framebuffers() {
-	//create the framebuffers for the swapchain images. This will connect the render-pass to the images for rendering
+	//create the framebuffers for the swapchain images. This will connect the render-pass to the images for
+	//rendering
 	vk::FramebufferCreateInfo fb_info = {};
 	fb_info.sType = vk::StructureType::eFramebufferCreateInfo;
 	fb_info.pNext = nullptr;
@@ -267,7 +270,8 @@ void RenderManager::init_framebuffers() {
 
 	//create framebuffers for each of the swapchain image views
 	for (int i = 0; i < swapchain_imagecount; i++) {
-		// We're reusing the same depth image view for all framebuffers, since we're only drawing one frame at a time
+		// We're reusing the same depth image view for all framebuffers, since we're only drawing one frame at a
+		// time
 		vk::ImageView attachments[2] = { swapchain_image_views[i], depth_image_view };
 
 		fb_info.pAttachments = &attachments[0];
@@ -285,20 +289,22 @@ void RenderManager::init_sync_structures() {
 	//create synchronization structures
 	vk::FenceCreateInfo fence_create_info = vk_init::fence_create_info(vk::FenceCreateFlagBits::eSignaled);
 
-	VK_CHECK(device.createFence(&fence_create_info, nullptr, &render_fence));
+	for (auto &frame : frames) {
+		VK_CHECK(device.createFence(&fence_create_info, nullptr, &frame.render_fence));
 
-	main_deletion_queue.push_function([=, this]() { device.destroyFence(render_fence); });
+		main_deletion_queue.push_function([=, this]() { device.destroyFence(frame.render_fence); });
 
-	//for the semaphores we don't need any flags
-	vk::SemaphoreCreateInfo semaphore_create_info = vk_init::semaphore_create_info();
+		//for the semaphores we don't need any flags
+		vk::SemaphoreCreateInfo semaphore_create_info = vk_init::semaphore_create_info();
 
-	VK_CHECK(device.createSemaphore(&semaphore_create_info, nullptr, &present_semaphore));
-	VK_CHECK(device.createSemaphore(&semaphore_create_info, nullptr, &render_semaphore));
+		VK_CHECK(device.createSemaphore(&semaphore_create_info, nullptr, &frame.present_semaphore));
+		VK_CHECK(device.createSemaphore(&semaphore_create_info, nullptr, &frame.render_semaphore));
 
-	main_deletion_queue.push_function([=, this]() {
-		device.destroySemaphore(present_semaphore);
-		device.destroySemaphore(render_semaphore);
-	});
+		main_deletion_queue.push_function([=, this]() {
+			device.destroySemaphore(frame.present_semaphore);
+			device.destroySemaphore(frame.render_semaphore);
+		});
+	}
 }
 
 void RenderManager::init_pipelines() {
@@ -317,8 +323,8 @@ void RenderManager::init_pipelines() {
 		SPDLOG_INFO("Triangle vertex shader successfully loaded");
 	}
 
-	//build the stage-create-info for both vertex and fragment stages. This lets the pipeline know the shader modules
-	//per stage
+	//build the stage-create-info for both vertex and fragment stages. This lets the pipeline know the shader
+	//modules per stage
 	PipelineBuilder pipeline_builder;
 
 	//vertex input controls how to read vertices from vertex buffers. We aren't using it yet
@@ -628,6 +634,10 @@ void RenderManager::shutdown() {
 	instance.destroy();
 }
 
+FrameData &RenderManager::get_current_frame() {
+	return frames[frame_number % FRAME_OVERLAP];
+}
+
 Material *RenderManager::create_material(vk::Pipeline pipeline, vk::PipelineLayout layout, const std::string &name) {
 	Material mat = {};
 	mat.pipeline = pipeline;
@@ -657,19 +667,20 @@ Mesh *RenderManager::get_mesh(const std::string &name) {
 
 void RenderManager::draw() {
 	//wait until the GPU has finished rendering the last frame. Timeout of 1 second
-	VK_CHECK(device.waitForFences(1, &render_fence, true, 1000000000));
-	VK_CHECK(device.resetFences(1, &render_fence));
+	VK_CHECK(device.waitForFences(1, &get_current_frame().render_fence, true, 1000000000));
+	VK_CHECK(device.resetFences(1, &get_current_frame().render_fence));
 
 	//request image from the swapchain, one second timeout
 	uint32_t swapchain_image_index;
-	VK_CHECK(device.acquireNextImageKHR(swapchain, 1000000000, present_semaphore, nullptr, &swapchain_image_index));
+	VK_CHECK(device.acquireNextImageKHR(
+			swapchain, 1000000000, get_current_frame().present_semaphore, nullptr, &swapchain_image_index));
 
 	//now that we are sure that the commands finished executing, we can safely reset the command buffer to begin
 	//recording again.
-	VK_CHECK(main_command_buffer.reset());
+	VK_CHECK(get_current_frame().main_command_buffer.reset());
 
 	//naming it cmd for shorter writing
-	vk::CommandBuffer cmd = main_command_buffer;
+	vk::CommandBuffer cmd = get_current_frame().main_command_buffer;
 
 	//begin the command buffer recording. We will use this command buffer exactly once, so we want to let Vulkan
 	//know that
@@ -681,9 +692,6 @@ void RenderManager::draw() {
 	cmd_begin_info.flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit;
 
 	VK_CHECK(cmd.begin(&cmd_begin_info));
-
-	static int frame_number = 0;
-	frame_number++;
 
 	//make a clear-color from frame number. This will flash with a 120*pi frame period.
 	vk::ClearValue color_clear_value;
@@ -734,17 +742,17 @@ void RenderManager::draw() {
 	submit.pWaitDstStageMask = &wait_stage;
 
 	submit.waitSemaphoreCount = 1;
-	submit.pWaitSemaphores = &present_semaphore;
+	submit.pWaitSemaphores = &get_current_frame().present_semaphore;
 
 	submit.signalSemaphoreCount = 1;
-	submit.pSignalSemaphores = &render_semaphore;
+	submit.pSignalSemaphores = &get_current_frame().render_semaphore;
 
 	submit.commandBufferCount = 1;
 	submit.pCommandBuffers = &cmd;
 
 	//submit command buffer to the queue and execute it.
 	// render_fence will now block until the graphic commands finish execution
-	VK_CHECK(graphics_queue.submit(1, &submit, render_fence));
+	VK_CHECK(graphics_queue.submit(1, &submit, get_current_frame().render_fence));
 
 	// this will put the image we just rendered into the visible window.
 	// we want to wait on the render_semaphore for that,
@@ -756,12 +764,14 @@ void RenderManager::draw() {
 	present_info.pSwapchains = &swapchain;
 	present_info.swapchainCount = 1;
 
-	present_info.pWaitSemaphores = &render_semaphore;
+	present_info.pWaitSemaphores = &get_current_frame().render_semaphore;
 	present_info.waitSemaphoreCount = 1;
 
 	present_info.pImageIndices = &swapchain_image_index;
 
 	VK_CHECK(graphics_queue.presentKHR(&present_info));
+
+	frame_number++;
 }
 
 void RenderManager::draw_objects(vk::CommandBuffer cmd, RenderObject *first, int count) const {
