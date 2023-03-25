@@ -106,6 +106,7 @@ class RenderManager {
 	void init_sync_structures();
 	void init_pipelines();
 	void init_scene();
+	void init_imgui(GLFWwindow *window);
 
 	//loads a shader module from a spir-v file. Returns false if it errors
 	bool load_shader_module(const char *file_path, vk::ShaderModule *out_shader_module);

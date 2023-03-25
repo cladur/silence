@@ -26,6 +26,8 @@ target_link_libraries(${RENDER_MANAGER_NAME} PUBLIC unofficial::VulkanMemoryAllo
 find_package(glm CONFIG REQUIRED)
 target_link_libraries(${RENDER_MANAGER_NAME} PUBLIC glm::glm)
 
+find_package(imgui CONFIG REQUIRED)
+target_link_libraries(${RENDER_MANAGER_NAME} PRIVATE imgui::imgui)
 
 include(FetchContent)
 FetchContent_Declare(

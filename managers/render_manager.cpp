@@ -17,11 +17,15 @@
 #include <ios>
 #include <vulkan/vulkan_enums.hpp>
 
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_vulkan.h"
+
 #define VK_CHECK(x)                                                                                                    \
 	do {                                                                                                               \
 		vk::Result err = x;                                                                                            \
 		if (err != vk::Result::eSuccess) {                                                                             \
-			SPDLOG_ERROR("Detected Vulkan error: {}", magic_enum::enum_name(err));                                     \
+			SPDLOG_ERROR("Detected Vulkan error: ({}) {}", magic_enum::enum_integer(err), magic_enum::enum_name(err)); \
 			abort();                                                                                                   \
 		}                                                                                                              \
 	} while (false)
@@ -420,6 +424,64 @@ void RenderManager::init_scene() {
 	}
 }
 
+void RenderManager::init_imgui(GLFWwindow *window) {
+	//1: create descriptor pool for IMGUI
+	// the size of the pool is very oversize, but it's copied from imgui demo itself.
+	vk::DescriptorPoolSize pool_sizes[] = { { vk::DescriptorType::eSampler, 1000 },
+		{ vk::DescriptorType::eCombinedImageSampler, 1000 }, { vk::DescriptorType::eSampledImage, 1000 },
+		{ vk::DescriptorType::eStorageImage, 1000 }, { vk::DescriptorType::eUniformTexelBuffer, 1000 },
+		{ vk::DescriptorType::eStorageTexelBuffer, 1000 }, { vk::DescriptorType::eUniformBuffer, 1000 },
+		{ vk::DescriptorType::eStorageBuffer, 1000 }, { vk::DescriptorType::eUniformBufferDynamic, 1000 },
+		{ vk::DescriptorType::eStorageBufferDynamic, 1000 }, { vk::DescriptorType::eInputAttachment, 1000 } };
+
+	vk::DescriptorPoolCreateInfo pool_info = {};
+	pool_info.sType = vk::StructureType::eDescriptorPoolCreateInfo;
+	pool_info.flags = vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet;
+
+	pool_info.maxSets = 1000;
+	pool_info.poolSizeCount = std::size(pool_sizes);
+	pool_info.pPoolSizes = pool_sizes;
+
+	vk::DescriptorPool imgui_pool;
+	VK_CHECK(device.createDescriptorPool(&pool_info, nullptr, &imgui_pool));
+
+	// 2: initialize imgui library
+
+	//this initializes the core structures of imgui
+	ImGui::CreateContext();
+
+	//this initializes imgui for GLFW
+	ImGui_ImplGlfw_InitForVulkan(window, true);
+
+	//this initializes imgui for Vulkan
+	ImGui_ImplVulkan_InitInfo init_info = {};
+	init_info.Instance = instance;
+	init_info.PhysicalDevice = chosen_gpu;
+	init_info.Device = device;
+	init_info.Queue = graphics_queue;
+	init_info.DescriptorPool = imgui_pool;
+	init_info.MinImageCount = 3;
+	init_info.ImageCount = 3;
+	init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+
+	ImGui_ImplVulkan_Init(&init_info, render_pass);
+
+	//execute a gpu command to upload imgui font textures
+
+	SPDLOG_ERROR("IMGUI INTEGRATION IS UNFINISHED!");
+	abort();
+	// immediate_submit([&](VkCommandBuffer cmd) { ImGui_ImplVulkan_CreateFontsTexture(cmd); });
+
+	//clear font textures from cpu data
+	ImGui_ImplVulkan_DestroyFontUploadObjects();
+
+	//queue destruction of the imgui created structures
+	main_deletion_queue.push_function([=, this]() {
+		device.destroyDescriptorPool(imgui_pool, nullptr);
+		ImGui_ImplVulkan_Shutdown();
+	});
+}
+
 void RenderManager::load_meshes() {
 	triangle_mesh.vertices.resize(3);
 
@@ -548,6 +610,8 @@ RenderManager::Status RenderManager::startup(DisplayManager &display_manager) {
 	init_pipelines();
 	load_meshes();
 	init_scene();
+
+	// init_imgui();
 
 	return Status::Ok;
 }
