@@ -71,7 +71,6 @@ vk::PipelineRasterizationStateCreateInfo vk_init::rasterization_state_create_inf
 	info.lineWidth = 1.0f;
 	//no backface cull
 	info.cullMode = vk::CullModeFlagBits::eNone;
-	;
 	info.frontFace = vk::FrontFace::eClockwise;
 	//no depth bias
 	info.depthBiasEnable = VK_FALSE;
@@ -118,19 +117,19 @@ vk::PipelineLayoutCreateInfo vk_init::pipeline_layout_create_info() {
 }
 
 vk::FenceCreateInfo vk_init::fence_create_info(vk::FenceCreateFlags flags) {
-	vk::FenceCreateInfo fenceCreateInfo = {};
-	fenceCreateInfo.sType = vk::StructureType::eFenceCreateInfo;
-	fenceCreateInfo.pNext = nullptr;
-	fenceCreateInfo.flags = flags;
-	return fenceCreateInfo;
+	vk::FenceCreateInfo fence_create_info = {};
+	fence_create_info.sType = vk::StructureType::eFenceCreateInfo;
+	fence_create_info.pNext = nullptr;
+	fence_create_info.flags = flags;
+	return fence_create_info;
 }
 
 vk::SemaphoreCreateInfo vk_init::semaphore_create_info(vk::SemaphoreCreateFlags flags) {
-	vk::SemaphoreCreateInfo semCreateInfo = {};
-	semCreateInfo.sType = vk::StructureType::eSemaphoreCreateInfo;
-	semCreateInfo.pNext = nullptr;
-	semCreateInfo.flags = flags;
-	return semCreateInfo;
+	vk::SemaphoreCreateInfo sem_create_info = {};
+	sem_create_info.sType = vk::StructureType::eSemaphoreCreateInfo;
+	sem_create_info.pNext = nullptr;
+	sem_create_info.flags = flags;
+	return sem_create_info;
 }
 
 vk::ImageCreateInfo vk_init::image_create_info(
@@ -155,7 +154,7 @@ vk::ImageCreateInfo vk_init::image_create_info(
 
 vk::ImageViewCreateInfo vk_init::image_view_create_info(
 		vk::Format format, vk::Image image, vk::ImageAspectFlags aspect_flags) {
-	//build a image-view for the depth image to use for rendering
+	//build an image-view for the depth image to use for rendering
 	vk::ImageViewCreateInfo info = {};
 	info.sType = vk::StructureType::eImageViewCreateInfo;
 	info.pNext = nullptr;

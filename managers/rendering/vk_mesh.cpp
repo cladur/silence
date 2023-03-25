@@ -1,7 +1,5 @@
 #include "vk_mesh.h"
 
-#include <iostream>
-
 #include <spdlog/spdlog.h>
 
 #define TINYGLTF_IMPLEMENTATION
@@ -103,9 +101,9 @@ bool Mesh::load_from_gltf(const char *filename) {
 			// Load indices
 			const auto &index_accessor = model.accessors[primitive.indices];
 			const auto &index_buffer_view = model.bufferViews[index_accessor.bufferView];
-			const auto &index_buffer = model.buffers[index_buffer_view.buffer];
+			const auto &gltf_index_buffer = model.buffers[index_buffer_view.buffer];
 
-			const auto &index_data = &index_buffer.data[index_buffer_view.byteOffset + index_accessor.byteOffset];
+			const auto &index_data = &gltf_index_buffer.data[index_buffer_view.byteOffset + index_accessor.byteOffset];
 
 			for (size_t i = 0; i < index_accessor.count; i++) {
 				switch (index_accessor.componentType) {

@@ -3,6 +3,7 @@
 
 #include <deque>
 #include <functional>
+#include <ranges>
 #include <unordered_map>
 #include <vector>
 
@@ -31,8 +32,8 @@ struct DeletionQueue {
 
 	void flush() {
 		// reverse iterate the deletion queue to execute all the functions
-		for (auto it = deletors.rbegin(); it != deletors.rend(); it++) {
-			(*it)(); //call the function
+		for (auto &deletor : std::ranges::reverse_view(deletors)) {
+			deletor(); //call the function
 		}
 
 		deletors.clear();
@@ -79,10 +80,7 @@ class RenderManager {
 	std::vector<vk::Framebuffer> framebuffers;
 
 	// PIPELINE
-	vk::PipelineLayout triangle_pipeline_layout;
 	vk::PipelineLayout mesh_pipeline_layout;
-	vk::Pipeline triangle_pipeline;
-	vk::Pipeline red_triangle_pipeline;
 	vk::Pipeline mesh_pipeline;
 
 	// MESHES
@@ -140,7 +138,7 @@ public:
 	Mesh *get_mesh(const std::string &name);
 
 	void draw();
-	void draw_objects(vk::CommandBuffer cmd, RenderObject *first, int count);
+	void draw_objects(vk::CommandBuffer cmd, RenderObject *first, int count) const;
 };
 
 #endif //SILENCE_RENDER_MANAGER_H

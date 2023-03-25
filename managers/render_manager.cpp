@@ -130,7 +130,7 @@ void RenderManager::init_swapchain(DisplayManager &display_manager) {
 	VK_CHECK(device.createImageView(&dview_info, nullptr, &depth_image_view));
 
 	//add to deletion queues
-	main_deletion_queue.push_function([=]() {
+	main_deletion_queue.push_function([=, this]() {
 		device.destroyImageView(depth_image_view);
 		allocator.destroyImage(depth_image.image, depth_image.allocation);
 	});
@@ -298,35 +298,11 @@ void RenderManager::init_sync_structures() {
 }
 
 void RenderManager::init_pipelines() {
-	vk::ShaderModule triangle_frag_shader;
-	if (!load_shader_module("resources/shaders/colored_triangle.frag.spv", &triangle_frag_shader)) {
+	vk::ShaderModule mesh_frag_shader;
+	if (!load_shader_module("resources/shaders/colored_triangle.frag.spv", &mesh_frag_shader)) {
 		SPDLOG_ERROR("Error when building the triangle fragment shader module");
 	} else {
 		SPDLOG_INFO("Triangle fragment shader successfully loaded");
-	}
-
-	vk::ShaderModule triangle_vertex_shader;
-	if (!load_shader_module("resources/shaders/colored_triangle.vert.spv", &triangle_vertex_shader)) {
-		SPDLOG_ERROR("Error when building the triangle vertex shader module");
-
-	} else {
-		SPDLOG_INFO("Triangle vertex shader successfully loaded");
-	}
-
-	vk::ShaderModule red_triangle_frag_shader;
-	if (!load_shader_module("resources/shaders/triangle.frag.spv", &red_triangle_frag_shader)) {
-		SPDLOG_ERROR("Error when building the triangle fragment shader module");
-		abort();
-	} else {
-		SPDLOG_INFO("Triangle fragment shader successfully loaded");
-	}
-
-	vk::ShaderModule red_triangle_vertex_shader;
-	if (!load_shader_module("resources/shaders/triangle.vert.spv", &red_triangle_vertex_shader)) {
-		SPDLOG_ERROR("Error when building the red triangle vertex shader module");
-		abort();
-	} else {
-		SPDLOG_INFO("Triangle vertex shader successfully loaded");
 	}
 
 	vk::ShaderModule mesh_vertex_shader;
@@ -337,21 +313,9 @@ void RenderManager::init_pipelines() {
 		SPDLOG_INFO("Triangle vertex shader successfully loaded");
 	}
 
-	//build the pipeline layout that controls the inputs/outputs of the shader
-	//we are not using descriptor sets or other systems yet, so no need to use anything other than empty default
-	vk::PipelineLayoutCreateInfo pipeline_layout_info = vk_init::pipeline_layout_create_info();
-
-	VK_CHECK(device.createPipelineLayout(&pipeline_layout_info, nullptr, &triangle_pipeline_layout));
-
 	//build the stage-create-info for both vertex and fragment stages. This lets the pipeline know the shader modules
 	//per stage
 	PipelineBuilder pipeline_builder;
-
-	pipeline_builder.shader_stages.push_back(
-			vk_init::pipeline_shader_stage_create_info(vk::ShaderStageFlagBits::eVertex, triangle_vertex_shader));
-
-	pipeline_builder.shader_stages.push_back(
-			vk_init::pipeline_shader_stage_create_info(vk::ShaderStageFlagBits::eFragment, triangle_frag_shader));
 
 	//vertex input controls how to read vertices from vertex buffers. We aren't using it yet
 	pipeline_builder.vertex_input_info = vk_init::vertex_input_state_create_info();
@@ -380,27 +344,8 @@ void RenderManager::init_pipelines() {
 	//a single blend attachment with no blending and writing to RGBA
 	pipeline_builder.color_blend_attachment = vk_init::color_blend_attachment_state();
 
-	//use the triangle layout we created
-	pipeline_builder.pipeline_layout = triangle_pipeline_layout;
-
 	//default depthtesting
 	pipeline_builder.depth_stencil = vk_init::depth_stencil_create_info(true, true, vk::CompareOp::eLessOrEqual);
-
-	//finally build the pipeline
-	triangle_pipeline = pipeline_builder.build_pipeline(device, render_pass);
-
-	//clear the shader stages for the builder
-	pipeline_builder.shader_stages.clear();
-
-	//add the other shaders
-	pipeline_builder.shader_stages.push_back(
-			vk_init::pipeline_shader_stage_create_info(vk::ShaderStageFlagBits::eVertex, red_triangle_vertex_shader));
-
-	pipeline_builder.shader_stages.push_back(
-			vk_init::pipeline_shader_stage_create_info(vk::ShaderStageFlagBits::eFragment, red_triangle_frag_shader));
-
-	//build the red triangle pipeline
-	red_triangle_pipeline = pipeline_builder.build_pipeline(device, render_pass);
 
 	//build the mesh pipeline
 	//we start from just the default empty pipeline layout info
@@ -431,16 +376,13 @@ void RenderManager::init_pipelines() {
 	pipeline_builder.vertex_input_info.pVertexBindingDescriptions = vertex_description.bindings.data();
 	pipeline_builder.vertex_input_info.vertexBindingDescriptionCount = vertex_description.bindings.size();
 
-	//clear the shader stages for the builder
-	pipeline_builder.shader_stages.clear();
-
 	//add the other shaders
 	pipeline_builder.shader_stages.push_back(
 			vk_init::pipeline_shader_stage_create_info(vk::ShaderStageFlagBits::eVertex, mesh_vertex_shader));
 
 	//make sure that triangle_frag_shader is holding the compiled colored_triangle.frag
 	pipeline_builder.shader_stages.push_back(
-			vk_init::pipeline_shader_stage_create_info(vk::ShaderStageFlagBits::eFragment, triangle_frag_shader));
+			vk_init::pipeline_shader_stage_create_info(vk::ShaderStageFlagBits::eFragment, mesh_frag_shader));
 
 	//build the mesh triangle pipeline
 	mesh_pipeline = pipeline_builder.build_pipeline(device, render_pass);
@@ -448,22 +390,16 @@ void RenderManager::init_pipelines() {
 	create_material(mesh_pipeline, mesh_pipeline_layout, "default_mesh");
 
 	device.destroyShaderModule(mesh_vertex_shader, nullptr);
-	device.destroyShaderModule(red_triangle_vertex_shader, nullptr);
-	device.destroyShaderModule(red_triangle_frag_shader, nullptr);
-	device.destroyShaderModule(triangle_vertex_shader, nullptr);
-	device.destroyShaderModule(triangle_frag_shader, nullptr);
+	device.destroyShaderModule(mesh_frag_shader, nullptr);
 
 	main_deletion_queue.push_function([=, this]() {
-		device.destroyPipeline(triangle_pipeline);
-		device.destroyPipeline(red_triangle_pipeline);
 		device.destroyPipeline(mesh_pipeline);
-		device.destroyPipelineLayout(triangle_pipeline_layout);
 		device.destroyPipelineLayout(mesh_pipeline_layout);
 	});
 }
 
 void RenderManager::init_scene() {
-	RenderObject monkey;
+	RenderObject monkey = {};
 	monkey.mesh = get_mesh("monkey");
 	monkey.material = get_material("default_mesh");
 	monkey.transformMatrix = glm::mat4{ 1.0f };
@@ -472,7 +408,7 @@ void RenderManager::init_scene() {
 
 	for (int x = -20; x <= 20; x++) {
 		for (int y = -20; y <= 20; y++) {
-			RenderObject tri;
+			RenderObject tri = {};
 			tri.mesh = get_mesh("triangle");
 			tri.material = get_material("default_mesh");
 			glm::mat4 translation = glm::translate(glm::mat4{ 1.0 }, glm::vec3(x, 0, y));
@@ -512,20 +448,20 @@ void RenderManager::load_meshes() {
 
 void RenderManager::upload_mesh(Mesh &mesh) {
 	//allocate vertex buffer
-	vk::BufferCreateInfo bufferInfo = {};
-	bufferInfo.sType = vk::StructureType::eBufferCreateInfo;
+	vk::BufferCreateInfo buffer_info = {};
+	buffer_info.sType = vk::StructureType::eBufferCreateInfo;
 	//this is the total size, in bytes, of the buffer we are allocating
-	bufferInfo.size = mesh.vertices.size() * sizeof(Vertex);
+	buffer_info.size = mesh.vertices.size() * sizeof(Vertex);
 	//this buffer is going to be used as a Vertex Buffer
-	bufferInfo.usage = vk::BufferUsageFlagBits::eVertexBuffer;
+	buffer_info.usage = vk::BufferUsageFlagBits::eVertexBuffer;
 
 	//let the VMA library know that this data should be writeable by CPU, but also readable by GPU
-	vma::AllocationCreateInfo vmaallocInfo = {};
-	vmaallocInfo.usage = vma::MemoryUsage::eCpuToGpu;
+	vma::AllocationCreateInfo vmaalloc_info = {};
+	vmaalloc_info.usage = vma::MemoryUsage::eCpuToGpu;
 
 	//allocate the buffer
 	VK_CHECK(allocator.createBuffer(
-			&bufferInfo, &vmaallocInfo, &mesh.vertex_buffer.buffer, &mesh.vertex_buffer.allocation, nullptr));
+			&buffer_info, &vmaalloc_info, &mesh.vertex_buffer.buffer, &mesh.vertex_buffer.allocation, nullptr));
 
 	//add the destruction of triangle mesh buffer to the deletion queue
 	main_deletion_queue.push_function(
@@ -540,10 +476,10 @@ void RenderManager::upload_mesh(Mesh &mesh) {
 	allocator.unmapMemory(mesh.vertex_buffer.allocation);
 
 	//allocate index buffer
-	bufferInfo.size = mesh.indices.size() * sizeof(uint32_t);
-	bufferInfo.usage = vk::BufferUsageFlagBits::eIndexBuffer;
+	buffer_info.size = mesh.indices.size() * sizeof(uint32_t);
+	buffer_info.usage = vk::BufferUsageFlagBits::eIndexBuffer;
 	VK_CHECK(allocator.createBuffer(
-			&bufferInfo, &vmaallocInfo, &mesh.index_buffer.buffer, &mesh.index_buffer.allocation, nullptr));
+			&buffer_info, &vmaalloc_info, &mesh.index_buffer.buffer, &mesh.index_buffer.allocation, nullptr));
 
 	//add the destruction of triangle mesh buffer to the deletion queue
 	main_deletion_queue.push_function(
@@ -629,7 +565,7 @@ void RenderManager::shutdown() {
 }
 
 Material *RenderManager::create_material(vk::Pipeline pipeline, vk::PipelineLayout layout, const std::string &name) {
-	Material mat;
+	Material mat = {};
 	mat.pipeline = pipeline;
 	mat.pipelineLayout = layout;
 	materials[name] = mat;
@@ -715,7 +651,7 @@ void RenderManager::draw() {
 
 	cmd.beginRenderPass(&rp_info, vk::SubpassContents::eInline);
 
-	draw_objects(cmd, renderables.data(), renderables.size());
+	draw_objects(cmd, renderables.data(), (int)renderables.size());
 
 	cmd.endRenderPass();
 	//finalize the command buffer (we can no longer add commands, but it can now be executed)
@@ -764,7 +700,9 @@ void RenderManager::draw() {
 	VK_CHECK(graphics_queue.presentKHR(&present_info));
 }
 
-void RenderManager::draw_objects(vk::CommandBuffer cmd, RenderObject *first, int count) {
+void RenderManager::draw_objects(vk::CommandBuffer cmd, RenderObject *first, int count) const {
+	// TODO: Sort RenderObjects by material and mesh to reduce pipeline and descriptor set changes
+
 	//make a model view matrix for rendering the object
 	//camera view
 	glm::vec3 cam_pos = { 0.f, 3.f, -10.f };
@@ -789,7 +727,7 @@ void RenderManager::draw_objects(vk::CommandBuffer cmd, RenderObject *first, int
 		//final render matrix, that we are calculating on the cpu
 		glm::mat4 mesh_matrix = projection * view * model;
 
-		MeshPushConstants constants;
+		MeshPushConstants constants = {};
 		constants.render_matrix = mesh_matrix;
 
 		//upload the mesh to the GPU via push constants
