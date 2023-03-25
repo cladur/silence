@@ -3,6 +3,7 @@
 
 #include <deque>
 #include <functional>
+#include <unordered_map>
 #include <vector>
 
 #include <glm/glm.hpp>
@@ -36,6 +37,17 @@ struct DeletionQueue {
 
 		deletors.clear();
 	}
+};
+
+struct Material {
+	VkPipeline pipeline;
+	VkPipelineLayout pipelineLayout;
+};
+
+struct RenderObject {
+	Mesh *mesh;
+	Material *material;
+	glm::mat4 transformMatrix;
 };
 
 class RenderManager {
@@ -95,6 +107,7 @@ class RenderManager {
 	void init_framebuffers();
 	void init_sync_structures();
 	void init_pipelines();
+	void init_scene();
 
 	//loads a shader module from a spir-v file. Returns false if it errors
 	bool load_shader_module(const char *file_path, vk::ShaderModule *out_shader_module);
@@ -103,18 +116,31 @@ class RenderManager {
 	void upload_mesh(Mesh &mesh);
 
 public:
-	vk::Semaphore present_semaphore, render_semaphore;
-	vk::Fence render_fence;
-
 	enum class Status {
 		Ok,
 		FailedToInitializeVulkan,
 	};
 
+	vk::Semaphore present_semaphore, render_semaphore;
+	vk::Fence render_fence;
+
+	//default array of renderable objects
+	std::vector<RenderObject> renderables;
+	std::unordered_map<std::string, Material> materials;
+	std::unordered_map<std::string, Mesh> meshes;
+
 	Status startup(DisplayManager &display_manager);
 	void shutdown();
 
+	//create material and add it to the map
+	Material *create_material(vk::Pipeline pipeline, vk::PipelineLayout layout, const std::string &name);
+	//returns nullptr if it can't be found
+	Material *get_material(const std::string &name);
+	//returns nullptr if it can't be found
+	Mesh *get_mesh(const std::string &name);
+
 	void draw();
+	void draw_objects(vk::CommandBuffer cmd, RenderObject *first, int count);
 };
 
 #endif //SILENCE_RENDER_MANAGER_H

@@ -357,7 +357,7 @@ void RenderManager::init_pipelines() {
 	pipeline_builder.vertex_input_info = vk_init::vertex_input_state_create_info();
 
 	//input assembly is the configuration for drawing triangle lists, strips, or individual points.
-	//we are just going to draw triangle list
+	//we are just going to draw_objects triangle list
 	pipeline_builder.input_assembly = vk_init::input_assembly_create_info(vk::PrimitiveTopology::eTriangleList);
 
 	//build viewport and scissor from the swapchain extents
@@ -371,7 +371,7 @@ void RenderManager::init_pipelines() {
 	pipeline_builder.scissor.offset = vk::Offset2D(0, 0);
 	pipeline_builder.scissor.extent = window_extent;
 
-	//configure the rasterizer to draw filled triangles
+	//configure the rasterizer to draw_objects filled triangles
 	pipeline_builder.rasterizer = vk_init::rasterization_state_create_info(vk::PolygonMode::eFill);
 
 	//we don't use multisampling, so just run the default one
@@ -445,6 +445,8 @@ void RenderManager::init_pipelines() {
 	//build the mesh triangle pipeline
 	mesh_pipeline = pipeline_builder.build_pipeline(device, render_pass);
 
+	create_material(mesh_pipeline, mesh_pipeline_layout, "default_mesh");
+
 	device.destroyShaderModule(mesh_vertex_shader, nullptr);
 	device.destroyShaderModule(red_triangle_vertex_shader, nullptr);
 	device.destroyShaderModule(red_triangle_frag_shader, nullptr);
@@ -458,6 +460,28 @@ void RenderManager::init_pipelines() {
 		device.destroyPipelineLayout(triangle_pipeline_layout);
 		device.destroyPipelineLayout(mesh_pipeline_layout);
 	});
+}
+
+void RenderManager::init_scene() {
+	RenderObject monkey;
+	monkey.mesh = get_mesh("monkey");
+	monkey.material = get_material("default_mesh");
+	monkey.transformMatrix = glm::mat4{ 1.0f };
+
+	renderables.push_back(monkey);
+
+	for (int x = -20; x <= 20; x++) {
+		for (int y = -20; y <= 20; y++) {
+			RenderObject tri;
+			tri.mesh = get_mesh("triangle");
+			tri.material = get_material("default_mesh");
+			glm::mat4 translation = glm::translate(glm::mat4{ 1.0 }, glm::vec3(x, 0, y));
+			glm::mat4 scale = glm::scale(glm::mat4{ 1.0 }, glm::vec3(0.2, 0.2, 0.2));
+			tri.transformMatrix = translation * scale;
+
+			renderables.push_back(tri);
+		}
+	}
 }
 
 void RenderManager::load_meshes() {
@@ -481,6 +505,9 @@ void RenderManager::load_meshes() {
 
 	upload_mesh(triangle_mesh);
 	upload_mesh(monkey_mesh);
+
+	meshes["triangle"] = triangle_mesh;
+	meshes["monkey"] = monkey_mesh;
 }
 
 void RenderManager::upload_mesh(Mesh &mesh) {
@@ -583,8 +610,8 @@ RenderManager::Status RenderManager::startup(DisplayManager &display_manager) {
 	init_framebuffers();
 	init_sync_structures();
 	init_pipelines();
-
 	load_meshes();
+	init_scene();
 
 	return Status::Ok;
 }
@@ -599,6 +626,33 @@ void RenderManager::shutdown() {
 	instance.destroySurfaceKHR(surface);
 	vkb::destroy_debug_utils_messenger(instance, debug_messenger);
 	instance.destroy();
+}
+
+Material *RenderManager::create_material(vk::Pipeline pipeline, vk::PipelineLayout layout, const std::string &name) {
+	Material mat;
+	mat.pipeline = pipeline;
+	mat.pipelineLayout = layout;
+	materials[name] = mat;
+	return &materials[name];
+}
+
+Material *RenderManager::get_material(const std::string &name) {
+	//search for the object, and return nullptr if not found
+	auto it = materials.find(name);
+	if (it == materials.end()) {
+		return nullptr;
+	} else {
+		return &(*it).second;
+	}
+}
+
+Mesh *RenderManager::get_mesh(const std::string &name) {
+	auto it = meshes.find(name);
+	if (it == meshes.end()) {
+		return nullptr;
+	} else {
+		return &(*it).second;
+	}
 }
 
 void RenderManager::draw() {
@@ -660,40 +714,9 @@ void RenderManager::draw() {
 	rp_info.pClearValues = &clear_values[0];
 
 	cmd.beginRenderPass(&rp_info, vk::SubpassContents::eInline);
-	//once we start adding rendering commands, they will go here
 
-	glm::vec3 cam_pos = { 0.f, 0.f, -2.f };
+	draw_objects(cmd, renderables.data(), renderables.size());
 
-	glm::mat4 view = glm::translate(glm::mat4(1.f), cam_pos);
-	//camera projection
-	float aspect = (float)window_extent.width / (float)window_extent.height;
-	glm::mat4 projection = glm::perspective(glm::radians(70.f), aspect, 0.1f, 200.0f);
-	//model rotation
-	glm::mat4 model = glm::rotate(glm::mat4{ 1.0f }, glm::radians(frame_number * 0.4f), glm::vec3(0, 1, 0));
-
-	//calculate final mesh matrix
-	glm::mat4 mesh_matrix = projection * view * model;
-
-	MeshPushConstants constants;
-	constants.render_matrix = mesh_matrix;
-
-	//upload the matrix to the GPU via push constants
-	cmd.pushConstants(mesh_pipeline_layout, vk::ShaderStageFlagBits::eVertex, 0, sizeof(MeshPushConstants), &constants);
-
-	cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, mesh_pipeline);
-	vk::DeviceSize offset = 0;
-	cmd.bindVertexBuffers(0, 1, &triangle_mesh.vertex_buffer.buffer, &offset);
-	cmd.bindIndexBuffer(triangle_mesh.index_buffer.buffer, 0, vk::IndexType::eUint32);
-	cmd.drawIndexed(triangle_mesh.indices.size(), 1, 0, 0, 0);
-
-	// //bind the mesh vertex buffer with offset 0
-	cmd.bindVertexBuffers(0, 1, &monkey_mesh.vertex_buffer.buffer, &offset);
-	cmd.bindIndexBuffer(monkey_mesh.index_buffer.buffer, 0, vk::IndexType::eUint32);
-
-	//we can now draw the mesh
-	cmd.drawIndexed(monkey_mesh.indices.size(), 1, 0, 0, 0);
-
-	//finalize the render pass
 	cmd.endRenderPass();
 	//finalize the command buffer (we can no longer add commands, but it can now be executed)
 	VK_CHECK(cmd.end());
@@ -739,4 +762,49 @@ void RenderManager::draw() {
 	present_info.pImageIndices = &swapchain_image_index;
 
 	VK_CHECK(graphics_queue.presentKHR(&present_info));
+}
+
+void RenderManager::draw_objects(vk::CommandBuffer cmd, RenderObject *first, int count) {
+	//make a model view matrix for rendering the object
+	//camera view
+	glm::vec3 cam_pos = { 0.f, 3.f, -10.f };
+
+	glm::mat4 view = glm::translate(glm::mat4(1.f), cam_pos);
+	//camera projection
+	float aspect = (float)window_extent.width / (float)window_extent.height;
+	glm::mat4 projection = glm::perspective(glm::radians(70.f), aspect, 0.1f, 200.0f);
+
+	Mesh *last_mesh = nullptr;
+	Material *last_material = nullptr;
+	for (int i = 0; i < count; i++) {
+		RenderObject &object = first[i];
+
+		//only bind the pipeline if it doesn't match with the already bound one
+		if (object.material != last_material) {
+			cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, object.material->pipeline);
+			last_material = object.material;
+		}
+
+		glm::mat4 model = object.transformMatrix;
+		//final render matrix, that we are calculating on the cpu
+		glm::mat4 mesh_matrix = projection * view * model;
+
+		MeshPushConstants constants;
+		constants.render_matrix = mesh_matrix;
+
+		//upload the mesh to the GPU via push constants
+		cmd.pushConstants(object.material->pipelineLayout, vk::ShaderStageFlagBits::eVertex, 0,
+				sizeof(MeshPushConstants), &constants);
+
+		//only bind the mesh if it's a different one from last bind
+		if (object.mesh != last_mesh) {
+			//bind the mesh vertex buffer with offset 0
+			vk::DeviceSize offset = 0;
+			cmd.bindVertexBuffers(0, 1, &object.mesh->vertex_buffer.buffer, &offset);
+			cmd.bindIndexBuffer(object.mesh->index_buffer.buffer, 0, vk::IndexType::eUint32);
+			last_mesh = object.mesh;
+		}
+		//we can now draw
+		cmd.drawIndexed(object.mesh->indices.size(), 1, 0, 0, 0);
+	}
 }
