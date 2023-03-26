@@ -19,4 +19,4 @@ target_link_libraries(${GAME_NAME} PRIVATE spdlog::spdlog spdlog::spdlog_header_
 find_package(magic_enum CONFIG REQUIRED)
 target_link_libraries(${GAME_NAME} PRIVATE magic_enum::magic_enum)
 
-target_link_libraries(${GAME_NAME} PRIVATE silence_display_manager silence_render_manager)
+target_link_libraries(${GAME_NAME} PRIVATE silence_display_manager silence_render_manager silence_ecs_manager silence_core)
