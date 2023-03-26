@@ -10,13 +10,11 @@ file(GLOB_RECURSE HEADER_FILES
         *.h
         *.hpp)
 
-add_library(${CORE_LIB_NAME} STATIC ${HEADER_FILES} ${SOURCE_FILES} input/Input.cpp input/input.h input/input.cpp input/input.h)
+add_library(${CORE_LIB_NAME} STATIC ${HEADER_FILES} ${SOURCE_FILES} input/input_manager.h input/input_manager.cpp input/input_key.h input/input_devices.h input/multiplatform_input.h input/multiplatform_input.cpp)
 
 target_include_directories(${CORE_LIB_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 
 # Linking libraries
-
-target_link_libraries(${CORE_LIB_NAME} PRIVATE silence_common)
 
 find_package(glfw3 CONFIG REQUIRED)
 target_link_libraries(${CORE_LIB_NAME} PRIVATE glfw)
