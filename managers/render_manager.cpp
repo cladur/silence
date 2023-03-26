@@ -163,14 +163,22 @@ void RenderManager::init_commands() {
 		//allocate the default command buffer that we will use for rendering
 		vk::CommandBufferAllocateInfo cmd_alloc_info = vk_init::command_buffer_allocate_info(frame.command_pool, 1);
 
-		auto main_command_buffer_res = device.allocateCommandBuffers(cmd_alloc_info);
-
-		VK_CHECK(main_command_buffer_res.result);
-
-		frame.main_command_buffer = main_command_buffer_res.value[0];
+		VK_CHECK(device.allocateCommandBuffers(&cmd_alloc_info, &frame.main_command_buffer));
 
 		main_deletion_queue.push_function([=, this]() { device.destroyCommandPool(frame.command_pool); });
 	}
+
+	vk::CommandPoolCreateInfo upload_command_pool_info = vk_init::command_pool_create_info(graphics_queue_family);
+	//create pool for upload context
+	VK_CHECK(device.createCommandPool(&upload_command_pool_info, nullptr, &upload_context.command_pool));
+
+	main_deletion_queue.push_function([=, this]() { device.destroyCommandPool(upload_context.command_pool); });
+
+	//allocate the default command buffer that we will use for the instant commands
+	vk::CommandBufferAllocateInfo cmd_alloc_info =
+			vk_init::command_buffer_allocate_info(upload_context.command_pool, 1);
+
+	VK_CHECK(device.allocateCommandBuffers(&cmd_alloc_info, &upload_context.command_buffer));
 }
 
 void RenderManager::init_default_renderpass() {
@@ -313,6 +321,12 @@ void RenderManager::init_sync_structures() {
 			device.destroySemaphore(frame.render_semaphore);
 		});
 	}
+
+	vk::FenceCreateInfo upload_fence_create_info = vk_init::fence_create_info();
+
+	VK_CHECK(device.createFence(&upload_fence_create_info, nullptr, &upload_context.upload_fence));
+
+	main_deletion_queue.push_function([=, this]() { device.destroyFence(upload_context.upload_fence); });
 }
 
 void RenderManager::init_descriptors() {
@@ -373,8 +387,8 @@ void RenderManager::init_descriptors() {
 				sizeof(GPUCameraData), vk::BufferUsageFlagBits::eUniformBuffer, vma::MemoryUsage::eCpuToGpu);
 
 		// TODO: Move this constant somewhere else
-		const int MAX_OBJECTS = 10000;
-		frame.object_buffer = create_buffer(MAX_OBJECTS * sizeof(GPUObjectData),
+		const int max_objects = 10000;
+		frame.object_buffer = create_buffer(max_objects * sizeof(GPUObjectData),
 				vk::BufferUsageFlagBits::eStorageBuffer, vma::MemoryUsage::eCpuToGpu);
 
 		//allocate one descriptor set for each frames[i]
@@ -418,7 +432,7 @@ void RenderManager::init_descriptors() {
 		vk::DescriptorBufferInfo object_buffer_info;
 		object_buffer_info.buffer = frame.object_buffer.buffer;
 		object_buffer_info.offset = 0;
-		object_buffer_info.range = sizeof(GPUObjectData) * MAX_OBJECTS;
+		object_buffer_info.range = sizeof(GPUObjectData) * max_objects;
 
 		vk::WriteDescriptorSet camera_write = vk_init::write_descriptor_buffer(
 				vk::DescriptorType::eUniformBuffer, frame.global_descriptor, &camera_info, 0);
@@ -706,17 +720,40 @@ void RenderManager::load_meshes() {
 }
 
 void RenderManager::upload_mesh(Mesh &mesh) {
+	size_t buffer_size = mesh.vertices.size() * sizeof(Vertex);
+	//allocate staging buffer
+	vk::BufferCreateInfo staging_buffer_info = {};
+	staging_buffer_info.sType = vk::StructureType::eBufferCreateInfo;
+	staging_buffer_info.pNext = nullptr;
+
+	staging_buffer_info.size = buffer_size;
+	staging_buffer_info.usage = vk::BufferUsageFlagBits::eTransferSrc;
+
+	//let the VMA library know that this data should be on CPU RAM
+	vma::AllocationCreateInfo vmaalloc_info = {};
+	vmaalloc_info.usage = vma::MemoryUsage::eCpuOnly;
+
+	AllocatedBuffer staging_buffer;
+
+	//allocate the buffer
+	VK_CHECK(allocator.createBuffer(
+			&staging_buffer_info, &vmaalloc_info, &staging_buffer.buffer, &staging_buffer.allocation, nullptr));
+
+	void *data;
+	VK_CHECK(allocator.mapMemory(staging_buffer.allocation, &data));
+	memcpy(data, mesh.vertices.data(), mesh.vertices.size() * sizeof(Vertex));
+	allocator.unmapMemory(staging_buffer.allocation);
+
 	//allocate vertex buffer
 	vk::BufferCreateInfo buffer_info = {};
 	buffer_info.sType = vk::StructureType::eBufferCreateInfo;
 	//this is the total size, in bytes, of the buffer we are allocating
 	buffer_info.size = mesh.vertices.size() * sizeof(Vertex);
 	//this buffer is going to be used as a Vertex Buffer
-	buffer_info.usage = vk::BufferUsageFlagBits::eVertexBuffer;
+	buffer_info.usage = vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst;
 
 	//let the VMA library know that this data should be writeable by CPU, but also readable by GPU
-	vma::AllocationCreateInfo vmaalloc_info = {};
-	vmaalloc_info.usage = vma::MemoryUsage::eCpuToGpu;
+	vmaalloc_info.usage = vma::MemoryUsage::eGpuOnly;
 
 	//allocate the buffer
 	VK_CHECK(allocator.createBuffer(
@@ -726,17 +763,34 @@ void RenderManager::upload_mesh(Mesh &mesh) {
 	main_deletion_queue.push_function(
 			[=, this]() { allocator.destroyBuffer(mesh.vertex_buffer.buffer, mesh.vertex_buffer.allocation); });
 
-	//copy vertex data
-	void *data;
-	VK_CHECK(allocator.mapMemory(mesh.vertex_buffer.allocation, &data));
+	// copy vertex data
+	immediate_submit([=](vk::CommandBuffer cmd) {
+		vk::BufferCopy copy;
+		copy.dstOffset = 0;
+		copy.srcOffset = 0;
+		copy.size = buffer_size;
+		cmd.copyBuffer(staging_buffer.buffer, mesh.vertex_buffer.buffer, 1, &copy);
+	});
 
-	memcpy(data, mesh.vertices.data(), mesh.vertices.size() * sizeof(Vertex));
+	allocator.destroyBuffer(staging_buffer.buffer, staging_buffer.allocation);
 
-	allocator.unmapMemory(mesh.vertex_buffer.allocation);
+	// Recreate staging buffer, this time for indices
+	buffer_size = mesh.indices.size() * sizeof(uint32_t);
+	staging_buffer_info.size = buffer_size;
+	vmaalloc_info.usage = vma::MemoryUsage::eCpuOnly;
+
+	VK_CHECK(allocator.createBuffer(
+			&staging_buffer_info, &vmaalloc_info, &staging_buffer.buffer, &staging_buffer.allocation, nullptr));
+
+	VK_CHECK(allocator.mapMemory(staging_buffer.allocation, &data));
+	memcpy(data, mesh.indices.data(), mesh.indices.size() * sizeof(uint32_t));
+	allocator.unmapMemory(staging_buffer.allocation);
 
 	//allocate index buffer
-	buffer_info.size = mesh.indices.size() * sizeof(uint32_t);
-	buffer_info.usage = vk::BufferUsageFlagBits::eIndexBuffer;
+	vmaalloc_info.usage = vma::MemoryUsage::eGpuOnly;
+
+	buffer_info.size = buffer_size;
+	buffer_info.usage = vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst;
 	VK_CHECK(allocator.createBuffer(
 			&buffer_info, &vmaalloc_info, &mesh.index_buffer.buffer, &mesh.index_buffer.allocation, nullptr));
 
@@ -745,11 +799,15 @@ void RenderManager::upload_mesh(Mesh &mesh) {
 			[=, this]() { allocator.destroyBuffer(mesh.index_buffer.buffer, mesh.index_buffer.allocation); });
 
 	//copy index data
-	VK_CHECK(allocator.mapMemory(mesh.index_buffer.allocation, &data));
+	immediate_submit([=](vk::CommandBuffer cmd) {
+		vk::BufferCopy copy;
+		copy.dstOffset = 0;
+		copy.srcOffset = 0;
+		copy.size = buffer_size;
+		cmd.copyBuffer(staging_buffer.buffer, mesh.index_buffer.buffer, 1, &copy);
+	});
 
-	memcpy(data, mesh.indices.data(), mesh.indices.size() * sizeof(uint32_t));
-
-	allocator.unmapMemory(mesh.index_buffer.allocation);
+	allocator.destroyBuffer(staging_buffer.buffer, staging_buffer.allocation);
 }
 
 AllocatedBuffer RenderManager::create_buffer(
@@ -781,6 +839,34 @@ size_t RenderManager::pad_uniform_buffer_size(size_t original_size) const {
 		aligned_size = (aligned_size + min_ubo_alignment - 1) & ~(min_ubo_alignment - 1);
 	}
 	return aligned_size;
+}
+
+void RenderManager::immediate_submit(std::function<void(vk::CommandBuffer)> &&function) {
+	vk::CommandBuffer cmd = upload_context.command_buffer;
+
+	//begin the command buffer recording. We will use this command buffer exactly once before resetting, so we tell
+	//vulkan that
+	vk::CommandBufferBeginInfo cmd_begin_info =
+			vk_init::command_buffer_begin_info(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
+
+	VK_CHECK(cmd.begin(&cmd_begin_info));
+
+	//execute the function
+	function(cmd);
+
+	VK_CHECK(cmd.end());
+
+	vk::SubmitInfo submit = vk_init::submit_info(&cmd);
+
+	//submit command buffer to the queue and execute it.
+	// _uploadFence will now block until the graphic commands finish execution
+	VK_CHECK(graphics_queue.submit(1, &submit, upload_context.upload_fence));
+
+	VK_CHECK(device.waitForFences(1, &upload_context.upload_fence, true, 9999999999));
+	VK_CHECK(device.resetFences(1, &upload_context.upload_fence));
+
+	// reset the command buffers inside the command pool
+	device.resetCommandPool(upload_context.command_pool);
 }
 
 RenderManager::Status RenderManager::startup(DisplayManager &display_manager) {

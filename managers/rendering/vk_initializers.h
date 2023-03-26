@@ -5,7 +5,7 @@
 
 namespace vk_init {
 
-vk::CommandPoolCreateInfo command_pool_create_info(uint32_t queue_family_index, vk::CommandPoolCreateFlags flags);
+vk::CommandPoolCreateInfo command_pool_create_info(uint32_t queue_family_index, vk::CommandPoolCreateFlags flags = {});
 
 vk::CommandBufferAllocateInfo command_buffer_allocate_info(
 		vk::CommandPool pool, uint32_t count = 1, vk::CommandBufferLevel level = vk::CommandBufferLevel::ePrimary);
@@ -41,6 +41,9 @@ vk::DescriptorSetLayoutBinding descriptor_set_layout_binding(
 
 vk::WriteDescriptorSet write_descriptor_buffer(
 		vk::DescriptorType type, vk::DescriptorSet dst_set, vk::DescriptorBufferInfo *buffer_info, uint32_t binding);
+
+vk::CommandBufferBeginInfo command_buffer_begin_info(vk::CommandBufferUsageFlags flags = {});
+vk::SubmitInfo submit_info(vk::CommandBuffer *cmd);
 
 } //namespace vk_init
 

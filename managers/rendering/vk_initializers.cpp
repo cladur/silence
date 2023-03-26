@@ -213,3 +213,29 @@ vk::WriteDescriptorSet vk_init::write_descriptor_buffer(
 
 	return write;
 }
+
+vk::CommandBufferBeginInfo vk_init::command_buffer_begin_info(vk::CommandBufferUsageFlags flags) {
+	vk::CommandBufferBeginInfo info = {};
+	info.sType = vk::StructureType::eCommandBufferBeginInfo;
+	info.pNext = nullptr;
+
+	info.pInheritanceInfo = nullptr;
+	info.flags = flags;
+	return info;
+}
+
+vk::SubmitInfo vk_init::submit_info(vk::CommandBuffer *cmd) {
+	vk::SubmitInfo info = {};
+	info.sType = vk::StructureType::eSubmitInfo;
+	info.pNext = nullptr;
+
+	info.waitSemaphoreCount = 0;
+	info.pWaitSemaphores = nullptr;
+	info.pWaitDstStageMask = nullptr;
+	info.commandBufferCount = 1;
+	info.pCommandBuffers = cmd;
+	info.signalSemaphoreCount = 0;
+	info.pSignalSemaphores = nullptr;
+
+	return info;
+}

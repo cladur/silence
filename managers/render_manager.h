@@ -25,6 +25,12 @@ struct MeshPushConstants {
 	glm::mat4 render_matrix;
 };
 
+struct UploadContext {
+	vk::Fence upload_fence;
+	vk::CommandPool command_pool;
+	vk::CommandBuffer command_buffer;
+};
+
 struct DeletionQueue {
 	std::deque<std::function<void()>> deletors;
 
@@ -131,6 +137,8 @@ class RenderManager {
 
 	vk::PhysicalDeviceProperties gpu_properties;
 
+	UploadContext upload_context;
+
 	GPUSceneData scene_parameters;
 	AllocatedBuffer scene_parameter_buffer;
 
@@ -159,6 +167,7 @@ class RenderManager {
 
 	AllocatedBuffer create_buffer(size_t alloc_size, vk::BufferUsageFlags usage, vma::MemoryUsage memory_usage);
 	size_t pad_uniform_buffer_size(size_t original_size) const;
+	void immediate_submit(std::function<void(vk::CommandBuffer cmd)> &&function);
 
 public:
 	enum class Status {
