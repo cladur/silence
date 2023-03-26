@@ -36,6 +36,12 @@ vk::ImageViewCreateInfo image_view_create_info(vk::Format format, vk::Image imag
 vk::PipelineDepthStencilStateCreateInfo depth_stencil_create_info(
 		bool depth_test, bool depth_write, vk::CompareOp compare_op);
 
+vk::DescriptorSetLayoutBinding descriptor_set_layout_binding(
+		vk::DescriptorType type, vk::ShaderStageFlags stage_flags, uint32_t binding);
+
+vk::WriteDescriptorSet write_descriptor_buffer(
+		vk::DescriptorType type, vk::DescriptorSet dst_set, vk::DescriptorBufferInfo *buffer_info, uint32_t binding);
+
 } //namespace vk_init
 
 #endif //SILENCE_VK_INITIALIZERS_H

@@ -59,6 +59,14 @@ struct GPUCameraData {
 	glm::mat4 viewproj;
 };
 
+struct GPUSceneData {
+	glm::vec4 fog_color; // w is for exponent
+	glm::vec4 fog_distances; //x for min, y for max, zw unused.
+	glm::vec4 ambient_color;
+	glm::vec4 sunlight_direction; //w for sun power
+	glm::vec4 sunlight_color;
+};
+
 struct FrameData {
 	vk::Semaphore present_semaphore, render_semaphore;
 	vk::Fence render_fence;
@@ -113,6 +121,11 @@ class RenderManager {
 	vk::DescriptorSetLayout global_set_layout;
 	vk::DescriptorPool descriptor_pool;
 
+	vk::PhysicalDeviceProperties gpu_properties;
+
+	GPUSceneData scene_parameters;
+	AllocatedBuffer scene_parameter_buffer;
+
 	vma::Allocator allocator;
 
 	DeletionQueue main_deletion_queue;
@@ -137,6 +150,7 @@ class RenderManager {
 	void upload_mesh(Mesh &mesh);
 
 	AllocatedBuffer create_buffer(size_t alloc_size, vk::BufferUsageFlags usage, vma::MemoryUsage memory_usage);
+	size_t pad_uniform_buffer_size(size_t original_size) const;
 
 public:
 	enum class Status {

@@ -78,6 +78,8 @@ void RenderManager::init_vulkan(DisplayManager &display_manager) {
 	allocator_info.instance = instance;
 	VK_CHECK(vma::createAllocator(&allocator_info, &allocator));
 
+	gpu_properties = vkb_device.physical_device.properties;
+
 	main_deletion_queue.push_function([=, this]() { allocator.destroy(); });
 }
 
@@ -308,31 +310,37 @@ void RenderManager::init_sync_structures() {
 }
 
 void RenderManager::init_descriptors() {
-	//information about the binding.
-	vk::DescriptorSetLayoutBinding cam_buffer_binding = {};
-	cam_buffer_binding.binding = 0;
-	cam_buffer_binding.descriptorCount = 1;
-	// it's a uniform buffer binding
-	cam_buffer_binding.descriptorType = vk::DescriptorType::eUniformBuffer;
+	const size_t scene_param_buffer_size = FRAME_OVERLAP * pad_uniform_buffer_size(sizeof(GPUSceneData));
 
-	// we use it from the vertex shader
-	cam_buffer_binding.stageFlags = vk::ShaderStageFlagBits::eVertex;
+	scene_parameter_buffer = create_buffer(
+			scene_param_buffer_size, vk::BufferUsageFlagBits::eUniformBuffer, vma::MemoryUsage::eCpuToGpu);
+
+	//information about the binding.
+	vk::DescriptorSetLayoutBinding camera_bind = vk_init::descriptor_set_layout_binding(
+			vk::DescriptorType::eUniformBuffer, vk::ShaderStageFlagBits::eVertex, 0);
+
+	//binding for scene data at 1
+	vk::DescriptorSetLayoutBinding scene_bind =
+			vk_init::descriptor_set_layout_binding(vk::DescriptorType::eUniformBufferDynamic,
+					vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment, 1);
+
+	vk::DescriptorSetLayoutBinding bindings[] = { camera_bind, scene_bind };
 
 	vk::DescriptorSetLayoutCreateInfo setinfo = {};
 	setinfo.sType = vk::StructureType::eDescriptorSetLayoutCreateInfo;
 	setinfo.pNext = nullptr;
 
-	//we are going to have 1 binding
-	setinfo.bindingCount = 1;
+	setinfo.bindingCount = 2;
 	//no flags
 	setinfo.flags = {};
 	//point to the camera buffer binding
-	setinfo.pBindings = &cam_buffer_binding;
+	setinfo.pBindings = bindings;
 
 	VK_CHECK(device.createDescriptorSetLayout(&setinfo, nullptr, &global_set_layout));
 
 	//create a descriptor pool that will hold 10 uniform buffers
-	std::vector<vk::DescriptorPoolSize> sizes = { { vk::DescriptorType::eUniformBuffer, 10 } };
+	std::vector<vk::DescriptorPoolSize> sizes = { { vk::DescriptorType::eUniformBuffer, 10 },
+		{ vk::DescriptorType::eUniformBufferDynamic, 10 } };
 
 	vk::DescriptorPoolCreateInfo pool_info = {};
 	pool_info.sType = vk::StructureType::eDescriptorPoolCreateInfo;
@@ -347,7 +355,7 @@ void RenderManager::init_descriptors() {
 		frame.camera_buffer = create_buffer(
 				sizeof(GPUCameraData), vk::BufferUsageFlagBits::eUniformBuffer, vma::MemoryUsage::eCpuToGpu);
 
-		//allocate one descriptor set for each frame
+		//allocate one descriptor set for each frames[i]
 		vk::DescriptorSetAllocateInfo alloc_info = {};
 		alloc_info.pNext = nullptr;
 		alloc_info.sType = vk::StructureType::eDescriptorSetAllocateInfo;
@@ -362,44 +370,44 @@ void RenderManager::init_descriptors() {
 		VK_CHECK(device.allocateDescriptorSets(&alloc_info, &frame.global_descriptor));
 
 		//information about the buffer we want to point at in the descriptor
-		vk::DescriptorBufferInfo binfo;
+		vk::DescriptorBufferInfo camera_info;
 		//it will be the camera buffer
-		binfo.buffer = frame.camera_buffer.buffer;
+		camera_info.buffer = frame.camera_buffer.buffer;
 		//at 0 offset
-		binfo.offset = 0;
+		camera_info.offset = 0;
 		//of the size of a camera data struct
-		binfo.range = sizeof(GPUCameraData);
+		camera_info.range = sizeof(GPUCameraData);
 
-		vk::WriteDescriptorSet set_write = {};
-		set_write.sType = vk::StructureType::eWriteDescriptorSet;
-		set_write.pNext = nullptr;
+		vk::DescriptorBufferInfo scene_info;
+		scene_info.buffer = scene_parameter_buffer.buffer;
+		scene_info.offset = 0;
+		scene_info.range = sizeof(GPUSceneData);
 
-		//we are going to write into binding number 0
-		set_write.dstBinding = 0;
-		//of the global descriptor
-		set_write.dstSet = frame.global_descriptor;
+		vk::WriteDescriptorSet camera_write = vk_init::write_descriptor_buffer(
+				vk::DescriptorType::eUniformBuffer, frame.global_descriptor, &camera_info, 0);
+		vk::WriteDescriptorSet scene_write = vk_init::write_descriptor_buffer(
+				vk::DescriptorType::eUniformBufferDynamic, frame.global_descriptor, &scene_info, 1);
 
-		set_write.descriptorCount = 1;
-		//and the type is uniform buffer
-		set_write.descriptorType = vk::DescriptorType::eUniformBuffer;
-		set_write.pBufferInfo = &binfo;
+		vk::WriteDescriptorSet set_writes[] = { camera_write, scene_write };
 
 		//update the descriptor set
-		device.updateDescriptorSets(1, &set_write, 0, nullptr);
-
-		main_deletion_queue.push_function(
-				[&]() { allocator.destroyBuffer(frame.camera_buffer.buffer, frame.camera_buffer.allocation); });
+		device.updateDescriptorSets(2, set_writes, 0, nullptr);
 	}
 
 	main_deletion_queue.push_function([&]() {
 		device.destroyDescriptorSetLayout(global_set_layout, nullptr);
 		device.destroyDescriptorPool(descriptor_pool, nullptr);
+		allocator.destroyBuffer(scene_parameter_buffer.buffer, scene_parameter_buffer.allocation);
+
+		for (auto &frame : frames) {
+			allocator.destroyBuffer(frame.camera_buffer.buffer, frame.camera_buffer.allocation);
+		}
 	});
 }
 
 void RenderManager::init_pipelines() {
 	vk::ShaderModule mesh_frag_shader;
-	if (!load_shader_module("resources/shaders/colored_triangle.frag.spv", &mesh_frag_shader)) {
+	if (!load_shader_module("resources/shaders/default_lit.frag.spv", &mesh_frag_shader)) {
 		SPDLOG_ERROR("Error when building the triangle fragment shader module");
 	} else {
 		SPDLOG_INFO("Triangle fragment shader successfully loaded");
@@ -485,7 +493,7 @@ void RenderManager::init_pipelines() {
 	pipeline_builder.shader_stages.push_back(
 			vk_init::pipeline_shader_stage_create_info(vk::ShaderStageFlagBits::eVertex, mesh_vertex_shader));
 
-	//make sure that triangle_frag_shader is holding the compiled colored_triangle.frag
+	//make sure that triangle_frag_shader is holding the compiled default_lit.frag
 	pipeline_builder.shader_stages.push_back(
 			vk_init::pipeline_shader_stage_create_info(vk::ShaderStageFlagBits::eFragment, mesh_frag_shader));
 
@@ -721,6 +729,16 @@ AllocatedBuffer RenderManager::create_buffer(
 	return new_buffer;
 }
 
+size_t RenderManager::pad_uniform_buffer_size(size_t original_size) const {
+	// Calculate required alignment based on minimum device offset alignment
+	size_t min_ubo_alignment = gpu_properties.limits.minUniformBufferOffsetAlignment;
+	size_t aligned_size = original_size;
+	if (min_ubo_alignment > 0) {
+		aligned_size = (aligned_size + min_ubo_alignment - 1) & ~(min_ubo_alignment - 1);
+	}
+	return aligned_size;
+}
+
 RenderManager::Status RenderManager::startup(DisplayManager &display_manager) {
 	// TODO: Handle failures
 	init_vulkan(display_manager);
@@ -812,8 +830,9 @@ void RenderManager::draw() {
 
 	//make a clear-color from frame number. This will flash with a 120*pi frame period.
 	vk::ClearValue color_clear_value;
-	float flash = abs(sin((float)frame_number / 15.f));
-	color_clear_value.color.setFloat32({ 0.0f, 0.0f, flash, 1.0f });
+	//	float flash = abs(sin((float)frame_number / 15.f));
+	//	color_clear_value.color.setFloat32({ 0.0f, 0.0f, flash, 1.0f });
+	color_clear_value.color.setFloat32({ 0.1f, 0.2f, 0.3f, 1.0f });
 
 	vk::ClearValue depth_clear_value;
 	depth_clear_value.depthStencil.setDepth(1.0f);
@@ -912,10 +931,19 @@ void RenderManager::draw_objects(vk::CommandBuffer cmd, RenderObject *first, int
 	//and copy it to the buffer
 	void *data;
 	VK_CHECK(allocator.mapMemory(get_current_frame().camera_buffer.allocation, &data));
-
 	memcpy(data, &cam_data, sizeof(GPUCameraData));
-
 	allocator.unmapMemory(get_current_frame().camera_buffer.allocation);
+
+	float framed = ((float)frame_number / 30.f);
+
+	scene_parameters.ambient_color = { sin(framed), 0, cos(framed), 1 };
+
+	char *scene_data;
+	VK_CHECK(allocator.mapMemory(scene_parameter_buffer.allocation, (void **)&scene_data));
+	unsigned int frame_index = frame_number % FRAME_OVERLAP;
+	scene_data += pad_uniform_buffer_size(sizeof(GPUSceneData)) * frame_index;
+	memcpy(scene_data, &scene_parameters, sizeof(GPUSceneData));
+	allocator.unmapMemory(scene_parameter_buffer.allocation);
 
 	Mesh *last_mesh = nullptr;
 	Material *last_material = nullptr;
@@ -927,9 +955,11 @@ void RenderManager::draw_objects(vk::CommandBuffer cmd, RenderObject *first, int
 			cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, object.material->pipeline);
 			last_material = object.material;
 
+			uint32_t uniform_offset = pad_uniform_buffer_size(sizeof(GPUSceneData)) * frame_index;
+
 			//bind the descriptor set when changing pipeline
 			cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, object.material->pipelineLayout, 0, 1,
-					&get_current_frame().global_descriptor, 0, nullptr);
+					&get_current_frame().global_descriptor, 1, &uniform_offset);
 		}
 
 		glm::mat4 model = object.transformMatrix;
