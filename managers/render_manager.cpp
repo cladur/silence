@@ -307,6 +307,96 @@ void RenderManager::init_sync_structures() {
 	}
 }
 
+void RenderManager::init_descriptors() {
+	//information about the binding.
+	vk::DescriptorSetLayoutBinding cam_buffer_binding = {};
+	cam_buffer_binding.binding = 0;
+	cam_buffer_binding.descriptorCount = 1;
+	// it's a uniform buffer binding
+	cam_buffer_binding.descriptorType = vk::DescriptorType::eUniformBuffer;
+
+	// we use it from the vertex shader
+	cam_buffer_binding.stageFlags = vk::ShaderStageFlagBits::eVertex;
+
+	vk::DescriptorSetLayoutCreateInfo setinfo = {};
+	setinfo.sType = vk::StructureType::eDescriptorSetLayoutCreateInfo;
+	setinfo.pNext = nullptr;
+
+	//we are going to have 1 binding
+	setinfo.bindingCount = 1;
+	//no flags
+	setinfo.flags = {};
+	//point to the camera buffer binding
+	setinfo.pBindings = &cam_buffer_binding;
+
+	VK_CHECK(device.createDescriptorSetLayout(&setinfo, nullptr, &global_set_layout));
+
+	//create a descriptor pool that will hold 10 uniform buffers
+	std::vector<vk::DescriptorPoolSize> sizes = { { vk::DescriptorType::eUniformBuffer, 10 } };
+
+	vk::DescriptorPoolCreateInfo pool_info = {};
+	pool_info.sType = vk::StructureType::eDescriptorPoolCreateInfo;
+	pool_info.flags = {};
+	pool_info.maxSets = 10;
+	pool_info.poolSizeCount = (uint32_t)sizes.size();
+	pool_info.pPoolSizes = sizes.data();
+
+	VK_CHECK(device.createDescriptorPool(&pool_info, nullptr, &descriptor_pool));
+
+	for (auto &frame : frames) {
+		frame.camera_buffer = create_buffer(
+				sizeof(GPUCameraData), vk::BufferUsageFlagBits::eUniformBuffer, vma::MemoryUsage::eCpuToGpu);
+
+		//allocate one descriptor set for each frame
+		vk::DescriptorSetAllocateInfo alloc_info = {};
+		alloc_info.pNext = nullptr;
+		alloc_info.sType = vk::StructureType::eDescriptorSetAllocateInfo;
+		//using the pool we just set
+		alloc_info.descriptorPool = descriptor_pool;
+		//only 1 descriptor
+		alloc_info.descriptorSetCount = 1;
+		//using the global data layout
+		alloc_info.pSetLayouts = &global_set_layout;
+
+		// allocate the descriptor set
+		VK_CHECK(device.allocateDescriptorSets(&alloc_info, &frame.global_descriptor));
+
+		//information about the buffer we want to point at in the descriptor
+		vk::DescriptorBufferInfo binfo;
+		//it will be the camera buffer
+		binfo.buffer = frame.camera_buffer.buffer;
+		//at 0 offset
+		binfo.offset = 0;
+		//of the size of a camera data struct
+		binfo.range = sizeof(GPUCameraData);
+
+		vk::WriteDescriptorSet set_write = {};
+		set_write.sType = vk::StructureType::eWriteDescriptorSet;
+		set_write.pNext = nullptr;
+
+		//we are going to write into binding number 0
+		set_write.dstBinding = 0;
+		//of the global descriptor
+		set_write.dstSet = frame.global_descriptor;
+
+		set_write.descriptorCount = 1;
+		//and the type is uniform buffer
+		set_write.descriptorType = vk::DescriptorType::eUniformBuffer;
+		set_write.pBufferInfo = &binfo;
+
+		//update the descriptor set
+		device.updateDescriptorSets(1, &set_write, 0, nullptr);
+
+		main_deletion_queue.push_function(
+				[&]() { allocator.destroyBuffer(frame.camera_buffer.buffer, frame.camera_buffer.allocation); });
+	}
+
+	main_deletion_queue.push_function([&]() {
+		device.destroyDescriptorSetLayout(global_set_layout, nullptr);
+		device.destroyDescriptorPool(descriptor_pool, nullptr);
+	});
+}
+
 void RenderManager::init_pipelines() {
 	vk::ShaderModule mesh_frag_shader;
 	if (!load_shader_module("resources/shaders/colored_triangle.frag.spv", &mesh_frag_shader)) {
@@ -370,8 +460,13 @@ void RenderManager::init_pipelines() {
 	//this push constant range is accessible only in the vertex shader
 	push_constant.stageFlags = vk::ShaderStageFlagBits::eVertex;
 
+	//push-constant setup
 	mesh_pipeline_layout_info.pPushConstantRanges = &push_constant;
 	mesh_pipeline_layout_info.pushConstantRangeCount = 1;
+
+	//hook the global set layout
+	mesh_pipeline_layout_info.setLayoutCount = 1;
+	mesh_pipeline_layout_info.pSetLayouts = &global_set_layout;
 
 	VK_CHECK(device.createPipelineLayout(&mesh_pipeline_layout_info, nullptr, &mesh_pipeline_layout));
 
@@ -488,6 +583,50 @@ void RenderManager::init_imgui(GLFWwindow *window) {
 	});
 }
 
+bool RenderManager::load_shader_module(const char *file_path, vk::ShaderModule *out_shader_module) {
+	std::ifstream file(file_path, std::ios::ate | std::ios::binary);
+
+	if (!file.is_open()) {
+		return false;
+	}
+
+	//find what the size of the file is by looking up the location of the cursor
+	//because the cursor is at the end, it gives the size directly in bytes
+	size_t file_size = (size_t)file.tellg();
+
+	//spirv expects the buffer to be on uint32, so make sure to reserve an int vector big
+	//enough for the entire file
+	std::vector<uint32_t> buffer(file_size / sizeof(uint32_t));
+
+	//put file cursor at beginning
+	file.seekg(0);
+
+	//load the entire file into the buffer
+	file.read((char *)buffer.data(), (std::streamsize)file_size);
+
+	//now that the file is loaded into the buffer, we can close it
+	file.close();
+
+	//create a new shader module, using the buffer we loaded
+	vk::ShaderModuleCreateInfo create_info = {};
+	create_info.sType = vk::StructureType::eShaderModuleCreateInfo;
+	create_info.pNext = nullptr;
+
+	//codeSize has to be in bytes, so multiply the ints in the buffer by size
+	//of int to know the real size of the buffer
+	create_info.codeSize = buffer.size() * sizeof(uint32_t);
+	create_info.pCode = buffer.data();
+
+	//check that the creation goes well.
+	vk::ShaderModule shader_module;
+	if (device.createShaderModule(&create_info, nullptr, &shader_module) != vk::Result::eSuccess) {
+		return false;
+	}
+	*out_shader_module = shader_module;
+
+	return true;
+}
+
 void RenderManager::load_meshes() {
 	triangle_mesh.vertices.resize(3);
 
@@ -561,48 +700,25 @@ void RenderManager::upload_mesh(Mesh &mesh) {
 	allocator.unmapMemory(mesh.index_buffer.allocation);
 }
 
-bool RenderManager::load_shader_module(const char *file_path, vk::ShaderModule *out_shader_module) {
-	std::ifstream file(file_path, std::ios::ate | std::ios::binary);
+AllocatedBuffer RenderManager::create_buffer(
+		size_t alloc_size, vk::BufferUsageFlags usage, vma::MemoryUsage memory_usage) {
+	//allocate vertex buffer
+	vk::BufferCreateInfo buffer_info = {};
+	buffer_info.sType = vk::StructureType::eBufferCreateInfo;
+	buffer_info.pNext = nullptr;
 
-	if (!file.is_open()) {
-		return false;
-	}
+	buffer_info.size = alloc_size;
+	buffer_info.usage = usage;
 
-	//find what the size of the file is by looking up the location of the cursor
-	//because the cursor is at the end, it gives the size directly in bytes
-	size_t file_size = (size_t)file.tellg();
+	vma::AllocationCreateInfo vmaalloc_info = {};
+	vmaalloc_info.usage = memory_usage;
 
-	//spirv expects the buffer to be on uint32, so make sure to reserve an int vector big
-	//enough for the entire file
-	std::vector<uint32_t> buffer(file_size / sizeof(uint32_t));
+	AllocatedBuffer new_buffer;
 
-	//put file cursor at beginning
-	file.seekg(0);
+	//allocate the buffer
+	VK_CHECK(allocator.createBuffer(&buffer_info, &vmaalloc_info, &new_buffer.buffer, &new_buffer.allocation, nullptr));
 
-	//load the entire file into the buffer
-	file.read((char *)buffer.data(), (std::streamsize)file_size);
-
-	//now that the file is loaded into the buffer, we can close it
-	file.close();
-
-	//create a new shader module, using the buffer we loaded
-	vk::ShaderModuleCreateInfo create_info = {};
-	create_info.sType = vk::StructureType::eShaderModuleCreateInfo;
-	create_info.pNext = nullptr;
-
-	//codeSize has to be in bytes, so multiply the ints in the buffer by size
-	//of int to know the real size of the buffer
-	create_info.codeSize = buffer.size() * sizeof(uint32_t);
-	create_info.pCode = buffer.data();
-
-	//check that the creation goes well.
-	vk::ShaderModule shader_module;
-	if (device.createShaderModule(&create_info, nullptr, &shader_module) != vk::Result::eSuccess) {
-		return false;
-	}
-	*out_shader_module = shader_module;
-
-	return true;
+	return new_buffer;
 }
 
 RenderManager::Status RenderManager::startup(DisplayManager &display_manager) {
@@ -613,6 +729,7 @@ RenderManager::Status RenderManager::startup(DisplayManager &display_manager) {
 	init_default_renderpass();
 	init_framebuffers();
 	init_sync_structures();
+	init_descriptors();
 	init_pipelines();
 	load_meshes();
 	init_scene();
@@ -774,7 +891,7 @@ void RenderManager::draw() {
 	frame_number++;
 }
 
-void RenderManager::draw_objects(vk::CommandBuffer cmd, RenderObject *first, int count) const {
+void RenderManager::draw_objects(vk::CommandBuffer cmd, RenderObject *first, int count) {
 	// TODO: Sort RenderObjects by material and mesh to reduce pipeline and descriptor set changes
 
 	//make a model view matrix for rendering the object
@@ -786,6 +903,20 @@ void RenderManager::draw_objects(vk::CommandBuffer cmd, RenderObject *first, int
 	float aspect = (float)window_extent.width / (float)window_extent.height;
 	glm::mat4 projection = glm::perspective(glm::radians(70.f), aspect, 0.1f, 200.0f);
 
+	//fill a GPU camera data struct
+	GPUCameraData cam_data = {};
+	cam_data.proj = projection;
+	cam_data.view = view;
+	cam_data.viewproj = projection * view;
+
+	//and copy it to the buffer
+	void *data;
+	VK_CHECK(allocator.mapMemory(get_current_frame().camera_buffer.allocation, &data));
+
+	memcpy(data, &cam_data, sizeof(GPUCameraData));
+
+	allocator.unmapMemory(get_current_frame().camera_buffer.allocation);
+
 	Mesh *last_mesh = nullptr;
 	Material *last_material = nullptr;
 	for (int i = 0; i < count; i++) {
@@ -795,6 +926,10 @@ void RenderManager::draw_objects(vk::CommandBuffer cmd, RenderObject *first, int
 		if (object.material != last_material) {
 			cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, object.material->pipeline);
 			last_material = object.material;
+
+			//bind the descriptor set when changing pipeline
+			cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, object.material->pipelineLayout, 0, 1,
+					&get_current_frame().global_descriptor, 0, nullptr);
 		}
 
 		glm::mat4 model = object.transformMatrix;
@@ -802,7 +937,7 @@ void RenderManager::draw_objects(vk::CommandBuffer cmd, RenderObject *first, int
 		glm::mat4 mesh_matrix = projection * view * model;
 
 		MeshPushConstants constants = {};
-		constants.render_matrix = mesh_matrix;
+		constants.render_matrix = object.transformMatrix;
 
 		//upload the mesh to the GPU via push constants
 		cmd.pushConstants(object.material->pipelineLayout, vk::ShaderStageFlagBits::eVertex, 0,

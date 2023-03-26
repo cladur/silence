@@ -43,8 +43,8 @@ struct DeletionQueue {
 };
 
 struct Material {
-	VkPipeline pipeline;
-	VkPipelineLayout pipelineLayout;
+	vk::Pipeline pipeline;
+	vk::PipelineLayout pipelineLayout;
 };
 
 struct RenderObject {
@@ -53,12 +53,22 @@ struct RenderObject {
 	glm::mat4 transformMatrix;
 };
 
+struct GPUCameraData {
+	glm::mat4 view;
+	glm::mat4 proj;
+	glm::mat4 viewproj;
+};
+
 struct FrameData {
 	vk::Semaphore present_semaphore, render_semaphore;
 	vk::Fence render_fence;
 
 	vk::CommandPool command_pool; //the command pool for our commands
 	vk::CommandBuffer main_command_buffer; //the buffer we will record into
+
+	//buffer that holds a single GPUCameraData to use when rendering
+	AllocatedBuffer camera_buffer;
+	vk::DescriptorSet global_descriptor;
 };
 
 class RenderManager {
@@ -99,6 +109,10 @@ class RenderManager {
 	AllocatedImage depth_image;
 	vk::Format depth_format;
 
+	// DESCRIPTORS
+	vk::DescriptorSetLayout global_set_layout;
+	vk::DescriptorPool descriptor_pool;
+
 	vma::Allocator allocator;
 
 	DeletionQueue main_deletion_queue;
@@ -111,6 +125,7 @@ class RenderManager {
 	void init_default_renderpass();
 	void init_framebuffers();
 	void init_sync_structures();
+	void init_descriptors();
 	void init_pipelines();
 	void init_scene();
 	void init_imgui(GLFWwindow *window);
@@ -120,6 +135,8 @@ class RenderManager {
 
 	void load_meshes();
 	void upload_mesh(Mesh &mesh);
+
+	AllocatedBuffer create_buffer(size_t alloc_size, vk::BufferUsageFlags usage, vma::MemoryUsage memory_usage);
 
 public:
 	enum class Status {
@@ -151,7 +168,7 @@ public:
 	Mesh *get_mesh(const std::string &name);
 
 	void draw();
-	void draw_objects(vk::CommandBuffer cmd, RenderObject *first, int count) const;
+	void draw_objects(vk::CommandBuffer cmd, RenderObject *first, int count);
 };
 
 #endif //SILENCE_RENDER_MANAGER_H
