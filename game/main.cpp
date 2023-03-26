@@ -4,6 +4,10 @@
 #include "magic_enum.hpp"
 #include "spdlog/spdlog.h"
 
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_vulkan.h"
+
 RenderManager render_manager;
 DisplayManager display_manager;
 
@@ -34,6 +38,15 @@ int main() {
 		// GAME LOGIC
 
 		display_manager.poll_events();
+
+		//imgui new frame
+		ImGui_ImplVulkan_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+
+		ImGui::NewFrame();
+
+		//imgui commands
+		ImGui::ShowDemoWindow();
 
 		if (display_manager.window_should_close()) {
 			should_run = false;

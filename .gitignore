@@ -13,3 +13,4 @@ build
 
 # SPIRV files
 *.spv
+imgui.ini

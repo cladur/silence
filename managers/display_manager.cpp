@@ -9,7 +9,7 @@ DisplayManager::Status DisplayManager::startup() {
 
 	// No need to create context since we're using Vulkan, not OpenGL(ES).
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-	window = glfwCreateWindow(640, 480, "Silence Game", nullptr, nullptr);
+	window = glfwCreateWindow(1024, 768, "Silence Game", nullptr, nullptr);
 	if (!window) {
 		glfwTerminate();
 		return Status::FailedToCreateWindow;

@@ -634,10 +634,7 @@ void RenderManager::init_imgui(GLFWwindow *window) {
 	ImGui_ImplVulkan_Init(&init_info, render_pass);
 
 	//execute a gpu command to upload imgui font textures
-
-	SPDLOG_ERROR("IMGUI INTEGRATION IS UNFINISHED!");
-	abort();
-	// immediate_submit([&](VkCommandBuffer cmd) { ImGui_ImplVulkan_CreateFontsTexture(cmd); });
+	immediate_submit([&](vk::CommandBuffer cmd) { ImGui_ImplVulkan_CreateFontsTexture(cmd); });
 
 	//clear font textures from cpu data
 	ImGui_ImplVulkan_DestroyFontUploadObjects();
@@ -647,6 +644,14 @@ void RenderManager::init_imgui(GLFWwindow *window) {
 		device.destroyDescriptorPool(imgui_pool, nullptr);
 		ImGui_ImplVulkan_Shutdown();
 	});
+
+	// zajebisty styl wulkanowy czerwony 😎
+	ImGuiStyle &vulkan_style = ImGui::GetStyle();
+	vulkan_style.Colors[ImGuiCol_TitleBg] = ImVec4(1.0f, 0.0f, 0.0f, 0.6f);
+	vulkan_style.Colors[ImGuiCol_TitleBgActive] = ImVec4(1.0f, 0.0f, 0.0f, 0.8f);
+	vulkan_style.Colors[ImGuiCol_MenuBarBg] = ImVec4(1.0f, 0.0f, 0.0f, 0.4f);
+	vulkan_style.Colors[ImGuiCol_Header] = ImVec4(1.0f, 0.0f, 0.0f, 0.4f);
+	vulkan_style.Colors[ImGuiCol_CheckMark] = ImVec4(0.0f, 1.0f, 0.0f, 1.0f);
 }
 
 bool RenderManager::load_shader_module(const char *file_path, vk::ShaderModule *out_shader_module) {
@@ -882,7 +887,7 @@ RenderManager::Status RenderManager::startup(DisplayManager &display_manager) {
 	load_meshes();
 	init_scene();
 
-	// init_imgui();
+	init_imgui(display_manager.window);
 
 	return Status::Ok;
 }
@@ -931,6 +936,8 @@ Mesh *RenderManager::get_mesh(const std::string &name) {
 }
 
 void RenderManager::draw() {
+	ImGui::Render();
+
 	//wait until the GPU has finished rendering the last frame. Timeout of 1 second
 	VK_CHECK(device.waitForFences(1, &get_current_frame().render_fence, true, 1000000000));
 	VK_CHECK(device.resetFences(1, &get_current_frame().render_fence));
@@ -957,7 +964,6 @@ void RenderManager::draw() {
 	cmd_begin_info.flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit;
 
 	VK_CHECK(cmd.begin(&cmd_begin_info));
-
 	//make a clear-color from frame number. This will flash with a 120*pi frame period.
 	vk::ClearValue color_clear_value;
 	//	float flash = abs(sin((float)frame_number / 15.f));
@@ -990,6 +996,8 @@ void RenderManager::draw() {
 	cmd.beginRenderPass(&rp_info, vk::SubpassContents::eInline);
 
 	draw_objects(cmd, renderables.data(), (int)renderables.size());
+
+	ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmd);
 
 	cmd.endRenderPass();
 	//finalize the command buffer (we can no longer add commands, but it can now be executed)
