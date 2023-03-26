@@ -35,7 +35,9 @@ void RenderManager::init_vulkan(DisplayManager &display_manager) {
 	auto inst_ret = builder.set_app_name("Silence Vulkan Application")
 							.request_validation_layers()
 							.use_default_debug_messenger()
+							.require_api_version(1, 1, 0)
 							.build();
+
 	if (!inst_ret) {
 		SPDLOG_ERROR("Failed to create Vulkan Instance. Error: {}", inst_ret.error().message());
 	}
@@ -61,7 +63,11 @@ void RenderManager::init_vulkan(DisplayManager &display_manager) {
 	//create the final Vulkan device
 	vkb::DeviceBuilder device_builder{ physical_device };
 
-	vkb::Device vkb_device = device_builder.build().value();
+	vk::PhysicalDeviceShaderDrawParametersFeatures shader_draw_parameters_features = {};
+	shader_draw_parameters_features.sType = vk::StructureType::ePhysicalDeviceShaderDrawParametersFeatures;
+	shader_draw_parameters_features.pNext = nullptr;
+	shader_draw_parameters_features.shaderDrawParameters = VK_TRUE;
+	vkb::Device vkb_device = device_builder.add_pNext(&shader_draw_parameters_features).build().value();
 
 	// Get the VkDevice handle used in the rest of a Vulkan application
 	device = vkb_device.device;
@@ -340,7 +346,7 @@ void RenderManager::init_descriptors() {
 
 	//create a descriptor pool that will hold 10 uniform buffers
 	std::vector<vk::DescriptorPoolSize> sizes = { { vk::DescriptorType::eUniformBuffer, 10 },
-		{ vk::DescriptorType::eUniformBufferDynamic, 10 } };
+		{ vk::DescriptorType::eUniformBufferDynamic, 10 }, { vk::DescriptorType::eStorageBuffer, 10 } };
 
 	vk::DescriptorPoolCreateInfo pool_info = {};
 	pool_info.sType = vk::StructureType::eDescriptorPoolCreateInfo;
@@ -351,9 +357,25 @@ void RenderManager::init_descriptors() {
 
 	VK_CHECK(device.createDescriptorPool(&pool_info, nullptr, &descriptor_pool));
 
+	vk::DescriptorSetLayoutBinding object_bind = vk_init::descriptor_set_layout_binding(
+			vk::DescriptorType::eStorageBuffer, vk::ShaderStageFlagBits::eVertex, 0);
+	vk::DescriptorSetLayoutCreateInfo object_set_info = {};
+	object_set_info.sType = vk::StructureType::eDescriptorSetLayoutCreateInfo;
+	object_set_info.pNext = nullptr;
+	object_set_info.bindingCount = 1;
+	object_set_info.flags = {};
+	object_set_info.pBindings = &object_bind;
+
+	VK_CHECK(device.createDescriptorSetLayout(&object_set_info, nullptr, &object_set_layout));
+
 	for (auto &frame : frames) {
 		frame.camera_buffer = create_buffer(
 				sizeof(GPUCameraData), vk::BufferUsageFlagBits::eUniformBuffer, vma::MemoryUsage::eCpuToGpu);
+
+		// TODO: Move this constant somewhere else
+		const int MAX_OBJECTS = 10000;
+		frame.object_buffer = create_buffer(MAX_OBJECTS * sizeof(GPUObjectData),
+				vk::BufferUsageFlagBits::eStorageBuffer, vma::MemoryUsage::eCpuToGpu);
 
 		//allocate one descriptor set for each frames[i]
 		vk::DescriptorSetAllocateInfo alloc_info = {};
@@ -369,6 +391,16 @@ void RenderManager::init_descriptors() {
 		// allocate the descriptor set
 		VK_CHECK(device.allocateDescriptorSets(&alloc_info, &frame.global_descriptor));
 
+		//allocate the descriptor set that will point to object buffer
+		vk::DescriptorSetAllocateInfo object_set_alloc = {};
+		object_set_alloc.pNext = nullptr;
+		object_set_alloc.sType = vk::StructureType::eDescriptorSetAllocateInfo;
+		object_set_alloc.descriptorPool = descriptor_pool;
+		object_set_alloc.descriptorSetCount = 1;
+		object_set_alloc.pSetLayouts = &object_set_layout;
+
+		VK_CHECK(device.allocateDescriptorSets(&object_set_alloc, &frame.object_descriptor));
+
 		//information about the buffer we want to point at in the descriptor
 		vk::DescriptorBufferInfo camera_info;
 		//it will be the camera buffer
@@ -383,15 +415,22 @@ void RenderManager::init_descriptors() {
 		scene_info.offset = 0;
 		scene_info.range = sizeof(GPUSceneData);
 
+		vk::DescriptorBufferInfo object_buffer_info;
+		object_buffer_info.buffer = frame.object_buffer.buffer;
+		object_buffer_info.offset = 0;
+		object_buffer_info.range = sizeof(GPUObjectData) * MAX_OBJECTS;
+
 		vk::WriteDescriptorSet camera_write = vk_init::write_descriptor_buffer(
 				vk::DescriptorType::eUniformBuffer, frame.global_descriptor, &camera_info, 0);
 		vk::WriteDescriptorSet scene_write = vk_init::write_descriptor_buffer(
 				vk::DescriptorType::eUniformBufferDynamic, frame.global_descriptor, &scene_info, 1);
+		VkWriteDescriptorSet object_write = vk_init::write_descriptor_buffer(
+				vk::DescriptorType::eStorageBuffer, frame.object_descriptor, &object_buffer_info, 0);
 
-		vk::WriteDescriptorSet set_writes[] = { camera_write, scene_write };
+		vk::WriteDescriptorSet set_writes[] = { camera_write, scene_write, object_write };
 
 		//update the descriptor set
-		device.updateDescriptorSets(2, set_writes, 0, nullptr);
+		device.updateDescriptorSets(3, set_writes, 0, nullptr);
 	}
 
 	main_deletion_queue.push_function([&]() {
@@ -401,7 +440,10 @@ void RenderManager::init_descriptors() {
 
 		for (auto &frame : frames) {
 			allocator.destroyBuffer(frame.camera_buffer.buffer, frame.camera_buffer.allocation);
+			allocator.destroyBuffer(frame.object_buffer.buffer, frame.object_buffer.allocation);
 		}
+
+		device.destroyDescriptorSetLayout(object_set_layout, nullptr);
 	});
 }
 
@@ -473,8 +515,10 @@ void RenderManager::init_pipelines() {
 	mesh_pipeline_layout_info.pushConstantRangeCount = 1;
 
 	//hook the global set layout
-	mesh_pipeline_layout_info.setLayoutCount = 1;
-	mesh_pipeline_layout_info.pSetLayouts = &global_set_layout;
+	vk::DescriptorSetLayout set_layouts[] = { global_set_layout, object_set_layout };
+
+	mesh_pipeline_layout_info.setLayoutCount = 2;
+	mesh_pipeline_layout_info.pSetLayouts = set_layouts;
 
 	VK_CHECK(device.createPipelineLayout(&mesh_pipeline_layout_info, nullptr, &mesh_pipeline_layout));
 
@@ -515,7 +559,7 @@ void RenderManager::init_scene() {
 	RenderObject monkey = {};
 	monkey.mesh = get_mesh("monkey");
 	monkey.material = get_material("default_mesh");
-	monkey.transformMatrix = glm::mat4{ 1.0f };
+	monkey.transform_matrix = glm::mat4{ 1.0f };
 
 	renderables.push_back(monkey);
 
@@ -526,7 +570,7 @@ void RenderManager::init_scene() {
 			tri.material = get_material("default_mesh");
 			glm::mat4 translation = glm::translate(glm::mat4{ 1.0 }, glm::vec3(x, 0, y));
 			glm::mat4 scale = glm::scale(glm::mat4{ 1.0 }, glm::vec3(0.2, 0.2, 0.2));
-			tri.transformMatrix = translation * scale;
+			tri.transform_matrix = translation * scale;
 
 			renderables.push_back(tri);
 		}
@@ -945,6 +989,16 @@ void RenderManager::draw_objects(vk::CommandBuffer cmd, RenderObject *first, int
 	memcpy(scene_data, &scene_parameters, sizeof(GPUSceneData));
 	allocator.unmapMemory(scene_parameter_buffer.allocation);
 
+	void *object_data;
+	VK_CHECK(allocator.mapMemory(get_current_frame().object_buffer.allocation, &object_data));
+	GPUObjectData *gpu_object_data = (GPUObjectData *)object_data;
+	for (int i = 0; i < count; i++) {
+		RenderObject &object = first[i];
+		//fill a GPU object data struct
+		gpu_object_data[i].model_matrix = object.transform_matrix;
+	}
+	allocator.unmapMemory(get_current_frame().object_buffer.allocation);
+
 	Mesh *last_mesh = nullptr;
 	Material *last_material = nullptr;
 	for (int i = 0; i < count; i++) {
@@ -957,17 +1011,21 @@ void RenderManager::draw_objects(vk::CommandBuffer cmd, RenderObject *first, int
 
 			uint32_t uniform_offset = pad_uniform_buffer_size(sizeof(GPUSceneData)) * frame_index;
 
-			//bind the descriptor set when changing pipeline
+			// bind the descriptor set when changing pipeline
 			cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, object.material->pipelineLayout, 0, 1,
 					&get_current_frame().global_descriptor, 1, &uniform_offset);
+
+			// bind the object descriptor set
+			cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, object.material->pipelineLayout, 1, 1,
+					&get_current_frame().object_descriptor, 0, nullptr);
 		}
 
-		glm::mat4 model = object.transformMatrix;
+		glm::mat4 model = object.transform_matrix;
 		//final render matrix, that we are calculating on the cpu
 		glm::mat4 mesh_matrix = projection * view * model;
 
 		MeshPushConstants constants = {};
-		constants.render_matrix = object.transformMatrix;
+		constants.render_matrix = object.transform_matrix;
 
 		//upload the mesh to the GPU via push constants
 		cmd.pushConstants(object.material->pipelineLayout, vk::ShaderStageFlagBits::eVertex, 0,
@@ -982,6 +1040,7 @@ void RenderManager::draw_objects(vk::CommandBuffer cmd, RenderObject *first, int
 			last_mesh = object.mesh;
 		}
 		//we can now draw
-		cmd.drawIndexed(object.mesh->indices.size(), 1, 0, 0, 0);
+		// We're passing object's index as instanceCount, to easily pass integer to the shader
+		cmd.drawIndexed(object.mesh->indices.size(), 1, 0, 0, i);
 	}
 }

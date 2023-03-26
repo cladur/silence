@@ -50,7 +50,7 @@ struct Material {
 struct RenderObject {
 	Mesh *mesh;
 	Material *material;
-	glm::mat4 transformMatrix;
+	glm::mat4 transform_matrix;
 };
 
 struct GPUCameraData {
@@ -67,6 +67,10 @@ struct GPUSceneData {
 	glm::vec4 sunlight_color;
 };
 
+struct GPUObjectData {
+	glm::mat4 model_matrix;
+};
+
 struct FrameData {
 	vk::Semaphore present_semaphore, render_semaphore;
 	vk::Fence render_fence;
@@ -77,6 +81,9 @@ struct FrameData {
 	//buffer that holds a single GPUCameraData to use when rendering
 	AllocatedBuffer camera_buffer;
 	vk::DescriptorSet global_descriptor;
+
+	AllocatedBuffer object_buffer;
+	vk::DescriptorSet object_descriptor;
 };
 
 class RenderManager {
@@ -119,6 +126,7 @@ class RenderManager {
 
 	// DESCRIPTORS
 	vk::DescriptorSetLayout global_set_layout;
+	vk::DescriptorSetLayout object_set_layout;
 	vk::DescriptorPool descriptor_pool;
 
 	vk::PhysicalDeviceProperties gpu_properties;
