@@ -1,15 +1,14 @@
 #include "display_manager.h"
 #include "render_manager.h"
 
-#include "../core/components/gravity_component.h"
-#include "../core/components/rigidbody_component.h"
-#include "../core/components/transform_component.h"
+#include "components/gravity_component.h"
+#include "components/rigidbody_component.h"
+#include "components/transform_component.h"
 #include "ecs/ecs_manager.h"
 #include "magic_enum.hpp"
 #include "spdlog/spdlog.h"
 #include "systems/physics_system.h"
 
-#include <iostream>
 #include <random>
 
 #include "imgui.h"
@@ -114,7 +113,7 @@ int main() {
 
 		physics_system->update(dt);
 
-		std::cout << ecs_manager.get_component<Transform>(7).position.y << std::endl;
+		SPDLOG_INFO("y position: {}", ecs_manager.get_component<Transform>(7).position.y);
 
 		auto stop_time = std::chrono::high_resolution_clock::now();
 

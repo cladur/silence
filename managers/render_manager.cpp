@@ -646,12 +646,13 @@ void RenderManager::init_imgui(GLFWwindow *window) {
 	});
 
 	// zajebisty styl wulkanowy czerwony 😎
-	ImGuiStyle &vulkan_style = ImGui::GetStyle();
-	vulkan_style.Colors[ImGuiCol_TitleBg] = ImVec4(1.0f, 0.0f, 0.0f, 0.6f);
-	vulkan_style.Colors[ImGuiCol_TitleBgActive] = ImVec4(1.0f, 0.0f, 0.0f, 0.8f);
-	vulkan_style.Colors[ImGuiCol_MenuBarBg] = ImVec4(1.0f, 0.0f, 0.0f, 0.4f);
-	vulkan_style.Colors[ImGuiCol_Header] = ImVec4(1.0f, 0.0f, 0.0f, 0.4f);
-	vulkan_style.Colors[ImGuiCol_CheckMark] = ImVec4(0.0f, 1.0f, 0.0f, 1.0f);
+	// TODO: zrobic styl wulkanowy fajniejszy
+	//	ImGuiStyle &vulkan_style = ImGui::GetStyle();
+	//	vulkan_style.Colors[ImGuiCol_TitleBg] = ImVec4(1.0f, 0.0f, 0.0f, 0.6f);
+	//	vulkan_style.Colors[ImGuiCol_TitleBgActive] = ImVec4(1.0f, 0.0f, 0.0f, 0.8f);
+	//	vulkan_style.Colors[ImGuiCol_MenuBarBg] = ImVec4(1.0f, 0.0f, 0.0f, 0.4f);
+	//	vulkan_style.Colors[ImGuiCol_Header] = ImVec4(1.0f, 0.0f, 0.0f, 0.4f);
+	//	vulkan_style.Colors[ImGuiCol_CheckMark] = ImVec4(0.0f, 1.0f, 0.0f, 1.0f);
 }
 
 bool RenderManager::load_shader_module(const char *file_path, vk::ShaderModule *out_shader_module) {
@@ -968,7 +969,7 @@ void RenderManager::draw() {
 	vk::ClearValue color_clear_value;
 	//	float flash = abs(sin((float)frame_number / 15.f));
 	//	color_clear_value.color.setFloat32({ 0.0f, 0.0f, flash, 1.0f });
-	color_clear_value.color.setFloat32({ 0.1f, 0.2f, 0.3f, 1.0f });
+	color_clear_value.color.setFloat32({ 0.01f, 0.01f, 0.01f, 1.0f });
 
 	vk::ClearValue depth_clear_value;
 	depth_clear_value.depthStencil.setDepth(1.0f);
@@ -1085,7 +1086,7 @@ void RenderManager::draw_objects(vk::CommandBuffer cmd, RenderObject *first, int
 
 	void *object_data;
 	VK_CHECK(allocator.mapMemory(get_current_frame().object_buffer.allocation, &object_data));
-	GPUObjectData *gpu_object_data = (GPUObjectData *)object_data;
+	auto *gpu_object_data = (GPUObjectData *)object_data;
 	for (int i = 0; i < count; i++) {
 		RenderObject &object = first[i];
 		//fill a GPU object data struct
