@@ -70,6 +70,7 @@ int main() {
 	{
 		Signature signature;
 		signature.set(ecs_manager.get_component_type<State>());
+		signature.set(ecs_manager.get_component_type<RigidBody>());
 		ecs_manager.set_system_signature<StateMachineSystem>(signature);
 	}
 
