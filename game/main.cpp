@@ -4,10 +4,14 @@
 #include "components/gravity_component.h"
 #include "components/rigidbody_component.h"
 #include "components/transform_component.h"
+#include "components/state_component.h"
 #include "ecs/ecs_manager.h"
 #include "magic_enum.hpp"
 #include "spdlog/spdlog.h"
 #include "systems/physics_system.h"
+
+#include "ai/state_machine/states/test_state.h"
+#include "systems/state_machine_system.h"
 
 #include <random>
 
@@ -46,6 +50,7 @@ int main() {
 	ecs_manager.register_component<Transform>();
 	ecs_manager.register_component<RigidBody>();
 	ecs_manager.register_component<Gravity>();
+	ecs_manager.register_component<State>();
 
 	auto physics_system = ecs_manager.register_system<PhysicsSystem>();
 	{
@@ -60,6 +65,15 @@ int main() {
 	}
 
 	physics_system->startup();
+
+	auto state_machine_system = ecs_manager.register_system<StateMachineSystem>();
+	{
+		Signature signature;
+		signature.set(ecs_manager.get_component_type<State>());
+		ecs_manager.set_system_signature<StateMachineSystem>(signature);
+	}
+
+	state_machine_system->startup();
 
 	std::vector<Entity> entities(MAX_ENTITIES - 1);
 
@@ -86,6 +100,7 @@ int main() {
 						.rotation = glm::vec3(rand_rotation(random_generator), rand_rotation(random_generator),
 								rand_rotation(random_generator)),
 						.scale = glm::vec3(scale, scale, scale) });
+		ecs_manager.add_component(entity, State{ .state = new TestState(std::string("idle")) });
 	}
 
 	float dt{};
@@ -115,8 +130,10 @@ int main() {
 		}
 
 		physics_system->update(dt);
+		state_machine_system->update(dt);
 
 		SPDLOG_INFO("y position: {}", ecs_manager.get_component<Transform>(7).position.y);
+		SPDLOG_INFO("entity 7 state: {}", ecs_manager.get_component<State>(7).state->get_name());
 
 		auto stop_time = std::chrono::high_resolution_clock::now();
 
