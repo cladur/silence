@@ -53,7 +53,10 @@ int main() {
 		signature.set(ecs_manager.get_component_type<Gravity>());
 		signature.set(ecs_manager.get_component_type<RigidBody>());
 		signature.set(ecs_manager.get_component_type<Transform>());
-		ecs_manager.set_system_signature<PhysicsSystem>(signature);
+		ecs_manager.set_system_component_whitelist<PhysicsSystem>(signature);
+		signature.reset();
+		signature.set(ecs_manager.get_component_type<Gravity>());
+		ecs_manager.set_system_component_blacklist<PhysicsSystem>(signature);
 	}
 
 	physics_system->startup();
@@ -85,7 +88,7 @@ int main() {
 						.scale = glm::vec3(scale, scale, scale) });
 	}
 
-	float dt;
+	float dt{};
 
 	// ECS DEMO -----------------------------------------
 

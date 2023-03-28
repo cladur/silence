@@ -44,7 +44,7 @@ public:
 
 		auto signature = entity_manager->get_signature(entity);
 		signature.set(component_manager->get_component_type<T>(), true);
-		entity_manager->set_signature(entity, signature);
+		entity_manager->set_component_whitelist(entity, signature);
 
 		system_manager->entity_signature_changed(entity, signature);
 	}
@@ -54,7 +54,7 @@ public:
 
 		auto signature = entity_manager->get_signature(entity);
 		signature.set(component_manager->get_component_type<T>(), false);
-		entity_manager->set_signature(entity, signature);
+		entity_manager->set_component_whitelist(entity, signature);
 
 		system_manager->entity_signature_changed(entity, signature);
 	}
@@ -72,7 +72,11 @@ public:
 		return system_manager->register_system<T>();
 	}
 
-	template <typename T> void set_system_signature(Signature signature) {
-		system_manager->set_signature<T>(signature);
+	template <typename T> void set_system_component_whitelist(Signature signature) {
+		system_manager->set_component_whitelist<T>(signature);
+	}
+
+	template <typename T> void set_system_component_blacklist(Signature signature) {
+		system_manager->set_component_blacklist<T>(signature);
 	}
 };
