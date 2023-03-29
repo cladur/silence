@@ -9,8 +9,6 @@
 #include "spdlog/spdlog.h"
 #include "systems/physics_system.h"
 
-#include "systems/state_machine_system.h"
-
 #include <random>
 
 #include "components/children_component.h"
@@ -264,16 +262,6 @@ int main()
 	ecs_manager.get_component<Children>(7).add_children(1);
 	ecs_manager.get_component<Children>(7).add_children(2);
 	ecs_manager.get_component<Children>(7).add_children(3);
-
-	auto state_machine_system = ecs_manager.register_system<StateMachineSystem>();
-	{
-		Signature signature;
-		signature.set(ecs_manager.get_component_type<State>());
-		signature.set(ecs_manager.get_component_type<RigidBody>());
-		ecs_manager.set_system_component_whitelist<StateMachineSystem>(signature);
-	}
-
-	state_machine_system->startup();
 
 	// ECS -----------------------------------------
 
