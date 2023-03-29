@@ -1,4 +1,5 @@
 #include "display_manager.h"
+#include "ecs/parent_manager.h"
 #include "render_manager.h"
 
 #include "components/gravity_component.h"
@@ -65,6 +66,19 @@ std::shared_ptr<ParentSystem> default_parent_system_init() {
 	parent_system->startup();
 
 	return parent_system;
+}
+
+std::shared_ptr<StateMachineSystem> default_state_system_init() {
+	auto state_machine_system = ecs_manager.register_system<StateMachineSystem>();
+
+	Signature signature;
+	signature.set(ecs_manager.get_component_type<State>());
+	signature.set(ecs_manager.get_component_type<RigidBody>());
+	ecs_manager.set_system_component_whitelist<StateMachineSystem>(signature);
+
+	state_machine_system->startup();
+
+	return state_machine_system;
 }
 
 void demo_entities_init(std::vector<Entity> entities) {
@@ -242,25 +256,10 @@ int main() {
 	default_ecs_manager_init();
 	auto physics_system = default_physics_system_init();
 	auto parent_system = default_parent_system_init();
+	auto state_system = default_state_system_init();
 
 	std::vector<Entity> entities(MAX_ENTITIES - 1);
 	demo_entities_init(entities);
-
-	ecs_manager.add_component<Children>(7, Children{});
-	ecs_manager.get_component<Children>(7).add_children(1);
-	ecs_manager.get_component<Children>(7).add_children(2);
-	ecs_manager.get_component<Children>(7).add_children(3);
-
-	auto state_machine_system = ecs_manager.register_system<StateMachineSystem>();
-	{
-		Signature signature;
-		signature.set(ecs_manager.get_component_type<State>());
-		signature.set(ecs_manager.get_component_type<RigidBody>());
-		ecs_manager.set_system_component_whitelist<StateMachineSystem>(signature);
-	}
-
-	state_machine_system->startup();
-	int x = 3;
 
 	// ECS -----------------------------------------
 
@@ -299,17 +298,11 @@ int main() {
 		ImGui::DragInt("Children Id", &imgui_children_id, 1, 1, MAX_IMGUI_ENTITIES);
 
 		if (ImGui::Button("Remove children")) {
-			if (ecs_manager.has_component<Children>(imgui_entity_id)) {
-				ecs_manager.get_component<Children>(imgui_entity_id).remove_children(imgui_children_id);
-			}
+			ParentManager::remove_children(imgui_entity_id, imgui_children_id);
 		}
 
 		if (ImGui::Button("Add children")) {
-			if (!ecs_manager.has_component<Children>(imgui_entity_id)) {
-				ecs_manager.add_component<Children>(imgui_entity_id, Children{});
-			}
-
-			ecs_manager.get_component<Children>(imgui_entity_id).add_children(imgui_children_id);
+			ParentManager::add_children(imgui_entity_id, imgui_children_id);
 		}
 
 		if (ImGui::Button("List children")) {
@@ -323,7 +316,7 @@ int main() {
 		}
 
 		physics_system->update(dt);
-		state_machine_system->update(dt);
+		state_system->update(dt);
 
 		auto stop_time = std::chrono::high_resolution_clock::now();
 
