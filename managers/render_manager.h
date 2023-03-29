@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "magic_enum.hpp"
 #include <glm/glm.hpp>
 
 #include "display_manager.h"
@@ -17,6 +18,15 @@
 #include "vulkan-memory-allocator-hpp/vk_mem_alloc.hpp"
 
 #include "rendering/vk_mesh.h"
+
+#define VK_CHECK(x)                                                                                                    \
+	do {                                                                                                               \
+		vk::Result err = x;                                                                                            \
+		if (err != vk::Result::eSuccess) {                                                                             \
+			SPDLOG_ERROR("Detected Vulkan error: ({}) {}", magic_enum::enum_integer(err), magic_enum::enum_name(err)); \
+			abort();                                                                                                   \
+		}                                                                                                              \
+	} while (false)
 
 constexpr unsigned int FRAME_OVERLAP = 2;
 
@@ -40,17 +50,23 @@ struct DeletionQueue {
 
 	void flush() {
 		// reverse iterate the deletion queue to execute all the functions
-		for (auto &deletor : std::ranges::reverse_view(deletors)) {
-			deletor(); //call the function
+		for (auto it = deletors.rbegin(); it != deletors.rend(); it++) { // NOLINT(modernize-loop-convert)
+			(*it)(); //call the function
 		}
 
 		deletors.clear();
 	}
 };
 
+struct Texture {
+	AllocatedImage image;
+	vk::ImageView image_view;
+};
+
 struct Material {
+	vk::DescriptorSet texture_set{ VK_NULL_HANDLE }; //texture defaulted to null
 	vk::Pipeline pipeline;
-	vk::PipelineLayout pipelineLayout;
+	vk::PipelineLayout pipeline_layout;
 };
 
 struct RenderObject {
@@ -133,6 +149,7 @@ class RenderManager {
 	// DESCRIPTORS
 	vk::DescriptorSetLayout global_set_layout;
 	vk::DescriptorSetLayout object_set_layout;
+	vk::DescriptorSetLayout single_texture_set_layout;
 	vk::DescriptorPool descriptor_pool;
 
 	vk::PhysicalDeviceProperties gpu_properties;
@@ -141,10 +158,6 @@ class RenderManager {
 
 	GPUSceneData scene_parameters;
 	AllocatedBuffer scene_parameter_buffer;
-
-	vma::Allocator allocator;
-
-	DeletionQueue main_deletion_queue;
 
 	vk::Extent2D window_extent;
 
@@ -165,9 +178,7 @@ class RenderManager {
 	void load_meshes();
 	void upload_mesh(Mesh &mesh);
 
-	AllocatedBuffer create_buffer(size_t alloc_size, vk::BufferUsageFlags usage, vma::MemoryUsage memory_usage);
 	size_t pad_uniform_buffer_size(size_t original_size) const;
-	void immediate_submit(std::function<void(vk::CommandBuffer cmd)> &&function);
 
 public:
 	enum class Status {
@@ -180,10 +191,16 @@ public:
 	// TODO: get frame_number from some global getter instead of storing it here
 	unsigned int frame_number = 0;
 
+	vma::Allocator allocator;
+	DeletionQueue main_deletion_queue;
+
 	//default array of renderable objects
 	std::vector<RenderObject> renderables;
 	std::unordered_map<std::string, Material> materials;
 	std::unordered_map<std::string, Mesh> meshes;
+
+	// texture stuff
+	std::unordered_map<std::string, Texture> loaded_textures;
 
 	Status startup(DisplayManager &display_manager);
 	void shutdown();
@@ -191,12 +208,17 @@ public:
 	//getter for the frame we are rendering to right now.
 	FrameData &get_current_frame();
 
+	AllocatedBuffer create_buffer(size_t alloc_size, vk::BufferUsageFlags usage, vma::MemoryUsage memory_usage);
+	void immediate_submit(std::function<void(vk::CommandBuffer cmd)> &&function);
+
 	//create material and add it to the map
 	Material *create_material(vk::Pipeline pipeline, vk::PipelineLayout layout, const std::string &name);
 	//returns nullptr if it can't be found
 	Material *get_material(const std::string &name);
 	//returns nullptr if it can't be found
 	Mesh *get_mesh(const std::string &name);
+
+	void load_images();
 
 	void draw();
 	void draw_objects(vk::CommandBuffer cmd, RenderObject *first, int count);

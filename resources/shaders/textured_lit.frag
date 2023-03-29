@@ -14,8 +14,10 @@ layout(set = 0, binding = 1) uniform SceneData {
     vec4 sunlight_color;
 } sceneData;
 
+layout(set = 2, binding = 0) uniform sampler2D tex1;
+
 void main()
 {
-    //return red
-    out_frag_color = vec4(in_color + sceneData.ambient_color.xyz, 1.0f);
+    vec3 color = texture(tex1, in_texcoord).rgb;
+    out_frag_color = vec4(color, 1.0f);
 }

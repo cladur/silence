@@ -42,9 +42,17 @@ VertexInputDescription Vertex::get_vertex_description() {
 	color_attribute.format = vk::Format::eR32G32B32A32Sfloat;
 	color_attribute.offset = offsetof(Vertex, color);
 
+	//UV will be stored at Location 3
+	vk::VertexInputAttributeDescription uv_attribute = {};
+	uv_attribute.binding = 0;
+	uv_attribute.location = 3;
+	uv_attribute.format = vk::Format::eR32G32Sfloat;
+	uv_attribute.offset = offsetof(Vertex, uv);
+
 	description.attributes.push_back(position_attribute);
 	description.attributes.push_back(normal_attribute);
 	description.attributes.push_back(color_attribute);
+	description.attributes.push_back(uv_attribute);
 	return description;
 }
 
@@ -58,7 +66,7 @@ bool Mesh::load_from_gltf(const char *filename) {
 	bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, filename);
 
 	if (!ret) {
-		SPDLOG_ERROR("Failed to load gltf file: %s\n", filename);
+		SPDLOG_ERROR("Failed to load gltf file: {} - {} - {}", filename, err, warn);
 		return false;
 	}
 
@@ -85,16 +93,23 @@ bool Mesh::load_from_gltf(const char *filename) {
 			const auto &normal_buffer_view = model.bufferViews[normal_accessor.bufferView];
 			const auto &normal_buffer = model.buffers[normal_buffer_view.buffer];
 
+			const auto &uv_accessor = model.accessors[attributes.find("TEXCOORD_0")->second];
+			const auto &uv_buffer_view = model.bufferViews[uv_accessor.bufferView];
+			const auto &uv_buffer = model.buffers[uv_buffer_view.buffer];
+
 			const auto &position_data = reinterpret_cast<const float *>(
 					&position_buffer.data[position_buffer_view.byteOffset + position_accessor.byteOffset]);
 			const auto &normal_data = reinterpret_cast<const float *>(
 					&normal_buffer.data[normal_buffer_view.byteOffset + normal_accessor.byteOffset]);
+			const auto &uv_data = reinterpret_cast<const float *>(
+					&uv_buffer.data[uv_buffer_view.byteOffset + uv_accessor.byteOffset]);
 
 			for (size_t i = 0; i < position_accessor.count; i++) {
 				Vertex vertex = {};
 				vertex.position = glm::vec3(position_data[i * 3], position_data[i * 3 + 1], position_data[i * 3 + 2]);
 				vertex.normal = glm::vec3(normal_data[i * 3], normal_data[i * 3 + 1], normal_data[i * 3 + 2]);
 				vertex.color = vertex.normal;
+				vertex.uv = glm::vec2(uv_data[i * 2], uv_data[i * 2 + 1]);
 				vertices.push_back(vertex);
 			}
 

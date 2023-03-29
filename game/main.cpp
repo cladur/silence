@@ -3,8 +3,8 @@
 
 #include "components/gravity_component.h"
 #include "components/rigidbody_component.h"
-#include "components/transform_component.h"
 #include "components/state_component.h"
+#include "components/transform_component.h"
 #include "ecs/ecs_manager.h"
 #include "magic_enum.hpp"
 #include "spdlog/spdlog.h"
@@ -133,8 +133,8 @@ int main() {
 		physics_system->update(dt);
 		state_machine_system->update(dt);
 
-		SPDLOG_INFO("y position: {}", ecs_manager.get_component<Transform>(7).position.y);
-		SPDLOG_INFO("entity 7 state: {}", ecs_manager.get_component<State>(7).state->get_name());
+		// SPDLOG_INFO("y position: {}", ecs_manager.get_component<Transform>(7).position.y);
+		// SPDLOG_INFO("entity 7 state: {}", ecs_manager.get_component<State>(7).state->get_name());
 
 		auto stop_time = std::chrono::high_resolution_clock::now();
 
