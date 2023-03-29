@@ -1,5 +1,5 @@
 #include "input_manager.h"
-InputSource GetInputSourceFromKey(InputKey key) {
+InputSource get_input_source_from_key(InputKey key) {
 	switch (key) {
 		case InputKey::W:
 		case InputKey::S:
@@ -19,6 +19,23 @@ InputSource GetInputSourceFromKey(InputKey key) {
 		case InputKey::L_STICK_Y:
 		case InputKey::R_STICK_X:
 		case InputKey::R_STICK_Y:
+		case InputKey::L_TRIGGER:
+		case InputKey::R_TRIGGER:
+		case InputKey::L_BUMPER:
+		case InputKey::R_BUMPER:
+		case InputKey::GAMEPAD_BUTTON_NORTH:
+		case InputKey::GAMEPAD_BUTTON_SOUTH:
+		case InputKey::GAMEPAD_BUTTON_EAST:
+		case InputKey::GAMEPAD_BUTTON_WEST:
+		case InputKey::GAMEPAD_START:
+		case InputKey::GAMEPAD_BACK:
+		case InputKey::GAMEPAD_LEFT_THUMB:
+		case InputKey::GAMEPAD_RIGHT_THUMB:
+		case InputKey::GAMEPAD_DPAD_UP:
+		case InputKey::GAMEPAD_DPAD_DOWN:
+		case InputKey::GAMEPAD_DPAD_LEFT:
+		case InputKey::GAMEPAD_DPAD_RIGHT:
+		case InputKey::GAMEPAD_GUIDE:
 			return InputSource::GAMEPAD;
 		default:
 			return InputSource::UNKNOWN;
@@ -34,7 +51,8 @@ void InputManager::remove_action_callback(const std::string &action_name, const 
 		return callback.callback_reference == callback_reference;
 	});
 }
-void InputManager::map_input_to_action(InputKey key, const InputAction &action) { //TODO: Check for duplicates
+void InputManager::map_input_to_action(InputKey key, const InputAction &action) {
+	//TODO: Check for duplicates
 	input_action_mapping[key].emplace_back(action);
 }
 void InputManager::unmap_input_from_action(InputKey key, const std::string &action) {
@@ -72,7 +90,7 @@ std::vector<InputManager::ActionEvent> InputManager::generate_action_event(
 
 	std::vector<ActionEvent> action_events{};
 
-	InputSource source = GetInputSourceFromKey(key);
+	InputSource source = get_input_source_from_key(key);
 	for (auto &action : actions) {
 		action_events.emplace_back(ActionEvent{ .action_name = action.action_name,
 				.source = source,
@@ -83,6 +101,7 @@ std::vector<InputManager::ActionEvent> InputManager::generate_action_event(
 	return action_events;
 }
 void InputManager::propagate_action_event(InputManager::ActionEvent event) {
+	//TODO: cast size_t to unsigned int or smth
 	for (size_t i = action_callbacks[event.action_name].size() - 1; i >= 0; i--) {
 		auto &action_callback = action_callbacks[event.action_name][i];
 
@@ -93,9 +112,11 @@ void InputManager::propagate_action_event(InputManager::ActionEvent event) {
 }
 void InputManager::register_device(const InputDevice &device) {
 	input_devices.emplace_back(device);
+	SPDLOG_INFO("Register device: {} {}", magic_enum::enum_name(device.Type), device.Index);
 }
 void InputManager::remove_device(InputDeviceType type, int input_index) {
 	erase_if(input_devices, [type, input_index](const InputDevice &device) {
+		SPDLOG_INFO("Removed device: {} {}", magic_enum::enum_name(device.Type), device.Index);
 		return device.Type == type && device.Index == input_index;
 	});
 }

@@ -26,3 +26,5 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(fetch_vk_bootstrap)
 target_link_libraries(${RENDER_SERVER_NAME} PUBLIC vk-bootstrap::vk-bootstrap)
 target_link_libraries(${DISPLAY_SERVER_NAME} PUBLIC vk-bootstrap::vk-bootstrap)
+
+target_link_libraries(${DISPLAY_SERVER_NAME} PRIVATE silence_core)

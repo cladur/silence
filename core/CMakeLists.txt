@@ -14,6 +14,11 @@ add_library(${CORE_LIB_NAME} STATIC ${HEADER_FILES} ${SOURCE_FILES} input/input_
 
 target_include_directories(${CORE_LIB_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 
+find_package(magic_enum CONFIG REQUIRED)
+target_link_libraries(${CORE_LIB_NAME} PRIVATE magic_enum::magic_enum)
+find_package(spdlog CONFIG REQUIRED)
+target_link_libraries(${CORE_LIB_NAME} PRIVATE spdlog::spdlog spdlog::spdlog_header_only)
+
 # Linking libraries
 
 find_package(glfw3 CONFIG REQUIRED)

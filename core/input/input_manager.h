@@ -2,14 +2,15 @@
 #define SILENCE_INPUT_MANAGER_H
 
 #pragma once
+#include "input_devices.h"
+#include "input_key.h"
+#include "magic_enum.hpp"
+#include <spdlog/spdlog.h>
 #include <functional>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
-
-#include "input_devices.h"
-#include "input_key.h"
 
 class InputManager {
 public:

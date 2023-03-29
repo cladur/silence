@@ -2,7 +2,12 @@
 #define SILENCE_DISPLAY_MANAGER_H
 
 #define GLFW_INCLUDE_VULKAN
+#include "../core/input/input_devices.h"
+#include "../core/input/input_key.h"
+#include "../core/input/input_manager.h"
+#include "../core/input/multiplatform_input.h"
 #include <GLFW/glfw3.h>
+#include <unordered_map>
 #include <utility>
 
 class DisplayManager {
@@ -16,8 +21,13 @@ public:
 
 	GLFWwindow *window;
 
+	//input
+	MultiplatformInput m_input{};
+	std::unordered_map<InputKey, InputDeviceState> get_gamepad_state(int index);
+
 	Status startup();
 	void shutdown();
+	void setup_input();
 
 	VkSurfaceKHR create_surface(VkInstance &instance) const;
 

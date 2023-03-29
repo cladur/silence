@@ -34,66 +34,31 @@ int main() {
 
 	//InputManager setup
 	input_manager = new InputManager;
-	MultiplatformInput input{};
-	glfwSetWindowUserPointer(display_manager.window, &input);
-	glfwSetKeyCallback(display_manager.window, [](GLFWwindow *window, int key, int scancode, int action, int mods) {
-		auto *input = static_cast<MultiplatformInput *>(glfwGetWindowUserPointer(window));
-		float value = 0.f;
-		switch (action) {
-			case GLFW_PRESS:
-			case GLFW_REPEAT:
-				value = 1.f;
-				break;
-			case GLFW_RELEASE:
-				break;
-			default:
-				value = 0.f;
-		}
-		input->update_keyboard_state(key, value);
-	});
 
-	glfwSetMouseButtonCallback(display_manager.window, [](GLFWwindow *window, int button, int action, int mods) {
-		auto *input = static_cast<MultiplatformInput *>(glfwGetWindowUserPointer(window));
-		if (input) {
-			input->update_mouse_state(button, action == GLFW_PRESS ? 1.f : 0.f);
-		}
-	});
+	//w
+	display_manager.setup_input();
 
-	if (input_manager) {
-		input_manager->register_device(InputDevice{
+	//Map inputs
+	input_manager->map_input_to_action(InputKey::A, InputAction{ .action_name = "Strife", .scale = -1.f });
+	input_manager->map_input_to_action(InputKey::D, InputAction{ .action_name = "Strife", .scale = 1.f });
+	input_manager->map_input_to_action(InputKey::MOUSE_LEFT, InputAction{ .action_name = "Click", .scale = 1.f });
 
-				.Type = InputDeviceType::MOUSE,
-				.Index = 0,
-				.StateFunc = std::bind(&MultiplatformInput::get_mouse_state, &input, std::placeholders::_1) });
-
-		input_manager->register_device(InputDevice{
-
-				.Type = InputDeviceType::KEYBOARD,
-				.Index = 0,
-				.StateFunc = std::bind(&MultiplatformInput::get_keyboard_state, &input, std::placeholders::_1) });
-
-		//Map inputs
-		input_manager->map_input_to_action(InputKey::A, InputAction{ .action_name = "Strife", .scale = -1.f });
-		input_manager->map_input_to_action(InputKey::D, InputAction{ .action_name = "Strife", .scale = 1.f });
-		input_manager->map_input_to_action(InputKey::MOUSE_LEFT, InputAction{ .action_name = "Click", .scale = 1.f });
-
-		input_manager->register_action_callback("Strife",
-				InputManager::ActionCallback{ .callback_reference = "Reference",
-						.func = [](InputSource source, int source_index, float value) {
-							printf("%f \n", value);
-							return true;
-						} });
-		input_manager->register_action_callback("Click",
-				InputManager::ActionCallback{
-						.callback_reference = "Mouse", .func = [](InputSource source, int source_index, float value) {
-							if (value == 1) {
-								printf("Clicked\n");
-							} else {
-								printf("Released\n");
-							}
-							return true;
-						} });
-	}
+	input_manager->register_action_callback("Strife",
+			InputManager::ActionCallback{
+					.callback_reference = "Reference", .func = [](InputSource source, int source_index, float value) {
+						printf("%f \n", value);
+						return true;
+					} });
+	input_manager->register_action_callback("Click",
+			InputManager::ActionCallback{
+					.callback_reference = "Mouse", .func = [](InputSource source, int source_index, float value) {
+						if (value == 1) {
+							printf("Clicked\n");
+						} else {
+							printf("Released\n");
+						}
+						return true;
+					} });
 
 	// Run the game.
 	bool should_run = true;
