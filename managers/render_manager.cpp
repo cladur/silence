@@ -712,6 +712,15 @@ void RenderManager::init_imgui(GLFWwindow *window) {
 		device.destroyDescriptorPool(imgui_pool, nullptr);
 		ImGui_ImplVulkan_Shutdown();
 	});
+
+	// zajebisty styl wulkanowy czerwony 😎
+	// TODO: zrobic styl wulkanowy fajniejszy
+	//	ImGuiStyle &vulkan_style = ImGui::GetStyle();
+	//	vulkan_style.Colors[ImGuiCol_TitleBg] = ImVec4(1.0f, 0.0f, 0.0f, 0.6f);
+	//	vulkan_style.Colors[ImGuiCol_TitleBgActive] = ImVec4(1.0f, 0.0f, 0.0f, 0.8f);
+	//	vulkan_style.Colors[ImGuiCol_MenuBarBg] = ImVec4(1.0f, 0.0f, 0.0f, 0.4f);
+	//	vulkan_style.Colors[ImGuiCol_Header] = ImVec4(1.0f, 0.0f, 0.0f, 0.4f);
+	//	vulkan_style.Colors[ImGuiCol_CheckMark] = ImVec4(0.0f, 1.0f, 0.0f, 1.0f);
 }
 
 bool RenderManager::load_shader_module(const char *file_path, vk::ShaderModule *out_shader_module) {

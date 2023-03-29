@@ -4,13 +4,64 @@
 #define SILENCE_TRANSFORM_H
 
 struct Transform {
-	glm::vec3 position;
-	glm::vec3 euler_rot;
-	glm::vec3 scale;
+private:
+	glm::vec3 position{};
+	glm::vec3 euler_rot{};
+	glm::vec3 scale{};
+	bool changed;
 
-	glm::mat4 modelMatrix = glm::mat4(1.0f);
+	glm::mat4 model_matrix = glm::mat4(1.0f);
 
+public:
+	//constructor
+	Transform(glm::vec3 position, glm::vec3 euler_rot, glm::vec3 scale) {
+		this->position = position;
+		this->euler_rot = euler_rot;
+		this->scale = scale;
+		this->changed = true;
+	}
+
+	Transform() {
+		this->position = glm::vec3(0.0f, 0.0f, 0.0f);
+		this->euler_rot = glm::vec3(0.0f, 0.0f, 0.0f);
+		this->scale = glm::vec3(1.0f, 1.0f, 1.0f);
+		this->changed = true;
+	}
+	// write getters
+	[[nodiscard]] glm::vec3 get_position() const {
+		return position;
+	}
+	[[nodiscard]] glm::vec3 get_euler_rot() const {
+		return euler_rot;
+	}
+	[[nodiscard]] glm::vec3 get_scale() const {
+		return scale;
+	}
+	void set_position(glm::vec3 new_position) {
+		this->position = new_position;
+		this->changed = true;
+	}
+	void add_position(glm::vec3 add_position) {
+		this->position += add_position;
+		this->changed = true;
+	}
+	void set_euler_rot(glm::vec3 new_euler_rot) {
+		this->euler_rot = new_euler_rot;
+		this->changed = true;
+	}
+	void add_euler_rot(glm::vec3 add_euler_rot) {
+		this->euler_rot += add_euler_rot;
+		this->changed = true;
+	}
+	void set_scale(glm::vec3 new_scale) {
+		this->scale = new_scale;
+		this->changed = true;
+	}
 	glm::mat4 get_local_model_matrix() {
+		if (!changed) {
+			return this->model_matrix;
+		}
+
 		const glm::mat4 transform_x =
 				glm::rotate(glm::mat4(1.0f), glm::radians(euler_rot.x), glm::vec3(1.0f, 0.0f, 0.0f));
 		const glm::mat4 transform_y =
@@ -22,9 +73,13 @@ struct Transform {
 		const glm::mat4 roation_matrix = transform_y * transform_x * transform_z;
 
 		// translation * rotation * scale (also known as TRS matrix)
-		this->modelMatrix =
+		this->model_matrix =
 				glm::translate(glm::mat4(1.0f), position) * roation_matrix * glm::scale(glm::mat4(1.0f), scale);
-		return this->modelMatrix;
+		return this->model_matrix;
+	}
+
+	void update_model_matrix(glm::mat4 parent_model) {
+		this->model_matrix = parent_model * get_local_model_matrix();
 	}
 };
 

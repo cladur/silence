@@ -1,13 +1,17 @@
 #include "display_manager.h"
+#include "ecs/parent_manager.h"
 #include "render_manager.h"
 
 #include "components/gravity_component.h"
 #include "components/rigidbody_component.h"
+#include "components/state_component.h"
 #include "components/transform_component.h"
 #include "ecs/ecs_manager.h"
 #include "magic_enum.hpp"
 #include "spdlog/spdlog.h"
 #include "systems/physics_system.h"
+
+#include "ai/state_machine/states/test_state.h"
 
 #include <random>
 
@@ -16,8 +20,6 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_vulkan.h"
-#include "state_machine/state_machine.h"
-#include "state_machine/states/test_state.h"
 #include "systems/parent_system.h"
 #include "types.h"
 
@@ -33,6 +35,7 @@ void default_ecs_manager_init() {
 	ecs_manager.register_component<Gravity>();
 	ecs_manager.register_component<Parent>();
 	ecs_manager.register_component<Children>();
+	ecs_manager.register_component<State>();
 }
 
 std::shared_ptr<PhysicsSystem> default_physics_system_init() {
@@ -54,10 +57,6 @@ std::shared_ptr<PhysicsSystem> default_physics_system_init() {
 
 std::shared_ptr<ParentSystem> default_parent_system_init() {
 	auto parent_system = ecs_manager.register_system<ParentSystem>();
-
-	Signature signature;
-	signature.set(ecs_manager.get_component_type<Children>());
-	ecs_manager.set_system_component_whitelist<ParentSystem>(signature);
 
 	parent_system->startup();
 
@@ -83,11 +82,11 @@ void demo_entities_init(std::vector<Entity> entities) {
 				RigidBody{ .velocity = glm::vec3(0.0f, 0.0f, 0.0f), .acceleration = glm::vec3(0.0f, 0.0f, 0.0f) });
 
 		ecs_manager.add_component(entity,
-				Transform{ .position = glm::vec3(rand_position(random_generator), rand_position(random_generator),
+				Transform{ glm::vec3(rand_position(random_generator), rand_position(random_generator),
 								   rand_position(random_generator)),
-						.euler_rot = glm::vec3(rand_rotation(random_generator), rand_rotation(random_generator),
+						glm::vec3(rand_rotation(random_generator), rand_rotation(random_generator),
 								rand_rotation(random_generator)),
-						.scale = glm::vec3(scale, scale, scale) });
+						glm::vec3(scale, scale, scale) });
 	}
 }
 
@@ -155,27 +154,10 @@ int main() {
 	auto physics_system = default_physics_system_init();
 	auto parent_system = default_parent_system_init();
 
-	std::vector<Entity> entities(MAX_ENTITIES - 1);
+	std::vector<Entity> entities(50);
 	demo_entities_init(entities);
 
-	ecs_manager.add_component<Children>(7, Children{});
-	ecs_manager.get_component<Children>(7).add_children(1);
-	ecs_manager.get_component<Children>(7).add_children(2);
-	ecs_manager.get_component<Children>(7).add_children(3);
-
 	// ECS -----------------------------------------
-
-	StateMachine machine = StateMachine();
-	TestState state_1 = TestState("one");
-	TestState state_2 = TestState("two");
-	TestState state_3 = TestState("three");
-
-	machine.add_state(&state_1);
-	machine.add_state(&state_2);
-	machine.add_state(&state_3);
-
-	machine.set_state("two");
-	machine.set_state("three");
 
 	// Run the game.
 	float dt{};
@@ -211,22 +193,12 @@ int main() {
 		ImGui::DragInt("Entity Id", &imgui_entity_id, 1, 1, MAX_IMGUI_ENTITIES);
 		ImGui::DragInt("Children Id", &imgui_children_id, 1, 1, MAX_IMGUI_ENTITIES);
 
-		if (ImGui::Button("Remove children")) {
-			if (ecs_manager.has_component<Children>(imgui_entity_id)) {
-				ecs_manager.get_component<Children>(imgui_entity_id).remove_children(imgui_children_id);
-			}
+		if (ImGui::Button("Add child")) {
+			ParentManager::add_children(imgui_entity_id, imgui_children_id);
 		}
 
-		if (ImGui::Button("Add children")) {
-			if (!ecs_manager.has_component<Children>(imgui_entity_id)) {
-				ecs_manager.add_component<Children>(imgui_entity_id, Children{});
-			}
-
-			ecs_manager.get_component<Children>(imgui_entity_id).add_children(imgui_children_id);
-		}
-
-		if (ImGui::Button("List children")) {
-			parent_system->update(dt);
+		if (ImGui::Button("Remove child")) {
+			ParentManager::remove_children(imgui_entity_id, imgui_children_id);
 		}
 
 		ImGui::End();
@@ -236,6 +208,7 @@ int main() {
 		}
 
 		physics_system->update(dt);
+		parent_system->update();
 
 		auto stop_time = std::chrono::high_resolution_clock::now();
 
