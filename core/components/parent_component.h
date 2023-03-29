@@ -6,6 +6,10 @@ struct Parent {
 	Entity parent;
 
 	void set_parent(Entity entity) {
+		if (entity == parent) {
+			return;
+		}
+
 		parent = entity;
 	}
 };
