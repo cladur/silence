@@ -239,3 +239,32 @@ vk::SubmitInfo vk_init::submit_info(vk::CommandBuffer *cmd) {
 
 	return info;
 }
+
+vk::SamplerCreateInfo vk_init::sampler_create_info(vk::Filter filters, vk::SamplerAddressMode sampler_address_mode) {
+	vk::SamplerCreateInfo info = {};
+	info.sType = vk::StructureType::eSamplerCreateInfo;
+	info.pNext = nullptr;
+
+	info.magFilter = filters;
+	info.minFilter = filters;
+	info.addressModeU = sampler_address_mode;
+	info.addressModeV = sampler_address_mode;
+	info.addressModeW = sampler_address_mode;
+
+	return info;
+}
+
+vk::WriteDescriptorSet vk_init::write_descriptor_image(
+		vk::DescriptorType type, vk::DescriptorSet dst_set, vk::DescriptorImageInfo *image_info, uint32_t binding) {
+	vk::WriteDescriptorSet write = {};
+	write.sType = vk::StructureType::eWriteDescriptorSet;
+	write.pNext = nullptr;
+
+	write.dstBinding = binding;
+	write.dstSet = dst_set;
+	write.descriptorCount = 1;
+	write.descriptorType = type;
+	write.pImageInfo = image_info;
+
+	return write;
+}

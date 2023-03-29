@@ -43,7 +43,14 @@ vk::WriteDescriptorSet write_descriptor_buffer(
 		vk::DescriptorType type, vk::DescriptorSet dst_set, vk::DescriptorBufferInfo *buffer_info, uint32_t binding);
 
 vk::CommandBufferBeginInfo command_buffer_begin_info(vk::CommandBufferUsageFlags flags = {});
+
 vk::SubmitInfo submit_info(vk::CommandBuffer *cmd);
+
+vk::SamplerCreateInfo sampler_create_info(
+		vk::Filter filters, vk::SamplerAddressMode sampler_address_mode = vk::SamplerAddressMode::eRepeat);
+
+vk::WriteDescriptorSet write_descriptor_image(
+		vk::DescriptorType type, vk::DescriptorSet dst_set, vk::DescriptorImageInfo *image_info, uint32_t binding);
 
 } //namespace vk_init
 

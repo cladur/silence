@@ -3,6 +3,7 @@
 
 #include <vector>
 
+#include "glm/vec2.hpp"
 #include "glm/vec3.hpp"
 #include "vk_types.h"
 
@@ -20,6 +21,9 @@ struct Vertex {
 	[[maybe_unused]] float padding2;
 	glm::vec3 color;
 	[[maybe_unused]] float padding3;
+	glm::vec2 uv;
+	[[maybe_unused]] float padding4;
+	[[maybe_unused]] float padding5;
 
 	static VertexInputDescription get_vertex_description();
 };

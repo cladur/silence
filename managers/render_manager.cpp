@@ -3,7 +3,6 @@
 
 #include <fstream>
 
-#include "magic_enum.hpp"
 #include <glm/gtx/transform.hpp>
 
 #define VMA_IMPLEMENTATION
@@ -12,6 +11,7 @@
 
 #include "rendering/pipeline_builder.h"
 #include "rendering/vk_initializers.h"
+#include "rendering/vk_textures.h"
 #include <VkBootstrap.h>
 #include <spdlog/spdlog.h>
 #include <ios>
@@ -20,15 +20,6 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_vulkan.h"
-
-#define VK_CHECK(x)                                                                                                    \
-	do {                                                                                                               \
-		vk::Result err = x;                                                                                            \
-		if (err != vk::Result::eSuccess) {                                                                             \
-			SPDLOG_ERROR("Detected Vulkan error: ({}) {}", magic_enum::enum_integer(err), magic_enum::enum_name(err)); \
-			abort();                                                                                                   \
-		}                                                                                                              \
-	} while (false)
 
 void RenderManager::init_vulkan(DisplayManager &display_manager) {
 	vkb::InstanceBuilder builder;
@@ -360,7 +351,8 @@ void RenderManager::init_descriptors() {
 
 	//create a descriptor pool that will hold 10 uniform buffers
 	std::vector<vk::DescriptorPoolSize> sizes = { { vk::DescriptorType::eUniformBuffer, 10 },
-		{ vk::DescriptorType::eUniformBufferDynamic, 10 }, { vk::DescriptorType::eStorageBuffer, 10 } };
+		{ vk::DescriptorType::eUniformBufferDynamic, 10 }, { vk::DescriptorType::eStorageBuffer, 10 },
+		{ vk::DescriptorType::eCombinedImageSampler, 10 } };
 
 	vk::DescriptorPoolCreateInfo pool_info = {};
 	pool_info.sType = vk::StructureType::eDescriptorPoolCreateInfo;
@@ -381,6 +373,18 @@ void RenderManager::init_descriptors() {
 	object_set_info.pBindings = &object_bind;
 
 	VK_CHECK(device.createDescriptorSetLayout(&object_set_info, nullptr, &object_set_layout));
+
+	vk::DescriptorSetLayoutBinding texture_bind = vk_init::descriptor_set_layout_binding(
+			vk::DescriptorType::eCombinedImageSampler, vk::ShaderStageFlagBits::eFragment, 0);
+
+	vk::DescriptorSetLayoutCreateInfo set3_info = {};
+	set3_info.sType = vk::StructureType::eDescriptorSetLayoutCreateInfo;
+	set3_info.pNext = nullptr;
+	set3_info.bindingCount = 1;
+	set3_info.flags = {};
+	set3_info.pBindings = &texture_bind;
+
+	VK_CHECK(device.createDescriptorSetLayout(&set3_info, nullptr, &single_texture_set_layout));
 
 	for (auto &frame : frames) {
 		frame.camera_buffer = create_buffer(
@@ -458,6 +462,7 @@ void RenderManager::init_descriptors() {
 		}
 
 		device.destroyDescriptorSetLayout(object_set_layout, nullptr);
+		device.destroyDescriptorSetLayout(single_texture_set_layout, nullptr);
 	});
 }
 
@@ -467,6 +472,13 @@ void RenderManager::init_pipelines() {
 		SPDLOG_ERROR("Error when building the triangle fragment shader module");
 	} else {
 		SPDLOG_INFO("Triangle fragment shader successfully loaded");
+	}
+
+	vk::ShaderModule textured_mesh_frag_shader;
+	if (!load_shader_module("resources/shaders/textured_lit.frag.spv", &textured_mesh_frag_shader)) {
+		SPDLOG_ERROR("Error when building the textured triangle fragment shader module");
+	} else {
+		SPDLOG_INFO("Textured triangle fragment shader successfully loaded");
 	}
 
 	vk::ShaderModule mesh_vertex_shader;
@@ -560,20 +572,45 @@ void RenderManager::init_pipelines() {
 
 	create_material(mesh_pipeline, mesh_pipeline_layout, "default_mesh");
 
+	// create pipeline for textured rendering
+	vk::PipelineLayoutCreateInfo textured_mesh_pipeline_layout_info = mesh_pipeline_layout_info;
+	vk::DescriptorSetLayout set_layouts2[] = { global_set_layout, object_set_layout, single_texture_set_layout };
+	textured_mesh_pipeline_layout_info.setLayoutCount = 3;
+	textured_mesh_pipeline_layout_info.pSetLayouts = set_layouts2;
+
+	vk::PipelineLayout textured_mesh_pipeline_layout;
+	VK_CHECK(device.createPipelineLayout(&textured_mesh_pipeline_layout_info, nullptr, &textured_mesh_pipeline_layout));
+
+	pipeline_builder.shader_stages.clear();
+	pipeline_builder.shader_stages.push_back(
+			vk_init::pipeline_shader_stage_create_info(vk::ShaderStageFlagBits::eVertex, mesh_vertex_shader));
+
+	//make sure that triangle_frag_shader is holding the compiled default_lit.frag
+	pipeline_builder.shader_stages.push_back(
+			vk_init::pipeline_shader_stage_create_info(vk::ShaderStageFlagBits::eFragment, textured_mesh_frag_shader));
+
+	pipeline_builder.pipeline_layout = textured_mesh_pipeline_layout;
+	vk::Pipeline textured_mesh_pipeline = pipeline_builder.build_pipeline(device, render_pass);
+	create_material(textured_mesh_pipeline, textured_mesh_pipeline_layout, "textured_mesh");
+
 	device.destroyShaderModule(mesh_vertex_shader, nullptr);
 	device.destroyShaderModule(mesh_frag_shader, nullptr);
+	device.destroyShaderModule(textured_mesh_frag_shader, nullptr);
 
 	main_deletion_queue.push_function([=, this]() {
 		device.destroyPipeline(mesh_pipeline);
 		device.destroyPipelineLayout(mesh_pipeline_layout);
+		device.destroyPipeline(textured_mesh_pipeline);
+		device.destroyPipelineLayout(textured_mesh_pipeline_layout);
 	});
 }
 
 void RenderManager::init_scene() {
 	RenderObject monkey = {};
 	monkey.mesh = get_mesh("monkey");
-	monkey.material = get_material("default_mesh");
-	monkey.transform_matrix = glm::mat4{ 1.0f };
+	monkey.material = get_material("textured_mesh");
+	glm::mat4 rotation = glm::rotate(glm::mat4{ 1.0 }, glm::radians(45.0f), glm::vec3(0, 1, 0));
+	monkey.transform_matrix = glm::mat4{ 1.0f } * rotation;
 
 	renderables.push_back(monkey);
 
@@ -589,6 +626,37 @@ void RenderManager::init_scene() {
 			renderables.push_back(tri);
 		}
 	}
+
+	//create a sampler for the texture
+	vk::SamplerCreateInfo sampler_info = vk_init::sampler_create_info(vk::Filter::eNearest);
+
+	vk::Sampler blocky_sampler;
+	VK_CHECK(device.createSampler(&sampler_info, nullptr, &blocky_sampler));
+
+	main_deletion_queue.push_function([=, this]() { device.destroySampler(blocky_sampler); });
+
+	Material *textured_mat = get_material("textured_mesh");
+
+	//allocate the descriptor set for single-texture to use on the material
+	vk::DescriptorSetAllocateInfo alloc_info = {};
+	alloc_info.sType = vk::StructureType::eDescriptorSetAllocateInfo;
+	alloc_info.pNext = nullptr;
+	alloc_info.descriptorPool = descriptor_pool;
+	alloc_info.descriptorSetCount = 1;
+	alloc_info.pSetLayouts = &single_texture_set_layout;
+
+	VK_CHECK(device.allocateDescriptorSets(&alloc_info, &textured_mat->texture_set));
+
+	//write to the descriptor set so that it points to our empire_diffuse texture
+	vk::DescriptorImageInfo image_buffer_info;
+	image_buffer_info.sampler = blocky_sampler;
+	image_buffer_info.imageView = loaded_textures["empire_diffuse"].image_view;
+	image_buffer_info.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+
+	vk::WriteDescriptorSet texture1 = vk_init::write_descriptor_image(
+			vk::DescriptorType::eCombinedImageSampler, textured_mat->texture_set, &image_buffer_info, 0);
+
+	device.updateDescriptorSets(1, &texture1, 0, nullptr);
 }
 
 void RenderManager::init_imgui(GLFWwindow *window) {
@@ -716,7 +784,7 @@ void RenderManager::load_meshes() {
 
 	//we don't care about the vertex normals
 
-	monkey_mesh.load_from_gltf("resources/models/monkey.gltf");
+	monkey_mesh.load_from_gltf("resources/models/BoxTextured.gltf");
 
 	upload_mesh(triangle_mesh);
 	upload_mesh(monkey_mesh);
@@ -886,6 +954,7 @@ RenderManager::Status RenderManager::startup(DisplayManager &display_manager) {
 	init_descriptors();
 	init_pipelines();
 	load_meshes();
+	load_images();
 	init_scene();
 
 	init_imgui(display_manager.window);
@@ -912,7 +981,7 @@ FrameData &RenderManager::get_current_frame() {
 Material *RenderManager::create_material(vk::Pipeline pipeline, vk::PipelineLayout layout, const std::string &name) {
 	Material mat = {};
 	mat.pipeline = pipeline;
-	mat.pipelineLayout = layout;
+	mat.pipeline_layout = layout;
 	materials[name] = mat;
 	return &materials[name];
 }
@@ -934,6 +1003,21 @@ Mesh *RenderManager::get_mesh(const std::string &name) {
 	} else {
 		return &(*it).second;
 	}
+}
+
+void RenderManager::load_images() {
+	Texture texture = {};
+
+	vk_util::load_image_from_file(*this, "resources/models/CesiumLogoFlat.png", texture.image);
+
+	vk::ImageViewCreateInfo image_info = vk_init::image_view_create_info(
+			vk::Format::eR8G8B8A8Srgb, texture.image.image, vk::ImageAspectFlagBits::eColor);
+
+	VK_CHECK(device.createImageView(&image_info, nullptr, &texture.image_view));
+
+	main_deletion_queue.push_function([=, this]() { device.destroyImageView(texture.image_view); });
+
+	loaded_textures["empire_diffuse"] = texture;
 }
 
 void RenderManager::draw() {
@@ -1107,12 +1191,18 @@ void RenderManager::draw_objects(vk::CommandBuffer cmd, RenderObject *first, int
 			uint32_t uniform_offset = pad_uniform_buffer_size(sizeof(GPUSceneData)) * frame_index;
 
 			// bind the descriptor set when changing pipeline
-			cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, object.material->pipelineLayout, 0, 1,
+			cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, object.material->pipeline_layout, 0, 1,
 					&get_current_frame().global_descriptor, 1, &uniform_offset);
 
 			// bind the object descriptor set
-			cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, object.material->pipelineLayout, 1, 1,
+			cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, object.material->pipeline_layout, 1, 1,
 					&get_current_frame().object_descriptor, 0, nullptr);
+
+			if (object.material->texture_set != (vk::DescriptorSet)VK_NULL_HANDLE) {
+				//texture descriptor
+				cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, object.material->pipeline_layout, 2, 1,
+						&object.material->texture_set, 0, nullptr);
+			}
 		}
 
 		glm::mat4 model = object.transform_matrix;
@@ -1123,7 +1213,7 @@ void RenderManager::draw_objects(vk::CommandBuffer cmd, RenderObject *first, int
 		constants.render_matrix = object.transform_matrix;
 
 		//upload the mesh to the GPU via push constants
-		cmd.pushConstants(object.material->pipelineLayout, vk::ShaderStageFlagBits::eVertex, 0,
+		cmd.pushConstants(object.material->pipeline_layout, vk::ShaderStageFlagBits::eVertex, 0,
 				sizeof(MeshPushConstants), &constants);
 
 		//only bind the mesh if it's a different one from last bind
