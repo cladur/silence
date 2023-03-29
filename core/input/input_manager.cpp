@@ -61,19 +61,20 @@ void InputManager::unmap_input_from_action(InputKey key, const std::string &acti
 }
 void InputManager::process_input() {
 	std::vector<ActionEvent> events{};
-	for (auto &device : input_devices) {
-		//get new state for device
-		auto new_state = device.StateFunc(device.Index);
-
+	//TODO:it will crash when using remove_device() if done like this: for (auto &device : input_devices) {
+	//https://stackoverflow.com/questions/8421623/vector-iterators-incompatible + erase_if creates copy of vector
+	for (int i = 0; i < input_devices.size(); i++) {
+		auto new_state = input_devices[i].StateFunc(input_devices[i].Index);
 		//compare to old stare for device
 		for (auto &key_state : new_state) {
-			if (device.CurrentState[key_state.first].value != key_state.second.value) {
+			if (input_devices[i].CurrentState[key_state.first].value != key_state.second.value) {
 				//TODO: Fix conflicting buttons
-				auto generated_events = generate_action_event(device.Index, key_state.first, key_state.second.value);
+				auto generated_events =
+						generate_action_event(input_devices[i].Index, key_state.first, key_state.second.value);
 				events.insert(events.end(), generated_events.begin(), generated_events.end());
 
 				//save new state value
-				device.CurrentState[key_state.first].value = key_state.second.value;
+				input_devices[i].CurrentState[key_state.first].value = key_state.second.value;
 			}
 		}
 	}
@@ -101,8 +102,8 @@ std::vector<InputManager::ActionEvent> InputManager::generate_action_event(
 	return action_events;
 }
 void InputManager::propagate_action_event(InputManager::ActionEvent event) {
-	//TODO: cast size_t to unsigned int or smth
-	for (size_t i = action_callbacks[event.action_name].size() - 1; i >= 0; i--) {
+	size_t var = action_callbacks[event.action_name].size();
+	for (int i = var - 1; i >= 0; i--) {
 		auto &action_callback = action_callbacks[event.action_name][i];
 
 		if (action_callback.func(event.source, event.source_index, event.value)) {
@@ -113,12 +114,13 @@ void InputManager::propagate_action_event(InputManager::ActionEvent event) {
 void InputManager::register_device(const InputDevice &device) {
 	input_devices.emplace_back(device);
 	SPDLOG_INFO("Register device: {} {}", magic_enum::enum_name(device.Type), device.Index);
+	SPDLOG_INFO("No devices: {}", input_devices.size());
 }
 void InputManager::remove_device(InputDeviceType type, int input_index) {
 	erase_if(input_devices, [type, input_index](const InputDevice &device) {
-		SPDLOG_INFO("Removed device: {} {}", magic_enum::enum_name(device.Type), device.Index);
 		return device.Type == type && device.Index == input_index;
 	});
+	SPDLOG_INFO("No devices: {}", input_devices.size());
 }
 InputManager::InputManager() = default;
 InputManager::~InputManager() = default;

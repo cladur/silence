@@ -62,14 +62,12 @@ void DisplayManager::setup_input() {
 				auto *input = static_cast<MultiplatformInput *>(glfwGetWindowUserPointer(display_manager.window));
 				if (input) {
 					if (event == GLFW_CONNECTED && glfwJoystickIsGamepad(joystickId)) {
-						//input->_input.AddController(joystickId);
 						input_manager->register_device(InputDevice{ .Type = InputDeviceType::GAMEPAD,
 								.Index = joystickId,
 								.StateFunc = std::bind(
 										&DisplayManager::get_gamepad_state, display_manager, std::placeholders::_1) });
 					} else if (event == GLFW_DISCONNECTED) {
 						// The joystick was disconnected
-						//input->_input.RemoveController(joystickId);
 						input_manager->remove_device(InputDeviceType::GAMEPAD, joystickId);
 					}
 				}

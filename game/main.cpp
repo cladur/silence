@@ -42,6 +42,7 @@ int main() {
 	input_manager->map_input_to_action(InputKey::A, InputAction{ .action_name = "Strife", .scale = -1.f });
 	input_manager->map_input_to_action(InputKey::D, InputAction{ .action_name = "Strife", .scale = 1.f });
 	input_manager->map_input_to_action(InputKey::MOUSE_LEFT, InputAction{ .action_name = "Click", .scale = 1.f });
+	input_manager->map_input_to_action(InputKey::W, InputAction{ .action_name = "Walk", .scale = 1.f });
 
 	input_manager->register_action_callback("Strife",
 			InputManager::ActionCallback{
