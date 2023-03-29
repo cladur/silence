@@ -3,14 +3,12 @@
 
 #include "components/gravity_component.h"
 #include "components/rigidbody_component.h"
-#include "components/state_component.h"
 #include "components/transform_component.h"
 #include "ecs/ecs_manager.h"
 #include "magic_enum.hpp"
 #include "spdlog/spdlog.h"
 #include "systems/physics_system.h"
 
-#include "ai/state_machine/states/test_state.h"
 #include "systems/state_machine_system.h"
 
 #include <random>
@@ -22,6 +20,8 @@
 #include "imgui_impl_vulkan.h"
 #include "systems/parent_system.h"
 #include "types.h"
+#include "state_machine/state_machine.h"
+#include "state_machine/states/test_state.h"
 
 RenderManager render_manager;
 DisplayManager display_manager;
@@ -36,7 +36,6 @@ void default_ecs_manager_init()
 	ecs_manager.register_component<Gravity>();
 	ecs_manager.register_component<Parent>();
 	ecs_manager.register_component<Children>();
-	ecs_manager.register_component<State>();
 }
 
 std::shared_ptr<PhysicsSystem> default_physics_system_init()
@@ -96,7 +95,6 @@ void demo_entities_init(std::vector<Entity> entities)
 					.euler_rot = glm::vec3(rand_rotation(random_generator), rand_rotation(random_generator),
 							rand_rotation(random_generator)),
 					.scale = glm::vec3(scale, scale, scale) });
-		ecs_manager.add_component(entity, State { .state = new TestState(std::string("idle")) });
 	}
 }
 
@@ -279,6 +277,18 @@ int main()
 
 	// ECS -----------------------------------------
 
+	StateMachine machine = StateMachine();
+	TestState state_1 = TestState("one");
+	TestState state_2 = TestState("two");
+	TestState state_3 = TestState("three");
+
+	machine.add_state(&state_1);
+	machine.add_state(&state_2);
+	machine.add_state(&state_3);
+
+	machine.set_state("two");
+	machine.set_state("three");
+
 	// Run the game.
 	float dt {};
 	bool show_ecs_logs = false;
@@ -346,7 +356,7 @@ int main()
 		}
 
 		physics_system->update(dt);
-		state_machine_system->update(dt);
+		SPDLOG_INFO("y position: {}", ecs_manager.get_component<Transform>(7).position.y);
 
 		auto stop_time = std::chrono::high_resolution_clock::now();
 
