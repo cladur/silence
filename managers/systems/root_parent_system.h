@@ -13,7 +13,7 @@ public:
 	void update();
 
 private:
-	void RootParentSystem::update_children(Entity parent, glm::mat4 parent_model);
+	void update_children(Entity parent, glm::mat4 parent_model);
 };
 
 #endif //SILENCE_ROOTPARENTSYSTEM_H
