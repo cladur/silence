@@ -96,11 +96,11 @@ void demo_entities_init(std::vector<Entity> entities) {
 				RigidBody{ .velocity = glm::vec3(0.0f, 0.0f, 0.0f), .acceleration = glm::vec3(0.0f, 0.0f, 0.0f) });
 
 		ecs_manager.add_component(entity,
-				Transform{ .position = glm::vec3(rand_position(random_generator), rand_position(random_generator),
+				Transform{ glm::vec3(rand_position(random_generator), rand_position(random_generator),
 								   rand_position(random_generator)),
-						.euler_rot = glm::vec3(rand_rotation(random_generator), rand_rotation(random_generator),
+						glm::vec3(rand_rotation(random_generator), rand_rotation(random_generator),
 								rand_rotation(random_generator)),
-						.scale = glm::vec3(scale, scale, scale) });
+						glm::vec3(scale, scale, scale) });
 		ecs_manager.add_component(entity, State{ .state = new TestState(std::string("idle")) });
 	}
 }
@@ -301,9 +301,9 @@ int main() {
 			ParentManager::remove_children(imgui_entity_id, imgui_children_id);
 		}
 
-		if (ImGui::Button("Parent system update")) {
-			parent_system->update();
-		}
+		//		if (ImGui::Button("Parent system update")) {
+		//
+		//		}
 
 		ImGui::End();
 
@@ -313,6 +313,7 @@ int main() {
 
 		physics_system->update(dt);
 		state_system->update(dt);
+		parent_system->update();
 
 		auto stop_time = std::chrono::high_resolution_clock::now();
 

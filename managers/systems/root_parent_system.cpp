@@ -24,7 +24,7 @@ void RootParentSystem::update_children(Entity parent, glm::mat4 parent_model) { 
 		child_transform.update_model_matrix(parent_model);
 
 		if (ecs_manager.has_component<Children>(child)) {
-			update_children(child, child_transform.model_matrix);
+			update_children(child, child_transform.get_local_model_matrix());
 		}
 	}
 }
