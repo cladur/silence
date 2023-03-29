@@ -293,15 +293,15 @@ int main() {
 		ImGui::DragInt("Entity Id", &imgui_entity_id, 1, 1, MAX_IMGUI_ENTITIES);
 		ImGui::DragInt("Children Id", &imgui_children_id, 1, 1, MAX_IMGUI_ENTITIES);
 
-		if (ImGui::Button("Remove children")) {
-			ParentManager::remove_children(imgui_entity_id, imgui_children_id);
-		}
-
-		if (ImGui::Button("Add children")) {
+		if (ImGui::Button("Add child")) {
 			ParentManager::add_children(imgui_entity_id, imgui_children_id);
 		}
 
-		if (ImGui::Button("List children")) {
+		if (ImGui::Button("Remove child")) {
+			ParentManager::remove_children(imgui_entity_id, imgui_children_id);
+		}
+
+		if (ImGui::Button("Parent system update")) {
 			parent_system->update();
 		}
 

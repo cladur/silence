@@ -2,6 +2,7 @@
 #define SILENCE_CHILDREN_COMPONENT_H
 
 #include "../../core/types.h"
+#include <spdlog/spdlog.h>
 #include <array>
 #include <cassert>
 #include <cstdint>
