@@ -20,7 +20,7 @@ void PhysicsSystem::update(float dt) {
 		// Forces
 		auto const &gravity = ecs_manager.get_component<Gravity>(entity);
 
-		transform.add_position(rigid_body.velocity * dt);
+		transform.position += rigid_body.velocity * dt;
 
 		rigid_body.velocity += gravity.force * dt;
 	}

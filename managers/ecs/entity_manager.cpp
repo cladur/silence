@@ -2,7 +2,7 @@
 #include <cassert>
 
 void EntityManager::startup() {
-	for (Entity entity = 1; entity < MAX_ENTITIES; ++entity) {
+	for (Entity entity = 0; entity < MAX_ENTITIES; ++entity) {
 		available_entities.push(entity);
 	}
 }

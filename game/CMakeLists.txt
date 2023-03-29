@@ -10,7 +10,7 @@ file(GLOB_RECURSE HEADER_FILES_EXE
         ${CMAKE_CURRENT_SOURCE_DIR}/*.h
         ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp)
 
-add_executable(${GAME_NAME} main.cpp ../managers/ecs/parent_manager.cpp ../managers/ecs/parent_manager.h)
+add_executable(${GAME_NAME} main.cpp)
 
 # Define the link libraries
 find_package(spdlog CONFIG REQUIRED)
