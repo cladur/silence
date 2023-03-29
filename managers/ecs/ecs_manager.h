@@ -63,6 +63,10 @@ public:
 		return component_manager->get_component<T>(entity);
 	}
 
+	template <typename T> bool has_component(Entity entity) {
+		return component_manager->has_component<T>(entity);
+	}
+
 	template <typename T> ComponentType get_component_type() {
 		return component_manager->get_component_type<T>();
 	}

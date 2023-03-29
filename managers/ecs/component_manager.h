@@ -69,6 +69,11 @@ public:
 		return get_component_array<T>()->get_data(entity);
 	}
 
+	template <typename T> bool has_component(Entity entity) {
+		// Check if entity has a component
+		return get_component_array<T>()->has_component(entity);
+	}
+
 	void entity_destroyed(Entity entity) {
 		// Notify each component array that an entity has been destroyed
 		// If it has a component for that entity, it will remove it

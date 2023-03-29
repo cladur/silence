@@ -58,6 +58,14 @@ public:
 		}
 	}
 
+	bool has_component(Entity entity) {
+		if (entityToIndexMap.find(entity) != entityToIndexMap.end()) {
+			return true;
+		}
+
+		return false;
+	}
+
 private:
 	// The packed array of components (of generic type T),
 	// set to a specified maximum amount, matching the maximum number
