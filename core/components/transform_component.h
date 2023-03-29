@@ -8,7 +8,7 @@ struct Transform {
 	glm::vec3 euler_rot;
 	glm::vec3 scale;
 
-	glm::mat4 modelMatrix = glm::mat4(1.0f);
+	glm::mat4 model_matrix = glm::mat4(1.0f);
 
 	glm::mat4 get_local_model_matrix() {
 		const glm::mat4 transform_x =
@@ -22,9 +22,13 @@ struct Transform {
 		const glm::mat4 roation_matrix = transform_y * transform_x * transform_z;
 
 		// translation * rotation * scale (also known as TRS matrix)
-		this->modelMatrix =
+		this->model_matrix =
 				glm::translate(glm::mat4(1.0f), position) * roation_matrix * glm::scale(glm::mat4(1.0f), scale);
-		return this->modelMatrix;
+		return this->model_matrix;
+	}
+
+	void update_model_matrix(glm::mat4 parent_model) {
+		this->model_matrix = parent_model * get_local_model_matrix();
 	}
 };
 

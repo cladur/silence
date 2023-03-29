@@ -59,10 +59,6 @@ std::shared_ptr<PhysicsSystem> default_physics_system_init() {
 std::shared_ptr<ParentSystem> default_parent_system_init() {
 	auto parent_system = ecs_manager.register_system<ParentSystem>();
 
-	Signature signature;
-	signature.set(ecs_manager.get_component_type<Children>());
-	ecs_manager.set_system_component_whitelist<ParentSystem>(signature);
-
 	parent_system->startup();
 
 	return parent_system;
@@ -258,7 +254,7 @@ int main() {
 	auto parent_system = default_parent_system_init();
 	auto state_system = default_state_system_init();
 
-	std::vector<Entity> entities(MAX_ENTITIES - 1);
+	std::vector<Entity> entities(50);
 	demo_entities_init(entities);
 
 	// ECS -----------------------------------------
@@ -306,7 +302,7 @@ int main() {
 		}
 
 		if (ImGui::Button("List children")) {
-			parent_system->update(dt);
+			parent_system->update();
 		}
 
 		ImGui::End();
