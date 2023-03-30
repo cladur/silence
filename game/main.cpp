@@ -227,10 +227,6 @@ int main() {
 		display_manager.poll_events();
 		input_manager->process_input();
 
-		if ((bool)input_manager->get_action_value("MouseClick")) {
-			SPDLOG_INFO("Clicked");
-		}
-
 		//imgui new frame
 		ImGui_ImplVulkan_NewFrame();
 		ImGui_ImplGlfw_NewFrame();

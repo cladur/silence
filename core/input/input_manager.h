@@ -7,6 +7,7 @@
 #include "magic_enum.hpp"
 #include <spdlog/spdlog.h>
 #include <functional>
+#include <glm/glm.hpp>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -49,6 +50,16 @@ public:
 
 	void map_input_to_action(InputKey key, const InputAction &action);
 	void unmap_input_from_action(InputKey key, const std::string &action);
+
+	// TODO: Implement those
+	bool is_action_just_pressed(const std::string &action_name);
+	bool is_action_just_released(const std::string &action_name);
+	bool is_action_pressed(const std::string &action_name);
+
+	float get_action_strength(const std::string &action_name);
+
+	glm::vec2 get_mouse_position();
+	glm::vec2 get_mouse_delta();
 
 	float get_action_raw_value(const std::string &action_name);
 	float get_action_value(const std::string &action_name);
