@@ -19,6 +19,6 @@ public:
 
 	Entity create_entity();
 	void destroy_entity(Entity entity);
-	void set_component_whitelist(Entity entity, Signature signature);
+	void set_entity_signature(Entity entity, Signature signature);
 	Signature get_signature(Entity entity);
 };

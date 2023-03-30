@@ -11,7 +11,7 @@ void RootParentSystem::update() {
 	for (auto const &entity : entities) {
 		auto &transform = ecs_manager.get_component<Transform>(entity);
 		transform.update_global_model_matrix();
-		auto model = transform.get_local_model_matrix();
+		auto model = transform.get_global_model_matrix();
 		update_children(entity, model);
 	}
 }

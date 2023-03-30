@@ -93,6 +93,8 @@ public:
 		// translation * rotation * scale (also known as TRS matrix)
 		this->local_model_matrix =
 				glm::translate(glm::mat4(1.0f), position) * roation_matrix * glm::scale(glm::mat4(1.0f), scale);
+
+		changed = false;
 	}
 };
 

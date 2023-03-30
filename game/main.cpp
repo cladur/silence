@@ -73,17 +73,17 @@ std::shared_ptr<ParentSystem> default_parent_system_init() {
 	return parent_system;
 }
 
-void demo_entities_init(std::vector<Entity> entities) {
+void demo_entities_init(std::vector<Entity> &entities) {
 	std::default_random_engine random_generator; // NOLINT(cert-msc51-cpp)
 	std::uniform_real_distribution<float> rand_position(-40.0f, 40.0f);
 	std::uniform_real_distribution<float> rand_rotation(0.0f, 3.0f);
 	std::uniform_real_distribution<float> rand_scale(3.0f, 5.0f);
 	std::uniform_real_distribution<float> rand_color(0.0f, 1.0f);
-	std::uniform_real_distribution<float> rand_gravity(-30.0f, -10.0f);
+	std::uniform_real_distribution<float> rand_gravity(-1000.0f, -100.0f);
 
 	float scale = rand_scale(random_generator);
 
-	for (auto &entity : entities) {
+	for (unsigned int &entity : entities) {
 		entity = ecs_manager.create_entity();
 
 		ecs_manager.add_component<Gravity>(entity, { glm::vec3(0.0f, rand_gravity(random_generator), 0.0f) });
@@ -152,6 +152,12 @@ void setup_imgui_style() {
 	}
 }
 
+void destroy_all_entities(const std::vector<Entity> &entities) {
+	for (unsigned int entity : entities) {
+		ecs_manager.destroy_entity(entity);
+	}
+}
+
 int main() {
 	SPDLOG_INFO("Starting up engine systems...");
 
@@ -171,26 +177,6 @@ int main() {
 	std::vector<Entity> entities(50);
 	demo_entities_init(entities);
 
-	Entity parent = ecs_manager.create_entity();
-	{
-		// Single textured box in the middle
-
-		ecs_manager.add_component(parent,
-				Transform{ glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 45.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f) });
-		ecs_manager.add_component(
-				parent, MeshInstance{ render_manager.get_mesh("box"), render_manager.get_material("textured_mesh") });
-
-		Entity child = ecs_manager.create_entity();
-
-		ecs_manager.add_component(child,
-				Transform{ glm::vec3(0.0f, 5.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.5f, 0.5f, 0.5f) });
-
-		ecs_manager.add_component(
-				child, MeshInstance{ render_manager.get_mesh("box"), render_manager.get_material("textured_mesh") });
-
-		ParentManager::add_child(parent, child);
-	}
-
 	// ECS -----------------------------------------
 
 	// Run the game.
@@ -198,8 +184,12 @@ int main() {
 	bool show_ecs_logs = false;
 	bool show_demo_window = false;
 	bool physics_system_enabled = false;
+	bool entities_destroyed = false;
 	int imgui_children_id = 1;
 	int imgui_entity_id = 1;
+	int max_imgui_entities = 50;
+	int max_entities = 100;
+	int imgui_entities_count = 50;
 
 	bool should_run = true;
 	while (should_run) {
@@ -216,11 +206,6 @@ int main() {
 
 		ImGui::Begin("Settings");
 
-		if (ImGui::Button("AAA")) {
-			Transform &trans = ecs_manager.get_component<Transform>(parent);
-			trans.add_euler_rot(glm::vec3(0.0f, 0.0f, 5.0f));
-		}
-
 		ImGui::Checkbox("Show console ecs logs", &show_ecs_logs);
 
 		ImGui::Checkbox("Show demo window", &show_demo_window);
@@ -231,8 +216,8 @@ int main() {
 			ImGui::ShowDemoWindow();
 		}
 
-		ImGui::DragInt("Entity Id", &imgui_entity_id, 1, 1, MAX_IMGUI_ENTITIES);
-		ImGui::DragInt("Children Id", &imgui_children_id, 1, 1, MAX_IMGUI_ENTITIES);
+		ImGui::DragInt("Entity Id", &imgui_entity_id, 1, 1, max_imgui_entities);
+		ImGui::DragInt("Children Id", &imgui_children_id, 1, 1, max_imgui_entities);
 
 		if (ImGui::Button("Add child")) {
 			ParentManager::add_child(imgui_entity_id, imgui_children_id);
@@ -241,6 +226,27 @@ int main() {
 		if (ImGui::Button("Remove child")) {
 			ParentManager::remove_child(imgui_entity_id, imgui_children_id);
 		}
+
+		if (ImGui::Button("Destroy all entities")) {
+			if (!entities_destroyed) {
+				destroy_all_entities(entities);
+			}
+			entities_destroyed = true;
+		}
+
+		ImGui::DragInt("Entities count", &imgui_entities_count, 1, 1, max_entities);
+
+		if (ImGui::Button("Create entities")) {
+			if (!entities_destroyed) {
+				destroy_all_entities(entities);
+			}
+			entities.resize(imgui_entities_count);
+			demo_entities_init(entities);
+			entities_destroyed = false;
+		}
+
+		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
+				ImGui::GetIO().Framerate);
 
 		ImGui::End();
 
