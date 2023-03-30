@@ -111,8 +111,9 @@ VkSurfaceKHR DisplayManager::create_surface(VkInstance &instance) const {
 	return surface;
 }
 
-void DisplayManager::poll_events() const {
+void DisplayManager::poll_events() {
 	glfwPollEvents();
+	m_input.update_mouse_position(window);
 }
 
 bool DisplayManager::window_should_close() const {

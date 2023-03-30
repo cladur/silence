@@ -1,13 +1,43 @@
 #include "input_manager.h"
 InputSource get_input_source_from_key(InputKey key) {
 	switch (key) {
-		case InputKey::W:
-		case InputKey::S:
 		case InputKey::A:
+		case InputKey::B:
+		case InputKey::C:
 		case InputKey::D:
 		case InputKey::E:
 		case InputKey::F:
+		case InputKey::G:
+		case InputKey::H:
+		case InputKey::I:
+		case InputKey::J:
+		case InputKey::K:
+		case InputKey::L:
+		case InputKey::M:
+		case InputKey::N:
+		case InputKey::O:
+		case InputKey::P:
+		case InputKey::Q:
 		case InputKey::R:
+		case InputKey::S:
+		case InputKey::T:
+		case InputKey::U:
+		case InputKey::V:
+		case InputKey::W:
+		case InputKey::X:
+		case InputKey::Y:
+		case InputKey::Z:
+		case InputKey::SPACE:
+		case InputKey::ENTER:
+		case InputKey::ESCAPE:
+		case InputKey::BACKSPACE:
+		case InputKey::TAB:
+		case InputKey::LEFT_CONTROL:
+		case InputKey::RIGHT_CONTROL:
+		case InputKey::LEFT_SHIFT:
+		case InputKey::RIGHT_SHIFT:
+		case InputKey::LEFT_ALT:
+		case InputKey::RIGHT_ALT:
 			return InputSource::KEYBOARD;
 		case InputKey::MOUSE_X:
 		case InputKey::MOUSE_Y:
@@ -61,14 +91,12 @@ void InputManager::unmap_input_from_action(InputKey key, const std::string &acti
 }
 void InputManager::process_input() {
 	std::vector<ActionEvent> events{};
-	//TODO:it will crash when using remove_device() if done like this: for (auto &device : input_devices) {
-	//https://stackoverflow.com/questions/8421623/vector-iterators-incompatible + erase_if creates copy of vector
-	for (int i = 0; i < input_devices.size(); i++) {
+	for (int i = 0; i < input_devices.size(); i++) { // NOLINT(modernize-loop-convert)
 		auto new_state = input_devices[i].StateFunc(input_devices[i].Index);
 		//compare to old stare for device
 		for (auto &key_state : new_state) {
 			if (input_devices[i].CurrentState[key_state.first].value != key_state.second.value) {
-				//TODO: Fix conflicting buttons
+				//TODO: Fix conflicting buttons if they are mapped to the same action
 				auto generated_events =
 						generate_action_event(input_devices[i].Index, key_state.first, key_state.second.value);
 				events.insert(events.end(), generated_events.begin(), generated_events.end());
@@ -103,7 +131,9 @@ std::vector<InputManager::ActionEvent> InputManager::generate_action_event(
 }
 void InputManager::propagate_action_event(InputManager::ActionEvent event) {
 	size_t var = action_callbacks[event.action_name].size();
+
 	for (int i = var - 1; i >= 0; i--) {
+		SPDLOG_INFO(var);
 		auto &action_callback = action_callbacks[event.action_name][i];
 
 		if (action_callback.func(event.source, event.source_index, event.value)) {
@@ -122,5 +152,85 @@ void InputManager::remove_device(InputDeviceType type, int input_index) {
 	});
 	SPDLOG_INFO("No devices: {}", input_devices.size());
 }
+float InputManager::get_action_raw_value(const std::string &action_name) {
+	float value = 0;
+	for (auto &device : input_devices) {
+		for (auto &key_state : device.CurrentState) {
+			auto &actions = input_action_mapping[key_state.first];
+			for (auto &action : actions) {
+				if (action.action_name == action_name) {
+					return key_state.second.value * action.scale;
+				}
+			}
+		}
+	}
+	return value;
+}
+float InputManager::get_action_value(const std::string &action_name) {
+	float value = 0;
+	for (auto &device : input_devices) {
+		for (auto &key_state : device.CurrentState) {
+			auto &actions = input_action_mapping[key_state.first];
+			for (auto &action : actions) {
+				if (action.action_name == action_name) {
+					if(abs(key_state.second.value) > abs(action.deadzone))
+					{
+						return key_state.second.value * action.scale;
+					}
+				}
+			}
+		}
+	}
+	return value;
+}
+
+float InputManager::get_axis(const std::string &negative_action, const std::string &positive_action) {
+	float negative_value = get_action_raw_value(negative_action);
+	float positive_value = get_action_raw_value(positive_action);
+	return negative_value + positive_value;
+}
+float InputManager::get_gamepad_action_value(int gamepad_index, const std::string &action_name) {
+	for (auto &device : input_devices) {
+		if (device.Type == InputDeviceType::GAMEPAD && device.Index == gamepad_index) {
+			for (auto &key_state : device.CurrentState) {
+				auto &actions = input_action_mapping[key_state.first];
+				for (auto &action : actions) {
+					if (action.action_name == action_name) {
+						return key_state.second.value * action.scale;
+					}
+				}
+			}
+		}
+	}
+	return 0;
+}
+int *InputManager::get_all_gamepads() {
+	int *gamepads = new int[input_devices.size()];
+	int i = 0;
+	for (auto &device : input_devices) {
+		if (device.Type == InputDeviceType::GAMEPAD) {
+			gamepads[i] = device.Index;
+			i++;
+		}
+	}
+	return gamepads;
+}
+float InputManager::get_mouse_x() {
+	for (auto &device : input_devices) {
+		if (device.Type == InputDeviceType::MOUSE) {
+			return device.CurrentState[InputKey::MOUSE_X].value;
+		}
+	}
+	return 0;
+}
+float InputManager::get_mouse_y() {
+	for (auto &device : input_devices) {
+		if (device.Type == InputDeviceType::MOUSE) {
+			return device.CurrentState[InputKey::MOUSE_Y].value;
+		}
+	}
+	return 0;
+}
+
 InputManager::InputManager() = default;
 InputManager::~InputManager() = default;

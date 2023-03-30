@@ -8,22 +8,49 @@ void MultiplatformInput::update_mouse_state(int button, float value) {
 	InputKey i_key = multiplatform_button_to_input_key(button);
 	mouse_state[i_key].value = value;
 }
+
 InputKey MultiplatformInput::multiplatform_key_to_input_key(int key) {
 	switch (key) {
-		case GLFW_KEY_W:
-			return InputKey::W;
-		case GLFW_KEY_S:
-			return InputKey::S;
 		case GLFW_KEY_A:
 			return InputKey::A;
+		case GLFW_KEY_B:
+			return InputKey::B;
+		case GLFW_KEY_C:
+			return InputKey::C;
 		case GLFW_KEY_D:
 			return InputKey::D;
 		case GLFW_KEY_E:
 			return InputKey::E;
 		case GLFW_KEY_F:
 			return InputKey::F;
+		case GLFW_KEY_W:
+			return InputKey::W;
+		case GLFW_KEY_S:
+			return InputKey::S;
 		case GLFW_KEY_R:
 			return InputKey::R;
+		case GLFW_KEY_SPACE:
+			return InputKey::SPACE;
+		case GLFW_KEY_ENTER:
+			return InputKey::ENTER;
+		case GLFW_KEY_ESCAPE:
+			return InputKey::ESCAPE;
+		case GLFW_KEY_BACKSPACE:
+			return InputKey::BACKSPACE;
+		case GLFW_KEY_TAB:
+			return InputKey::TAB;
+		case GLFW_KEY_LEFT_CONTROL:
+			return InputKey::LEFT_CONTROL;
+		case GLFW_KEY_RIGHT_CONTROL:
+			return InputKey::RIGHT_CONTROL;
+		case GLFW_KEY_LEFT_SHIFT:
+			return InputKey::LEFT_SHIFT;
+		case GLFW_KEY_RIGHT_SHIFT:
+			return InputKey::RIGHT_SHIFT;
+		case GLFW_KEY_LEFT_ALT:
+			return InputKey::LEFT_ALT;
+		case GLFW_KEY_RIGHT_ALT:
+			return InputKey::RIGHT_ALT;
 		default:
 			return InputKey::UNKNOWN;
 	}
@@ -125,4 +152,18 @@ std::unordered_map<InputKey, InputDeviceState> MultiplatformInput::get_gamepad_s
 	}
 
 	return gamepad_state;
+}
+void MultiplatformInput::update_mouse_position(GLFWwindow *window) {
+
+// Set movement
+float last_x = mouse_state[InputKey::MOUSE_POS_X].value;
+float last_y = mouse_state[InputKey::MOUSE_POS_Y].value;
+
+double x, y;
+glfwGetCursorPos(window, &x, &y);
+
+mouse_state[InputKey::MOUSE_X].value = static_cast<float>(x) - last_x;
+mouse_state[InputKey::MOUSE_Y].value = static_cast<float>(y) - last_y;
+mouse_state[InputKey::MOUSE_POS_X].value = static_cast<float>(x);
+mouse_state[InputKey::MOUSE_POS_Y].value = static_cast<float>(y);
 }

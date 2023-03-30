@@ -28,11 +28,8 @@ private:
 		float value;
 	};
 
-	static InputManager *singleton;
-
 	std::unordered_map<InputKey, std::vector<InputAction>> input_action_mapping{};
 	std::unordered_map<std::string, std::vector<ActionCallback>> action_callbacks{};
-
 	std::vector<InputDevice> input_devices;
 
 public:
@@ -52,6 +49,19 @@ public:
 
 	void map_input_to_action(InputKey key, const InputAction &action);
 	void unmap_input_from_action(InputKey key, const std::string &action);
+
+	float get_action_raw_value(const std::string &action_name);
+	float get_action_value(const std::string &action_name);
+	float get_axis(const std::string &negative_action, const std::string &positive_action);
+	float get_mouse_x();
+	float get_mouse_y();
+
+
+	float get_gamepad_action_value(int gamepad_index, const std::string &action_name);
+
+
+
+	int *get_all_gamepads();
 };
 
 #endif //SILENCE_INPUT_MANAGER_H

@@ -11,6 +11,16 @@ RenderManager render_manager;
 DisplayManager display_manager;
 InputManager *input_manager;
 
+void default_mappings(){
+	input_manager->map_input_to_action(InputKey::W, InputAction{ .action_name = "Forward", .scale = 1.f });
+	input_manager->map_input_to_action(InputKey::S, InputAction{ .action_name = "Backward", .scale = -1.f });
+	input_manager->map_input_to_action(InputKey::A, InputAction{ .action_name = "Left", .scale = -1.f });
+	input_manager->map_input_to_action(InputKey::D, InputAction{ .action_name = "Right", .scale = 1.f });
+	input_manager->map_input_to_action(InputKey::MOUSE_LEFT, InputAction{ .action_name = "MouseClick", .scale = 1.f });
+	input_manager->map_input_to_action(InputKey::L_STICK_X, InputAction{ .action_name = "LAxisX", .scale = 1.f, .deadzone = 0.1f });
+	input_manager->map_input_to_action(InputKey::L_STICK_Y, InputAction{ .action_name = "LAxisY", .scale = 1.f, .deadzone = 0.1f });
+}
+
 int main() {
 	SPDLOG_INFO("Starting up engine systems...");
 
@@ -34,39 +44,19 @@ int main() {
 
 	//InputManager setup
 	input_manager = new InputManager;
-
-	//w
 	display_manager.setup_input();
 
 	//Map inputs
-	input_manager->map_input_to_action(InputKey::A, InputAction{ .action_name = "Strife", .scale = -1.f });
-	input_manager->map_input_to_action(InputKey::D, InputAction{ .action_name = "Strife", .scale = 1.f });
-	input_manager->map_input_to_action(InputKey::MOUSE_LEFT, InputAction{ .action_name = "Click", .scale = 1.f });
-	input_manager->map_input_to_action(InputKey::W, InputAction{ .action_name = "Walk", .scale = 1.f });
-
-	input_manager->register_action_callback("Strife",
-			InputManager::ActionCallback{
-					.callback_reference = "Reference", .func = [](InputSource source, int source_index, float value) {
-						printf("%f \n", value);
-						return true;
-					} });
-	input_manager->register_action_callback("Click",
-			InputManager::ActionCallback{
-					.callback_reference = "Mouse", .func = [](InputSource source, int source_index, float value) {
-						if (value == 1) {
-							printf("Clicked\n");
-						} else {
-							printf("Released\n");
-						}
-						return true;
-					} });
+	default_mappings();
 
 	// Run the game.
 	bool should_run = true;
 	while (should_run) {
 		// GAME LOGIC
-		input_manager->process_input();
 		display_manager.poll_events();
+		input_manager->process_input();
+
+		//SPDLOG_INFO(input_manager->get_axis("Left","Right"));
 
 		if (display_manager.window_should_close()) {
 			should_run = false;

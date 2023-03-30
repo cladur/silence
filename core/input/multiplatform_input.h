@@ -25,6 +25,7 @@ public:
 
 	void update_keyboard_state(int key, float value);
 	void update_mouse_state(int button, float value);
+	void update_mouse_position(GLFWwindow *window);
 	void update_gamepad_state(const GLFWgamepadstate &state);
 };
 

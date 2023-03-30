@@ -7,13 +7,44 @@
 enum class InputKey {
 	UNKNOWN,
 
-	W,
-	S,
 	A,
+	B,
+	C,
 	D,
 	E,
 	F,
+	G,
+	H,
+	I,
+	J,
+	K,
+	L,
+	M,
+	N,
+	O,
+	P,
+	Q,
 	R,
+	S,
+	T,
+	U,
+	V,
+	W,
+	X,
+	Y,
+	Z,
+	SPACE,
+	ENTER,
+	ESCAPE,
+	BACKSPACE,
+	TAB,
+	LEFT_CONTROL,
+	RIGHT_CONTROL,
+	LEFT_SHIFT,
+	RIGHT_SHIFT,
+	LEFT_ALT,
+	RIGHT_ALT,
+
 
 	MOUSE_POS_X,
 	MOUSE_POS_Y,
@@ -45,8 +76,6 @@ enum class InputKey {
 	GAMEPAD_DPAD_RIGHT,
 	GAMEPAD_GUIDE,
 
-	//write all the buttons in style ""GAMEPAD_BUTTON_"" + button name
-
 };
 
 enum class InputSource { KEYBOARD, MOUSE, GAMEPAD, UNKNOWN };
@@ -54,6 +83,7 @@ enum class InputSource { KEYBOARD, MOUSE, GAMEPAD, UNKNOWN };
 struct InputAction {
 	std::string action_name;
 	float scale{ 1.f };
+	[[maybe_unused]] float deadzone {0.1f};
 };
 
 InputSource get_input_source_from_key(InputKey key);
