@@ -56,10 +56,7 @@ public:
 	float get_mouse_x();
 	float get_mouse_y();
 
-
 	float get_gamepad_action_value(int gamepad_index, const std::string &action_name);
-
-
 
 	int *get_all_gamepads();
 };

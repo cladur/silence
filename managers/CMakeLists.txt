@@ -48,4 +48,4 @@ target_link_libraries(${ECS_MANAGER_NAME} PRIVATE silence_core)
 target_link_libraries(${RENDER_MANAGER_NAME} PUBLIC silence_core)
 target_link_libraries(${RENDER_MANAGER_NAME} PUBLIC ${ECS_MANAGER_NAME})
 
-target_link_libraries(${DISPLAY_SERVER_NAME} PRIVATE silence_core)
+target_link_libraries(${DISPLAY_MANAGER_NAME} PRIVATE silence_core)

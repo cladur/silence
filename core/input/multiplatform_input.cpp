@@ -154,16 +154,15 @@ std::unordered_map<InputKey, InputDeviceState> MultiplatformInput::get_gamepad_s
 	return gamepad_state;
 }
 void MultiplatformInput::update_mouse_position(GLFWwindow *window) {
+	// Set movement
+	float last_x = mouse_state[InputKey::MOUSE_POS_X].value;
+	float last_y = mouse_state[InputKey::MOUSE_POS_Y].value;
 
-// Set movement
-float last_x = mouse_state[InputKey::MOUSE_POS_X].value;
-float last_y = mouse_state[InputKey::MOUSE_POS_Y].value;
+	double x, y;
+	glfwGetCursorPos(window, &x, &y);
 
-double x, y;
-glfwGetCursorPos(window, &x, &y);
-
-mouse_state[InputKey::MOUSE_X].value = static_cast<float>(x) - last_x;
-mouse_state[InputKey::MOUSE_Y].value = static_cast<float>(y) - last_y;
-mouse_state[InputKey::MOUSE_POS_X].value = static_cast<float>(x);
-mouse_state[InputKey::MOUSE_POS_Y].value = static_cast<float>(y);
+	mouse_state[InputKey::MOUSE_X].value = static_cast<float>(x) - last_x;
+	mouse_state[InputKey::MOUSE_Y].value = static_cast<float>(y) - last_y;
+	mouse_state[InputKey::MOUSE_POS_X].value = static_cast<float>(x);
+	mouse_state[InputKey::MOUSE_POS_Y].value = static_cast<float>(y);
 }

@@ -2,13 +2,13 @@
 #include "ecs/parent_manager.h"
 #include "render_manager.h"
 
+#include "../core/input/input_manager.h"
+#include "../core/input/multiplatform_input.h"
 #include "components/gravity_component.h"
 #include "components/rigidbody_component.h"
 #include "components/state_component.h"
 #include "components/transform_component.h"
 #include "ecs/ecs_manager.h"
-#include "../core/input/input_manager.h"
-#include "../core/input/multiplatform_input.h"
 
 #include "magic_enum.hpp"
 #include "spdlog/spdlog.h"
@@ -56,14 +56,16 @@ std::shared_ptr<PhysicsSystem> default_physics_system_init() {
 	return physics_system;
 }
 
-void default_mappings(){
+void default_mappings() {
 	input_manager->map_input_to_action(InputKey::W, InputAction{ .action_name = "Forward", .scale = 1.f });
 	input_manager->map_input_to_action(InputKey::S, InputAction{ .action_name = "Backward", .scale = -1.f });
 	input_manager->map_input_to_action(InputKey::A, InputAction{ .action_name = "Left", .scale = -1.f });
 	input_manager->map_input_to_action(InputKey::D, InputAction{ .action_name = "Right", .scale = 1.f });
 	input_manager->map_input_to_action(InputKey::MOUSE_LEFT, InputAction{ .action_name = "MouseClick", .scale = 1.f });
-	input_manager->map_input_to_action(InputKey::L_STICK_X, InputAction{ .action_name = "LAxisX", .scale = 1.f, .deadzone = 0.1f });
-	input_manager->map_input_to_action(InputKey::L_STICK_Y, InputAction{ .action_name = "LAxisY", .scale = 1.f, .deadzone = 0.1f });
+	input_manager->map_input_to_action(
+			InputKey::L_STICK_X, InputAction{ .action_name = "LAxisX", .scale = 1.f, .deadzone = 0.1f });
+	input_manager->map_input_to_action(
+			InputKey::L_STICK_Y, InputAction{ .action_name = "LAxisY", .scale = 1.f, .deadzone = 0.1f });
 }
 
 std::shared_ptr<RenderSystem> default_render_system_init() {
@@ -169,7 +171,15 @@ void setup_imgui_style() {
 int main() {
 	SPDLOG_INFO("Starting up engine systems...");
 
-	if (!display_manager_init() || !render_manager_init()) {
+	if (!display_manager_init()) {
+		return -1;
+	}
+
+	//InputManager setup
+	input_manager = new InputManager;
+	display_manager.setup_input();
+
+	if (!render_manager_init()) {
 		return -1;
 	}
 
@@ -198,10 +208,6 @@ int main() {
 
 	// ECS -----------------------------------------
 
-	//InputManager setup
-	input_manager = new InputManager;
-	display_manager.setup_input();
-
 	//Map inputs
 	default_mappings();
 
@@ -221,12 +227,16 @@ int main() {
 		display_manager.poll_events();
 		input_manager->process_input();
 
-		//SPDLOG_INFO(input_manager->get_axis("Left","Right"));
+		if ((bool)input_manager->get_action_value("MouseClick")) {
+			SPDLOG_INFO("Clicked");
+		}
 
 		//imgui new frame
 		ImGui_ImplVulkan_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
+
+		input_manager->process_input();
 
 		ImGui::Begin("Settings");
 

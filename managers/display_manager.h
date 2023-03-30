@@ -31,9 +31,9 @@ public:
 
 	VkSurfaceKHR create_surface(VkInstance &instance) const;
 
-	std::pair<int, int> get_framebuffer_size() const;
+	[[nodiscard]] std::pair<int, int> get_framebuffer_size() const;
 	void poll_events();
-	bool window_should_close() const;
+	[[nodiscard]] bool window_should_close() const;
 };
 
 #endif //SILENCE_DISPLAY_MANAGER_H
