@@ -188,8 +188,10 @@ int main() {
 	float dt{};
 	bool show_ecs_logs = false;
 	bool show_demo_window = false;
+	bool physics_system_enabled = false;
 	int imgui_children_id = 1;
 	int imgui_entity_id = 1;
+
 
 	bool should_run = true;
 	while (should_run) {
@@ -209,6 +211,8 @@ int main() {
 		ImGui::Checkbox("Show console ecs logs", &show_ecs_logs);
 
 		ImGui::Checkbox("Show demo window", &show_demo_window);
+
+		ImGui::Checkbox("Physics system", &physics_system_enabled);
 
 		if (show_demo_window) {
 			ImGui::ShowDemoWindow();
@@ -231,7 +235,10 @@ int main() {
 			should_run = false;
 		}
 
-		physics_system->update(dt);
+		if (physics_system_enabled) {
+			physics_system->update(dt);
+		}
+
 		parent_system->update();
 		render_system->update(render_manager);
 
