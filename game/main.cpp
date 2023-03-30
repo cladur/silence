@@ -168,19 +168,36 @@ int main() {
 	auto parent_system = default_parent_system_init();
 	auto render_system = default_render_system_init();
 
-	std::vector<Entity> entities(50);
-	demo_entities_init(entities);
+	std::vector<Entity> entities(2);
+	//demo_entities_init(entities);
 
-	{
-		// Single textured box in the middle
+	Entity entity1 = ecs_manager.create_entity();
+	Entity entity2 = ecs_manager.create_entity();
 
-		Entity entity = ecs_manager.create_entity();
+	ecs_manager.add_component(entity1,
+			Transform{ glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f) });
+	ecs_manager.add_component(entity2,
+			Transform{ glm::vec3(5.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f) });
+	ecs_manager.add_component(
+			entity1, MeshInstance{ render_manager.get_mesh("box"), render_manager.get_material("textured_mesh") });
 
-		ecs_manager.add_component(entity,
-				Transform{ glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 45.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f) });
-		ecs_manager.add_component(
-				entity, MeshInstance{ render_manager.get_mesh("box"), render_manager.get_material("textured_mesh") });
-	}
+	ecs_manager.add_component(
+			entity2, MeshInstance{ render_manager.get_mesh("box"), render_manager.get_material("textured_mesh") });
+
+	ecs_manager.add_component(entity1, Gravity{ glm::vec3(0.0f, -25.0f, 0.0f) });
+	ecs_manager.add_component(
+			entity1, RigidBody{ .velocity = glm::vec3(0.0f, 0.0f, 0.0f), .acceleration = glm::vec3(0.0f, 0.0f, 0.0f) });
+	//	{
+	//		// Single textured box in the middle
+	//
+	//		Entity entity = ecs_manager.create_entity();
+	//
+	//		ecs_manager.add_component(entity,
+	//				Transform{ glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 45.0f, 0.0f),
+	//glm::vec3(1.0f, 1.0f, 1.0f)
+	//}); 		ecs_manager.add_component( 				entity, MeshInstance{ render_manager.get_mesh("box"),
+	//render_manager.get_material("textured_mesh") });
+	//	}
 
 	// ECS -----------------------------------------
 
@@ -191,7 +208,6 @@ int main() {
 	bool physics_system_enabled = false;
 	int imgui_children_id = 1;
 	int imgui_entity_id = 1;
-
 
 	bool should_run = true;
 	while (should_run) {
@@ -235,11 +251,12 @@ int main() {
 			should_run = false;
 		}
 
+		parent_system->update();
+
 		if (physics_system_enabled) {
 			physics_system->update(dt);
 		}
 
-		parent_system->update();
 		render_system->update(render_manager);
 
 		auto stop_time = std::chrono::high_resolution_clock::now();

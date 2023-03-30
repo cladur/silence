@@ -8,6 +8,6 @@ void IsolatedEntitiesSystem::startup() {
 }
 void IsolatedEntitiesSystem::update() {
 	for (auto const &entity : entities) {
-		ecs_manager.get_component<Transform>(entity).get_local_model_matrix();
+		ecs_manager.get_component<Transform>(entity).update_global_model_matrix();
 	}
 }
