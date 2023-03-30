@@ -31,7 +31,7 @@ public:
 
 	VkSurfaceKHR create_surface(VkInstance &instance) const;
 
-	std::pair<int, int> get_window_size() const;
+	std::pair<int, int> get_framebuffer_size() const;
 	void poll_events();
 	bool window_should_close() const;
 };

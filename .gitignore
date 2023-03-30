@@ -4,3 +4,13 @@ cmake-build-debug
 
 # Mac stuff
 .DS_Store
+build_xcode
+
+.vscode
+.cache
+CMakeFiles
+build
+
+# SPIRV files
+*.spv
+imgui.ini

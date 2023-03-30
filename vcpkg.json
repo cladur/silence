@@ -1,20 +1,53 @@
 {
-  "name" : "silence",
-  "version-string" : "1.0.0",
-  "builtin-baseline" : "464f782e269afe54243b156e5b240c11f7d2d7f3",
-  "dependencies" : [ {
-    "name" : "spdlog",
-    "version>=" : "1.11.0",
-    "$comment" : "    # this is heuristically generated, and may not be correct\n\n    find_package(spdlog CONFIG REQUIRED)\n\n    target_link_libraries(main PRIVATE spdlog::spdlog spdlog::spdlog_header_only)\n"
-  }, {
-    "name" : "glfw3",
-    "version>=" : "3.3.8#2"
-  }, {
-    "name" : "magic-enum",
-    "version>=" : "0.8.2",
-    "$comment" : "    # this is heuristically generated, and may not be correct\n\n    find_package(magic_enum CONFIG REQUIRED)\n\n    target_link_libraries(main PRIVATE magic_enum::magic_enum)\n"
-  }, {
-    "name" : "vulkan-hpp",
-    "version>=" : "1.3.231#1"
-  } ]
+  "name": "silence",
+  "version-string": "1.0.0",
+  "builtin-baseline": "464f782e269afe54243b156e5b240c11f7d2d7f3",
+  "dependencies": [
+    {
+      "name": "spdlog",
+      "version>=": "1.11.0",
+      "$comment": "    # this is heuristically generated, and may not be correct\n\n    find_package(spdlog CONFIG REQUIRED)\n\n    target_link_libraries(main PRIVATE spdlog::spdlog spdlog::spdlog_header_only)\n"
+    },
+    {
+      "name": "glfw3",
+      "version>=": "3.3.8#2"
+    },
+    {
+      "name": "magic-enum",
+      "version>=": "0.8.2",
+      "$comment": "    # this is heuristically generated, and may not be correct\n\n    find_package(magic_enum CONFIG REQUIRED)\n\n    target_link_libraries(main PRIVATE magic_enum::magic_enum)\n"
+    },
+    {
+      "name": "vulkan-hpp",
+      "version>=": "1.3.231#1"
+    },
+    {
+      "name": "vulkan-memory-allocator-hpp",
+      "version>=": "3.0.1",
+      "$comment": "    # this is heuristically generated, and may not be correct\n\n    find_package(unofficial-vulkan-memory-allocator-hpp CONFIG REQUIRED)\n\n    target_link_libraries(main PRIVATE unofficial::VulkanMemoryAllocator-Hpp::VulkanMemoryAllocator-Hpp)\n"
+    },
+    {
+      "name": "glm",
+      "version>=": "0.9.9.8#2",
+      "$comment": "    # this is heuristically generated, and may not be correct\n\n    find_package(glm CONFIG REQUIRED)\n\n    target_link_libraries(main PRIVATE glm::glm)\n"
+    },
+    {
+      "name": "vulkan-memory-allocator",
+      "version>=": "3.0.1",
+      "$comment": "    # this is heuristically generated, and may not be correct\n\n    find_package(unofficial-vulkan-memory-allocator CONFIG REQUIRED)\n\n    target_link_libraries(main PRIVATE unofficial::vulkan-memory-allocator::vulkan-memory-allocator)\n"
+    },
+    {
+      "name": "tinygltf",
+      "version>=": "2.8.4"
+    },
+    {
+      "name": "imgui",
+      "version>=": "1.89.3",
+      "features": [
+        "docking-experimental",
+        "glfw-binding",
+        "vulkan-binding"
+      ]
+    }
+  ]
 }
