@@ -11,8 +11,6 @@
 #include "spdlog/spdlog.h"
 #include "systems/physics_system.h"
 
-#include "ai/state_machine/states/test_state.h"
-
 #include <random>
 
 #include "components/children_component.h"
@@ -20,6 +18,7 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_vulkan.h"
+#include "rendering/render_system.h"
 #include "systems/parent_system.h"
 #include "types.h"
 
@@ -36,6 +35,7 @@ void default_ecs_manager_init() {
 	ecs_manager.register_component<Parent>();
 	ecs_manager.register_component<Children>();
 	ecs_manager.register_component<State>();
+	ecs_manager.register_component<MeshInstance>();
 }
 
 std::shared_ptr<PhysicsSystem> default_physics_system_init() {
@@ -46,13 +46,23 @@ std::shared_ptr<PhysicsSystem> default_physics_system_init() {
 	signature.set(ecs_manager.get_component_type<RigidBody>());
 	signature.set(ecs_manager.get_component_type<Transform>());
 	ecs_manager.set_system_component_whitelist<PhysicsSystem>(signature);
-	signature.reset();
-	signature.set(ecs_manager.get_component_type<Gravity>());
-	ecs_manager.set_system_component_blacklist<PhysicsSystem>(signature);
 
 	physics_system->startup();
 
 	return physics_system;
+}
+
+std::shared_ptr<RenderSystem> default_render_system_init() {
+	auto render_system = ecs_manager.register_system<RenderSystem>();
+
+	Signature signature;
+	signature.set(ecs_manager.get_component_type<Transform>());
+	signature.set(ecs_manager.get_component_type<MeshInstance>());
+	ecs_manager.set_system_component_whitelist<RenderSystem>(signature);
+
+	render_system->startup();
+
+	return render_system;
 }
 
 std::shared_ptr<ParentSystem> default_parent_system_init() {
@@ -65,11 +75,11 @@ std::shared_ptr<ParentSystem> default_parent_system_init() {
 
 void demo_entities_init(std::vector<Entity> entities) {
 	std::default_random_engine random_generator; // NOLINT(cert-msc51-cpp)
-	std::uniform_real_distribution<float> rand_position(-100.0f, 100.0f);
+	std::uniform_real_distribution<float> rand_position(-40.0f, 40.0f);
 	std::uniform_real_distribution<float> rand_rotation(0.0f, 3.0f);
 	std::uniform_real_distribution<float> rand_scale(3.0f, 5.0f);
 	std::uniform_real_distribution<float> rand_color(0.0f, 1.0f);
-	std::uniform_real_distribution<float> rand_gravity(-10.0f, -1.0f);
+	std::uniform_real_distribution<float> rand_gravity(-30.0f, -10.0f);
 
 	float scale = rand_scale(random_generator);
 
@@ -82,11 +92,14 @@ void demo_entities_init(std::vector<Entity> entities) {
 				RigidBody{ .velocity = glm::vec3(0.0f, 0.0f, 0.0f), .acceleration = glm::vec3(0.0f, 0.0f, 0.0f) });
 
 		ecs_manager.add_component(entity,
-				Transform{ glm::vec3(rand_position(random_generator), rand_position(random_generator),
+				Transform{ glm::vec3(rand_position(random_generator), rand_position(random_generator) + 40.0f,
 								   rand_position(random_generator)),
 						glm::vec3(rand_rotation(random_generator), rand_rotation(random_generator),
 								rand_rotation(random_generator)),
 						glm::vec3(scale, scale, scale) });
+
+		ecs_manager.add_component<MeshInstance>(
+				entity, { render_manager.get_mesh("box"), render_manager.get_material("default_mesh") });
 	}
 }
 
@@ -153,9 +166,21 @@ int main() {
 	default_ecs_manager_init();
 	auto physics_system = default_physics_system_init();
 	auto parent_system = default_parent_system_init();
+	auto render_system = default_render_system_init();
 
 	std::vector<Entity> entities(50);
 	demo_entities_init(entities);
+
+	{
+		// Single textured box in the middle
+
+		Entity entity = ecs_manager.create_entity();
+
+		ecs_manager.add_component(entity,
+				Transform{ glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 45.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f) });
+		ecs_manager.add_component(
+				entity, MeshInstance{ render_manager.get_mesh("box"), render_manager.get_material("textured_mesh") });
+	}
 
 	// ECS -----------------------------------------
 
@@ -177,7 +202,6 @@ int main() {
 		//imgui new frame
 		ImGui_ImplVulkan_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
-
 		ImGui::NewFrame();
 
 		ImGui::Begin("Settings");
@@ -209,6 +233,7 @@ int main() {
 
 		physics_system->update(dt);
 		parent_system->update();
+		render_system->update(render_manager);
 
 		auto stop_time = std::chrono::high_resolution_clock::now();
 

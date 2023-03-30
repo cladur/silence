@@ -75,6 +75,11 @@ struct RenderObject {
 	glm::mat4 transform_matrix;
 };
 
+struct MeshInstance {
+	Mesh *mesh;
+	Material *material;
+};
+
 struct GPUCameraData {
 	glm::mat4 view;
 	glm::mat4 proj;
@@ -139,7 +144,7 @@ class RenderManager {
 
 	// MESHES
 	Mesh triangle_mesh;
-	Mesh monkey_mesh;
+	Mesh box_mesh;
 
 	// DEPTH
 	vk::ImageView depth_image_view;
@@ -208,7 +213,7 @@ public:
 	//getter for the frame we are rendering to right now.
 	FrameData &get_current_frame();
 
-	AllocatedBuffer create_buffer(size_t alloc_size, vk::BufferUsageFlags usage, vma::MemoryUsage memory_usage);
+	AllocatedBuffer create_buffer(size_t alloc_size, vk::BufferUsageFlags usage, vma::MemoryUsage memory_usage) const;
 	void immediate_submit(std::function<void(vk::CommandBuffer cmd)> &&function);
 
 	//create material and add it to the map

@@ -501,10 +501,13 @@ void RenderManager::init_pipelines() {
 	pipeline_builder.input_assembly = vk_init::input_assembly_create_info(vk::PrimitiveTopology::eTriangleList);
 
 	//build viewport and scissor from the swapchain extents
+
+	// We flip the viewport's y-axis to match other's APIs coordinate system
+	// https://www.saschawillems.de/blog/2019/03/29/flipping-the-vulkan-viewport/
 	pipeline_builder.viewport.x = 0.0f;
-	pipeline_builder.viewport.y = 0.0f;
+	pipeline_builder.viewport.y = (float)window_extent.height;
 	pipeline_builder.viewport.width = (float)window_extent.width;
-	pipeline_builder.viewport.height = (float)window_extent.height;
+	pipeline_builder.viewport.height = -(float)window_extent.height;
 	pipeline_builder.viewport.minDepth = 0.0f;
 	pipeline_builder.viewport.maxDepth = 1.0f;
 
@@ -606,13 +609,13 @@ void RenderManager::init_pipelines() {
 }
 
 void RenderManager::init_scene() {
-	RenderObject monkey = {};
-	monkey.mesh = get_mesh("monkey");
-	monkey.material = get_material("textured_mesh");
+	RenderObject box = {};
+	box.mesh = get_mesh("box");
+	box.material = get_material("textured_mesh");
 	glm::mat4 rotation = glm::rotate(glm::mat4{ 1.0 }, glm::radians(45.0f), glm::vec3(0, 1, 0));
-	monkey.transform_matrix = glm::mat4{ 1.0f } * rotation;
+	box.transform_matrix = glm::mat4{ 1.0f } * rotation;
 
-	renderables.push_back(monkey);
+	renderables.push_back(box);
 
 	for (int x = -20; x <= 20; x++) {
 		for (int y = -20; y <= 20; y++) {
@@ -784,13 +787,13 @@ void RenderManager::load_meshes() {
 
 	//we don't care about the vertex normals
 
-	monkey_mesh.load_from_gltf("resources/models/BoxTextured.gltf");
+	box_mesh.load_from_gltf("resources/models/BoxTextured.gltf");
 
 	upload_mesh(triangle_mesh);
-	upload_mesh(monkey_mesh);
+	upload_mesh(box_mesh);
 
 	meshes["triangle"] = triangle_mesh;
-	meshes["monkey"] = monkey_mesh;
+	meshes["box"] = box_mesh;
 }
 
 void RenderManager::upload_mesh(Mesh &mesh) {
@@ -885,7 +888,7 @@ void RenderManager::upload_mesh(Mesh &mesh) {
 }
 
 AllocatedBuffer RenderManager::create_buffer(
-		size_t alloc_size, vk::BufferUsageFlags usage, vma::MemoryUsage memory_usage) {
+		size_t alloc_size, vk::BufferUsageFlags usage, vma::MemoryUsage memory_usage) const {
 	//allocate vertex buffer
 	vk::BufferCreateInfo buffer_info = {};
 	buffer_info.sType = vk::StructureType::eBufferCreateInfo;
@@ -1021,8 +1024,6 @@ void RenderManager::load_images() {
 }
 
 void RenderManager::draw() {
-	ImGui::Render();
-
 	//wait until the GPU has finished rendering the last frame. Timeout of 1 second
 	VK_CHECK(device.waitForFences(1, &get_current_frame().render_fence, true, 1000000000));
 	VK_CHECK(device.resetFences(1, &get_current_frame().render_fence));
@@ -1082,6 +1083,8 @@ void RenderManager::draw() {
 
 	draw_objects(cmd, renderables.data(), (int)renderables.size());
 
+	ImGui::Render();
+
 	ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmd);
 
 	cmd.endRenderPass();
@@ -1138,12 +1141,32 @@ void RenderManager::draw_objects(vk::CommandBuffer cmd, RenderObject *first, int
 
 	//make a model view matrix for rendering the object
 	//camera view
-	glm::vec3 cam_pos = { 0.f, 3.f, -10.f };
+	static glm::vec3 cam_pos = { 0.f, 0.f, -25.f };
 
-	glm::mat4 view = glm::translate(glm::mat4(1.f), cam_pos);
+	static float fov = 60.f;
+
+	static float pitch = 0.f;
+	static float yaw = 0.f;
+
+	glm::vec3 final_cam_pos = cam_pos;
+	final_cam_pos.y *= -1.f;
+
+	glm::mat4 view = glm::translate(glm::mat4(1.f), final_cam_pos) *
+			glm::rotate(glm::mat4(1.f), pitch, glm::vec3(1, 0, 0)) *
+			glm::rotate(glm::mat4(1.f), yaw, glm::vec3(0, 1, 0));
 	//camera projection
-	float aspect = (float)window_extent.width / (float)window_extent.height;
-	glm::mat4 projection = glm::perspective(glm::radians(70.f), aspect, 0.1f, 200.0f);
+	static float aspect = (float)window_extent.width / (float)window_extent.height;
+	glm::mat4 projection = glm::perspective(glm::radians(fov), aspect, 0.1f, 200.0f);
+
+	float pi = 3.14f;
+
+	ImGui::Begin("Camera");
+	ImGui::SliderFloat("Y", &cam_pos.y, -50, 50);
+	ImGui::SliderFloat("Z", &cam_pos.z, -100, -2);
+	ImGui::SliderFloat("Pitch", &pitch, -pi, pi);
+	ImGui::SliderFloat("Yaw", &yaw, -pi, pi);
+	ImGui::SliderFloat("FOV", &fov, 30, 120);
+	ImGui::End();
 
 	//fill a GPU camera data struct
 	GPUCameraData cam_data = {};
