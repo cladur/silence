@@ -168,36 +168,28 @@ int main() {
 	auto parent_system = default_parent_system_init();
 	auto render_system = default_render_system_init();
 
-	std::vector<Entity> entities(2);
-	//demo_entities_init(entities);
+	std::vector<Entity> entities(50);
+	demo_entities_init(entities);
 
-	Entity entity1 = ecs_manager.create_entity();
-	Entity entity2 = ecs_manager.create_entity();
+	Entity parent = ecs_manager.create_entity();
+	{
+		// Single textured box in the middle
 
-	ecs_manager.add_component(entity1,
-			Transform{ glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f) });
-	ecs_manager.add_component(entity2,
-			Transform{ glm::vec3(5.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f) });
-	ecs_manager.add_component(
-			entity1, MeshInstance{ render_manager.get_mesh("box"), render_manager.get_material("textured_mesh") });
+		ecs_manager.add_component(parent,
+				Transform{ glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 45.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f) });
+		ecs_manager.add_component(
+				parent, MeshInstance{ render_manager.get_mesh("box"), render_manager.get_material("textured_mesh") });
 
-	ecs_manager.add_component(
-			entity2, MeshInstance{ render_manager.get_mesh("box"), render_manager.get_material("textured_mesh") });
+		Entity child = ecs_manager.create_entity();
 
-	ecs_manager.add_component(entity1, Gravity{ glm::vec3(0.0f, -25.0f, 0.0f) });
-	ecs_manager.add_component(
-			entity1, RigidBody{ .velocity = glm::vec3(0.0f, 0.0f, 0.0f), .acceleration = glm::vec3(0.0f, 0.0f, 0.0f) });
-	//	{
-	//		// Single textured box in the middle
-	//
-	//		Entity entity = ecs_manager.create_entity();
-	//
-	//		ecs_manager.add_component(entity,
-	//				Transform{ glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 45.0f, 0.0f),
-	//glm::vec3(1.0f, 1.0f, 1.0f)
-	//}); 		ecs_manager.add_component( 				entity, MeshInstance{ render_manager.get_mesh("box"),
-	//render_manager.get_material("textured_mesh") });
-	//	}
+		ecs_manager.add_component(child,
+				Transform{ glm::vec3(0.0f, 5.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.5f, 0.5f, 0.5f) });
+
+		ecs_manager.add_component(
+				child, MeshInstance{ render_manager.get_mesh("box"), render_manager.get_material("textured_mesh") });
+
+		ParentManager::add_child(parent, child);
+	}
 
 	// ECS -----------------------------------------
 
@@ -224,6 +216,11 @@ int main() {
 
 		ImGui::Begin("Settings");
 
+		if (ImGui::Button("AAA")) {
+			Transform &trans = ecs_manager.get_component<Transform>(parent);
+			trans.add_euler_rot(glm::vec3(0.0f, 0.0f, 5.0f));
+		}
+
 		ImGui::Checkbox("Show console ecs logs", &show_ecs_logs);
 
 		ImGui::Checkbox("Show demo window", &show_demo_window);
@@ -238,11 +235,11 @@ int main() {
 		ImGui::DragInt("Children Id", &imgui_children_id, 1, 1, MAX_IMGUI_ENTITIES);
 
 		if (ImGui::Button("Add child")) {
-			ParentManager::add_children(imgui_entity_id, imgui_children_id);
+			ParentManager::add_child(imgui_entity_id, imgui_children_id);
 		}
 
 		if (ImGui::Button("Remove child")) {
-			ParentManager::remove_children(imgui_entity_id, imgui_children_id);
+			ParentManager::remove_child(imgui_entity_id, imgui_children_id);
 		}
 
 		ImGui::End();
@@ -251,12 +248,11 @@ int main() {
 			should_run = false;
 		}
 
-		parent_system->update();
-
 		if (physics_system_enabled) {
 			physics_system->update(dt);
 		}
 
+		parent_system->update();
 		render_system->update(render_manager);
 
 		auto stop_time = std::chrono::high_resolution_clock::now();

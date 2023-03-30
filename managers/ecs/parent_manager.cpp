@@ -6,7 +6,7 @@
 
 extern ECSManager ecs_manager;
 
-bool ParentManager::add_children(Entity parent, Entity child) {
+bool ParentManager::add_child(Entity parent, Entity child) {
 	if (child == parent) {
 		SPDLOG_ERROR("Parent and children are the same entity");
 		return false;
@@ -23,7 +23,7 @@ bool ParentManager::add_children(Entity parent, Entity child) {
 	return ecs_manager.get_component<Children>(parent).add_children(child);
 }
 
-bool ParentManager::remove_children(Entity parent, Entity child) {
+bool ParentManager::remove_child(Entity parent, Entity child) {
 	if (!ecs_manager.has_component<Children>(parent)) {
 		SPDLOG_ERROR("No children component found on parent");
 		return false;
