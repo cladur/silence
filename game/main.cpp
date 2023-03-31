@@ -4,7 +4,6 @@
 
 #include "components/gravity_component.h"
 #include "components/rigidbody_component.h"
-#include "components/state_component.h"
 #include "components/transform_component.h"
 #include "ecs/ecs_manager.h"
 #include "magic_enum.hpp"
@@ -19,6 +18,8 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_vulkan.h"
 #include "rendering/render_system.h"
+#include "state_machine/state_machine.h"
+#include "state_machine/states/test_state.h"
 #include "systems/parent_system.h"
 #include "types.h"
 
@@ -34,7 +35,6 @@ void default_ecs_manager_init() {
 	ecs_manager.register_component<Gravity>();
 	ecs_manager.register_component<Parent>();
 	ecs_manager.register_component<Children>();
-	ecs_manager.register_component<State>();
 	ecs_manager.register_component<MeshInstance>();
 }
 
@@ -178,6 +178,22 @@ int main() {
 	demo_entities_init(entities);
 
 	// ECS -----------------------------------------
+
+	// State machine test
+
+	StateMachine machine = StateMachine();
+	TestState test_state = TestState("one");
+	TestState test_state2 = TestState("two");
+	TestState test_state3 = TestState("three");
+
+	machine.add_state(&test_state);
+	machine.add_state(&test_state2);
+	machine.add_state(&test_state3);
+
+	machine.set_state("two");
+	machine.set_state("three");
+
+	// State machine test
 
 	// Run the game.
 	float dt{};
