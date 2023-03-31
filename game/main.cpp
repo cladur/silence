@@ -11,15 +11,21 @@
 #include "systems/physics_system.h"
 
 #include <random>
+#include <memory>
 
 #include "components/children_component.h"
 #include "components/parent_component.h"
+
+#include "behavior_tree/behavior_tree.h"
+#include "behavior_tree/behavior_tree_builder.h"
+#include "behavior_tree/composite_nodes/sequence_node.h"
+#include "behavior_tree/leaf_nodes/success_leaf.h"
+#include "behavior_tree/leaf_nodes/failure_leaf.h"
+
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_vulkan.h"
 #include "rendering/render_system.h"
-#include "state_machine/state_machine.h"
-#include "state_machine/states/test_state.h"
 #include "systems/parent_system.h"
 #include "types.h"
 
@@ -179,21 +185,28 @@ int main() {
 
 	// ECS -----------------------------------------
 
-	// State machine test
+	// BEHAVIOR TREE TEST --------------------------
 
-	StateMachine machine = StateMachine();
-	TestState test_state = TestState("one");
-	TestState test_state2 = TestState("two");
-	TestState test_state3 = TestState("three");
+	std::shared_ptr<BehaviorTree> bt =
+			BehaviorTreeBuilder()
+					.composite<SequenceNode>("sequence")
+					        .leaf<SuccessLeaf>("success1")
+					        .leaf<SuccessLeaf>("success3")
+							.leaf<SuccessLeaf>("success2")
+			.end()
+	.build();
 
-	machine.add_state(&test_state);
-	machine.add_state(&test_state2);
-	machine.add_state(&test_state3);
+	SPDLOG_INFO("\n\n\nBEHAVIOR TREE SEQUENCE TEST\n");
+	bt->update(0.1);
+	bt->update(0.1);
+	bt->update(0.1);
+	bt->update(0.1);
+	bt->update(0.1);
+	bt->update(0.1);
 
-	machine.set_state("two");
-	machine.set_state("three");
 
-	// State machine test
+	SPDLOG_INFO("\nBEHAVIOR TREE SEQUENCE TEST\n\n\n");
+	// BEHAVIOR TREE TEST --------------------------
 
 	// Run the game.
 	float dt{};

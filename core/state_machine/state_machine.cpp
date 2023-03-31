@@ -9,12 +9,6 @@ void StateMachine::update(float dt) {
 	current_state->update(dt);
 }
 
-/*
- * Add a state to the state machine and assign this as its machine.
- * If the state machine is empty, set the current state to the new state.
- * If the state machine already contains the new state, do nothing.
- *
- */
 void StateMachine::add_state(State *new_state) {
 	if (states.empty()) {
 		current_state = new_state;
@@ -27,10 +21,6 @@ void StateMachine::add_state(State *new_state) {
 	states.push_back(new_state);
 }
 
-/*
- * Set the current state to the state with the given name.
- * If the state machine does not contain a state with the given name, do nothing.
- */
 void StateMachine::set_state(std::string state_name) {
 	// check for existence of state with given name
 	auto found = find_if (
