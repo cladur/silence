@@ -12,26 +12,11 @@ private:
 	std::unique_ptr<SystemManager> system_manager;
 
 public:
-	void startup() {
-		// Create pointers to each manager
-		component_manager = std::make_unique<ComponentManager>();
-		entity_manager = std::make_unique<EntityManager>();
-		entity_manager->startup();
-		system_manager = std::make_unique<SystemManager>();
-	}
+	void startup();
 
 	// Entity methods
-	Entity create_entity() {
-		return entity_manager->create_entity();
-	}
-
-	void destroy_entity(Entity entity) {
-		entity_manager->destroy_entity(entity);
-
-		component_manager->entity_destroyed(entity);
-
-		system_manager->entity_destroyed(entity);
-	}
+	Entity create_entity();
+	void destroy_entity(Entity entity);
 
 	// Component methods
 	template <typename T> void register_component() {
@@ -82,6 +67,10 @@ public:
 	template <typename T> void set_system_component_blacklist(Signature signature) {
 		system_manager->set_component_blacklist<T>(signature);
 	}
+
+	// Specific parent system methods
+	bool add_child(Entity parent, Entity child);
+	bool remove_child(Entity parent, Entity child);
 };
 
 #endif //SILENCE_ECSMANAGER_H

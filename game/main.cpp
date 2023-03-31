@@ -12,7 +12,6 @@
 #include "systems/physics_system.h"
 
 #include "ecs/ecs_manager.h"
-#include "ecs/parent_manager.h"
 
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_vulkan.h"
@@ -212,11 +211,11 @@ int main() {
 		ImGui::DragInt("Children Id", &imgui_children_id, 1, 1, max_imgui_entities);
 
 		if (ImGui::Button("Add child")) {
-			ParentManager::add_child(imgui_entity_id, imgui_children_id);
+			ecs_manager.add_child(imgui_entity_id, imgui_children_id);
 		}
 
 		if (ImGui::Button("Remove child")) {
-			ParentManager::remove_child(imgui_entity_id, imgui_children_id);
+			ecs_manager.remove_child(imgui_entity_id, imgui_children_id);
 		}
 
 		if (ImGui::Button("Destroy all entities")) {

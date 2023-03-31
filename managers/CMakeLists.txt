@@ -21,10 +21,8 @@ add_library(${ECS_MANAGER_NAME} STATIC
         ecs/entity_manager.cpp ecs/entity_manager.h
         ecs/component_array.h ecs/component_array_interface.h
         ecs/component_manager.h
-        ecs/parent_manager.cpp ecs/parent_manager.h
-        ecs/parent_manager.cpp ecs/parent_manager.h
         ecs/system_manager.h
-        ecs/ecs_manager.h
+        ecs/ecs_manager.cpp ecs/ecs_manager.h
         systems/base_system.h
         systems/physics_system.cpp systems/physics_system.h
         systems/parent_system.cpp systems/parent_system.h
