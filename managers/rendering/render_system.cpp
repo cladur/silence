@@ -7,6 +7,10 @@
 extern ECSManager ecs_manager;
 
 void RenderSystem::startup() {
+	Signature signature;
+	signature.set(ecs_manager.get_component_type<Transform>());
+	signature.set(ecs_manager.get_component_type<MeshInstance>());
+	ecs_manager.set_system_component_whitelist<RenderSystem>(signature);
 }
 
 void RenderSystem::update(RenderManager &render_manager) {

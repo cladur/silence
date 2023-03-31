@@ -7,7 +7,13 @@
 extern ECSManager ecs_manager;
 
 void PhysicsSystem::startup() {
+	Signature signature;
+	signature.set(ecs_manager.get_component_type<Gravity>());
+	signature.set(ecs_manager.get_component_type<RigidBody>());
+	signature.set(ecs_manager.get_component_type<Transform>());
+	ecs_manager.set_system_component_whitelist<PhysicsSystem>(signature);
 }
+
 void PhysicsSystem::update(float dt) {
 	for (auto const &entity : entities) {
 		auto &rigid_body = ecs_manager.get_component<RigidBody>(entity);

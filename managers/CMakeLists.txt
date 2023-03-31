@@ -36,13 +36,10 @@ target_include_directories(${DISPLAY_MANAGER_NAME} PUBLIC ${CMAKE_CURRENT_LIST_D
 target_include_directories(${ECS_MANAGER_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 
 # Dependencies
-find_package(spdlog CONFIG REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(Vulkan REQUIRED)
 find_package(unofficial-vulkan-memory-allocator CONFIG REQUIRED)
 find_package(unofficial-vulkan-memory-allocator-hpp CONFIG REQUIRED)
-find_package(glm CONFIG REQUIRED)
-find_package(imgui CONFIG REQUIRED)
 
 include(FetchContent)
 FetchContent_Declare(

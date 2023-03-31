@@ -31,41 +31,6 @@ void default_ecs_manager_init() {
 	ecs_manager.register_component<MeshInstance>();
 }
 
-std::shared_ptr<PhysicsSystem> default_physics_system_init() {
-	auto physics_system = ecs_manager.register_system<PhysicsSystem>();
-
-	Signature signature;
-	signature.set(ecs_manager.get_component_type<Gravity>());
-	signature.set(ecs_manager.get_component_type<RigidBody>());
-	signature.set(ecs_manager.get_component_type<Transform>());
-	ecs_manager.set_system_component_whitelist<PhysicsSystem>(signature);
-
-	physics_system->startup();
-
-	return physics_system;
-}
-
-std::shared_ptr<RenderSystem> default_render_system_init() {
-	auto render_system = ecs_manager.register_system<RenderSystem>();
-
-	Signature signature;
-	signature.set(ecs_manager.get_component_type<Transform>());
-	signature.set(ecs_manager.get_component_type<MeshInstance>());
-	ecs_manager.set_system_component_whitelist<RenderSystem>(signature);
-
-	render_system->startup();
-
-	return render_system;
-}
-
-std::shared_ptr<ParentSystem> default_parent_system_init() {
-	auto parent_system = ecs_manager.register_system<ParentSystem>();
-
-	parent_system->startup();
-
-	return parent_system;
-}
-
 void demo_entities_init(std::vector<Entity> &entities) {
 	std::default_random_engine random_generator; // NOLINT(cert-msc51-cpp)
 	std::uniform_real_distribution<float> rand_position(-40.0f, 40.0f);
@@ -163,9 +128,13 @@ int main() {
 	// ECS ----------------------------------------
 
 	default_ecs_manager_init();
-	auto physics_system = default_physics_system_init();
-	auto parent_system = default_parent_system_init();
-	auto render_system = default_render_system_init();
+	auto physics_system = ecs_manager.register_system<PhysicsSystem>();
+	auto parent_system = ecs_manager.register_system<ParentSystem>();
+	auto render_system = ecs_manager.register_system<RenderSystem>();
+
+	physics_system->startup();
+	parent_system->startup();
+	render_system->startup();
 
 	std::vector<Entity> entities(50);
 	demo_entities_init(entities);
