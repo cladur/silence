@@ -23,6 +23,7 @@
 #include "behavior_tree/leaf_nodes/failure_leaf.h"
 #include "behavior_tree/composite_nodes/selector_node.h"
 
+#include "behavior_tree/decorator_nodes/invert_node.h"
 #include "behavior_tree/decorator_nodes/repeater_node.h"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
@@ -210,7 +211,8 @@ int main() {
 	std::shared_ptr<BehaviorTree> bt_seq =
 				BehaviorTreeBuilder()
 						.decorator<RepeaterNode>("repeater", 3)
-								.leaf<SuccessLeaf>("success1")
+						        .decorator<InvertNode>("invert")
+						                .leaf<SuccessLeaf>("success1")
 				.end()
 		.build();
 

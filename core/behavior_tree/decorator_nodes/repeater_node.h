@@ -17,7 +17,7 @@ public:
 	}
 
 	void enter() override {
-		SPDLOG_INFO("entering repeater node, repeat count: {}", repeat_count);
+		//SPDLOG_INFO("entering repeater node, repeat count: {}", repeat_count);
 	}
 
 	ExecutionStatus update(float dt) override {
@@ -40,8 +40,13 @@ public:
 				}
 
 			case ExecutionStatus::FAILURE:
+				SPDLOG_INFO("repeater node failed, index reset, returning fail.");
 				return ExecutionStatus::FAILURE;
+
+			case ExecutionStatus::UNDEFINED:
+				return ExecutionStatus::UNDEFINED;
 		}
+		return ExecutionStatus::UNDEFINED;
 	}
 };
 
