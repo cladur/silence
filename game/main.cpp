@@ -1,27 +1,21 @@
 #include "display_manager.h"
-#include "ecs/parent_manager.h"
 #include "render_manager.h"
 
+#include "components/children_component.h"
 #include "components/gravity_component.h"
+#include "components/parent_component.h"
 #include "components/rigidbody_component.h"
 #include "components/transform_component.h"
-#include "ecs/ecs_manager.h"
-#include "magic_enum.hpp"
-#include "spdlog/spdlog.h"
-#include "systems/physics_system.h"
 
-#include <memory>
-#include <random>
-
-#include "components/children_component.h"
-#include "components/parent_component.h"
-
-#include "imgui.h"
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_vulkan.h"
 #include "rendering/render_system.h"
 #include "systems/parent_system.h"
-#include "types.h"
+#include "systems/physics_system.h"
+
+#include "ecs/ecs_manager.h"
+#include "ecs/parent_manager.h"
+
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_vulkan.h"
 
 RenderManager render_manager;
 DisplayManager display_manager;

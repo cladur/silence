@@ -1,5 +1,4 @@
 #include "state_machine.h"
-#include "spdlog/spdlog.h"
 
 void StateMachine::startup() {
 }
@@ -23,14 +22,10 @@ void StateMachine::add_state(State *new_state) {
 
 void StateMachine::set_state(std::string state_name) {
 	// check for existence of state with given name
-	auto found = find_if (
-			states.begin(),
-			states.end(),
-			[&state_name] (const auto& s) {
-				return s->get_name() == state_name;
-			} );
+	auto found =
+			find_if(states.begin(), states.end(), [&state_name](const auto &s) { return s->get_name() == state_name; });
 
-	if ( found != states.end() ) {
+	if (found != states.end()) {
 		current_state->exit();
 		current_state = *found;
 		current_state->enter();

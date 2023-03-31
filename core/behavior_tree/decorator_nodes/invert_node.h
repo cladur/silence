@@ -1,15 +1,15 @@
 #ifndef SILENCE_INVERT_NODE_H
 #define SILENCE_INVERT_NODE_H
 
-#include "../decorator_node.h"
+#include "behavior_tree/decorator_node.h"
 
 /**
  * An invert node will invert the result of the child node.
  */
 class InvertNode : public DecoratorNode {
-
 public:
-	explicit InvertNode(std::string name) : DecoratorNode(std::move(name)) {}
+	explicit InvertNode(std::string name) : DecoratorNode(std::move(name)) {
+	}
 
 	void enter() override {
 	}

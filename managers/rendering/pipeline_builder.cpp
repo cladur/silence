@@ -1,7 +1,5 @@
 #include "pipeline_builder.h"
 
-#include "spdlog/spdlog.h"
-
 vk::Pipeline PipelineBuilder::build_pipeline(vk::Device device, vk::RenderPass pass) {
 	//make viewport state from our stored viewport and scissor.
 	//at the moment we won't support multiple viewports or scissors

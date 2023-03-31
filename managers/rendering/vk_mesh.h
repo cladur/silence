@@ -1,10 +1,6 @@
 #ifndef SILENCE_VK_MESH_H
 #define SILENCE_VK_MESH_H
 
-#include <vector>
-
-#include "glm/vec2.hpp"
-#include "glm/vec3.hpp"
 #include "vk_types.h"
 
 struct VertexInputDescription {

@@ -1,8 +1,6 @@
 #ifndef SILENCE_PIPELINE_BUILDER_H
 #define SILENCE_PIPELINE_BUILDER_H
 
-#include <vector>
-
 #include <vulkan/vulkan.hpp>
 
 class PipelineBuilder {

@@ -1,8 +1,5 @@
 #include "test_state.h"
 
-#include <utility>
-#include "spdlog/spdlog.h"
-
 TestState::TestState(std::string name) : State(std::move(name)) {
 }
 

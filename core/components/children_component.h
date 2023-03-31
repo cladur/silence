@@ -1,11 +1,6 @@
 #ifndef SILENCE_CHILDREN_COMPONENT_H
 #define SILENCE_CHILDREN_COMPONENT_H
 
-#include "../../core/types.h"
-#include <spdlog/spdlog.h>
-#include <array>
-#include <cassert>
-#include <cstdint>
 struct Children {
 	std::uint8_t children_count{};
 	std::array<Entity, MAX_CHILDREN> children{};

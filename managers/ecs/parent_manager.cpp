@@ -2,7 +2,6 @@
 #include "components/children_component.h"
 #include "components/parent_component.h"
 #include "ecs_manager.h"
-#include <spdlog/spdlog.h>
 
 extern ECSManager ecs_manager;
 

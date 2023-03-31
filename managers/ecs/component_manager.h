@@ -1,12 +1,7 @@
-
-#include "../../core/types.h"
-#include "component_array.h"
-#include <memory>
-#include <unordered_map>
 #ifndef SILENCE_COMPONENTMANAGER_H
 #define SILENCE_COMPONENTMANAGER_H
 
-#endif //SILENCE_COMPONENTMANAGER_H
+#include "component_array.h"
 
 class ComponentManager {
 private:
@@ -84,3 +79,5 @@ public:
 		}
 	}
 };
+
+#endif //SILENCE_COMPONENTMANAGER_H

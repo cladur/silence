@@ -1,7 +1,3 @@
-//
-// Created by Kurogami on 24/03/2023.
-//
-
 #ifndef SILENCE_PHYSICS_SYSTEM_H
 #define SILENCE_PHYSICS_SYSTEM_H
 

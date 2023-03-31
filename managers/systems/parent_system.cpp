@@ -1,13 +1,10 @@
 #include "parent_system.h"
-#include "../../core/components/children_component.h"
-#include "../../core/components/parent_component.h"
+#include "components/children_component.h"
+#include "components/parent_component.h"
 #include "components/transform_component.h"
 #include "ecs/ecs_manager.h"
 #include "isolated_entities_system.h"
 #include "root_parent_system.h"
-#include <spdlog/spdlog.h>
-#include <algorithm>
-#include <iostream>
 
 extern ECSManager ecs_manager;
 

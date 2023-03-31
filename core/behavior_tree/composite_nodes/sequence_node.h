@@ -1,17 +1,19 @@
 #ifndef SILENCE_SEQUENCE_NODE_H
 #define SILENCE_SEQUENCE_NODE_H
 
-#include "../composite_node.h"
+#include "behavior_tree/composite_node.h"
 
 /**
  * A sequence node is a node that has multiple children.
  * The sequence node will execute each of the children until it returns anything other than RUNNING.
  * If a child returns FAILURE, the sequence node will return FAILURE.
- * If a child returns SUCCESS, the sequence node will execute the next child, or return SUCCESS if there are no more children.
+ * If a child returns SUCCESS, the sequence node will execute the next child, or return SUCCESS if there are no more
+ * children.
  */
 class SequenceNode : public CompositeNode {
 protected:
 	int current_running_child = -1;
+
 public:
 	explicit SequenceNode(std::string name) : CompositeNode(std::move(name)) {
 		current_running_child = -1;

@@ -2,21 +2,18 @@
 #define SILENCE_BEHAVIOR_TREE_BUILDER_H
 
 #include "behavior_tree.h"
-#include "tree_node.h"
-#include "leaf_node.h"
-#include "decorator_node.h"
 #include "composite_node.h"
-#include <stack>
+#include "decorator_node.h"
+#include "leaf_node.h"
+#include "tree_node.h"
 
-enum CurrentParent {
-	COMPOSITE,
-	DECORATOR
-};
+enum CurrentParent { COMPOSITE, DECORATOR };
 
 class BehaviorTreeBuilder {
 private:
 	std::shared_ptr<TreeNode> currentParent;
 	std::stack<CurrentParent> treeHierarchy;
+
 public:
 	BehaviorTreeBuilder() {
 		currentParent = nullptr;
@@ -30,8 +27,7 @@ public:
 	 * @param arguments
 	 * @return
 	 */
-	template<typename leafType, typename ... Types>
-	BehaviorTreeBuilder &leaf(Types... arguments) {
+	template <typename leafType, typename... Types> BehaviorTreeBuilder &leaf(Types... arguments) {
 		// create a new leaf node
 		std::shared_ptr<LeafNode> new_leaf = std::make_shared<leafType>(arguments...);
 		// set the leaf nodes parent
@@ -56,8 +52,7 @@ public:
 	 * @param arguments
 	 * @return
 	 */
-	template<class compositeType, typename ... Types>
-	BehaviorTreeBuilder &composite(Types... arguments) {
+	template <class compositeType, typename... Types> BehaviorTreeBuilder &composite(Types... arguments) {
 		std::shared_ptr<CompositeNode> new_composite = std::make_shared<compositeType>(arguments...);
 		new_composite->set_parent(currentParent);
 
@@ -81,8 +76,7 @@ public:
 	 * @param arguments
 	 * @return
 	 */
-	template<class decoratorType, typename ... Types>
-	BehaviorTreeBuilder &decorator(Types... arguments) {
+	template <class decoratorType, typename... Types> BehaviorTreeBuilder &decorator(Types... arguments) {
 		std::shared_ptr<DecoratorNode> new_decorator = std::make_shared<decoratorType>(arguments...);
 		new_decorator->set_parent(currentParent);
 
@@ -120,6 +114,5 @@ public:
 	std::shared_ptr<BehaviorTree> build() {
 		return std::make_shared<BehaviorTree>(currentParent);
 	}
-
 };
 #endif //SILENCE_BEHAVIOR_TREE_BUILDER_H

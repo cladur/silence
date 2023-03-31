@@ -1,7 +1,7 @@
 #ifndef SILENCE_REPEATER_NODE_H
 #define SILENCE_REPEATER_NODE_H
 
-#include "../decorator_node.h"
+#include "behavior_tree/decorator_node.h"
 
 /**
  * A repeater node is a decorator node that repeats the execution of its child node a certain amount of times.
@@ -11,6 +11,7 @@ class RepeaterNode : public DecoratorNode {
 protected:
 	int repeat_count;
 	int current_repeat;
+
 public:
 	RepeaterNode(std::string name, int repeat_count) : DecoratorNode(std::move(name)), repeat_count(repeat_count) {
 		current_repeat = 0;

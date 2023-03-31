@@ -1,7 +1,7 @@
-#include <glm/ext/matrix_transform.hpp>
-#include <glm/glm.hpp>
 #ifndef SILENCE_TRANSFORM_H
 #define SILENCE_TRANSFORM_H
+
+#include <glm/ext/matrix_transform.hpp>
 
 struct Transform {
 private:

@@ -1,11 +1,5 @@
-#include "../../core/types.h"
-#include <array>
-#include <queue>
-
 #ifndef SILENCE_ENTITY_MANAGER_H
 #define SILENCE_ENTITY_MANAGER_H
-
-#endif //SILENCE_ENTITY_MANAGER_H
 
 class EntityManager {
 private:
@@ -22,3 +16,5 @@ public:
 	void set_entity_signature(Entity entity, Signature signature);
 	Signature get_signature(Entity entity);
 };
+
+#endif //SILENCE_ENTITY_MANAGER_H

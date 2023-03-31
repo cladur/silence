@@ -1,8 +1,7 @@
 #ifndef SILENCE_SELECTOR_NODE_H
 #define SILENCE_SELECTOR_NODE_H
 
-#include "../composite_node.h"
-#include <spdlog/spdlog.h>
+#include "behavior_tree/composite_node.h"
 
 /**
  * A selector node is a composite node that will execute its children in order until one of them succeeds.
@@ -11,6 +10,7 @@
 class SelectorNode : public CompositeNode {
 protected:
 	int current_running_child = -1;
+
 public:
 	explicit SelectorNode(std::string name) : CompositeNode(std::move(name)) {
 		current_running_child = -1;

@@ -1,7 +1,3 @@
-//
-// Created by 7hube on 27.03.2023.
-//
-
 #ifndef SILENCE_TEST_STATE_H
 #define SILENCE_TEST_STATE_H
 

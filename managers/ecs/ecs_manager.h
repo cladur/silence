@@ -1,10 +1,9 @@
-#include "component_manager.h"
-#include "entity_manager.h"
-#include "system_manager.h"
 #ifndef SILENCE_ECSMANAGER_H
 #define SILENCE_ECSMANAGER_H
 
-#endif //SILENCE_ECSMANAGER_H
+#include "component_manager.h"
+#include "entity_manager.h"
+#include "system_manager.h"
 
 class ECSManager {
 private:
@@ -84,3 +83,5 @@ public:
 		system_manager->set_component_blacklist<T>(signature);
 	}
 };
+
+#endif //SILENCE_ECSMANAGER_H

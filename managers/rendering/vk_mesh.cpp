@@ -1,7 +1,5 @@
 #include "vk_mesh.h"
 
-#include <spdlog/spdlog.h>
-
 #define TINYGLTF_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION

@@ -1,7 +1,5 @@
 #include "vk_textures.h"
 
-#include "spdlog/spdlog.h"
-
 #include "vk_initializers.h"
 
 // #define STB_IMAGE_IMPLEMENTATION

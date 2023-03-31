@@ -1,15 +1,15 @@
 #ifndef SILENCE_FAILURE_LEAF_H
 #define SILENCE_FAILURE_LEAF_H
 
-#include "../leaf_node.h"
-#include <spdlog/spdlog.h>
+#include "behavior_tree/leaf_node.h"
 
 /**
  * A failure leaf node always returns failure.
  */
 class FailureLeaf : public LeafNode {
 public:
-	explicit FailureLeaf(std::string name) : LeafNode(std::move(name)) {}
+	explicit FailureLeaf(std::string name) : LeafNode(std::move(name)) {
+	}
 
 	void enter() override {
 		SPDLOG_INFO("entering {} leaf", name);

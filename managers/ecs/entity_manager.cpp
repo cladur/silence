@@ -1,6 +1,4 @@
 #include "entity_manager.h"
-#include <spdlog/spdlog.h>
-#include <cassert>
 
 void EntityManager::startup() {
 	for (Entity entity = 1; entity < MAX_ENTITIES; ++entity) {

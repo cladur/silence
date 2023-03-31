@@ -1,7 +1,6 @@
 #ifndef SILENCE_PARENT_MANAGER_H
 #define SILENCE_PARENT_MANAGER_H
 
-#include "types.h"
 class ParentManager {
 public:
 	static bool add_child(Entity parent, Entity child);

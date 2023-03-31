@@ -1,11 +1,7 @@
-//
-// Created by Kurogami on 24/03/2023.
-//
-
 #include "physics_system.h"
-#include "../../core/components/gravity_component.h"
-#include "../../core/components/rigidbody_component.h"
-#include "../../core/components/transform_component.h"
+#include "components/gravity_component.h"
+#include "components/rigidbody_component.h"
+#include "components/transform_component.h"
 #include "ecs/ecs_manager.h"
 
 extern ECSManager ecs_manager;

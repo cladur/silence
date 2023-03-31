@@ -1,4 +1,3 @@
-#include <glm/vec3.hpp>
 #ifndef SILENCE_RIGIDBODY_H
 #define SILENCE_RIGIDBODY_H
 

@@ -1,8 +1,7 @@
 #ifndef SILENCE_SUCCESS_LEAF_H
 #define SILENCE_SUCCESS_LEAF_H
 
-#include "../leaf_node.h"
-#include <spdlog/spdlog.h>
+#include "behavior_tree/leaf_node.h"
 
 /**
  * A success leaf node always returns success.
@@ -10,7 +9,8 @@
 
 class SuccessLeaf : public LeafNode {
 public:
-	explicit SuccessLeaf(std::string name) : LeafNode(std::move(name)) {}
+	explicit SuccessLeaf(std::string name) : LeafNode(std::move(name)) {
+	}
 
 	void enter() override {
 		SPDLOG_INFO("entering {} leaf", name);
