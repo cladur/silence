@@ -10,21 +10,12 @@
 #include "spdlog/spdlog.h"
 #include "systems/physics_system.h"
 
-#include <random>
 #include <memory>
+#include <random>
 
 #include "components/children_component.h"
 #include "components/parent_component.h"
 
-#include "behavior_tree/behavior_tree.h"
-#include "behavior_tree/behavior_tree_builder.h"
-#include "behavior_tree/composite_nodes/sequence_node.h"
-#include "behavior_tree/leaf_nodes/success_leaf.h"
-#include "behavior_tree/leaf_nodes/failure_leaf.h"
-#include "behavior_tree/composite_nodes/selector_node.h"
-
-#include "behavior_tree/decorator_nodes/invert_node.h"
-#include "behavior_tree/decorator_nodes/repeater_node.h"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_vulkan.h"
@@ -185,47 +176,6 @@ int main() {
 
 	std::vector<Entity> entities(50);
 	demo_entities_init(entities);
-
-	// ECS -----------------------------------------
-
-	// BEHAVIOR TREE TEST --------------------------
-
-//	SPDLOG_INFO("\n\n\nBEHAVIOR TREE SEQUENCE TEST\n");
-//	std::shared_ptr<BehaviorTree> bt_seq =
-//			BehaviorTreeBuilder()
-//					.composite<SequenceNode>("sequence")
-//					        .leaf<SuccessLeaf>("success1")
-//					        .leaf<FailureLeaf>("success3")
-//							.leaf<SuccessLeaf>("success2")
-//			.end()
-//	.build();
-//
-//	bt_seq->update(0.1);
-//	bt_seq->update(0.1);
-//	bt_seq->update(0.1);
-//	bt_seq->update(0.1);
-//
-//	SPDLOG_INFO("BEHAVIOR TREE SEQUENCE TEST\n\n");
-
-	SPDLOG_INFO("BEHAVIOR TREE SEQUENCE TEST\n");
-	std::shared_ptr<BehaviorTree> bt_seq =
-				BehaviorTreeBuilder()
-						.decorator<RepeaterNode>("repeater", 3)
-						        .decorator<InvertNode>("invert")
-						                .leaf<SuccessLeaf>("success1")
-				.end()
-		.build();
-
-	bt_seq->update(0.1);
-	bt_seq->update(0.1);
-	bt_seq->update(0.1);
-	bt_seq->update(0.1);
-	bt_seq->update(0.1);
-	bt_seq->update(0.1);
-
-	SPDLOG_INFO("BEHAVIOR TREE SEQUENCE TEST\n");
-
-
 
 	// Run the game.
 	float dt{};
