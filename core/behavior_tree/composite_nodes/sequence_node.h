@@ -5,11 +5,10 @@
 
 /**
  * A sequence node is a node that has multiple children.
- * The sequence node will execute all children in order.
- * If a child fails, the sequence node will fail.
- * If all children succeed, the sequence node will succeed.
+ * The sequence node will execute each of the children until it returns anything other than RUNNING.
+ * If a child returns FAILURE, the sequence node will return FAILURE.
+ * If a child returns SUCCESS, the sequence node will execute the next child, or return SUCCESS if there are no more children.
  */
-
 class SequenceNode : public CompositeNode {
 protected:
 	int current_running_child = -1;

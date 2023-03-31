@@ -21,6 +21,7 @@
 #include "behavior_tree/composite_nodes/sequence_node.h"
 #include "behavior_tree/leaf_nodes/success_leaf.h"
 #include "behavior_tree/leaf_nodes/failure_leaf.h"
+#include "behavior_tree/composite_nodes/selector_node.h"
 
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
@@ -187,26 +188,26 @@ int main() {
 
 	// BEHAVIOR TREE TEST --------------------------
 
-	std::shared_ptr<BehaviorTree> bt =
-			BehaviorTreeBuilder()
-					.composite<SequenceNode>("sequence")
-					        .leaf<SuccessLeaf>("success1")
-					        .leaf<SuccessLeaf>("success3")
-							.leaf<SuccessLeaf>("success2")
-			.end()
-	.build();
+//	SPDLOG_INFO("\n\n\nBEHAVIOR TREE SEQUENCE TEST\n");
+//	std::shared_ptr<BehaviorTree> bt_seq =
+//			BehaviorTreeBuilder()
+//					.composite<SequenceNode>("sequence")
+//					        .leaf<SuccessLeaf>("success1")
+//					        .leaf<FailureLeaf>("success3")
+//							.leaf<SuccessLeaf>("success2")
+//			.end()
+//	.build();
+//
+//	bt_seq->update(0.1);
+//	bt_seq->update(0.1);
+//	bt_seq->update(0.1);
+//	bt_seq->update(0.1);
+//
+//	SPDLOG_INFO("BEHAVIOR TREE SEQUENCE TEST\n\n");
 
-	SPDLOG_INFO("\n\n\nBEHAVIOR TREE SEQUENCE TEST\n");
-	bt->update(0.1);
-	bt->update(0.1);
-	bt->update(0.1);
-	bt->update(0.1);
-	bt->update(0.1);
-	bt->update(0.1);
-
-
-	SPDLOG_INFO("\nBEHAVIOR TREE SEQUENCE TEST\n\n\n");
 	// BEHAVIOR TREE TEST --------------------------
+
+
 
 	// Run the game.
 	float dt{};
