@@ -23,6 +23,7 @@
 #include "behavior_tree/leaf_nodes/failure_leaf.h"
 #include "behavior_tree/composite_nodes/selector_node.h"
 
+#include "behavior_tree/decorator_nodes/repeater_node.h"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_vulkan.h"
@@ -205,7 +206,22 @@ int main() {
 //
 //	SPDLOG_INFO("BEHAVIOR TREE SEQUENCE TEST\n\n");
 
-	// BEHAVIOR TREE TEST --------------------------
+	SPDLOG_INFO("BEHAVIOR TREE SEQUENCE TEST\n");
+	std::shared_ptr<BehaviorTree> bt_seq =
+				BehaviorTreeBuilder()
+						.decorator<RepeaterNode>("repeater", 3)
+								.leaf<SuccessLeaf>("success1")
+				.end()
+		.build();
+
+	bt_seq->update(0.1);
+	bt_seq->update(0.1);
+	bt_seq->update(0.1);
+	bt_seq->update(0.1);
+	bt_seq->update(0.1);
+	bt_seq->update(0.1);
+
+	SPDLOG_INFO("BEHAVIOR TREE SEQUENCE TEST\n");
 
 
 

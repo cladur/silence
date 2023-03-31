@@ -18,6 +18,7 @@ public:
      * execute the behavior tree.
 	 */
 	ExecutionStatus update(float dt) {
+		root->enter();
 		return root->update(dt);
 	}
 

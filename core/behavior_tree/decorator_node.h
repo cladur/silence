@@ -17,6 +17,9 @@ public:
 	 * Add a child to the decorator node.
 	 */
 	void set_child(std::shared_ptr<TreeNode> child) {
+		if (this->child != nullptr) {
+			SPDLOG_WARN("Decorator node {} already has a child {}. Replacing with {}.", name, this->child->get_name(), child->get_name());
+		}
 		this->child = child;
 	}
 
