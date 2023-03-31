@@ -4,17 +4,18 @@
 
 #include "components/gravity_component.h"
 #include "components/rigidbody_component.h"
-#include "components/state_component.h"
 #include "components/transform_component.h"
 #include "ecs/ecs_manager.h"
 #include "magic_enum.hpp"
 #include "spdlog/spdlog.h"
 #include "systems/physics_system.h"
 
+#include <memory>
 #include <random>
 
 #include "components/children_component.h"
 #include "components/parent_component.h"
+
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_vulkan.h"
@@ -34,7 +35,6 @@ void default_ecs_manager_init() {
 	ecs_manager.register_component<Gravity>();
 	ecs_manager.register_component<Parent>();
 	ecs_manager.register_component<Children>();
-	ecs_manager.register_component<State>();
 	ecs_manager.register_component<MeshInstance>();
 }
 
@@ -176,8 +176,6 @@ int main() {
 
 	std::vector<Entity> entities(50);
 	demo_entities_init(entities);
-
-	// ECS -----------------------------------------
 
 	// Run the game.
 	float dt{};
