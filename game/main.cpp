@@ -2,14 +2,16 @@
 #include "ecs/parent_manager.h"
 #include "render_manager.h"
 
+#include "components/collider_aabb.h"
+#include "components/collider_tag_component.h"
 #include "components/gravity_component.h"
 #include "components/rigidbody_component.h"
 #include "components/state_component.h"
 #include "components/transform_component.h"
 #include "ecs/ecs_manager.h"
 #include "magic_enum.hpp"
+#include "physics/physics_system.h"
 #include "spdlog/spdlog.h"
-#include "systems/physics_system.h"
 
 #include <random>
 
@@ -36,6 +38,8 @@ void default_ecs_manager_init() {
 	ecs_manager.register_component<Children>();
 	ecs_manager.register_component<State>();
 	ecs_manager.register_component<MeshInstance>();
+	ecs_manager.register_component<ColliderTag>();
+	ecs_manager.register_component<ColliderAABB>();
 }
 
 std::shared_ptr<PhysicsSystem> default_physics_system_init() {
@@ -256,6 +260,7 @@ int main() {
 
 		if (physics_system_enabled) {
 			physics_system->update(dt);
+			physics_system->update_collision();
 		}
 
 		parent_system->update();
