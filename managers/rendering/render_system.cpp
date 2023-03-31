@@ -18,7 +18,7 @@ void RenderSystem::update(RenderManager &render_manager) {
 		RenderObject render_object;
 		render_object.mesh = mesh_instance.mesh;
 		render_object.material = mesh_instance.material;
-		render_object.transform_matrix = transform.get_local_model_matrix();
+		render_object.transform_matrix = transform.get_global_model_matrix();
 
 		render_manager.renderables.push_back(render_object);
 	}

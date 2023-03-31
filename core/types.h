@@ -18,4 +18,3 @@ const ComponentType MAX_COMPONENTS = 32;
 using Signature = std::bitset<MAX_COMPONENTS>;
 const Entity MAX_ENTITIES = 5000;
 const Entity MAX_CHILDREN = 255;
-const Entity MAX_IMGUI_ENTITIES = 50;

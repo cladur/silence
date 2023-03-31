@@ -4,8 +4,8 @@
 #include "types.h"
 class ParentManager {
 public:
-	static bool add_children(Entity parent, Entity children);
-	static bool remove_children(Entity parent, Entity children);
+	static bool add_child(Entity parent, Entity child);
+	static bool remove_child(Entity parent, Entity child);
 };
 
 #endif //SILENCE_PARENT_MANAGER_H

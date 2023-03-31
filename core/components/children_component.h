@@ -10,7 +10,7 @@ struct Children {
 	std::uint8_t children_count{};
 	std::array<Entity, MAX_CHILDREN> children{};
 
-	bool add_children(Entity entity) {
+	bool add_child(Entity entity) {
 		if (children_count >= MAX_CHILDREN || get_children_index(entity) != -1) {
 			return false;
 		}
@@ -20,7 +20,7 @@ struct Children {
 		return true;
 	}
 
-	bool remove_children(Entity entity) {
+	bool remove_child(Entity entity) {
 		if (children_count == 0) {
 			return false;
 		}

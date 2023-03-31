@@ -10,7 +10,8 @@ private:
 	glm::vec3 scale{};
 	bool changed;
 
-	glm::mat4 model_matrix = glm::mat4(1.0f);
+	glm::mat4 local_model_matrix = glm::mat4(1.0f);
+	glm::mat4 global_model_matrix = glm::mat4(1.0f);
 
 public:
 	//constructor
@@ -57,11 +58,28 @@ public:
 		this->scale = new_scale;
 		this->changed = true;
 	}
+
+	glm::mat4 get_global_model_matrix() {
+		return this->global_model_matrix;
+	}
+
 	glm::mat4 get_local_model_matrix() {
 		if (!changed) {
-			return this->model_matrix;
+			return this->local_model_matrix;
 		}
 
+		calculate_local_model_matrix();
+		return this->local_model_matrix;
+	}
+
+	void update_global_model_matrix(glm::mat4 parent_model = glm::mat4(1.0f)) {
+		if (changed) {
+			calculate_local_model_matrix();
+		}
+		this->global_model_matrix = parent_model * get_local_model_matrix();
+	}
+
+	void calculate_local_model_matrix() {
 		const glm::mat4 transform_x =
 				glm::rotate(glm::mat4(1.0f), glm::radians(euler_rot.x), glm::vec3(1.0f, 0.0f, 0.0f));
 		const glm::mat4 transform_y =
@@ -73,13 +91,10 @@ public:
 		const glm::mat4 roation_matrix = transform_y * transform_x * transform_z;
 
 		// translation * rotation * scale (also known as TRS matrix)
-		this->model_matrix =
+		this->local_model_matrix =
 				glm::translate(glm::mat4(1.0f), position) * roation_matrix * glm::scale(glm::mat4(1.0f), scale);
-		return this->model_matrix;
-	}
 
-	void update_model_matrix(glm::mat4 parent_model) {
-		this->model_matrix = parent_model * get_local_model_matrix();
+		changed = false;
 	}
 };
 

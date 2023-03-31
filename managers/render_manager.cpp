@@ -6,7 +6,7 @@
 #include <glm/gtx/transform.hpp>
 
 #define VMA_IMPLEMENTATION
-#include "vma/vk_mem_alloc.h"
+#include "vk_mem_alloc.h"
 #include "vulkan-memory-allocator-hpp/vk_mem_alloc.hpp"
 
 #include "rendering/pipeline_builder.h"
@@ -14,7 +14,6 @@
 #include "rendering/vk_textures.h"
 #include <VkBootstrap.h>
 #include <spdlog/spdlog.h>
-#include <ios>
 #include <vulkan/vulkan_enums.hpp>
 
 #include "imgui.h"
