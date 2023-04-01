@@ -1,9 +1,11 @@
 #ifndef SILENCE_TRANSFORM_H
 #define SILENCE_TRANSFORM_H
 
+#include "on_destroy_interface.h"
+#include "on_start_interface.h"
 #include <glm/ext/matrix_transform.hpp>
 
-struct Transform {
+struct Transform : public IOnStart, public IOnDestroy {
 private:
 	glm::vec3 position{};
 	glm::vec3 euler_rot{};
@@ -95,6 +97,14 @@ public:
 				glm::translate(glm::mat4(1.0f), position) * roation_matrix * glm::scale(glm::mat4(1.0f), scale);
 
 		changed = false;
+	}
+
+	void on_start() override {
+		SPDLOG_INFO("Transform component started");
+	}
+
+	void on_destroy() override {
+		SPDLOG_INFO("Transform component destroyed");
 	}
 };
 

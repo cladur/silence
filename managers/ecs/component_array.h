@@ -50,6 +50,11 @@ public:
 	void entity_destroyed(Entity entity) override {
 		if (entityToIndexMap.find(entity) != entityToIndexMap.end()) {
 			// Remove the entity's component if it existed
+			auto index = entityToIndexMap[entity];
+			T component = componentArray[index];
+
+			try_call_on_destroy(&component);
+
 			remove_data(entity);
 		}
 	}
@@ -77,6 +82,12 @@ private:
 
 	// Total size of valid entries in the array.
 	size_t size{};
+
+	void try_call_on_destroy(T *component) {
+		if constexpr (std::is_base_of_v<IOnDestroy, T>) {
+			static_cast<IOnDestroy *>(component)->on_destroy();
+		}
+	}
 };
 
 #endif //SILENCE_COMPONENT_ARRAY_INTERFACE_H
