@@ -1,4 +1,4 @@
-#include "audio_manager.h"
+#include "audio/audio_manager.h"
 #include "display_manager.h"
 #include "render_manager.h"
 
@@ -14,6 +14,8 @@
 
 #include "ecs/ecs_manager.h"
 
+#include "audio/fmod_listener.h"
+#include "components/fmod_listener_component.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_vulkan.h"
 
@@ -31,6 +33,7 @@ void default_ecs_manager_init() {
 	ecs_manager.register_component<Parent>();
 	ecs_manager.register_component<Children>();
 	ecs_manager.register_component<MeshInstance>();
+	ecs_manager.register_component<FmodListener>();
 }
 
 void demo_entities_init(std::vector<Entity> &entities) {
@@ -61,6 +64,14 @@ void demo_entities_init(std::vector<Entity> &entities) {
 		ecs_manager.add_component<MeshInstance>(
 				entity, { render_manager.get_mesh("box"), render_manager.get_material("default_mesh") });
 	}
+	auto entity = ecs_manager.create_entity();
+	ecs_manager.add_component(entity,
+			Transform{
+					glm::vec3(0.0f, 0.0f, -25.0f),
+					glm::vec3(0.0f),
+					glm::vec3(1.0f) });
+	ecs_manager.add_component<FmodListener>(entity, FmodListener{ .prev_frame_position = glm::vec3(0.0f, 0.0f, -25.0f)});
+	entities.push_back(entity);
 }
 
 bool display_manager_init() {
@@ -133,15 +144,21 @@ int main() {
 	auto physics_system = ecs_manager.register_system<PhysicsSystem>();
 	auto parent_system = ecs_manager.register_system<ParentSystem>();
 	auto render_system = ecs_manager.register_system<RenderSystem>();
+	auto fmod_listener_system = ecs_manager.register_system<FmodListenerSystem>();
 
 	physics_system->startup();
 	parent_system->startup();
 	render_system->startup();
+	fmod_listener_system->startup();
 
 	std::vector<Entity> entities(50);
 	demo_entities_init(entities);
 
 	audio_manager.startup();
+	audio_manager.load_bank("Music");
+	audio_manager.load_bank("SFX");
+	audio_manager.load_bank("Ambience");
+	audio_manager.load_sample_data();
 
 	// Run the game.
 	float dt{};
@@ -154,6 +171,10 @@ int main() {
 	int max_imgui_entities = 50;
 	int max_entities = 100;
 	int imgui_entities_count = 50;
+
+	// TEST FOR 3D AUDIO
+	glm::vec3 sound_position = glm::vec3(0.0f, 0.0f, 0.0f);
+	//
 
 	bool should_run = true;
 	while (should_run) {
@@ -209,8 +230,18 @@ int main() {
 			entities_destroyed = false;
 		}
 
+		// 3D SOUND DEMO
+		ImGui::SliderFloat3("Sound position", &sound_position[0], -100.0f, 100.0f);
+
+		if (ImGui::Button("Play pluck")) {
+			//audio_manager.test_play_sound();
+			audio_manager.play_one_shot_3d("test_pluck", sound_position);
+		}
+		// 3D SOUND DEMO
+
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
 				ImGui::GetIO().Framerate);
+
 
 		ImGui::End();
 
@@ -230,6 +261,8 @@ int main() {
 		dt = std::chrono::duration<float, std::chrono::seconds::period>(stop_time - start_time).count();
 
 		render_manager.draw();
+
+		fmod_listener_system->update(dt);
 		audio_manager.update();
 	}
 

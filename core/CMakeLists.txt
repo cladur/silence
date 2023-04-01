@@ -4,7 +4,7 @@ set(CORE_LIB_NAME "silence_core")
 add_library(${COMMON_LIB_NAME} INTERFACE
         pch.h
         types.h
-        )
+        components/fmod_listener_component.h)
 
 add_library(${CORE_LIB_NAME} STATIC
         components/transform_component.h
