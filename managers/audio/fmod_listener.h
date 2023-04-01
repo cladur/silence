@@ -7,6 +7,9 @@
 class FmodListenerSystem : public BaseSystem {
 public:
 	void startup();
+
+	void late_start();
+
 	void update(float dt);
 };
 

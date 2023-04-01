@@ -84,7 +84,7 @@ void AudioManager::test_play_sound() {
 	FMOD_CHECK(test_event_instance->start());
 }
 
-FMOD::Studio::EventInstance *AudioManager::create_event_instance(const EventReference event_ref) {
+FMOD::Studio::EventInstance *AudioManager::create_event_instance(const EventReference& event_ref) {
 	FMOD::Studio::EventDescription *event_description = nullptr;
 	FMOD_RESULT res = system->getEvent((event_path_prefix + event_ref.path).c_str(), &event_description);
 	if (res != FMOD_OK) {
@@ -98,7 +98,7 @@ FMOD::Studio::EventInstance *AudioManager::create_event_instance(const EventRefe
 	return event_instance;
 }
 
-void AudioManager::play_one_shot_2d(const EventReference event_ref) {
+void AudioManager::play_one_shot_2d(const EventReference &event_ref) {
 	FMOD::Studio::EventInstance *event_instance = create_event_instance(event_ref);
 	if (event_instance == nullptr) {
 		return;
@@ -108,6 +108,7 @@ void AudioManager::play_one_shot_2d(const EventReference event_ref) {
 }
 
 void AudioManager::set_3d_listener_attributes(
+		int listener_id,
 		glm::vec3 position,
 		glm::vec3 velocity,
 		glm::vec3 forward,
@@ -117,10 +118,10 @@ void AudioManager::set_3d_listener_attributes(
 	attributes.velocity = {velocity.x, velocity.y, velocity.z};
 	attributes.forward = {forward.x, forward.y, forward.z};
 	attributes.up = {up.x, up.y, up.z};
-	FMOD_CHECK(system->setListenerAttributes(0, &attributes));
+	FMOD_CHECK(system->setListenerAttributes(listener_id, &attributes));
 }
 
-void AudioManager::play_one_shot_3d(const EventReference eventRef, glm::vec3 position, RigidBody *rigid_body) {
+void AudioManager::play_one_shot_3d(const EventReference &eventRef, glm::vec3 position, RigidBody *rigid_body) {
 	auto event_instance = create_event_instance(eventRef);
 	FMOD_3D_ATTRIBUTES attributes = to_3d_attributes(position, rigid_body);
 	event_instance->set3DAttributes(&attributes);

@@ -160,6 +160,9 @@ int main() {
 	audio_manager.load_bank("Ambience");
 	audio_manager.load_sample_data();
 
+	// i made this late start to assign all listeners a unique id. Can't do this in startup ¯\_(ツ)_/¯
+	fmod_listener_system->late_start();
+
 	// Run the game.
 	float dt{};
 	bool show_ecs_logs = false;

@@ -3,6 +3,7 @@
 
 #include <glm/vec3.hpp>
 struct FmodListener {
+	int listener_id;
 	glm::vec3 prev_frame_position {};
 };
 

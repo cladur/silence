@@ -26,7 +26,7 @@ public:
 	void load_startup_banks();
 	void load_bank(const std::string &name);
 
-	void set_3d_listener_attributes(glm::vec3 position, glm::vec3 velocity, glm::vec3 forward, glm::vec3 up);
+	void set_3d_listener_attributes(int listener_id, glm::vec3 position, glm::vec3 velocity, glm::vec3 forward, glm::vec3 up);
 
 	// this loads ALL SAMPLES FROM ALL BANKS
 	// which later may create a lot of memory overhead
@@ -46,13 +46,13 @@ public:
 	 * @param path
 	 * @return
 	 */
-	FMOD::Studio::EventInstance *create_event_instance(const EventReference event_ref);
+	FMOD::Studio::EventInstance *create_event_instance(const EventReference& event_ref);
 
-	void play_one_shot_2d(const EventReference event_ref);
+	void play_one_shot_2d(const EventReference &event_ref);
 
-	void play_one_shot_3d(const EventReference event_ref, glm::vec3 position, RigidBody *rigid_body = nullptr);
+	void play_one_shot_3d(const EventReference &event_ref, glm::vec3 position, RigidBody *rigid_body = nullptr);
 
-	FMOD_3D_ATTRIBUTES to_3d_attributes(glm::vec3 position, RigidBody *rigid_body = nullptr);
+	static FMOD_3D_ATTRIBUTES to_3d_attributes(glm::vec3 position, RigidBody *rigid_body = nullptr);
 
 	FMOD_GUID path_to_guid(const std::string &path);
 

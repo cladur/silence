@@ -27,7 +27,16 @@ void FmodListenerSystem::update(float dt) {
 //		glm::vec3 up = transform.get_up();
 		glm::vec3 f = glm::vec3(0.0f, 0.0f, 1.0f);
 		glm::vec3 u = glm::vec3(0.0f, 1.0f, 0.0f);
+		audio_manager.set_3d_listener_attributes(listener.listener_id, p, v, f, u);
+	}
+}
 
-		audio_manager.set_3d_listener_attributes(p, v, f, u);
+void FmodListenerSystem::late_start() {
+	int id = 0;
+	for (auto const &entity : entities) {
+		auto &listener = ecs_manager.get_component<FmodListener>(entity);
+		SPDLOG_INFO("assigning listener id: {}", id);
+		listener.listener_id = id;
+		id++;
 	}
 }
