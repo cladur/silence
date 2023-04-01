@@ -67,6 +67,15 @@ public:
 		return false;
 	}
 
+	void run_starts() override {
+		if constexpr (std::is_base_of_v<IOnStart, T>) {
+			for (size_t i = 0; i < size; i++) {
+				T *component = &componentArray[i];
+				static_cast<IOnStart *>(component)->on_start();
+			}
+		}
+	}
+
 private:
 	// The packed array of components (of generic type T),
 	// set to a specified maximum amount, matching the maximum number

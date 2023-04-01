@@ -2,6 +2,7 @@
 #define SILENCE_COMPONENTMANAGER_H
 
 #include "component_array.h"
+#include "types.h"
 
 class ComponentManager {
 private:
@@ -76,6 +77,14 @@ public:
 			auto const &component = pair.second;
 
 			component->entity_destroyed(entity);
+		}
+	}
+
+	void run_starts() {
+		for (auto const &pair : component_arrays) {
+			auto const &component = pair.second;
+
+			component->run_starts();
 		}
 	}
 };

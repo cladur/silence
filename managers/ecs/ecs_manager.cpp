@@ -67,3 +67,6 @@ bool ECSManager::remove_child(Entity parent, Entity child) {
 
 	return true;
 }
+void ECSManager::call_all_on_starts() {
+	component_manager->run_starts();
+}

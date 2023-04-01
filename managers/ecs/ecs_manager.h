@@ -68,6 +68,7 @@ public:
 		system_manager->set_component_blacklist<T>(signature);
 	}
 
+	void call_all_on_starts();
 	// Specific parent system methods
 	bool add_child(Entity parent, Entity child);
 	bool remove_child(Entity parent, Entity child);

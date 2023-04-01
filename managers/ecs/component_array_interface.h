@@ -5,6 +5,7 @@ class IComponentArray {
 public:
 	virtual ~IComponentArray() = default;
 	virtual void entity_destroyed(Entity entity) = 0;
+	virtual void run_starts() = 0;
 };
 
 #endif //SILENCE_ICOMPONENTARRAY_H

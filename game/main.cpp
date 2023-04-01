@@ -58,8 +58,6 @@ void demo_entities_init(std::vector<Entity> &entities) {
 
 		ecs_manager.add_component<MeshInstance>(
 				entity, { render_manager.get_mesh("box"), render_manager.get_material("default_mesh") });
-
-		ecs_manager.get_component<Transform>(entity).on_start();
 	}
 }
 
@@ -152,6 +150,8 @@ int main() {
 	int max_imgui_entities = 50;
 	int max_entities = 100;
 	int imgui_entities_count = 50;
+
+	ecs_manager.call_all_on_starts();
 
 	bool should_run = true;
 	while (should_run) {
