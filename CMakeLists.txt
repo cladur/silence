@@ -3,6 +3,9 @@ project(silence)
 
 set(CMAKE_CXX_STANDARD 20)
 
+# We set the exe output directory to build directory, so that it'll be next to the DLLs.
+set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+
 include_directories(${PROJECT_SOURCE_DIR})
 
 add_subdirectory(thirdparty)
