@@ -1,5 +1,4 @@
 #include "audio_manager.h"
-
 #include "fmod_errors.h"
 
 #define FMOD_CHECK(x)                                                                                                  \
@@ -85,11 +84,11 @@ void AudioManager::test_play_sound() {
 	FMOD_CHECK(test_event_instance->start());
 }
 
-FMOD::Studio::EventInstance *AudioManager::create_event_instance(const std::string &name) {
+FMOD::Studio::EventInstance *AudioManager::create_event_instance(const EventReference event_ref) {
 	FMOD::Studio::EventDescription *event_description = nullptr;
-	FMOD_RESULT res = system->getEvent((event_path_prefix + name).c_str(), &event_description);
+	FMOD_RESULT res = system->getEvent((event_path_prefix + event_ref.path).c_str(), &event_description);
 	if (res != FMOD_OK) {
-		SPDLOG_ERROR("Audio Manager: Failed to get event description for {}. {}", name, FMOD_ErrorString(res));
+		SPDLOG_ERROR("Audio Manager: Failed to get event description for {}. {}", event_ref.path, FMOD_ErrorString(res));
 		return nullptr;
 	}
 
@@ -99,8 +98,8 @@ FMOD::Studio::EventInstance *AudioManager::create_event_instance(const std::stri
 	return event_instance;
 }
 
-void AudioManager::play_one_shot_2d(const std::string &path) {
-	FMOD::Studio::EventInstance *event_instance = create_event_instance(path);
+void AudioManager::play_one_shot_2d(const EventReference event_ref) {
+	FMOD::Studio::EventInstance *event_instance = create_event_instance(event_ref);
 	if (event_instance == nullptr) {
 		return;
 	}
@@ -121,8 +120,8 @@ void AudioManager::set_3d_listener_attributes(
 	FMOD_CHECK(system->setListenerAttributes(0, &attributes));
 }
 
-void AudioManager::play_one_shot_3d(const std::string &path, glm::vec3 position, RigidBody *rigid_body) {
-	auto event_instance = create_event_instance(path);
+void AudioManager::play_one_shot_3d(const EventReference eventRef, glm::vec3 position, RigidBody *rigid_body) {
+	auto event_instance = create_event_instance(eventRef);
 	FMOD_3D_ATTRIBUTES attributes = to_3d_attributes(position, rigid_body);
 	event_instance->set3DAttributes(&attributes);
 	event_instance->start();
@@ -138,4 +137,15 @@ FMOD_3D_ATTRIBUTES AudioManager::to_3d_attributes(glm::vec3 position, RigidBody 
 		attributes.velocity = {rigid_body->velocity.x, rigid_body->velocity.y, rigid_body->velocity.z};
 	}
 	return attributes;
+}
+
+FMOD_GUID AudioManager::path_to_guid(const std::string &path) {
+	FMOD_GUID guid;
+	FMOD_RESULT res = system->lookupID((event_path_prefix + path).c_str(), &guid);
+	if (res != FMOD_OK) {
+		SPDLOG_ERROR("Audio Manager: Failed to get guid for {}. {}", path, FMOD_ErrorString(res));
+		char c[8] = {0};
+		return FMOD_GUID(0,0,0,"0000000");
+	}
+	return guid;
 }

@@ -2,6 +2,7 @@
 #define SILENCE_AUDIO_MANAGER_H
 
 #include "components/rigidbody_component.h"
+#include "event_reference.h"
 #include "fmod_studio.hpp"
 
 class AudioManager {
@@ -45,13 +46,16 @@ public:
 	 * @param path
 	 * @return
 	 */
-	FMOD::Studio::EventInstance *create_event_instance(const std::string &path);
+	FMOD::Studio::EventInstance *create_event_instance(const EventReference event_ref);
 
-	void play_one_shot_2d(const std::string &path);
+	void play_one_shot_2d(const EventReference event_ref);
 
-	void play_one_shot_3d(const std::string &path, glm::vec3 position, RigidBody *rigid_body = nullptr);
+	void play_one_shot_3d(const EventReference event_ref, glm::vec3 position, RigidBody *rigid_body = nullptr);
 
 	FMOD_3D_ATTRIBUTES to_3d_attributes(glm::vec3 position, RigidBody *rigid_body = nullptr);
+
+	FMOD_GUID path_to_guid(const std::string &path);
+
 };
 
 

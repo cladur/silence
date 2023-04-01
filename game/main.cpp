@@ -174,7 +174,8 @@ int main() {
 
 	// TEST FOR 3D AUDIO
 	glm::vec3 sound_position = glm::vec3(0.0f, 0.0f, 0.0f);
-	//
+	EventReference test_pluck = EventReference("test_pluck");
+	// #################
 
 	bool should_run = true;
 	while (should_run) {
@@ -235,7 +236,7 @@ int main() {
 
 		if (ImGui::Button("Play pluck")) {
 			//audio_manager.test_play_sound();
-			audio_manager.play_one_shot_3d("test_pluck", sound_position);
+			audio_manager.play_one_shot_3d(test_pluck, sound_position);
 		}
 		// 3D SOUND DEMO
 

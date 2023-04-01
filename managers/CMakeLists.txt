@@ -33,7 +33,7 @@ add_library(${ECS_MANAGER_NAME} STATIC
 
 add_library(${AUDIO_MANAGER_NAME} STATIC
         audio/audio_manager.cpp audio/audio_manager.h
-        audio/fmod_listener.h audio/fmod_listener.cpp)
+        audio/fmod_listener.h audio/fmod_listener.cpp audio/event_reference.cpp audio/event_reference.h)
 
 # Include directories
 target_include_directories(${RENDER_MANAGER_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
