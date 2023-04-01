@@ -11,4 +11,5 @@ target_link_libraries(${GAME_NAME} PRIVATE
         silence_display_manager
         silence_render_manager
         silence_ecs_manager
+        silence_audio_manager
         )

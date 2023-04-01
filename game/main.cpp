@@ -1,3 +1,4 @@
+#include "audio_manager.h"
 #include "display_manager.h"
 #include "render_manager.h"
 
@@ -19,6 +20,7 @@
 RenderManager render_manager;
 DisplayManager display_manager;
 ECSManager ecs_manager;
+AudioManager audio_manager;
 
 void default_ecs_manager_init() {
 	ecs_manager.startup();
@@ -139,6 +141,8 @@ int main() {
 	std::vector<Entity> entities(50);
 	demo_entities_init(entities);
 
+	audio_manager.startup();
+
 	// Run the game.
 	float dt{};
 	bool show_ecs_logs = false;
@@ -226,10 +230,12 @@ int main() {
 		dt = std::chrono::duration<float, std::chrono::seconds::period>(stop_time - start_time).count();
 
 		render_manager.draw();
+		audio_manager.update();
 	}
 
 	// Shut everything down, in reverse order.
 	SPDLOG_INFO("Shutting down engine subsystems...");
+	audio_manager.shutdown();
 	render_manager.shutdown();
 	display_manager.shutdown();
 

@@ -1,6 +1,7 @@
 set(RENDER_MANAGER_NAME "silence_render_manager")
 set(DISPLAY_MANAGER_NAME "silence_display_manager")
 set(ECS_MANAGER_NAME "silence_ecs_manager")
+set(AUDIO_MANAGER_NAME "silence_audio_manager")
 
 # Libraries
 add_library(${RENDER_MANAGER_NAME} STATIC
@@ -30,10 +31,15 @@ add_library(${ECS_MANAGER_NAME} STATIC
         systems/root_parent_system.cpp systems/root_parent_system.h
         )
 
+add_library(${AUDIO_MANAGER_NAME} STATIC
+        audio_manager.cpp audio_manager.h
+        )
+
 # Include directories
 target_include_directories(${RENDER_MANAGER_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 target_include_directories(${DISPLAY_MANAGER_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 target_include_directories(${ECS_MANAGER_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
+target_include_directories(${AUDIO_MANAGER_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 
 # Dependencies
 find_package(glfw3 CONFIG REQUIRED)
@@ -72,6 +78,14 @@ target_link_libraries(${DISPLAY_MANAGER_NAME} PRIVATE
         )
 
 target_link_libraries(${ECS_MANAGER_NAME} PRIVATE
+        silence_common
+        silence_core
+        )
+
+target_link_libraries(${AUDIO_MANAGER_NAME}
+        PUBLIC
+        fmod
+        PRIVATE
         silence_common
         silence_core
         )
