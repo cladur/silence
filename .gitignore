@@ -6,6 +6,7 @@ cmake-build-debug
 .DS_Store
 build_xcode
 
+.vs
 .vscode
 .cache
 CMakeFiles
@@ -14,3 +15,7 @@ build
 # SPIRV files
 *.spv
 imgui.ini
+
+# FMOD stuff
+thirdparty/fmod/api
+thirdparty/fmod/plugins

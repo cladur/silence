@@ -1,5 +1,5 @@
 #include "render_manager.h"
-#include "display_manager.h"
+#include "managers/display/display_manager.h"
 
 #include <fstream>
 
@@ -9,10 +9,10 @@
 #include "vk_mem_alloc.h"
 #include "vulkan-memory-allocator-hpp/vk_mem_alloc.hpp"
 
-#include "rendering/pipeline_builder.h"
-#include "rendering/vk_initializers.h"
-#include "rendering/vk_textures.h"
-#include <VkBootstrap.h>
+#include "cmake-build-debug/_deps/fetch_vk_bootstrap-src/src/VkBootstrap.h"
+#include "render/pipeline_builder.h"
+#include "render/vk_initializers.h"
+#include "render/vk_textures.h"
 #include <spdlog/spdlog.h>
 #include <vulkan/vulkan_enums.hpp>
 
@@ -125,7 +125,7 @@ void RenderManager::init_swapchain(DisplayManager &display_manager) {
 	//allocate and create the image
 	VK_CHECK(allocator.createImage(&dimg_info, &dimg_allocinfo, &depth_image.image, &depth_image.allocation, nullptr));
 
-	//build an image-view for the depth image to use for rendering
+	//build an image-view for the depth image to use for render
 	vk::ImageViewCreateInfo dview_info =
 			vk_init::image_view_create_info(depth_format, depth_image.image, vk::ImageAspectFlagBits::eDepth);
 
@@ -150,7 +150,7 @@ void RenderManager::init_commands() {
 
 		frame.command_pool = command_pool_res.value;
 
-		//allocate the default command buffer that we will use for rendering
+		//allocate the default command buffer that we will use for render
 		vk::CommandBufferAllocateInfo cmd_alloc_info = vk_init::command_buffer_allocate_info(frame.command_pool, 1);
 
 		VK_CHECK(device.allocateCommandBuffers(&cmd_alloc_info, &frame.main_command_buffer));
@@ -259,7 +259,7 @@ void RenderManager::init_default_renderpass() {
 
 void RenderManager::init_framebuffers() {
 	//create the framebuffers for the swapchain images. This will connect the render-pass to the images for
-	//rendering
+	//render
 	vk::FramebufferCreateInfo fb_info = {};
 	fb_info.sType = vk::StructureType::eFramebufferCreateInfo;
 	fb_info.pNext = nullptr;
@@ -574,7 +574,7 @@ void RenderManager::init_pipelines() {
 
 	create_material(mesh_pipeline, mesh_pipeline_layout, "default_mesh");
 
-	// create pipeline for textured rendering
+	// create pipeline for textured render
 	vk::PipelineLayoutCreateInfo textured_mesh_pipeline_layout_info = mesh_pipeline_layout_info;
 	vk::DescriptorSetLayout set_layouts2[] = { global_set_layout, object_set_layout, single_texture_set_layout };
 	textured_mesh_pipeline_layout_info.setLayoutCount = 3;
@@ -1023,7 +1023,7 @@ void RenderManager::load_images() {
 }
 
 void RenderManager::draw() {
-	//wait until the GPU has finished rendering the last frame. Timeout of 1 second
+	//wait until the GPU has finished render the last frame. Timeout of 1 second
 	VK_CHECK(device.waitForFences(1, &get_current_frame().render_fence, true, 1000000000));
 	VK_CHECK(device.resetFences(1, &get_current_frame().render_fence));
 
@@ -1092,7 +1092,7 @@ void RenderManager::draw() {
 
 	//prepare the submission to the queue.
 	//we want to wait on the _present_semaphore, as that semaphore is signaled when the swapchain is ready
-	//we will signal the render_semaphore, to signal that rendering has finished
+	//we will signal the render_semaphore, to signal that render has finished
 
 	vk::SubmitInfo submit = {};
 	submit.sType = vk::StructureType::eSubmitInfo;
@@ -1138,7 +1138,7 @@ void RenderManager::draw() {
 void RenderManager::draw_objects(vk::CommandBuffer cmd, RenderObject *first, int count) {
 	// TODO: Sort RenderObjects by material and mesh to reduce pipeline and descriptor set changes
 
-	//make a model view matrix for rendering the object
+	//make a model view matrix for render the object
 	//camera view
 	static glm::vec3 cam_pos = { 0.f, 0.f, -25.f };
 
