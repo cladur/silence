@@ -1,5 +1,5 @@
-#ifndef SILENCE_FMOD_LISTENER_H
-#define SILENCE_FMOD_LISTENER_H
+#ifndef SILENCE_FMOD_LISTENER_SYSTEM_H
+#define SILENCE_FMOD_LISTENER_SYSTEM_H
 
 #include "ecs/systems/base_system.h"
 #include "fmod_studio.hpp"
@@ -10,4 +10,4 @@ public:
 	void update(float dt);
 };
 
-#endif //SILENCE_FMOD_LISTENER_H
+#endif //SILENCE_FMOD_LISTENER_SYSTEM_H

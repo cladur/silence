@@ -2,7 +2,7 @@ set(AUDIO_MANAGER_NAME "silence_audio_manager")
 
 add_library(${AUDIO_MANAGER_NAME} STATIC
         audio_manager.cpp audio_manager.h
-        fmod_listener.h fmod_listener.cpp
+        fmod_listener_system.h fmod_listener_system.cpp
         event_reference.cpp event_reference.h
         )
 
