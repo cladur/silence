@@ -225,12 +225,7 @@ int main() {
 
 		display_manager.poll_events();
 		input_manager->process_input();
-
-		//input test
-		if (input_manager->is_action_pressed("Left")) {
-			should_run = false;
-		}
-
+		
 		//imgui new frame
 		ImGui_ImplVulkan_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
