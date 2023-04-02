@@ -5,7 +5,6 @@
 #include "../core/input/input_devices.h"
 #include "../core/input/input_key.h"
 #include "../core/input/input_manager.h"
-#include "../core/input/multiplatform_input.h"
 #include <GLFW/glfw3.h>
 #include <unordered_map>
 #include <utility>
@@ -21,8 +20,6 @@ public:
 
 	GLFWwindow *window;
 
-	//input
-	MultiplatformInput m_input{};
 	std::unordered_map<InputKey, InputDeviceState> get_gamepad_state(int index);
 
 	Status startup();

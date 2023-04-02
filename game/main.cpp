@@ -3,7 +3,6 @@
 #include "render_manager.h"
 
 #include "../core/input/input_manager.h"
-#include "../core/input/multiplatform_input.h"
 #include "components/gravity_component.h"
 #include "components/rigidbody_component.h"
 #include "components/state_component.h"
@@ -226,6 +225,11 @@ int main() {
 
 		display_manager.poll_events();
 		input_manager->process_input();
+
+		//input test
+		if (input_manager->is_action_pressed("Left")) {
+			should_run = false;
+		}
 
 		//imgui new frame
 		ImGui_ImplVulkan_NewFrame();

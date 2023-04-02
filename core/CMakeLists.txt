@@ -10,7 +10,7 @@ file(GLOB_RECURSE HEADER_FILES
         *.h
         *.hpp)
 
-add_library(${CORE_LIB_NAME} STATIC ${HEADER_FILES} ${SOURCE_FILES} input/input_manager.h input/input_manager.cpp input/input_key.h input/input_devices.h input/multiplatform_input.h input/multiplatform_input.cpp types.h components/transform_component.h components/rigidbody_component.h components/gravity_component.h components/parent_component.h components/children_component.h components/state_component.h ai/state_machine/base_state.h ai/state_machine/states/test_state.cpp ai/state_machine/states/test_state.h)
+add_library(${CORE_LIB_NAME} STATIC ${HEADER_FILES} ${SOURCE_FILES} input/input_manager.h input/input_manager.cpp input/input_key.h input/input_devices.h types.h components/transform_component.h components/rigidbody_component.h components/gravity_component.h components/parent_component.h components/children_component.h components/state_component.h ai/state_machine/base_state.h ai/state_machine/states/test_state.cpp ai/state_machine/states/test_state.h)
 
 target_include_directories(${CORE_LIB_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 

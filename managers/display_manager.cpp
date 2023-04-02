@@ -28,15 +28,14 @@ DisplayManager::Status DisplayManager::startup() {
 
 void DisplayManager::setup_input() {
 	//input
-	glfwSetWindowUserPointer(window, &m_input);
+	glfwSetWindowUserPointer(window, input_manager);
 
 	//registering devices
 	for (int i = 0; i <= GLFW_JOYSTICK_LAST; i++) {
 		if (glfwJoystickPresent(i)) {
 			// Register connected devices
 			if (input_manager) {
-				//input.AddController(i);
-				input_manager->register_device(InputDevice{ .Type = InputDeviceType::GAMEPAD,
+				input_manager->add_device(InputDevice{ .Type = InputDeviceType::GAMEPAD,
 						.Index = i,
 						.StateFunc = std::bind(
 								&DisplayManager::get_gamepad_state, display_manager, std::placeholders::_1) });
@@ -44,26 +43,26 @@ void DisplayManager::setup_input() {
 		}
 	}
 	if (input_manager) {
-		input_manager->register_device(InputDevice{
+		input_manager->add_device(InputDevice{
 
 				.Type = InputDeviceType::MOUSE,
 				.Index = 0,
-				.StateFunc = std::bind(&MultiplatformInput::get_mouse_state, &m_input, std::placeholders::_1) });
+				.StateFunc = std::bind(&InputManager::get_mouse_state, input_manager, std::placeholders::_1) });
 
-		input_manager->register_device(InputDevice{
+		input_manager->add_device(InputDevice{
 
 				.Type = InputDeviceType::KEYBOARD,
 				.Index = 0,
-				.StateFunc = std::bind(&MultiplatformInput::get_keyboard_state, &m_input, std::placeholders::_1) });
+				.StateFunc = std::bind(&InputManager::get_keyboard_state, input_manager, std::placeholders::_1) });
 
 		//Setting-up callbacks
 
 		glfwSetJoystickCallback([](int joystickId, int event) {
 			if (input_manager) {
-				auto *input = static_cast<MultiplatformInput *>(glfwGetWindowUserPointer(display_manager.window));
+				auto *input = static_cast<InputManager *>(glfwGetWindowUserPointer(display_manager.window));
 				if (input) {
 					if (event == GLFW_CONNECTED && glfwJoystickIsGamepad(joystickId)) {
-						input_manager->register_device(InputDevice{ .Type = InputDeviceType::GAMEPAD,
+						input_manager->add_device(InputDevice{ .Type = InputDeviceType::GAMEPAD,
 								.Index = joystickId,
 								.StateFunc = std::bind(
 										&DisplayManager::get_gamepad_state, display_manager, std::placeholders::_1) });
@@ -76,7 +75,7 @@ void DisplayManager::setup_input() {
 		});
 
 		glfwSetKeyCallback(window, [](GLFWwindow *w_window, int key, int scancode, int action, int mods) {
-			auto *input = static_cast<MultiplatformInput *>(glfwGetWindowUserPointer(w_window));
+			auto *input = static_cast<InputManager *>(glfwGetWindowUserPointer(w_window));
 			float value = 0.f;
 			switch (action) {
 				case GLFW_PRESS:
@@ -92,7 +91,7 @@ void DisplayManager::setup_input() {
 		});
 
 		glfwSetMouseButtonCallback(window, [](GLFWwindow *w_window, int button, int action, int mods) {
-			auto *input = static_cast<MultiplatformInput *>(glfwGetWindowUserPointer(w_window));
+			auto *input = static_cast<InputManager *>(glfwGetWindowUserPointer(w_window));
 			if (input) {
 				input->update_mouse_state(button, action == GLFW_PRESS ? 1.f : 0.f);
 			}
@@ -114,7 +113,7 @@ VkSurfaceKHR DisplayManager::create_surface(VkInstance &instance) const {
 
 void DisplayManager::poll_events() {
 	glfwPollEvents();
-	m_input.update_mouse_position(window);
+	input_manager->update_mouse_position(window);
 }
 
 bool DisplayManager::window_should_close() const {
@@ -130,7 +129,7 @@ std::pair<int, int> DisplayManager::get_framebuffer_size() const {
 std::unordered_map<InputKey, InputDeviceState> DisplayManager::get_gamepad_state(int index) {
 	GLFWgamepadstate state;
 	if (glfwGetGamepadState(index, &state)) {
-		return m_input.get_gamepad_state(state);
+		return input_manager->get_gamepad_state(state);
 	}
 
 	return std::unordered_map<InputKey, InputDeviceState>{};
