@@ -155,7 +155,7 @@ vk::ImageCreateInfo vk_init::image_create_info(
 
 vk::ImageViewCreateInfo vk_init::image_view_create_info(
 		vk::Format format, vk::Image image, vk::ImageAspectFlags aspect_flags) {
-	//build an image-view for the depth image to use for rendering
+	//build an image-view for the depth image to use for render
 	vk::ImageViewCreateInfo info = {};
 	info.sType = vk::StructureType::eImageViewCreateInfo;
 	info.pNext = nullptr;

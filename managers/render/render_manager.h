@@ -10,14 +10,14 @@
 #include "magic_enum.hpp"
 #include <glm/glm.hpp>
 
-#include "display_manager.h"
+#include "managers/display/display_manager.h"
 
 #define VULKAN_HPP_NO_EXCEPTIONS
 #include "vulkan/vulkan.hpp"
 
 #include "vulkan-memory-allocator-hpp/vk_mem_alloc.hpp"
 
-#include "rendering/vk_mesh.h"
+#include "render/vk_mesh.h"
 
 #define VK_CHECK(x)                                                                                                    \
 	do {                                                                                                               \
@@ -105,7 +105,7 @@ struct FrameData {
 	vk::CommandPool command_pool; //the command pool for our commands
 	vk::CommandBuffer main_command_buffer; //the buffer we will record into
 
-	//buffer that holds a single GPUCameraData to use when rendering
+	//buffer that holds a single GPUCameraData to use when render
 	AllocatedBuffer camera_buffer;
 	vk::DescriptorSet global_descriptor;
 
@@ -210,7 +210,7 @@ public:
 	Status startup(DisplayManager &display_manager);
 	void shutdown();
 
-	//getter for the frame we are rendering to right now.
+	//getter for the frame we are render to right now.
 	FrameData &get_current_frame();
 
 	AllocatedBuffer create_buffer(size_t alloc_size, vk::BufferUsageFlags usage, vma::MemoryUsage memory_usage) const;

@@ -1,6 +1,6 @@
 #include "audio/audio_manager.h"
-#include "display_manager.h"
-#include "render_manager.h"
+#include "managers/display/display_manager.h"
+#include "managers/render/render_manager.h"
 
 #include "components/children_component.h"
 #include "components/gravity_component.h"
@@ -8,9 +8,9 @@
 #include "components/rigidbody_component.h"
 #include "components/transform_component.h"
 
-#include "rendering/render_system.h"
-#include "systems/parent_system.h"
-#include "systems/physics_system.h"
+#include "ecs/systems/parent_system.h"
+#include "ecs/systems/physics_system.h"
+#include "render/render_system.h"
 
 #include "ecs/ecs_manager.h"
 
@@ -64,14 +64,14 @@ void demo_entities_init(std::vector<Entity> &entities) {
 		ecs_manager.add_component<MeshInstance>(
 				entity, { render_manager.get_mesh("box"), render_manager.get_material("default_mesh") });
 	}
-	auto entity = ecs_manager.create_entity();
-	ecs_manager.add_component(entity,
-			Transform{
-					glm::vec3(0.0f, 0.0f, -25.0f),
-					glm::vec3(0.0f),
-					glm::vec3(1.0f) });
-	ecs_manager.add_component<FmodListener>(entity, FmodListener{ .prev_frame_position = glm::vec3(0.0f, 0.0f, -25.0f)});
-	entities.push_back(entity);
+
+	auto listener = ecs_manager.create_entity();
+	ecs_manager.add_component(listener, Transform{ glm::vec3(0.0f, 0.0f, -25.0f), glm::vec3(0.0f), glm::vec3(1.0f) });
+	// Later on attach FmodListener component to camera
+	ecs_manager.add_component<FmodListener>(listener,
+			FmodListener{ .listener_id = SILENCE_FMOD_LISTENER_DEBUG_CAMERA,
+					.prev_frame_position = glm::vec3(0.0f, 0.0f, -25.0f) });
+	entities.push_back(listener);
 }
 
 bool display_manager_init() {
@@ -160,9 +160,6 @@ int main() {
 	audio_manager.load_bank("Ambience");
 	audio_manager.load_sample_data();
 
-	// i made this late start to assign all listeners a unique id. Can't do this in startup ¯\_(ツ)_/¯
-	fmod_listener_system->late_start();
-
 	// Run the game.
 	float dt{};
 	bool show_ecs_logs = false;
@@ -245,7 +242,6 @@ int main() {
 
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
 				ImGui::GetIO().Framerate);
-
 
 		ImGui::End();
 

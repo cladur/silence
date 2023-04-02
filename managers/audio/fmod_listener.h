@@ -1,15 +1,12 @@
 #ifndef SILENCE_FMOD_LISTENER_H
 #define SILENCE_FMOD_LISTENER_H
 
+#include "ecs/systems/base_system.h"
 #include "fmod_studio.hpp"
-#include "../systems/base_system.h"
 
 class FmodListenerSystem : public BaseSystem {
 public:
 	void startup();
-
-	void late_start();
-
 	void update(float dt);
 };
 

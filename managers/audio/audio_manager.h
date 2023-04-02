@@ -5,6 +5,11 @@
 #include "event_reference.h"
 #include "fmod_studio.hpp"
 
+#define SILENCE_FMOD_LISTENER_DEBUG_CAMERA 0
+// Add them when we need them
+// #define SILENCE_FMOD_LISTENER_AGENT 1
+// #define SILENCE_FMOD_LISTENER_HACKER 2
+
 class AudioManager {
 	FMOD::Studio::System *system = nullptr;
 
@@ -18,6 +23,7 @@ class AudioManager {
 	std::string event_path_prefix = "event:/";
 
 	FMOD::Studio::EventInstance *test_event_instance = nullptr;
+
 public:
 	void startup();
 	void shutdown();
@@ -26,7 +32,8 @@ public:
 	void load_startup_banks();
 	void load_bank(const std::string &name);
 
-	void set_3d_listener_attributes(int listener_id, glm::vec3 position, glm::vec3 velocity, glm::vec3 forward, glm::vec3 up);
+	void set_3d_listener_attributes(
+			int listener_id, glm::vec3 position, glm::vec3 velocity, glm::vec3 forward, glm::vec3 up);
 
 	// this loads ALL SAMPLES FROM ALL BANKS
 	// which later may create a lot of memory overhead
@@ -46,7 +53,7 @@ public:
 	 * @param path
 	 * @return
 	 */
-	FMOD::Studio::EventInstance *create_event_instance(const EventReference& event_ref);
+	FMOD::Studio::EventInstance *create_event_instance(const EventReference &event_ref);
 
 	void play_one_shot_2d(const EventReference &event_ref);
 
@@ -55,9 +62,6 @@ public:
 	static FMOD_3D_ATTRIBUTES to_3d_attributes(glm::vec3 position, RigidBody *rigid_body = nullptr);
 
 	FMOD_GUID path_to_guid(const std::string &path);
-
 };
 
-
 #endif //SILENCE_AUDIO_MANAGER_H
-
