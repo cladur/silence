@@ -130,6 +130,9 @@ void InputManager::remove_action(const std::string &action_name) {
 }
 
 void InputManager::add_key_to_action(const std::string &action_name, InputKey key) {
+	if (!actions.contains(action_name)) {
+		SPDLOG_WARN("Action {} does not exist", action_name);
+	}
 	actions[action_name].keys.push_back(key);
 }
 

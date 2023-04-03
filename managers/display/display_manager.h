@@ -22,6 +22,8 @@ public:
 	Status startup();
 	void shutdown();
 
+	void capture_mouse(bool capture) const;
+
 	VkSurfaceKHR create_surface(VkInstance &instance) const;
 
 	[[nodiscard]] std::pair<int, int> get_framebuffer_size() const;

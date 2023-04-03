@@ -29,6 +29,10 @@ DisplayManager::Status DisplayManager::startup() {
 void DisplayManager::shutdown() {
 }
 
+void DisplayManager::capture_mouse(bool capture) const {
+	glfwSetInputMode(window, GLFW_CURSOR, capture ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
+}
+
 VkSurfaceKHR DisplayManager::create_surface(VkInstance &instance) const {
 	VkSurfaceKHR surface;
 	VkResult err = glfwCreateWindowSurface(instance, window, nullptr, &surface);

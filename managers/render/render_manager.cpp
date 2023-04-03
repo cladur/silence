@@ -714,15 +714,6 @@ void RenderManager::init_imgui(GLFWwindow *window) {
 		device.destroyDescriptorPool(imgui_pool, nullptr);
 		ImGui_ImplVulkan_Shutdown();
 	});
-
-	// zajebisty styl wulkanowy czerwony 😎
-	// TODO: zrobic styl wulkanowy fajniejszy
-	//	ImGuiStyle &vulkan_style = ImGui::GetStyle();
-	//	vulkan_style.Colors[ImGuiCol_TitleBg] = ImVec4(1.0f, 0.0f, 0.0f, 0.6f);
-	//	vulkan_style.Colors[ImGuiCol_TitleBgActive] = ImVec4(1.0f, 0.0f, 0.0f, 0.8f);
-	//	vulkan_style.Colors[ImGuiCol_MenuBarBg] = ImVec4(1.0f, 0.0f, 0.0f, 0.4f);
-	//	vulkan_style.Colors[ImGuiCol_Header] = ImVec4(1.0f, 0.0f, 0.0f, 0.4f);
-	//	vulkan_style.Colors[ImGuiCol_CheckMark] = ImVec4(0.0f, 1.0f, 0.0f, 1.0f);
 }
 
 bool RenderManager::load_shader_module(const char *file_path, vk::ShaderModule *out_shader_module) {
@@ -1022,7 +1013,7 @@ void RenderManager::load_images() {
 	loaded_textures["empire_diffuse"] = texture;
 }
 
-void RenderManager::draw() {
+void RenderManager::draw(Camera &camera) {
 	//wait until the GPU has finished render the last frame. Timeout of 1 second
 	VK_CHECK(device.waitForFences(1, &get_current_frame().render_fence, true, 1000000000));
 	VK_CHECK(device.resetFences(1, &get_current_frame().render_fence));
@@ -1080,7 +1071,7 @@ void RenderManager::draw() {
 
 	cmd.beginRenderPass(&rp_info, vk::SubpassContents::eInline);
 
-	draw_objects(cmd, renderables.data(), (int)renderables.size());
+	draw_objects(camera, cmd, renderables.data(), (int)renderables.size());
 
 	ImGui::Render();
 
@@ -1135,37 +1126,13 @@ void RenderManager::draw() {
 	frame_number++;
 }
 
-void RenderManager::draw_objects(vk::CommandBuffer cmd, RenderObject *first, int count) {
+void RenderManager::draw_objects(Camera &camera, vk::CommandBuffer cmd, RenderObject *first, int count) {
 	// TODO: Sort RenderObjects by material and mesh to reduce pipeline and descriptor set changes
 
-	//make a model view matrix for render the object
-	//camera view
-	static glm::vec3 cam_pos = { 0.f, 0.f, -25.f };
-
-	static float fov = 60.f;
-
-	static float pitch = 0.f;
-	static float yaw = 0.f;
-
-	glm::vec3 final_cam_pos = cam_pos;
-	final_cam_pos.y *= -1.f;
-
-	glm::mat4 view = glm::translate(glm::mat4(1.f), final_cam_pos) *
-			glm::rotate(glm::mat4(1.f), pitch, glm::vec3(1, 0, 0)) *
-			glm::rotate(glm::mat4(1.f), yaw, glm::vec3(0, 1, 0));
+	glm::mat4 view = camera.get_view_matrix();
 	//camera projection
 	static float aspect = (float)window_extent.width / (float)window_extent.height;
-	glm::mat4 projection = glm::perspective(glm::radians(fov), aspect, 0.1f, 200.0f);
-
-	float pi = 3.14f;
-
-	ImGui::Begin("Camera");
-	ImGui::SliderFloat("Y", &cam_pos.y, -50, 50);
-	ImGui::SliderFloat("Z", &cam_pos.z, -100, -2);
-	ImGui::SliderFloat("Pitch", &pitch, -pi, pi);
-	ImGui::SliderFloat("Yaw", &yaw, -pi, pi);
-	ImGui::SliderFloat("FOV", &fov, 30, 120);
-	ImGui::End();
+	glm::mat4 projection = glm::perspective(glm::radians(camera.fov), aspect, 0.1f, 200.0f);
 
 	//fill a GPU camera data struct
 	GPUCameraData cam_data = {};
