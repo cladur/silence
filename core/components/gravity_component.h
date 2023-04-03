@@ -1,4 +1,3 @@
-#include <glm/vec3.hpp>
 #ifndef SILENCE_GRAVITY_H
 #define SILENCE_GRAVITY_H
 

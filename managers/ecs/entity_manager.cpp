@@ -1,5 +1,4 @@
 #include "entity_manager.h"
-#include <cassert>
 
 void EntityManager::startup() {
 	for (Entity entity = 1; entity < MAX_ENTITIES; ++entity) {
@@ -33,7 +32,7 @@ void EntityManager::destroy_entity(Entity entity) {
 	living_entities_count--;
 }
 
-void EntityManager::set_component_whitelist(Entity entity, Signature signature) {
+void EntityManager::set_entity_signature(Entity entity, Signature signature) {
 	assert(entity < MAX_ENTITIES && "Entity bigger than max value");
 
 	// Set signature for entity (signature = bitset representing which components are on gameObject or which components

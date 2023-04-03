@@ -1,11 +1,7 @@
-#include "../../core/types.h"
-#include "component_array_interface.h"
-#include <cassert>
-#include <unordered_map>
-#ifndef SILENCE_COMPONENTARRAYINTERFACE_H
-#define SILENCE_COMPONENTARRAYINTERFACE_H
+#ifndef SILENCE_COMPONENT_ARRAY_INTERFACE_H
+#define SILENCE_COMPONENT_ARRAY_INTERFACE_H
 
-#endif //SILENCE_COMPONENTARRAYINTERFACE_H
+#include "component_array_interface.h"
 
 // An interface is needed so that the ComponentManager (seen later)
 // can tell a generic ComponentArray that an entity has been destroyed
@@ -82,3 +78,5 @@ private:
 	// Total size of valid entries in the array.
 	size_t size{};
 };
+
+#endif //SILENCE_COMPONENT_ARRAY_INTERFACE_H
