@@ -4,6 +4,7 @@
 
 #include "components/children_component.h"
 #include "components/gravity_component.h"
+#include "components/mesh_instance_component.h"
 #include "components/parent_component.h"
 #include "components/rigidbody_component.h"
 #include "components/transform_component.h"
@@ -181,6 +182,7 @@ int main() {
 
 	bool should_run = true;
 	std::string json_c1;
+	nlohmann::json scene;
 	while (should_run) {
 		// GAME LOGIC
 
@@ -224,7 +226,8 @@ int main() {
 		}
 
 		if (ImGui::Button("Save scene")) {
-			json_c1 = scene_manager.save_scene("aa");
+			scene = scene_manager.save_scene("scena", entities);
+			SceneManager::save_json_to_file("test.json", scene);
 		}
 
 		if (ImGui::Button("Load scene")) {

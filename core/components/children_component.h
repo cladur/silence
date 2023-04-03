@@ -5,6 +5,17 @@ struct Children {
 	std::uint8_t children_count{};
 	std::array<Entity, MAX_CHILDREN> children{};
 
+	void serialize(nlohmann::json &j) {
+		nlohmann::json::object_t obj;
+		obj["children_count"] = children_count;
+		obj["children"] = nlohmann::json::array();
+		for (int i = 0; i < children_count; i++) {
+			obj["children"].push_back(children[i]);
+		}
+		j.push_back(nlohmann::json::object());
+		j.back()["children"] = obj;
+	}
+
 	bool add_child(Entity entity) {
 		if (children_count >= MAX_CHILDREN || get_children_index(entity) != -1) {
 			return false;

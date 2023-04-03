@@ -75,11 +75,6 @@ struct RenderObject {
 	glm::mat4 transform_matrix;
 };
 
-struct MeshInstance {
-	Mesh *mesh;
-	Material *material;
-};
-
 struct GPUCameraData {
 	glm::mat4 view;
 	glm::mat4 proj;

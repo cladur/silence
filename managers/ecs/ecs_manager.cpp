@@ -2,6 +2,7 @@
 
 #include "components/children_component.h"
 #include "components/parent_component.h"
+#include <spdlog/spdlog.h>
 
 void ECSManager::startup() {
 	// Create pointers to each manager
@@ -80,4 +81,10 @@ bool ECSManager::has_child(Entity parent, Entity child) {
 		}
 	}
 	return false;
+}
+void ECSManager::serialize_entity(nlohmann::json &json, Entity entity) {
+	json["entity"] = entity;
+	json["signature"] = entity_manager->get_signature(entity).to_string();
+	json["components"] = nlohmann::json::array();
+	component_manager->serialize_entity(json["components"], entity);
 }

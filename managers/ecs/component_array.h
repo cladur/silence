@@ -2,10 +2,15 @@
 #define SILENCE_COMPONENT_ARRAY_INTERFACE_H
 
 #include "component_array_interface.h"
+#include <memory>
 
 // An interface is needed so that the ComponentManager (seen later)
 // can tell a generic ComponentArray that an entity has been destroyed
 // and that it needs to update its array mappings.
+template <typename T>
+concept Serializable = requires(T t, nlohmann::json &j) {
+	{ t.serialize(j) };
+};
 
 template <typename T> class ComponentArray : public IComponentArray {
 public:
@@ -54,12 +59,25 @@ public:
 		}
 	}
 
-	bool has_component(Entity entity) {
+	bool has_component(Entity entity) override {
 		if (entityToIndexMap.find(entity) != entityToIndexMap.end()) {
 			return true;
 		}
 
 		return false;
+	}
+
+	void serialize_entity(nlohmann::json &json, Entity entity) override {
+		if (entityToIndexMap.find(entity) != entityToIndexMap.end()) {
+			// cast component to Serializable to get serialize method
+			serialize_component(componentArray[entityToIndexMap[entity]], json);
+		}
+	}
+
+	void serialize_component(T &component, nlohmann::json &json)
+		requires Serializable<T>
+	{
+		component.serialize(json);
 	}
 
 private:

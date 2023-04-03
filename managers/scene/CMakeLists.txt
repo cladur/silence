@@ -11,6 +11,5 @@ target_link_libraries(${SCENE_MANAGER_NAME}
         PUBLIC
         PRIVATE
         silence_common
-
         )
 

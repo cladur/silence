@@ -78,6 +78,14 @@ public:
 			component->entity_destroyed(entity);
 		}
 	}
+
+	void serialize_entity(nlohmann::json &json, Entity entity) {
+		for (auto const &pair : component_arrays) {
+			auto const &component = pair.second;
+
+			component->serialize_entity(json, entity);
+		}
+	}
 };
 
 #endif //SILENCE_COMPONENTMANAGER_H
