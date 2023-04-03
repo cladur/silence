@@ -32,6 +32,11 @@ bool ECSManager::add_child(Entity parent, Entity child) {
 	if (!has_component<Children>(parent)) {
 		add_component<Children>(parent, Children{});
 		SPDLOG_INFO("Added children component to {}", parent);
+	} else {
+		if (has_child(parent, child)) {
+			SPDLOG_WARN("Child {} already exists on parent {}", child, parent);
+			return false;
+		}
 	}
 
 	if (!has_component<Parent>(child)) {
@@ -66,4 +71,13 @@ bool ECSManager::remove_child(Entity parent, Entity child) {
 	}
 
 	return true;
+}
+
+bool ECSManager::has_child(Entity parent, Entity child) {
+	for (auto &c : get_component<Children>(parent).children) {
+		if (c == child) {
+			return true;
+		}
+	}
+	return false;
 }

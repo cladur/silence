@@ -71,6 +71,7 @@ public:
 	// Specific parent system methods
 	bool add_child(Entity parent, Entity child);
 	bool remove_child(Entity parent, Entity child);
+	bool has_child(Entity parent, Entity child);
 };
 
 #endif //SILENCE_ECSMANAGER_H

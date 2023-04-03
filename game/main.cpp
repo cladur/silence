@@ -18,11 +18,13 @@
 #include "components/fmod_listener_component.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_vulkan.h"
+#include "scene/scene_manager.h"
 
 RenderManager render_manager;
 DisplayManager display_manager;
 ECSManager ecs_manager;
 AudioManager audio_manager;
+SceneManager scene_manager;
 
 void default_ecs_manager_init() {
 	ecs_manager.startup();
@@ -178,6 +180,7 @@ int main() {
 	// #################
 
 	bool should_run = true;
+	std::string json_c1;
 	while (should_run) {
 		// GAME LOGIC
 
@@ -218,6 +221,14 @@ int main() {
 				destroy_all_entities(entities);
 			}
 			entities_destroyed = true;
+		}
+
+		if (ImGui::Button("Save scene")) {
+			json_c1 = scene_manager.save_scene("aa");
+		}
+
+		if (ImGui::Button("Load scene")) {
+			scene_manager.load_scene(json_c1);
 		}
 
 		ImGui::DragInt("Entities count", &imgui_entities_count, 1, 1, max_entities);

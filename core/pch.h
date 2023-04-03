@@ -37,6 +37,7 @@
 #include "glm/glm.hpp"
 #include "imgui.h"
 #include "magic_enum.hpp"
+#include "nlohmann/json.hpp"
 #include "spdlog/spdlog.h"
 
 // our stuff

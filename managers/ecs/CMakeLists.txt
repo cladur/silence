@@ -19,4 +19,5 @@ target_include_directories(${ECS_MANAGER_NAME} PUBLIC ${MANAGER_DIR})
 target_link_libraries(${ECS_MANAGER_NAME} PRIVATE
         silence_common
         silence_core
+
         )
