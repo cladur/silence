@@ -25,6 +25,24 @@ ECSManager ecs_manager;
 AudioManager audio_manager;
 InputManager input_manager;
 
+void default_mappings() {
+	input_manager.add_action("jump");
+	input_manager.add_key_to_action("jump", InputKey::SPACE);
+	input_manager.add_key_to_action("jump", InputKey::GAMEPAD_BUTTON_A);
+	input_manager.add_action("menu");
+	input_manager.add_key_to_action("menu", InputKey::ESCAPE);
+	input_manager.add_key_to_action("menu", InputKey::GAMEPAD_BACK);
+	input_manager.add_action("shoot");
+	input_manager.add_key_to_action("shoot", InputKey::MOUSE_LEFT);
+	input_manager.add_key_to_action("shoot", InputKey::GAMEPAD_RIGHT_TRIGGER);
+	input_manager.add_action("move_forward");
+	input_manager.add_key_to_action("move_forward", InputKey::W);
+	input_manager.add_key_to_action("move_forward", InputKey::GAMEPAD_LEFT_STICK_Y_POSITIVE);
+	input_manager.add_action("move_backward");
+	input_manager.add_key_to_action("move_backward", InputKey::S);
+	input_manager.add_key_to_action("move_backward", InputKey::GAMEPAD_LEFT_STICK_Y_NEGATIVE);
+}
+
 void default_ecs_manager_init() {
 	ecs_manager.startup();
 
@@ -253,7 +271,6 @@ int main() {
 		ImGui::SliderFloat3("Sound position", &sound_position[0], -100.0f, 100.0f);
 
 		if (ImGui::Button("Play pluck")) {
-			//audio_manager.test_play_sound();
 			audio_manager.play_one_shot_3d(test_pluck, sound_position);
 		}
 		// 3D SOUND DEMO
