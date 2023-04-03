@@ -1,292 +1,226 @@
 #include "input_manager.h"
 
-void InputManager::add_action_callback(const std::string &action_name, const ActionCallback &callback) {
-	action_callbacks[action_name].emplace_back(callback);
+bool InputManager::is_action_valid(const std::string &action_name) {
+	if (!actions.contains(action_name)) {
+		SPDLOG_WARN("Action {} does not exist", action_name);
+		return false;
+	}
+
+	auto action = actions[action_name];
+	if (action.keys.empty()) {
+		SPDLOG_WARN("Action {} has no keys assigned to it", action_name);
+		return false;
+	}
+	return true;
 }
-void InputManager::remove_action_callback(const std::string &action_name, const std::string &callback_reference) {
-	std::erase_if(action_callbacks[action_name], [callback_reference](const ActionCallback &callback) {
-		return callback.callback_reference == callback_reference;
+
+inline void InputManager::poll_stick_axis(
+		GLFWgamepadstate &state, int glfw_axis, InputKey positive_key, InputKey negative_key) {
+	float value = state.axes[glfw_axis];
+	if (value > 0.0f) {
+		key_state[positive_key] = value;
+		key_state[negative_key] = 0.0f;
+	} else {
+		key_state[positive_key] = 0.0f;
+		key_state[negative_key] = -value;
+	}
+}
+
+void InputManager::poll_gamepads() {
+	GLFWgamepadstate state;
+
+	for (int gamepad = GLFW_JOYSTICK_1; gamepad <= GLFW_JOYSTICK_LAST; gamepad++) {
+		if (glfwGetGamepadState(gamepad, &state)) {
+			// Buttons
+			for (int i = 0; i <= GLFW_GAMEPAD_BUTTON_LAST; i++) {
+				InputKey key = glfw_gamepad_button_to_input_key(i);
+				if (state.buttons[i] == GLFW_PRESS) {
+					key_state[key] = 1.0f;
+				} else {
+					key_state[key] = 0.0f;
+				}
+			}
+
+			// Sticks
+			poll_stick_axis(state, GLFW_GAMEPAD_AXIS_LEFT_X, InputKey::GAMEPAD_LEFT_STICK_X_POSITIVE,
+					InputKey::GAMEPAD_LEFT_STICK_X_NEGATIVE);
+			poll_stick_axis(state, GLFW_GAMEPAD_AXIS_LEFT_Y, InputKey::GAMEPAD_LEFT_STICK_Y_NEGATIVE,
+					InputKey::GAMEPAD_LEFT_STICK_Y_POSITIVE);
+			poll_stick_axis(state, GLFW_GAMEPAD_AXIS_RIGHT_X, InputKey::GAMEPAD_RIGHT_STICK_X_POSITIVE,
+					InputKey::GAMEPAD_RIGHT_STICK_X_NEGATIVE);
+			poll_stick_axis(state, GLFW_GAMEPAD_AXIS_RIGHT_Y, InputKey::GAMEPAD_RIGHT_STICK_Y_NEGATIVE,
+					InputKey::GAMEPAD_RIGHT_STICK_Y_POSITIVE);
+
+			// Triggers
+			key_state[InputKey::GAMEPAD_LEFT_TRIGGER] = (state.axes[GLFW_GAMEPAD_AXIS_LEFT_TRIGGER] + 1.0f) * 0.5f;
+			key_state[InputKey::GAMEPAD_RIGHT_TRIGGER] = (state.axes[GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER] + 1.0f) * 0.5f;
+		}
+	}
+}
+
+void InputManager::startup(GLFWwindow *window) {
+	glfwSetWindowUserPointer(window, this);
+	for (int i = GLFW_JOYSTICK_1; i < GLFW_JOYSTICK_16; i++) {
+		glfwSetJoystickUserPointer(i, this);
+	}
+
+	glfwSetJoystickCallback([](int joystickId, int event) {
+		auto *input = static_cast<InputManager *>(glfwGetJoystickUserPointer(joystickId));
+		if (input == nullptr) {
+			return;
+		}
+		switch (event) {
+			case GLFW_CONNECTED: {
+				const char *name = glfwGetJoystickName(joystickId);
+				SPDLOG_INFO("Gamepad ({}) {} connected", joystickId, name);
+				break;
+			}
+			case GLFW_DISCONNECTED: {
+				SPDLOG_INFO("Gamepad ({}) disconnected", joystickId);
+				break;
+			}
+			default:
+				break;
+		}
+	});
+
+	glfwSetKeyCallback(window, [](GLFWwindow *w_window, int key, int scancode, int action, int mods) {
+		auto *input = static_cast<InputManager *>(glfwGetWindowUserPointer(w_window));
+		InputKey input_key = glfw_key_to_input_key(key);
+		float value = 0.f;
+		switch (action) {
+			case GLFW_PRESS:
+				value = 1.f;
+				break;
+			case GLFW_RELEASE:
+				value = 0.f;
+				break;
+			case GLFW_REPEAT:
+			default:
+				return;
+		}
+		input->key_state[input_key] = value;
+	});
+
+	glfwSetMouseButtonCallback(window, [](GLFWwindow *w_window, int button, int action, int mods) {
+		auto *input = static_cast<InputManager *>(glfwGetWindowUserPointer(w_window));
+		InputKey input_key = glfw_mouse_button_to_input_key(button);
+		input->key_state[input_key] = action == GLFW_PRESS ? 1.f : 0.f;
+	});
+
+	glfwSetCursorPosCallback(window, [](GLFWwindow *w_window, double xpos, double ypos) {
+		auto *input = static_cast<InputManager *>(glfwGetWindowUserPointer(w_window));
+		input->mouse_position = glm::vec2(xpos, ypos);
 	});
 }
-void InputManager::map_input_to_action(InputKey key, const InputAction &action) {
-	//TODO: Check for duplicates
-	input_action_mapping[key].emplace_back(action);
+
+void InputManager::shutdown() {
 }
-void InputManager::unmap_input_from_action(InputKey key, const std::string &action) {
-	erase_if(input_action_mapping[key],
-			[action](const InputAction &input_action) { return input_action.action_name == action; });
+
+void InputManager::add_action(const std::string &action_name) {
+	if (actions.contains(action_name)) {
+		SPDLOG_WARN("Action {} already exists", action_name);
+		return;
+	}
+	actions[action_name] = Action{ .name = action_name, .keys = {}, .deadzone = 0.5f };
 }
+
+void InputManager::remove_action(const std::string &action_name) {
+	actions.erase(action_name);
+}
+
+void InputManager::add_key_to_action(const std::string &action_name, InputKey key) {
+	actions[action_name].keys.push_back(key);
+}
+
+void InputManager::remove_key_from_action(const std::string &action_name, InputKey key) {
+	actions[action_name].keys.erase(
+			std::remove(actions[action_name].keys.begin(), actions[action_name].keys.end(), key),
+			actions[action_name].keys.end());
+}
+
 void InputManager::process_input() {
-	std::vector<ActionEvent> events{};
-	for (int i = 0; i < input_devices.size(); i++) { // NOLINT(modernize-loop-convert)
-		auto new_state = input_devices[i].StateFunc(input_devices[i].Index);
-		//compare to old stare for device
-		for (auto &key_state : new_state) {
-			if (input_devices[i].CurrentState[key_state.first].value != key_state.second.value) {
-				//TODO: Fix conflicting buttons if they are mapped to the same action
-				auto generated_events =
-						generate_action_event(input_devices[i].Index, key_state.first, key_state.second.value);
-				events.insert(events.end(), generated_events.begin(), generated_events.end());
-
-				//save new state value
-				input_devices[i].CurrentState[key_state.first].value = key_state.second.value;
-			}
-		}
-	}
-
-	//propagate action events
-	for (auto &event : events) {
-		propagate_action_event(event);
-	}
+	previous_key_state = key_state;
+	mouse_delta = mouse_position - last_mouse_position;
+	last_mouse_position = mouse_position;
+	poll_gamepads();
 }
 
-std::vector<InputManager::ActionEvent> InputManager::generate_action_event(
-		int DeviceIndex, InputKey key, float newVal) {
-	auto &actions = input_action_mapping[key];
-
-	std::vector<ActionEvent> action_events{};
-
-	InputSource source = get_input_source_from_key(key);
-	for (auto &action : actions) {
-		action_events.emplace_back(ActionEvent{ .action_name = action.action_name,
-				.source = source,
-				.source_index = DeviceIndex,
-				.value = newVal * action.scale });
-	}
-
-	return action_events;
-}
-void InputManager::propagate_action_event(InputManager::ActionEvent event) {
-	size_t var = action_callbacks[event.action_name].size();
-
-	for (int i = var - 1; i >= 0; i--) {
-		SPDLOG_INFO(var);
-		auto &action_callback = action_callbacks[event.action_name][i];
-
-		if (action_callback.func(event.source, event.source_index, event.value)) {
-			break;
-		}
-	}
-}
-void InputManager::add_device(const InputDevice &device) {
-	input_devices.emplace_back(device);
-	SPDLOG_INFO("Register device: {} {}", magic_enum::enum_name(device.Type), device.Index);
-	SPDLOG_INFO("No devices: {}", input_devices.size());
-}
-void InputManager::remove_device(InputDeviceType type, int input_index) {
-	erase_if(input_devices, [type, input_index](const InputDevice &device) {
-		return device.Type == type && device.Index == input_index;
-	});
-	SPDLOG_INFO("No devices: {}", input_devices.size());
-}
-float InputManager::get_action_raw_strength(const std::string &action_name) {
-	float value = 0;
-	for (auto &device : input_devices) {
-		for (auto &key_state : device.CurrentState) {
-			auto &actions = input_action_mapping[key_state.first];
-			for (auto &action : actions) {
-				if (action.action_name == action_name) {
-					return key_state.second.value * action.scale;
-				}
-			}
-		}
-	}
-	return value;
-}
-float InputManager::get_action_strength(const std::string &action_name) {
-	float value = 0;
-	for (auto &device : input_devices) {
-		for (auto &key_state : device.CurrentState) {
-			auto &actions = input_action_mapping[key_state.first];
-			for (auto &action : actions) {
-				if (action.action_name == action_name) {
-					if (abs(key_state.second.value) > abs(action.deadzone)) {
-						return key_state.second.value * action.scale;
-					}
-				}
-			}
-		}
-	}
-	return value;
-}
-
-float InputManager::get_axis(const std::string &negative_action, const std::string &positive_action) {
-	float negative_value = get_action_raw_strength(negative_action);
-	float positive_value = get_action_raw_strength(positive_action);
-	return negative_value + positive_value;
-}
-float InputManager::get_gamepad_action_value(int gamepad_index, const std::string &action_name) {
-	for (auto &device : input_devices) {
-		if (device.Type == InputDeviceType::GAMEPAD && device.Index == gamepad_index) {
-			for (auto &key_state : device.CurrentState) {
-				auto &actions = input_action_mapping[key_state.first];
-				for (auto &action : actions) {
-					if (action.action_name == action_name) {
-						return key_state.second.value * action.scale;
-					}
-				}
-			}
-		}
-	}
-	return 0;
-}
-int *InputManager::get_all_gamepads() {
-	int *gamepads = new int[input_devices.size()];
-	int i = 0;
-	for (auto &device : input_devices) {
-		if (device.Type == InputDeviceType::GAMEPAD) {
-			gamepads[i] = device.Index;
-			i++;
-		}
-	}
-	return gamepads;
-}
-
-glm::vec2 InputManager::get_mouse_position() {
-	for (auto &device : input_devices) {
-		if (device.Type == InputDeviceType::MOUSE) {
-			return { device.CurrentState[InputKey::MOUSE_POS_X].value,
-				device.CurrentState[InputKey::MOUSE_POS_Y].value };
-		}
-	}
-	return glm::vec2(0);
-}
-glm::vec2 InputManager::get_mouse_delta() {
-	for (auto &device : input_devices) {
-		if (device.Type == InputDeviceType::MOUSE) {
-			return { device.CurrentState[InputKey::MOUSE_X].value, device.CurrentState[InputKey::MOUSE_Y].value };
-		}
-	}
-	return glm::vec2(0);
-}
-bool InputManager::is_action_pressed(const std::string &action_name) {
-	for (auto &device : input_devices) {
-		for (auto &key_state : device.CurrentState) {
-			auto &actions = input_action_mapping[key_state.first];
-			for (auto &action : actions) {
-				if (action.action_name == action_name) {
-					return key_state.second.value > 0;
-				}
-			}
-		}
-	}
-	return false;
-}
 bool InputManager::is_action_just_pressed(const std::string &action_name) {
+	if (!is_action_valid(action_name)) {
+		return false;
+	}
+	auto action = actions[action_name];
+
+	for (auto &key : action.keys) { // NOLINT(readability-use-anyofallof)
+		if (key == InputKey::UNKNOWN) {
+			continue;
+		}
+		if (key_state[key] > action.deadzone && previous_key_state[key] < action.deadzone) {
+			return true;
+		}
+	}
 	return false;
 }
 bool InputManager::is_action_just_released(const std::string &action_name) {
+	if (!is_action_valid(action_name)) {
+		return false;
+	}
+	auto action = actions[action_name];
+
+	for (auto &key : action.keys) { // NOLINT(readability-use-anyofallof)
+		if (key == InputKey::UNKNOWN) {
+			continue;
+		}
+		if (key_state[key] < action.deadzone && previous_key_state[key] > action.deadzone) {
+			return true;
+		}
+	}
 	return false;
 }
+bool InputManager::is_action_pressed(const std::string &action_name) {
+	if (!is_action_valid(action_name)) {
+		return false;
+	}
+	auto action = actions[action_name];
 
-void InputManager::update_keyboard_state(int key, float value) {
-	InputKey i_key = multiplatform_key_to_input_key(key);
-	keyboard_state[i_key].value = value;
+	for (auto &key : action.keys) { // NOLINT(readability-use-anyofallof)
+		if (key == InputKey::UNKNOWN) {
+			continue;
+		}
+		if (key_state[key] > action.deadzone) {
+			return true;
+		}
+	}
+	return false;
 }
-void InputManager::update_mouse_state(int button, float value) {
-	InputKey i_key = multiplatform_button_to_input_key(button);
-	mouse_state[i_key].value = value;
+glm::vec2 InputManager::get_mouse_position() {
+	return mouse_position;
 }
+glm::vec2 InputManager::get_mouse_delta() {
+	return mouse_delta;
+}
+float InputManager::get_action_strength(const std::string &action_name) {
+	if (!is_action_valid(action_name)) {
+		return 0.f;
+	}
 
-std::unordered_map<InputKey, InputDeviceState> InputManager::get_gamepad_state(const GLFWgamepadstate &state) {
-	std::unordered_map<InputKey, InputDeviceState> gamepad_state{};
-
-	for (int i = 0; i <= GLFW_GAMEPAD_BUTTON_LAST; i++) {
-		int button_state = state.buttons[i];
-		float value = button_state == GLFW_PRESS ? 1.f : 0.f;
-
-		switch (i) {
-			case GLFW_GAMEPAD_BUTTON_B:
-				gamepad_state[InputKey::GAMEPAD_BUTTON_EAST].value = value;
-				break;
-			case GLFW_GAMEPAD_BUTTON_A:
-				gamepad_state[InputKey::GAMEPAD_BUTTON_SOUTH].value = value;
-				break;
-			case GLFW_GAMEPAD_BUTTON_X:
-				gamepad_state[InputKey::GAMEPAD_BUTTON_WEST].value = value;
-				break;
-			case GLFW_GAMEPAD_BUTTON_Y:
-				gamepad_state[InputKey::GAMEPAD_BUTTON_NORTH].value = value;
-				break;
-			case GLFW_GAMEPAD_BUTTON_LEFT_BUMPER:
-				gamepad_state[InputKey::L_BUMPER].value = value;
-				break;
-			case GLFW_GAMEPAD_BUTTON_RIGHT_BUMPER:
-				gamepad_state[InputKey::R_BUMPER].value = value;
-				break;
-			case GLFW_GAMEPAD_BUTTON_BACK:
-				gamepad_state[InputKey::GAMEPAD_BACK].value = value;
-				break;
-			case GLFW_GAMEPAD_BUTTON_START:
-				gamepad_state[InputKey::GAMEPAD_START].value = value;
-				break;
-			case GLFW_GAMEPAD_BUTTON_LEFT_THUMB:
-				gamepad_state[InputKey::GAMEPAD_LEFT_THUMB].value = value;
-				break;
-			case GLFW_GAMEPAD_BUTTON_RIGHT_THUMB:
-				gamepad_state[InputKey::GAMEPAD_RIGHT_THUMB].value = value;
-				break;
-			case GLFW_GAMEPAD_BUTTON_DPAD_UP:
-				gamepad_state[InputKey::GAMEPAD_DPAD_UP].value = value;
-				break;
-			case GLFW_GAMEPAD_BUTTON_DPAD_RIGHT:
-				gamepad_state[InputKey::GAMEPAD_DPAD_RIGHT].value = value;
-				break;
-			case GLFW_GAMEPAD_BUTTON_DPAD_DOWN:
-				gamepad_state[InputKey::GAMEPAD_DPAD_DOWN].value = value;
-				break;
-			case GLFW_GAMEPAD_BUTTON_DPAD_LEFT:
-				gamepad_state[InputKey::GAMEPAD_DPAD_LEFT].value = value;
-				break;
-			case GLFW_GAMEPAD_BUTTON_GUIDE:
-				gamepad_state[InputKey::GAMEPAD_GUIDE].value = value;
-			default:
-				break;
+	auto action = actions[action_name];
+	float strength = 0.f;
+	for (auto &key : action.keys) { // NOLINT(readability-use-anyofallof)
+		if (key == InputKey::UNKNOWN) {
+			continue;
+		}
+		if (key_state[key] > strength) {
+			strength = key_state[key];
 		}
 	}
 
-	for (int i = 0; i <= GLFW_GAMEPAD_AXIS_LAST; i++) {
-		float value = state.axes[i];
-
-		switch (i) {
-			case GLFW_GAMEPAD_AXIS_LEFT_X:
-				gamepad_state[InputKey::L_STICK_X].value = value;
-				break;
-			case GLFW_GAMEPAD_AXIS_LEFT_Y:
-				gamepad_state[InputKey::L_STICK_Y].value = -value;
-				break;
-			case GLFW_GAMEPAD_AXIS_RIGHT_X:
-				gamepad_state[InputKey::R_STICK_X].value = value;
-				break;
-			case GLFW_GAMEPAD_AXIS_RIGHT_Y:
-				gamepad_state[InputKey::R_STICK_Y].value = -value;
-				break;
-			case GLFW_GAMEPAD_AXIS_LEFT_TRIGGER:
-				gamepad_state[InputKey::L_TRIGGER].value = value;
-				break;
-			case GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER:
-				gamepad_state[InputKey::R_TRIGGER].value = value;
-				break;
-			default:
-				break;
-		}
-	}
-
-	return gamepad_state;
-}
-void InputManager::update_mouse_position(GLFWwindow *window) {
-	// Set movement
-	float last_x = mouse_state[InputKey::MOUSE_POS_X].value;
-	float last_y = mouse_state[InputKey::MOUSE_POS_Y].value;
-
-	double x, y;
-	glfwGetCursorPos(window, &x, &y);
-
-	mouse_state[InputKey::MOUSE_X].value = static_cast<float>(x) - last_x;
-	mouse_state[InputKey::MOUSE_Y].value = static_cast<float>(y) - last_y;
-	mouse_state[InputKey::MOUSE_POS_X].value = static_cast<float>(x);
-	mouse_state[InputKey::MOUSE_POS_Y].value = static_cast<float>(y);
+	return strength;
 }
 
-InputManager::InputManager() = default;
-InputManager::~InputManager() = default;
+float InputManager::get_axis(const std::string &negative_action, const std::string &positive_action) {
+	float negative = get_action_strength(negative_action);
+	float positive = get_action_strength(positive_action);
+	return positive - negative;
+}

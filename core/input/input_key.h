@@ -1,9 +1,8 @@
 #ifndef SILENCE_INPUT_KEY_H
 #define SILENCE_INPUT_KEY_H
 
-#pragma once
 #include "GLFW/glfw3.h"
-#include "string"
+#include <string>
 
 enum class InputKey {
 	UNKNOWN,
@@ -46,26 +45,26 @@ enum class InputKey {
 	LEFT_ALT,
 	RIGHT_ALT,
 
-	MOUSE_POS_X,
-	MOUSE_POS_Y,
-	MOUSE_X,
-	MOUSE_Y,
 	MOUSE_LEFT,
 	MOUSE_RIGHT,
 	MOUSE_MIDDLE,
 
-	L_STICK_X,
-	L_STICK_Y,
-	R_STICK_X,
-	R_STICK_Y,
-	L_TRIGGER,
-	R_TRIGGER,
-	L_BUMPER,
-	R_BUMPER,
-	GAMEPAD_BUTTON_NORTH,
-	GAMEPAD_BUTTON_SOUTH,
-	GAMEPAD_BUTTON_EAST,
-	GAMEPAD_BUTTON_WEST,
+	GAMEPAD_LEFT_STICK_X_POSITIVE,
+	GAMEPAD_LEFT_STICK_X_NEGATIVE,
+	GAMEPAD_LEFT_STICK_Y_POSITIVE,
+	GAMEPAD_LEFT_STICK_Y_NEGATIVE,
+	GAMEPAD_RIGHT_STICK_X_POSITIVE,
+	GAMEPAD_RIGHT_STICK_X_NEGATIVE,
+	GAMEPAD_RIGHT_STICK_Y_POSITIVE,
+	GAMEPAD_RIGHT_STICK_Y_NEGATIVE,
+	GAMEPAD_LEFT_TRIGGER,
+	GAMEPAD_RIGHT_TRIGGER,
+	GAMEPAD_LEFT_BUMPER,
+	GAMEPAD_RIGHT_BUMPER,
+	GAMEPAD_BUTTON_Y,
+	GAMEPAD_BUTTON_A,
+	GAMEPAD_BUTTON_B,
+	GAMEPAD_BUTTON_X,
 	GAMEPAD_START,
 	GAMEPAD_BACK,
 	GAMEPAD_LEFT_THUMB,
@@ -78,15 +77,57 @@ enum class InputKey {
 
 };
 
-enum class InputSource { KEYBOARD, MOUSE, GAMEPAD, UNKNOWN };
+static InputKey glfw_mouse_button_to_input_key(int button) {
+	switch (button) {
+		case GLFW_MOUSE_BUTTON_LEFT:
+			return InputKey::MOUSE_LEFT;
+		case GLFW_MOUSE_BUTTON_RIGHT:
+			return InputKey::MOUSE_RIGHT;
+		case GLFW_MOUSE_BUTTON_MIDDLE:
+			return InputKey::MOUSE_MIDDLE;
+		default:
+			return InputKey::UNKNOWN;
+	}
+}
 
-struct InputAction {
-	std::string action_name;
-	float scale{ 1.f };
-	[[maybe_unused]] float deadzone{ 0.1f };
-};
+static InputKey glfw_gamepad_button_to_input_key(int button) {
+	switch (button) {
+		case GLFW_GAMEPAD_BUTTON_A:
+			return InputKey::GAMEPAD_BUTTON_A;
+		case GLFW_GAMEPAD_BUTTON_B:
+			return InputKey::GAMEPAD_BUTTON_B;
+		case GLFW_GAMEPAD_BUTTON_X:
+			return InputKey::GAMEPAD_BUTTON_X;
+		case GLFW_GAMEPAD_BUTTON_Y:
+			return InputKey::GAMEPAD_BUTTON_Y;
+		case GLFW_GAMEPAD_BUTTON_LEFT_BUMPER:
+			return InputKey::GAMEPAD_LEFT_BUMPER;
+		case GLFW_GAMEPAD_BUTTON_RIGHT_BUMPER:
+			return InputKey::GAMEPAD_RIGHT_BUMPER;
+		case GLFW_GAMEPAD_BUTTON_BACK:
+			return InputKey::GAMEPAD_BACK;
+		case GLFW_GAMEPAD_BUTTON_START:
+			return InputKey::GAMEPAD_START;
+		case GLFW_GAMEPAD_BUTTON_GUIDE:
+			return InputKey::GAMEPAD_GUIDE;
+		case GLFW_GAMEPAD_BUTTON_LEFT_THUMB:
+			return InputKey::GAMEPAD_LEFT_THUMB;
+		case GLFW_GAMEPAD_BUTTON_RIGHT_THUMB:
+			return InputKey::GAMEPAD_RIGHT_THUMB;
+		case GLFW_GAMEPAD_BUTTON_DPAD_UP:
+			return InputKey::GAMEPAD_DPAD_UP;
+		case GLFW_GAMEPAD_BUTTON_DPAD_RIGHT:
+			return InputKey::GAMEPAD_DPAD_RIGHT;
+		case GLFW_GAMEPAD_BUTTON_DPAD_DOWN:
+			return InputKey::GAMEPAD_DPAD_DOWN;
+		case GLFW_GAMEPAD_BUTTON_DPAD_LEFT:
+			return InputKey::GAMEPAD_DPAD_LEFT;
+		default:
+			return InputKey::UNKNOWN;
+	}
+}
 
-static InputKey multiplatform_key_to_input_key(int key) {
+static InputKey glfw_key_to_input_key(int key) {
 	switch (key) {
 		case GLFW_KEY_A:
 			return InputKey::A;
@@ -100,12 +141,46 @@ static InputKey multiplatform_key_to_input_key(int key) {
 			return InputKey::E;
 		case GLFW_KEY_F:
 			return InputKey::F;
-		case GLFW_KEY_W:
-			return InputKey::W;
-		case GLFW_KEY_S:
-			return InputKey::S;
+		case GLFW_KEY_G:
+			return InputKey::G;
+		case GLFW_KEY_H:
+			return InputKey::H;
+		case GLFW_KEY_I:
+			return InputKey::I;
+		case GLFW_KEY_J:
+			return InputKey::J;
+		case GLFW_KEY_K:
+			return InputKey::K;
+		case GLFW_KEY_L:
+			return InputKey::L;
+		case GLFW_KEY_M:
+			return InputKey::M;
+		case GLFW_KEY_N:
+			return InputKey::N;
+		case GLFW_KEY_O:
+			return InputKey::O;
+		case GLFW_KEY_P:
+			return InputKey::P;
+		case GLFW_KEY_Q:
+			return InputKey::Q;
 		case GLFW_KEY_R:
 			return InputKey::R;
+		case GLFW_KEY_S:
+			return InputKey::S;
+		case GLFW_KEY_T:
+			return InputKey::T;
+		case GLFW_KEY_U:
+			return InputKey::U;
+		case GLFW_KEY_V:
+			return InputKey::V;
+		case GLFW_KEY_W:
+			return InputKey::W;
+		case GLFW_KEY_X:
+			return InputKey::X;
+		case GLFW_KEY_Y:
+			return InputKey::Y;
+		case GLFW_KEY_Z:
+			return InputKey::Z;
 		case GLFW_KEY_SPACE:
 			return InputKey::SPACE;
 		case GLFW_KEY_ENTER:
@@ -130,92 +205,6 @@ static InputKey multiplatform_key_to_input_key(int key) {
 			return InputKey::RIGHT_ALT;
 		default:
 			return InputKey::UNKNOWN;
-	}
-}
-
-static InputKey multiplatform_button_to_input_key(int button) {
-	switch (button) {
-		case GLFW_MOUSE_BUTTON_LEFT:
-			return InputKey::MOUSE_LEFT;
-		case GLFW_MOUSE_BUTTON_RIGHT:
-			return InputKey::MOUSE_RIGHT;
-		case GLFW_MOUSE_BUTTON_MIDDLE:
-			return InputKey::MOUSE_MIDDLE;
-		default:
-			return InputKey::UNKNOWN;
-	}
-}
-
-static InputSource get_input_source_from_key(InputKey key) {
-	switch (key) {
-		case InputKey::A:
-		case InputKey::B:
-		case InputKey::C:
-		case InputKey::D:
-		case InputKey::E:
-		case InputKey::F:
-		case InputKey::G:
-		case InputKey::H:
-		case InputKey::I:
-		case InputKey::J:
-		case InputKey::K:
-		case InputKey::L:
-		case InputKey::M:
-		case InputKey::N:
-		case InputKey::O:
-		case InputKey::P:
-		case InputKey::Q:
-		case InputKey::R:
-		case InputKey::S:
-		case InputKey::T:
-		case InputKey::U:
-		case InputKey::V:
-		case InputKey::W:
-		case InputKey::X:
-		case InputKey::Y:
-		case InputKey::Z:
-		case InputKey::SPACE:
-		case InputKey::ENTER:
-		case InputKey::ESCAPE:
-		case InputKey::BACKSPACE:
-		case InputKey::TAB:
-		case InputKey::LEFT_CONTROL:
-		case InputKey::RIGHT_CONTROL:
-		case InputKey::LEFT_SHIFT:
-		case InputKey::RIGHT_SHIFT:
-		case InputKey::LEFT_ALT:
-		case InputKey::RIGHT_ALT:
-			return InputSource::KEYBOARD;
-		case InputKey::MOUSE_X:
-		case InputKey::MOUSE_Y:
-		case InputKey::MOUSE_LEFT:
-		case InputKey::MOUSE_RIGHT:
-		case InputKey::MOUSE_MIDDLE:
-			return InputSource::MOUSE;
-		case InputKey::L_STICK_X:
-		case InputKey::L_STICK_Y:
-		case InputKey::R_STICK_X:
-		case InputKey::R_STICK_Y:
-		case InputKey::L_TRIGGER:
-		case InputKey::R_TRIGGER:
-		case InputKey::L_BUMPER:
-		case InputKey::R_BUMPER:
-		case InputKey::GAMEPAD_BUTTON_NORTH:
-		case InputKey::GAMEPAD_BUTTON_SOUTH:
-		case InputKey::GAMEPAD_BUTTON_EAST:
-		case InputKey::GAMEPAD_BUTTON_WEST:
-		case InputKey::GAMEPAD_START:
-		case InputKey::GAMEPAD_BACK:
-		case InputKey::GAMEPAD_LEFT_THUMB:
-		case InputKey::GAMEPAD_RIGHT_THUMB:
-		case InputKey::GAMEPAD_DPAD_UP:
-		case InputKey::GAMEPAD_DPAD_DOWN:
-		case InputKey::GAMEPAD_DPAD_LEFT:
-		case InputKey::GAMEPAD_DPAD_RIGHT:
-		case InputKey::GAMEPAD_GUIDE:
-			return InputSource::GAMEPAD;
-		default:
-			return InputSource::UNKNOWN;
 	}
 }
 

@@ -27,7 +27,7 @@
 RenderManager render_manager;
 DisplayManager display_manager;
 ECSManager ecs_manager;
-InputManager *input_manager;
+InputManager input_manager;
 
 void default_ecs_manager_init() {
 	ecs_manager.startup();
@@ -56,15 +56,21 @@ std::shared_ptr<PhysicsSystem> default_physics_system_init() {
 }
 
 void default_mappings() {
-	input_manager->map_input_to_action(InputKey::W, InputAction{ .action_name = "Forward", .scale = 1.f });
-	input_manager->map_input_to_action(InputKey::S, InputAction{ .action_name = "Backward", .scale = -1.f });
-	input_manager->map_input_to_action(InputKey::A, InputAction{ .action_name = "Left", .scale = -1.f });
-	input_manager->map_input_to_action(InputKey::D, InputAction{ .action_name = "Right", .scale = 1.f });
-	input_manager->map_input_to_action(InputKey::MOUSE_LEFT, InputAction{ .action_name = "MouseClick", .scale = 1.f });
-	input_manager->map_input_to_action(
-			InputKey::L_STICK_X, InputAction{ .action_name = "LAxisX", .scale = 1.f, .deadzone = 0.1f });
-	input_manager->map_input_to_action(
-			InputKey::L_STICK_Y, InputAction{ .action_name = "LAxisY", .scale = 1.f, .deadzone = 0.1f });
+	input_manager.add_action("jump");
+	input_manager.add_key_to_action("jump", InputKey::SPACE);
+	input_manager.add_key_to_action("jump", InputKey::GAMEPAD_BUTTON_A);
+	input_manager.add_action("menu");
+	input_manager.add_key_to_action("menu", InputKey::ESCAPE);
+	input_manager.add_key_to_action("menu", InputKey::GAMEPAD_BACK);
+	input_manager.add_action("shoot");
+	input_manager.add_key_to_action("shoot", InputKey::MOUSE_LEFT);
+	input_manager.add_key_to_action("shoot", InputKey::GAMEPAD_RIGHT_TRIGGER);
+	input_manager.add_action("move_forward");
+	input_manager.add_key_to_action("move_forward", InputKey::W);
+	input_manager.add_key_to_action("move_forward", InputKey::GAMEPAD_LEFT_STICK_Y_POSITIVE);
+	input_manager.add_action("move_backward");
+	input_manager.add_key_to_action("move_backward", InputKey::S);
+	input_manager.add_key_to_action("move_backward", InputKey::GAMEPAD_LEFT_STICK_Y_NEGATIVE);
 }
 
 std::shared_ptr<RenderSystem> default_render_system_init() {
@@ -175,8 +181,8 @@ int main() {
 	}
 
 	//InputManager setup
-	input_manager = new InputManager;
-	display_manager.setup_input();
+	input_manager.startup(display_manager.window);
+	//	display_manager.setup_input();
 
 	if (!render_manager_init()) {
 		return -1;
@@ -224,14 +230,23 @@ int main() {
 		auto start_time = std::chrono::high_resolution_clock::now();
 
 		display_manager.poll_events();
-		input_manager->process_input();
-		
+
+		if (input_manager.is_action_just_pressed("jump")) {
+			SPDLOG_INFO("Jumped");
+		}
+
+		if (input_manager.is_action_just_released("menu")) {
+			SPDLOG_INFO("Escape released");
+		}
+
+		if (input_manager.is_action_pressed("shoot")) {
+			SPDLOG_INFO("*kla kla kla*");
+		}
+
 		//imgui new frame
 		ImGui_ImplVulkan_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
-
-		input_manager->process_input();
 
 		ImGui::Begin("Settings");
 
@@ -267,12 +282,13 @@ int main() {
 		auto stop_time = std::chrono::high_resolution_clock::now();
 
 		dt = std::chrono::duration<float, std::chrono::seconds::period>(stop_time - start_time).count();
-
+		input_manager.process_input();
 		render_manager.draw();
 	}
 
 	// Shut everything down, in reverse order.
 	SPDLOG_INFO("Shutting down engine subsystems...");
+	input_manager.shutdown();
 	render_manager.shutdown();
 	display_manager.shutdown();
 
