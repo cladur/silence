@@ -1,11 +1,7 @@
 #ifndef SILENCE_RENDER_MANAGER_H
 #define SILENCE_RENDER_MANAGER_H
 
-#include <deque>
-#include <functional>
-#include <ranges>
-#include <unordered_map>
-#include <vector>
+#include "core/camera/camera.h"
 
 #include "magic_enum.hpp"
 #include <glm/glm.hpp>
@@ -225,8 +221,8 @@ public:
 
 	void load_images();
 
-	void draw();
-	void draw_objects(vk::CommandBuffer cmd, RenderObject *first, int count);
+	void draw(Camera &camera);
+	void draw_objects(Camera &camera, vk::CommandBuffer cmd, RenderObject *first, int count);
 };
 
 #endif //SILENCE_RENDER_MANAGER_H

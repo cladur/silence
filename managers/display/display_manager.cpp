@@ -2,6 +2,9 @@
 
 #include <cassert>
 
+extern DisplayManager display_manager;
+extern InputManager *input_manager;
+
 DisplayManager::Status DisplayManager::startup() {
 	if (!glfwInit()) {
 		return Status::FailedToInitializeGlfw;
@@ -20,11 +23,14 @@ DisplayManager::Status DisplayManager::startup() {
 		glfwTerminate();
 		return Status::VulkanNotSupported;
 	}
-
 	return Status::Ok;
 }
 
 void DisplayManager::shutdown() {
+}
+
+void DisplayManager::capture_mouse(bool capture) const {
+	glfwSetInputMode(window, GLFW_CURSOR, capture ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
 }
 
 VkSurfaceKHR DisplayManager::create_surface(VkInstance &instance) const {
@@ -36,7 +42,7 @@ VkSurfaceKHR DisplayManager::create_surface(VkInstance &instance) const {
 	return surface;
 }
 
-void DisplayManager::poll_events() const {
+void DisplayManager::poll_events() {
 	glfwPollEvents();
 }
 
