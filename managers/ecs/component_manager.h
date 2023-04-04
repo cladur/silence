@@ -2,9 +2,6 @@
 #define SILENCE_COMPONENTMANAGER_H
 
 #include "component_array.h"
-#include "json_deserializer.h"
-
-extern JsonDeserializer json_deserializer;
 
 class ComponentManager {
 private:
@@ -32,8 +29,6 @@ public:
 
 		assert(component_types.find(type_name) == component_types.end() &&
 				"Registering component type more than once.");
-
-		json_deserializer.add_component_to_map<T>(type_name);
 
 		// Add this component type to the component type map
 		component_types.insert({ type_name, next_component_type });

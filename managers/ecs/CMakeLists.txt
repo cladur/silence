@@ -11,7 +11,7 @@ add_library(${ECS_MANAGER_NAME} STATIC
         systems/parent_system.cpp systems/parent_system.h
         systems/isolated_entities_system.cpp systems/isolated_entities_system.h
         systems/root_parent_system.cpp systems/root_parent_system.h
-        json_deserializer.cpp json_deserializer.h)
+        )
 
 target_include_directories(${ECS_MANAGER_NAME} PUBLIC ${MANAGER_DIR})
 
