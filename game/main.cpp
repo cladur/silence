@@ -217,7 +217,7 @@ int main() {
 	int max_entities = 100;
 	int imgui_entities_count = 50;
 
-	float target_frame_time = 1.0f / 60.0f;
+	float target_frame_time = 1.0f / display_manager.get_refresh_rate();
 	float dt = target_frame_time;
 
 	// TEST FOR 3D AUDIO
@@ -313,6 +313,12 @@ int main() {
 		parent_system->update();
 		render_system->update(render_manager);
 
+		input_manager.process_input();
+		render_manager.draw(camera);
+
+		fmod_listener_system->update(dt);
+		audio_manager.update();
+
 		auto stop_time = std::chrono::high_resolution_clock::now();
 
 		// TODO: This is a hack to make sure we don't go over the target frame time.
@@ -321,12 +327,6 @@ int main() {
 				target_frame_time) {
 			stop_time = std::chrono::high_resolution_clock::now();
 		}
-
-		input_manager.process_input();
-		render_manager.draw(camera);
-
-		fmod_listener_system->update(dt);
-		audio_manager.update();
 	}
 
 	// Shut everything down, in reverse order.

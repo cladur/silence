@@ -24,6 +24,8 @@ public:
 
 	void capture_mouse(bool capture) const;
 
+	[[nodiscard]] int get_refresh_rate() const;
+
 	VkSurfaceKHR create_surface(VkInstance &instance) const;
 
 	[[nodiscard]] std::pair<int, int> get_framebuffer_size() const;
