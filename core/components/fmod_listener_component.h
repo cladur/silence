@@ -5,7 +5,7 @@ struct FmodListener {
 	int listener_id;
 	glm::vec3 prev_frame_position{};
 
-	void serialize(nlohmann::json &j) {
+	void serialize_json(nlohmann::json &j) {
 		nlohmann::json::object_t obj;
 		obj["listener_id"] = listener_id;
 		j.push_back(nlohmann::json::object());

@@ -13,7 +13,7 @@ nlohmann::json SceneManager::save_scene(const std::string &scene_name, const std
 	nlohmann::json scene_json = nlohmann::json::array();
 	for (auto const &entity : entities) {
 		scene_json.push_back(nlohmann::json::object());
-		ecs_manager.serialize_entity(scene_json.back(), entity);
+		ecs_manager.serialize_entity_json(scene_json.back(), entity);
 	}
 	return scene_json;
 }

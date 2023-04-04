@@ -12,7 +12,7 @@ struct Parent {
 		parent = entity;
 	}
 
-	void serialize(nlohmann::json &j) {
+	void serialize_json(nlohmann::json &j) {
 		nlohmann::json::object_t obj;
 		obj["parent"] = parent;
 		j.push_back(nlohmann::json::object());

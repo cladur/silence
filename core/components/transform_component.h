@@ -13,7 +13,7 @@ private:
 	glm::mat4 global_model_matrix = glm::mat4(1.0f);
 
 public:
-	void serialize(nlohmann::json &j) {
+	void serialize_json(nlohmann::json &j) {
 		nlohmann::json obj;
 		obj["position"] = nlohmann::json::object();
 		obj["euler_rot"] = nlohmann::json::object();

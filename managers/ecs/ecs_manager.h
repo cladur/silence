@@ -72,7 +72,7 @@ public:
 	bool add_child(Entity parent, Entity child);
 	bool remove_child(Entity parent, Entity child);
 	bool has_child(Entity parent, Entity child);
-	void serialize_entity(nlohmann::json &json, Entity entity);
+	void serialize_entity_json(nlohmann::json &json, Entity entity);
 };
 
 #endif //SILENCE_ECSMANAGER_H

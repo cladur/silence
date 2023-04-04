@@ -83,7 +83,7 @@ public:
 		for (auto const &pair : component_arrays) {
 			auto const &component = pair.second;
 
-			component->serialize_entity(json, entity);
+			component->serialize_entity_json(json, entity);
 		}
 	}
 };

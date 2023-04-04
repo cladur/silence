@@ -7,7 +7,7 @@ struct MeshInstance {
 	Mesh *mesh;
 	Material *material;
 
-	void serialize(nlohmann::json &j) {
+	void serialize_json(nlohmann::json &j) {
 		// TODO good serialization
 		nlohmann::json::object_t obj;
 		obj["mesh"] = "Mesh";

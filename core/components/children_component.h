@@ -5,7 +5,7 @@ struct Children {
 	std::uint8_t children_count{};
 	std::array<Entity, MAX_CHILDREN> children{};
 
-	void serialize(nlohmann::json &j) {
+	void serialize_json(nlohmann::json &j) {
 		nlohmann::json::object_t obj;
 		obj["children_count"] = children_count;
 		obj["children"] = nlohmann::json::array();

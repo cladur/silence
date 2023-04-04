@@ -82,7 +82,7 @@ bool ECSManager::has_child(Entity parent, Entity child) {
 	}
 	return false;
 }
-void ECSManager::serialize_entity(nlohmann::json &json, Entity entity) {
+void ECSManager::serialize_entity_json(nlohmann::json &json, Entity entity) {
 	json["entity"] = entity;
 	json["signature"] = entity_manager->get_signature(entity).to_string();
 	json["components"] = nlohmann::json::array();

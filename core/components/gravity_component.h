@@ -4,7 +4,7 @@
 struct Gravity {
 	glm::vec3 force;
 
-	void serialize(nlohmann::json &j) {
+	void serialize_json(nlohmann::json &j) {
 		nlohmann::json::object_t obj;
 		obj["force"] = nlohmann::json::object();
 		obj["force"]["x"] = force.x;

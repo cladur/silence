@@ -9,7 +9,7 @@
 // and that it needs to update its array mappings.
 template <typename T>
 concept Serializable = requires(T t, nlohmann::json &j) {
-	{ t.serialize(j) };
+	{ t.serialize_json(j) };
 };
 
 template <typename T> class ComponentArray : public IComponentArray {
@@ -67,9 +67,9 @@ public:
 		return false;
 	}
 
-	void serialize_entity(nlohmann::json &json, Entity entity) override {
+	void serialize_entity_json(nlohmann::json &json, Entity entity) override {
 		if (entityToIndexMap.find(entity) != entityToIndexMap.end()) {
-			// cast component to Serializable to get serialize method
+			// cast component to Serializable to get serialize_json method
 			serialize_component(componentArray[entityToIndexMap[entity]], json);
 		}
 	}
@@ -77,7 +77,7 @@ public:
 	void serialize_component(T &component, nlohmann::json &json)
 		requires Serializable<T>
 	{
-		component.serialize(json);
+		component.serialize_json(json);
 	}
 
 private:

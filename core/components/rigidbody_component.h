@@ -5,7 +5,7 @@ struct RigidBody {
 	glm::vec3 velocity;
 	glm::vec3 acceleration;
 
-	void serialize(nlohmann::json &j) {
+	void serialize_json(nlohmann::json &j) {
 		nlohmann::json::object_t obj;
 		obj["velocity"] = nlohmann::json::object();
 		obj["acceleration"] = nlohmann::json::object();
