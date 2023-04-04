@@ -34,6 +34,7 @@
 #include <utility>
 
 // third party
+#include "boost/variant.hpp"
 #include "glm/glm.hpp"
 #include "imgui.h"
 #include "magic_enum.hpp"

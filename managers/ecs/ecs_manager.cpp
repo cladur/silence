@@ -88,3 +88,6 @@ void ECSManager::serialize_entity_json(nlohmann::json &json, Entity entity) {
 	json["components"] = nlohmann::json::array();
 	component_manager->serialize_entity(json["components"], entity);
 }
+std::bitset<MAX_COMPONENTS> ECSManager::get_entity_signature(Entity entity) {
+	return entity_manager->get_signature(entity);
+}

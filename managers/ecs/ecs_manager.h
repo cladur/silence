@@ -72,7 +72,9 @@ public:
 	bool add_child(Entity parent, Entity child);
 	bool remove_child(Entity parent, Entity child);
 	bool has_child(Entity parent, Entity child);
+	// other
 	void serialize_entity_json(nlohmann::json &json, Entity entity);
+	std::bitset<MAX_COMPONENTS> get_entity_signature(Entity entity);
 };
 
 #endif //SILENCE_ECSMANAGER_H
