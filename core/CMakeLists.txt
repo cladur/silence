@@ -38,12 +38,14 @@ find_package(glm CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)
 find_package(magic_enum CONFIG REQUIRED)
+find_package(Tracy CONFIG REQUIRED)
 
 target_link_libraries(${COMMON_LIB_NAME} INTERFACE
         spdlog::spdlog spdlog::spdlog_header_only
         imgui::imgui
         glm::glm
         magic_enum::magic_enum
+        Tracy::TracyClient
         )
 
 target_link_libraries(${CORE_LIB_NAME} PRIVATE
