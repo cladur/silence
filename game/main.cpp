@@ -71,7 +71,7 @@ void demo_entities_init(std::vector<Entity> &entities) {
 	std::uniform_real_distribution<float> rand_rotation(0.0f, 0.0f);
 	std::uniform_real_distribution<float> rand_scale(3.0f, 5.0f);
 	std::uniform_real_distribution<float> rand_color(0.0f, 1.0f);
-	std::uniform_real_distribution<float> rand_gravity(-1000.0f, -100.0f);
+	std::uniform_real_distribution<float> rand_gravity(-40.0f, -20.0f);
 
 	float scale = rand_scale(random_generator);
 
@@ -207,7 +207,6 @@ int main() {
 	Camera camera(glm::vec3(0.0f, 0.0f, -25.0f));
 
 	// Run the game.
-	float dt{};
 	bool show_ecs_logs = false;
 	bool show_demo_window = false;
 	bool physics_system_enabled = false;
@@ -217,6 +216,9 @@ int main() {
 	int max_imgui_entities = 50;
 	int max_entities = 100;
 	int imgui_entities_count = 50;
+
+	float target_frame_time = 1.0f / 60.0f;
+	float dt = target_frame_time;
 
 	// TEST FOR 3D AUDIO
 	glm::vec3 sound_position = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -313,7 +315,13 @@ int main() {
 
 		auto stop_time = std::chrono::high_resolution_clock::now();
 
-		dt = std::chrono::duration<float, std::chrono::seconds::period>(stop_time - start_time).count();
+		// TODO: This is a hack to make sure we don't go over the target frame time.
+		// We need to make calculate dt properly and make target frame time changeable.
+		while (std::chrono::duration<float, std::chrono::seconds::period>(stop_time - start_time).count() <
+				target_frame_time) {
+			stop_time = std::chrono::high_resolution_clock::now();
+		}
+
 		input_manager.process_input();
 		render_manager.draw(camera);
 
