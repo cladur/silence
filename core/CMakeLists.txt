@@ -28,7 +28,8 @@ add_library(${CORE_LIB_NAME} STATIC
         behavior_tree/decorator_nodes/repeater_node.h
         behavior_tree/decorator_nodes/retry_node.h
         behavior_tree/decorator_nodes/invert_node.h
-        components/mesh_instance_component.h)
+        components/mesh_instance_component.h
+        class_map.h)
 
 target_include_directories(${CORE_LIB_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 

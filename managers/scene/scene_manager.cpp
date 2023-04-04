@@ -1,6 +1,5 @@
 #include "scene_manager.h"
 #include "ecs/ecs_manager.h"
-#include <core/components/children_component.h>
 #include <fstream>
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>

@@ -9,11 +9,12 @@
 #include "components/rigidbody_component.h"
 #include "components/transform_component.h"
 
-#include "ecs/systems/parent_system.h"
-#include "ecs/systems/physics_system.h"
 #include "render/render_system.h"
 
 #include "ecs/ecs_manager.h"
+#include "ecs/json_deserializer.h"
+#include "ecs/systems/parent_system.h"
+#include "ecs/systems/physics_system.h"
 
 #include "audio/fmod_listener_system.h"
 #include "components/fmod_listener_component.h"
@@ -26,6 +27,7 @@ DisplayManager display_manager;
 ECSManager ecs_manager;
 AudioManager audio_manager;
 SceneManager scene_manager;
+JsonDeserializer json_deserializer;
 
 void default_ecs_manager_init() {
 	ecs_manager.startup();
@@ -251,6 +253,11 @@ int main() {
 		if (ImGui::Button("Play pluck")) {
 			//audio_manager.test_play_sound();
 			audio_manager.play_one_shot_3d(test_pluck, sound_position);
+		}
+
+		if (ImGui::Button("Show class map")) {
+			//audio_manager.test_play_sound();
+			json_deserializer.show_map();
 		}
 		// 3D SOUND DEMO
 
