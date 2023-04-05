@@ -141,6 +141,7 @@ class RenderManager {
 	// MESHES
 	Mesh triangle_mesh;
 	Mesh box_mesh;
+    Mesh debug_box_mesh;
 
 	// DEPTH
 	vk::ImageView depth_image_view;
@@ -177,6 +178,7 @@ class RenderManager {
 	bool load_shader_module(const char *file_path, vk::ShaderModule *out_shader_module);
 
 	void load_meshes();
+    void generate_debug_box_mesh();
 	void upload_mesh(Mesh &mesh);
 
 	size_t pad_uniform_buffer_size(size_t original_size) const;

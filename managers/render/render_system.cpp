@@ -1,3 +1,4 @@
+#include <render/debug/debug_drawing.h>
 #include "render_system.h"
 
 #include "core/components/transform_component.h"
@@ -23,6 +24,8 @@ void RenderSystem::update(RenderManager &render_manager) {
 		render_object.mesh = mesh_instance.mesh;
 		render_object.material = mesh_instance.material;
 		render_object.transform_matrix = transform.get_global_model_matrix();
+
+        DebugDraw::draw_box(transform.get_position(), transform.get_scale() * 1.05f);
 
 		render_manager.renderables.push_back(render_object);
 	}

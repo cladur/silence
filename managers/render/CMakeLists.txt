@@ -9,7 +9,7 @@ add_library(${RENDER_MANAGER_NAME} STATIC
         vk_mesh.cpp vk_mesh.h
         vk_textures.cpp vk_textures.h
         render_system.cpp render_system.h
-        )
+        debug/debug_drawing.cpp debug/debug_drawing.h)
 
 # Include directories
 target_include_directories(${RENDER_MANAGER_NAME} PUBLIC ${MANAGER_DIR})

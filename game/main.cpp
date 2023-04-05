@@ -20,6 +20,7 @@
 #include "imgui_impl_vulkan.h"
 
 #include "core/camera/camera.h"
+#include "render/debug/debug_drawing.h"
 
 RenderManager render_manager;
 DisplayManager display_manager;
@@ -311,7 +312,7 @@ int main() {
 		parent_system->update();
 		render_system->update(render_manager);
 
-		auto stop_time = std::chrono::high_resolution_clock::now();
+        auto stop_time = std::chrono::high_resolution_clock::now();
 
 		dt = std::chrono::duration<float, std::chrono::seconds::period>(stop_time - start_time).count();
 		input_manager.process_input();
