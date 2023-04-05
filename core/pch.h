@@ -4,6 +4,7 @@
 // types
 #include <cctype>
 #include <cstdint>
+#include <fstream>
 #include <limits>
 #include <sstream>
 #include <string>
@@ -25,6 +26,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>
+#include <filesystem>
 #include <functional>
 #include <iomanip>
 #include <iostream>

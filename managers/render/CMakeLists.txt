@@ -19,6 +19,7 @@ target_include_directories(${RENDER_MANAGER_NAME} PUBLIC ${MANAGER_DIR})
 target_link_libraries(${RENDER_MANAGER_NAME} PRIVATE
         silence_common
         silence_core
+        silence_assets
         Vulkan::Vulkan
         unofficial::vulkan-memory-allocator::vulkan-memory-allocator
         unofficial::VulkanMemoryAllocator-Hpp::VulkanMemoryAllocator-Hpp

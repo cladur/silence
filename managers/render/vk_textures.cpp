@@ -1,41 +1,60 @@
 #include "vk_textures.h"
 
+#include "assets/texture_asset.h"
+
 #include "vk_initializers.h"
 
 // #define STB_IMAGE_IMPLEMENTATION
 // #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image.h>
 
-bool vk_util::load_image_from_file(RenderManager &engine, const char *file, AllocatedImage &out_image) {
-	int tex_width, tex_height, tex_channels;
+bool vk_util::load_image_from_asset(RenderManager &manager, const char *filename, AllocatedImage &out_image) {
+	assets::AssetFile file;
+	bool loaded = assets::load_binary_file(filename, file);
 
-	stbi_uc *pixels = stbi_load(file, &tex_width, &tex_height, &tex_channels, STBI_rgb_alpha);
-
-	if (!pixels) {
-		SPDLOG_ERROR("Failed to load image from file: {}", file);
+	if (!loaded) {
+		SPDLOG_ERROR("Couldn't load image asset {}", filename);
 		return false;
 	}
 
-	void *pixel_ptr = pixels;
-	vk::DeviceSize image_size = tex_width * tex_height * 4;
+	assets::TextureInfo texture_info = assets::read_texture_info(&file);
 
-	//the format R8G8B8A8 matches exactly with the pixels loaded from stb_image lib
-	vk::Format image_format = vk::Format::eR8G8B8A8Srgb;
+	vk::DeviceSize image_size = texture_info.texture_size;
+	vk::Format image_format;
+	switch (texture_info.texture_format) {
+		case assets::TextureFormat::RGBA8:
+			image_format = vk::Format::eR8G8B8A8Unorm;
+			break;
+		default:
+			SPDLOG_ERROR("Encountered unsupported texture format while loading image asset {}", filename);
+			return false;
+	}
 
 	//allocate temporary buffer for holding texture data to upload
 	AllocatedBuffer staging_buffer =
-			engine.create_buffer(image_size, vk::BufferUsageFlagBits::eTransferSrc, vma::MemoryUsage::eCpuOnly);
+			manager.create_buffer(image_size, vk::BufferUsageFlagBits::eTransferSrc, vma::MemoryUsage::eCpuOnly);
 
 	//copy data to buffer
 	void *data;
-	VK_CHECK(engine.allocator.mapMemory(staging_buffer.allocation, &data));
+	VK_CHECK(manager.allocator.mapMemory(staging_buffer.allocation, &data));
 
-	memcpy(data, pixel_ptr, static_cast<size_t>(image_size));
+	//	memcpy(data, pixel_ptr, static_cast<size_t>(image_size));
+	assets::unpack_texture(&texture_info, file.binary_blob.data(), file.binary_blob.size(), (char *)data);
 
-	engine.allocator.unmapMemory(staging_buffer.allocation);
-	//we no longer need the loaded data, so we can free the pixels as they are now in the staging buffer
-	stbi_image_free(pixels);
+	manager.allocator.unmapMemory(staging_buffer.allocation);
 
+	out_image =
+			upload_image(manager, texture_info.pixel_size[0], texture_info.pixel_size[1], image_format, staging_buffer);
+
+	manager.allocator.destroyBuffer(staging_buffer.buffer, staging_buffer.allocation);
+
+	SPDLOG_INFO("Texture asset loaded successfully: {}", filename);
+
+	return true;
+}
+
+AllocatedImage vk_util::upload_image(RenderManager &manager, uint32_t tex_width, uint32_t tex_height,
+		vk::Format image_format, AllocatedBuffer &staging_buffer) {
 	vk::Extent3D image_extent;
 	image_extent.width = static_cast<uint32_t>(tex_width);
 	image_extent.height = static_cast<uint32_t>(tex_height);
@@ -50,10 +69,10 @@ bool vk_util::load_image_from_file(RenderManager &engine, const char *file, Allo
 	dimg_allocinfo.usage = vma::MemoryUsage::eGpuOnly;
 
 	//allocate and create the image
-	VK_CHECK(engine.allocator.createImage(
+	VK_CHECK(manager.allocator.createImage(
 			&dimg_info, &dimg_allocinfo, &new_image.image, &new_image.allocation, nullptr));
 
-	engine.immediate_submit([&](vk::CommandBuffer cmd) {
+	manager.immediate_submit([&](vk::CommandBuffer cmd) {
 		vk::ImageSubresourceRange range;
 		range.aspectMask = vk::ImageAspectFlagBits::eColor;
 		range.baseMipLevel = 0;
@@ -104,14 +123,8 @@ bool vk_util::load_image_from_file(RenderManager &engine, const char *file, Allo
 				nullptr, 0, nullptr, 1, &image_barrier_to_readable);
 	});
 
-	engine.main_deletion_queue.push_function(
-			[=]() { engine.allocator.destroyImage(new_image.image, new_image.allocation); });
+	manager.main_deletion_queue.push_function(
+			[=]() { manager.allocator.destroyImage(new_image.image, new_image.allocation); });
 
-	engine.allocator.destroyBuffer(staging_buffer.buffer, staging_buffer.allocation);
-
-	SPDLOG_INFO("Texture loaded successfully: {}", file);
-
-	out_image = new_image;
-
-	return true;
+	return new_image;
 }

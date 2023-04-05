@@ -19,3 +19,7 @@ imgui.ini
 # FMOD stuff
 thirdparty/fmod/api
 thirdparty/fmod/plugins
+
+# Asset files
+.tx
+.mesh

@@ -91,7 +91,7 @@ void demo_entities_init(std::vector<Entity> &entities) {
 						glm::vec3(scale, scale, scale) });
 
 		ecs_manager.add_component<MeshInstance>(
-				entity, { render_manager.get_mesh("box"), render_manager.get_material("default_mesh") });
+				entity, { render_manager.get_mesh("box"), render_manager.get_material("textured_mesh") });
 	}
 
 	auto listener = ecs_manager.create_entity();

@@ -51,3 +51,5 @@ target_link_libraries(${CORE_LIB_NAME} PRIVATE
         )
 
 target_precompile_headers(${COMMON_LIB_NAME} INTERFACE pch.h)
+
+add_subdirectory(assets)

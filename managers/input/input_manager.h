@@ -2,15 +2,6 @@
 #define SILENCE_INPUT_MANAGER_H
 
 #include "input_key.h"
-#include "magic_enum.hpp"
-#include <GLFW/glfw3.h>
-#include <spdlog/spdlog.h>
-#include <functional>
-#include <glm/glm.hpp>
-#include <string>
-#include <unordered_map>
-#include <unordered_set>
-#include <vector>
 
 class InputManager {
 public:

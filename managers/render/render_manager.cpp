@@ -1,8 +1,6 @@
 #include "render_manager.h"
 #include "managers/display/display_manager.h"
 
-#include <fstream>
-
 #include <glm/gtx/transform.hpp>
 
 #define VMA_IMPLEMENTATION
@@ -1001,10 +999,10 @@ Mesh *RenderManager::get_mesh(const std::string &name) {
 void RenderManager::load_images() {
 	Texture texture = {};
 
-	vk_util::load_image_from_file(*this, "resources/models/CesiumLogoFlat.png", texture.image);
+	vk_util::load_image_from_asset(*this, "resources/models/CesiumLogoFlat.tx", texture.image);
 
 	vk::ImageViewCreateInfo image_info = vk_init::image_view_create_info(
-			vk::Format::eR8G8B8A8Srgb, texture.image.image, vk::ImageAspectFlagBits::eColor);
+			vk::Format::eR8G8B8A8Unorm, texture.image.image, vk::ImageAspectFlagBits::eColor);
 
 	VK_CHECK(device.createImageView(&image_info, nullptr, &texture.image_view));
 

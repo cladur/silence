@@ -3,9 +3,6 @@
 
 #include "core/camera/camera.h"
 
-#include "magic_enum.hpp"
-#include <glm/glm.hpp>
-
 #include "managers/display/display_manager.h"
 
 #define VULKAN_HPP_NO_EXCEPTIONS

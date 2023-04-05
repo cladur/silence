@@ -11,6 +11,7 @@ include_directories(${PROJECT_SOURCE_DIR})
 add_subdirectory(thirdparty)
 add_subdirectory(core)
 add_subdirectory(managers)
+add_subdirectory(asset_baker)
 add_subdirectory(game)
 
 # Shader compilation
