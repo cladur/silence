@@ -34,6 +34,21 @@ void DebugDraw::draw_box(const glm::vec3 &center, const glm::vec3 &scale) {
 	render_manager.renderables.push_back(render_object);
 }
 
-void DebugDraw::draw_sphere(const glm::vec3 &center, float radius, const glm::vec3 &color) {
+void DebugDraw::draw_sphere(const glm::vec3 &center, float radius) {
+    Material *mat = render_manager.get_material("debug_material");
+
+    RenderObject render_object;
+    Mesh *box = render_manager.get_mesh("debug_sphere");
+
+    render_object.mesh = box;
+    render_object.material = mat;
+
+    glm::mat4 transform = glm::mat4(1.0f);
+    transform = glm::translate(transform, center);
+    transform = glm::scale(transform, glm::vec3(radius));
+
+    render_object.transform_matrix = transform;
+
+    render_manager.renderables.push_back(render_object);
 }
 

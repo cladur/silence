@@ -15,7 +15,7 @@ public:
 
 	static void draw_box(const glm::vec3 &center, const glm::vec3 &scale);
 
-	static void draw_sphere(const glm::vec3 &center, float radius, const glm::vec3 &color);
+	static void draw_sphere(const glm::vec3 &center, float radius);
 };
 
 #endif //SILENCE_DEBUG_DRAWING_H

@@ -142,6 +142,7 @@ class RenderManager {
 	Mesh triangle_mesh;
 	Mesh box_mesh;
     Mesh debug_box_mesh;
+    Mesh debug_sphere_mesh;
 
 	// DEPTH
 	vk::ImageView depth_image_view;
@@ -179,6 +180,8 @@ class RenderManager {
 
 	void load_meshes();
     void generate_debug_box_mesh();
+    void generate_debug_sphere_mesh();
+
 	void upload_mesh(Mesh &mesh);
 
 	size_t pad_uniform_buffer_size(size_t original_size) const;

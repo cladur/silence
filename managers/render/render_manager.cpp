@@ -635,7 +635,7 @@ void RenderManager::init_pipelines() {
 	vk::PipelineLayout debug_pipeline_layout;
 	VK_CHECK(device.createPipelineLayout(&debug_pipeline_layout_info, nullptr, &debug_pipeline_layout));
 
-	pipeline_builder.input_assembly = vk_init::input_assembly_create_info(vk::PrimitiveTopology::eLineStrip);
+	pipeline_builder.input_assembly = vk_init::input_assembly_create_info(vk::PrimitiveTopology::eLineList);
 
 	pipeline_builder.pipeline_layout = debug_pipeline_layout;
 
@@ -840,14 +840,17 @@ void RenderManager::load_meshes() {
 	box_mesh.load_from_gltf("resources/models/BoxTextured.gltf");
 
     generate_debug_box_mesh();
+    generate_debug_sphere_mesh();
 
 	upload_mesh(triangle_mesh);
 	upload_mesh(box_mesh);
     upload_mesh(debug_box_mesh);
+    upload_mesh(debug_sphere_mesh);
 
 	meshes["triangle"] = triangle_mesh;
 	meshes["box"] = box_mesh;
     meshes["debug_box"] = debug_box_mesh;
+    meshes["debug_sphere"] = debug_sphere_mesh;
 }
 
 void RenderManager::generate_debug_box_mesh() {
@@ -870,10 +873,66 @@ void RenderManager::generate_debug_box_mesh() {
     }
 
     // indeces for LINE_STRIP drawing a cube shape
+//    debug_box_mesh.indices = {
+//            0, 1, 2, 3, 0, 4, 5, 6, 7, 4, 5, 1, 2, 6, 7, 3
+//    };
+
+    // indeces for LINE_LIST drawing a cube shape
     debug_box_mesh.indices = {
-            0, 1, 2, 3, 0, 4, 5, 6, 7, 4, 5, 1, 2, 6, 7, 3
+            0, 1, 1, 2, 2, 3, 3, 0, 4, 5, 5, 6, 6, 7, 7, 4, 0, 4, 1, 5, 2, 6, 3, 7
     };
 }
+
+void RenderManager::generate_debug_sphere_mesh() {
+    // prepare sphere vertices
+    static const int X_SEGMENTS = 16;
+    static const int Y_SEGMENTS = 16;
+    static const float PI = 3.14159265359f;
+
+    float x_segment_step = 2.f * PI / X_SEGMENTS;
+    float y_segment_step = PI / Y_SEGMENTS;
+    float x_segment_angle = 0.f;
+    float y_segment_angle = 0.f;
+
+    float xy;
+    float z;
+
+    for (int y = 0; y <= Y_SEGMENTS; ++y) {
+        y_segment_angle = PI / 2.0f - (float)y * y_segment_step;
+        xy = cos(y_segment_angle); // assuming r=1
+        z = sin(y_segment_angle);
+
+        for (int x = 0; x <= X_SEGMENTS; ++x) {
+            x_segment_angle = (float)x * x_segment_step;
+
+            float x_val = xy * cos(x_segment_angle);
+            float y_val = xy * sin(x_segment_angle);
+
+            Vertex vertex;
+            vertex.position = glm::vec3(x_val, z, y_val);
+            vertex.color = glm::vec3(1.f, 1.f, 1.f);
+            debug_sphere_mesh.vertices.push_back(vertex);
+        }
+    }
+
+    // indeces for drawing a LINE LIST with lines going both ways
+    for (int y = 0; y < Y_SEGMENTS; ++y) {
+        for (int x = 0; x < X_SEGMENTS; ++x) {
+            debug_sphere_mesh.indices.push_back(y * (X_SEGMENTS + 1) + x);
+            debug_sphere_mesh.indices.push_back(y * (X_SEGMENTS + 1) + x + 1);
+        }
+    }
+
+    for (int y = 0; y < Y_SEGMENTS; ++y) {
+        for (int x = 0; x < X_SEGMENTS; ++x) {
+            debug_sphere_mesh.indices.push_back(y * (X_SEGMENTS + 1) + x);
+            debug_sphere_mesh.indices.push_back((y + 1) * (X_SEGMENTS + 1) + x);
+        }
+    }
+
+
+}
+
 
 void RenderManager::upload_mesh(Mesh &mesh) {
 	size_t buffer_size = mesh.vertices.size() * sizeof(Vertex);
@@ -1307,3 +1366,4 @@ void RenderManager::draw_objects(Camera &camera, vk::CommandBuffer cmd, RenderOb
 		cmd.drawIndexed(object.mesh->indices.size(), 1, 0, 0, i);
 	}
 }
+
