@@ -1,6 +1,7 @@
 #ifndef SILENCE_TRANSFORM_H
 #define SILENCE_TRANSFORM_H
 
+#include "types.h"
 #include <spdlog/spdlog.h>
 #include <glm/ext/matrix_transform.hpp>
 struct Transform {
@@ -33,16 +34,17 @@ public:
 	}
 
 	void deserialize_json(nlohmann::json &j) {
-		nlohmann::json obj = j[0];
-		position.x = obj["transform"]["position"]["x"];
-		position.y = obj["transform"]["position"]["y"];
-		position.z = obj["transform"]["position"]["z"];
-		euler_rot.x = obj["transform"]["euler_rot"]["x"];
-		euler_rot.y = obj["transform"]["euler_rot"]["y"];
-		euler_rot.z = obj["transform"]["euler_rot"]["z"];
-		scale.x = obj["transform"]["scale"]["x"];
-		scale.y = obj["transform"]["scale"]["y"];
-		scale.z = obj["transform"]["scale"]["z"];
+		nlohmann::json obj = Serializaer::get_data("transform", j);
+
+		position.x = obj["position"]["x"];
+		position.y = obj["position"]["y"];
+		position.z = obj["position"]["z"];
+		euler_rot.x = obj["euler_rot"]["x"];
+		euler_rot.y = obj["euler_rot"]["y"];
+		euler_rot.z = obj["euler_rot"]["z"];
+		scale.x = obj["scale"]["x"];
+		scale.y = obj["scale"]["y"];
+		scale.z = obj["scale"]["z"];
 	}
 	//constructor
 	Transform(glm::vec3 position, glm::vec3 euler_rot, glm::vec3 scale) {

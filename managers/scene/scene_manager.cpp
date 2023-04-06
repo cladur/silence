@@ -11,12 +11,13 @@ SceneManager::SceneManager() {
 	class_map = serialization::IdToClassConstructor{};
 }
 
-void SceneManager::load_scene_from_json_file(const std::string &scene_name) {
+void SceneManager::load_scene_from_json_file(const std::string &scene_name, std::vector<Entity> &entities) {
 	std::ifstream file(scene_name);
 	nlohmann::json scene_json = nlohmann::json::parse(file);
 	file.close();
 	SPDLOG_INFO("Loaded scene from file {}", scene_name);
-	ecs_manager.deserialize_entities_json(scene_json);
+	entities.clear();
+	ecs_manager.deserialize_entities_json(scene_json, entities);
 }
 nlohmann::json SceneManager::save_scene(const std::vector<Entity> &entities) {
 	nlohmann::json scene_json = nlohmann::json::array();

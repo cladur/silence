@@ -15,6 +15,7 @@
 #include <variant>
 
 namespace serialization {
+
 template <typename T>
 concept Serializable = requires(T t, nlohmann::json &j) {
 	{ t.serialize_json(j) };
@@ -28,7 +29,7 @@ concept Deserializable = requires(T t, nlohmann::json &j) {
 typedef std::variant<Children, Parent, Transform, RigidBody, FmodListener, Gravity, MeshInstance> variant_type;
 
 template <typename T>
-variant_type create_instance(nlohmann::json &j)
+T create_instance(nlohmann::json &j)
 	requires Deserializable<T>
 {
 	variant_type component_variant = variant_type(T());

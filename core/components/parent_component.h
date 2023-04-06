@@ -1,6 +1,7 @@
 #ifndef SILENCE_PARENT_COMPONENT_H
 #define SILENCE_PARENT_COMPONENT_H
 
+#include "types.h"
 struct Parent {
 	Entity parent;
 
@@ -20,6 +21,8 @@ struct Parent {
 	}
 
 	void deserialize_json(nlohmann::json &j) {
+		nlohmann::json obj = Serializaer::get_data("parent", j);
+		parent = obj["parent"];
 	}
 };
 

@@ -1,5 +1,6 @@
 #include "ecs_manager.h"
 
+#include "component_visitor.h"
 #include "components/children_component.h"
 #include "components/parent_component.h"
 #include "serialization.h"
@@ -15,6 +16,10 @@ void ECSManager::startup() {
 
 Entity ECSManager::create_entity() {
 	return entity_manager->create_entity();
+}
+
+Entity ECSManager::create_entity(Entity entity) {
+	return entity_manager->create_entity(entity);
 }
 
 void ECSManager::destroy_entity(Entity entity) {
@@ -90,21 +95,26 @@ void ECSManager::serialize_entity_json(nlohmann::json &json, Entity entity) {
 	component_manager->serialize_entity(json["components"], entity);
 }
 
-void ECSManager::deserialize_entities_json(nlohmann::json &json) {
+void ECSManager::deserialize_entities_json(nlohmann::json &json, std::vector<Entity> &entities) {
 	serialization::IdToClassConstructor map = SceneManager::get_class_map();
 	Entity entity{};
 	Signature signature{};
 	std::string string_signature{};
 	for (auto &array_entity : json) {
 		entity = array_entity["entity"];
+		entities.push_back(entity);
+		SPDLOG_INFO("Entity {} created or loaded", entity);
+		create_entity(entity);
+
 		string_signature = array_entity["signature"];
 		std::reverse(string_signature.begin(), string_signature.end());
+
 		for (int i = 0; i < string_signature.size(); i++) {
 			int component_active = string_signature[i] - '0';
 			if (component_active) {
 				auto component = map[i](array_entity["components"]);
-				if (i == 0) {
-				}
+
+				ComponentVisitor::visit(entity, component);
 			}
 		}
 	}

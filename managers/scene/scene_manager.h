@@ -15,7 +15,7 @@ public:
 	void operator=(const SceneManager &) = delete;
 	static SceneManager *get_instance();
 
-	void load_scene_from_json_file(const std::string &scene_name);
+	void load_scene_from_json_file(const std::string &scene_name, std::vector<Entity> &entities);
 	static nlohmann::json save_scene(const std::vector<Entity> &entities);
 	static void save_json_to_file(const std::string &file_name, const nlohmann::json &json);
 	static serialization::IdToClassConstructor &get_class_map();

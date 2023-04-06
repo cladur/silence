@@ -15,6 +15,10 @@ struct Gravity {
 	}
 
 	void deserialize_json(nlohmann::json &j) {
+		nlohmann::json obj = Serializaer::get_data("gravity", j);
+		force.x = obj["force"]["x"];
+		force.y = obj["force"]["y"];
+		force.z = obj["force"]["z"];
 	}
 };
 

@@ -3,7 +3,7 @@
 
 class EntityManager {
 private:
-	std::queue<Entity> available_entities{};
+	std::vector<Entity> available_entities{};
 	std::array<Signature, MAX_ENTITIES> signatures{};
 	uint32_t living_entities_count{};
 
@@ -12,6 +12,7 @@ public:
 	void shutdown();
 
 	Entity create_entity();
+	Entity create_entity(Entity entity);
 	void destroy_entity(Entity entity);
 	void set_entity_signature(Entity entity, Signature signature);
 	Signature get_signature(Entity entity);

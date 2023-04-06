@@ -13,6 +13,8 @@ struct FmodListener {
 	}
 
 	void deserialize_json(nlohmann::json &j) {
+		nlohmann::json obj = Serializaer::get_data("fmod_listener", j);
+		listener_id = obj["listener_id"];
 	}
 };
 

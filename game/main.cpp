@@ -21,6 +21,7 @@
 #include "imgui_impl_vulkan.h"
 #include "scene/scene_manager.h"
 #include "serialization.h"
+#include <spdlog/spdlog.h>
 
 RenderManager render_manager;
 DisplayManager display_manager;
@@ -175,6 +176,7 @@ int main() {
 	int max_imgui_entities = 50;
 	int max_entities = 100;
 	int imgui_entities_count = 50;
+	int frames_count = 0;
 
 	std::string file_name = "test.json";
 
@@ -221,10 +223,8 @@ int main() {
 		}
 
 		if (ImGui::Button("Destroy all entities")) {
-			if (!entities_destroyed) {
-				destroy_all_entities(entities);
-			}
-			entities_destroyed = true;
+			destroy_all_entities(entities);
+			entities.clear();
 		}
 
 		if (ImGui::Button("Save scene")) {
@@ -233,18 +233,16 @@ int main() {
 		}
 
 		if (ImGui::Button("Load scene")) {
-			scene_manager.load_scene_from_json_file(file_name);
+			destroy_all_entities(entities);
+			scene_manager.load_scene_from_json_file(file_name, entities);
 		}
 
 		ImGui::DragInt("Entities count", &imgui_entities_count, 1, 1, max_entities);
 
 		if (ImGui::Button("Create entities")) {
-			if (!entities_destroyed) {
-				destroy_all_entities(entities);
-			}
-			entities.resize(imgui_entities_count);
+			destroy_all_entities(entities);
+			entities.resize(imgui_entities_count - 1);
 			demo_entities_init(entities);
-			entities_destroyed = false;
 		}
 
 		// 3D SOUND DEMO
@@ -269,6 +267,10 @@ int main() {
 			physics_system->update(dt);
 		}
 
+		if (frames_count % 100 == 0) {
+			SPDLOG_INFO("ECount {}", entities.size());
+		}
+
 		parent_system->update();
 		render_system->update(render_manager);
 
@@ -280,6 +282,8 @@ int main() {
 
 		fmod_listener_system->update(dt);
 		audio_manager.update();
+
+		frames_count++;
 	}
 
 	// Shut everything down, in reverse order.

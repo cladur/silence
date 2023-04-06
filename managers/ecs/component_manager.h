@@ -58,6 +58,11 @@ public:
 		get_component_array<T>()->insert_data(entity, component);
 	}
 
+	template <typename T> void update_component(Entity entity, T component) {
+		// Add a component to the array for an entity
+		get_component_array<T>()->update_data(entity, component);
+	}
+
 	template <typename T> void remove_component(Entity entity) {
 		// Remove a component from the array for an entity
 		get_component_array<T>()->remove_data(entity);

@@ -22,6 +22,13 @@ public:
 		size++;
 	}
 
+	void update_data(Entity entity, T component) {
+		assert(entityToIndexMap.find(entity) != entityToIndexMap.end() && "Component does not exist");
+
+		// Update existing entry
+		componentArray[entityToIndexMap[entity]] = component;
+	}
+
 	void remove_data(Entity entity) {
 		assert(entityToIndexMap.find(entity) != entityToIndexMap.end() && "Component does not exist");
 
@@ -67,11 +74,11 @@ public:
 	void serialize_entity_json(nlohmann::json &json, Entity entity) override {
 		if (entityToIndexMap.find(entity) != entityToIndexMap.end()) {
 			// cast component to Serializable to get serialize_json method
-			serialize_component(componentArray[entityToIndexMap[entity]], json);
+			serialize_component_json(componentArray[entityToIndexMap[entity]], json);
 		}
 	}
 
-	void serialize_component(T &component, nlohmann::json &json)
+	void serialize_component_json(T &component, nlohmann::json &json)
 		requires serialization::Serializable<T>
 	{
 		component.serialize_json(json);
