@@ -4,7 +4,11 @@
 #include "core/camera/camera.h"
 
 #include "magic_enum.hpp"
+
 #include <glm/glm.hpp>
+
+#include "ft2build.h"
+#include FT_FREETYPE_H
 
 #include "managers/display/display_manager.h"
 
@@ -223,6 +227,8 @@ public:
 
 	void draw(Camera &camera);
 	void draw_objects(Camera &camera, vk::CommandBuffer cmd, RenderObject *first, int count);
+
+	Texture get_character_texture(FT_Face &face);
 };
 
 #endif //SILENCE_RENDER_MANAGER_H

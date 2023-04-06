@@ -9,7 +9,19 @@ add_library(${RENDER_MANAGER_NAME} STATIC
         vk_mesh.cpp vk_mesh.h
         vk_textures.cpp vk_textures.h
         render_system.cpp render_system.h
-        )
+        ui/text/font_manager.cpp
+        ui/text/font_manager.h
+        ui/text/font.cpp
+        ui/text/font.h)
+
+find_package(Freetype CONFIG REQUIRED)
+if(TARGET freetype AND NOT TARGET Freetype::Freetype)
+    add_library(Freetype::Freetype ALIAS freetype)
+endif()
+if(NOT TARGET Freetype::Freetype)
+    MESSAGE("FREETYPE NOT FOUND!")
+endif()
+target_link_libraries(${RENDER_MANAGER_NAME} PRIVATE Freetype::Freetype)
 
 # Include directories
 target_include_directories(${RENDER_MANAGER_NAME} PUBLIC ${MANAGER_DIR})

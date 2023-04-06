@@ -20,6 +20,8 @@
 #include "imgui_impl_vulkan.h"
 
 #include "core/camera/camera.h"
+#include "render/ui/text/font.h"
+#include "render/ui/text/font_manager.h"
 
 RenderManager render_manager;
 DisplayManager display_manager;
@@ -205,6 +207,9 @@ int main() {
 	default_mappings();
 
 	Camera camera(glm::vec3(0.0f, 0.0f, -25.0f));
+
+	FontManager font_manager = FontManager();
+	Font font = Font(font_manager.load_font("resources/fonts/BebasNeue-Regular.ttf", 32));
 
 	// Run the game.
 	bool show_ecs_logs = false;

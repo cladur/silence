@@ -1218,3 +1218,126 @@ void RenderManager::draw_objects(Camera &camera, vk::CommandBuffer cmd, RenderOb
 		cmd.drawIndexed(object.mesh->indices.size(), 1, 0, 0, i);
 	}
 }
+
+Texture RenderManager::get_character_texture(FT_Face &face) {
+	int width = face->glyph->bitmap.width;
+	int height = face->glyph->bitmap.rows;
+
+	//create a texture for the glyph
+	Texture texture = {};
+
+	if(face->glyph->bitmap.pixel_mode != FT_PIXEL_MODE_GRAY) {
+		SPDLOG_ERROR("Trying to load an unsupported pixel mode glyph");
+		return texture;
+	}
+
+	// convert grayscale 8 bit image to rgba 32 bit
+	std::vector<uint8_t> rgba(width * height * 4);
+	int idx = 0;
+	for (int y = 0; y < height; y++) {
+		for (int x = 0; x < width; x++) {
+			uint8_t gray = face->glyph->bitmap.buffer[idx];
+			rgba[idx++] = gray;
+			rgba[idx++] = gray;
+			rgba[idx++] = gray;
+			rgba[idx++] = gray;
+		}
+	}
+
+	// image is 8bit grayscale but will be converted to 32bit rgba
+	vk::DeviceSize image_size = width * height * 4;
+	vk::Format image_format = vk::Format::eR8G8B8A8Srgb;
+
+	//allocate temporary buffer for holding texture data to upload
+	AllocatedBuffer staging_buffer =
+			create_buffer(image_size, vk::BufferUsageFlagBits::eTransferSrc, vma::MemoryUsage::eCpuOnly);
+
+	//copy data to buffer
+	void *data;
+	VK_CHECK(allocator.mapMemory(staging_buffer.allocation, &data));
+	memcpy(data, rgba.data(), image_size);
+	allocator.unmapMemory(staging_buffer.allocation);
+
+	vk::Extent3D image_extent;
+	image_extent.width = static_cast<uint32_t>(width);
+	image_extent.height = static_cast<uint32_t>(height);
+	image_extent.depth = 1;
+
+	vk::ImageCreateInfo dimg_info = vk_init::image_create_info(
+			image_format, vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferDst, image_extent);
+
+	AllocatedImage new_image;
+
+	vma::AllocationCreateInfo dimg_allocinfo = {};
+	dimg_allocinfo.usage = vma::MemoryUsage::eGpuOnly;
+
+	VK_CHECK(allocator.createImage(
+			&dimg_info, &dimg_allocinfo, &new_image.image, &new_image.allocation, nullptr));
+
+	immediate_submit([&](vk::CommandBuffer cmd) {
+		vk::ImageSubresourceRange range;
+		range.aspectMask = vk::ImageAspectFlagBits::eColor;
+		range.baseMipLevel = 0;
+		range.levelCount = 1;
+		range.baseArrayLayer = 0;
+		range.layerCount = 1;
+
+		vk::ImageMemoryBarrier image_barrier_to_transfer = {};
+		image_barrier_to_transfer.sType = vk::StructureType::eImageMemoryBarrier;
+
+		image_barrier_to_transfer.oldLayout = vk::ImageLayout::eUndefined;
+		image_barrier_to_transfer.newLayout = vk::ImageLayout::eTransferDstOptimal;
+		image_barrier_to_transfer.image = new_image.image;
+		image_barrier_to_transfer.subresourceRange = range;
+
+		image_barrier_to_transfer.srcAccessMask = {};
+		image_barrier_to_transfer.dstAccessMask = vk::AccessFlagBits::eTransferWrite;
+
+		//barrier the image into the transfer-receive layout
+		cmd.pipelineBarrier(vk::PipelineStageFlagBits::eTopOfPipe, vk::PipelineStageFlagBits::eTransfer, {}, 0, nullptr,
+				0, nullptr, 1, &image_barrier_to_transfer);
+
+		vk::BufferImageCopy copy_region = {};
+		copy_region.bufferOffset = 0;
+		copy_region.bufferRowLength = 0;
+		copy_region.bufferImageHeight = 0;
+
+		copy_region.imageSubresource.aspectMask = vk::ImageAspectFlagBits::eColor;
+		copy_region.imageSubresource.mipLevel = 0;
+		copy_region.imageSubresource.baseArrayLayer = 0;
+		copy_region.imageSubresource.layerCount = 1;
+		copy_region.imageExtent = image_extent;
+
+		//copy the buffer into the image
+		cmd.copyBufferToImage(
+				staging_buffer.buffer, new_image.image, vk::ImageLayout::eTransferDstOptimal, 1, &copy_region);
+
+		vk::ImageMemoryBarrier image_barrier_to_readable = image_barrier_to_transfer;
+
+		image_barrier_to_readable.oldLayout = vk::ImageLayout::eTransferDstOptimal;
+		image_barrier_to_readable.newLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+
+		image_barrier_to_readable.srcAccessMask = vk::AccessFlagBits::eTransferWrite;
+		image_barrier_to_readable.dstAccessMask = vk::AccessFlagBits::eShaderRead;
+
+		//barrier the image into the shader readable layout
+		cmd.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eFragmentShader, {}, 0,
+				nullptr, 0, nullptr, 1, &image_barrier_to_readable);
+	});
+
+	main_deletion_queue.push_function(
+			[=, this]() { allocator.destroyImage(new_image.image, new_image.allocation); });
+
+	allocator.destroyBuffer(staging_buffer.buffer, staging_buffer.allocation);
+
+	texture.image = new_image;
+
+	vk::ImageViewCreateInfo image_info = vk_init::image_view_create_info(
+			vk::Format::eR8G8B8A8Srgb, texture.image.image, vk::ImageAspectFlagBits::eColor);
+
+	VK_CHECK(device.createImageView(&image_info, nullptr, &texture.image_view));
+
+	main_deletion_queue.push_function([=, this]() { device.destroyImageView(texture.image_view); });
+
+	return texture;
+}
