@@ -29,7 +29,18 @@ public:
 		obj["scale"]["z"] = scale.z;
 		j.push_back(nlohmann::json::object());
 		j.back()["transform"] = obj;
-		SPDLOG_INFO("{}", j.dump());
+	}
+
+	void deserialize_json(nlohmann::json &j) {
+		position.x = j["transform"]["position"]["x"];
+		position.y = j["transform"]["position"]["y"];
+		position.z = j["transform"]["position"]["z"];
+		euler_rot.x = j["transform"]["euler_rot"]["x"];
+		euler_rot.y = j["transform"]["euler_rot"]["y"];
+		euler_rot.z = j["transform"]["euler_rot"]["z"];
+		scale.x = j["transform"]["scale"]["x"];
+		scale.y = j["transform"]["scale"]["y"];
+		scale.z = j["transform"]["scale"]["z"];
 	}
 	//constructor
 	Transform(glm::vec3 position, glm::vec3 euler_rot, glm::vec3 scale) {

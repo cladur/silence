@@ -2,15 +2,12 @@
 #define SILENCE_COMPONENT_ARRAY_INTERFACE_H
 
 #include "component_array_interface.h"
+#include "core/serialization.h"
 #include <memory>
 
 // An interface is needed so that the ComponentManager (seen later)
 // can tell a generic ComponentArray that an entity has been destroyed
 // and that it needs to update its array mappings.
-template <typename T>
-concept Serializable = requires(T t, nlohmann::json &j) {
-	{ t.serialize_json(j) };
-};
 
 template <typename T> class ComponentArray : public IComponentArray {
 public:

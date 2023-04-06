@@ -88,3 +88,15 @@ void ECSManager::serialize_entity_json(nlohmann::json &json, Entity entity) {
 	json["components"] = nlohmann::json::array();
 	component_manager->serialize_entity(json["components"], entity);
 }
+
+void ECSManager::deserialize_entities_json(nlohmann::json &json) {
+	Entity entity{};
+	Signature signature{};
+	std::string string_signature{};
+	for (auto &array_entity : json) {
+		entity = array_entity["entity"];
+		string_signature = array_entity["signature"];
+		signature = Signature(string_signature);
+		entity_manager->set_entity_signature(entity, signature);
+	}
+}

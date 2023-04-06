@@ -18,6 +18,9 @@ struct Parent {
 		j.push_back(nlohmann::json::object());
 		j.back()["parent"] = obj;
 	}
+
+	void deserialize_json(nlohmann::json &j) {
+	}
 };
 
 #endif //SILENCE_PARENT_COMPONENT_H

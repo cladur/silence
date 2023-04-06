@@ -8,8 +8,8 @@ target_include_directories(${SCENE_MANAGER_NAME} PUBLIC ${MANAGER_DIR})
 
 
 target_link_libraries(${SCENE_MANAGER_NAME}
-        PUBLIC
         PRIVATE
         silence_common
+        silence_core
         )
 

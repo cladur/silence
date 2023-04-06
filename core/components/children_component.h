@@ -16,6 +16,9 @@ struct Children {
 		j.back()["children"] = obj;
 	}
 
+	void deserialize_json(nlohmann::json &j) {
+	}
+
 	bool add_child(Entity entity) {
 		if (children_count >= MAX_CHILDREN || get_children_index(entity) != -1) {
 			return false;

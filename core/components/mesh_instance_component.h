@@ -15,6 +15,9 @@ struct MeshInstance {
 		j.push_back(nlohmann::json::object());
 		j.back()["mesh_instance"] = obj;
 	}
+
+	void deserialize_json(nlohmann::json &j) {
+	}
 };
 
 #endif //SILENCE_MESHINSTANCE_H

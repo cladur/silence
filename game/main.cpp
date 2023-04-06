@@ -12,7 +12,6 @@
 #include "render/render_system.h"
 
 #include "ecs/ecs_manager.h"
-#include "ecs/json_deserializer.h"
 #include "ecs/systems/parent_system.h"
 #include "ecs/systems/physics_system.h"
 
@@ -27,7 +26,6 @@ DisplayManager display_manager;
 ECSManager ecs_manager;
 AudioManager audio_manager;
 SceneManager scene_manager;
-JsonDeserializer json_deserializer;
 
 void default_ecs_manager_init() {
 	ecs_manager.startup();
@@ -177,13 +175,14 @@ int main() {
 	int max_entities = 100;
 	int imgui_entities_count = 50;
 
+	std::string file_name = "test.json";
+
 	// TEST FOR 3D AUDIO
 	glm::vec3 sound_position = glm::vec3(0.0f, 0.0f, 0.0f);
 	EventReference test_pluck = EventReference("test_pluck");
 	// #################
 
 	bool should_run = true;
-	std::string json_c1;
 	nlohmann::json scene;
 	while (should_run) {
 		// GAME LOGIC
@@ -228,12 +227,12 @@ int main() {
 		}
 
 		if (ImGui::Button("Save scene")) {
-			scene = scene_manager.save_scene("scena", entities);
-			SceneManager::save_json_to_file("test.json", scene);
+			scene = SceneManager::save_scene(entities);
+			SceneManager::save_json_to_file(file_name, scene);
 		}
 
 		if (ImGui::Button("Load scene")) {
-			scene_manager.load_scene(json_c1);
+			scene_manager.load_scene_from_json_file(file_name);
 		}
 
 		ImGui::DragInt("Entities count", &imgui_entities_count, 1, 1, max_entities);
@@ -257,7 +256,7 @@ int main() {
 
 		if (ImGui::Button("Show class map")) {
 			//audio_manager.test_play_sound();
-			json_deserializer.show_map();
+			scene_manager.show_map();
 		}
 		// 3D SOUND DEMO
 

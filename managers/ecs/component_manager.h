@@ -2,9 +2,9 @@
 #define SILENCE_COMPONENTMANAGER_H
 
 #include "component_array.h"
-#include "json_deserializer.h"
+#include "scene/scene_manager.h"
 
-extern JsonDeserializer json_deserializer;
+extern SceneManager scene_manager;
 
 class ComponentManager {
 private:
@@ -33,7 +33,7 @@ public:
 		assert(component_types.find(type_name) == component_types.end() &&
 				"Registering component type more than once.");
 
-		json_deserializer.add_component_to_map<T>(std::to_string(next_component_type) + type_name);
+		scene_manager.add_component_to_map<T>(std::to_string(next_component_type) + type_name);
 
 		// Add this component type to the component type map
 		component_types.insert({ type_name, next_component_type });

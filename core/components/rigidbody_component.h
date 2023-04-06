@@ -18,6 +18,9 @@ struct RigidBody {
 		j.push_back(nlohmann::json::object());
 		j.back()["rigidbody"] = obj;
 	}
+
+	void deserialize_json(nlohmann::json &j) {
+	}
 };
 
 #endif //SILENCE_RIGIDBODY_H

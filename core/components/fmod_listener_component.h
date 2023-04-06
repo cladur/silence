@@ -11,6 +11,9 @@ struct FmodListener {
 		j.push_back(nlohmann::json::object());
 		j.back()["fmod_listener"] = obj;
 	}
+
+	void deserialize_json(nlohmann::json &j) {
+	}
 };
 
 #endif //SILENCE_FMOD_LISTENER_COMPONENT_H
