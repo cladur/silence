@@ -5,17 +5,24 @@
 
 class SceneManager {
 private:
-	map_type class_map;
+	static SceneManager *instance;
+	static std::mutex mutex;
+	serialization::IdToClassConstructor class_map;
 
 public:
-	template <typename T> void add_component_to_map(std::string name) {
-		class_map[name] = &create_instance<T>;
-	}
+	SceneManager();
+	SceneManager(SceneManager &other) = delete;
+	void operator=(const SceneManager &) = delete;
+	static SceneManager *get_instance();
 
-	void show_map();
 	void load_scene_from_json_file(const std::string &scene_name);
 	static nlohmann::json save_scene(const std::vector<Entity> &entities);
 	static void save_json_to_file(const std::string &file_name, const nlohmann::json &json);
+	static serialization::IdToClassConstructor &get_class_map();
+
+	template <typename T> static void add_component_to_map(ComponentType id) {
+		get_instance()->class_map[id] = &serialization::create_instance<T>;
+	}
 };
 
 #endif //SILENCE_SCENEMANAGER_H

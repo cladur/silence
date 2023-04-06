@@ -3,8 +3,7 @@
 
 #include "component_array.h"
 #include "scene/scene_manager.h"
-
-extern SceneManager scene_manager;
+#include "serialization.h"
 
 class ComponentManager {
 private:
@@ -33,7 +32,7 @@ public:
 		assert(component_types.find(type_name) == component_types.end() &&
 				"Registering component type more than once.");
 
-		scene_manager.add_component_to_map<T>(std::to_string(next_component_type) + type_name);
+		SceneManager::add_component_to_map<T>(next_component_type);
 
 		// Add this component type to the component type map
 		component_types.insert({ type_name, next_component_type });

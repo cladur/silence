@@ -2,6 +2,7 @@
 
 #include "components/children_component.h"
 #include "components/parent_component.h"
+#include "serialization.h"
 #include <spdlog/spdlog.h>
 
 void ECSManager::startup() {
@@ -90,13 +91,21 @@ void ECSManager::serialize_entity_json(nlohmann::json &json, Entity entity) {
 }
 
 void ECSManager::deserialize_entities_json(nlohmann::json &json) {
+	serialization::IdToClassConstructor map = SceneManager::get_class_map();
 	Entity entity{};
 	Signature signature{};
 	std::string string_signature{};
 	for (auto &array_entity : json) {
 		entity = array_entity["entity"];
 		string_signature = array_entity["signature"];
-		signature = Signature(string_signature);
-		entity_manager->set_entity_signature(entity, signature);
+		std::reverse(string_signature.begin(), string_signature.end());
+		for (int i = 0; i < string_signature.size(); i++) {
+			int component_active = string_signature[i] - '0';
+			if (component_active) {
+				auto component = map[i](array_entity["components"]);
+				if (i == 0) {
+				}
+			}
+		}
 	}
 }

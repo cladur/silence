@@ -1,10 +1,15 @@
 #include "scene_manager.h"
 #include "ecs/ecs_manager.h"
+#include "serialization.h"
 #include <fstream>
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
 
 extern ECSManager ecs_manager;
+
+SceneManager::SceneManager() {
+	class_map = serialization::IdToClassConstructor{};
+}
 
 void SceneManager::load_scene_from_json_file(const std::string &scene_name) {
 	std::ifstream file(scene_name);
@@ -28,9 +33,18 @@ void SceneManager::save_json_to_file(const std::string &file_name, const nlohman
 	file.close();
 	SPDLOG_INFO("Saved scene to file {}", file_name);
 }
-
-void SceneManager::show_map() {
-	for (auto &[name, component] : class_map) {
-		SPDLOG_INFO("{}", name);
+SceneManager *SceneManager::get_instance() {
+	std::lock_guard<std::mutex> lock(mutex);
+	if (instance == nullptr) {
+		if (instance == nullptr) {
+			instance = new SceneManager();
+		}
 	}
+	return instance;
 }
+
+SceneManager *SceneManager::instance = nullptr;
+serialization::IdToClassConstructor &SceneManager::get_class_map() {
+	return get_instance()->class_map;
+}
+std::mutex SceneManager::mutex;

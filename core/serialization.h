@@ -14,6 +14,7 @@
 #include <string>
 #include <variant>
 
+namespace serialization {
 template <typename T>
 concept Serializable = requires(T t, nlohmann::json &j) {
 	{ t.serialize_json(j) };
@@ -36,6 +37,8 @@ variant_type create_instance(nlohmann::json &j)
 	return component;
 }
 
-typedef std::map<std::string, std::function<variant_type(nlohmann::json &j)>> map_type;
+typedef std::map<ComponentType, std::function<variant_type(nlohmann::json &j)>> IdToClassConstructor;
+
+} //namespace serialization
 
 #endif //SILENCE_SERIALIZATION_H

@@ -20,6 +20,7 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_vulkan.h"
 #include "scene/scene_manager.h"
+#include "serialization.h"
 
 RenderManager render_manager;
 DisplayManager display_manager;
@@ -252,11 +253,6 @@ int main() {
 		if (ImGui::Button("Play pluck")) {
 			//audio_manager.test_play_sound();
 			audio_manager.play_one_shot_3d(test_pluck, sound_position);
-		}
-
-		if (ImGui::Button("Show class map")) {
-			//audio_manager.test_play_sound();
-			scene_manager.show_map();
 		}
 		// 3D SOUND DEMO
 

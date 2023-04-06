@@ -3,6 +3,7 @@
 
 #include "component_manager.h"
 #include "entity_manager.h"
+#include "serialization.h"
 #include "system_manager.h"
 
 class ECSManager {

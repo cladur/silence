@@ -72,7 +72,7 @@ public:
 	}
 
 	void serialize_component(T &component, nlohmann::json &json)
-		requires Serializable<T>
+		requires serialization::Serializable<T>
 	{
 		component.serialize_json(json);
 	}
