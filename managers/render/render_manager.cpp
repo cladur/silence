@@ -775,7 +775,7 @@ void RenderManager::load_meshes() {
 
 	//we don't care about the vertex normals
 
-	box_mesh.load_from_gltf("resources/models/BoxTextured.gltf");
+	box_mesh.load_from_asset("resources/models/BoxTextured.mesh");
 
 	upload_mesh(triangle_mesh);
 	upload_mesh(box_mesh);

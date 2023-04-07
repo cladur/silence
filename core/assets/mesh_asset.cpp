@@ -1,12 +1,11 @@
 #include "mesh_asset.h"
 
 #include "lz4.h"
-#include "mesh_asset.h"
 #include <nlohmann/json.hpp>
 
-assets::VertexFormat parse_format(const char *f) {
+assets::VertexFormat parse_mesh_format(const char *f) {
 	if (strcmp(f, "PNCV32") == 0) {
-		return assets::VertexFormat::PNCV_F32;
+		return assets::VertexFormat::PNCV32;
 	} else if (strcmp(f, "P32N8C8V16") == 0) {
 		return assets::VertexFormat::P32N8C8V16;
 	} else {
@@ -42,24 +41,24 @@ assets::MeshInfo assets::read_mesh_info(AssetFile *file) {
 	info.bounds.extents[2] = bounds_data[6];
 
 	std::string vertex_format = metadata["vertex_format"];
-	info.vertex_format = parse_format(vertex_format.c_str());
+	info.vertex_format = parse_mesh_format(vertex_format.c_str());
 	return info;
 }
 
 void assets::unpack_mesh(
-		MeshInfo *info, const char *sourcebuffer, size_t sourceSize, char *vertexBufer, char *indexBuffer) {
+		MeshInfo *info, const char *source_buffer, size_t source_size, char *vertex_buffer, char *index_buffer) {
 	//decompressing into temporal vector. TODO: streaming decompress directly on the buffers
 	std::vector<char> decompressed_buffer;
 	decompressed_buffer.resize(info->vertex_buffer_size + info->index_buffer_size);
 
-	LZ4_decompress_safe(sourcebuffer, decompressed_buffer.data(), static_cast<int>(sourceSize),
+	LZ4_decompress_safe(source_buffer, decompressed_buffer.data(), static_cast<int>(source_size),
 			static_cast<int>(decompressed_buffer.size()));
 
 	//copy vertex buffer
-	memcpy(vertexBufer, decompressed_buffer.data(), info->vertex_buffer_size);
+	memcpy(vertex_buffer, decompressed_buffer.data(), info->vertex_buffer_size);
 
 	//copy index buffer
-	memcpy(indexBuffer, decompressed_buffer.data() + info->vertex_buffer_size, info->index_buffer_size);
+	memcpy(index_buffer, decompressed_buffer.data() + info->vertex_buffer_size, info->index_buffer_size);
 }
 
 assets::AssetFile assets::pack_mesh(MeshInfo *info, char *vertexData, char *indexData) {
@@ -73,7 +72,7 @@ assets::AssetFile assets::pack_mesh(MeshInfo *info, char *vertexData, char *inde
 	nlohmann::json metadata;
 	if (info->vertex_format == VertexFormat::P32N8C8V16) {
 		metadata["vertex_format"] = "P32N8C8V16";
-	} else if (info->vertex_format == VertexFormat::PNCV_F32) {
+	} else if (info->vertex_format == VertexFormat::PNCV32) {
 		metadata["vertex_format"] = "PNCV_F32";
 	}
 	metadata["vertex_buffer_size"] = info->vertex_buffer_size;

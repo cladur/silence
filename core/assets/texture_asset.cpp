@@ -3,7 +3,7 @@
 #include <lz4.h>
 #include <nlohmann/json.hpp>
 
-assets::TextureFormat parse_format(const char *f) {
+assets::TextureFormat parse_texture_format(const char *f) {
 	if (strcmp(f, "RGBA8") == 0) {
 		return assets::TextureFormat::RGBA8;
 	} else {
@@ -17,7 +17,7 @@ assets::TextureInfo assets::read_texture_info(AssetFile *file) {
 	nlohmann::json texture_metadata = nlohmann::json::parse(file->json);
 
 	std::string format_string = texture_metadata["format"];
-	info.texture_format = parse_format(format_string.c_str());
+	info.texture_format = parse_texture_format(format_string.c_str());
 
 	std::string compression_string = texture_metadata["compression"];
 	info.compression_mode = parse_compression(compression_string.c_str());

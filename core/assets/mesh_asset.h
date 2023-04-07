@@ -20,7 +20,7 @@ struct VertexP32N8C8V16 {
 
 enum class VertexFormat : uint32_t {
 	Unknown = 0,
-	PNCV_F32, //everything at 32 bits
+	PNCV32, //everything at 32 bits
 	P32N8C8V16 //position at 32 bits, normal at 8 bits, color at 8 bits, uvs at 16 bits float
 };
 

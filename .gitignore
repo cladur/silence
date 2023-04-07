@@ -21,5 +21,5 @@ thirdparty/fmod/api
 thirdparty/fmod/plugins
 
 # Asset files
-.tx
-.mesh
+*.tx
+*.mesh
