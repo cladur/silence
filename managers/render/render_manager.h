@@ -12,6 +12,9 @@
 
 #include "render/vk_mesh.h"
 
+class DescriptorLayoutCache;
+class DescriptorAllocator;
+
 #define VK_CHECK(x)                                                                                                    \
 	do {                                                                                                               \
 		vk::Result err = x;                                                                                            \
@@ -98,12 +101,14 @@ struct FrameData {
 	vk::CommandPool command_pool; //the command pool for our commands
 	vk::CommandBuffer main_command_buffer; //the buffer we will record into
 
+	DescriptorAllocator *dynamic_descriptor_allocator; //descriptor allocator for this frame
+
 	//buffer that holds a single GPUCameraData to use when render
 	AllocatedBuffer camera_buffer;
-	vk::DescriptorSet global_descriptor;
-
+	//	vk::DescriptorSet global_descriptor;
+	//
 	AllocatedBuffer object_buffer;
-	vk::DescriptorSet object_descriptor;
+	//	vk::DescriptorSet object_descriptor;
 };
 
 class RenderManager {
@@ -145,10 +150,12 @@ class RenderManager {
 	vk::Format depth_format;
 
 	// DESCRIPTORS
+	DescriptorAllocator *descriptor_allocator;
+	DescriptorLayoutCache *descriptor_layout_cache;
+
 	vk::DescriptorSetLayout global_set_layout;
 	vk::DescriptorSetLayout object_set_layout;
 	vk::DescriptorSetLayout single_texture_set_layout;
-	vk::DescriptorPool descriptor_pool;
 
 	vk::PhysicalDeviceProperties gpu_properties;
 

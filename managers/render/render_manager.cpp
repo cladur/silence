@@ -1,14 +1,13 @@
 #include "render_manager.h"
 #include "managers/display/display_manager.h"
 
-#include <glm/gtx/transform.hpp>
-
 #define VMA_IMPLEMENTATION
 #include "vk_mem_alloc.h"
 #include "vulkan-memory-allocator-hpp/vk_mem_alloc.hpp"
 
 #include "cmake-build-debug/_deps/fetch_vk_bootstrap-src/src/VkBootstrap.h"
 #include "render/pipeline_builder.h"
+#include "render/vk_descriptors.h"
 #include "render/vk_initializers.h"
 #include "render/vk_textures.h"
 #include <spdlog/spdlog.h>
@@ -318,6 +317,12 @@ void RenderManager::init_sync_structures() {
 }
 
 void RenderManager::init_descriptors() {
+	descriptor_allocator = new DescriptorAllocator();
+	descriptor_allocator->init(device);
+
+	descriptor_layout_cache = new DescriptorLayoutCache();
+	descriptor_layout_cache->init(device);
+
 	const size_t scene_param_buffer_size = FRAME_OVERLAP * pad_uniform_buffer_size(sizeof(GPUSceneData));
 
 	scene_parameter_buffer = create_buffer(
@@ -344,21 +349,7 @@ void RenderManager::init_descriptors() {
 	//point to the camera buffer binding
 	setinfo.pBindings = bindings;
 
-	VK_CHECK(device.createDescriptorSetLayout(&setinfo, nullptr, &global_set_layout));
-
-	//create a descriptor pool that will hold 10 uniform buffers
-	std::vector<vk::DescriptorPoolSize> sizes = { { vk::DescriptorType::eUniformBuffer, 10 },
-		{ vk::DescriptorType::eUniformBufferDynamic, 10 }, { vk::DescriptorType::eStorageBuffer, 10 },
-		{ vk::DescriptorType::eCombinedImageSampler, 10 } };
-
-	vk::DescriptorPoolCreateInfo pool_info = {};
-	pool_info.sType = vk::StructureType::eDescriptorPoolCreateInfo;
-	pool_info.flags = {};
-	pool_info.maxSets = 10;
-	pool_info.poolSizeCount = (uint32_t)sizes.size();
-	pool_info.pPoolSizes = sizes.data();
-
-	VK_CHECK(device.createDescriptorPool(&pool_info, nullptr, &descriptor_pool));
+	global_set_layout = descriptor_layout_cache->create_descriptor_layout(&setinfo);
 
 	vk::DescriptorSetLayoutBinding object_bind = vk_init::descriptor_set_layout_binding(
 			vk::DescriptorType::eStorageBuffer, vk::ShaderStageFlagBits::eVertex, 0);
@@ -369,7 +360,7 @@ void RenderManager::init_descriptors() {
 	object_set_info.flags = {};
 	object_set_info.pBindings = &object_bind;
 
-	VK_CHECK(device.createDescriptorSetLayout(&object_set_info, nullptr, &object_set_layout));
+	object_set_layout = descriptor_layout_cache->create_descriptor_layout(&object_set_info);
 
 	vk::DescriptorSetLayoutBinding texture_bind = vk_init::descriptor_set_layout_binding(
 			vk::DescriptorType::eCombinedImageSampler, vk::ShaderStageFlagBits::eFragment, 0);
@@ -381,9 +372,12 @@ void RenderManager::init_descriptors() {
 	set3_info.flags = {};
 	set3_info.pBindings = &texture_bind;
 
-	VK_CHECK(device.createDescriptorSetLayout(&set3_info, nullptr, &single_texture_set_layout));
+	single_texture_set_layout = descriptor_layout_cache->create_descriptor_layout(&set3_info);
 
 	for (auto &frame : frames) {
+		frame.dynamic_descriptor_allocator = new DescriptorAllocator();
+		frame.dynamic_descriptor_allocator->init(device);
+
 		frame.camera_buffer = create_buffer(
 				sizeof(GPUCameraData), vk::BufferUsageFlagBits::eUniformBuffer, vma::MemoryUsage::eCpuToGpu);
 
@@ -391,75 +385,15 @@ void RenderManager::init_descriptors() {
 		const int max_objects = 10000;
 		frame.object_buffer = create_buffer(max_objects * sizeof(GPUObjectData),
 				vk::BufferUsageFlagBits::eStorageBuffer, vma::MemoryUsage::eCpuToGpu);
-
-		//allocate one descriptor set for each frames[i]
-		vk::DescriptorSetAllocateInfo alloc_info = {};
-		alloc_info.pNext = nullptr;
-		alloc_info.sType = vk::StructureType::eDescriptorSetAllocateInfo;
-		//using the pool we just set
-		alloc_info.descriptorPool = descriptor_pool;
-		//only 1 descriptor
-		alloc_info.descriptorSetCount = 1;
-		//using the global data layout
-		alloc_info.pSetLayouts = &global_set_layout;
-
-		// allocate the descriptor set
-		VK_CHECK(device.allocateDescriptorSets(&alloc_info, &frame.global_descriptor));
-
-		//allocate the descriptor set that will point to object buffer
-		vk::DescriptorSetAllocateInfo object_set_alloc = {};
-		object_set_alloc.pNext = nullptr;
-		object_set_alloc.sType = vk::StructureType::eDescriptorSetAllocateInfo;
-		object_set_alloc.descriptorPool = descriptor_pool;
-		object_set_alloc.descriptorSetCount = 1;
-		object_set_alloc.pSetLayouts = &object_set_layout;
-
-		VK_CHECK(device.allocateDescriptorSets(&object_set_alloc, &frame.object_descriptor));
-
-		//information about the buffer we want to point at in the descriptor
-		vk::DescriptorBufferInfo camera_info;
-		//it will be the camera buffer
-		camera_info.buffer = frame.camera_buffer.buffer;
-		//at 0 offset
-		camera_info.offset = 0;
-		//of the size of a camera data struct
-		camera_info.range = sizeof(GPUCameraData);
-
-		vk::DescriptorBufferInfo scene_info;
-		scene_info.buffer = scene_parameter_buffer.buffer;
-		scene_info.offset = 0;
-		scene_info.range = sizeof(GPUSceneData);
-
-		vk::DescriptorBufferInfo object_buffer_info;
-		object_buffer_info.buffer = frame.object_buffer.buffer;
-		object_buffer_info.offset = 0;
-		object_buffer_info.range = sizeof(GPUObjectData) * max_objects;
-
-		vk::WriteDescriptorSet camera_write = vk_init::write_descriptor_buffer(
-				vk::DescriptorType::eUniformBuffer, frame.global_descriptor, &camera_info, 0);
-		vk::WriteDescriptorSet scene_write = vk_init::write_descriptor_buffer(
-				vk::DescriptorType::eUniformBufferDynamic, frame.global_descriptor, &scene_info, 1);
-		VkWriteDescriptorSet object_write = vk_init::write_descriptor_buffer(
-				vk::DescriptorType::eStorageBuffer, frame.object_descriptor, &object_buffer_info, 0);
-
-		vk::WriteDescriptorSet set_writes[] = { camera_write, scene_write, object_write };
-
-		//update the descriptor set
-		device.updateDescriptorSets(3, set_writes, 0, nullptr);
 	}
 
 	main_deletion_queue.push_function([&]() {
-		device.destroyDescriptorSetLayout(global_set_layout, nullptr);
-		device.destroyDescriptorPool(descriptor_pool, nullptr);
 		allocator.destroyBuffer(scene_parameter_buffer.buffer, scene_parameter_buffer.allocation);
 
 		for (auto &frame : frames) {
 			allocator.destroyBuffer(frame.camera_buffer.buffer, frame.camera_buffer.allocation);
 			allocator.destroyBuffer(frame.object_buffer.buffer, frame.object_buffer.allocation);
 		}
-
-		device.destroyDescriptorSetLayout(object_set_layout, nullptr);
-		device.destroyDescriptorSetLayout(single_texture_set_layout, nullptr);
 	});
 }
 
@@ -627,6 +561,8 @@ void RenderManager::init_scene() {
 		}
 	}
 
+	Material *textured_mat = get_material("textured_mesh");
+
 	//create a sampler for the texture
 	vk::SamplerCreateInfo sampler_info = vk_init::sampler_create_info(vk::Filter::eNearest);
 
@@ -635,28 +571,15 @@ void RenderManager::init_scene() {
 
 	main_deletion_queue.push_function([=, this]() { device.destroySampler(blocky_sampler); });
 
-	Material *textured_mat = get_material("textured_mesh");
-
-	//allocate the descriptor set for single-texture to use on the material
-	vk::DescriptorSetAllocateInfo alloc_info = {};
-	alloc_info.sType = vk::StructureType::eDescriptorSetAllocateInfo;
-	alloc_info.pNext = nullptr;
-	alloc_info.descriptorPool = descriptor_pool;
-	alloc_info.descriptorSetCount = 1;
-	alloc_info.pSetLayouts = &single_texture_set_layout;
-
-	VK_CHECK(device.allocateDescriptorSets(&alloc_info, &textured_mat->texture_set));
-
-	//write to the descriptor set so that it points to our empire_diffuse texture
 	vk::DescriptorImageInfo image_buffer_info;
 	image_buffer_info.sampler = blocky_sampler;
 	image_buffer_info.imageView = loaded_textures["empire_diffuse"].image_view;
 	image_buffer_info.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
 
-	vk::WriteDescriptorSet texture1 = vk_init::write_descriptor_image(
-			vk::DescriptorType::eCombinedImageSampler, textured_mat->texture_set, &image_buffer_info, 0);
-
-	device.updateDescriptorSets(1, &texture1, 0, nullptr);
+	DescriptorBuilder::begin(descriptor_layout_cache, descriptor_allocator)
+			.bind_image(0, &image_buffer_info, vk::DescriptorType::eCombinedImageSampler,
+					vk::ShaderStageFlagBits::eFragment)
+			.build(textured_mat->texture_set);
 }
 
 void RenderManager::init_imgui(GLFWwindow *window) {
@@ -959,6 +882,13 @@ void RenderManager::shutdown() {
 
 	main_deletion_queue.flush();
 
+	for (auto &frame : frames) {
+		frame.dynamic_descriptor_allocator->cleanup();
+	}
+
+	descriptor_allocator->cleanup();
+	descriptor_layout_cache->cleanup();
+
 	device.destroy();
 	instance.destroySurfaceKHR(surface);
 	vkb::destroy_debug_utils_messenger(instance, debug_messenger);
@@ -1015,6 +945,8 @@ void RenderManager::draw(Camera &camera) {
 	//wait until the GPU has finished render the last frame. Timeout of 1 second
 	VK_CHECK(device.waitForFences(1, &get_current_frame().render_fence, true, 1000000000));
 	VK_CHECK(device.resetFences(1, &get_current_frame().render_fence));
+
+	get_current_frame().dynamic_descriptor_allocator->reset_pools();
 
 	//request image from the swapchain, one second timeout
 	uint32_t swapchain_image_index;
@@ -1167,6 +1099,34 @@ void RenderManager::draw_objects(Camera &camera, vk::CommandBuffer cmd, RenderOb
 
 	Mesh *last_mesh = nullptr;
 	Material *last_material = nullptr;
+
+	vk::DescriptorBufferInfo camera_buffer_info = {};
+	camera_buffer_info.buffer = get_current_frame().camera_buffer.buffer;
+	camera_buffer_info.offset = 0;
+	camera_buffer_info.range = 100;
+
+	vk::DescriptorBufferInfo object_buffer_info = {};
+	object_buffer_info.buffer = get_current_frame().object_buffer.buffer;
+	object_buffer_info.offset = 0;
+	object_buffer_info.range = sizeof(GPUObjectData) * 10000;
+
+	vk::DescriptorBufferInfo scene_buffer_info = {};
+	scene_buffer_info.buffer = scene_parameter_buffer.buffer;
+	scene_buffer_info.offset = 0;
+	scene_buffer_info.range = sizeof(GPUSceneData);
+
+	vk::DescriptorSet global_set;
+	DescriptorBuilder::begin(descriptor_layout_cache, descriptor_allocator)
+			.bind_buffer(0, &camera_buffer_info, vk::DescriptorType::eUniformBuffer, vk::ShaderStageFlagBits::eVertex)
+			.bind_buffer(1, &scene_buffer_info, vk::DescriptorType::eUniformBufferDynamic,
+					vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment)
+			.build(global_set);
+
+	vk::DescriptorSet object_set;
+	DescriptorBuilder::begin(descriptor_layout_cache, descriptor_allocator)
+			.bind_buffer(0, &object_buffer_info, vk::DescriptorType::eStorageBuffer, vk::ShaderStageFlagBits::eVertex)
+			.build(object_set);
+
 	for (int i = 0; i < count; i++) {
 		RenderObject &object = first[i];
 
@@ -1179,11 +1139,11 @@ void RenderManager::draw_objects(Camera &camera, vk::CommandBuffer cmd, RenderOb
 
 			// bind the descriptor set when changing pipeline
 			cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, object.material->pipeline_layout, 0, 1,
-					&get_current_frame().global_descriptor, 1, &uniform_offset);
+					&global_set, 1, &uniform_offset);
 
 			// bind the object descriptor set
-			cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, object.material->pipeline_layout, 1, 1,
-					&get_current_frame().object_descriptor, 0, nullptr);
+			cmd.bindDescriptorSets(
+					vk::PipelineBindPoint::eGraphics, object.material->pipeline_layout, 1, 1, &object_set, 0, nullptr);
 
 			if (object.material->texture_set != (vk::DescriptorSet)VK_NULL_HANDLE) {
 				//texture descriptor

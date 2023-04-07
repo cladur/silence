@@ -72,6 +72,7 @@ void demo_entities_init(std::vector<Entity> &entities) {
 	std::uniform_real_distribution<float> rand_scale(3.0f, 5.0f);
 	std::uniform_real_distribution<float> rand_color(0.0f, 1.0f);
 	std::uniform_real_distribution<float> rand_gravity(-40.0f, -20.0f);
+	std::uniform_real_distribution<float> rand_material(0.0f, 1.0f);
 
 	float scale = rand_scale(random_generator);
 
@@ -90,8 +91,13 @@ void demo_entities_init(std::vector<Entity> &entities) {
 								rand_rotation(random_generator)),
 						glm::vec3(scale, scale, scale) });
 
-		ecs_manager.add_component<MeshInstance>(
-				entity, { render_manager.get_mesh("box"), render_manager.get_material("textured_mesh") });
+		if (rand_material(random_generator) > 0.5f) {
+			ecs_manager.add_component<MeshInstance>(
+					entity, { render_manager.get_mesh("box"), render_manager.get_material("textured_mesh") });
+		} else {
+			ecs_manager.add_component<MeshInstance>(
+					entity, { render_manager.get_mesh("box"), render_manager.get_material("default_mesh") });
+		}
 	}
 
 	auto listener = ecs_manager.create_entity();
@@ -217,7 +223,7 @@ int main() {
 	int max_entities = 100;
 	int imgui_entities_count = 50;
 
-	float target_frame_time = 1.0f / display_manager.get_refresh_rate();
+	float target_frame_time = 1.0f / (float)display_manager.get_refresh_rate();
 	float dt = target_frame_time;
 
 	// TEST FOR 3D AUDIO

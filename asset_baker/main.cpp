@@ -52,6 +52,10 @@ void pack_vertex(assets::VertexPNCV32 &new_vert, float vx, float vy, float vz, f
 	new_vert.normal[1] = ny;
 	new_vert.normal[2] = nz;
 
+	new_vert.color[0] = nx;
+	new_vert.color[1] = ny;
+	new_vert.color[2] = nz;
+
 	new_vert.uv[0] = ux;
 	new_vert.uv[1] = 1 - uy;
 }
@@ -99,7 +103,6 @@ void extract_mesh_from_gltf(
 		for (size_t i = 0; i < position_accessor.count; i++) {
 			auto pos = glm::vec3(position_data[i * 3], position_data[i * 3 + 1], position_data[i * 3 + 2]);
 			auto normal = glm::vec3(normal_data[i * 3], normal_data[i * 3 + 1], normal_data[i * 3 + 2]);
-			auto color = normal;
 			auto uv = glm::vec2(uv_data[i * 2], uv_data[i * 2 + 1]);
 
 			V vertex = {};
