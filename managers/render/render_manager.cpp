@@ -17,6 +17,8 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_vulkan.h"
 
+AutoCVarFloat cvar_draw_distance("render.draw_distance", "Distance cull", 5000);
+
 void RenderManager::init_vulkan(DisplayManager &display_manager) {
 	vkb::InstanceBuilder builder;
 	auto inst_ret = builder.set_app_name("Silence Vulkan Application")
@@ -1062,7 +1064,7 @@ void RenderManager::draw_objects(Camera &camera, vk::CommandBuffer cmd, RenderOb
 	glm::mat4 view = camera.get_view_matrix();
 	//camera projection
 	static float aspect = (float)window_extent.width / (float)window_extent.height;
-	glm::mat4 projection = glm::perspective(glm::radians(camera.fov), aspect, 0.1f, 200.0f);
+	glm::mat4 projection = glm::perspective(glm::radians(camera.fov), aspect, 0.1f, cvar_draw_distance.get());
 
 	//fill a GPU camera data struct
 	GPUCameraData cam_data = {};

@@ -44,6 +44,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 // our stuff
+#include "cvars/cvars.h"
 #include "types.h"
 
 #endif //SILENCE_PCH_H

@@ -213,6 +213,7 @@ int main() {
 	Camera camera(glm::vec3(0.0f, 0.0f, -25.0f));
 
 	// Run the game.
+	bool show_cvar_editor = false;
 	bool show_ecs_logs = false;
 	bool show_demo_window = false;
 	bool physics_system_enabled = false;
@@ -259,6 +260,8 @@ int main() {
 		ImGui::Checkbox("Show console ecs logs", &show_ecs_logs);
 
 		ImGui::Checkbox("Show demo window", &show_demo_window);
+
+		ImGui::Checkbox("Show CVAR editor", &show_cvar_editor);
 
 		ImGui::Checkbox("Physics system", &physics_system_enabled);
 
@@ -307,6 +310,10 @@ int main() {
 				ImGui::GetIO().Framerate);
 
 		ImGui::End();
+
+		if (show_cvar_editor) {
+			CVarSystem::get()->draw_imgui_editor();
+		}
 
 		if (display_manager.window_should_close()) {
 			should_run = false;
