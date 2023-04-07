@@ -109,6 +109,8 @@ struct FrameData {
 	//
 	AllocatedBuffer object_buffer;
 	//	vk::DescriptorSet object_descriptor;
+
+	AllocatedBuffer indirect_buffer;
 };
 
 class RenderManager {

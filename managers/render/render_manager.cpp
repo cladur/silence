@@ -41,6 +41,12 @@ void RenderManager::init_vulkan(DisplayManager &display_manager) {
 	surface = display_manager.create_surface(vkb_inst.instance);
 
 	vkb::PhysicalDeviceSelector selector{ vkb_inst };
+
+	vk::PhysicalDeviceFeatures features = {};
+	features.multiDrawIndirect = VK_TRUE;
+
+	selector.set_required_features(features);
+
 	auto physical_device_ret = selector.set_minimum_version(1, 1).set_surface(surface).select();
 
 	if (!physical_device_ret) {
@@ -56,6 +62,7 @@ void RenderManager::init_vulkan(DisplayManager &display_manager) {
 	shader_draw_parameters_features.sType = vk::StructureType::ePhysicalDeviceShaderDrawParametersFeatures;
 	shader_draw_parameters_features.pNext = nullptr;
 	shader_draw_parameters_features.shaderDrawParameters = VK_TRUE;
+
 	vkb::Device vkb_device = device_builder.add_pNext(&shader_draw_parameters_features).build().value();
 
 	// Get the VkDevice handle used in the rest of a Vulkan application
@@ -387,6 +394,14 @@ void RenderManager::init_descriptors() {
 		const int max_objects = 10000;
 		frame.object_buffer = create_buffer(max_objects * sizeof(GPUObjectData),
 				vk::BufferUsageFlagBits::eStorageBuffer, vma::MemoryUsage::eCpuToGpu);
+
+		// TODO: Move this constant somewhere else
+		const int max_commands = 10000;
+
+		frame.indirect_buffer = create_buffer(max_commands * sizeof(vk::DrawIndexedIndirectCommand),
+				vk::BufferUsageFlagBits::eIndirectBuffer | vk::BufferUsageFlagBits::eTransferDst |
+						vk::BufferUsageFlagBits::eStorageBuffer,
+				vma::MemoryUsage::eCpuToGpu);
 	}
 
 	main_deletion_queue.push_function([&]() {
@@ -395,6 +410,7 @@ void RenderManager::init_descriptors() {
 		for (auto &frame : frames) {
 			allocator.destroyBuffer(frame.camera_buffer.buffer, frame.camera_buffer.allocation);
 			allocator.destroyBuffer(frame.object_buffer.buffer, frame.object_buffer.allocation);
+			allocator.destroyBuffer(frame.indirect_buffer.buffer, frame.indirect_buffer.allocation);
 		}
 	});
 }
@@ -1058,6 +1074,46 @@ void RenderManager::draw(Camera &camera) {
 	frame_number++;
 }
 
+struct IndirectBatch {
+	Mesh *mesh;
+	Material *material;
+	uint32_t first;
+	uint32_t count;
+};
+
+std::vector<IndirectBatch> compact_draws(RenderObject *objects, int count) {
+	std::vector<IndirectBatch> draws;
+
+	IndirectBatch first_draw{};
+	first_draw.mesh = objects[0].mesh;
+	first_draw.material = objects[0].material;
+	first_draw.first = 0;
+	first_draw.count = 1;
+
+	draws.push_back(first_draw);
+
+	for (int i = 0; i < count; i++) {
+		//compare the mesh and material with the end of the vector of draws
+		bool same_mesh = objects[i].mesh == draws.back().mesh;
+		bool same_material = objects[i].material == draws.back().material;
+
+		if (same_mesh && same_material) {
+			//all matches, add count
+			draws.back().count++;
+		} else {
+			//add new draw
+			IndirectBatch new_draw{};
+			new_draw.mesh = objects[i].mesh;
+			new_draw.material = objects[i].material;
+			new_draw.first = i;
+			new_draw.count = 1;
+
+			draws.push_back(new_draw);
+		}
+	}
+	return draws;
+}
+
 void RenderManager::draw_objects(Camera &camera, vk::CommandBuffer cmd, RenderObject *first, int count) {
 	// TODO: Sort RenderObjects by material and mesh to reduce pipeline and descriptor set changes
 
@@ -1099,9 +1155,6 @@ void RenderManager::draw_objects(Camera &camera, vk::CommandBuffer cmd, RenderOb
 	}
 	allocator.unmapMemory(get_current_frame().object_buffer.allocation);
 
-	Mesh *last_mesh = nullptr;
-	Material *last_material = nullptr;
-
 	vk::DescriptorBufferInfo camera_buffer_info = {};
 	camera_buffer_info.buffer = get_current_frame().camera_buffer.buffer;
 	camera_buffer_info.offset = 0;
@@ -1129,52 +1182,60 @@ void RenderManager::draw_objects(Camera &camera, vk::CommandBuffer cmd, RenderOb
 			.bind_buffer(0, &object_buffer_info, vk::DescriptorType::eStorageBuffer, vk::ShaderStageFlagBits::eVertex)
 			.build(object_set);
 
+	Mesh *last_mesh = nullptr;
+	Material *last_material = nullptr;
+
+	std::vector<IndirectBatch> batches = compact_draws(first, count);
+
+	vk::DrawIndexedIndirectCommand *draw_commands = nullptr;
+	VK_CHECK(allocator.mapMemory(get_current_frame().indirect_buffer.allocation, (void **)&draw_commands));
+
+	//encode the draw data of each object into the indirect draw buffer
 	for (int i = 0; i < count; i++) {
 		RenderObject &object = first[i];
+		draw_commands[i].indexCount = object.mesh->indices.size();
+		draw_commands[i].instanceCount = 1;
+		draw_commands[i].firstIndex = 0;
+		draw_commands[i].vertexOffset = 0;
+		draw_commands[i].firstInstance = i; //used to access object matrix in the shader
+	}
 
-		//only bind the pipeline if it doesn't match with the already bound one
-		if (object.material != last_material) {
-			cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, object.material->pipeline);
-			last_material = object.material;
+	allocator.unmapMemory(get_current_frame().indirect_buffer.allocation);
 
+	for (IndirectBatch &batch : batches) {
+		if (batch.material != last_material) {
+			cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, batch.material->pipeline);
 			uint32_t uniform_offset = pad_uniform_buffer_size(sizeof(GPUSceneData)) * frame_index;
 
 			// bind the descriptor set when changing pipeline
-			cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, object.material->pipeline_layout, 0, 1,
-					&global_set, 1, &uniform_offset);
+			cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, batch.material->pipeline_layout, 0, 1, &global_set,
+					1, &uniform_offset);
 
 			// bind the object descriptor set
 			cmd.bindDescriptorSets(
-					vk::PipelineBindPoint::eGraphics, object.material->pipeline_layout, 1, 1, &object_set, 0, nullptr);
+					vk::PipelineBindPoint::eGraphics, batch.material->pipeline_layout, 1, 1, &object_set, 0, nullptr);
 
-			if (object.material->texture_set != (vk::DescriptorSet)VK_NULL_HANDLE) {
+			if (batch.material->texture_set != (vk::DescriptorSet)VK_NULL_HANDLE) {
 				//texture descriptor
-				cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, object.material->pipeline_layout, 2, 1,
-						&object.material->texture_set, 0, nullptr);
+				cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, batch.material->pipeline_layout, 2, 1,
+						&batch.material->texture_set, 0, nullptr);
 			}
+
+			last_material = batch.material;
 		}
 
-		glm::mat4 model = object.transform_matrix;
-		//final render matrix, that we are calculating on the cpu
-		glm::mat4 mesh_matrix = projection * view * model;
-
-		MeshPushConstants constants = {};
-		constants.render_matrix = object.transform_matrix;
-
-		//upload the mesh to the GPU via push constants
-		cmd.pushConstants(object.material->pipeline_layout, vk::ShaderStageFlagBits::eVertex, 0,
-				sizeof(MeshPushConstants), &constants);
-
-		//only bind the mesh if it's a different one from last bind
-		if (object.mesh != last_mesh) {
+		if (batch.mesh != last_mesh) {
 			//bind the mesh vertex buffer with offset 0
 			vk::DeviceSize offset = 0;
-			cmd.bindVertexBuffers(0, 1, &object.mesh->vertex_buffer.buffer, &offset);
-			cmd.bindIndexBuffer(object.mesh->index_buffer.buffer, 0, vk::IndexType::eUint32);
-			last_mesh = object.mesh;
+			cmd.bindVertexBuffers(0, 1, &batch.mesh->vertex_buffer.buffer, &offset);
+			cmd.bindIndexBuffer(batch.mesh->index_buffer.buffer, 0, vk::IndexType::eUint32);
+
+			last_mesh = batch.mesh;
 		}
+
 		//we can now draw
-		// We're passing object's index as instanceCount, to easily pass integer to the shader
-		cmd.drawIndexed(object.mesh->indices.size(), 1, 0, 0, i);
+		vk::DeviceSize offset = sizeof(vk::DrawIndexedIndirectCommand) * batch.first;
+		uint32_t stride = sizeof(vk::DrawIndexedIndirectCommand);
+		cmd.drawIndexedIndirect(get_current_frame().indirect_buffer.buffer, offset, batch.count, stride);
 	}
 }
