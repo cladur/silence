@@ -488,6 +488,22 @@ void RenderManager::init_pipelines() {
 		SPDLOG_INFO("Triangle vertex shader successfully loaded");
 	}
 
+	vk::ShaderModule ui_vertex_shader;
+	if (!load_shader_module("resources/shaders/ui.vert.spv", &ui_vertex_shader)) {
+		SPDLOG_ERROR("Error when building the ui vertex shader module");
+		abort();
+	} else {
+		SPDLOG_INFO("UI vertex shader successfully loaded");
+	}
+
+	vk::ShaderModule ui_frag_shader;
+	if (!load_shader_module("resources/shaders/ui.frag.spv", &ui_frag_shader)) {
+		SPDLOG_ERROR("Error when building the ui fragment shader module");
+		abort();
+	} else {
+		SPDLOG_INFO("UI fragment shader successfully loaded");
+	}
+
 	//build the stage-create-info for both vertex and fragment stages. This lets the pipeline know the shader
 	//modules per stage
 	PipelineBuilder pipeline_builder;
@@ -595,15 +611,48 @@ void RenderManager::init_pipelines() {
 	vk::Pipeline textured_mesh_pipeline = pipeline_builder.build_pipeline(device, render_pass);
 	create_material(textured_mesh_pipeline, textured_mesh_pipeline_layout, "textured_mesh");
 
+	// create pipeline for ui rendering
+	vk::PipelineLayoutCreateInfo ui_pipeline_layout_info = mesh_pipeline_layout_info;
+	vk::DescriptorSetLayout set_layouts3[] = { global_set_layout, object_set_layout, single_texture_set_layout };
+	ui_pipeline_layout_info.setLayoutCount = 3;
+	ui_pipeline_layout_info.pSetLayouts = set_layouts3;
+
+	vk::PipelineLayout ui_pipeline_layout;
+	VK_CHECK(device.createPipelineLayout(&ui_pipeline_layout_info, nullptr, &ui_pipeline_layout));
+
+	pipeline_builder.shader_stages.clear();
+	pipeline_builder.shader_stages.push_back(
+			vk_init::pipeline_shader_stage_create_info(vk::ShaderStageFlagBits::eVertex, ui_vertex_shader));
+	pipeline_builder.shader_stages.push_back(
+			vk_init::pipeline_shader_stage_create_info(vk::ShaderStageFlagBits::eFragment, ui_frag_shader));
+	pipeline_builder.pipeline_layout = ui_pipeline_layout;
+	// create a blend attachment that supports transparency
+	vk::PipelineColorBlendAttachmentState blend_attachment = {};
+	blend_attachment.blendEnable = VK_TRUE;
+	blend_attachment.srcColorBlendFactor = vk::BlendFactor::eSrcAlpha;
+	blend_attachment.dstColorBlendFactor = vk::BlendFactor::eOneMinusSrcAlpha;
+	blend_attachment.colorBlendOp = vk::BlendOp::eAdd;
+	blend_attachment.srcAlphaBlendFactor = vk::BlendFactor::eOne;
+	blend_attachment.dstAlphaBlendFactor = vk::BlendFactor::eZero;
+	blend_attachment.alphaBlendOp = vk::BlendOp::eAdd;
+	blend_attachment.colorWriteMask = vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG | vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA;
+	pipeline_builder.color_blend_attachment = blend_attachment;
+	ui_pipeline = pipeline_builder.build_pipeline(device, render_pass);
+	create_material(ui_pipeline, ui_pipeline_layout, "ui");
+
 	device.destroyShaderModule(mesh_vertex_shader, nullptr);
 	device.destroyShaderModule(mesh_frag_shader, nullptr);
 	device.destroyShaderModule(textured_mesh_frag_shader, nullptr);
+	device.destroyShaderModule(ui_vertex_shader, nullptr);
+	device.destroyShaderModule(ui_frag_shader, nullptr);
 
 	main_deletion_queue.push_function([=, this]() {
 		device.destroyPipeline(mesh_pipeline);
 		device.destroyPipelineLayout(mesh_pipeline_layout);
 		device.destroyPipeline(textured_mesh_pipeline);
 		device.destroyPipelineLayout(textured_mesh_pipeline_layout);
+		device.destroyPipeline(ui_pipeline);
+		device.destroyPipelineLayout(ui_pipeline_layout);
 	});
 }
 
@@ -648,6 +697,18 @@ void RenderManager::init_scene() {
 	alloc_info.pSetLayouts = &single_texture_set_layout;
 
 	VK_CHECK(device.allocateDescriptorSets(&alloc_info, &textured_mat->texture_set));
+
+	Material *ui_mat = get_material("ui");
+
+	//allocate the descriptor set for single-texture to use on the material
+	vk::DescriptorSetAllocateInfo ui_alloc_info = {};
+	ui_alloc_info.sType = vk::StructureType::eDescriptorSetAllocateInfo;
+	ui_alloc_info.pNext = nullptr;
+	ui_alloc_info.descriptorPool = descriptor_pool;
+	ui_alloc_info.descriptorSetCount = 1;
+	ui_alloc_info.pSetLayouts = &single_texture_set_layout;
+
+	VK_CHECK(device.allocateDescriptorSets(&ui_alloc_info, &ui_mat->texture_set));
 
 	//write to the descriptor set so that it points to our empire_diffuse texture
 	vk::DescriptorImageInfo image_buffer_info;
@@ -777,13 +838,19 @@ void RenderManager::load_meshes() {
 
 	//we don't care about the vertex normals
 
+	SPDLOG_INFO("Loading test cube gltf file");
 	box_mesh.load_from_gltf("resources/models/BoxTextured.gltf");
 
+	plane_mesh.load_from_gltf("resources/models/plane.gltf");
+
+	SPDLOG_INFO("Loaded test cube gltf file");
 	upload_mesh(triangle_mesh);
 	upload_mesh(box_mesh);
+	upload_mesh(plane_mesh);
 
 	meshes["triangle"] = triangle_mesh;
 	meshes["box"] = box_mesh;
+	meshes["plane"] = plane_mesh;
 }
 
 void RenderManager::upload_mesh(Mesh &mesh) {
@@ -1169,8 +1236,17 @@ void RenderManager::draw_objects(Camera &camera, vk::CommandBuffer cmd, RenderOb
 
 	Mesh *last_mesh = nullptr;
 	Material *last_material = nullptr;
+	Material *ui_mat = get_material("ui");
+	int ui_object_idx = 0;
 	for (int i = 0; i < count; i++) {
 		RenderObject &object = first[i];
+
+		if (object.material == ui_mat) {
+			SPDLOG_INFO("Drawing UI object {} out of {}", ui_object_idx, glyphs.size());
+			Texture t = glyphs[ui_object_idx];
+			ui_object_idx++;
+			update_descriptor_set_with_texture(t, glyph_sampler,  *object.material);
+		}
 
 		//only bind the pipeline if it doesn't match with the already bound one
 		if (object.material != last_material) {
@@ -1223,20 +1299,17 @@ Texture RenderManager::get_character_texture(FT_Face &face) {
 	int width = face->glyph->bitmap.width;
 	int height = face->glyph->bitmap.rows;
 
+	SPDLOG_INFO("Loading glyph with dimensions w{}xh{}", width, height);
 	//create a texture for the glyph
 	Texture texture = {};
-
-	if(face->glyph->bitmap.pixel_mode != FT_PIXEL_MODE_GRAY) {
-		SPDLOG_ERROR("Trying to load an unsupported pixel mode glyph");
-		return texture;
-	}
 
 	// convert grayscale 8 bit image to rgba 32 bit
 	std::vector<uint8_t> rgba(width * height * 4);
 	int idx = 0;
+	int idx2 = 0;
 	for (int y = 0; y < height; y++) {
 		for (int x = 0; x < width; x++) {
-			uint8_t gray = face->glyph->bitmap.buffer[idx];
+			uint8_t gray = face->glyph->bitmap.buffer[idx2++];
 			rgba[idx++] = gray;
 			rgba[idx++] = gray;
 			rgba[idx++] = gray;
@@ -1253,9 +1326,10 @@ Texture RenderManager::get_character_texture(FT_Face &face) {
 			create_buffer(image_size, vk::BufferUsageFlagBits::eTransferSrc, vma::MemoryUsage::eCpuOnly);
 
 	//copy data to buffer
+	void *rgba_ptr = rgba.data();
 	void *data;
 	VK_CHECK(allocator.mapMemory(staging_buffer.allocation, &data));
-	memcpy(data, rgba.data(), image_size);
+	memcpy(data, rgba_ptr, static_cast<size_t>(image_size));
 	allocator.unmapMemory(staging_buffer.allocation);
 
 	vk::Extent3D image_extent;
@@ -1339,5 +1413,39 @@ Texture RenderManager::get_character_texture(FT_Face &face) {
 
 	main_deletion_queue.push_function([=, this]() { device.destroyImageView(texture.image_view); });
 
+
+
+	//write to the descriptor set so that it points to our texture
+//	vk::DescriptorImageInfo ui_image_buffer_info;
+//	ui_image_buffer_info.sampler = ui_sampler;
+//	ui_image_buffer_info.imageView = loaded_textures["ui"].image_view;
+//	ui_image_buffer_info.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+//
+//	vk::WriteDescriptorSet ui_texture1 = vk_init::write_descriptor_image(
+//			vk::DescriptorType::eCombinedImageSampler, ui_mat->texture_set, &ui_image_buffer_info, 0);
+//
+//	device.updateDescriptorSets(1, &ui_texture1, 0, nullptr);
+
 	return texture;
+}
+
+vk::Sampler RenderManager::create_sampler(vk::Filter filter, vk::SamplerAddressMode address_mode) {
+	vk::SamplerCreateInfo ui_sampler_info = vk_init::sampler_create_info(filter, address_mode);
+
+	vk::Sampler sampler;
+	VK_CHECK(device.createSampler(&ui_sampler_info, nullptr, &sampler));
+
+	main_deletion_queue.push_function([=, this]() { device.destroySampler(sampler); });
+	return sampler;
+}
+void RenderManager::update_descriptor_set_with_texture(Texture texture, vk::Sampler &sampler, Material &mat) {
+		vk::DescriptorImageInfo ui_image_buffer_info;
+		ui_image_buffer_info.sampler = sampler;
+		ui_image_buffer_info.imageView = texture.image_view;
+		ui_image_buffer_info.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+
+		vk::WriteDescriptorSet ui_texture1 = vk_init::write_descriptor_image(
+				vk::DescriptorType::eCombinedImageSampler, mat.texture_set, &ui_image_buffer_info, 0);
+
+		device.updateDescriptorSets(1, &ui_texture1, 0, nullptr);
 }

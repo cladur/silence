@@ -17,7 +17,10 @@ class Font {
 private:
 	FT_Face face;
 	std::unordered_map<char, CharacterGlyph> characters;
+
 public:
+	vk::Sampler sampler;
+
 	explicit Font(FT_Face face);
 	~Font();
 

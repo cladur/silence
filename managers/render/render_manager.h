@@ -142,9 +142,13 @@ class RenderManager {
 	vk::PipelineLayout mesh_pipeline_layout;
 	vk::Pipeline mesh_pipeline;
 
+	vk::PipelineLayout ui_pipeline_layout;
+	vk::Pipeline ui_pipeline;
+
 	// MESHES
 	Mesh triangle_mesh;
 	Mesh box_mesh;
+	Mesh plane_mesh;
 
 	// DEPTH
 	vk::ImageView depth_image_view;
@@ -204,6 +208,10 @@ public:
 	std::unordered_map<std::string, Material> materials;
 	std::unordered_map<std::string, Mesh> meshes;
 
+	//i hate the way of doing this but i couln;t figure out anything else 💀
+	std::vector<Texture> glyphs;
+	vk::Sampler glyph_sampler;
+
 	// texture stuff
 	std::unordered_map<std::string, Texture> loaded_textures;
 
@@ -229,6 +237,10 @@ public:
 	void draw_objects(Camera &camera, vk::CommandBuffer cmd, RenderObject *first, int count);
 
 	Texture get_character_texture(FT_Face &face);
+
+	vk::Sampler create_sampler(vk::Filter filter, vk::SamplerAddressMode address_mode);
+
+	void update_descriptor_set_with_texture(Texture texture, vk::Sampler &sampler, Material &mat);
 };
 
 #endif //SILENCE_RENDER_MANAGER_H

@@ -1,4 +1,5 @@
 #include "render_system.h"
+#include <components/ui_text_component.h>
 
 #include "core/components/transform_component.h"
 #include "ecs/ecs_manager.h"
@@ -11,6 +12,9 @@ void RenderSystem::startup() {
 	signature.set(ecs_manager.get_component_type<Transform>());
 	signature.set(ecs_manager.get_component_type<MeshInstance>());
 	ecs_manager.set_system_component_whitelist<RenderSystem>(signature);
+	signature.reset();
+	signature.set(ecs_manager.get_component_type<UIText>());
+	ecs_manager.set_system_component_blacklist<RenderSystem>(signature);
 }
 
 void RenderSystem::update(RenderManager &render_manager) {

@@ -7,6 +7,7 @@
 #include "components/parent_component.h"
 #include "components/rigidbody_component.h"
 #include "components/transform_component.h"
+#include "components/ui_text_component.h"
 
 #include "ecs/systems/parent_system.h"
 #include "ecs/systems/physics_system.h"
@@ -22,12 +23,14 @@
 #include "core/camera/camera.h"
 #include "render/ui/text/font.h"
 #include "render/ui/text/font_manager.h"
+#include "render/ui/ui_render_system.h"
 
 RenderManager render_manager;
 DisplayManager display_manager;
 ECSManager ecs_manager;
 AudioManager audio_manager;
 InputManager input_manager;
+FontManager font_manager;
 
 bool in_debug_menu = true;
 
@@ -65,6 +68,7 @@ void default_ecs_manager_init() {
 	ecs_manager.register_component<Children>();
 	ecs_manager.register_component<MeshInstance>();
 	ecs_manager.register_component<FmodListener>();
+	ecs_manager.register_component<UIText>();
 }
 
 void demo_entities_init(std::vector<Entity> &entities) {
@@ -103,6 +107,15 @@ void demo_entities_init(std::vector<Entity> &entities) {
 			FmodListener{ .listener_id = SILENCE_FMOD_LISTENER_DEBUG_CAMERA,
 					.prev_frame_position = glm::vec3(0.0f, 0.0f, -25.0f) });
 	entities.push_back(listener);
+
+	auto ui_entity = ecs_manager.create_entity();
+	ecs_manager.add_component(ui_entity,
+			Transform{ glm::vec3(50.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f) });
+	ecs_manager.add_component<MeshInstance>(
+			ui_entity, { render_manager.get_mesh("plane"), render_manager.get_material("ui") });
+
+	ecs_manager.add_component<UIText>(ui_entity, { 0, "Hello123!@#", glm::vec3 { 1.0f, 1.0f, 1.0f }, 1.0f});
+	entities.push_back(ui_entity);
 }
 
 bool display_manager_init() {
@@ -188,11 +201,13 @@ int main() {
 	auto parent_system = ecs_manager.register_system<ParentSystem>();
 	auto render_system = ecs_manager.register_system<RenderSystem>();
 	auto fmod_listener_system = ecs_manager.register_system<FmodListenerSystem>();
+	auto ui_render_system = ecs_manager.register_system<UiRenderSystem>();
 
 	physics_system->startup();
 	parent_system->startup();
 	render_system->startup();
 	fmod_listener_system->startup();
+	ui_render_system->startup();
 
 	std::vector<Entity> entities(50);
 	demo_entities_init(entities);
@@ -208,8 +223,8 @@ int main() {
 
 	Camera camera(glm::vec3(0.0f, 0.0f, -25.0f));
 
-	FontManager font_manager = FontManager();
-	Font font = Font(font_manager.load_font("resources/fonts/BebasNeue-Regular.ttf", 32));
+	font_manager.startup();
+	font_manager.load_font("resources/fonts/THEBOLDFONT.ttf", 32);
 
 	// Run the game.
 	bool show_ecs_logs = false;
@@ -317,6 +332,7 @@ int main() {
 
 		parent_system->update();
 		render_system->update(render_manager);
+		ui_render_system->update(render_manager);
 
 		input_manager.process_input();
 		render_manager.draw(camera);

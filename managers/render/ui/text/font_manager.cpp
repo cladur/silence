@@ -1,28 +1,42 @@
 #include "font_manager.h"
-
+#include <filesystem>
 #include <iostream>
 #include <map>
 #include <string>
 
-FontManager::FontManager() {
-	if (FT_Init_FreeType(&ft)) {
+void FontManager::startup() {
+	auto er = FT_Init_FreeType(&ft);
+	if (er) {
 		SPDLOG_ERROR("Could not init FreeType Library");
 	}
+	SPDLOG_INFO("Initialized Font Manager");
 }
 
-FontManager::~FontManager() {
+void FontManager::shutdown() {
 	FT_Done_FreeType(ft);
 }
 
-FT_Face FontManager::load_font(const char *path, int size) {
-
+void FontManager::load_font(const char *path, int size) {
 	FT_Face face;
+	// initialize face
+
 	SPDLOG_INFO("Loading font: {}", path);
-	if (FT_New_Face(ft, path, 0, &face)) {
+	auto error = FT_New_Face(ft, path, 0, &face);
+	SPDLOG_INFO("error: {}", error);
+	if (error) {
 		SPDLOG_ERROR("Failed to load font: {}", path);
-		return nullptr;
 	}
 
 	FT_Set_Pixel_Sizes(face, 0, size);
-	return face;
+	Font f = Font(face);
+	fonts.push_back(f);
 }
+
+Font &FontManager::get_font(int id) {
+	if (id >= fonts.size()) {
+		SPDLOG_ERROR("Font id {} is out of range, returning font of id 0", id);
+		return fonts[0];
+	}
+	return fonts[id];
+}
+

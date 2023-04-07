@@ -12,7 +12,9 @@ add_library(${RENDER_MANAGER_NAME} STATIC
         ui/text/font_manager.cpp
         ui/text/font_manager.h
         ui/text/font.cpp
-        ui/text/font.h)
+        ui/text/font.h
+        ui/ui_render_system.cpp
+        ui/ui_render_system.h)
 
 find_package(Freetype CONFIG REQUIRED)
 if(TARGET freetype AND NOT TARGET Freetype::Freetype)
