@@ -22,6 +22,7 @@
 #include "scene/scene_manager.h"
 #include "serialization.h"
 #include <spdlog/spdlog.h>
+#include <fstream>
 
 RenderManager render_manager;
 DisplayManager display_manager;
@@ -178,7 +179,8 @@ int main() {
 	int imgui_entities_count = 50;
 	int frames_count = 0;
 
-	std::string file_name = "test.json";
+	char load_file_name[128] = "scene.json";
+	char save_file_name[128] = "scene.json";
 
 	// TEST FOR 3D AUDIO
 	glm::vec3 sound_position = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -227,14 +229,28 @@ int main() {
 			entities.clear();
 		}
 
+		ImGui::Text("Save file");
+		ImGui::InputText("#Save file name", save_file_name, IM_ARRAYSIZE(save_file_name));
+
 		if (ImGui::Button("Save scene")) {
 			scene = SceneManager::save_scene(entities);
-			SceneManager::save_json_to_file(file_name, scene);
+			SceneManager::save_json_to_file(save_file_name, scene);
 		}
 
+		ImGui::Text("Load file");
+		ImGui::InputText("#Load file name", load_file_name, IM_ARRAYSIZE(load_file_name));
+
 		if (ImGui::Button("Load scene")) {
-			destroy_all_entities(entities);
-			scene_manager.load_scene_from_json_file(file_name, entities);
+			std::ifstream file(load_file_name);
+			if (file.is_open()) {
+				SPDLOG_INFO("Loaded scene from file {}", load_file_name);
+				nlohmann::json scene_json = nlohmann::json::parse(file);
+				file.close();
+				destroy_all_entities(entities);
+				scene_manager.load_scene_from_json_file(scene_json, load_file_name, entities);
+			} else {
+				SPDLOG_ERROR("File {} not found", load_file_name);
+			}
 		}
 
 		ImGui::DragInt("Entities count", &imgui_entities_count, 1, 1, max_entities);
@@ -265,10 +281,6 @@ int main() {
 
 		if (physics_system_enabled) {
 			physics_system->update(dt);
-		}
-
-		if (frames_count % 100 == 0) {
-			SPDLOG_INFO("ECount {}", entities.size());
 		}
 
 		parent_system->update();
