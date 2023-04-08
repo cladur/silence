@@ -1,10 +1,8 @@
 #include "entity_manager.h"
-#include <spdlog/spdlog.h>
-#include <cassert>
 
 void EntityManager::startup() {
 	for (Entity entity = 1; entity < MAX_ENTITIES; ++entity) {
-		available_entities.push(entity);
+		available_entities.push_back(entity);
 	}
 }
 
@@ -16,11 +14,23 @@ Entity EntityManager::create_entity() {
 
 	// Take id of first entity and then remove it from the queue
 	Entity created_entity = available_entities.front();
-	available_entities.pop();
+	available_entities.erase(available_entities.begin());
 	living_entities_count++;
 
 	// Return found id
 	return created_entity;
+}
+
+Entity EntityManager::create_entity(Entity entity) {
+	if (std::find(available_entities.begin(), available_entities.end(), entity) != available_entities.end()) {
+		assert(living_entities_count < MAX_ENTITIES && "Too many entities alive");
+		available_entities.erase(
+				std::remove(available_entities.begin(), available_entities.end(), entity), available_entities.end());
+		living_entities_count++;
+		return entity;
+	} else {
+		return entity;
+	}
 }
 
 void EntityManager::destroy_entity(Entity entity) {
@@ -30,7 +40,7 @@ void EntityManager::destroy_entity(Entity entity) {
 	signatures[entity].reset();
 
 	// Push it back to queue
-	available_entities.push(entity);
+	available_entities.push_back(entity);
 	living_entities_count--;
 }
 

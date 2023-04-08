@@ -1,13 +1,7 @@
+#ifndef SILENCE_SYSTEM_MANAGER_H
+#define SILENCE_SYSTEM_MANAGER_H
 
-#include "../../core/types.h"
 #include "systems/base_system.h"
-#include <cassert>
-#include <memory>
-#include <unordered_map>
-#ifndef SILENCE_SYSTEMMANAGER_H
-#define SILENCE_SYSTEMMANAGER_H
-
-#endif //SILENCE_SYSTEMMANAGER_H
 
 class SystemManager {
 private:
@@ -82,3 +76,5 @@ public:
 		}
 	}
 };
+
+#endif //SILENCE_SYSTEM_MANAGER_H

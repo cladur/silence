@@ -1,32 +1,62 @@
-#include "display_manager.h"
-#include "ecs/parent_manager.h"
-#include "render_manager.h"
-
-#include "components/collider_aabb.h"
-#include "components/collider_tag_component.h"
-#include "components/gravity_component.h"
-#include "components/rigidbody_component.h"
-#include "components/state_component.h"
-#include "components/transform_component.h"
-#include "ecs/ecs_manager.h"
-#include "magic_enum.hpp"
-#include "physics/physics_system.h"
-#include "spdlog/spdlog.h"
-
-#include <random>
+#include "audio/audio_manager.h"
+#include "managers/display/display_manager.h"
+#include "managers/render/render_manager.h"
 
 #include "components/children_component.h"
+#include "components/gravity_component.h"
+#include "components/mesh_instance_component.h"
 #include "components/parent_component.h"
-#include "imgui.h"
+#include "components/rigidbody_component.h"
+#include "components/transform_component.h"
+
+#include "render/render_system.h"
+
+#include "ecs/ecs_manager.h"
+#include "ecs/systems/parent_system.h"
+#include "ecs/systems/physics_system.h"
+
+#include "audio/fmod_listener_system.h"
+#include "components/fmod_listener_component.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_vulkan.h"
-#include "rendering/render_system.h"
-#include "systems/parent_system.h"
-#include "types.h"
+#include "scene/scene_manager.h"
+#include "serialization.h"
+#include <spdlog/spdlog.h>
+#include <fstream>
+
+#include "core/camera/camera.h"
 
 RenderManager render_manager;
 DisplayManager display_manager;
 ECSManager ecs_manager;
+AudioManager audio_manager;
+InputManager input_manager;
+
+bool in_debug_menu = true;
+
+void default_mappings() {
+	input_manager.add_action("debug_menu");
+	input_manager.add_key_to_action("debug_menu", InputKey::ESCAPE);
+	input_manager.add_key_to_action("debug_menu", InputKey::GAMEPAD_START);
+	input_manager.add_action("move_forward");
+	input_manager.add_key_to_action("move_forward", InputKey::W);
+	input_manager.add_key_to_action("move_forward", InputKey::GAMEPAD_LEFT_STICK_Y_POSITIVE);
+	input_manager.add_action("move_backward");
+	input_manager.add_key_to_action("move_backward", InputKey::S);
+	input_manager.add_key_to_action("move_backward", InputKey::GAMEPAD_LEFT_STICK_Y_NEGATIVE);
+	input_manager.add_action("move_left");
+	input_manager.add_key_to_action("move_left", InputKey::A);
+	input_manager.add_key_to_action("move_left", InputKey::GAMEPAD_LEFT_STICK_X_NEGATIVE);
+	input_manager.add_action("move_right");
+	input_manager.add_key_to_action("move_right", InputKey::D);
+	input_manager.add_key_to_action("move_right", InputKey::GAMEPAD_LEFT_STICK_X_POSITIVE);
+	input_manager.add_action("move_up");
+	input_manager.add_key_to_action("move_up", InputKey::SPACE);
+	input_manager.add_key_to_action("move_up", InputKey::GAMEPAD_BUTTON_A);
+	input_manager.add_action("move_down");
+	input_manager.add_key_to_action("move_down", InputKey::LEFT_SHIFT);
+	input_manager.add_key_to_action("move_down", InputKey::GAMEPAD_BUTTON_B);
+}
 
 void default_ecs_manager_init() {
 	ecs_manager.startup();
@@ -36,54 +66,17 @@ void default_ecs_manager_init() {
 	ecs_manager.register_component<Gravity>();
 	ecs_manager.register_component<Parent>();
 	ecs_manager.register_component<Children>();
-	ecs_manager.register_component<State>();
 	ecs_manager.register_component<MeshInstance>();
-	ecs_manager.register_component<ColliderTag>();
-	ecs_manager.register_component<ColliderAABB>();
-}
-
-std::shared_ptr<PhysicsSystem> default_physics_system_init() {
-	auto physics_system = ecs_manager.register_system<PhysicsSystem>();
-
-	Signature signature;
-	signature.set(ecs_manager.get_component_type<Gravity>());
-	signature.set(ecs_manager.get_component_type<RigidBody>());
-	signature.set(ecs_manager.get_component_type<Transform>());
-	ecs_manager.set_system_component_whitelist<PhysicsSystem>(signature);
-
-	physics_system->startup();
-
-	return physics_system;
-}
-
-std::shared_ptr<RenderSystem> default_render_system_init() {
-	auto render_system = ecs_manager.register_system<RenderSystem>();
-
-	Signature signature;
-	signature.set(ecs_manager.get_component_type<Transform>());
-	signature.set(ecs_manager.get_component_type<MeshInstance>());
-	ecs_manager.set_system_component_whitelist<RenderSystem>(signature);
-
-	render_system->startup();
-
-	return render_system;
-}
-
-std::shared_ptr<ParentSystem> default_parent_system_init() {
-	auto parent_system = ecs_manager.register_system<ParentSystem>();
-
-	parent_system->startup();
-
-	return parent_system;
+	ecs_manager.register_component<FmodListener>();
 }
 
 void demo_entities_init(std::vector<Entity> &entities) {
 	std::default_random_engine random_generator; // NOLINT(cert-msc51-cpp)
 	std::uniform_real_distribution<float> rand_position(-40.0f, 40.0f);
-	std::uniform_real_distribution<float> rand_rotation(0.0f, 3.0f);
+	std::uniform_real_distribution<float> rand_rotation(0.0f, 0.0f);
 	std::uniform_real_distribution<float> rand_scale(3.0f, 5.0f);
 	std::uniform_real_distribution<float> rand_color(0.0f, 1.0f);
-	std::uniform_real_distribution<float> rand_gravity(-1000.0f, -100.0f);
+	std::uniform_real_distribution<float> rand_gravity(-40.0f, -20.0f);
 
 	float scale = rand_scale(random_generator);
 
@@ -105,6 +98,14 @@ void demo_entities_init(std::vector<Entity> &entities) {
 		ecs_manager.add_component<MeshInstance>(
 				entity, { render_manager.get_mesh("box"), render_manager.get_material("default_mesh") });
 	}
+
+	auto listener = ecs_manager.create_entity();
+	ecs_manager.add_component(listener, Transform{ glm::vec3(0.0f, 0.0f, -25.0f), glm::vec3(0.0f), glm::vec3(1.0f) });
+	// Later on attach FmodListener component to camera
+	ecs_manager.add_component<FmodListener>(listener,
+			FmodListener{ .listener_id = SILENCE_FMOD_LISTENER_DEBUG_CAMERA,
+					.prev_frame_position = glm::vec3(0.0f, 0.0f, -25.0f) });
+	entities.push_back(listener);
 }
 
 bool display_manager_init() {
@@ -162,46 +163,92 @@ void destroy_all_entities(const std::vector<Entity> &entities) {
 	}
 }
 
+void handle_camera(Camera &camera, float dt) {
+	float forward = input_manager.get_axis("move_backward", "move_forward");
+	float right = input_manager.get_axis("move_left", "move_right");
+	float up = input_manager.get_axis("move_down", "move_up");
+	camera.move_forward(forward * dt);
+	camera.move_right(right * dt);
+	camera.move_up(up * dt);
+
+	glm::vec2 mouse_delta = input_manager.get_mouse_delta();
+	camera.rotate(mouse_delta.x * dt, mouse_delta.y * dt);
+}
+
 int main() {
 	SPDLOG_INFO("Starting up engine systems...");
 
-	if (!display_manager_init() || !render_manager_init()) {
-		return -1;
-	}
+	display_manager_init();
+	input_manager.startup(display_manager.window);
+	render_manager_init();
 
 	setup_imgui_style();
 
 	// ECS ----------------------------------------
 
 	default_ecs_manager_init();
-	auto physics_system = default_physics_system_init();
-	auto parent_system = default_parent_system_init();
-	auto render_system = default_render_system_init();
+	auto physics_system = ecs_manager.register_system<PhysicsSystem>();
+	auto parent_system = ecs_manager.register_system<ParentSystem>();
+	auto render_system = ecs_manager.register_system<RenderSystem>();
+	auto fmod_listener_system = ecs_manager.register_system<FmodListenerSystem>();
+
+	physics_system->startup();
+	parent_system->startup();
+	render_system->startup();
+	fmod_listener_system->startup();
 
 	std::vector<Entity> entities(50);
 	demo_entities_init(entities);
 
-	// ECS -----------------------------------------
+	audio_manager.startup();
+	audio_manager.load_bank("Music");
+	audio_manager.load_bank("SFX");
+	audio_manager.load_bank("Ambience");
+	audio_manager.load_sample_data();
+
+	//Map inputs
+	default_mappings();
+
+	Camera camera(glm::vec3(0.0f, 0.0f, -25.0f));
 
 	// Run the game.
-	float dt{};
 	bool show_ecs_logs = false;
 	bool show_demo_window = false;
 	bool physics_system_enabled = false;
-	bool entities_destroyed = false;
 	int imgui_children_id = 1;
 	int imgui_entity_id = 1;
 	int max_imgui_entities = 50;
 	int max_entities = 100;
 	int imgui_entities_count = 50;
+	int frames_count = 0;
+
+	char load_file_name[128] = "scene.json";
+	char save_file_name[128] = "scene.json";
+
+	float target_frame_time = 1.0f / display_manager.get_refresh_rate();
+	float dt = target_frame_time;
+
+	// TEST FOR 3D AUDIO
+	glm::vec3 sound_position = glm::vec3(0.0f, 0.0f, 0.0f);
+	EventReference test_pluck = EventReference("test_pluck");
+	// #################
 
 	bool should_run = true;
+	nlohmann::json scene;
 	while (should_run) {
 		// GAME LOGIC
-
 		auto start_time = std::chrono::high_resolution_clock::now();
 
 		display_manager.poll_events();
+
+		if (input_manager.is_action_just_pressed("debug_menu")) {
+			in_debug_menu = !in_debug_menu;
+			display_manager.capture_mouse(!in_debug_menu);
+		}
+
+		if (!in_debug_menu) {
+			handle_camera(camera, dt);
+		}
 
 		//imgui new frame
 		ImGui_ImplVulkan_NewFrame();
@@ -209,6 +256,8 @@ int main() {
 		ImGui::NewFrame();
 
 		ImGui::Begin("Settings");
+
+		ImGui::Text("%s", fmt::format("In debug menu: {}", in_debug_menu).c_str());
 
 		ImGui::Checkbox("Show console ecs logs", &show_ecs_logs);
 
@@ -224,30 +273,57 @@ int main() {
 		ImGui::DragInt("Children Id", &imgui_children_id, 1, 1, max_imgui_entities);
 
 		if (ImGui::Button("Add child")) {
-			ParentManager::add_child(imgui_entity_id, imgui_children_id);
+			ecs_manager.add_child(imgui_entity_id, imgui_children_id);
 		}
 
 		if (ImGui::Button("Remove child")) {
-			ParentManager::remove_child(imgui_entity_id, imgui_children_id);
+			ecs_manager.remove_child(imgui_entity_id, imgui_children_id);
 		}
 
 		if (ImGui::Button("Destroy all entities")) {
-			if (!entities_destroyed) {
+			destroy_all_entities(entities);
+			entities.clear();
+		}
+
+		ImGui::Text("Save file");
+		ImGui::InputText("#Save file name", save_file_name, IM_ARRAYSIZE(save_file_name));
+
+		if (ImGui::Button("Save scene")) {
+			scene = SceneManager::save_scene(entities);
+			SceneManager::save_json_to_file(save_file_name, scene);
+		}
+
+		ImGui::Text("Load file");
+		ImGui::InputText("#Load file name", load_file_name, IM_ARRAYSIZE(load_file_name));
+
+		if (ImGui::Button("Load scene")) {
+			std::ifstream file(load_file_name);
+			if (file.is_open()) {
+				SPDLOG_INFO("Loaded scene from file {}", load_file_name);
+				nlohmann::json scene_json = nlohmann::json::parse(file);
+				file.close();
 				destroy_all_entities(entities);
+				SceneManager::load_scene_from_json_file(scene_json, load_file_name, entities);
+			} else {
+				SPDLOG_ERROR("File {} not found", load_file_name);
 			}
-			entities_destroyed = true;
 		}
 
 		ImGui::DragInt("Entities count", &imgui_entities_count, 1, 1, max_entities);
 
 		if (ImGui::Button("Create entities")) {
-			if (!entities_destroyed) {
-				destroy_all_entities(entities);
-			}
-			entities.resize(imgui_entities_count);
+			destroy_all_entities(entities);
+			entities.resize(imgui_entities_count - 1);
 			demo_entities_init(entities);
-			entities_destroyed = false;
 		}
+
+		// 3D SOUND DEMO
+		ImGui::SliderFloat3("Sound position", &sound_position[0], -100.0f, 100.0f);
+
+		if (ImGui::Button("Play pluck")) {
+			audio_manager.play_one_shot_3d(test_pluck, sound_position);
+		}
+		// 3D SOUND DEMO
 
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
 				ImGui::GetIO().Framerate);
@@ -266,15 +342,27 @@ int main() {
 		parent_system->update();
 		render_system->update(render_manager);
 
+		input_manager.process_input();
+		render_manager.draw(camera);
+
+		fmod_listener_system->update(dt);
+		audio_manager.update();
+
+		frames_count++;
 		auto stop_time = std::chrono::high_resolution_clock::now();
 
-		dt = std::chrono::duration<float, std::chrono::seconds::period>(stop_time - start_time).count();
-
-		render_manager.draw();
+		// TODO: This is a hack to make sure we don't go over the target frame time.
+		// We need to make calculate dt properly and make target frame time changeable.
+		while (std::chrono::duration<float, std::chrono::seconds::period>(stop_time - start_time).count() <
+				target_frame_time) {
+			stop_time = std::chrono::high_resolution_clock::now();
+		}
 	}
 
 	// Shut everything down, in reverse order.
 	SPDLOG_INFO("Shutting down engine subsystems...");
+	input_manager.shutdown();
+	audio_manager.shutdown();
 	render_manager.shutdown();
 	display_manager.shutdown();
 
