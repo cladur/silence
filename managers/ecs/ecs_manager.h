@@ -3,6 +3,7 @@
 
 #include "component_manager.h"
 #include "entity_manager.h"
+#include "serialization.h"
 #include "system_manager.h"
 
 class ECSManager {
@@ -16,6 +17,7 @@ public:
 
 	// Entity methods
 	Entity create_entity();
+	Entity create_entity(Entity entity);
 	void destroy_entity(Entity entity);
 
 	// Component methods
@@ -31,6 +33,10 @@ public:
 		entity_manager->set_entity_signature(entity, signature);
 
 		system_manager->entity_signature_changed(entity, signature);
+	}
+
+	template <typename T> void update_component(Entity entity, T component) {
+		component_manager->update_component<T>(entity, component);
 	}
 
 	template <typename T> void remove_component(Entity entity) {
@@ -71,6 +77,9 @@ public:
 	// Specific parent system methods
 	bool add_child(Entity parent, Entity child);
 	bool remove_child(Entity parent, Entity child);
+	bool has_child(Entity parent, Entity child);
+	void serialize_entity_json(nlohmann::json &json, Entity entity);
+	void deserialize_entities_json(nlohmann::json &json, std::vector<Entity> &entities);
 };
 
 #endif //SILENCE_ECSMANAGER_H

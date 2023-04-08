@@ -19,3 +19,4 @@ imgui.ini
 # FMOD stuff
 thirdparty/fmod/api
 thirdparty/fmod/plugins
+test.json
