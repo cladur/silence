@@ -28,6 +28,8 @@ add_library(${CORE_LIB_NAME} STATIC
         behavior_tree/decorator_nodes/repeater_node.h
         behavior_tree/decorator_nodes/retry_node.h
         behavior_tree/decorator_nodes/invert_node.h
+        components/mesh_instance_component.h
+        serialization.h
         camera/camera.cpp camera/camera.h)
 
 target_include_directories(${CORE_LIB_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
@@ -38,12 +40,14 @@ find_package(glm CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)
 find_package(magic_enum CONFIG REQUIRED)
+find_package(nlohmann_json CONFIG REQUIRED)
 
 target_link_libraries(${COMMON_LIB_NAME} INTERFACE
         spdlog::spdlog spdlog::spdlog_header_only
         imgui::imgui
         glm::glm
         magic_enum::magic_enum
+        nlohmann_json::nlohmann_json
         )
 
 target_link_libraries(${CORE_LIB_NAME} PRIVATE
