@@ -25,6 +25,7 @@
 #include <fstream>
 
 #include "core/camera/camera.h"
+#include "render/debug/debug_drawing.h"
 
 RenderManager render_manager;
 DisplayManager display_manager;

@@ -9,6 +9,7 @@ add_library(${RENDER_MANAGER_NAME} STATIC
         vk_mesh.cpp vk_mesh.h
         vk_textures.cpp vk_textures.h
         render_system.cpp render_system.h
+        debug/debug_drawing.cpp debug/debug_drawing.h
         ../animation/skinned_mesh.cpp ../animation/skinned_mesh.h ../animation/skinned_model.cpp ../animation/skinned_model.h ../animation/animation.cpp ../animation/animation.h ../animation/joint.h ../animation/bone.cpp ../animation/bone.h ../animation/bone.cpp ../animation/bone.cpp ../animation/bone.cpp ../animation/animator.cpp ../animation/animator.h ../animation/bone.cpp)
 
 # Include directories
