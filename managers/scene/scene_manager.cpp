@@ -8,6 +8,7 @@
 extern ECSManager ecs_manager;
 
 SceneManager::SceneManager() {
+	instance = this;
 	class_map = serialization::IdToClassConstructor{};
 }
 

@@ -28,7 +28,6 @@ RenderManager render_manager;
 DisplayManager display_manager;
 ECSManager ecs_manager;
 AudioManager audio_manager;
-SceneManager scene_manager;
 
 void default_ecs_manager_init() {
 	ecs_manager.startup();
@@ -171,7 +170,6 @@ int main() {
 	bool show_ecs_logs = false;
 	bool show_demo_window = false;
 	bool physics_system_enabled = false;
-	bool entities_destroyed = false;
 	int imgui_children_id = 1;
 	int imgui_entity_id = 1;
 	int max_imgui_entities = 50;
@@ -247,7 +245,7 @@ int main() {
 				nlohmann::json scene_json = nlohmann::json::parse(file);
 				file.close();
 				destroy_all_entities(entities);
-				scene_manager.load_scene_from_json_file(scene_json, load_file_name, entities);
+				SceneManager::load_scene_from_json_file(scene_json, load_file_name, entities);
 			} else {
 				SPDLOG_ERROR("File {} not found", load_file_name);
 			}
