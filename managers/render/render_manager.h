@@ -143,6 +143,7 @@ class RenderManager {
 	Mesh box_mesh;
     Mesh debug_box_mesh;
     Mesh debug_sphere_mesh;
+	Mesh debug_line_mesh;
 
 	// DEPTH
 	vk::ImageView depth_image_view;
@@ -181,6 +182,7 @@ class RenderManager {
 	void load_meshes();
     void generate_debug_box_mesh();
     void generate_debug_sphere_mesh();
+	void generate_debug_line_mesh();
 
 	void upload_mesh(Mesh &mesh);
 

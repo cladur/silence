@@ -25,15 +25,6 @@ void RenderSystem::update(RenderManager &render_manager) {
 		render_object.material = mesh_instance.material;
 		render_object.transform_matrix = transform.get_global_model_matrix();
 
-        DebugDraw::draw_box(transform.get_position(), transform.get_scale() * 1.01f);
-
-        float radius = transform.get_scale().x * 0.5f * (float)sqrt(3);
-
-        DebugDraw::draw_sphere(transform.get_position(), radius);
-
-//        DebugDraw::draw_box(transform.get_position(), glm::vec3(1.0f));
-//        DebugDraw::draw_sphere(transform.get_position(), 0.5f);
-
 		render_manager.renderables.push_back(render_object);
 	}
 }

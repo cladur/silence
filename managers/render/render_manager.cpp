@@ -841,16 +841,19 @@ void RenderManager::load_meshes() {
 
     generate_debug_box_mesh();
     generate_debug_sphere_mesh();
+	generate_debug_line_mesh();
 
 	upload_mesh(triangle_mesh);
 	upload_mesh(box_mesh);
     upload_mesh(debug_box_mesh);
     upload_mesh(debug_sphere_mesh);
+	upload_mesh(debug_line_mesh);
 
 	meshes["triangle"] = triangle_mesh;
 	meshes["box"] = box_mesh;
     meshes["debug_box"] = debug_box_mesh;
     meshes["debug_sphere"] = debug_sphere_mesh;
+	meshes["debug_line"] = debug_line_mesh;
 }
 
 void RenderManager::generate_debug_box_mesh() {
@@ -871,11 +874,6 @@ void RenderManager::generate_debug_box_mesh() {
     for (auto &vertex : debug_box_mesh.vertices) {
         vertex.color = glm::vec3(1.f, 1.f, 1.f);
     }
-
-    // indeces for LINE_STRIP drawing a cube shape
-//    debug_box_mesh.indices = {
-//            0, 1, 2, 3, 0, 4, 5, 6, 7, 4, 5, 1, 2, 6, 7, 3
-//    };
 
     // indeces for LINE_LIST drawing a cube shape
     debug_box_mesh.indices = {
@@ -929,8 +927,6 @@ void RenderManager::generate_debug_sphere_mesh() {
             debug_sphere_mesh.indices.push_back((y + 1) * (X_SEGMENTS + 1) + x);
         }
     }
-
-
 }
 
 
@@ -1367,3 +1363,22 @@ void RenderManager::draw_objects(Camera &camera, vk::CommandBuffer cmd, RenderOb
 	}
 }
 
+void RenderManager::generate_debug_line_mesh() {
+	//create a mesh for debug lines
+	std::vector<Vertex> vertices;
+	std::vector<uint32_t> indices;
+
+	//create a line mesh
+	Vertex v1 = {};
+	v1.position = glm::vec3 { 0, 0, 0 };
+	v1.color = glm::vec3 { 1, 0, 0 };
+	debug_line_mesh.vertices.push_back(v1);
+
+	Vertex v2 = {};
+	v2.position = glm::vec3 { 1, 0, 0 };
+	v2.color = glm::vec3 { 0, 0, 1 };
+	debug_line_mesh.vertices.push_back(v2);
+
+	debug_line_mesh.indices.push_back(0);
+	debug_line_mesh.indices.push_back(1);
+}
