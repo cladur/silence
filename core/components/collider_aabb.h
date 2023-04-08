@@ -2,8 +2,6 @@
 #define SILENCE_COLLIDER_AABB_H
 #include "glm/glm.hpp"
 
-//TODO: Add updating center by parent transform translation and range by scale
-
 struct ColliderAABB {
 	// Center of collider
 	glm::vec3 center;
