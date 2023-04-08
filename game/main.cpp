@@ -24,10 +24,39 @@
 #include <spdlog/spdlog.h>
 #include <fstream>
 
+#include "core/camera/camera.h"
+
 RenderManager render_manager;
 DisplayManager display_manager;
 ECSManager ecs_manager;
 AudioManager audio_manager;
+InputManager input_manager;
+
+bool in_debug_menu = true;
+
+void default_mappings() {
+	input_manager.add_action("debug_menu");
+	input_manager.add_key_to_action("debug_menu", InputKey::ESCAPE);
+	input_manager.add_key_to_action("debug_menu", InputKey::GAMEPAD_START);
+	input_manager.add_action("move_forward");
+	input_manager.add_key_to_action("move_forward", InputKey::W);
+	input_manager.add_key_to_action("move_forward", InputKey::GAMEPAD_LEFT_STICK_Y_POSITIVE);
+	input_manager.add_action("move_backward");
+	input_manager.add_key_to_action("move_backward", InputKey::S);
+	input_manager.add_key_to_action("move_backward", InputKey::GAMEPAD_LEFT_STICK_Y_NEGATIVE);
+	input_manager.add_action("move_left");
+	input_manager.add_key_to_action("move_left", InputKey::A);
+	input_manager.add_key_to_action("move_left", InputKey::GAMEPAD_LEFT_STICK_X_NEGATIVE);
+	input_manager.add_action("move_right");
+	input_manager.add_key_to_action("move_right", InputKey::D);
+	input_manager.add_key_to_action("move_right", InputKey::GAMEPAD_LEFT_STICK_X_POSITIVE);
+	input_manager.add_action("move_up");
+	input_manager.add_key_to_action("move_up", InputKey::SPACE);
+	input_manager.add_key_to_action("move_up", InputKey::GAMEPAD_BUTTON_A);
+	input_manager.add_action("move_down");
+	input_manager.add_key_to_action("move_down", InputKey::LEFT_SHIFT);
+	input_manager.add_key_to_action("move_down", InputKey::GAMEPAD_BUTTON_B);
+}
 
 void default_ecs_manager_init() {
 	ecs_manager.startup();
@@ -44,10 +73,10 @@ void default_ecs_manager_init() {
 void demo_entities_init(std::vector<Entity> &entities) {
 	std::default_random_engine random_generator; // NOLINT(cert-msc51-cpp)
 	std::uniform_real_distribution<float> rand_position(-40.0f, 40.0f);
-	std::uniform_real_distribution<float> rand_rotation(0.0f, 3.0f);
+	std::uniform_real_distribution<float> rand_rotation(0.0f, 0.0f);
 	std::uniform_real_distribution<float> rand_scale(3.0f, 5.0f);
 	std::uniform_real_distribution<float> rand_color(0.0f, 1.0f);
-	std::uniform_real_distribution<float> rand_gravity(-1000.0f, -100.0f);
+	std::uniform_real_distribution<float> rand_gravity(-40.0f, -20.0f);
 
 	float scale = rand_scale(random_generator);
 
@@ -134,12 +163,24 @@ void destroy_all_entities(const std::vector<Entity> &entities) {
 	}
 }
 
+void handle_camera(Camera &camera, float dt) {
+	float forward = input_manager.get_axis("move_backward", "move_forward");
+	float right = input_manager.get_axis("move_left", "move_right");
+	float up = input_manager.get_axis("move_down", "move_up");
+	camera.move_forward(forward * dt);
+	camera.move_right(right * dt);
+	camera.move_up(up * dt);
+
+	glm::vec2 mouse_delta = input_manager.get_mouse_delta();
+	camera.rotate(mouse_delta.x * dt, mouse_delta.y * dt);
+}
+
 int main() {
 	SPDLOG_INFO("Starting up engine systems...");
 
-	if (!display_manager_init() || !render_manager_init()) {
-		return -1;
-	}
+	display_manager_init();
+	input_manager.startup(display_manager.window);
+	render_manager_init();
 
 	setup_imgui_style();
 
@@ -165,8 +206,12 @@ int main() {
 	audio_manager.load_bank("Ambience");
 	audio_manager.load_sample_data();
 
+	//Map inputs
+	default_mappings();
+
+	Camera camera(glm::vec3(0.0f, 0.0f, -25.0f));
+
 	// Run the game.
-	float dt{};
 	bool show_ecs_logs = false;
 	bool show_demo_window = false;
 	bool physics_system_enabled = false;
@@ -180,6 +225,9 @@ int main() {
 	char load_file_name[128] = "scene.json";
 	char save_file_name[128] = "scene.json";
 
+	float target_frame_time = 1.0f / display_manager.get_refresh_rate();
+	float dt = target_frame_time;
+
 	// TEST FOR 3D AUDIO
 	glm::vec3 sound_position = glm::vec3(0.0f, 0.0f, 0.0f);
 	EventReference test_pluck = EventReference("test_pluck");
@@ -189,10 +237,18 @@ int main() {
 	nlohmann::json scene;
 	while (should_run) {
 		// GAME LOGIC
-
 		auto start_time = std::chrono::high_resolution_clock::now();
 
 		display_manager.poll_events();
+
+		if (input_manager.is_action_just_pressed("debug_menu")) {
+			in_debug_menu = !in_debug_menu;
+			display_manager.capture_mouse(!in_debug_menu);
+		}
+
+		if (!in_debug_menu) {
+			handle_camera(camera, dt);
+		}
 
 		//imgui new frame
 		ImGui_ImplVulkan_NewFrame();
@@ -200,6 +256,8 @@ int main() {
 		ImGui::NewFrame();
 
 		ImGui::Begin("Settings");
+
+		ImGui::Text("%s", fmt::format("In debug menu: {}", in_debug_menu).c_str());
 
 		ImGui::Checkbox("Show console ecs logs", &show_ecs_logs);
 
@@ -263,7 +321,6 @@ int main() {
 		ImGui::SliderFloat3("Sound position", &sound_position[0], -100.0f, 100.0f);
 
 		if (ImGui::Button("Play pluck")) {
-			//audio_manager.test_play_sound();
 			audio_manager.play_one_shot_3d(test_pluck, sound_position);
 		}
 		// 3D SOUND DEMO
@@ -284,20 +341,26 @@ int main() {
 		parent_system->update();
 		render_system->update(render_manager);
 
-		auto stop_time = std::chrono::high_resolution_clock::now();
-
-		dt = std::chrono::duration<float, std::chrono::seconds::period>(stop_time - start_time).count();
-
-		render_manager.draw();
+		input_manager.process_input();
+		render_manager.draw(camera);
 
 		fmod_listener_system->update(dt);
 		audio_manager.update();
 
 		frames_count++;
+		auto stop_time = std::chrono::high_resolution_clock::now();
+
+		// TODO: This is a hack to make sure we don't go over the target frame time.
+		// We need to make calculate dt properly and make target frame time changeable.
+		while (std::chrono::duration<float, std::chrono::seconds::period>(stop_time - start_time).count() <
+				target_frame_time) {
+			stop_time = std::chrono::high_resolution_clock::now();
+		}
 	}
 
 	// Shut everything down, in reverse order.
 	SPDLOG_INFO("Shutting down engine subsystems...");
+	input_manager.shutdown();
 	audio_manager.shutdown();
 	render_manager.shutdown();
 	display_manager.shutdown();

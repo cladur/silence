@@ -3,8 +3,7 @@ set(CORE_LIB_NAME "silence_core")
 
 add_library(${COMMON_LIB_NAME} INTERFACE
         pch.h
-        types.h
-        components/fmod_listener_component.h)
+        types.h)
 
 add_library(${CORE_LIB_NAME} STATIC
         components/transform_component.h
@@ -12,6 +11,7 @@ add_library(${CORE_LIB_NAME} STATIC
         components/gravity_component.h
         components/parent_component.h
         components/children_component.h
+        components/fmod_listener_component.h
         state_machine/states/state.h
         state_machine/states/test_state.cpp state_machine/states/test_state.h
         state_machine/state_machine.cpp state_machine/state_machine.h
@@ -29,7 +29,8 @@ add_library(${CORE_LIB_NAME} STATIC
         behavior_tree/decorator_nodes/retry_node.h
         behavior_tree/decorator_nodes/invert_node.h
         components/mesh_instance_component.h
-        serialization.h)
+        serialization.h
+        camera/camera.cpp camera/camera.h)
 
 target_include_directories(${CORE_LIB_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 

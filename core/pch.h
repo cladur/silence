@@ -30,6 +30,7 @@
 #include <iostream>
 #include <memory>
 #include <random>
+#include <ranges>
 #include <tuple>
 #include <utility>
 
@@ -39,6 +40,7 @@
 #include "magic_enum.hpp"
 #include "nlohmann/json.hpp"
 #include "spdlog/spdlog.h"
+#include <glm/gtc/matrix_transform.hpp>
 
 // our stuff
 #include "types.h"
