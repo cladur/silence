@@ -1,8 +1,10 @@
 #include "audio/audio_manager.h"
-#include "managers/display/display_manager.h"
-#include "managers/render/render_manager.h"
+#include "display/display_manager.h"
+#include "input/input_manager.h"
+#include "render/render_manager.h"
 
 #include "components/children_component.h"
+#include "components/collider_aabb.h"
 #include "components/gravity_component.h"
 #include "components/mesh_instance_component.h"
 #include "components/parent_component.h"
@@ -12,6 +14,8 @@
 #include "render/render_system.h"
 
 #include "ecs/ecs_manager.h"
+#include "ecs/systems/collider_components_factory.h"
+#include "ecs/systems/collision_system.h"
 #include "ecs/systems/parent_system.h"
 #include "ecs/systems/physics_system.h"
 
@@ -57,6 +61,19 @@ void default_mappings() {
 	input_manager.add_action("move_down");
 	input_manager.add_key_to_action("move_down", InputKey::LEFT_SHIFT);
 	input_manager.add_key_to_action("move_down", InputKey::GAMEPAD_BUTTON_B);
+
+	input_manager.add_action("collider_forward");
+	input_manager.add_key_to_action("collider_forward", InputKey::I);
+	input_manager.add_action("collider_backward");
+	input_manager.add_key_to_action("collider_backward", InputKey::K);
+	input_manager.add_action("collider_left");
+	input_manager.add_key_to_action("collider_left", InputKey::J);
+	input_manager.add_action("collider_right");
+	input_manager.add_key_to_action("collider_right", InputKey::L);
+	input_manager.add_action("collider_up");
+	input_manager.add_key_to_action("collider_up", InputKey::O);
+	input_manager.add_action("collider_down");
+	input_manager.add_key_to_action("collider_down", InputKey::U);
 }
 
 void default_ecs_manager_init() {
@@ -69,6 +86,8 @@ void default_ecs_manager_init() {
 	ecs_manager.register_component<Children>();
 	ecs_manager.register_component<MeshInstance>();
 	ecs_manager.register_component<FmodListener>();
+	ecs_manager.register_component<ColliderAABB>();
+	ecs_manager.register_component<ColliderTag>();
 }
 
 void demo_entities_init(std::vector<Entity> &entities) {
@@ -89,12 +108,16 @@ void demo_entities_init(std::vector<Entity> &entities) {
 		ecs_manager.add_component(entity,
 				RigidBody{ .velocity = glm::vec3(0.0f, 0.0f, 0.0f), .acceleration = glm::vec3(0.0f, 0.0f, 0.0f) });
 
-		ecs_manager.add_component(entity,
+		Transform transform =
 				Transform{ glm::vec3(rand_position(random_generator), rand_position(random_generator) + 40.0f,
 								   rand_position(random_generator)),
-						glm::vec3(rand_rotation(random_generator), rand_rotation(random_generator),
-								rand_rotation(random_generator)),
-						glm::vec3(scale, scale, scale) });
+					glm::vec3(rand_rotation(random_generator), rand_rotation(random_generator),
+							rand_rotation(random_generator)),
+					glm::vec3(1.0f) };
+		ecs_manager.add_component(entity, transform);
+
+		ColliderComponentsFactory::add_collider_component(
+				entity, ColliderAABB{ transform.get_position(), transform.get_scale(), true });
 
 		ecs_manager.add_component<MeshInstance>(
 				entity, { render_manager.get_mesh("box"), render_manager.get_material("default_mesh") });
@@ -107,6 +130,30 @@ void demo_entities_init(std::vector<Entity> &entities) {
 			FmodListener{ .listener_id = SILENCE_FMOD_LISTENER_DEBUG_CAMERA,
 					.prev_frame_position = glm::vec3(0.0f, 0.0f, -25.0f) });
 	entities.push_back(listener);
+}
+
+void demo_collision_init(Entity &entity) {
+	entity = ecs_manager.create_entity();
+
+	Transform transform = Transform{ glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f) };
+	ecs_manager.add_component(entity, transform);
+
+	ColliderComponentsFactory::add_collider_component(
+			entity, ColliderAABB{ transform.get_position(), transform.get_scale(), true });
+
+	ecs_manager.add_component<MeshInstance>(
+			entity, { render_manager.get_mesh("box"), render_manager.get_material("default_mesh") });
+
+	Entity floor = ecs_manager.create_entity();
+
+	Transform transform1 = Transform{ glm::vec3(0.0f, -20.0f, 0.0f), glm::vec3(0.0f), glm::vec3(20.0f, 1.0f, 20.0f) };
+	ecs_manager.add_component(floor, transform1);
+
+	ColliderComponentsFactory::add_collider_component(
+			floor, ColliderAABB{ transform1.get_position(), transform1.get_scale(), false });
+
+	ecs_manager.add_component<MeshInstance>(
+			floor, { render_manager.get_mesh("box"), render_manager.get_material("default_mesh") });
 }
 
 bool display_manager_init() {
@@ -176,6 +223,17 @@ void handle_camera(Camera &camera, float dt) {
 	camera.rotate(mouse_delta.x * dt, mouse_delta.y * dt);
 }
 
+void handle_collider_movement(Entity entity, float dt) {
+	float forward = -input_manager.get_axis("collider_backward", "collider_forward");
+	float right = -input_manager.get_axis("collider_left", "collider_right");
+	float up = -input_manager.get_axis("collider_down", "collider_up");
+
+	Transform &t = ecs_manager.get_component<Transform>(entity);
+
+	const float speed = 5.0f;
+	t.add_position(glm::vec3(forward, up, right) * speed * dt);
+}
+
 int main() {
 	SPDLOG_INFO("Starting up engine systems...");
 
@@ -189,17 +247,22 @@ int main() {
 
 	default_ecs_manager_init();
 	auto physics_system = ecs_manager.register_system<PhysicsSystem>();
+	auto collision_system = ecs_manager.register_system<CollisionSystem>();
 	auto parent_system = ecs_manager.register_system<ParentSystem>();
 	auto render_system = ecs_manager.register_system<RenderSystem>();
 	auto fmod_listener_system = ecs_manager.register_system<FmodListenerSystem>();
 
 	physics_system->startup();
+	collision_system->startup();
 	parent_system->startup();
 	render_system->startup();
 	fmod_listener_system->startup();
 
 	std::vector<Entity> entities(50);
 	demo_entities_init(entities);
+
+	Entity collision_tester;
+	demo_collision_init(collision_tester);
 
 	audio_manager.startup();
 	audio_manager.load_bank("Music");
@@ -250,6 +313,7 @@ int main() {
 		if (!in_debug_menu) {
 			handle_camera(camera, dt);
 		}
+		handle_collider_movement(collision_tester, dt);
 
 		//imgui new frame
 		ImGui_ImplVulkan_NewFrame();
@@ -338,6 +402,8 @@ int main() {
 		if (physics_system_enabled) {
 			physics_system->update(dt);
 		}
+
+		collision_system->update();
 
 		parent_system->update();
 		render_system->update(render_manager);

@@ -8,10 +8,11 @@ add_library(${ECS_MANAGER_NAME} STATIC
         ecs_manager.cpp ecs_manager.h
         systems/base_system.h
         systems/physics_system.cpp systems/physics_system.h
+        systems/collider_components_factory.h
         systems/parent_system.cpp systems/parent_system.h
         systems/isolated_entities_system.cpp systems/isolated_entities_system.h
         systems/root_parent_system.cpp systems/root_parent_system.h
-        component_visitor.h)
+        component_visitor.h systems/collision_system.cpp systems/collision_system.h)
 
 target_include_directories(${ECS_MANAGER_NAME} PUBLIC ${MANAGER_DIR})
 
