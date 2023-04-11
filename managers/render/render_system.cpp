@@ -1,3 +1,4 @@
+#include <render/debug/debug_drawing.h>
 #include "render_system.h"
 #include <components/mesh_instance_component.h>
 
