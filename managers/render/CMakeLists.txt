@@ -16,7 +16,7 @@ add_library(${RENDER_MANAGER_NAME} STATIC
         ui/ui_render_system.cpp
         ui/ui_render_system.h
         debug/debug_drawing.cpp debug/debug_drawing.h
-        ../animation/skinned_mesh.cpp ../animation/skinned_mesh.h ../animation/skinned_model.cpp ../animation/skinned_model.h ../animation/animation.cpp ../animation/animation.h ../animation/joint.h ../animation/bone.cpp ../animation/bone.h ../animation/bone.cpp ../animation/bone.cpp ../animation/bone.cpp ../animation/animator.cpp ../animation/animator.h ../animation/bone.cpp)
+        ../animation/skinned_mesh.cpp ../animation/skinned_mesh.h ../animation/skinned_model.cpp ../animation/skinned_model.h ../animation/animation.cpp ../animation/animation.h ../animation/joint.h ../animation/bone.cpp ../animation/bone.h ../animation/bone.cpp ../animation/bone.cpp ../animation/bone.cpp ../animation/animator.cpp ../animation/animator.h ../animation/bone.cpp ui/texture_atlas.cpp ui/texture_atlas.h)
 
 find_package(Freetype CONFIG REQUIRED)
 if(TARGET freetype AND NOT TARGET Freetype::Freetype)

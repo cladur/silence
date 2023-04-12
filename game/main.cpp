@@ -118,7 +118,7 @@ void demo_entities_init(std::vector<Entity> &entities) {
 
 	auto ui_entity = ecs_manager.create_entity();
 	ecs_manager.add_component(ui_entity,
-			Transform{ glm::vec3(50.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f) });
+			Transform{ glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f) });
 	ecs_manager.add_component<MeshInstance>(
 			ui_entity, { render_manager.get_mesh("plane"), render_manager.get_material("ui") });
 

@@ -28,24 +28,31 @@ void UiRenderSystem::update(RenderManager &render_manager) {
 		Font &font = font_manager.get_font(ui_text.font_id);
 		render_manager.glyph_sampler = font.sampler;
 		render_manager.glyphs.clear();
-		for (auto c : ui_text.text) {
-			// check if c is the end of the string
-			CharacterGlyph *g = font.get_character_glyph(c);
-			Texture t = g->texture;
-			render_manager.glyphs.push_back(t);
-			current_position.x += (float)g->advance;
-
-			RenderObject render_object = {};
-			render_object.mesh = mesh_instance.mesh;
-			render_object.material = mesh_instance.material;
-			glm::mat4 m = transform.get_global_model_matrix();
-			//m = glm::scale(m, glm::vec3((float)g->size.x / (float)g->advance, (float)g->size.y / (float)g->advance, 1.0f));
-			m = glm::translate(m, current_position);
-			render_object.transform_matrix = m;
-
-            //DebugDraw::draw_box(current_position, glm::vec3(g->size.x, g->size.y, 1.0f));
-
-			render_manager.renderables.push_back(render_object);
-		}
+//		for (auto c : ui_text.text) {
+//			// check if c is the end of the string
+//			CharacterGlyph *g = font.get_character_glyph(c);
+//			Texture t = g->texture;
+//			render_manager.glyphs.push_back(t);
+//			current_position.x += (float)g->advance;
+//
+//			RenderObject render_object = {};
+//			render_object.mesh = mesh_instance.mesh;
+//			render_object.material = mesh_instance.material;
+//			glm::mat4 m = transform.get_global_model_matrix();
+//			//m = glm::scale(m, glm::vec3((float)g->size.x / (float)g->advance, (float)g->size.y / (float)g->advance, 1.0f));
+//			m = glm::translate(m, current_position);
+//			render_object.transform_matrix = m;
+//
+//            DebugDraw::draw_box(current_position, glm::vec3(g->size.x, g->size.y, 1.0f));
+//
+//			render_manager.renderables.push_back(render_object);
+//		}
+		RenderObject render_object = {};
+		render_object.mesh = mesh_instance.mesh;
+		render_object.material = mesh_instance.material;
+		glm::mat4 m = transform.get_global_model_matrix();
+		m = glm::scale(m, glm::vec3(27.0f, 2.0f, 2.0f));
+		render_object.transform_matrix = m;
+		render_manager.renderables.push_back(render_object);
 	}
 }

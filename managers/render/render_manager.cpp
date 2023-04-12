@@ -759,18 +759,6 @@ void RenderManager::init_scene() {
 
 	VK_CHECK(device.allocateDescriptorSets(&alloc_info, &textured_mat->texture_set));
 
-	Material *ui_mat = get_material("ui");
-
-	//allocate the descriptor set for single-texture to use on the material
-	vk::DescriptorSetAllocateInfo ui_alloc_info = {};
-	ui_alloc_info.sType = vk::StructureType::eDescriptorSetAllocateInfo;
-	ui_alloc_info.pNext = nullptr;
-	ui_alloc_info.descriptorPool = descriptor_pool;
-	ui_alloc_info.descriptorSetCount = 1;
-	ui_alloc_info.pSetLayouts = &single_texture_set_layout;
-
-	VK_CHECK(device.allocateDescriptorSets(&ui_alloc_info, &ui_mat->texture_set));
-
 	//write to the descriptor set so that it points to our empire_diffuse texture
 	vk::DescriptorImageInfo image_buffer_info;
 	image_buffer_info.sampler = blocky_sampler;
@@ -1383,56 +1371,41 @@ void RenderManager::draw_objects(Camera &camera, vk::CommandBuffer cmd, RenderOb
 	Material *last_material = nullptr;
 	Material *ui_mat = get_material("ui");
 	int ui_object_idx = 0;
+	bool is_ui = false;
 	for (int i = 0; i < count; i++) {
 		RenderObject &object = first[i];
 
 		if (object.material == ui_mat) {
-            // ui materials are always the same but have updated textures so we need to update it always
-			Texture t = glyphs[ui_object_idx];
-			ui_object_idx++;
-			update_descriptor_set_with_texture(t, glyph_sampler,  *object.material);
-
-            cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, object.material->pipeline);
-            last_material = object.material;
-
-            uint32_t uniform_offset = pad_uniform_buffer_size(sizeof(GPUSceneData)) * frame_index;
-
-            // bind the descriptor set when changing pipeline
-            cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, object.material->pipeline_layout, 0, 1,
-                                   &get_current_frame().global_descriptor, 1, &uniform_offset);
-
-            // bind the object descriptor set
-            cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, object.material->pipeline_layout, 1, 1,
-                                   &get_current_frame().object_descriptor, 0, nullptr);
-
-            if (object.material->texture_set != (vk::DescriptorSet)VK_NULL_HANDLE) {
-                //texture descriptor
-                cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, object.material->pipeline_layout, 2, 1,
-                                       &object.material->texture_set, 0, nullptr);
-            }
+//			Texture t = glyphs[ui_object_idx];
+//			ui_object_idx++;
+//			update_descriptor_set_with_texture(t, glyph_sampler,  *object.material);
+			is_ui = true;
 		} else {
-            //only bind the pipeline if it doesn't match with the already bound one
-            if (object.material != last_material) {
-                cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, object.material->pipeline);
-                last_material = object.material;
+			is_ui = false;
+		}
+		// ui materials are always the same but have updated textures so we need to update it always
 
-                uint32_t uniform_offset = pad_uniform_buffer_size(sizeof(GPUSceneData)) * frame_index;
+		//only bind the pipeline if it doesn't match with the already bound one
+		if (object.material != last_material) {
+			cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, object.material->pipeline);
+			last_material = object.material;
 
-                // bind the descriptor set when changing pipeline
-                cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, object.material->pipeline_layout, 0, 1,
-                                       &get_current_frame().global_descriptor, 1, &uniform_offset);
+			uint32_t uniform_offset = pad_uniform_buffer_size(sizeof(GPUSceneData)) * frame_index;
 
-                // bind the object descriptor set
-                cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, object.material->pipeline_layout, 1, 1,
-                                       &get_current_frame().object_descriptor, 0, nullptr);
+			// bind the descriptor set when changing pipeline
+			cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, object.material->pipeline_layout, 0, 1,
+								   &get_current_frame().global_descriptor, 1, &uniform_offset);
 
-                if (object.material->texture_set != (vk::DescriptorSet)VK_NULL_HANDLE) {
-                    //texture descriptor
-                    cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, object.material->pipeline_layout, 2, 1,
-                                           &object.material->texture_set, 0, nullptr);
-                }
-            }
-        }
+			// bind the object descriptor set
+			cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, object.material->pipeline_layout, 1, 1,
+								   &get_current_frame().object_descriptor, 0, nullptr);
+
+			if (object.material->texture_set != (vk::DescriptorSet)VK_NULL_HANDLE) {
+				//texture descriptor
+				cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, object.material->pipeline_layout, 2, 1,
+									   &object.material->texture_set, 0, nullptr);
+			}
+		}
 
 		glm::mat4 model = object.transform_matrix;
 		//final render matrix, that we are calculating on the cpu
@@ -1633,4 +1606,135 @@ void RenderManager::generate_debug_line_mesh() {
 
 	debug_line_mesh.indices.push_back(0);
 	debug_line_mesh.indices.push_back(1);
+}
+
+Texture RenderManager::create_sized_texture(int width, int height) {
+	vk::DeviceSize image_size = width * height * 4;
+	vk::Format image_format = vk::Format::eR8G8B8A8Srgb;
+
+	vk::Extent3D image_extent;
+	image_extent.width = static_cast<uint32_t>(width);
+	image_extent.height = static_cast<uint32_t>(height);
+	image_extent.depth = 1;
+
+	vk::ImageCreateInfo dimg_info = vk_init::image_create_info(
+			image_format, vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferDst, image_extent);
+
+	AllocatedImage new_image;
+
+	vma::AllocationCreateInfo dimg_allocinfo = {};
+	dimg_allocinfo.usage = vma::MemoryUsage::eGpuOnly;
+
+	VK_CHECK(allocator.createImage(
+			&dimg_info, &dimg_allocinfo, &new_image.image, &new_image.allocation, nullptr));
+
+	Texture texture = {};
+	texture.image = new_image;
+
+	vk::ImageViewCreateInfo image_info = vk_init::image_view_create_info(
+			vk::Format::eR8G8B8A8Srgb, texture.image.image, vk::ImageAspectFlagBits::eColor);
+
+	VK_CHECK(device.createImageView(&image_info, nullptr, &texture.image_view));
+
+	main_deletion_queue.push_function([=, this]() {
+		device.destroyImageView(texture.image_view);
+		allocator.destroyImage(texture.image.image, texture.image.allocation);
+	});
+
+	return texture;
+}
+
+void RenderManager::transition_image_layout(AllocatedImage image, vk::ImageLayout old_layout, vk::ImageLayout new_layout) {
+	immediate_submit([&](vk::CommandBuffer cmd) {
+		vk::ImageMemoryBarrier barrier = {};
+		barrier.sType = vk::StructureType::eImageMemoryBarrier;
+
+		barrier.oldLayout = old_layout;
+		barrier.newLayout = new_layout;
+		barrier.image = image.image;
+		barrier.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eColor;
+		barrier.subresourceRange.baseMipLevel = 0;
+		barrier.subresourceRange.levelCount = 1;
+		barrier.subresourceRange.baseArrayLayer = 0;
+		barrier.subresourceRange.layerCount = 1;
+
+		vk::Flags<vk::PipelineStageFlagBits> source_stage = vk::PipelineStageFlagBits::eTopOfPipe;
+		vk::Flags<vk::PipelineStageFlagBits> destination_stage = vk::PipelineStageFlagBits::eTopOfPipe;
+
+		switch (old_layout) {
+			case vk::ImageLayout::eUndefined:
+				barrier.srcAccessMask = vk::AccessFlagBits::eNoneKHR;
+				break;
+			case vk::ImageLayout::eTransferDstOptimal:
+				barrier.srcAccessMask = vk::AccessFlagBits::eTransferWrite;
+				source_stage = vk::PipelineStageFlagBits::eTransfer;
+				break;
+			case vk::ImageLayout::eShaderReadOnlyOptimal:
+				barrier.srcAccessMask = vk::AccessFlagBits::eShaderRead;
+				source_stage = vk::PipelineStageFlagBits::eFragmentShader;
+				break;
+			default:
+				SPDLOG_WARN("Unsupported layout transition!");
+				break;
+		}
+
+		switch (new_layout) {
+			case vk::ImageLayout::eTransferDstOptimal:
+				barrier.dstAccessMask = vk::AccessFlagBits::eTransferWrite;
+				destination_stage = vk::PipelineStageFlagBits::eTransfer;
+				break;
+			case vk::ImageLayout::eShaderReadOnlyOptimal:
+				barrier.dstAccessMask = vk::AccessFlagBits::eShaderRead;
+				//barrier.srcAccessMask = vk::AccessFlagBits::eShaderWrite;
+				destination_stage = vk::PipelineStageFlagBits::eFragmentShader;
+				break;
+			default:
+				SPDLOG_WARN("Unsupported layout transition!");
+				break;
+		}
+
+		cmd.pipelineBarrier(source_stage, destination_stage, {}, 0, nullptr, 0, nullptr, 1, &barrier);
+	});
+}
+void RenderManager::create_descriptor_set_for_material(vk::ImageView, vk::Sampler, std::string mat_name) {
+	Material *mat = get_material(mat_name);
+
+	//allocate the descriptor set for single-texture to use on the material
+	vk::DescriptorSetAllocateInfo alloc_info = {};
+	alloc_info.sType = vk::StructureType::eDescriptorSetAllocateInfo;
+	alloc_info.pNext = nullptr;
+	alloc_info.descriptorPool = descriptor_pool;
+	alloc_info.descriptorSetCount = 1;
+	alloc_info.pSetLayouts = &single_texture_set_layout;
+
+	VK_CHECK(device.allocateDescriptorSets(&alloc_info, &mat->texture_set));
+}
+
+void RenderManager::copy_to_buffer(AllocatedBuffer buffer, void *data, size_t size) {
+	void *mapped;
+	VK_CHECK(allocator.mapMemory(buffer.allocation, &mapped));
+	memcpy(mapped, data, size);
+	allocator.unmapMemory(buffer.allocation);
+}
+
+void RenderManager::copy_buffer_to_image(AllocatedBuffer buffer, AllocatedImage image, uint32_t width, uint32_t height,
+		int32_t offset_x, int32_t offset_y) {
+	immediate_submit([&](vk::CommandBuffer cmd) {
+		vk::BufferImageCopy region = {};
+		region.bufferOffset = 0;
+		region.bufferRowLength = 0;
+		region.bufferImageHeight = 0;
+		region.imageSubresource.aspectMask = vk::ImageAspectFlagBits::eColor;
+		region.imageSubresource.mipLevel = 0;
+		region.imageSubresource.baseArrayLayer = 0;
+		region.imageSubresource.layerCount = 1;
+		region.imageOffset = vk::Offset3D{offset_x, offset_y, 0};
+		region.imageExtent = vk::Extent3D{width, height, 1};
+
+		cmd.copyBufferToImage(buffer.buffer, image.image, vk::ImageLayout::eTransferDstOptimal, 1, &region);
+	});
+}
+
+void RenderManager::destroy_buffer(AllocatedBuffer buffer) {
+	allocator.destroyBuffer(buffer.buffer, buffer.allocation);
 }

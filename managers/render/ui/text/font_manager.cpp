@@ -22,13 +22,13 @@ void FontManager::load_font(const char *path, int size) {
 
 	SPDLOG_INFO("Loading font: {}", path);
 	auto error = FT_New_Face(ft, path, 0, &face);
-	SPDLOG_INFO("error: {}", error);
 	if (error) {
 		SPDLOG_ERROR("Failed to load font: {}", path);
 	}
 
 	FT_Set_Pixel_Sizes(face, 0, size);
-	Font f = Font(face);
+	TextureAtlas atlas = TextureAtlas(glm::ivec2(2048, 128));
+	Font f = Font(face, atlas);
 	fonts.push_back(f);
 }
 

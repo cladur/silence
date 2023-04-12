@@ -242,6 +242,18 @@ public:
     vk::Sampler create_sampler(vk::Filter filter, vk::SamplerAddressMode address_mode);
 
     void update_descriptor_set_with_texture(Texture texture, vk::Sampler &sampler, Material &mat);
+
+	Texture create_sized_texture(int width, int height);
+
+	void transition_image_layout(AllocatedImage image, vk::ImageLayout old_layout, vk::ImageLayout new_layout);
+
+	void create_descriptor_set_for_material(vk::ImageView, vk::Sampler, std::string mat_name);
+
+	void copy_to_buffer(AllocatedBuffer buffer, void *data, size_t size);
+
+	void copy_buffer_to_image(AllocatedBuffer buffer, AllocatedImage image, uint32_t width, uint32_t height, int32_t offset_x, int32_t offset_y);
+
+	void destroy_buffer(AllocatedBuffer buffer);
 };
 
 #endif //SILENCE_RENDER_MANAGER_H

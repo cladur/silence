@@ -2,7 +2,7 @@
 
 extern RenderManager render_manager;
 
-Font::Font(FT_Face face) {
+Font::Font(FT_Face face, TextureAtlas atlas) : atlas(atlas){
 	this->face = face;
 
 	// convert face to textures and store them in the characters map
@@ -21,25 +21,53 @@ Font::Font(FT_Face face) {
 			throw std::runtime_error("failed to render glyph");
 		}
 
-		SPDLOG_INFO("Loading Glyph: {}, size {}x{}, advance {}", (char)c, face->glyph->bitmap.width, face->glyph->bitmap.rows, face->glyph->advance.x);
+		SPDLOG_INFO("Loading Glyph: {}, size {}x{}, advance {}", (char)c, face->glyph->bitmap.width, face->glyph->bitmap.rows, face->glyph->advance.x >> 6);
 
 		if (face->glyph->bitmap.width == 0 || face->glyph->bitmap.rows == 0) {
 			SPDLOG_INFO("Glyph {} is empty", (char)c);
 			continue;
 		}
 
-		characters.insert(std::pair<char, CharacterGlyph>(c, CharacterGlyph{
-			render_manager.get_character_texture(face),
-			glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
-			glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
-			static_cast<unsigned int>(face->glyph->advance.x >> 6)
-		}));
+		int width = face->glyph->bitmap.width;
+		int height = face->glyph->bitmap.rows;
+
+		std::vector<uint8_t> rgba(width * height * 4);
+		int idx = 0;
+		int idx2 = 0;
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
+				uint8_t gray = face->glyph->bitmap.buffer[idx2++];
+				rgba[idx++] = gray;
+				rgba[idx++] = gray;
+				rgba[idx++] = gray;
+				rgba[idx++] = gray;
+			}
+		}
+
+		void *rgba_ptr = rgba.data();
+
+		int char_pos = atlas.add(rgba_ptr, glm::ivec2(width, height));
+		CharacterGlyph char_glyph = {
+					char_pos,
+					glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
+					glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
+					glm::ivec2(face->glyph->advance.x >> 6, face->glyph->advance.y >> 6),
+		};
+
+		atlas_positions.insert(std::pair<char, CharacterGlyph>(c, char_glyph));
+
+//		characters.insert(std::pair<char, CharacterGlyph>(c, CharacterGlyph{
+//			render_manager.get_character_texture(face),
+//			glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
+//			glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
+//			glm::ivec2(face->glyph->advance.x >> 6, face->glyph->advance.y >> 6),
+//		}));
 
 		SPDLOG_INFO("Glyph {} Loaded", (char)c);
 	}
 
 	sampler = render_manager.create_sampler(vk::Filter::eLinear, vk::SamplerAddressMode::eClampToBorder);
-
+	render_manager.glyph_sampler = sampler;
 	FT_Done_Face(face);
 }
 
@@ -47,5 +75,5 @@ Font::~Font() {
 }
 
 CharacterGlyph *Font::get_character_glyph(char c) {
-	return &characters[c];
+	return &atlas_positions[c];
 }
