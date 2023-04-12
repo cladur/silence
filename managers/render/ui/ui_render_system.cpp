@@ -4,6 +4,7 @@
 #include "ecs/ecs_manager.h"
 #include <render/render_system.h>
 #include <render/ui/text/font_manager.h>
+#include <render/debug/debug_drawing.h>
 
 extern ECSManager ecs_manager;
 extern FontManager font_manager;
@@ -41,6 +42,8 @@ void UiRenderSystem::update(RenderManager &render_manager) {
 			//m = glm::scale(m, glm::vec3((float)g->size.x / (float)g->advance, (float)g->size.y / (float)g->advance, 1.0f));
 			m = glm::translate(m, current_position);
 			render_object.transform_matrix = m;
+
+            //DebugDraw::draw_box(current_position, glm::vec3(g->size.x, g->size.y, 1.0f));
 
 			render_manager.renderables.push_back(render_object);
 		}

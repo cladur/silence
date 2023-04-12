@@ -1387,33 +1387,52 @@ void RenderManager::draw_objects(Camera &camera, vk::CommandBuffer cmd, RenderOb
 		RenderObject &object = first[i];
 
 		if (object.material == ui_mat) {
-			SPDLOG_INFO("Drawing UI object {} out of {}", ui_object_idx, glyphs.size());
+            // ui materials are always the same but have updated textures so we need to update it always
 			Texture t = glyphs[ui_object_idx];
 			ui_object_idx++;
 			update_descriptor_set_with_texture(t, glyph_sampler,  *object.material);
-		}
 
-		//only bind the pipeline if it doesn't match with the already bound one
-		if (object.material != last_material) {
-			cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, object.material->pipeline);
-			last_material = object.material;
+            cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, object.material->pipeline);
+            last_material = object.material;
 
-			uint32_t uniform_offset = pad_uniform_buffer_size(sizeof(GPUSceneData)) * frame_index;
+            uint32_t uniform_offset = pad_uniform_buffer_size(sizeof(GPUSceneData)) * frame_index;
 
-			// bind the descriptor set when changing pipeline
-			cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, object.material->pipeline_layout, 0, 1,
-					&get_current_frame().global_descriptor, 1, &uniform_offset);
+            // bind the descriptor set when changing pipeline
+            cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, object.material->pipeline_layout, 0, 1,
+                                   &get_current_frame().global_descriptor, 1, &uniform_offset);
 
-			// bind the object descriptor set
-			cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, object.material->pipeline_layout, 1, 1,
-					&get_current_frame().object_descriptor, 0, nullptr);
+            // bind the object descriptor set
+            cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, object.material->pipeline_layout, 1, 1,
+                                   &get_current_frame().object_descriptor, 0, nullptr);
 
-			if (object.material->texture_set != (vk::DescriptorSet)VK_NULL_HANDLE) {
-				//texture descriptor
-				cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, object.material->pipeline_layout, 2, 1,
-						&object.material->texture_set, 0, nullptr);
-			}
-		}
+            if (object.material->texture_set != (vk::DescriptorSet)VK_NULL_HANDLE) {
+                //texture descriptor
+                cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, object.material->pipeline_layout, 2, 1,
+                                       &object.material->texture_set, 0, nullptr);
+            }
+		} else {
+            //only bind the pipeline if it doesn't match with the already bound one
+            if (object.material != last_material) {
+                cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, object.material->pipeline);
+                last_material = object.material;
+
+                uint32_t uniform_offset = pad_uniform_buffer_size(sizeof(GPUSceneData)) * frame_index;
+
+                // bind the descriptor set when changing pipeline
+                cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, object.material->pipeline_layout, 0, 1,
+                                       &get_current_frame().global_descriptor, 1, &uniform_offset);
+
+                // bind the object descriptor set
+                cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, object.material->pipeline_layout, 1, 1,
+                                       &get_current_frame().object_descriptor, 0, nullptr);
+
+                if (object.material->texture_set != (vk::DescriptorSet)VK_NULL_HANDLE) {
+                    //texture descriptor
+                    cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, object.material->pipeline_layout, 2, 1,
+                                           &object.material->texture_set, 0, nullptr);
+                }
+            }
+        }
 
 		glm::mat4 model = object.transform_matrix;
 		//final render matrix, that we are calculating on the cpu

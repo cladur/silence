@@ -74,11 +74,6 @@ struct RenderObject {
 	glm::mat4 transform_matrix;
 };
 
-struct MeshInstance {
-	Mesh *mesh;
-	Material *material;
-};
-
 struct GPUCameraData {
 	glm::mat4 view;
 	glm::mat4 proj;
@@ -241,6 +236,12 @@ public:
 
 	void draw(Camera &camera);
 	void draw_objects(Camera &camera, vk::CommandBuffer cmd, RenderObject *first, int count);
+
+    Texture get_character_texture(FT_Face &face);
+
+    vk::Sampler create_sampler(vk::Filter filter, vk::SamplerAddressMode address_mode);
+
+    void update_descriptor_set_with_texture(Texture texture, vk::Sampler &sampler, Material &mat);
 };
 
 #endif //SILENCE_RENDER_MANAGER_H

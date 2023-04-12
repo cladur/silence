@@ -21,7 +21,7 @@ Font::Font(FT_Face face) {
 			throw std::runtime_error("failed to render glyph");
 		}
 
-		SPDLOG_INFO("Loading Glyph: {}", (char)c);
+		SPDLOG_INFO("Loading Glyph: {}, size {}x{}, advance {}", (char)c, face->glyph->bitmap.width, face->glyph->bitmap.rows, face->glyph->advance.x);
 
 		if (face->glyph->bitmap.width == 0 || face->glyph->bitmap.rows == 0) {
 			SPDLOG_INFO("Glyph {} is empty", (char)c);
@@ -32,7 +32,7 @@ Font::Font(FT_Face face) {
 			render_manager.get_character_texture(face),
 			glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
 			glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
-			static_cast<unsigned int>(face->glyph->advance.x)
+			static_cast<unsigned int>(face->glyph->advance.x >> 6)
 		}));
 
 		SPDLOG_INFO("Glyph {} Loaded", (char)c);

@@ -36,6 +36,9 @@ private:
 	void visit(Entity entity, MeshInstance &component) {
 		UPDATECOMPONENT
 	}
+    void visit(Entity entity, UIText &component) {
+        UPDATECOMPONENT
+    }
 
 public:
 	static void visit(Entity entity, serialization::variant_type &variant) {
@@ -96,6 +99,14 @@ public:
 				ComponentVisitor().visit(entity, component);
 				break;
 			}
+            case 7: {
+                UIText &component = std::get<7>(variant);
+                if (!ecs_manager.has_component<UIText>(entity)) {
+                    ecs_manager.add_component<UIText>(entity, component);
+                }
+                ComponentVisitor().visit(entity, component);
+                break;
+            }
 		}
 	}
 };

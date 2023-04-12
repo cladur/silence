@@ -8,6 +8,7 @@
 #include "components/parent_component.h"
 #include "components/rigidbody_component.h"
 #include "components/transform_component.h"
+#include "components/ui_text_component.h"
 
 #include <functional>
 #include <map>
@@ -26,7 +27,7 @@ concept Deserializable = requires(T t, nlohmann::json &j) {
 	{ t.deserialize_json(j) };
 };
 
-typedef std::variant<Children, Parent, Transform, RigidBody, FmodListener, Gravity, MeshInstance> variant_type;
+typedef std::variant<Children, Parent, Transform, RigidBody, FmodListener, Gravity, MeshInstance, UIText> variant_type;
 
 template <typename T>
 T create_instance(nlohmann::json &j)
