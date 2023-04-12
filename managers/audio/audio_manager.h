@@ -4,6 +4,7 @@
 #include "components/rigidbody_component.h"
 #include "event_reference.h"
 #include "fmod_studio.hpp"
+#include "tracy/tracy.hpp"
 
 #define SILENCE_FMOD_LISTENER_DEBUG_CAMERA 0
 // Add them when we need them

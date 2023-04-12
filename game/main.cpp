@@ -21,6 +21,8 @@
 
 #include "core/camera/camera.h"
 
+#include "tracy/Tracy.hpp"
+
 RenderManager render_manager;
 DisplayManager display_manager;
 ECSManager ecs_manager;
@@ -319,6 +321,7 @@ int main() {
 
 		fmod_listener_system->update(dt);
 		audio_manager.update();
+		FrameMark;
 	}
 
 	// Shut everything down, in reverse order.

@@ -43,6 +43,7 @@ VkSurfaceKHR DisplayManager::create_surface(VkInstance &instance) const {
 }
 
 void DisplayManager::poll_events() {
+	ZoneScopedN("DisplayManager::poll_events");
 	glfwPollEvents();
 }
 

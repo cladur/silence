@@ -952,6 +952,9 @@ RenderManager::Status RenderManager::startup(DisplayManager &display_manager) {
 
 	init_imgui(display_manager.window);
 
+	vk::CommandBuffer cmd = get_current_frame().main_command_buffer;
+	TracyVkContext(chosen_gpu, device, graphics_queue, cmd);
+
 	return Status::Ok;
 }
 
@@ -1014,6 +1017,7 @@ void RenderManager::load_images() {
 }
 
 void RenderManager::draw(Camera &camera) {
+	ZoneNamed(Zone1, true);
 	//wait until the GPU has finished render the last frame. Timeout of 1 second
 	VK_CHECK(device.waitForFences(1, &get_current_frame().render_fence, true, 1000000000));
 	VK_CHECK(device.resetFences(1, &get_current_frame().render_fence));
@@ -1127,6 +1131,7 @@ void RenderManager::draw(Camera &camera) {
 }
 
 void RenderManager::draw_objects(Camera &camera, vk::CommandBuffer cmd, RenderObject *first, int count) {
+	ZoneNamed(Zone2, true);
 	// TODO: Sort RenderObjects by material and mesh to reduce pipeline and descriptor set changes
 
 	glm::mat4 view = camera.get_view_matrix();
