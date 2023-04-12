@@ -488,7 +488,26 @@ void RenderManager::init_pipelines() {
 		SPDLOG_INFO("Triangle vertex shader successfully loaded");
 	}
 
-	//build the stage-create-info for both vertex and fragment stages. This lets the pipeline know the shader
+    // debug shaders
+
+    vk::ShaderModule debug_vert_shader;
+    if (!load_shader_module("resources/shaders/debug.vert.spv", &debug_vert_shader)) {
+        SPDLOG_ERROR("Error when building the debug vertex shader module");
+        abort();
+    } else {
+        SPDLOG_INFO("Debug vertex shader successfully loaded");
+    }
+
+    vk::ShaderModule debug_frag_shader;
+    if (!load_shader_module("resources/shaders/debug.frag.spv", &debug_frag_shader)) {
+        SPDLOG_ERROR("Error when building the debug fragment shader module");
+        abort();
+    } else {
+        SPDLOG_INFO("Debug fragment shader successfully loaded");
+    }
+
+
+    //build the stage-create-info for both vertex and fragment stages. This lets the pipeline know the shader
 	//modules per stage
 	PipelineBuilder pipeline_builder;
 
@@ -595,15 +614,56 @@ void RenderManager::init_pipelines() {
 	vk::Pipeline textured_mesh_pipeline = pipeline_builder.build_pipeline(device, render_pass);
 	create_material(textured_mesh_pipeline, textured_mesh_pipeline_layout, "textured_mesh");
 
+	// DEBUG DRAWING STUFF
+
+
+
+	//build the mesh pipeline
+	//we start from just the default empty pipeline layout info
+	vk::PipelineLayoutCreateInfo debug_pipeline_layout_info = vk_init::pipeline_layout_create_info();
+
+    //push-constant setup
+    debug_pipeline_layout_info.pPushConstantRanges = &push_constant;
+    debug_pipeline_layout_info.pushConstantRangeCount = 1;
+
+	//hook the global set layout
+	vk::DescriptorSetLayout layouts[] = { global_set_layout, object_set_layout };
+
+	debug_pipeline_layout_info.setLayoutCount = 2;
+	debug_pipeline_layout_info.pSetLayouts = layouts;
+
+	vk::PipelineLayout debug_pipeline_layout;
+	VK_CHECK(device.createPipelineLayout(&debug_pipeline_layout_info, nullptr, &debug_pipeline_layout));
+
+	pipeline_builder.input_assembly = vk_init::input_assembly_create_info(vk::PrimitiveTopology::eLineList);
+
+	pipeline_builder.pipeline_layout = debug_pipeline_layout;
+
+	pipeline_builder.shader_stages.clear();
+	pipeline_builder.shader_stages.push_back(
+			vk_init::pipeline_shader_stage_create_info(vk::ShaderStageFlagBits::eVertex, debug_vert_shader));
+
+	//make sure that triangle_frag_shader is holding the compiled default_lit.frag
+	pipeline_builder.shader_stages.push_back(
+			vk_init::pipeline_shader_stage_create_info(vk::ShaderStageFlagBits::eFragment, debug_frag_shader));
+
+	pipeline_builder.pipeline_layout = debug_pipeline_layout;
+	vk::Pipeline debug_pipeline = pipeline_builder.build_pipeline(device, render_pass);
+	create_material(debug_pipeline, debug_pipeline_layout, "debug_material");
+
 	device.destroyShaderModule(mesh_vertex_shader, nullptr);
 	device.destroyShaderModule(mesh_frag_shader, nullptr);
 	device.destroyShaderModule(textured_mesh_frag_shader, nullptr);
+	device.destroyShaderModule(debug_vert_shader, nullptr);
+	device.destroyShaderModule(debug_frag_shader, nullptr);
 
 	main_deletion_queue.push_function([=, this]() {
 		device.destroyPipeline(mesh_pipeline);
 		device.destroyPipelineLayout(mesh_pipeline_layout);
 		device.destroyPipeline(textured_mesh_pipeline);
 		device.destroyPipelineLayout(textured_mesh_pipeline_layout);
+		device.destroyPipeline(debug_pipeline);
+		device.destroyPipelineLayout(debug_pipeline_layout);
 	});
 }
 
@@ -779,12 +839,96 @@ void RenderManager::load_meshes() {
 
 	box_mesh.load_from_gltf("resources/models/BoxTextured.gltf");
 
+    generate_debug_box_mesh();
+    generate_debug_sphere_mesh();
+	generate_debug_line_mesh();
+
 	upload_mesh(triangle_mesh);
 	upload_mesh(box_mesh);
+    upload_mesh(debug_box_mesh);
+    upload_mesh(debug_sphere_mesh);
+	upload_mesh(debug_line_mesh);
 
 	meshes["triangle"] = triangle_mesh;
 	meshes["box"] = box_mesh;
+    meshes["debug_box"] = debug_box_mesh;
+    meshes["debug_sphere"] = debug_sphere_mesh;
+	meshes["debug_line"] = debug_line_mesh;
 }
+
+void RenderManager::generate_debug_box_mesh() {
+    debug_box_mesh.vertices.resize(8);
+    // bottom face
+    debug_box_mesh.vertices[0].position = glm::vec3(-0.5f, -0.5f, -0.5f);
+    debug_box_mesh.vertices[1].position = glm::vec3(0.5f, -0.5f, -0.5f);
+    debug_box_mesh.vertices[2].position = glm::vec3(0.5f, -0.5f, 0.5f);
+    debug_box_mesh.vertices[3].position = glm::vec3(-0.5f, -0.5f, 0.5f);
+
+    // top face
+    debug_box_mesh.vertices[4].position = glm::vec3(-0.5f, 0.5f, -0.5f);
+    debug_box_mesh.vertices[5].position = glm::vec3(0.5f, 0.5f, -0.5f);
+    debug_box_mesh.vertices[6].position = glm::vec3(0.5f, 0.5f, 0.5f);
+    debug_box_mesh.vertices[7].position = glm::vec3(-0.5f, 0.5f, 0.5f);
+
+    // white color for best visibility. I dont know how to re-buffer vertex data on runtime so we'll stay with white
+    for (auto &vertex : debug_box_mesh.vertices) {
+        vertex.color = glm::vec3(1.f, 1.f, 1.f);
+    }
+
+    // indeces for LINE_LIST drawing a cube shape
+    debug_box_mesh.indices = {
+            0, 1, 1, 2, 2, 3, 3, 0, 4, 5, 5, 6, 6, 7, 7, 4, 0, 4, 1, 5, 2, 6, 3, 7
+    };
+}
+
+void RenderManager::generate_debug_sphere_mesh() {
+    // prepare sphere vertices
+    static const int X_SEGMENTS = 16;
+    static const int Y_SEGMENTS = 16;
+    static const float PI = 3.14159265359f;
+
+    float x_segment_step = 2.f * PI / X_SEGMENTS;
+    float y_segment_step = PI / Y_SEGMENTS;
+    float x_segment_angle = 0.f;
+    float y_segment_angle = 0.f;
+
+    float xy;
+    float z;
+
+    for (int y = 0; y <= Y_SEGMENTS; ++y) {
+        y_segment_angle = PI / 2.0f - (float)y * y_segment_step;
+        xy = cos(y_segment_angle); // assuming r=1
+        z = sin(y_segment_angle);
+
+        for (int x = 0; x <= X_SEGMENTS; ++x) {
+            x_segment_angle = (float)x * x_segment_step;
+
+            float x_val = xy * cos(x_segment_angle);
+            float y_val = xy * sin(x_segment_angle);
+
+            Vertex vertex;
+            vertex.position = glm::vec3(x_val, z, y_val);
+            vertex.color = glm::vec3(1.f, 1.f, 1.f);
+            debug_sphere_mesh.vertices.push_back(vertex);
+        }
+    }
+
+    // indeces for drawing a LINE LIST with lines going both ways
+    for (int y = 0; y < Y_SEGMENTS; ++y) {
+        for (int x = 0; x < X_SEGMENTS; ++x) {
+            debug_sphere_mesh.indices.push_back(y * (X_SEGMENTS + 1) + x);
+            debug_sphere_mesh.indices.push_back(y * (X_SEGMENTS + 1) + x + 1);
+        }
+    }
+
+    for (int y = 0; y < Y_SEGMENTS; ++y) {
+        for (int x = 0; x < X_SEGMENTS; ++x) {
+            debug_sphere_mesh.indices.push_back(y * (X_SEGMENTS + 1) + x);
+            debug_sphere_mesh.indices.push_back((y + 1) * (X_SEGMENTS + 1) + x);
+        }
+    }
+}
+
 
 void RenderManager::upload_mesh(Mesh &mesh) {
 	size_t buffer_size = mesh.vertices.size() * sizeof(Vertex);
@@ -1222,4 +1366,24 @@ void RenderManager::draw_objects(Camera &camera, vk::CommandBuffer cmd, RenderOb
 		// We're passing object's index as instanceCount, to easily pass integer to the shader
 		cmd.drawIndexed(object.mesh->indices.size(), 1, 0, 0, i);
 	}
+}
+
+void RenderManager::generate_debug_line_mesh() {
+	//create a mesh for debug lines
+	std::vector<Vertex> vertices;
+	std::vector<uint32_t> indices;
+
+	//create a line mesh
+	Vertex v1 = {};
+	v1.position = glm::vec3 { 0, 0, 0 };
+	v1.color = glm::vec3 { 1, 0, 0 };
+	debug_line_mesh.vertices.push_back(v1);
+
+	Vertex v2 = {};
+	v2.position = glm::vec3 { 1, 0, 0 };
+	v2.color = glm::vec3 { 0, 0, 1 };
+	debug_line_mesh.vertices.push_back(v2);
+
+	debug_line_mesh.indices.push_back(0);
+	debug_line_mesh.indices.push_back(1);
 }

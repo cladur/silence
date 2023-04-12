@@ -1,25 +1,35 @@
 #include "audio/audio_manager.h"
-#include "managers/display/display_manager.h"
-#include "managers/render/render_manager.h"
+#include "display/display_manager.h"
+#include "input/input_manager.h"
+#include "render/render_manager.h"
 
 #include "components/children_component.h"
+#include "components/collider_aabb.h"
 #include "components/gravity_component.h"
+#include "components/mesh_instance_component.h"
 #include "components/parent_component.h"
 #include "components/rigidbody_component.h"
 #include "components/transform_component.h"
 
-#include "ecs/systems/parent_system.h"
-#include "ecs/systems/physics_system.h"
 #include "render/render_system.h"
 
 #include "ecs/ecs_manager.h"
+#include "ecs/systems/collider_components_factory.h"
+#include "ecs/systems/collision_system.h"
+#include "ecs/systems/parent_system.h"
+#include "ecs/systems/physics_system.h"
 
 #include "audio/fmod_listener_system.h"
 #include "components/fmod_listener_component.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_vulkan.h"
+#include "scene/scene_manager.h"
+#include "serialization.h"
+#include <spdlog/spdlog.h>
+#include <fstream>
 
 #include "core/camera/camera.h"
+#include "render/debug/debug_drawing.h"
 
 #include "tracy/Tracy.hpp"
 
@@ -53,6 +63,19 @@ void default_mappings() {
 	input_manager.add_action("move_down");
 	input_manager.add_key_to_action("move_down", InputKey::LEFT_SHIFT);
 	input_manager.add_key_to_action("move_down", InputKey::GAMEPAD_BUTTON_B);
+
+	input_manager.add_action("collider_forward");
+	input_manager.add_key_to_action("collider_forward", InputKey::I);
+	input_manager.add_action("collider_backward");
+	input_manager.add_key_to_action("collider_backward", InputKey::K);
+	input_manager.add_action("collider_left");
+	input_manager.add_key_to_action("collider_left", InputKey::J);
+	input_manager.add_action("collider_right");
+	input_manager.add_key_to_action("collider_right", InputKey::L);
+	input_manager.add_action("collider_up");
+	input_manager.add_key_to_action("collider_up", InputKey::O);
+	input_manager.add_action("collider_down");
+	input_manager.add_key_to_action("collider_down", InputKey::U);
 }
 
 void default_ecs_manager_init() {
@@ -65,6 +88,8 @@ void default_ecs_manager_init() {
 	ecs_manager.register_component<Children>();
 	ecs_manager.register_component<MeshInstance>();
 	ecs_manager.register_component<FmodListener>();
+	ecs_manager.register_component<ColliderAABB>();
+	ecs_manager.register_component<ColliderTag>();
 }
 
 void demo_entities_init(std::vector<Entity> &entities) {
@@ -73,7 +98,7 @@ void demo_entities_init(std::vector<Entity> &entities) {
 	std::uniform_real_distribution<float> rand_rotation(0.0f, 0.0f);
 	std::uniform_real_distribution<float> rand_scale(3.0f, 5.0f);
 	std::uniform_real_distribution<float> rand_color(0.0f, 1.0f);
-	std::uniform_real_distribution<float> rand_gravity(-1000.0f, -100.0f);
+	std::uniform_real_distribution<float> rand_gravity(-40.0f, -20.0f);
 
 	float scale = rand_scale(random_generator);
 
@@ -85,12 +110,16 @@ void demo_entities_init(std::vector<Entity> &entities) {
 		ecs_manager.add_component(entity,
 				RigidBody{ .velocity = glm::vec3(0.0f, 0.0f, 0.0f), .acceleration = glm::vec3(0.0f, 0.0f, 0.0f) });
 
-		ecs_manager.add_component(entity,
+		Transform transform =
 				Transform{ glm::vec3(rand_position(random_generator), rand_position(random_generator) + 40.0f,
 								   rand_position(random_generator)),
-						glm::vec3(rand_rotation(random_generator), rand_rotation(random_generator),
-								rand_rotation(random_generator)),
-						glm::vec3(scale, scale, scale) });
+					glm::vec3(rand_rotation(random_generator), rand_rotation(random_generator),
+							rand_rotation(random_generator)),
+					glm::vec3(1.0f) };
+		ecs_manager.add_component(entity, transform);
+
+		ColliderComponentsFactory::add_collider_component(
+				entity, ColliderAABB{ transform.get_position(), transform.get_scale(), true });
 
 		ecs_manager.add_component<MeshInstance>(
 				entity, { render_manager.get_mesh("box"), render_manager.get_material("default_mesh") });
@@ -103,6 +132,30 @@ void demo_entities_init(std::vector<Entity> &entities) {
 			FmodListener{ .listener_id = SILENCE_FMOD_LISTENER_DEBUG_CAMERA,
 					.prev_frame_position = glm::vec3(0.0f, 0.0f, -25.0f) });
 	entities.push_back(listener);
+}
+
+void demo_collision_init(Entity &entity) {
+	entity = ecs_manager.create_entity();
+
+	Transform transform = Transform{ glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f) };
+	ecs_manager.add_component(entity, transform);
+
+	ColliderComponentsFactory::add_collider_component(
+			entity, ColliderAABB{ transform.get_position(), transform.get_scale(), true });
+
+	ecs_manager.add_component<MeshInstance>(
+			entity, { render_manager.get_mesh("box"), render_manager.get_material("default_mesh") });
+
+	Entity floor = ecs_manager.create_entity();
+
+	Transform transform1 = Transform{ glm::vec3(0.0f, -20.0f, 0.0f), glm::vec3(0.0f), glm::vec3(20.0f, 1.0f, 20.0f) };
+	ecs_manager.add_component(floor, transform1);
+
+	ColliderComponentsFactory::add_collider_component(
+			floor, ColliderAABB{ transform1.get_position(), transform1.get_scale(), false });
+
+	ecs_manager.add_component<MeshInstance>(
+			floor, { render_manager.get_mesh("box"), render_manager.get_material("default_mesh") });
 }
 
 bool display_manager_init() {
@@ -172,6 +225,17 @@ void handle_camera(Camera &camera, float dt) {
 	camera.rotate(mouse_delta.x * dt, mouse_delta.y * dt);
 }
 
+void handle_collider_movement(Entity entity, float dt) {
+	float forward = -input_manager.get_axis("collider_backward", "collider_forward");
+	float right = -input_manager.get_axis("collider_left", "collider_right");
+	float up = -input_manager.get_axis("collider_down", "collider_up");
+
+	Transform &t = ecs_manager.get_component<Transform>(entity);
+
+	const float speed = 5.0f;
+	t.add_position(glm::vec3(forward, up, right) * speed * dt);
+}
+
 int main() {
 	SPDLOG_INFO("Starting up engine systems...");
 
@@ -185,17 +249,22 @@ int main() {
 
 	default_ecs_manager_init();
 	auto physics_system = ecs_manager.register_system<PhysicsSystem>();
+	auto collision_system = ecs_manager.register_system<CollisionSystem>();
 	auto parent_system = ecs_manager.register_system<ParentSystem>();
 	auto render_system = ecs_manager.register_system<RenderSystem>();
 	auto fmod_listener_system = ecs_manager.register_system<FmodListenerSystem>();
 
 	physics_system->startup();
+	collision_system->startup();
 	parent_system->startup();
 	render_system->startup();
 	fmod_listener_system->startup();
 
 	std::vector<Entity> entities(50);
 	demo_entities_init(entities);
+
+	Entity collision_tester;
+	demo_collision_init(collision_tester);
 
 	audio_manager.startup();
 	audio_manager.load_bank("Music");
@@ -209,16 +278,21 @@ int main() {
 	Camera camera(glm::vec3(0.0f, 0.0f, -25.0f));
 
 	// Run the game.
-	float dt{};
 	bool show_ecs_logs = false;
 	bool show_demo_window = false;
 	bool physics_system_enabled = false;
-	bool entities_destroyed = false;
 	int imgui_children_id = 1;
 	int imgui_entity_id = 1;
 	int max_imgui_entities = 50;
 	int max_entities = 100;
 	int imgui_entities_count = 50;
+	int frames_count = 0;
+
+	char load_file_name[128] = "scene.json";
+	char save_file_name[128] = "scene.json";
+
+	float target_frame_time = 1.0f / display_manager.get_refresh_rate();
+	float dt = target_frame_time;
 
 	// TEST FOR 3D AUDIO
 	glm::vec3 sound_position = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -226,6 +300,7 @@ int main() {
 	// #################
 
 	bool should_run = true;
+	nlohmann::json scene;
 	while (should_run) {
 		// GAME LOGIC
 		auto start_time = std::chrono::high_resolution_clock::now();
@@ -240,6 +315,7 @@ int main() {
 		if (!in_debug_menu) {
 			handle_camera(camera, dt);
 		}
+		handle_collider_movement(collision_tester, dt);
 
 		//imgui new frame
 		ImGui_ImplVulkan_NewFrame();
@@ -272,21 +348,40 @@ int main() {
 		}
 
 		if (ImGui::Button("Destroy all entities")) {
-			if (!entities_destroyed) {
+			destroy_all_entities(entities);
+			entities.clear();
+		}
+
+		ImGui::Text("Save file");
+		ImGui::InputText("#Save file name", save_file_name, IM_ARRAYSIZE(save_file_name));
+
+		if (ImGui::Button("Save scene")) {
+			scene = SceneManager::save_scene(entities);
+			SceneManager::save_json_to_file(save_file_name, scene);
+		}
+
+		ImGui::Text("Load file");
+		ImGui::InputText("#Load file name", load_file_name, IM_ARRAYSIZE(load_file_name));
+
+		if (ImGui::Button("Load scene")) {
+			std::ifstream file(load_file_name);
+			if (file.is_open()) {
+				SPDLOG_INFO("Loaded scene from file {}", load_file_name);
+				nlohmann::json scene_json = nlohmann::json::parse(file);
+				file.close();
 				destroy_all_entities(entities);
+				SceneManager::load_scene_from_json_file(scene_json, load_file_name, entities);
+			} else {
+				SPDLOG_ERROR("File {} not found", load_file_name);
 			}
-			entities_destroyed = true;
 		}
 
 		ImGui::DragInt("Entities count", &imgui_entities_count, 1, 1, max_entities);
 
 		if (ImGui::Button("Create entities")) {
-			if (!entities_destroyed) {
-				destroy_all_entities(entities);
-			}
-			entities.resize(imgui_entities_count);
+			destroy_all_entities(entities);
+			entities.resize(imgui_entities_count - 1);
 			demo_entities_init(entities);
-			entities_destroyed = false;
 		}
 
 		// 3D SOUND DEMO
@@ -310,18 +405,27 @@ int main() {
 			physics_system->update(dt);
 		}
 
+		collision_system->update();
+
 		parent_system->update();
 		render_system->update(render_manager);
 
-		auto stop_time = std::chrono::high_resolution_clock::now();
-
-		dt = std::chrono::duration<float, std::chrono::seconds::period>(stop_time - start_time).count();
 		input_manager.process_input();
 		render_manager.draw(camera);
 
 		fmod_listener_system->update(dt);
 		audio_manager.update();
 		FrameMark;
+
+		frames_count++;
+		auto stop_time = std::chrono::high_resolution_clock::now();
+
+		// TODO: This is a hack to make sure we don't go over the target frame time.
+		// We need to make calculate dt properly and make target frame time changeable.
+		while (std::chrono::duration<float, std::chrono::seconds::period>(stop_time - start_time).count() <
+				target_frame_time) {
+			stop_time = std::chrono::high_resolution_clock::now();
+		}
 	}
 
 	// Shut everything down, in reverse order.

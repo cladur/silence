@@ -2,6 +2,8 @@
 #define SILENCE_COMPONENTMANAGER_H
 
 #include "component_array.h"
+#include "scene/scene_manager.h"
+#include "serialization.h"
 
 class ComponentManager {
 private:
@@ -30,6 +32,8 @@ public:
 		assert(component_types.find(type_name) == component_types.end() &&
 				"Registering component type more than once.");
 
+		SceneManager::add_component_to_map<T>(next_component_type);
+
 		// Add this component type to the component type map
 		component_types.insert({ type_name, next_component_type });
 
@@ -54,6 +58,11 @@ public:
 		get_component_array<T>()->insert_data(entity, component);
 	}
 
+	template <typename T> void update_component(Entity entity, T component) {
+		// Add a component to the array for an entity
+		get_component_array<T>()->update_data(entity, component);
+	}
+
 	template <typename T> void remove_component(Entity entity) {
 		// Remove a component from the array for an entity
 		get_component_array<T>()->remove_data(entity);
@@ -76,6 +85,14 @@ public:
 			auto const &component = pair.second;
 
 			component->entity_destroyed(entity);
+		}
+	}
+
+	void serialize_entity(nlohmann::json &json, Entity entity) {
+		for (auto const &pair : component_arrays) {
+			auto const &component = pair.second;
+
+			component->serialize_entity_json(json, entity);
 		}
 	}
 };

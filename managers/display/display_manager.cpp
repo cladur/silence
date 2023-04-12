@@ -33,6 +33,12 @@ void DisplayManager::capture_mouse(bool capture) const {
 	glfwSetInputMode(window, GLFW_CURSOR, capture ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
 }
 
+int DisplayManager::get_refresh_rate() const {
+	GLFWmonitor *monitor = glfwGetPrimaryMonitor();
+	const GLFWvidmode *mode = glfwGetVideoMode(monitor);
+	return mode->refreshRate;
+}
+
 VkSurfaceKHR DisplayManager::create_surface(VkInstance &instance) const {
 	VkSurfaceKHR surface;
 	VkResult err = glfwCreateWindowSurface(instance, window, nullptr, &surface);
