@@ -4,6 +4,8 @@
 #define VULKAN_HPP_NO_EXCEPTIONS
 #include "vulkan/vulkan.hpp"
 
+namespace vk_util {
+
 class DescriptorAllocator {
 public:
 	struct PoolSizes {
@@ -78,5 +80,7 @@ private:
 	DescriptorLayoutCache *cache;
 	DescriptorAllocator *alloc;
 };
+
+} //namespace vk_util
 
 #endif //SILENCE_VK_DESCRIPTORS_H

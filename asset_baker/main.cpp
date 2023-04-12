@@ -17,6 +17,8 @@ bool convert_image(const fs::path &input, const fs::path &output) {
 
 	int tex_width, tex_height, tex_channels;
 
+	stbi_set_flip_vertically_on_load(true);
+
 	stbi_uc *pixels =
 			stbi_load((const char *)input.u8string().c_str(), &tex_width, &tex_height, &tex_channels, STBI_rgb_alpha);
 

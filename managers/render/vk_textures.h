@@ -9,7 +9,7 @@ namespace vk_util {
 bool load_image_from_asset(RenderManager &manager, const char *filename, AllocatedImage &out_image);
 
 AllocatedImage upload_image(RenderManager &manager, uint32_t tex_width, uint32_t tex_height, vk::Format image_format,
-		AllocatedBuffer &staging_buffer);
+		AllocatedBufferUntyped &staging_buffer);
 
 }; //namespace vk_util
 

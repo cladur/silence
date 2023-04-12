@@ -1,6 +1,9 @@
 #ifndef SILENCE_PCH_H
 #define SILENCE_PCH_H
 
+#define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+
 // types
 #include <cctype>
 #include <cstdint>

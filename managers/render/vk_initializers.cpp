@@ -1,4 +1,5 @@
 #include "vk_initializers.h"
+#include <vulkan/vulkan_enums.hpp>
 
 vk::CommandPoolCreateInfo vk_init::command_pool_create_info(
 		uint32_t queue_family_index, vk::CommandPoolCreateFlags flags) {
@@ -268,4 +269,79 @@ vk::WriteDescriptorSet vk_init::write_descriptor_image(
 	write.pImageInfo = image_info;
 
 	return write;
+}
+
+vk::BufferMemoryBarrier vk_init::buffer_barrier(vk::Buffer buffer, uint32_t queue) {
+	vk::BufferMemoryBarrier barrier{};
+	barrier.buffer = buffer;
+	barrier.size = VK_WHOLE_SIZE;
+	barrier.srcQueueFamilyIndex = queue;
+	barrier.dstQueueFamilyIndex = queue;
+	barrier.sType = vk::StructureType::eBufferMemoryBarrier;
+	barrier.pNext = nullptr;
+
+	return barrier;
+}
+
+vk::ImageMemoryBarrier vk_init::image_barrier(vk::Image image, vk::AccessFlags src_access_mask,
+		vk::AccessFlags dst_access_mask, vk::ImageLayout old_layout, vk::ImageLayout new_layout,
+		vk::ImageAspectFlags aspect_mask) {
+	vk::ImageMemoryBarrier result{};
+	result.sType = vk::StructureType::eImageMemoryBarrier;
+
+	result.srcAccessMask = src_access_mask;
+	result.dstAccessMask = dst_access_mask;
+	result.oldLayout = old_layout;
+	result.newLayout = new_layout;
+	result.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	result.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	result.image = image;
+	result.subresourceRange.aspectMask = aspect_mask;
+	result.subresourceRange.levelCount = VK_REMAINING_MIP_LEVELS;
+	result.subresourceRange.layerCount = VK_REMAINING_ARRAY_LAYERS;
+
+	return result;
+}
+
+vk::RenderPassBeginInfo vk_init::renderpass_begin_info(
+		vk::RenderPass render_pass, vk::Extent2D window_extent, vk::Framebuffer framebuffer) {
+	vk::RenderPassBeginInfo info = {};
+	info.sType = vk::StructureType::eRenderPassBeginInfo;
+	info.pNext = nullptr;
+
+	info.renderPass = render_pass;
+	info.renderArea.offset.x = 0;
+	info.renderArea.offset.y = 0;
+	info.renderArea.extent = window_extent;
+	info.clearValueCount = 0;
+	info.pClearValues = nullptr;
+	info.framebuffer = framebuffer;
+
+	return info;
+}
+vk::FramebufferCreateInfo vk_init::framebuffer_create_info(vk::RenderPass render_pass, vk::Extent2D extent) {
+	vk::FramebufferCreateInfo info = {};
+	info.sType = vk::StructureType::eFramebufferCreateInfo;
+	info.pNext = nullptr;
+
+	info.renderPass = render_pass;
+	info.attachmentCount = 1;
+	info.width = extent.width;
+	info.height = extent.height;
+	info.layers = 1;
+
+	return info;
+}
+vk::PresentInfoKHR vk_init::present_info() {
+	vk::PresentInfoKHR info = {};
+	info.sType = vk::StructureType::ePresentInfoKHR;
+	info.pNext = nullptr;
+
+	info.swapchainCount = 0;
+	info.pSwapchains = nullptr;
+	info.pWaitSemaphores = nullptr;
+	info.waitSemaphoreCount = 0;
+	info.pImageIndices = nullptr;
+
+	return info;
 }

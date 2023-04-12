@@ -52,6 +52,18 @@ vk::SamplerCreateInfo sampler_create_info(
 vk::WriteDescriptorSet write_descriptor_image(
 		vk::DescriptorType type, vk::DescriptorSet dst_set, vk::DescriptorImageInfo *image_info, uint32_t binding);
 
+vk::BufferMemoryBarrier buffer_barrier(vk::Buffer buffer, uint32_t queue);
+
+vk::ImageMemoryBarrier image_barrier(vk::Image image, vk::AccessFlags src_access_mask, vk::AccessFlags dst_access_mask,
+		vk::ImageLayout old_layout, vk::ImageLayout new_layout, vk::ImageAspectFlags aspect_mask);
+
+vk::RenderPassBeginInfo renderpass_begin_info(
+		vk::RenderPass render_pass, vk::Extent2D window_extent, vk::Framebuffer framebuffer);
+
+vk::FramebufferCreateInfo framebuffer_create_info(vk::RenderPass render_pass, vk::Extent2D extent);
+
+vk::PresentInfoKHR present_info();
+
 } //namespace vk_init
 
 #endif //SILENCE_VK_INITIALIZERS_H

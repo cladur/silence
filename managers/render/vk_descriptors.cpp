@@ -2,6 +2,8 @@
 
 #include "render_manager.h"
 
+namespace vk_util {
+
 vk::DescriptorPool create_pool(vk::Device device, const DescriptorAllocator::PoolSizes &pool_sizes, int count,
 		vk::DescriptorPoolCreateFlags flags) {
 	std::vector<vk::DescriptorPoolSize> sizes;
@@ -38,7 +40,7 @@ void DescriptorAllocator::reset_pools() {
 
 bool DescriptorAllocator::allocate(vk::DescriptorSet *set, vk::DescriptorSetLayout layout) {
 	//initialize the current_pool handle if it's null
-	if (VK_NULL_HANDLE == current_pool) {
+	if (!current_pool) {
 		current_pool = grab_pool();
 		used_pools.push_back(current_pool);
 	}
@@ -293,3 +295,5 @@ bool DescriptorBuilder::build(vk::DescriptorSet &set) {
 	vk::DescriptorSetLayout layout;
 	return build(set, layout);
 }
+
+} //namespace vk_util

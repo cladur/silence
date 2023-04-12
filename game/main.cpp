@@ -27,6 +27,8 @@ ECSManager ecs_manager;
 AudioManager audio_manager;
 InputManager input_manager;
 
+Camera camera(glm::vec3(0.0f, 0.0f, -25.0f));
+
 bool in_debug_menu = true;
 
 void default_mappings() {
@@ -91,13 +93,17 @@ void demo_entities_init(std::vector<Entity> &entities) {
 								rand_rotation(random_generator)),
 						glm::vec3(scale, scale, scale) });
 
-		if (rand_material(random_generator) > 0.5f) {
-			ecs_manager.add_component<MeshInstance>(
-					entity, { render_manager.get_mesh("box"), render_manager.get_material("textured_mesh") });
-		} else {
-			ecs_manager.add_component<MeshInstance>(
-					entity, { render_manager.get_mesh("box"), render_manager.get_material("default_mesh") });
-		}
+		ecs_manager.add_component<MeshInstance>(
+				entity, { render_manager.get_mesh("box"), render_manager.material_system.get_material("textured") });
+		//});
+
+		// if (rand_material(random_generator) > 0.5f) {
+		// 	ecs_manager.add_component<MeshInstance>(
+		// 			entity, { render_manager.get_mesh("box"), render_manager.get_material("textured_mesh") });
+		// } else {
+		// 	ecs_manager.add_component<MeshInstance>(
+		// 			entity, { render_manager.get_mesh("box"), render_manager.get_material("default_mesh") });
+		// }
 	}
 
 	auto listener = ecs_manager.create_entity();
@@ -123,7 +129,7 @@ bool display_manager_init() {
 }
 
 bool render_manager_init() {
-	auto render_manager_result = render_manager.startup(display_manager);
+	auto render_manager_result = render_manager.startup(display_manager, &camera);
 	if (render_manager_result == RenderManager::Status::Ok) {
 		SPDLOG_INFO("Initialized render manager");
 	} else {
@@ -164,16 +170,16 @@ void destroy_all_entities(const std::vector<Entity> &entities) {
 	}
 }
 
-void handle_camera(Camera &camera, float dt) {
+void handle_camera(Camera &cam, float dt) {
 	float forward = input_manager.get_axis("move_backward", "move_forward");
 	float right = input_manager.get_axis("move_left", "move_right");
 	float up = input_manager.get_axis("move_down", "move_up");
-	camera.move_forward(forward * dt);
-	camera.move_right(right * dt);
-	camera.move_up(up * dt);
+	cam.move_forward(forward * dt);
+	cam.move_right(right * dt);
+	cam.move_up(up * dt);
 
 	glm::vec2 mouse_delta = input_manager.get_mouse_delta();
-	camera.rotate(mouse_delta.x * dt, mouse_delta.y * dt);
+	cam.rotate(mouse_delta.x * dt, mouse_delta.y * dt);
 }
 
 int main() {
@@ -209,8 +215,6 @@ int main() {
 
 	//Map inputs
 	default_mappings();
-
-	Camera camera(glm::vec3(0.0f, 0.0f, -25.0f));
 
 	// Run the game.
 	bool show_cvar_editor = false;

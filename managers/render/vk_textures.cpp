@@ -2,6 +2,7 @@
 
 #include "assets/texture_asset.h"
 
+#include "render/vk_types.h"
 #include "vk_initializers.h"
 
 // #define STB_IMAGE_IMPLEMENTATION
@@ -31,7 +32,7 @@ bool vk_util::load_image_from_asset(RenderManager &manager, const char *filename
 	}
 
 	//allocate temporary buffer for holding texture data to upload
-	AllocatedBuffer staging_buffer =
+	AllocatedBufferUntyped staging_buffer =
 			manager.create_buffer(image_size, vk::BufferUsageFlagBits::eTransferSrc, vma::MemoryUsage::eCpuOnly);
 
 	//copy data to buffer
@@ -54,7 +55,7 @@ bool vk_util::load_image_from_asset(RenderManager &manager, const char *filename
 }
 
 AllocatedImage vk_util::upload_image(RenderManager &manager, uint32_t tex_width, uint32_t tex_height,
-		vk::Format image_format, AllocatedBuffer &staging_buffer) {
+		vk::Format image_format, AllocatedBufferUntyped &staging_buffer) {
 	vk::Extent3D image_extent;
 	image_extent.width = static_cast<uint32_t>(tex_width);
 	image_extent.height = static_cast<uint32_t>(tex_height);
