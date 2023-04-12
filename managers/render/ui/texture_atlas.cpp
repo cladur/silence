@@ -32,7 +32,7 @@ int TextureAtlas::add(void *pixels, glm::ivec2 size) {
 	AllocatedBuffer staging_buffer = render_manager.create_buffer(
 			buffer_size,
 			vk::BufferUsageFlagBits::eTransferSrc,
-			vma::MemoryUsage::eCpuCopy);
+			vma::MemoryUsage::eCpuOnly);
 	render_manager.copy_to_buffer(staging_buffer, pixels, buffer_size);
 	render_manager.transition_image_layout(
 			texture.image,
