@@ -4,7 +4,6 @@
 #include "core/camera/camera.h"
 
 #include "magic_enum.hpp"
-
 #include <glm/glm.hpp>
 
 #include "ft2build.h"
@@ -148,6 +147,9 @@ class RenderManager {
 	// MESHES
 	Mesh triangle_mesh;
 	Mesh box_mesh;
+    Mesh debug_box_mesh;
+    Mesh debug_sphere_mesh;
+	Mesh debug_line_mesh;
 	Mesh plane_mesh;
 
 	// DEPTH
@@ -185,6 +187,10 @@ class RenderManager {
 	bool load_shader_module(const char *file_path, vk::ShaderModule *out_shader_module);
 
 	void load_meshes();
+    void generate_debug_box_mesh();
+    void generate_debug_sphere_mesh();
+	void generate_debug_line_mesh();
+
 	void upload_mesh(Mesh &mesh);
 
 	size_t pad_uniform_buffer_size(size_t original_size) const;
@@ -235,12 +241,6 @@ public:
 
 	void draw(Camera &camera);
 	void draw_objects(Camera &camera, vk::CommandBuffer cmd, RenderObject *first, int count);
-
-	Texture get_character_texture(FT_Face &face);
-
-	vk::Sampler create_sampler(vk::Filter filter, vk::SamplerAddressMode address_mode);
-
-	void update_descriptor_set_with_texture(Texture texture, vk::Sampler &sampler, Material &mat);
 };
 
 #endif //SILENCE_RENDER_MANAGER_H

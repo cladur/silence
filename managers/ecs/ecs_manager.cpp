@@ -1,7 +1,10 @@
 #include "ecs_manager.h"
 
+#include "component_visitor.h"
 #include "components/children_component.h"
 #include "components/parent_component.h"
+#include "serialization.h"
+#include <spdlog/spdlog.h>
 
 void ECSManager::startup() {
 	// Create pointers to each manager
@@ -13,6 +16,10 @@ void ECSManager::startup() {
 
 Entity ECSManager::create_entity() {
 	return entity_manager->create_entity();
+}
+
+Entity ECSManager::create_entity(Entity entity) {
+	return entity_manager->create_entity(entity);
 }
 
 void ECSManager::destroy_entity(Entity entity) {
@@ -32,6 +39,11 @@ bool ECSManager::add_child(Entity parent, Entity child) {
 	if (!has_component<Children>(parent)) {
 		add_component<Children>(parent, Children{});
 		SPDLOG_INFO("Added children component to {}", parent);
+	} else {
+		if (has_child(parent, child)) {
+			SPDLOG_WARN("Child {} already exists on parent {}", child, parent);
+			return false;
+		}
 	}
 
 	if (!has_component<Parent>(child)) {
@@ -66,4 +78,44 @@ bool ECSManager::remove_child(Entity parent, Entity child) {
 	}
 
 	return true;
+}
+
+bool ECSManager::has_child(Entity parent, Entity child) {
+	for (auto &c : get_component<Children>(parent).children) {
+		if (c == child) {
+			return true;
+		}
+	}
+	return false;
+}
+void ECSManager::serialize_entity_json(nlohmann::json &json, Entity entity) {
+	json["entity"] = entity;
+	json["signature"] = entity_manager->get_signature(entity).to_string();
+	json["components"] = nlohmann::json::array();
+	component_manager->serialize_entity(json["components"], entity);
+}
+
+void ECSManager::deserialize_entities_json(nlohmann::json &json, std::vector<Entity> &entities) {
+	serialization::IdToClassConstructor map = SceneManager::get_class_map();
+	Entity entity{};
+	Signature signature{};
+	std::string string_signature{};
+	for (auto &array_entity : json) {
+		entity = array_entity["entity"];
+		entities.push_back(entity);
+		SPDLOG_INFO("Entity {} created or loaded", entity);
+		create_entity(entity);
+
+		string_signature = array_entity["signature"];
+		std::reverse(string_signature.begin(), string_signature.end());
+
+		for (int i = 0; i < string_signature.size(); i++) {
+			int component_active = string_signature[i] - '0';
+			if (component_active) {
+				auto component = map[i](array_entity["components"]);
+
+				ComponentVisitor::visit(entity, component);
+			}
+		}
+	}
 }

@@ -14,7 +14,9 @@ add_library(${RENDER_MANAGER_NAME} STATIC
         ui/text/font.cpp
         ui/text/font.h
         ui/ui_render_system.cpp
-        ui/ui_render_system.h)
+        ui/ui_render_system.h,
+        debug/debug_drawing.cpp debug/debug_drawing.h
+        ../animation/skinned_mesh.cpp ../animation/skinned_mesh.h ../animation/skinned_model.cpp ../animation/skinned_model.h ../animation/animation.cpp ../animation/animation.h ../animation/joint.h ../animation/bone.cpp ../animation/bone.h ../animation/bone.cpp ../animation/bone.cpp ../animation/bone.cpp ../animation/animator.cpp ../animation/animator.h ../animation/bone.cpp)
 
 find_package(Freetype CONFIG REQUIRED)
 if(TARGET freetype AND NOT TARGET Freetype::Freetype)

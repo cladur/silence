@@ -1,5 +1,7 @@
+#include <render/debug/debug_drawing.h>
 #include "render_system.h"
 #include <components/ui_text_component.h>
+#include <components/mesh_instance_component.h>
 
 #include "core/components/transform_component.h"
 #include "ecs/ecs_manager.h"

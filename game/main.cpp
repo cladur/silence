@@ -4,6 +4,7 @@
 
 #include "components/children_component.h"
 #include "components/gravity_component.h"
+#include "components/mesh_instance_component.h"
 #include "components/parent_component.h"
 #include "components/rigidbody_component.h"
 #include "components/transform_component.h"
@@ -14,16 +15,23 @@
 #include "render/render_system.h"
 
 #include "ecs/ecs_manager.h"
+#include "ecs/systems/parent_system.h"
+#include "ecs/systems/physics_system.h"
 
 #include "audio/fmod_listener_system.h"
 #include "components/fmod_listener_component.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_vulkan.h"
+#include "scene/scene_manager.h"
+#include "serialization.h"
+#include <spdlog/spdlog.h>
+#include <fstream>
 
 #include "core/camera/camera.h"
 #include "render/ui/text/font.h"
 #include "render/ui/text/font_manager.h"
 #include "render/ui/ui_render_system.h"
+#include "render/debug/debug_drawing.h"
 
 RenderManager render_manager;
 DisplayManager display_manager;
@@ -68,7 +76,7 @@ void default_ecs_manager_init() {
 	ecs_manager.register_component<Children>();
 	ecs_manager.register_component<MeshInstance>();
 	ecs_manager.register_component<FmodListener>();
-	ecs_manager.register_component<UIText>();
+    ecs_manager.register_component<UIText>();
 }
 
 void demo_entities_init(std::vector<Entity> &entities) {
@@ -236,6 +244,10 @@ int main() {
 	int max_imgui_entities = 50;
 	int max_entities = 100;
 	int imgui_entities_count = 50;
+	int frames_count = 0;
+
+	char load_file_name[128] = "scene.json";
+	char save_file_name[128] = "scene.json";
 
 	float target_frame_time = 1.0f / display_manager.get_refresh_rate();
 	float dt = target_frame_time;
@@ -246,6 +258,7 @@ int main() {
 	// #################
 
 	bool should_run = true;
+	nlohmann::json scene;
 	while (should_run) {
 		// GAME LOGIC
 		auto start_time = std::chrono::high_resolution_clock::now();
@@ -292,21 +305,40 @@ int main() {
 		}
 
 		if (ImGui::Button("Destroy all entities")) {
-			if (!entities_destroyed) {
+			destroy_all_entities(entities);
+			entities.clear();
+		}
+
+		ImGui::Text("Save file");
+		ImGui::InputText("#Save file name", save_file_name, IM_ARRAYSIZE(save_file_name));
+
+		if (ImGui::Button("Save scene")) {
+			scene = SceneManager::save_scene(entities);
+			SceneManager::save_json_to_file(save_file_name, scene);
+		}
+
+		ImGui::Text("Load file");
+		ImGui::InputText("#Load file name", load_file_name, IM_ARRAYSIZE(load_file_name));
+
+		if (ImGui::Button("Load scene")) {
+			std::ifstream file(load_file_name);
+			if (file.is_open()) {
+				SPDLOG_INFO("Loaded scene from file {}", load_file_name);
+				nlohmann::json scene_json = nlohmann::json::parse(file);
+				file.close();
 				destroy_all_entities(entities);
+				SceneManager::load_scene_from_json_file(scene_json, load_file_name, entities);
+			} else {
+				SPDLOG_ERROR("File {} not found", load_file_name);
 			}
-			entities_destroyed = true;
 		}
 
 		ImGui::DragInt("Entities count", &imgui_entities_count, 1, 1, max_entities);
 
 		if (ImGui::Button("Create entities")) {
-			if (!entities_destroyed) {
-				destroy_all_entities(entities);
-			}
-			entities.resize(imgui_entities_count);
+			destroy_all_entities(entities);
+			entities.resize(imgui_entities_count - 1);
 			demo_entities_init(entities);
-			entities_destroyed = false;
 		}
 
 		// 3D SOUND DEMO
@@ -340,6 +372,7 @@ int main() {
 		fmod_listener_system->update(dt);
 		audio_manager.update();
 
+		frames_count++;
 		auto stop_time = std::chrono::high_resolution_clock::now();
 
 		// TODO: This is a hack to make sure we don't go over the target frame time.
