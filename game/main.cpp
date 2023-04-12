@@ -5,6 +5,7 @@
 
 #include "components/children_component.h"
 #include "components/collider_aabb.h"
+#include "components/collider_sphere.h"
 #include "components/gravity_component.h"
 #include "components/mesh_instance_component.h"
 #include "components/parent_component.h"
@@ -87,6 +88,7 @@ void default_ecs_manager_init() {
 	ecs_manager.register_component<MeshInstance>();
 	ecs_manager.register_component<FmodListener>();
 	ecs_manager.register_component<ColliderAABB>();
+	ecs_manager.register_component<ColliderSphere>();
 	ecs_manager.register_component<ColliderTag>();
 }
 
@@ -139,10 +141,7 @@ void demo_collision_init(Entity &entity) {
 	ecs_manager.add_component(entity, transform);
 
 	ColliderComponentsFactory::add_collider_component(
-			entity, ColliderAABB{ transform.get_position(), transform.get_scale(), true });
-
-	ecs_manager.add_component<MeshInstance>(
-			entity, { render_manager.get_mesh("box"), render_manager.get_material("default_mesh") });
+			entity, ColliderSphere{ transform.get_position(), transform.get_scale().x, true });
 
 	Entity floor = ecs_manager.create_entity();
 
@@ -154,6 +153,22 @@ void demo_collision_init(Entity &entity) {
 
 	ecs_manager.add_component<MeshInstance>(
 			floor, { render_manager.get_mesh("box"), render_manager.get_material("default_mesh") });
+}
+
+void demo_collision_sphere(std::vector<Entity> &entities) {
+	std::default_random_engine random_generator; // NOLINT(cert-msc51-cpp)
+	std::uniform_real_distribution<float> rand_position(-10.0f, 10.0f);
+
+	for (Entity &entity : entities) {
+		entity = ecs_manager.create_entity();
+
+		Transform transform =
+				Transform{ glm::vec3(rand_position(random_generator)), glm::vec3(0.0f, 10.0f, 0.0f), glm::vec3(1.0f) };
+		ecs_manager.add_component(entity, transform);
+
+		ColliderComponentsFactory::add_collider_component(entity,
+				ColliderSphere{ transform.get_position(), transform.get_scale().x, static_cast<bool>(entity % 2) });
+	}
 }
 
 bool display_manager_init() {
@@ -260,6 +275,9 @@ int main() {
 
 	std::vector<Entity> entities(50);
 	demo_entities_init(entities);
+
+	std::vector<Entity> spheres(10);
+	demo_collision_sphere(spheres);
 
 	Entity collision_tester;
 	demo_collision_init(collision_tester);
@@ -407,6 +425,13 @@ int main() {
 
 		parent_system->update();
 		render_system->update(render_manager);
+
+		for (auto sphere : spheres) {
+			ColliderSphere &c = ecs_manager.get_component<ColliderSphere>(sphere);
+			DebugDraw::draw_sphere(c.center, c.radius);
+		}
+		ColliderSphere &c = ecs_manager.get_component<ColliderSphere>(collision_tester);
+		DebugDraw::draw_sphere(c.center, c.radius);
 
 		input_manager.process_input();
 		render_manager.draw(camera);

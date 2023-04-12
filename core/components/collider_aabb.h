@@ -1,6 +1,5 @@
 #ifndef SILENCE_COLLIDER_AABB_H
 #define SILENCE_COLLIDER_AABB_H
-#include "glm/glm.hpp"
 
 struct ColliderAABB {
 	// Center of collider
@@ -33,6 +32,14 @@ struct ColliderAABB {
 		range.y = obj["range"]["y"];
 		range.z = obj["range"]["z"];
 		is_movable = obj["is_movable"];
+	}
+
+	glm::vec3 min() const {
+		return { center.x - range.x, center.y - range.y, center.z - range.z };
+	}
+
+	glm::vec3 max() const {
+		return { center.x + range.x, center.y + range.y, center.z + range.z };
 	}
 };
 
