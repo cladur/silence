@@ -219,11 +219,11 @@ void RenderManager::init_swapchain(DisplayManager &display_manager) {
 			&pyramid_info, &dimg_allocinfo, &depth_pyramid.image, &depth_pyramid.allocation, nullptr));
 
 	//build a image-view for the depth image to use for rendering
-	vk::ImageViewCreateInfo priview_info = vk_init::image_view_create_info(
+	vk::ImageViewCreateInfo preview_info = vk_init::image_view_create_info(
 			vk::Format::eR32Sfloat, depth_pyramid.image, vk::ImageAspectFlagBits::eColor);
-	priview_info.subresourceRange.levelCount = depth_pyramid_levels;
+	preview_info.subresourceRange.levelCount = depth_pyramid_levels;
 
-	VK_CHECK(device.createImageView(&priview_info, nullptr, &depth_pyramid.default_view));
+	VK_CHECK(device.createImageView(&preview_info, nullptr, &depth_pyramid.default_view));
 
 	for (int32_t i = 0; i < depth_pyramid_levels; ++i) {
 		vk::ImageViewCreateInfo level_info = vk_init::image_view_create_info(
