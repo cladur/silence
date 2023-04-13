@@ -1,6 +1,14 @@
 #ifndef SILENCE_VK_TYPES_H
 #define SILENCE_VK_TYPES_H
 
+#if 0
+#define VMA_DEBUG_LOG(format, ...)                                                                                     \
+	do {                                                                                                               \
+		printf(format, ##__VA_ARGS__);                                                                                 \
+		printf("\n");                                                                                                  \
+	} while (false)
+#endif
+
 #include "vulkan-memory-allocator-hpp/vk_mem_alloc.hpp"
 
 #define VK_CHECK(x)                                                                                                    \

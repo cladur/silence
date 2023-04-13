@@ -13,8 +13,6 @@
 #define VULKAN_HPP_NO_EXCEPTIONS
 #include "vulkan/vulkan.hpp"
 
-#include "vulkan-memory-allocator-hpp/vk_mem_alloc.hpp"
-
 #include "vk_mesh.h"
 #include "vk_scene.h"
 #include "vk_shaders.h"
