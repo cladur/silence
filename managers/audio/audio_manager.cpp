@@ -19,7 +19,7 @@ void AudioManager::startup() {
 }
 
 void AudioManager::update() {
-	ZoneScopedN("AudioManager::update");
+	ZoneScopedNC("AudioManager::update", 0xcacaca);
 	FMOD_3D_ATTRIBUTES attributes;
 	system->getListenerAttributes(0, &attributes);
 	FMOD_CHECK(system->update());

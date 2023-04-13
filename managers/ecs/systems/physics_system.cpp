@@ -15,6 +15,7 @@ void PhysicsSystem::startup() {
 }
 
 void PhysicsSystem::update(float dt) {
+	ZoneScopedN("PhysicsSystem::update");
 	for (auto const &entity : entities) {
 		auto &rigid_body = ecs_manager.get_component<RigidBody>(entity);
 		auto &transform = ecs_manager.get_component<Transform>(entity);
