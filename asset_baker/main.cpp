@@ -146,7 +146,7 @@ bool convert_mesh(const fs::path &input, const fs::path &output) {
 
 	static tg::TinyGLTF loader;
 
-	bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, input);
+	bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, input.generic_string());
 
 	if (!ret) {
 		SPDLOG_ERROR("Failed to load gltf file: {} - {} - {}", input.string(), err, warn);

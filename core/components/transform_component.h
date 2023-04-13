@@ -9,9 +9,17 @@ private:
 	glm::vec3 euler_rot{};
 	glm::vec3 scale{};
 	bool changed;
+	bool changed_this_frame = false;
 
 	glm::mat4 local_model_matrix = glm::mat4(1.0f);
 	glm::mat4 global_model_matrix = glm::mat4(1.0f);
+
+	void update_changed_this_frame() {
+		changed_this_frame = false;
+		if (changed) {
+			changed_this_frame = true;
+		}
+	}
 
 public:
 	//constructor
@@ -38,6 +46,24 @@ public:
 	[[nodiscard]] glm::vec3 get_scale() const {
 		return scale;
 	}
+	[[nodiscard]] bool is_changed() const {
+		return changed;
+	}
+
+	[[nodiscard]] bool is_changed_this_frame() {
+		//		if (changed_this_frame) {
+		//			changed_this_frame = false;
+		//			return true;
+		//		} else {
+		//			return false;
+		//		}
+		return changed_this_frame;
+	}
+
+	void set_changed(bool changed) {
+		changed = changed;
+	}
+
 	void set_position(glm::vec3 new_position) {
 		this->position = new_position;
 		this->changed = true;
@@ -58,8 +84,11 @@ public:
 		this->scale = new_scale;
 		this->changed = true;
 	}
-
+	void set_changed_this_frame(bool changed_this_frame) {
+		changed_this_frame = changed_this_frame;
+	}
 	glm::mat4 get_global_model_matrix() {
+		//update_global_model_matrix();
 		return this->global_model_matrix;
 	}
 
@@ -72,11 +101,14 @@ public:
 		return this->local_model_matrix;
 	}
 
-	void update_global_model_matrix(glm::mat4 parent_model = glm::mat4(1.0f)) {
-		if (changed) {
-			calculate_local_model_matrix();
-		}
+	void update_global_model_matrix(glm::mat4 parent_model) {
+		update_changed_this_frame();
 		this->global_model_matrix = parent_model * get_local_model_matrix();
+	}
+
+	void update_global_model_matrix() {
+		update_changed_this_frame();
+		this->global_model_matrix = get_local_model_matrix();
 	}
 
 	void calculate_local_model_matrix() {

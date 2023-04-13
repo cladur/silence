@@ -35,7 +35,9 @@ void RenderSystem::update(RenderManager &render_manager) {
 			continue;
 		}
 
-		render_manager.render_scene.update_transform(mesh_instance.object_id, transform.get_global_model_matrix());
+		if (transform.is_changed_this_frame()) {
+			render_manager.render_scene.update_transform(mesh_instance.object_id, transform.get_global_model_matrix());
+		}
 	}
 
 	if (new_instance) {
