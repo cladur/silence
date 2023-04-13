@@ -29,7 +29,7 @@ void main()
 {
     //gl_Position = CameraData.viewproj * ObjectData.model * vec4(v_position, 1.0);
     mat4 model_matrix = objectBuffer.objects[gl_BaseInstance].model;
-    mat4 transform_matrix = (CameraData.viewproj * model_matrix);
-    gl_Position = transform_matrix * vec4(v_position, 1.0f);
+    //mat4 transform_matrix = (CameraData.viewproj * model_matrix);
+    gl_Position = model_matrix * vec4(v_position, 1.0f);
     out_texcoord = v_texcoord;
 }

@@ -47,11 +47,17 @@ void UiRenderSystem::update(RenderManager &render_manager) {
 //
 //			render_manager.renderables.push_back(render_object);
 //		}
+
 		RenderObject render_object = {};
 		render_object.mesh = mesh_instance.mesh;
 		render_object.material = mesh_instance.material;
-		glm::mat4 m = transform.get_global_model_matrix();
-		m = glm::scale(m, glm::vec3(27.0f, 2.0f, 2.0f));
+		glm::mat4 m = glm::mat4(1.0f);//transform.get_global_model_matrix();
+        glm::vec3 scale = glm::vec3(27.0f, 0.1f, 2.0f);
+        m = glm::translate(m, glm::vec3(0.15f, 0.7f, 0.0f));
+        m = glm::rotate(m, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        scale = glm::vec3(1.0f, 1.0f, 0.15f);
+		m = glm::scale(m, scale);
+        //DebugDraw::draw_box(transform.get_position(), scale * 2.0f);
 		render_object.transform_matrix = m;
 		render_manager.renderables.push_back(render_object);
 	}
