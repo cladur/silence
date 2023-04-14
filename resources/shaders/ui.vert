@@ -32,4 +32,5 @@ void main()
     //mat4 transform_matrix = (CameraData.viewproj * model_matrix);
     gl_Position = model_matrix * vec4(v_position, 1.0f);
     out_texcoord = v_texcoord;
+    out_color = v_color;
 }

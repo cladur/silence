@@ -13,7 +13,7 @@ struct CharacterGlyph {
 	glm::vec3 atlas_pos;
 	glm::ivec2 size; // Size of glyph
 	glm::ivec2 bearing; // Offset from baseline to left/top of glyph
-	glm::ivec2 advance; // Horizontal offset to advance to next glyph
+	unsigned int advance; // Horizontal offset to advance to next glyph
 };
 
 class Font {

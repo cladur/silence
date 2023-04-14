@@ -21,8 +21,6 @@ Font::Font(FT_Face face, TextureAtlas atlas) : atlas(atlas){
 			throw std::runtime_error("failed to render glyph");
 		}
 
-		SPDLOG_INFO("Loading Glyph: {}, size {}x{}, advance {}", (char)c, face->glyph->bitmap.width, face->glyph->bitmap.rows, face->glyph->advance.x >> 6);
-
 		if (face->glyph->bitmap.width == 0 || face->glyph->bitmap.rows == 0) {
 			SPDLOG_INFO("Glyph {} is empty", (char)c);
 			continue;
@@ -51,7 +49,7 @@ Font::Font(FT_Face face, TextureAtlas atlas) : atlas(atlas){
 					char_pos,
 					glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
 					glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
-					glm::ivec2(face->glyph->advance.x >> 6, face->glyph->advance.y >> 6),
+					static_cast<unsigned int>(face->glyph->advance.x >> 6),
 		};
 
 		glyph_data.insert(std::pair<char, CharacterGlyph>(c, char_glyph));
@@ -62,8 +60,7 @@ Font::Font(FT_Face face, TextureAtlas atlas) : atlas(atlas){
 //			glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
 //			glm::ivec2(face->glyph->advance.x >> 6, face->glyph->advance.y >> 6),
 //		}));
-
-		SPDLOG_INFO("Glyph {} Loaded", (char)c);
+		SPDLOG_INFO("Loading Glyph: {}, size {}x{}, advance {}, atlas x1 and x2 {}, {}", (char)c, face->glyph->bitmap.width, face->glyph->bitmap.rows, face->glyph->advance.x >> 6, char_pos.x, char_pos.y);
 	}
 
 	sampler = render_manager.create_sampler(vk::Filter::eLinear, vk::SamplerAddressMode::eClampToBorder);

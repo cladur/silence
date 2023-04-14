@@ -27,7 +27,7 @@ void FontManager::load_font(const char *path, int size) {
 	}
 
 	FT_Set_Pixel_Sizes(face, 0, size);
-	TextureAtlas atlas = TextureAtlas(glm::ivec2(2048, 128));
+	TextureAtlas atlas = TextureAtlas(glm::ivec2(4096, 128));
 	Font f = Font(face, atlas);
 	fonts.push_back(f);
 }

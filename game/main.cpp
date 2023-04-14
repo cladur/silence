@@ -120,7 +120,7 @@ void demo_entities_init(std::vector<Entity> &entities) {
 	ecs_manager.add_component(ui_entity,
 			Transform{ glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f) });
 
-	ecs_manager.add_component<UIText>(ui_entity, { 0, "Hello123!@#", glm::vec3 { 1.0f, 1.0f, 1.0f }, 1.0f});
+	ecs_manager.add_component<UIText>(ui_entity, { 0, "Hello123!@#", glm::vec3 { 0.54f, 0.62f, 0.960f }, 1.0f});
 	entities.push_back(ui_entity);
 }
 
@@ -230,7 +230,7 @@ int main() {
 	Camera camera(glm::vec3(0.0f, 0.0f, -25.0f));
 
 	font_manager.startup();
-	font_manager.load_font("resources/fonts/THEBOLDFONT.ttf", 36);
+	font_manager.load_font("resources/fonts/THEBOLDFONT.ttf", 46);
 
 	// Run the game.
 	bool show_ecs_logs = false;

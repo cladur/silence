@@ -49,8 +49,9 @@ glm::vec3 TextureAtlas::add(void *pixels, glm::ivec2 size) {
 
 	// we need to divide all those values by the atlas size to get the (0,1) normalized texture coordinates
 	glyph_coords.x = (float)current_x / (float) this->size.x;
-	current_x += size.x + 1;
+	current_x += size.x;
 	glyph_coords.y = (float)current_x / (float) this->size.x;
 	glyph_coords.z = (float)size.y / (float) this->size.y;
+	current_x += 2; // add 2 pixels of padding between glyphs to prevent bleeding
 	return glyph_coords;
 }

@@ -26,5 +26,5 @@ void main()
         opacity = 0.0;
     }
 
-    out_frag_color = vec4(color.rrr, opacity) * vec4(1 - sceneData.ambient_color.r, 0.0f, 1 - sceneData.ambient_color.b, 1.0f);
+    out_frag_color = vec4(color.rrr, opacity) * vec4(in_color, 1.0f);
 }
