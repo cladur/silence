@@ -186,8 +186,6 @@ class RenderManager {
     void generate_debug_sphere_mesh();
 	void generate_debug_line_mesh();
 
-	void upload_mesh(Mesh &mesh);
-
 	size_t pad_uniform_buffer_size(size_t original_size) const;
 
 public:
@@ -254,6 +252,9 @@ public:
 	void copy_buffer_to_image(AllocatedBuffer buffer, AllocatedImage image, uint32_t width, uint32_t height, int32_t offset_x, int32_t offset_y);
 
 	void destroy_buffer(AllocatedBuffer buffer);
+
+	// needed this as public for ui
+	void upload_mesh(Mesh &mesh);
 };
 
 #endif //SILENCE_RENDER_MANAGER_H

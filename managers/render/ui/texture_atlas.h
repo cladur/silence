@@ -15,7 +15,7 @@ public:
 	TextureAtlas(glm::ivec2 size);
 	~TextureAtlas();
     // todo: this should return texture region of a single glyph
-	int add(void *pixels, glm::ivec2 size);
+	glm::vec3 add(void *pixels, glm::ivec2 size);
 	glm::ivec2 get_size();
 };
 

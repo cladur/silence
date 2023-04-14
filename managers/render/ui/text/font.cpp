@@ -46,7 +46,7 @@ Font::Font(FT_Face face, TextureAtlas atlas) : atlas(atlas){
 
 		void *rgba_ptr = rgba.data();
 
-		int char_pos = atlas.add(rgba_ptr, glm::ivec2(width, height));
+		glm::vec3 char_pos = atlas.add(rgba_ptr, glm::ivec2(width, height));
 		CharacterGlyph char_glyph = {
 					char_pos,
 					glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
@@ -54,7 +54,7 @@ Font::Font(FT_Face face, TextureAtlas atlas) : atlas(atlas){
 					glm::ivec2(face->glyph->advance.x >> 6, face->glyph->advance.y >> 6),
 		};
 
-		atlas_positions.insert(std::pair<char, CharacterGlyph>(c, char_glyph));
+		glyph_data.insert(std::pair<char, CharacterGlyph>(c, char_glyph));
 
 //		characters.insert(std::pair<char, CharacterGlyph>(c, CharacterGlyph{
 //			render_manager.get_character_texture(face),
@@ -74,6 +74,6 @@ Font::Font(FT_Face face, TextureAtlas atlas) : atlas(atlas){
 Font::~Font() {
 }
 
-CharacterGlyph *Font::get_character_glyph(char c) {
-	return &atlas_positions[c];
+CharacterGlyph *Font::get_character_glyph_data(char c) {
+	return &glyph_data[c];
 }

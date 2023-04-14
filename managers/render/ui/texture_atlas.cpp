@@ -27,7 +27,8 @@ glm::ivec2 TextureAtlas::get_size() {
 	return size;
 }
 
-int TextureAtlas::add(void *pixels, glm::ivec2 size) {
+glm::vec3 TextureAtlas::add(void *pixels, glm::ivec2 size) {
+	glm::vec3 glyph_coords = glm::vec3(0.0f);
 	vk::DeviceSize buffer_size = size.x * size.y * 4;
 	AllocatedBuffer staging_buffer = render_manager.create_buffer(
 			buffer_size,
@@ -46,6 +47,10 @@ int TextureAtlas::add(void *pixels, glm::ivec2 size) {
 
 	render_manager.destroy_buffer(staging_buffer);
 
-	current_x += size.x;
-	return current_x;
+	// we need to divide all those values by the atlas size to get the (0,1) normalized texture coordinates
+	glyph_coords.x = (float)current_x / (float) this->size.x;
+	current_x += size.x + 1;
+	glyph_coords.y = (float)current_x / (float) this->size.x;
+	glyph_coords.z = (float)size.y / (float) this->size.y;
+	return glyph_coords;
 }

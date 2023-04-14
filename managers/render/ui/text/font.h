@@ -8,7 +8,9 @@
 
 //define a Character struct
 struct CharacterGlyph {
-	int atlas_pos; // glyph texture
+	// glyph texture coordinates in atlas. x, y are x offsets and z is the y offset down.
+	// that os we're assuming the glyph always start on top of the atlas. for now.
+	glm::vec3 atlas_pos;
 	glm::ivec2 size; // Size of glyph
 	glm::ivec2 bearing; // Offset from baseline to left/top of glyph
 	glm::ivec2 advance; // Horizontal offset to advance to next glyph
@@ -17,7 +19,7 @@ struct CharacterGlyph {
 class Font {
 private:
 	FT_Face face;
-	std::unordered_map<char, CharacterGlyph> atlas_positions;
+	std::unordered_map<char, CharacterGlyph> glyph_data;
 	TextureAtlas atlas;
 
 public:
@@ -26,7 +28,7 @@ public:
 	explicit Font(FT_Face face, TextureAtlas atlas);
 	~Font();
 
-	CharacterGlyph *get_character_glyph(char c);
+	CharacterGlyph *get_character_glyph_data(char c);
 };
 
 #endif //SILENCE_FONT_H

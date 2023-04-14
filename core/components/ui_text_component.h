@@ -10,6 +10,7 @@ struct UIText {
 	std::string text;
 	glm::vec3 color;
 	float scale;
+	Mesh mesh;
 
     void serialize_json(nlohmann::json &j) {
         // TODO good serialization
