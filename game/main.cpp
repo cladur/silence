@@ -230,7 +230,7 @@ int main() {
 	Camera camera(glm::vec3(0.0f, 0.0f, -25.0f));
 
 	font_manager.startup();
-	font_manager.load_font("resources/fonts/THEBOLDFONT.ttf", 46);
+	font_manager.load_font("resources/fonts/FROSTBITE-Narrow.ttf", 46);
 
 	// Run the game.
 	bool show_ecs_logs = false;

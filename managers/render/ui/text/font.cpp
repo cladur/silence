@@ -54,14 +54,28 @@ Font::Font(FT_Face face, TextureAtlas atlas) : atlas(atlas){
 
 		glyph_data.insert(std::pair<char, CharacterGlyph>(c, char_glyph));
 
-//		characters.insert(std::pair<char, CharacterGlyph>(c, CharacterGlyph{
-//			render_manager.get_character_texture(face),
-//			glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
-//			glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
-//			glm::ivec2(face->glyph->advance.x >> 6, face->glyph->advance.y >> 6),
-//		}));
 		SPDLOG_INFO("Loading Glyph: {}, size {}x{}, advance {}, atlas x1 and x2 {}, {}", (char)c, face->glyph->bitmap.width, face->glyph->bitmap.rows, face->glyph->advance.x >> 6, char_pos.x, char_pos.y);
 	}
+
+	auto error = FT_Load_Char(face, ' ', FT_LOAD_DEFAULT);
+	if(error) {
+		throw std::runtime_error("failed to load glyph");
+	}
+
+	FT_GlyphSlot glyphSlot = face->glyph;
+	error = FT_Render_Glyph(glyphSlot, FT_RENDER_MODE_NORMAL);
+	if(error) {
+		throw std::runtime_error("failed to render glyph");
+	}
+
+	// manually adding the space
+	CharacterGlyph char_glyph = {
+		glm::vec3(0.0, 0.01, 0.01),
+		glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
+		glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
+		static_cast<unsigned int>(face->glyph->advance.x >> 6),
+	};
+	glyph_data.insert(std::pair<char, CharacterGlyph>(' ', char_glyph));
 
 	sampler = render_manager.create_sampler(vk::Filter::eLinear, vk::SamplerAddressMode::eClampToBorder);
 	render_manager.glyph_sampler = sampler;

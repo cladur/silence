@@ -23,11 +23,10 @@ void UiRenderSystem::update(RenderManager &render_manager) {
 		//auto &mesh_instance = ecs_manager.get_component<MeshInstance>(entity);
 		auto &ui_text = ecs_manager.get_component<UIText>(entity);
 
-		// get a random number between 0 and text size -1
-		int random_index = rand() % ui_text.text.size();
-		// get the character at that index
-		ui_text.text[random_index] = rand() % 26 + 'a';
-
+		int r = rand() % 10;
+		if (r == 0) {
+			ui_text.text = "Testing the glyphs 1234567890 !@#$%^&*()_+";
+		}
 		glm::vec3 current_position = glm::vec3(0.0f, 0.0f, 0.0f);
 
 		Font &font = font_manager.get_font(ui_text.font_id);
@@ -37,91 +36,88 @@ void UiRenderSystem::update(RenderManager &render_manager) {
 		ui_text.mesh.indices.clear();
 		int current_index = 0;
 		for (auto c : ui_text.text) {
-			// check if c is the end of the string
 			CharacterGlyph *g = font.get_character_glyph_data(c);
-			//create a plane vertex data for this character
+			if (c != ' ') {
+				//create a plane vertex data for this character
+				glm::vec2 top_left_uv = glm::vec2(g->atlas_pos.x, 0.0f);
+				glm::vec2 top_right_uv = glm::vec2(g->atlas_pos.y, 0.0f);
+				glm::vec2 bottom_right_uv = glm::vec2(g->atlas_pos.y, g->atlas_pos.z);
+				glm::vec2 bottom_left_uv = glm::vec2(g->atlas_pos.x, g->atlas_pos.z);
 
-			glm::vec2 top_left_uv = glm::vec2(g->atlas_pos.x, 0.0f);
-			glm::vec2 top_right_uv = glm::vec2(g->atlas_pos.y, 0.0f);
-			glm::vec2 bottom_right_uv = glm::vec2(g->atlas_pos.y, g->atlas_pos.z);
-			glm::vec2 bottom_left_uv = glm::vec2(g->atlas_pos.x, g->atlas_pos.z);
+				float xpos = current_position.x + g->bearing.x * ui_text.scale;
+				float ypos = current_position.y - (g->size.y - g->bearing.y) * ui_text.scale;
 
-			float xpos = current_position.x + g->bearing.x * ui_text.scale;
-			float ypos = current_position.y - (g->size.y - g->bearing.y) * ui_text.scale;
+				float w = g->size.x * ui_text.scale;
+				float h = g->size.y * ui_text.scale;
 
-			float w = g->size.x * ui_text.scale;
-			float h = g->size.y * ui_text.scale;
+				ui_text.mesh.vertices.push_back(
+						Vertex {
+								glm::vec3(xpos, ypos, 0.0f), // pos
+								0.0f, // pad
+								glm::vec3(0.0f), //normal
+								0.0f, // pad
+								ui_text.color, // color
+								0.0f, // pad
+								bottom_left_uv,
+								0.0f, // pad
+								0.0f, // pad
+						}
+				);
 
-			current_position.y += g->bearing.y;
-			current_position.x += g->bearing.x;
+				ui_text.mesh.vertices.push_back(
+						Vertex {
+								glm::vec3(xpos, ypos + h, 0.0f), // pos
+								0.0f, // pad
+								glm::vec3(0.0f), //normal
+								0.0f, // pad
+								ui_text.color, // color
+								0.0f, // pad
+								top_left_uv,
+								0.0f, // pad
+								0.0f, // pad
+						}
+				);
 
-			ui_text.mesh.vertices.push_back(
-					Vertex {
-						glm::vec3(xpos, ypos, 0.0f), // pos
-						0.0f, // pad
-						glm::vec3(0.0f), //normal
-						0.0f, // pad
-						ui_text.color, // color
-						0.0f, // pad
-						bottom_left_uv,
-						0.0f, // pad
-						0.0f, // pad
-					}
- 			);
+				ui_text.mesh.vertices.push_back(
+						Vertex {
+								glm::vec3(xpos + w, ypos + h, 0.0f), // pos
+								0.0f, // pad
+								glm::vec3(0.0f), //normal
+								0.0f, // pad
+								ui_text.color, // color
+								0.0f, // pad
+								top_right_uv,
+								0.0f, // pad
+								0.0f, // pad
+						}
+				);
 
-			ui_text.mesh.vertices.push_back(
-					Vertex {
-						glm::vec3(xpos, ypos + h, 0.0f), // pos
-						0.0f, // pad
-						glm::vec3(0.0f), //normal
-						0.0f, // pad
-							ui_text.color, // color
-						0.0f, // pad
-						top_left_uv,
-						0.0f, // pad
-						0.0f, // pad
-					}
-			);
+				ui_text.mesh.vertices.push_back(
+						Vertex {
+								glm::vec3(xpos + w, ypos, 0.0f), // pos
+								0.0f, // pad
+								glm::vec3(0.0f), //normal
+								0.0f, // pad
+								ui_text.color, // color
+								0.0f, // pad
+								bottom_right_uv,
+								0.0f, // pad
+								0.0f, // pad
+						}
+				);
 
-			ui_text.mesh.vertices.push_back(
-					Vertex {
-						glm::vec3(xpos + w, ypos + h, 0.0f), // pos
-						0.0f, // pad
-						glm::vec3(0.0f), //normal
-						0.0f, // pad
-							ui_text.color, // color
-						0.0f, // pad
-						top_right_uv,
-						0.0f, // pad
-						0.0f, // pad
-					}
-			);
-
-			ui_text.mesh.vertices.push_back(
-					Vertex {
-						glm::vec3(xpos + w, ypos, 0.0f), // pos
-						0.0f, // pad
-						glm::vec3(0.0f), //normal
-						0.0f, // pad
-							ui_text.color, // color
-						0.0f, // pad
-						bottom_right_uv,
-						0.0f, // pad
-						0.0f, // pad
-					}
-			);
-
-			current_position.x += (float)g->advance * ui_text.scale;
-			// = { 0, 1, 2, 2, 3, 0 };
-			ui_text.mesh.indices.push_back(current_index + 0);
-			ui_text.mesh.indices.push_back(current_index + 1);
-			ui_text.mesh.indices.push_back(current_index + 2);
-			ui_text.mesh.indices.push_back(current_index + 2);
-			ui_text.mesh.indices.push_back(current_index + 3);
-			ui_text.mesh.indices.push_back(current_index + 0);
-			current_index += 4;
-
-			current_position.y -= g->bearing.y;
+				current_position.x += (float)g->advance * ui_text.scale;
+				// = { 0, 1, 2, 2, 3, 0 };
+				ui_text.mesh.indices.push_back(current_index + 0);
+				ui_text.mesh.indices.push_back(current_index + 1);
+				ui_text.mesh.indices.push_back(current_index + 2);
+				ui_text.mesh.indices.push_back(current_index + 2);
+				ui_text.mesh.indices.push_back(current_index + 3);
+				ui_text.mesh.indices.push_back(current_index + 0);
+				current_index += 4;
+			} else {
+				current_position.x += g->advance * ui_text.scale;
+			}
 		}
 		render_manager.upload_mesh(ui_text.mesh);
 
