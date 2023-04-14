@@ -28,10 +28,10 @@
 #include <fstream>
 
 #include "core/camera/camera.h"
+#include "render/debug/debug_drawing.h"
 #include "render/ui/text/font.h"
 #include "render/ui/text/font_manager.h"
-#include "render/ui/ui_render_system.h"
-#include "render/debug/debug_drawing.h"
+#include "render/ui/ui_text_render_system.h"
 
 RenderManager render_manager;
 DisplayManager display_manager;
@@ -116,12 +116,19 @@ void demo_entities_init(std::vector<Entity> &entities) {
 					.prev_frame_position = glm::vec3(0.0f, 0.0f, -25.0f) });
 	entities.push_back(listener);
 
-	auto ui_entity = ecs_manager.create_entity();
-	ecs_manager.add_component(ui_entity,
-			Transform{ glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f) });
+	auto ui_entity_1 = ecs_manager.create_entity();
+	ecs_manager.add_component(ui_entity_1,
+			Transform{ glm::vec3(650.0f, 550.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f) });
 
-	ecs_manager.add_component<UIText>(ui_entity, { 0, "Hello123!@#", glm::vec3 { 0.54f, 0.62f, 0.960f }, 1.0f});
-	entities.push_back(ui_entity);
+	ecs_manager.add_component<UIText>(ui_entity_1, { 0, "HUD text here", glm::vec3 { 0.54f, 0.62f, 0.960f }, 1.1f});
+	entities.push_back(ui_entity_1);
+
+	auto ui_entity_2 = ecs_manager.create_entity();
+	ecs_manager.add_component(ui_entity_2,
+			Transform{ glm::vec3(650.0f, 400.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f) });
+
+	ecs_manager.add_component<UIText>(ui_entity_2, { 0, "0000000000", glm::vec3 { 0.12f, 0.91f, 0.73f }, 1.3f});
+	entities.push_back(ui_entity_2);
 }
 
 bool display_manager_init() {
@@ -250,7 +257,9 @@ int main() {
 	float target_frame_time = 1.0f / display_manager.get_refresh_rate();
 	float dt = target_frame_time;
 
-	// TEST FOR 3D AUDIO
+	int test_counter = 0;
+
+			// TEST FOR 3D AUDIO
 	glm::vec3 sound_position = glm::vec3(0.0f, 0.0f, 0.0f);
 	EventReference test_pluck = EventReference("test_pluck");
 	// #################
@@ -271,6 +280,12 @@ int main() {
 		if (!in_debug_menu) {
 			handle_camera(camera, dt);
 		}
+
+		auto &numbers = ecs_manager.get_component<UIText>(entities[entities.size() - 1]);
+		std::string num = std::to_string(test_counter / 10);
+		num = std::string(10 - num.length(), '0') + num;
+		numbers.text = num;
+		test_counter++;
 
 		//imgui new frame
 		ImGui_ImplVulkan_NewFrame();

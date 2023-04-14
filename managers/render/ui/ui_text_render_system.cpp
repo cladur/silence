@@ -1,10 +1,10 @@
-#include "ui_render_system.h"
+#include "ui_text_render_system.h"
 #include "core/components/transform_component.h"
 #include "core/components/ui_text_component.h"
 #include "ecs/ecs_manager.h"
+#include <render/debug/debug_drawing.h>
 #include <render/render_system.h>
 #include <render/ui/text/font_manager.h>
-#include <render/debug/debug_drawing.h>
 
 extern ECSManager ecs_manager;
 extern FontManager font_manager;
@@ -18,15 +18,12 @@ void UiRenderSystem::startup() {
 }
 
 void UiRenderSystem::update(RenderManager &render_manager) {
+	static int counter = 0;
 	for (auto const &entity : entities) {
 		auto &transform = ecs_manager.get_component<Transform>(entity);
 		//auto &mesh_instance = ecs_manager.get_component<MeshInstance>(entity);
 		auto &ui_text = ecs_manager.get_component<UIText>(entity);
 
-		int r = rand() % 10;
-		if (r == 0) {
-			ui_text.text = "Testing the glyphs 1234567890 !@#$%^&*()_+";
-		}
 		glm::vec3 current_position = glm::vec3(0.0f, 0.0f, 0.0f);
 
 		Font &font = font_manager.get_font(ui_text.font_id);
@@ -133,7 +130,9 @@ void UiRenderSystem::update(RenderManager &render_manager) {
 		pos.x = pos.x / 1280.0f;
 		pos.y = pos.y / 720.0f;
 		m = glm::translate(m, pos);
+		pos.x -= current_position.x / (1280.0f * 2.0f);
 		m = glm::scale(m, scale);
+
 		render_object.transform_matrix = m;
 		render_manager.renderables.push_back(render_object);
 	}

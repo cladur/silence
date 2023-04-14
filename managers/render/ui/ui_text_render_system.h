@@ -1,5 +1,5 @@
-#ifndef SILENCE_UI_RENDER_SYSTEM_H
-#define SILENCE_UI_RENDER_SYSTEM_H
+#ifndef SILENCE_UI_TEXT_RENDER_SYSTEM_H
+#define SILENCE_UI_TEXT_RENDER_SYSTEM_H
 
 #include <ecs/systems/base_system.h>
 
@@ -11,4 +11,4 @@ public:
 	void update(RenderManager &render_manager);
 };
 
-#endif //SILENCE_UI_RENDER_SYSTEM_H
+#endif //SILENCE_UI_TEXT_RENDER_SYSTEM_H
