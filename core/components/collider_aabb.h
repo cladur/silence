@@ -35,11 +35,11 @@ struct ColliderAABB {
 	}
 
 	glm::vec3 min() const {
-		return { center.x - range.x, center.y - range.y, center.z - range.z };
+		return center - range;
 	}
 
 	glm::vec3 max() const {
-		return { center.x + range.x, center.y + range.y, center.z + range.z };
+		return center + range;
 	}
 };
 
