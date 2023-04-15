@@ -41,6 +41,7 @@
 
 // third party
 #include "glm/glm.hpp"
+#include "glm/gtc/quaternion.hpp"
 #include "imgui.h"
 #include "magic_enum.hpp"
 #include "spdlog/spdlog.h"

@@ -375,6 +375,7 @@ void RenderManager::draw_objects_forward(vk::CommandBuffer cmd, RenderScene::Mes
 			.bind_buffer(0, &object_buffer_info, vk::DescriptorType::eStorageBuffer, vk::ShaderStageFlagBits::eVertex)
 			.bind_buffer(1, &instance_info, vk::DescriptorType::eStorageBuffer, vk::ShaderStageFlagBits::eVertex)
 			.build(object_data_set);
+
 	cmd.setDepthBias(0, 0, 0);
 
 	std::vector<uint32_t> dynamic_offsets;
@@ -385,7 +386,7 @@ void RenderManager::draw_objects_forward(vk::CommandBuffer cmd, RenderScene::Mes
 
 void RenderManager::execute_draw_commands(vk::CommandBuffer cmd, RenderScene::MeshPass &pass,
 		vk::DescriptorSet object_data_set, std::vector<uint32_t> dynamic_offsets, vk::DescriptorSet global_set) {
-	if (pass.batches.size() > 0) {
+	if (!pass.batches.empty()) {
 		Mesh *last_mesh = nullptr;
 		vk::Pipeline last_pipeline{ VK_NULL_HANDLE };
 		vk::PipelineLayout last_layout{ VK_NULL_HANDLE };

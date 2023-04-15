@@ -1,6 +1,7 @@
 #ifndef SILENCE_RENDER_MANAGER_H
 #define SILENCE_RENDER_MANAGER_H
 
+#include "assets/prefab_asset.h"
 #include "core/camera/camera.h"
 
 #include "managers/display/display_manager.h"
@@ -265,6 +266,9 @@ public:
 	void load_meshes();
 	void upload_mesh(Mesh &mesh);
 
+	bool load_image_to_cache(const char *name, const char *path);
+	bool load_prefab(const char *path, const glm::mat4 &root = glm::mat4(1.0f));
+
 	bool load_compute_shader(const char *shader_path, vk::Pipeline &pipeline, vk::PipelineLayout &layout);
 
 	[[nodiscard]] size_t pad_uniform_buffer_size(size_t original_size) const;
@@ -289,6 +293,7 @@ public:
 
 	// texture stuff
 	std::unordered_map<std::string, Texture> loaded_textures;
+	std::unordered_map<std::string, assets::PrefabInfo *> prefab_cache;
 
 	Status startup(DisplayManager &display_manager, Camera *cam);
 	void shutdown();
@@ -317,7 +322,7 @@ public:
 			vma::MemoryUsage memory_usage, vk::MemoryPropertyFlags required_flags = {});
 
 	template <typename T> T *map_buffer(AllocatedBuffer<T> &buffer);
-	void unmap_buffer(AllocatedBufferUntyped &buffer);
+	void unmap_buffer(AllocatedBufferUntyped &buffer) const;
 
 	void immediate_submit(std::function<void(vk::CommandBuffer cmd)> &&function);
 

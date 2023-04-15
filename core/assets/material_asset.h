@@ -1,7 +1,7 @@
 #ifndef SILENCE_MATERIAL_ASSET_H
 #define SILENCE_MATERIAL_ASSET_H
 
-struct AssetFile;
+#include "asset_loader.h"
 
 namespace assets {
 
