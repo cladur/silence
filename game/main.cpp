@@ -479,12 +479,11 @@ int main() {
 		parent_system->update();
 		render_system->update(render_manager);
 
+		// TODO: remove this when collision demo will be removed
 		for (auto sphere : spheres) {
 			ColliderSphere &c = ecs_manager.get_component<ColliderSphere>(sphere);
 			DebugDraw::draw_sphere(c.center, c.radius);
 		}
-		//		ColliderSphere &c = ecs_manager.get_component<ColliderSphere>(collision_tester);
-		//		DebugDraw::draw_sphere(c.center, c.radius);
 
 		input_manager.process_input();
 		render_manager.draw(camera);
