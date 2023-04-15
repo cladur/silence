@@ -170,11 +170,16 @@ void RenderScene::merge_meshes(RenderManager *manager) {
 		m.is_merged = true;
 	}
 
-	merged_vertex_buffer = manager->create_buffer(total_vertices * sizeof(Vertex),
+	merged_vertex_buffer = manager->create_buffer("Merged vertex buffer", total_vertices * sizeof(Vertex),
 			vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eVertexBuffer, vma::MemoryUsage::eGpuOnly);
 
-	merged_index_buffer = manager->create_buffer(total_indices * sizeof(uint32_t),
+	merged_index_buffer = manager->create_buffer("Merged index buffer", total_indices * sizeof(uint32_t),
 			vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eIndexBuffer, vma::MemoryUsage::eGpuOnly);
+
+	manager->main_deletion_queue.push_function([=, this]() {
+		manager->allocator.destroyBuffer(merged_vertex_buffer.buffer, merged_vertex_buffer.allocation);
+		manager->allocator.destroyBuffer(merged_index_buffer.buffer, merged_index_buffer.allocation);
+	});
 
 	manager->immediate_submit([&](vk::CommandBuffer cmd) {
 		for (auto &m : meshes) {

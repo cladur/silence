@@ -32,8 +32,8 @@ bool vk_util::load_image_from_asset(RenderManager &manager, const char *filename
 	}
 
 	//allocate temporary buffer for holding texture data to upload
-	AllocatedBufferUntyped staging_buffer =
-			manager.create_buffer(image_size, vk::BufferUsageFlagBits::eTransferSrc, vma::MemoryUsage::eCpuOnly);
+	AllocatedBufferUntyped staging_buffer = manager.create_buffer(
+			"Staging buffer", image_size, vk::BufferUsageFlagBits::eTransferSrc, vma::MemoryUsage::eCpuOnly);
 
 	//copy data to buffer
 	void *data;

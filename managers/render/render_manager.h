@@ -9,6 +9,7 @@
 #include "render_system.h"
 #include "vk_push_buffer.h"
 #include "vk_types.h"
+#include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_handles.hpp>
 
 #define VULKAN_HPP_NO_EXCEPTIONS
@@ -153,6 +154,8 @@ struct FrameData {
 
 	AllocatedBufferUntyped indirect_buffer;
 
+	AllocatedBufferUntyped dynamic_buffer;
+
 	vk_util::PushBuffer dynamic_data;
 };
 
@@ -282,6 +285,7 @@ public:
 
 	vma::Allocator allocator;
 	DeletionQueue main_deletion_queue;
+	DeletionQueue late_deletion_queue;
 
 	//default array of renderable objects
 	RenderScene render_scene;
@@ -312,8 +316,8 @@ public:
 	void forward_pass(vk::CommandBuffer cmd);
 	void copy_render_to_swapchain(vk::CommandBuffer cmd, uint32_t swapchain_image_index);
 
-	[[nodiscard]] AllocatedBufferUntyped create_buffer(
-			size_t alloc_size, vk::BufferUsageFlags usage, vma::MemoryUsage memory_usage) const;
+	[[nodiscard]] AllocatedBufferUntyped create_buffer(const std::string &allocation_name, size_t alloc_size,
+			vk::BufferUsageFlags usage, vma::MemoryUsage memory_usage) const;
 	void reallocate_buffer(AllocatedBufferUntyped &buffer, size_t alloc_size, vk::BufferUsageFlags usage,
 			vma::MemoryUsage memory_usage, vk::MemoryPropertyFlags required_flags = {});
 

@@ -124,7 +124,7 @@ void RenderManager::ready_mesh_draw(vk::CommandBuffer cmd) {
 
 		//if 80% of the objects are dirty, then just reupload the whole thing
 		if (render_scene.dirty_objects.size() >= render_scene.renderables.size() * 0.8) {
-			AllocatedBuffer<GPUObjectData> new_buffer = create_buffer(copy_size,
+			AllocatedBuffer<GPUObjectData> new_buffer = create_buffer("80% or more dirty", copy_size,
 					vk::BufferUsageFlagBits::eTransferSrc | vk::BufferUsageFlagBits::eStorageBuffer,
 					vma::MemoryUsage::eCpuToGpu);
 
@@ -133,7 +133,7 @@ void RenderManager::ready_mesh_draw(vk::CommandBuffer cmd) {
 			unmap_buffer(new_buffer);
 
 			get_current_frame().frame_deletion_queue.push_function(
-					[=]() { allocator.destroyBuffer(new_buffer.buffer, new_buffer.allocation); });
+					[=, this]() { allocator.destroyBuffer(new_buffer.buffer, new_buffer.allocation); });
 
 			//copy from the uploaded cpu side instance buffer to the gpu one
 			vk::BufferCopy indirect_copy;
@@ -152,14 +152,14 @@ void RenderManager::ready_mesh_draw(vk::CommandBuffer cmd) {
 			uint64_t intsize = sizeof(uint32_t);
 			uint64_t wordsize = sizeof(GPUObjectData) / sizeof(uint32_t);
 			uint64_t uploadSize = render_scene.dirty_objects.size() * wordsize * intsize;
-			AllocatedBuffer<GPUObjectData> new_buffer = create_buffer(buffersize,
+			AllocatedBuffer<GPUObjectData> new_buffer = create_buffer("New buffer, changed elements", buffersize,
 					vk::BufferUsageFlagBits::eTransferSrc | vk::BufferUsageFlagBits::eStorageBuffer,
 					vma::MemoryUsage::eCpuToGpu);
-			AllocatedBuffer<uint32_t> target_buffer = create_buffer(uploadSize,
+			AllocatedBuffer<uint32_t> target_buffer = create_buffer("Target buffer, changed elements", uploadSize,
 					vk::BufferUsageFlagBits::eTransferSrc | vk::BufferUsageFlagBits::eStorageBuffer,
 					vma::MemoryUsage::eCpuToGpu);
 
-			get_current_frame().frame_deletion_queue.push_function([=]() {
+			get_current_frame().frame_deletion_queue.push_function([=, this]() {
 				allocator.destroyBuffer(new_buffer.buffer, new_buffer.allocation);
 				allocator.destroyBuffer(target_buffer.buffer, target_buffer.allocation);
 			});
@@ -255,7 +255,7 @@ void RenderManager::ready_mesh_draw(vk::CommandBuffer cmd) {
 		//if the pass has changed the batches, need to reupload them
 		if (pass.needs_indirect_refresh && pass.batches.size() > 0) {
 			AllocatedBuffer<GPUIndirectObject> new_buffer =
-					create_buffer(sizeof(GPUIndirectObject) * pass.batches.size(),
+					create_buffer("Reupload batches, indirect", sizeof(GPUIndirectObject) * pass.batches.size(),
 							vk::BufferUsageFlagBits::eTransferSrc | vk::BufferUsageFlagBits::eStorageBuffer |
 									vk::BufferUsageFlagBits::eIndirectBuffer,
 							vma::MemoryUsage::eCpuToGpu);
@@ -275,17 +275,21 @@ void RenderManager::ready_mesh_draw(vk::CommandBuffer cmd) {
 				AllocatedBufferUntyped deletionBuffer = pass.clear_indirect_buffer;
 				//add buffer to deletion queue of this frame
 				get_current_frame().frame_deletion_queue.push_function(
-						[=]() { allocator.destroyBuffer(deletionBuffer.buffer, deletionBuffer.allocation); });
+						[=, this]() { allocator.destroyBuffer(deletionBuffer.buffer, deletionBuffer.allocation); });
 			}
+
+			main_deletion_queue.push_function(
+					[=, this]() { allocator.destroyBuffer(new_buffer.buffer, new_buffer.allocation); });
 
 			pass.clear_indirect_buffer = new_buffer;
 			pass.needs_indirect_refresh = false;
 		}
 
 		if (pass.needs_instance_refresh && pass.flat_batches.size() > 0) {
-			AllocatedBuffer<GPUInstance> new_buffer = create_buffer(sizeof(GPUInstance) * pass.flat_batches.size(),
-					vk::BufferUsageFlagBits::eTransferSrc | vk::BufferUsageFlagBits::eStorageBuffer,
-					vma::MemoryUsage::eCpuToGpu);
+			AllocatedBuffer<GPUInstance> new_buffer =
+					create_buffer("Reupload batches, instance refresh", sizeof(GPUInstance) * pass.flat_batches.size(),
+							vk::BufferUsageFlagBits::eTransferSrc | vk::BufferUsageFlagBits::eStorageBuffer,
+							vma::MemoryUsage::eCpuToGpu);
 
 			GPUInstance *instanceData = map_buffer(new_buffer);
 			p_scene->fill_instances_array(instanceData, *ppass);
@@ -339,7 +343,10 @@ void RenderManager::draw_objects_forward(vk::CommandBuffer cmd, RenderScene::Mes
 	scene_parameters.ambient_color = { sin(framed), 0, cos(framed), 1 };
 	scene_parameters.sunlight_direction = { sin(framed), 0, cos(framed), 1 };
 
-	//push data to dynmem
+	//push data to dynamic buffer
+	
+	get_current_frame().dynamic_data.reset();
+
 	uint32_t scene_data_offset = get_current_frame().dynamic_data.push(scene_parameters);
 
 	uint32_t camera_data_offset = get_current_frame().dynamic_data.push(cam_data);
@@ -378,6 +385,8 @@ void RenderManager::draw_objects_forward(vk::CommandBuffer cmd, RenderScene::Mes
 	std::vector<uint32_t> dynamic_offsets;
 	dynamic_offsets.push_back(camera_data_offset);
 	dynamic_offsets.push_back(scene_data_offset);
+
+	SPDLOG_INFO("{} ___ {}", camera_data_offset, scene_data_offset);
 	execute_draw_commands(cmd, pass, object_data_set, dynamic_offsets, global_set);
 }
 
