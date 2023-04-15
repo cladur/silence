@@ -190,7 +190,7 @@ void vk_util::MaterialSystem::build_default_templates() {
 		default_textured.default_parameters = nullptr;
 		default_textured.transparency = assets::TransparencyMode::Opaque;
 
-		template_cache["textured"] = default_textured;
+		template_cache["texturedPBR_opaque"] = default_textured;
 	}
 	/*
 	{

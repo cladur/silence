@@ -124,8 +124,15 @@ AllocatedImage vk_util::upload_image(RenderManager &manager, uint32_t tex_width,
 				nullptr, 0, nullptr, 1, &image_barrier_to_readable);
 	});
 
-	manager.main_deletion_queue.push_function(
-			[=]() { manager.allocator.destroyImage(new_image.image, new_image.allocation); });
+	vk::ImageViewCreateInfo image_info = vk_init::image_view_create_info(
+			vk::Format::eR8G8B8A8Unorm, new_image.image, vk::ImageAspectFlagBits::eColor);
+
+	VK_CHECK(manager.device.createImageView(&image_info, nullptr, &new_image.default_view));
+
+	manager.main_deletion_queue.push_function([=]() {
+		manager.device.destroyImageView(new_image.default_view);
+		manager.allocator.destroyImage(new_image.image, new_image.allocation);
+	});
 
 	return new_image;
 }

@@ -1,8 +1,10 @@
 #include "render_manager.h"
+#include "asset_loader.h"
 #include "managers/display/display_manager.h"
 #include "render/vk_types.h"
 #include <vulkan-memory-allocator-hpp/vk_mem_alloc_enums.hpp>
 #include <vulkan/vulkan_handles.hpp>
+#include <vulkan/vulkan_structs.hpp>
 
 #define VMA_IMPLEMENTATION
 #include "vk_mem_alloc.h"
@@ -20,7 +22,7 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_vulkan.h"
 
-#define ASSET_PATH "resources/models/"
+#define ASSET_PATH "resources/assets_export/"
 #define SHADER_PATH "resources/shaders/"
 
 void RenderManager::init_vulkan(DisplayManager &display_manager) {
@@ -536,15 +538,20 @@ void RenderManager::init_descriptors() {
 
 	object_set_layout = descriptor_layout_cache->create_descriptor_layout(&object_set_info);
 
-	vk::DescriptorSetLayoutBinding texture_bind = vk_init::descriptor_set_layout_binding(
+	vk::DescriptorSetLayoutBinding texture1_bind = vk_init::descriptor_set_layout_binding(
 			vk::DescriptorType::eCombinedImageSampler, vk::ShaderStageFlagBits::eFragment, 0);
+
+	vk::DescriptorSetLayoutBinding texture2_bind = vk_init::descriptor_set_layout_binding(
+			vk::DescriptorType::eCombinedImageSampler, vk::ShaderStageFlagBits::eFragment, 1);
+
+	vk::DescriptorSetLayoutBinding texture_binds[] = { texture1_bind, texture2_bind };
 
 	vk::DescriptorSetLayoutCreateInfo set3_info = {};
 	set3_info.sType = vk::StructureType::eDescriptorSetLayoutCreateInfo;
 	set3_info.pNext = nullptr;
-	set3_info.bindingCount = 1;
+	set3_info.bindingCount = 2;
 	set3_info.flags = {};
-	set3_info.pBindings = &texture_bind;
+	set3_info.pBindings = &texture_binds[0];
 
 	single_texture_set_layout = descriptor_layout_cache->create_descriptor_layout(&set3_info);
 
@@ -683,34 +690,36 @@ bool RenderManager::load_compute_shader(const char *shader_path, vk::Pipeline &p
 }
 
 void RenderManager::init_scene() {
-	//create a sampler for the texture
-	vk::SamplerCreateInfo sampler_info = vk_init::sampler_create_info(vk::Filter::eNearest);
+	// //create a sampler for the texture
+	// vk::SamplerCreateInfo sampler_info = vk_init::sampler_create_info(vk::Filter::eNearest);
 
-	vk::Sampler blocky_sampler;
-	VK_CHECK(device.createSampler(&sampler_info, nullptr, &blocky_sampler));
+	// vk::Sampler blocky_sampler;
+	// VK_CHECK(device.createSampler(&sampler_info, nullptr, &blocky_sampler));
 
-	sampler_info.mipmapMode = vk::SamplerMipmapMode::eLinear;
-	// TODO: check this
-	// sampler_info.mipLodBias = 2;
-	sampler_info.maxLod = 30;
-	sampler_info.minLod = 3;
+	// sampler_info.mipmapMode = vk::SamplerMipmapMode::eLinear;
+	// // TODO: check this
+	// // sampler_info.mipLodBias = 2;
+	// sampler_info.maxLod = 30;
+	// sampler_info.minLod = 3;
 
-	vk::Sampler smooth_sampler2;
-	VK_CHECK(device.createSampler(&sampler_info, nullptr, &smooth_sampler2));
+	// vk::Sampler smooth_sampler2;
+	// VK_CHECK(device.createSampler(&sampler_info, nullptr, &smooth_sampler2));
 
-	{
-		vk_util::MaterialData textured_info = {};
-		textured_info.base_template = "textured";
-		textured_info.parameters = nullptr;
+	// {
+	// 	vk_util::MaterialData textured_info = {};
+	// 	textured_info.base_template = "textured";
+	// 	textured_info.parameters = nullptr;
 
-		vk_util::SampledTexture white_tex = {};
-		white_tex.sampler = smooth_sampler2;
-		white_tex.image_view = loaded_textures["white"].image_view;
+	// 	vk_util::SampledTexture white_tex = {};
+	// 	white_tex.sampler = smooth_sampler2;
+	// 	white_tex.image_view = loaded_textures["white"].image_view;
 
-		textured_info.textures.push_back(white_tex);
+	// 	textured_info.textures.push_back(white_tex);
 
-		vk_util::Material *new_mat = material_system.build_material("textured", textured_info);
-	}
+	// 	vk_util::Material *new_mat = material_system.build_material("textured", textured_info);
+	// }
+
+	load_prefab(asset_path("DamagedHelmet/DamagedHelmet.pfb").c_str());
 }
 
 void RenderManager::init_imgui(GLFWwindow *window) {
@@ -785,13 +794,13 @@ void RenderManager::load_meshes() {
 
 	//we don't care about the vertex normals
 
-	box_mesh.load_from_asset("resources/models/Duck.mesh");
+	// box_mesh.load_from_asset("resources/models/Duck.mesh");
 
-	upload_mesh(triangle_mesh);
-	upload_mesh(box_mesh);
+	// upload_mesh(triangle_mesh);
+	// upload_mesh(box_mesh);
 
-	meshes["triangle"] = triangle_mesh;
-	meshes["box"] = box_mesh;
+	// meshes["triangle"] = triangle_mesh;
+	// meshes["box"] = box_mesh;
 }
 
 void RenderManager::upload_mesh(Mesh &mesh) {
@@ -835,6 +844,221 @@ void RenderManager::upload_mesh(Mesh &mesh) {
 	//add the destruction of triangle mesh buffer to the deletion queue
 	main_deletion_queue.push_function(
 			[=, this]() { allocator.destroyBuffer(mesh.index_buffer.buffer, mesh.index_buffer.allocation); });
+}
+
+bool RenderManager::load_image_to_cache(const char *name, const char *path) {
+	Texture newtex;
+
+	if (loaded_textures.find(name) != loaded_textures.end()) {
+		return true;
+	}
+
+	bool result = vk_util::load_image_from_asset(*this, path, newtex.image);
+
+	if (!result) {
+		SPDLOG_ERROR("Error When texture {} at path {}", name, path);
+		return false;
+	} else {
+		SPDLOG_INFO("Loaded texture {} at path {}", name, path);
+	}
+	newtex.image_view = newtex.image.default_view;
+	//VkImageViewCreateInfo imageinfo = vkinit::imageview_create_info(VK_FORMAT_R8G8B8A8_UNORM, newtex.image._image,
+	//VK_IMAGE_ASPECT_COLOR_BIT); imageinfo.subresourceRange.levelCount = newtex.image.mipLevels;
+	//vkCreateImageView(_device, &imageinfo, nullptr, &newtex.imageView);
+
+	loaded_textures[name] = newtex;
+	return true;
+}
+
+bool RenderManager::load_prefab(const char *path, const glm::mat4 &root) {
+	auto pf = prefab_cache.find(path);
+	if (pf == prefab_cache.end()) {
+		assets::AssetFile file;
+		bool loaded = assets::load_binary_file(path, file);
+
+		if (!loaded) {
+			SPDLOG_ERROR("Error When loading prefab file at path {}", path);
+			return false;
+		} else {
+			SPDLOG_INFO("Prefab {} loaded to cache", path);
+		}
+
+		prefab_cache[path] = new assets::PrefabInfo;
+
+		*prefab_cache[path] = assets::read_prefab_info(&file);
+	}
+
+	assets::PrefabInfo *prefab = prefab_cache[path];
+
+	vk::SamplerCreateInfo sampler_info = vk_init::sampler_create_info(vk::Filter::eLinear);
+	sampler_info.mipmapMode = vk::SamplerMipmapMode::eLinear;
+
+	std::unordered_map<uint64_t, glm::mat4> node_worldmats;
+
+	std::vector<std::pair<uint64_t, glm::mat4>> pending_nodes;
+	for (auto &[k, v] : prefab->node_matrices) {
+		glm::mat4 nodematrix{ 1.f };
+
+		auto nm = prefab->matrices[v];
+		memcpy(&nodematrix, &nm, sizeof(glm::mat4));
+
+		//check if it has parents
+		auto matrix_it = prefab->node_parents.find(k);
+		if (matrix_it == prefab->node_parents.end()) {
+			//add to worldmats
+			node_worldmats[k] = root * nodematrix;
+		} else {
+			//enqueue
+			pending_nodes.emplace_back(k, nodematrix);
+		}
+	}
+
+	//process pending nodes list until it empties
+	while (!pending_nodes.empty()) {
+		for (int i = 0; i < pending_nodes.size(); i++) {
+			uint64_t node = pending_nodes[i].first;
+			uint64_t parent = prefab->node_parents[node];
+
+			//try to find parent in cache
+			auto matrix_it = node_worldmats.find(parent);
+			if (matrix_it != node_worldmats.end()) {
+				//transform with the parent
+				glm::mat4 nodematrix = (matrix_it)->second * pending_nodes[i].second;
+
+				node_worldmats[node] = nodematrix;
+
+				//remove from queue, pop last
+				pending_nodes[i] = pending_nodes.back();
+				pending_nodes.pop_back();
+				i--;
+			}
+		}
+	}
+
+	std::vector<MeshObject> prefab_renderables;
+	prefab_renderables.reserve(prefab->node_meshes.size());
+
+	for (auto &[k, v] : prefab->node_meshes) {
+		//load mesh
+
+		if (v.mesh_path.find("Sky") != std::string::npos) {
+			continue;
+		}
+
+		if (!get_mesh(v.mesh_path)) {
+			Mesh mesh{};
+			mesh.load_from_asset(asset_path(v.mesh_path).c_str());
+
+			upload_mesh(mesh);
+
+			meshes[v.mesh_path.c_str()] = mesh;
+		}
+
+		auto material_name = v.material_path.c_str();
+		//load material
+
+		vk_util::Material *object_material = material_system.get_material(material_name);
+		if (!object_material) {
+			assets::AssetFile material_file;
+			bool loaded = assets::load_binary_file(asset_path(material_name).c_str(), material_file);
+
+			if (loaded) {
+				assets::MaterialInfo material = assets::read_material_info(&material_file);
+
+				std::vector<std::string> textures;
+
+				auto base_color_tex = material.textures["baseColor"];
+				if (base_color_tex.size() <= 3) {
+					// TODO: Figure out if this should be a white texture after all?
+					// texture = "Sponza/white.tx";
+					base_color_tex = "missing.tx";
+				}
+
+				loaded = load_image_to_cache(base_color_tex.c_str(), asset_path(base_color_tex).c_str());
+				if (!loaded) {
+					SPDLOG_ERROR("Failed to load base color texture {}", base_color_tex);
+				}
+
+				textures.push_back(base_color_tex);
+
+				auto ao_tex = material.textures["occlusion"];
+				if (ao_tex.size() <= 3) {
+					ao_tex = "missing.tx";
+				}
+
+				loaded = load_image_to_cache(ao_tex.c_str(), asset_path(ao_tex).c_str());
+				if (!loaded) {
+					SPDLOG_ERROR("Failed to load ambient occlusion texture {}", ao_tex);
+				}
+
+				textures.push_back(ao_tex);
+
+				vk_util::MaterialData info;
+				info.parameters = nullptr;
+
+				if (material.transparency == assets::TransparencyMode::Transparent) {
+					info.base_template = "texturedPBR_transparent";
+				} else {
+					info.base_template = "texturedPBR_opaque";
+				}
+
+				for (auto &texture : textures) {
+					vk::Sampler smooth_sampler;
+					VK_CHECK(device.createSampler(&sampler_info, nullptr, &smooth_sampler));
+
+					vk_util::SampledTexture tex;
+					tex.image_view = loaded_textures[texture].image_view;
+					tex.sampler = smooth_sampler;
+
+					info.textures.push_back(tex);
+				}
+
+				object_material = material_system.build_material(material_name, info);
+
+				if (!object_material) {
+					SPDLOG_ERROR("Error When building material {}", v.material_path);
+				}
+			} else {
+				SPDLOG_ERROR("Error When loading material at path {}", v.material_path);
+			}
+		}
+
+		MeshObject load_mesh;
+		//transparent objects will be invisible
+
+		load_mesh.b_draw_forward_pass = true;
+		load_mesh.b_draw_shadow_pass = true;
+
+		glm::mat4 nodematrix{ 1.f };
+
+		auto matrix_it = node_worldmats.find(k);
+		if (matrix_it != node_worldmats.end()) {
+			auto nm = (*matrix_it).second;
+			memcpy(&nodematrix, &nm, sizeof(glm::mat4));
+		}
+
+		load_mesh.mesh = get_mesh(v.mesh_path);
+		load_mesh.transform_matrix = nodematrix;
+		load_mesh.material = object_material;
+
+		// TODO: implement this
+		// refresh_renderbounds(&load_mesh);
+
+		//sort key from location
+		auto lx = int(load_mesh.bounds.origin.x / 10.f);
+		auto ly = int(load_mesh.bounds.origin.y / 10.f);
+
+		uint32_t key = uint32_t(std::hash<int32_t>()(lx) ^ std::hash<int32_t>()(ly ^ 1337));
+
+		load_mesh.custom_sort_key = 0; // rng;// key;
+
+		prefab_renderables.push_back(load_mesh);
+		//_renderables.push_back(load_mesh);
+	}
+
+	render_scene.register_object_batch(prefab_renderables.data(), static_cast<uint32_t>(prefab_renderables.size()));
+
+	return true;
 }
 
 AllocatedBufferUntyped RenderManager::create_buffer(
@@ -881,7 +1105,7 @@ size_t RenderManager::pad_uniform_buffer_size(size_t original_size) const {
 	return aligned_size;
 }
 
-void RenderManager::unmap_buffer(AllocatedBufferUntyped &buffer) {
+void RenderManager::unmap_buffer(AllocatedBufferUntyped &buffer) const {
 	allocator.unmapMemory(buffer.allocation);
 }
 
@@ -922,6 +1146,10 @@ std::string RenderManager::shader_path(std::string_view path) {
 }
 
 void RenderManager::ready_cull_data(RenderScene::MeshPass &pass, vk::CommandBuffer cmd) {
+	if (pass.batches.empty()) {
+		return;
+	}
+
 	//copy from the cleared indirect buffer into the one we will use on rendering. This one happens every frame
 	vk::BufferCopy indirect_copy;
 	indirect_copy.dstOffset = 0;
@@ -966,8 +1194,8 @@ RenderManager::Status RenderManager::startup(DisplayManager &display_manager, Ca
 
 	init_scene();
 
-	//	render_scene.build_batches();
-	//	render_scene.merge_meshes(this);
+	render_scene.build_batches();
+	render_scene.merge_meshes(this);
 
 	init_imgui(display_manager.window);
 
@@ -1007,18 +1235,7 @@ Mesh *RenderManager::get_mesh(const std::string &name) {
 }
 
 void RenderManager::load_images() {
-	Texture texture = {};
-
-	vk_util::load_image_from_asset(*this, "resources/models/DuckCM.tx", texture.image);
-
-	vk::ImageViewCreateInfo image_info = vk_init::image_view_create_info(
-			vk::Format::eR8G8B8A8Unorm, texture.image.image, vk::ImageAspectFlagBits::eColor);
-
-	VK_CHECK(device.createImageView(&image_info, nullptr, &texture.image_view));
-
-	main_deletion_queue.push_function([=, this]() { device.destroyImageView(texture.image_view); });
-
-	loaded_textures["white"] = texture;
+	load_image_to_cache("white", asset_path("missing.tx").c_str());
 }
 
 void RenderManager::draw(Camera &camera) {

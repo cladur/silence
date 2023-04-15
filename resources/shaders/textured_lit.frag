@@ -15,9 +15,11 @@ layout(set = 0, binding = 1) uniform SceneData {
 } sceneData;
 
 layout(set = 2, binding = 0) uniform sampler2D tex1;
+layout(set = 2, binding = 1) uniform sampler2D tex2;
 
 void main()
 {
     vec3 color = texture(tex1, in_texcoord).rgb;
+    vec3 ao = texture(tex2, in_texcoord).rgb;
     out_frag_color = vec4(color, 1.0f);
 }
