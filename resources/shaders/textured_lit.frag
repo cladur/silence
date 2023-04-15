@@ -21,5 +21,5 @@ void main()
 {
     vec3 color = texture(tex1, in_texcoord).rgb;
     vec3 ao = texture(tex2, in_texcoord).rgb;
-    out_frag_color = vec4(color, 1.0f);
+    out_frag_color = vec4(color * ao.r, 1.0f);
 }

@@ -270,8 +270,10 @@ vk_util::Material *vk_util::MaterialSystem::build_material(
 
 		auto db = vk_util::DescriptorBuilder::begin(manager->descriptor_layout_cache, manager->descriptor_allocator);
 
+		vk::DescriptorImageInfo image_buffer_infos[info.textures.size()];
+
 		for (int i = 0; i < info.textures.size(); i++) {
-			vk::DescriptorImageInfo image_buffer_info;
+			vk::DescriptorImageInfo &image_buffer_info = image_buffer_infos[i];
 			image_buffer_info.sampler = info.textures[i].sampler;
 			image_buffer_info.imageView = info.textures[i].image_view;
 			image_buffer_info.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
