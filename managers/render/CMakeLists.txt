@@ -13,7 +13,7 @@ add_library(${RENDER_MANAGER_NAME} STATIC
         vk_shaders.cpp vk_shaders.h
         vk_scene.cpp vk_scene.h
         vk_push_buffer.cpp vk_push_buffer.h
-        vk_scene_render.cpp)
+        vk_scene_render.cpp vk_debug.cpp vk_debug.h)
 
 # Include directories
 target_include_directories(${RENDER_MANAGER_NAME} PUBLIC ${MANAGER_DIR})

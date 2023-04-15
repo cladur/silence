@@ -8,6 +8,7 @@ struct PushBuffer {
 
 	void init(vma::Allocator &allocator, AllocatedBufferUntyped source_buffer, uint32_t alignement);
 	void reset();
+	void free(vma::Allocator &allocator);
 
 	uint32_t pad_uniform_buffer_size(uint32_t original_size);
 	AllocatedBufferUntyped source;

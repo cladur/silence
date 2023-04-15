@@ -1,8 +1,11 @@
 #include "render_manager.h"
 #include "managers/display/display_manager.h"
 #include "render/vk_types.h"
+#include "vk_debug.h"
+#include <stdint.h>
 #include <vulkan-memory-allocator-hpp/vk_mem_alloc_enums.hpp>
 #include <vulkan/vulkan_handles.hpp>
+#include <vulkan/vulkan_structs.hpp>
 
 #define VMA_IMPLEMENTATION
 #include "vk_mem_alloc.h"
@@ -29,6 +32,7 @@ void RenderManager::init_vulkan(DisplayManager &display_manager) {
 							.request_validation_layers()
 							.use_default_debug_messenger()
 							.require_api_version(1, 1, 0)
+							.enable_extension(VK_EXT_DEBUG_UTILS_EXTENSION_NAME)
 							.build();
 
 	if (!inst_ret) {
@@ -39,6 +43,7 @@ void RenderManager::init_vulkan(DisplayManager &display_manager) {
 
 	//store the instance
 	instance = vkb_inst.instance;
+
 	//store the debug messenger
 	debug_messenger = vkb_inst.debug_messenger;
 
@@ -87,6 +92,8 @@ void RenderManager::init_vulkan(DisplayManager &display_manager) {
 	allocator_info.instance = instance;
 	VK_CHECK(vma::createAllocator(&allocator_info, &allocator));
 
+	VkDebug::setup_debugging(this);
+
 	gpu_properties = vkb_device.physical_device.properties;
 
 	main_deletion_queue.push_function([=, this]() { allocator.destroy(); });
@@ -95,8 +102,9 @@ void RenderManager::init_vulkan(DisplayManager &display_manager) {
 uint32_t previous_pow2(uint32_t v) {
 	uint32_t r = 1;
 
-	while (r * 2 < v)
+	while (r * 2 < v) {
 		r *= 2;
+	}
 
 	return r;
 }
@@ -236,7 +244,14 @@ void RenderManager::init_swapchain(DisplayManager &display_manager) {
 
 		depth_pyramid_mips[i] = pyramid;
 		assert(depth_pyramid_mips[i]);
+
+		main_deletion_queue.push_function([=, this]() { device.destroyImageView(pyramid); });
 	}
+
+	main_deletion_queue.push_function([=, this]() {
+		device.destroyImageView(depth_pyramid.default_view);
+		allocator.destroyImage(depth_pyramid.image, depth_pyramid.allocation);
+	});
 
 	vk::SamplerCreateInfo create_info = {};
 
@@ -439,6 +454,7 @@ void RenderManager::init_framebuffers() {
 	fwd_info.pAttachments = attachments;
 	fwd_info.attachmentCount = 2;
 	VK_CHECK(device.createFramebuffer(&fwd_info, nullptr, &forward_framebuffer));
+	VkDebug::set_object_name(forward_framebuffer, "Forward Framebuffer");
 	//create the framebuffers for the swapchain images. This will connect the render-pass to the images for
 	//render
 
@@ -460,6 +476,8 @@ void RenderManager::init_framebuffers() {
 			device.destroyImageView(swapchain_image_views[i]);
 		});
 	}
+
+	//main_deletion_queue.push_function([=, this]() { device.destroyFramebuffer(forward_framebuffer); });
 }
 
 void RenderManager::init_sync_structures() {
@@ -499,8 +517,8 @@ void RenderManager::init_descriptors() {
 
 	const size_t scene_param_buffer_size = FRAME_OVERLAP * pad_uniform_buffer_size(sizeof(GPUSceneData));
 
-	scene_parameter_buffer = create_buffer(
-			scene_param_buffer_size, vk::BufferUsageFlagBits::eUniformBuffer, vma::MemoryUsage::eCpuToGpu);
+	scene_parameter_buffer = create_buffer("Scene parameter buffer", scene_param_buffer_size,
+			vk::BufferUsageFlagBits::eUniformBuffer, vma::MemoryUsage::eCpuToGpu);
 
 	//information about the binding.
 	vk::DescriptorSetLayoutBinding camera_bind = vk_init::descriptor_set_layout_binding(
@@ -552,26 +570,26 @@ void RenderManager::init_descriptors() {
 		frame.dynamic_descriptor_allocator = new vk_util::DescriptorAllocator();
 		frame.dynamic_descriptor_allocator->init(device);
 
-		frame.camera_buffer = create_buffer(
-				sizeof(GPUCameraData), vk::BufferUsageFlagBits::eUniformBuffer, vma::MemoryUsage::eCpuToGpu);
+		frame.camera_buffer = create_buffer("Camera buffer", sizeof(GPUCameraData),
+				vk::BufferUsageFlagBits::eUniformBuffer, vma::MemoryUsage::eCpuToGpu);
 
 		// TODO: Move this constant somewhere else
 		const int max_objects = 10000;
-		frame.object_buffer = create_buffer(max_objects * sizeof(GPUObjectData),
+		frame.object_buffer = create_buffer("Object buffer", max_objects * sizeof(GPUObjectData),
 				vk::BufferUsageFlagBits::eStorageBuffer, vma::MemoryUsage::eCpuToGpu);
 
 		// TODO: Move this constant somewhere else
 		const int max_commands = 10000;
 
-		frame.indirect_buffer = create_buffer(max_commands * sizeof(vk::DrawIndexedIndirectCommand),
+		frame.indirect_buffer = create_buffer("Indirect buffer", max_commands * sizeof(vk::DrawIndexedIndirectCommand),
 				vk::BufferUsageFlagBits::eIndirectBuffer | vk::BufferUsageFlagBits::eTransferDst |
 						vk::BufferUsageFlagBits::eStorageBuffer,
 				vma::MemoryUsage::eCpuToGpu);
 
 		// 1 megabyte of dynamic data buffer
-		auto dynamic_data_buffer =
-				create_buffer(1000000, vk::BufferUsageFlagBits::eUniformBuffer, vma::MemoryUsage::eCpuOnly);
-		frame.dynamic_data.init(allocator, dynamic_data_buffer, gpu_properties.limits.minUniformBufferOffsetAlignment);
+		frame.dynamic_buffer = create_buffer(
+				"Dynamic data buffer", 1000000, vk::BufferUsageFlagBits::eUniformBuffer, vma::MemoryUsage::eCpuOnly);
+		frame.dynamic_data.init(allocator, frame.dynamic_buffer, gpu_properties.limits.minUniformBufferOffsetAlignment);
 	}
 
 	main_deletion_queue.push_function([&]() {
@@ -581,6 +599,8 @@ void RenderManager::init_descriptors() {
 			allocator.destroyBuffer(frame.camera_buffer.buffer, frame.camera_buffer.allocation);
 			allocator.destroyBuffer(frame.object_buffer.buffer, frame.object_buffer.allocation);
 			allocator.destroyBuffer(frame.indirect_buffer.buffer, frame.indirect_buffer.allocation);
+			frame.dynamic_data.free(allocator);
+			allocator.destroyBuffer(frame.dynamic_buffer.buffer, frame.dynamic_buffer.allocation);
 		}
 	});
 }
@@ -837,8 +857,8 @@ void RenderManager::upload_mesh(Mesh &mesh) {
 			[=, this]() { allocator.destroyBuffer(mesh.index_buffer.buffer, mesh.index_buffer.allocation); });
 }
 
-AllocatedBufferUntyped RenderManager::create_buffer(
-		size_t alloc_size, vk::BufferUsageFlags usage, vma::MemoryUsage memory_usage) const {
+AllocatedBufferUntyped RenderManager::create_buffer(const std::string &allocation_name, size_t alloc_size,
+		vk::BufferUsageFlags usage, vma::MemoryUsage memory_usage) const {
 	//allocate vertex buffer
 	vk::BufferCreateInfo buffer_info = {};
 	buffer_info.sType = vk::StructureType::eBufferCreateInfo;
@@ -849,12 +869,14 @@ AllocatedBufferUntyped RenderManager::create_buffer(
 
 	vma::AllocationCreateInfo vmaalloc_info = {};
 	vmaalloc_info.usage = memory_usage;
+	vmaalloc_info.pUserData = nullptr;
 
 	AllocatedBufferUntyped new_buffer;
 
 	//allocate the buffer
 	VK_CHECK(allocator.createBuffer(&buffer_info, &vmaalloc_info, &new_buffer.buffer, &new_buffer.allocation, nullptr));
 
+	vmaSetAllocationName(allocator, new_buffer.allocation, allocation_name.c_str());
 	new_buffer.size = alloc_size;
 
 	return new_buffer;
@@ -863,10 +885,13 @@ AllocatedBufferUntyped RenderManager::create_buffer(
 void RenderManager::reallocate_buffer(AllocatedBufferUntyped &buffer, size_t alloc_size, vk::BufferUsageFlags usage,
 		vma::MemoryUsage memory_usage, vk::MemoryPropertyFlags required_flags) {
 	// TODO: Add required_flags to create_buffer()
-	AllocatedBufferUntyped new_buffer = create_buffer(alloc_size, usage, memory_usage);
+	AllocatedBufferUntyped new_buffer = create_buffer("Reallocation of buffer", alloc_size, usage, memory_usage);
 
 	get_current_frame().frame_deletion_queue.push_function(
-			[=]() { allocator.destroyBuffer(buffer.buffer, buffer.allocation); });
+			[=, this]() { allocator.destroyBuffer(buffer.buffer, buffer.allocation); });
+
+	main_deletion_queue.push_function(
+			[=, this]() { allocator.destroyBuffer(new_buffer.buffer, new_buffer.allocation); });
 
 	buffer = new_buffer;
 }
@@ -977,7 +1002,6 @@ RenderManager::Status RenderManager::startup(DisplayManager &display_manager, Ca
 void RenderManager::shutdown() {
 	//make sure the GPU has stopped doing its things
 	device.waitIdle();
-
 	main_deletion_queue.flush();
 
 	for (auto &frame : frames) {

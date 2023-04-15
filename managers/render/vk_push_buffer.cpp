@@ -22,6 +22,10 @@ void vk_util::PushBuffer::reset() {
 	current_offset = 0;
 }
 
+void vk_util::PushBuffer::free(vma::Allocator &allocator) {
+	allocator.unmapMemory(source.allocation);
+}
+
 uint32_t vk_util::PushBuffer::pad_uniform_buffer_size(uint32_t original_size) {
 	// Calculate required alignment based on minimum device offset alignment
 	size_t min_ubo_alignment = align;
