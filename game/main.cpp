@@ -5,6 +5,8 @@
 
 #include "components/children_component.h"
 #include "components/collider_aabb.h"
+#include "components/collider_obb.h"
+#include "components/collider_sphere.h"
 #include "components/gravity_component.h"
 #include "components/mesh_instance_component.h"
 #include "components/parent_component.h"
@@ -86,8 +88,10 @@ void default_ecs_manager_init() {
 	ecs_manager.register_component<Children>();
 	ecs_manager.register_component<MeshInstance>();
 	ecs_manager.register_component<FmodListener>();
-	ecs_manager.register_component<ColliderAABB>();
 	ecs_manager.register_component<ColliderTag>();
+	ecs_manager.register_component<ColliderSphere>();
+	ecs_manager.register_component<ColliderAABB>();
+	ecs_manager.register_component<ColliderOBB>();
 }
 
 void demo_entities_init(std::vector<Entity> &entities) {
@@ -130,30 +134,91 @@ void demo_entities_init(std::vector<Entity> &entities) {
 			FmodListener{ .listener_id = SILENCE_FMOD_LISTENER_DEBUG_CAMERA,
 					.prev_frame_position = glm::vec3(0.0f, 0.0f, -25.0f) });
 	entities.push_back(listener);
+
+	Entity floor = ecs_manager.create_entity();
+
+	Transform transform = Transform{ glm::vec3(0.0f, -20.0f, 0.0f), glm::vec3(0.0f), glm::vec3(20.0f, 1.0f, 20.0f) };
+	ecs_manager.add_component(floor, transform);
+
+	ColliderComponentsFactory::add_collider_component(
+			floor, ColliderAABB{ transform.get_position(), transform.get_scale(), false });
+
+	ecs_manager.add_component<MeshInstance>(
+			floor, { render_manager.get_mesh("box"), render_manager.get_material("default_mesh") });
+
+	entities.push_back(floor);
 }
 
 void demo_collision_init(Entity &entity) {
 	entity = ecs_manager.create_entity();
 
-	Transform transform = Transform{ glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f) };
+	Transform transform = Transform{ glm::vec3(0.0f), glm::vec3(45.0f), glm::vec3(1.0f) };
 	ecs_manager.add_component(entity, transform);
 
-	ColliderComponentsFactory::add_collider_component(
-			entity, ColliderAABB{ transform.get_position(), transform.get_scale(), true });
+	ColliderOBB c{};
+	c.center = transform.get_position();
+	c.range = transform.get_scale();
+	c.set_orientation(transform.get_euler_rot());
+	c.is_movable = true;
+	ColliderComponentsFactory::add_collider_component(entity, c);
 
 	ecs_manager.add_component<MeshInstance>(
 			entity, { render_manager.get_mesh("box"), render_manager.get_material("default_mesh") });
+}
 
-	Entity floor = ecs_manager.create_entity();
+void demo_collision_sphere(std::vector<Entity> &entities) {
+	std::default_random_engine random_generator; // NOLINT(cert-msc51-cpp)
+	std::uniform_real_distribution<float> rand_position(-20.0f, 20.0f);
+	std::uniform_real_distribution<float> rand_gravity(-40.0f, -20.0f);
 
-	Transform transform1 = Transform{ glm::vec3(0.0f, -20.0f, 0.0f), glm::vec3(0.0f), glm::vec3(20.0f, 1.0f, 20.0f) };
-	ecs_manager.add_component(floor, transform1);
+	for (Entity &entity : entities) {
+		entity = ecs_manager.create_entity();
 
-	ColliderComponentsFactory::add_collider_component(
-			floor, ColliderAABB{ transform1.get_position(), transform1.get_scale(), false });
+		Transform transform = Transform{ glm::vec3(rand_position(random_generator), rand_position(random_generator),
+												 rand_position(random_generator)),
+			glm::vec3(0.0f), glm::vec3(1.0f) };
+		ecs_manager.add_component(entity, transform);
 
-	ecs_manager.add_component<MeshInstance>(
-			floor, { render_manager.get_mesh("box"), render_manager.get_material("default_mesh") });
+		ColliderComponentsFactory::add_collider_component(
+				entity, ColliderSphere{ transform.get_position(), transform.get_scale().x, true });
+
+		ecs_manager.add_component<Gravity>(entity, { glm::vec3(0.0f, rand_gravity(random_generator), 0.0f) });
+
+		ecs_manager.add_component(entity,
+				RigidBody{ .velocity = glm::vec3(0.0f, 0.0f, 0.0f), .acceleration = glm::vec3(0.0f, 0.0f, 0.0f) });
+	}
+}
+
+void demo_collision_obb(std::vector<Entity> &entities) {
+	std::default_random_engine random_generator; // NOLINT(cert-msc51-cpp)
+	std::uniform_real_distribution<float> rand_position(-10.0f, 10.0f);
+	std::uniform_real_distribution<float> rand_rotation(-90.0f, 90.0f);
+	std::uniform_real_distribution<float> rand_gravity(-40.0f, -20.0f);
+
+	for (Entity &entity : entities) {
+		entity = ecs_manager.create_entity();
+
+		Transform transform = Transform{ glm::vec3(rand_position(random_generator), rand_position(random_generator),
+												 rand_position(random_generator)),
+			glm::vec3(rand_rotation(random_generator)), glm::vec3(1.0f) };
+		ecs_manager.add_component(entity, transform);
+
+		ColliderOBB c{};
+		c.center = transform.get_position();
+		c.range = transform.get_scale();
+		c.set_orientation(transform.get_euler_rot());
+		c.is_movable = true;
+
+		ColliderComponentsFactory::add_collider_component(entity, c);
+
+		ecs_manager.add_component<MeshInstance>(
+				entity, { render_manager.get_mesh("box"), render_manager.get_material("default_mesh") });
+
+		ecs_manager.add_component<Gravity>(entity, { glm::vec3(0.0f, rand_gravity(random_generator), 0.0f) });
+
+		ecs_manager.add_component(entity,
+				RigidBody{ .velocity = glm::vec3(0.0f, 0.0f, 0.0f), .acceleration = glm::vec3(0.0f, 0.0f, 0.0f) });
+	}
 }
 
 bool display_manager_init() {
@@ -260,6 +325,12 @@ int main() {
 
 	std::vector<Entity> entities(50);
 	demo_entities_init(entities);
+
+	std::vector<Entity> spheres(10);
+	demo_collision_sphere(spheres);
+
+	std::vector<Entity> obbs(10);
+	demo_collision_obb(obbs);
 
 	Entity collision_tester;
 	demo_collision_init(collision_tester);
@@ -407,6 +478,12 @@ int main() {
 
 		parent_system->update();
 		render_system->update(render_manager);
+
+		// TODO: remove this when collision demo will be removed
+		for (auto sphere : spheres) {
+			ColliderSphere &c = ecs_manager.get_component<ColliderSphere>(sphere);
+			DebugDraw::draw_sphere(c.center, c.radius);
+		}
 
 		input_manager.process_input();
 		render_manager.draw(camera);
