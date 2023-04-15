@@ -334,9 +334,10 @@ void RenderManager::draw_objects_forward(vk::CommandBuffer cmd, RenderScene::Mes
 	cam_data.view = view;
 	cam_data.viewproj = projection * view;
 
-	float framed = ((float)frame_number / 30.f);
+	float framed = ((float)frame_number / 120.f);
 
 	scene_parameters.ambient_color = { sin(framed), 0, cos(framed), 1 };
+	scene_parameters.sunlight_direction = { sin(framed), 0, cos(framed), 1 };
 
 	//push data to dynmem
 	uint32_t scene_data_offset = get_current_frame().dynamic_data.push(scene_parameters);

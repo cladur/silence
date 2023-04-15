@@ -993,6 +993,30 @@ bool RenderManager::load_prefab(const char *path, const glm::mat4 &root) {
 
 				textures.push_back(ao_tex);
 
+				auto normal_tex = material.textures["normals"];
+				loaded = load_image_to_cache(normal_tex.c_str(), asset_path(normal_tex).c_str());
+
+				if (!loaded) {
+					SPDLOG_ERROR("Failed to load normal texture {}", normal_tex);
+				}
+
+				textures.push_back(normal_tex);
+
+				auto metallic_roughness_tex = material.textures["metallicRoughness"];
+				loaded =
+						load_image_to_cache(metallic_roughness_tex.c_str(), asset_path(metallic_roughness_tex).c_str());
+				if (!loaded) {
+					SPDLOG_ERROR("Failed to load metallic roughness texture {}", metallic_roughness_tex);
+				}
+				textures.push_back(metallic_roughness_tex);
+
+				auto emissive_tex = material.textures["emissive"];
+				loaded = load_image_to_cache(emissive_tex.c_str(), asset_path(emissive_tex).c_str());
+				if (!loaded) {
+					SPDLOG_ERROR("Failed to load emissive texture {}", emissive_tex);
+				}
+				textures.push_back(emissive_tex);
+
 				vk_util::MaterialData info;
 				info.parameters = nullptr;
 
@@ -1090,7 +1114,7 @@ void RenderManager::reallocate_buffer(AllocatedBufferUntyped &buffer, size_t all
 	AllocatedBufferUntyped new_buffer = create_buffer(alloc_size, usage, memory_usage);
 
 	get_current_frame().frame_deletion_queue.push_function(
-			[=]() { allocator.destroyBuffer(buffer.buffer, buffer.allocation); });
+			[=, this]() { allocator.destroyBuffer(buffer.buffer, buffer.allocation); });
 
 	buffer = new_buffer;
 }
