@@ -27,18 +27,16 @@
 #define ASSET_PATH "resources/assets_export/"
 #define SHADER_PATH "resources/shaders/"
 
-void RenderManager::init_vulkan(DisplayManager& display_manager)
-{
+void RenderManager::init_vulkan(DisplayManager &display_manager) {
 	vkb::InstanceBuilder builder;
 	auto inst_ret = builder.set_app_name("Silence Vulkan Application")
-		.request_validation_layers()
-		.use_default_debug_messenger()
-		.require_api_version(1, 1, 0)
-		.enable_extension(VK_EXT_DEBUG_UTILS_EXTENSION_NAME)
-		.build();
+							.request_validation_layers()
+							.use_default_debug_messenger()
+							.require_api_version(1, 1, 0)
+							.enable_extension(VK_EXT_DEBUG_UTILS_EXTENSION_NAME)
+							.build();
 
-	if (!inst_ret)
-	{
+	if (!inst_ret) {
 		SPDLOG_ERROR("Failed to create Vulkan Instance. Error: {}", inst_ret.error().message());
 	}
 
@@ -60,12 +58,11 @@ void RenderManager::init_vulkan(DisplayManager& display_manager)
 	selector.set_required_features(features);
 
 	auto physical_device_ret = selector.set_minimum_version(1, 1)
-		.set_surface(surface)
-		//    .add_required_extension(VK_EXT_SAMPLER_FILTER_MINMAX_EXTENSION_NAME)
-		.select();
+									   .set_surface(surface)
+									   //    .add_required_extension(VK_EXT_SAMPLER_FILTER_MINMAX_EXTENSION_NAME)
+									   .select();
 
-	if (!physical_device_ret)
-	{
+	if (!physical_device_ret) {
 		SPDLOG_ERROR("Failed to find a suitable GPU. Error: {}", physical_device_ret.error().message());
 	}
 
@@ -100,26 +97,22 @@ void RenderManager::init_vulkan(DisplayManager& display_manager)
 
 	gpu_properties = vkb_device.physical_device.properties;
 
-	main_deletion_queue.push_function([ =, this ]() { allocator.destroy(); });
+	main_deletion_queue.push_function([=, this]() { allocator.destroy(); });
 }
 
-uint32_t previous_pow2(uint32_t v)
-{
+uint32_t previous_pow2(uint32_t v) {
 	uint32_t r = 1;
 
-	while (r * 2 < v)
-	{
+	while (r * 2 < v) {
 		r *= 2;
 	}
 
 	return r;
 }
-uint32_t get_image_mip_levels(uint32_t width, uint32_t height)
-{
+uint32_t get_image_mip_levels(uint32_t width, uint32_t height) {
 	uint32_t result = 1;
 
-	while (width > 1 || height > 1)
-	{
+	while (width > 1 || height > 1) {
 		result++;
 		width /= 2;
 		height /= 2;
@@ -128,8 +121,7 @@ uint32_t get_image_mip_levels(uint32_t width, uint32_t height)
 	return result;
 }
 
-void RenderManager::init_swapchain(DisplayManager& display_manager)
-{
+void RenderManager::init_swapchain(DisplayManager &display_manager) {
 	auto window_size = display_manager.get_framebuffer_size();
 	window_extent.width = window_size.first;
 	window_extent.height = window_size.second;
@@ -137,13 +129,13 @@ void RenderManager::init_swapchain(DisplayManager& display_manager)
 	vkb::SwapchainBuilder swapchain_builder{ chosen_gpu, device, surface };
 
 	auto vkb_swapchain = swapchain_builder
-		.use_default_format_selection()
-		// We use VSync present mode for now
-		// TODO: make this configurable if we want to uncap FPS in future
-		.set_desired_present_mode(VK_PRESENT_MODE_FIFO_KHR)
-		.set_desired_extent(window_extent.width, window_extent.height)
-		.build()
-		.value();
+								 .use_default_format_selection()
+								 // We use VSync present mode for now
+								 // TODO: make this configurable if we want to uncap FPS in future
+								 .set_desired_present_mode(VK_PRESENT_MODE_FIFO_KHR)
+								 .set_desired_extent(window_extent.width, window_extent.height)
+								 .build()
+								 .value();
 
 	//store swapchain and its related images
 	swapchain = vkb_swapchain.swapchain;
@@ -151,11 +143,11 @@ void RenderManager::init_swapchain(DisplayManager& display_manager)
 	swapchain_images = std::vector<vk::Image>(temp_swapchain_images.begin(), temp_swapchain_images.end());
 	auto temp_swapchain_image_views = vkb_swapchain.get_image_views().value();
 	swapchain_image_views =
-		std::vector<vk::ImageView>(temp_swapchain_image_views.begin(), temp_swapchain_image_views.end());
+			std::vector<vk::ImageView>(temp_swapchain_image_views.begin(), temp_swapchain_image_views.end());
 
 	swapchain_image_format = static_cast<vk::Format>(vkb_swapchain.image_format);
 
-	main_deletion_queue.push_function([ =, this ]() { device.destroySwapchainKHR(swapchain); });
+	main_deletion_queue.push_function([=, this]() { device.destroySwapchainKHR(swapchain); });
 
 	//for the render, depth and pyramid images, we want to allocate them from gpu local memory
 	vma::AllocationCreateInfo dimg_allocinfo = {};
@@ -168,25 +160,24 @@ void RenderManager::init_swapchain(DisplayManager& display_manager)
 		vk::Extent3D render_image_extent = { window_extent.width, window_extent.height, 1 };
 		render_format = vk::Format::eR32G32B32A32Sfloat;
 		vk::ImageCreateInfo ri_info = vk_init::image_create_info(render_format,
-			vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransferSrc |
-			vk::ImageUsageFlagBits::eSampled,
-			render_image_extent);
+				vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransferSrc |
+						vk::ImageUsageFlagBits::eSampled,
+				render_image_extent);
 
 		//allocate and create the image
 		VK_CHECK(allocator.createImage(
-			&ri_info, &dimg_allocinfo, &raw_render_image.image, &raw_render_image.allocation, nullptr));
+				&ri_info, &dimg_allocinfo, &raw_render_image.image, &raw_render_image.allocation, nullptr));
 
 		//build a image-view for the depth image to use for rendering
 		vk::ImageViewCreateInfo dview_info =
-			vk_init::image_view_create_info(render_format, raw_render_image.image, vk::ImageAspectFlagBits::eColor);
+				vk_init::image_view_create_info(render_format, raw_render_image.image, vk::ImageAspectFlagBits::eColor);
 
 		VK_CHECK(device.createImageView(&dview_info, nullptr, &raw_render_image.default_view));
 
-		main_deletion_queue.push_function([ =, this ]()
-			{
-				device.destroyImageView(raw_render_image.default_view);
-				allocator.destroyImage(raw_render_image.image, raw_render_image.allocation);
-			});
+		main_deletion_queue.push_function([=, this]() {
+			device.destroyImageView(raw_render_image.default_view);
+			allocator.destroyImage(raw_render_image.image, raw_render_image.allocation);
+		});
 	}
 
 	// depth image
@@ -199,24 +190,23 @@ void RenderManager::init_swapchain(DisplayManager& display_manager)
 
 		//the depth image will be an image with the format we selected and Depth Attachment usage flag
 		vk::ImageCreateInfo dimg_info = vk_init::image_create_info(depth_format,
-			vk::ImageUsageFlagBits::eDepthStencilAttachment | vk::ImageUsageFlagBits::eSampled, depth_image_extent);
+				vk::ImageUsageFlagBits::eDepthStencilAttachment | vk::ImageUsageFlagBits::eSampled, depth_image_extent);
 
 		//allocate and create the image
 		VK_CHECK(allocator.createImage(
-			&dimg_info, &dimg_allocinfo, &depth_image.image, &depth_image.allocation, nullptr));
+				&dimg_info, &dimg_allocinfo, &depth_image.image, &depth_image.allocation, nullptr));
 
 		//build an image-view for the depth image to use for render
 		vk::ImageViewCreateInfo dview_info =
-			vk_init::image_view_create_info(depth_format, depth_image.image, vk::ImageAspectFlagBits::eDepth);
+				vk_init::image_view_create_info(depth_format, depth_image.image, vk::ImageAspectFlagBits::eDepth);
 
 		VK_CHECK(device.createImageView(&dview_info, nullptr, &depth_image.default_view));
 
 		//add to deletion queues
-		main_deletion_queue.push_function([ =, this ]()
-			{
-				device.destroyImageView(depth_image.default_view);
-				allocator.destroyImage(depth_image.image, depth_image.allocation);
-			});
+		main_deletion_queue.push_function([=, this]() {
+			device.destroyImageView(depth_image.default_view);
+			allocator.destroyImage(depth_image.image, depth_image.allocation);
+		});
 	}
 
 	// Note: previous_pow2 makes sure all reductions are at most by 2x2 which makes sure they are conservative
@@ -228,43 +218,41 @@ void RenderManager::init_swapchain(DisplayManager& display_manager)
 		static_cast<uint32_t>(depth_pyramid_height), 1 };
 	//the depth image will be a image with the format we selected and Depth Attachment usage flag
 	vk::ImageCreateInfo pyramid_info = vk_init::image_create_info(vk::Format::eR32Sfloat,
-		vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eStorage | vk::ImageUsageFlagBits::eTransferSrc,
-		pyramid_extent);
+			vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eStorage | vk::ImageUsageFlagBits::eTransferSrc,
+			pyramid_extent);
 
 	pyramid_info.mipLevels = depth_pyramid_levels;
 
 	//allocate and create the image
 	VK_CHECK(allocator.createImage(
-		&pyramid_info, &dimg_allocinfo, &depth_pyramid.image, &depth_pyramid.allocation, nullptr));
+			&pyramid_info, &dimg_allocinfo, &depth_pyramid.image, &depth_pyramid.allocation, nullptr));
 
 	//build a image-view for the depth image to use for rendering
 	vk::ImageViewCreateInfo preview_info = vk_init::image_view_create_info(
-		vk::Format::eR32Sfloat, depth_pyramid.image, vk::ImageAspectFlagBits::eColor);
+			vk::Format::eR32Sfloat, depth_pyramid.image, vk::ImageAspectFlagBits::eColor);
 	preview_info.subresourceRange.levelCount = depth_pyramid_levels;
 
 	VK_CHECK(device.createImageView(&preview_info, nullptr, &depth_pyramid.default_view));
 
-	for (int32_t i = 0; i < depth_pyramid_levels; ++i)
-	{
+	for (int32_t i = 0; i < depth_pyramid_levels; ++i) {
 		vk::ImageViewCreateInfo level_info = vk_init::image_view_create_info(
-			vk::Format::eR32Sfloat, depth_pyramid.image, vk::ImageAspectFlagBits::eColor);
+				vk::Format::eR32Sfloat, depth_pyramid.image, vk::ImageAspectFlagBits::eColor);
 		level_info.subresourceRange.levelCount = 1;
 		level_info.subresourceRange.baseMipLevel = i;
 
 		vk::ImageView pyramid;
 		VK_CHECK(device.createImageView(&level_info, nullptr, &pyramid));
 
-		depth_pyramid_mips[ i ] = pyramid;
-		assert(depth_pyramid_mips[ i ]);
+		depth_pyramid_mips[i] = pyramid;
+		assert(depth_pyramid_mips[i]);
 
-		main_deletion_queue.push_function([ =, this ]() { device.destroyImageView(pyramid); });
+		main_deletion_queue.push_function([=, this]() { device.destroyImageView(pyramid); });
 	}
 
-	main_deletion_queue.push_function([ =, this ]()
-		{
-			device.destroyImageView(depth_pyramid.default_view);
-			allocator.destroyImage(depth_pyramid.image, depth_pyramid.allocation);
-		});
+	main_deletion_queue.push_function([=, this]() {
+		device.destroyImageView(depth_pyramid.default_view);
+		allocator.destroyImage(depth_pyramid.image, depth_pyramid.allocation);
+	});
 
 	vk::SamplerCreateInfo create_info = {};
 
@@ -298,14 +286,12 @@ void RenderManager::init_swapchain(DisplayManager& display_manager)
 	VK_CHECK(device.createSampler(&sampler_info, nullptr, &smooth_sampler));
 }
 
-void RenderManager::init_commands()
-{
+void RenderManager::init_commands() {
 	//create a command pool for commands submitted to the graphics queue.
 	vk::CommandPoolCreateInfo command_pool_info = vk_init::command_pool_create_info(
-		graphics_queue_family, vk::CommandPoolCreateFlagBits::eResetCommandBuffer);
+			graphics_queue_family, vk::CommandPoolCreateFlagBits::eResetCommandBuffer);
 
-	for (auto& frame : frames)
-	{
+	for (auto &frame : frames) {
 		frame.command_pool = device.createCommandPool(command_pool_info);
 
 		//allocate the default command buffer that we will use for render
@@ -313,24 +299,23 @@ void RenderManager::init_commands()
 
 		VK_CHECK(device.allocateCommandBuffers(&cmd_alloc_info, &frame.main_command_buffer));
 
-		main_deletion_queue.push_function([ =, this ]() { device.destroyCommandPool(frame.command_pool); });
+		main_deletion_queue.push_function([=, this]() { device.destroyCommandPool(frame.command_pool); });
 	}
 
 	vk::CommandPoolCreateInfo upload_command_pool_info = vk_init::command_pool_create_info(graphics_queue_family);
 	//create pool for upload context
 	VK_CHECK(device.createCommandPool(&upload_command_pool_info, nullptr, &upload_context.command_pool));
 
-	main_deletion_queue.push_function([ =, this ]() { device.destroyCommandPool(upload_context.command_pool); });
+	main_deletion_queue.push_function([=, this]() { device.destroyCommandPool(upload_context.command_pool); });
 
 	//allocate the default command buffer that we will use for the instant commands
 	vk::CommandBufferAllocateInfo cmd_alloc_info =
-		vk_init::command_buffer_allocate_info(upload_context.command_pool, 1);
+			vk_init::command_buffer_allocate_info(upload_context.command_pool, 1);
 
 	VK_CHECK(device.allocateCommandBuffers(&cmd_alloc_info, &upload_context.command_buffer));
 }
 
-void RenderManager::init_forward_renderpass()
-{
+void RenderManager::init_forward_renderpass() {
 	// the renderpass will use this color attachment.
 	vk::AttachmentDescription color_attachment = {};
 	//the attachment will have the HDR format
@@ -390,34 +375,33 @@ void RenderManager::init_forward_renderpass()
 	depth_dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
 	depth_dependency.dstSubpass = 0;
 	depth_dependency.srcStageMask =
-		vk::PipelineStageFlagBits::eEarlyFragmentTests | vk::PipelineStageFlagBits::eLateFragmentTests;
+			vk::PipelineStageFlagBits::eEarlyFragmentTests | vk::PipelineStageFlagBits::eLateFragmentTests;
 	depth_dependency.srcAccessMask = {};
 	depth_dependency.dstStageMask =
-		vk::PipelineStageFlagBits::eEarlyFragmentTests | vk::PipelineStageFlagBits::eLateFragmentTests;
+			vk::PipelineStageFlagBits::eEarlyFragmentTests | vk::PipelineStageFlagBits::eLateFragmentTests;
 	depth_dependency.dstAccessMask = vk::AccessFlagBits::eDepthStencilAttachmentWrite;
 
-	vk::AttachmentDescription attachments[ 2 ] = { color_attachment, depth_attachment };
-	vk::SubpassDependency dependencies[ 2 ] = { color_dependency, depth_dependency };
+	vk::AttachmentDescription attachments[2] = { color_attachment, depth_attachment };
+	vk::SubpassDependency dependencies[2] = { color_dependency, depth_dependency };
 
 	vk::RenderPassCreateInfo render_pass_info = {};
 	render_pass_info.sType = vk::StructureType::eRenderPassCreateInfo;
 	//connect the color and depth attachments to the info
 	render_pass_info.attachmentCount = 2;
-	render_pass_info.pAttachments = &attachments[ 0 ];
+	render_pass_info.pAttachments = &attachments[0];
 	//connect the subpass to the info
 	render_pass_info.subpassCount = 1;
 	render_pass_info.pSubpasses = &subpass;
 	// connect the dependencies to the info
 	render_pass_info.dependencyCount = 2;
-	render_pass_info.pDependencies = &dependencies[ 0 ];
+	render_pass_info.pDependencies = &dependencies[0];
 
 	VK_CHECK(device.createRenderPass(&render_pass_info, nullptr, &render_pass));
 
-	main_deletion_queue.push_function([ =, this ]() { device.destroyRenderPass(render_pass); });
+	main_deletion_queue.push_function([=, this]() { device.destroyRenderPass(render_pass); });
 }
 
-void RenderManager::init_copy_renderpass()
-{
+void RenderManager::init_copy_renderpass() {
 	vk::AttachmentDescription color_attachment = {};
 	color_attachment.format = swapchain_image_format;
 	color_attachment.samples = vk::SampleCountFlagBits::e1;
@@ -459,20 +443,19 @@ void RenderManager::init_copy_renderpass()
 
 	VK_CHECK(device.createRenderPass(&render_pass_info, nullptr, &copy_pass));
 
-	main_deletion_queue.push_function([ = ]() { device.destroyRenderPass(copy_pass, nullptr); });
+	main_deletion_queue.push_function([=]() { device.destroyRenderPass(copy_pass, nullptr); });
 }
 
-void RenderManager::init_framebuffers()
-{
+void RenderManager::init_framebuffers() {
 	vk::FramebufferCreateInfo fwd_info = vk_init::framebuffer_create_info(render_pass, window_extent);
-	vk::ImageView attachments[ 2 ];
-	attachments[ 0 ] = raw_render_image.default_view;
-	attachments[ 1 ] = depth_image.default_view;
+	vk::ImageView attachments[2];
+	attachments[0] = raw_render_image.default_view;
+	attachments[1] = depth_image.default_view;
 
 	fwd_info.pAttachments = attachments;
 	fwd_info.attachmentCount = 2;
 	VK_CHECK(device.createFramebuffer(&fwd_info, nullptr, &forward_framebuffer));
-	VkDebug::set_object_name(forward_framebuffer, "Forward Framebuffer");
+	VkDebug::set_name(forward_framebuffer, "Forward Framebuffer");
 	//create the framebuffers for the swapchain images. This will connect the render-pass to the images for
 	//render
 
@@ -481,35 +464,31 @@ void RenderManager::init_framebuffers()
 	framebuffers = std::vector<vk::Framebuffer>(swapchain_imagecount);
 
 	//create framebuffers for each of the swapchain image views
-	for (int i = 0; i < swapchain_imagecount; i++)
-	{
+	for (int i = 0; i < swapchain_imagecount; i++) {
 		// We're reusing the same depth image view for all framebuffers, since we're only drawing one frame at a
 		// time
 		vk::FramebufferCreateInfo fb_info = vk_init::framebuffer_create_info(copy_pass, window_extent);
-		fb_info.pAttachments = &swapchain_image_views[ i ];
+		fb_info.pAttachments = &swapchain_image_views[i];
 		fb_info.attachmentCount = 1;
-		VK_CHECK(device.createFramebuffer(&fb_info, nullptr, &framebuffers[ i ]));
+		VK_CHECK(device.createFramebuffer(&fb_info, nullptr, &framebuffers[i]));
 
-		main_deletion_queue.push_function([ =, this ]()
-			{
-				device.destroyFramebuffer(framebuffers[ i ]);
-				device.destroyImageView(swapchain_image_views[ i ]);
-			});
+		main_deletion_queue.push_function([=, this]() {
+			device.destroyFramebuffer(framebuffers[i]);
+			device.destroyImageView(swapchain_image_views[i]);
+		});
 	}
 
 	//main_deletion_queue.push_function([=, this]() { device.destroyFramebuffer(forward_framebuffer); });
 }
 
-void RenderManager::init_sync_structures()
-{
+void RenderManager::init_sync_structures() {
 	//create synchronization structures
 	vk::FenceCreateInfo fence_create_info = vk_init::fence_create_info(vk::FenceCreateFlagBits::eSignaled);
 
-	for (auto& frame : frames)
-	{
+	for (auto &frame : frames) {
 		VK_CHECK(device.createFence(&fence_create_info, nullptr, &frame.render_fence));
 
-		main_deletion_queue.push_function([ =, this ]() { device.destroyFence(frame.render_fence); });
+		main_deletion_queue.push_function([=, this]() { device.destroyFence(frame.render_fence); });
 
 		//for the semaphores we don't need any flags
 		vk::SemaphoreCreateInfo semaphore_create_info = vk_init::semaphore_create_info();
@@ -517,22 +496,20 @@ void RenderManager::init_sync_structures()
 		VK_CHECK(device.createSemaphore(&semaphore_create_info, nullptr, &frame.present_semaphore));
 		VK_CHECK(device.createSemaphore(&semaphore_create_info, nullptr, &frame.render_semaphore));
 
-		main_deletion_queue.push_function([ =, this ]()
-			{
-				device.destroySemaphore(frame.present_semaphore);
-				device.destroySemaphore(frame.render_semaphore);
-			});
+		main_deletion_queue.push_function([=, this]() {
+			device.destroySemaphore(frame.present_semaphore);
+			device.destroySemaphore(frame.render_semaphore);
+		});
 	}
 
 	vk::FenceCreateInfo upload_fence_create_info = vk_init::fence_create_info();
 
 	VK_CHECK(device.createFence(&upload_fence_create_info, nullptr, &upload_context.upload_fence));
 
-	main_deletion_queue.push_function([ =, this ]() { device.destroyFence(upload_context.upload_fence); });
+	main_deletion_queue.push_function([=, this]() { device.destroyFence(upload_context.upload_fence); });
 }
 
-void RenderManager::init_descriptors()
-{
+void RenderManager::init_descriptors() {
 	descriptor_allocator = new vk_util::DescriptorAllocator();
 	descriptor_allocator->init(device);
 
@@ -542,18 +519,18 @@ void RenderManager::init_descriptors()
 	const size_t scene_param_buffer_size = FRAME_OVERLAP * pad_uniform_buffer_size(sizeof(GPUSceneData));
 
 	scene_parameter_buffer = create_buffer("Scene parameter buffer", scene_param_buffer_size,
-		vk::BufferUsageFlagBits::eUniformBuffer, vma::MemoryUsage::eCpuToGpu);
+			vk::BufferUsageFlagBits::eUniformBuffer, vma::MemoryUsage::eCpuToGpu);
 
 	//information about the binding.
 	vk::DescriptorSetLayoutBinding camera_bind = vk_init::descriptor_set_layout_binding(
-		vk::DescriptorType::eUniformBuffer, vk::ShaderStageFlagBits::eVertex, 0);
+			vk::DescriptorType::eUniformBuffer, vk::ShaderStageFlagBits::eVertex, 0);
 
 	//binding for scene data at 1
 	vk::DescriptorSetLayoutBinding scene_bind =
-		vk_init::descriptor_set_layout_binding(vk::DescriptorType::eUniformBufferDynamic,
-			vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment, 1);
+			vk_init::descriptor_set_layout_binding(vk::DescriptorType::eUniformBufferDynamic,
+					vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment, 1);
 
-	vk::DescriptorSetLayoutBinding bindings [ ] = { camera_bind, scene_bind };
+	vk::DescriptorSetLayoutBinding bindings[] = { camera_bind, scene_bind };
 
 	vk::DescriptorSetLayoutCreateInfo setinfo = {};
 	setinfo.sType = vk::StructureType::eDescriptorSetLayoutCreateInfo;
@@ -568,7 +545,7 @@ void RenderManager::init_descriptors()
 	global_set_layout = descriptor_layout_cache->create_descriptor_layout(&setinfo);
 
 	vk::DescriptorSetLayoutBinding object_bind = vk_init::descriptor_set_layout_binding(
-		vk::DescriptorType::eStorageBuffer, vk::ShaderStageFlagBits::eVertex, 0);
+			vk::DescriptorType::eStorageBuffer, vk::ShaderStageFlagBits::eVertex, 0);
 	vk::DescriptorSetLayoutCreateInfo object_set_info = {};
 	object_set_info.sType = vk::StructureType::eDescriptorSetLayoutCreateInfo;
 	object_set_info.pNext = nullptr;
@@ -579,73 +556,69 @@ void RenderManager::init_descriptors()
 	object_set_layout = descriptor_layout_cache->create_descriptor_layout(&object_set_info);
 
 	vk::DescriptorSetLayoutBinding texture1_bind = vk_init::descriptor_set_layout_binding(
-		vk::DescriptorType::eCombinedImageSampler, vk::ShaderStageFlagBits::eFragment, 0);
+			vk::DescriptorType::eCombinedImageSampler, vk::ShaderStageFlagBits::eFragment, 0);
 
 	vk::DescriptorSetLayoutBinding texture2_bind = vk_init::descriptor_set_layout_binding(
-		vk::DescriptorType::eCombinedImageSampler, vk::ShaderStageFlagBits::eFragment, 1);
+			vk::DescriptorType::eCombinedImageSampler, vk::ShaderStageFlagBits::eFragment, 1);
 
-	vk::DescriptorSetLayoutBinding texture_binds [ ] = { texture1_bind, texture2_bind };
+	vk::DescriptorSetLayoutBinding texture_binds[] = { texture1_bind, texture2_bind };
 
 	vk::DescriptorSetLayoutCreateInfo set3_info = {};
 	set3_info.sType = vk::StructureType::eDescriptorSetLayoutCreateInfo;
 	set3_info.pNext = nullptr;
 	set3_info.bindingCount = 2;
 	set3_info.flags = {};
-	set3_info.pBindings = &texture_binds[ 0 ];
+	set3_info.pBindings = &texture_binds[0];
 
 	single_texture_set_layout = descriptor_layout_cache->create_descriptor_layout(&set3_info);
 
-	for (auto& frame : frames)
-	{
+	for (auto &frame : frames) {
 		frame.dynamic_descriptor_allocator = new vk_util::DescriptorAllocator();
 		frame.dynamic_descriptor_allocator->init(device);
 
 		frame.camera_buffer = create_buffer("Camera buffer", sizeof(GPUCameraData),
-			vk::BufferUsageFlagBits::eUniformBuffer, vma::MemoryUsage::eCpuToGpu);
+				vk::BufferUsageFlagBits::eUniformBuffer, vma::MemoryUsage::eCpuToGpu);
 
 		// TODO: Move this constant somewhere else
 		const int max_objects = 10000;
 		frame.object_buffer = create_buffer("Object buffer", max_objects * sizeof(GPUObjectData),
-			vk::BufferUsageFlagBits::eStorageBuffer, vma::MemoryUsage::eCpuToGpu);
+				vk::BufferUsageFlagBits::eStorageBuffer, vma::MemoryUsage::eCpuToGpu);
 
 		// TODO: Move this constant somewhere else
 		const int max_commands = 10000;
 
 		frame.indirect_buffer = create_buffer("Indirect buffer", max_commands * sizeof(vk::DrawIndexedIndirectCommand),
-			vk::BufferUsageFlagBits::eIndirectBuffer | vk::BufferUsageFlagBits::eTransferDst |
-			vk::BufferUsageFlagBits::eStorageBuffer,
-			vma::MemoryUsage::eCpuToGpu);
+				vk::BufferUsageFlagBits::eIndirectBuffer | vk::BufferUsageFlagBits::eTransferDst |
+						vk::BufferUsageFlagBits::eStorageBuffer,
+				vma::MemoryUsage::eCpuToGpu);
 
 		// 1 megabyte of dynamic data buffer
 		frame.dynamic_buffer = create_buffer(
-			"Dynamic data buffer", 1000000, vk::BufferUsageFlagBits::eUniformBuffer, vma::MemoryUsage::eCpuOnly);
+				"Dynamic data buffer", 1000000, vk::BufferUsageFlagBits::eUniformBuffer, vma::MemoryUsage::eCpuOnly);
 		frame.dynamic_data.init(allocator, frame.dynamic_buffer, gpu_properties.limits.minUniformBufferOffsetAlignment);
 	}
 
-	main_deletion_queue.push_function([ & ]()
-		{
-			allocator.destroyBuffer(scene_parameter_buffer.buffer, scene_parameter_buffer.allocation);
+	main_deletion_queue.push_function([&]() {
+		allocator.destroyBuffer(scene_parameter_buffer.buffer, scene_parameter_buffer.allocation);
 
-			for (auto& frame : frames)
-			{
-				allocator.destroyBuffer(frame.camera_buffer.buffer, frame.camera_buffer.allocation);
-				allocator.destroyBuffer(frame.object_buffer.buffer, frame.object_buffer.allocation);
-				allocator.destroyBuffer(frame.indirect_buffer.buffer, frame.indirect_buffer.allocation);
-				frame.dynamic_data.free(allocator);
-				allocator.destroyBuffer(frame.dynamic_buffer.buffer, frame.dynamic_buffer.allocation);
-			}
-		});
+		for (auto &frame : frames) {
+			allocator.destroyBuffer(frame.camera_buffer.buffer, frame.camera_buffer.allocation);
+			allocator.destroyBuffer(frame.object_buffer.buffer, frame.object_buffer.allocation);
+			allocator.destroyBuffer(frame.indirect_buffer.buffer, frame.indirect_buffer.allocation);
+			frame.dynamic_data.free(allocator);
+			allocator.destroyBuffer(frame.dynamic_buffer.buffer, frame.dynamic_buffer.allocation);
+		}
+	});
 }
 
-void RenderManager::init_pipelines()
-{
+void RenderManager::init_pipelines() {
 	material_system.init(this);
 	material_system.build_default_templates();
 
 	//fullscreen triangle pipeline for blits
-	auto* blit_effect = new ShaderEffect();
+	auto *blit_effect = new ShaderEffect();
 	blit_effect->add_stage(
-		shader_cache.get_shader(shader_path("fullscreen.vert.spv")), vk::ShaderStageFlagBits::eVertex);
+			shader_cache.get_shader(shader_path("fullscreen.vert.spv")), vk::ShaderStageFlagBits::eVertex);
 	blit_effect->add_stage(shader_cache.get_shader(shader_path("blit.frag.spv")), vk::ShaderStageFlagBits::eFragment);
 	blit_effect->reflect_layout(device, nullptr, 0);
 
@@ -690,11 +663,10 @@ void RenderManager::init_pipelines()
 	blit_pipeline = pipeline_builder.build_pipeline(device, copy_pass);
 	blit_pipeline_layout = blit_effect->built_layout;
 
-	main_deletion_queue.push_function([ &, this ]()
-		{
-			device.destroyPipeline(blit_pipeline);
-			device.destroyPipelineLayout(blit_pipeline_layout);
-		});
+	main_deletion_queue.push_function([&, this]() {
+		device.destroyPipeline(blit_pipeline);
+		device.destroyPipelineLayout(blit_pipeline_layout);
+	});
 
 	//load the compute shaders
 	load_compute_shader(shader_path("indirect_cull.comp.spv").c_str(), cull_pipeline, cull_layout);
@@ -702,8 +674,7 @@ void RenderManager::init_pipelines()
 	load_compute_shader(shader_path("sparse_upload.comp.spv").c_str(), sparse_upload_pipeline, sparse_upload_layout);
 }
 
-bool RenderManager::load_compute_shader(const char* shader_path, vk::Pipeline& pipeline, vk::PipelineLayout& layout)
-{
+bool RenderManager::load_compute_shader(const char *shader_path, vk::Pipeline &pipeline, vk::PipelineLayout &layout) {
 	ShaderModule compute_module;
 	if (!vk_util::load_shader_module(device, shader_path, &compute_module))
 
@@ -712,7 +683,7 @@ bool RenderManager::load_compute_shader(const char* shader_path, vk::Pipeline& p
 		return false;
 	}
 
-	auto* compute_effect = new ShaderEffect();
+	auto *compute_effect = new ShaderEffect();
 
 	compute_effect->add_stage(&compute_module, vk::ShaderStageFlagBits::eCompute);
 
@@ -721,25 +692,23 @@ bool RenderManager::load_compute_shader(const char* shader_path, vk::Pipeline& p
 	ComputePipelineBuilder compute_builder;
 	compute_builder.pipeline_layout = compute_effect->built_layout;
 	compute_builder.shader_stage =
-		vk_init::pipeline_shader_stage_create_info(vk::ShaderStageFlagBits::eCompute, compute_module.module);
+			vk_init::pipeline_shader_stage_create_info(vk::ShaderStageFlagBits::eCompute, compute_module.module);
 
 	layout = compute_effect->built_layout;
 	pipeline = compute_builder.build_pipeline(device);
 
 	device.destroyShaderModule(compute_module.module, nullptr);
 
-	main_deletion_queue.push_function([ = ]()
-		{
-			device.destroyPipeline(pipeline, nullptr);
+	main_deletion_queue.push_function([=]() {
+		device.destroyPipeline(pipeline, nullptr);
 
-			device.destroyPipelineLayout(layout, nullptr);
-		});
+		device.destroyPipelineLayout(layout, nullptr);
+	});
 
 	return true;
 }
 
-void RenderManager::init_scene()
-{
+void RenderManager::init_scene() {
 	// //create a sampler for the texture
 	// vk::SamplerCreateInfo sampler_info = vk_init::sampler_create_info(vk::Filter::eNearest);
 
@@ -772,11 +741,10 @@ void RenderManager::init_scene()
 	load_prefab(asset_path("DamagedHelmet/DamagedHelmet.pfb").c_str());
 }
 
-void RenderManager::init_imgui(GLFWwindow* window)
-{
+void RenderManager::init_imgui(GLFWwindow *window) {
 	//1: create descriptor pool for IMGUI
 	// the size of the pool is very oversize, but it's copied from imgui demo itself.
-	vk::DescriptorPoolSize pool_sizes [ ] = { { vk::DescriptorType::eSampler, 1000 },
+	vk::DescriptorPoolSize pool_sizes[] = { { vk::DescriptorType::eSampler, 1000 },
 		{ vk::DescriptorType::eCombinedImageSampler, 1000 }, { vk::DescriptorType::eSampledImage, 1000 },
 		{ vk::DescriptorType::eStorageImage, 1000 }, { vk::DescriptorType::eUniformTexelBuffer, 1000 },
 		{ vk::DescriptorType::eStorageTexelBuffer, 1000 }, { vk::DescriptorType::eUniformBuffer, 1000 },
@@ -816,32 +784,30 @@ void RenderManager::init_imgui(GLFWwindow* window)
 	ImGui_ImplVulkan_Init(&init_info, render_pass);
 
 	//execute a gpu command to upload imgui font textures
-	immediate_submit([ & ](vk::CommandBuffer cmd) { ImGui_ImplVulkan_CreateFontsTexture(cmd); });
+	immediate_submit([&](vk::CommandBuffer cmd) { ImGui_ImplVulkan_CreateFontsTexture(cmd); });
 
 	//clear font textures from cpu data
 	ImGui_ImplVulkan_DestroyFontUploadObjects();
 
 	//queue destruction of the imgui created structures
-	main_deletion_queue.push_function([ =, this ]()
-		{
-			device.destroyDescriptorPool(imgui_pool, nullptr);
-			ImGui_ImplVulkan_Shutdown();
-		});
+	main_deletion_queue.push_function([=, this]() {
+		device.destroyDescriptorPool(imgui_pool, nullptr);
+		ImGui_ImplVulkan_Shutdown();
+	});
 }
 
-void RenderManager::load_meshes()
-{
+void RenderManager::load_meshes() {
 	triangle_mesh.vertices.resize(3);
 
 	//vertex positions
-	triangle_mesh.vertices[ 0 ].position = { 1.f, 1.f, 0.0f };
-	triangle_mesh.vertices[ 1 ].position = { -1.f, 1.f, 0.0f };
-	triangle_mesh.vertices[ 2 ].position = { 0.f, -1.f, 0.0f };
+	triangle_mesh.vertices[0].position = { 1.f, 1.f, 0.0f };
+	triangle_mesh.vertices[1].position = { -1.f, 1.f, 0.0f };
+	triangle_mesh.vertices[2].position = { 0.f, -1.f, 0.0f };
 
 	//vertex colors, all green
-	triangle_mesh.vertices[ 0 ].color = { 0.f, 1.f, 0.0f }; //pure green
-	triangle_mesh.vertices[ 1 ].color = { 0.f, 1.f, 0.0f }; //pure green
-	triangle_mesh.vertices[ 2 ].color = { 0.f, 1.f, 0.0f }; //pure green
+	triangle_mesh.vertices[0].color = { 0.f, 1.f, 0.0f }; //pure green
+	triangle_mesh.vertices[1].color = { 0.f, 1.f, 0.0f }; //pure green
+	triangle_mesh.vertices[2].color = { 0.f, 1.f, 0.0f }; //pure green
 
 	triangle_mesh.indices = { 0, 1, 2 };
 
@@ -856,8 +822,7 @@ void RenderManager::load_meshes()
 	// meshes["box"] = box_mesh;
 }
 
-void RenderManager::upload_mesh(Mesh& mesh)
-{
+void RenderManager::upload_mesh(Mesh &mesh) {
 	size_t buffer_size = mesh.vertices.size() * sizeof(Vertex);
 	//allocate staging buffer
 	vk::BufferCreateInfo buffer_info = {};
@@ -873,23 +838,23 @@ void RenderManager::upload_mesh(Mesh& mesh)
 
 	//allocate the buffer
 	VK_CHECK(allocator.createBuffer(
-		&buffer_info, &vmaalloc_info, &mesh.vertex_buffer.buffer, &mesh.vertex_buffer.allocation, nullptr));
+			&buffer_info, &vmaalloc_info, &mesh.vertex_buffer.buffer, &mesh.vertex_buffer.allocation, nullptr));
 
-	void* data;
+	void *data;
 	VK_CHECK(allocator.mapMemory(mesh.vertex_buffer.allocation, &data));
 	memcpy(data, mesh.vertices.data(), mesh.vertices.size() * sizeof(Vertex));
 	allocator.unmapMemory(mesh.vertex_buffer.allocation);
 
 	//add the destruction of triangle mesh buffer to the deletion queue
 	main_deletion_queue.push_function(
-		[ =, this ]() { allocator.destroyBuffer(mesh.vertex_buffer.buffer, mesh.vertex_buffer.allocation); });
+			[=, this]() { allocator.destroyBuffer(mesh.vertex_buffer.buffer, mesh.vertex_buffer.allocation); });
 
 	// Create new buffer, this time for indices
 	buffer_size = mesh.indices.size() * sizeof(uint32_t);
 	buffer_info.size = buffer_size;
 
 	VK_CHECK(allocator.createBuffer(
-		&buffer_info, &vmaalloc_info, &mesh.index_buffer.buffer, &mesh.index_buffer.allocation, nullptr));
+			&buffer_info, &vmaalloc_info, &mesh.index_buffer.buffer, &mesh.index_buffer.allocation, nullptr));
 
 	VK_CHECK(allocator.mapMemory(mesh.index_buffer.allocation, &data));
 	memcpy(data, mesh.indices.data(), mesh.indices.size() * sizeof(uint32_t));
@@ -897,27 +862,22 @@ void RenderManager::upload_mesh(Mesh& mesh)
 
 	//add the destruction of triangle mesh buffer to the deletion queue
 	main_deletion_queue.push_function(
-		[ =, this ]() { allocator.destroyBuffer(mesh.index_buffer.buffer, mesh.index_buffer.allocation); });
+			[=, this]() { allocator.destroyBuffer(mesh.index_buffer.buffer, mesh.index_buffer.allocation); });
 }
 
-bool RenderManager::load_image_to_cache(const char* name, const char* path)
-{
+bool RenderManager::load_image_to_cache(const char *name, const char *path) {
 	Texture newtex;
 
-	if (loaded_textures.find(name) != loaded_textures.end())
-	{
+	if (loaded_textures.find(name) != loaded_textures.end()) {
 		return true;
 	}
 
 	bool result = vk_util::load_image_from_asset(*this, path, newtex.image);
 
-	if (!result)
-	{
+	if (!result) {
 		SPDLOG_ERROR("Error When texture {} at path {}", name, path);
 		return false;
-	}
-	else
-	{
+	} else {
 		SPDLOG_INFO("Loaded texture {} at path {}", name, path);
 	}
 	newtex.image_view = newtex.image.default_view;
@@ -925,34 +885,29 @@ bool RenderManager::load_image_to_cache(const char* name, const char* path)
 	//VK_IMAGE_ASPECT_COLOR_BIT); imageinfo.subresourceRange.levelCount = newtex.image.mipLevels;
 	//vkCreateImageView(_device, &imageinfo, nullptr, &newtex.imageView);
 
-	loaded_textures[ name ] = newtex;
+	loaded_textures[name] = newtex;
 	return true;
 }
 
-bool RenderManager::load_prefab(const char* path, const glm::mat4& root)
-{
+bool RenderManager::load_prefab(const char *path, const glm::mat4 &root) {
 	auto pf = prefab_cache.find(path);
-	if (pf == prefab_cache.end())
-	{
+	if (pf == prefab_cache.end()) {
 		assets::AssetFile file;
 		bool loaded = assets::load_binary_file(path, file);
 
-		if (!loaded)
-		{
+		if (!loaded) {
 			SPDLOG_ERROR("Error When loading prefab file at path {}", path);
 			return false;
-		}
-		else
-		{
+		} else {
 			SPDLOG_INFO("Prefab {} loaded to cache", path);
 		}
 
-		prefab_cache[ path ] = new assets::PrefabInfo;
+		prefab_cache[path] = new assets::PrefabInfo;
 
-		*prefab_cache[ path ] = assets::read_prefab_info(&file);
+		*prefab_cache[path] = assets::read_prefab_info(&file);
 	}
 
-	assets::PrefabInfo* prefab = prefab_cache[ path ];
+	assets::PrefabInfo *prefab = prefab_cache[path];
 
 	vk::SamplerCreateInfo sampler_info = vk_init::sampler_create_info(vk::Filter::eLinear);
 	sampler_info.mipmapMode = vk::SamplerMipmapMode::eLinear;
@@ -960,46 +915,39 @@ bool RenderManager::load_prefab(const char* path, const glm::mat4& root)
 	std::unordered_map<uint64_t, glm::mat4> node_worldmats;
 
 	std::vector<std::pair<uint64_t, glm::mat4>> pending_nodes;
-	for (auto& [k, v] : prefab->node_matrices)
-	{
+	for (auto &[k, v] : prefab->node_matrices) {
 		glm::mat4 nodematrix{ 1.f };
 
-		auto nm = prefab->matrices[ v ];
+		auto nm = prefab->matrices[v];
 		memcpy(&nodematrix, &nm, sizeof(glm::mat4));
 
 		//check if it has parents
 		auto matrix_it = prefab->node_parents.find(k);
-		if (matrix_it == prefab->node_parents.end())
-		{
+		if (matrix_it == prefab->node_parents.end()) {
 			//add to worldmats
-			node_worldmats[ k ] = root * nodematrix;
-		}
-		else
-		{
+			node_worldmats[k] = root * nodematrix;
+		} else {
 			//enqueue
 			pending_nodes.emplace_back(k, nodematrix);
 		}
 	}
 
 	//process pending nodes list until it empties
-	while (!pending_nodes.empty())
-	{
-		for (int i = 0; i < pending_nodes.size(); i++)
-		{
-			uint64_t node = pending_nodes[ i ].first;
-			uint64_t parent = prefab->node_parents[ node ];
+	while (!pending_nodes.empty()) {
+		for (int i = 0; i < pending_nodes.size(); i++) {
+			uint64_t node = pending_nodes[i].first;
+			uint64_t parent = prefab->node_parents[node];
 
 			//try to find parent in cache
 			auto matrix_it = node_worldmats.find(parent);
-			if (matrix_it != node_worldmats.end())
-			{
+			if (matrix_it != node_worldmats.end()) {
 				//transform with the parent
-				glm::mat4 nodematrix = (matrix_it)->second * pending_nodes[ i ].second;
+				glm::mat4 nodematrix = (matrix_it)->second * pending_nodes[i].second;
 
-				node_worldmats[ node ] = nodematrix;
+				node_worldmats[node] = nodematrix;
 
 				//remove from queue, pop last
-				pending_nodes[ i ] = pending_nodes.back();
+				pending_nodes[i] = pending_nodes.back();
 				pending_nodes.pop_back();
 				i--;
 			}
@@ -1009,65 +957,56 @@ bool RenderManager::load_prefab(const char* path, const glm::mat4& root)
 	std::vector<MeshObject> prefab_renderables;
 	prefab_renderables.reserve(prefab->node_meshes.size());
 
-	for (auto& [k, v] : prefab->node_meshes)
-	{
+	for (auto &[k, v] : prefab->node_meshes) {
 		//load mesh
 
-		if (v.mesh_path.find("Sky") != std::string::npos)
-		{
+		if (v.mesh_path.find("Sky") != std::string::npos) {
 			continue;
 		}
 
-		if (!get_mesh(v.mesh_path))
-		{
-			Mesh mesh {};
+		if (!get_mesh(v.mesh_path)) {
+			Mesh mesh{};
 			mesh.load_from_asset(asset_path(v.mesh_path).c_str());
 
 			upload_mesh(mesh);
 
-			meshes[ v.mesh_path.c_str() ] = mesh;
+			meshes[v.mesh_path.c_str()] = mesh;
 		}
 
 		auto material_name = v.material_path.c_str();
 		//load material
 
-		vk_util::Material* object_material = material_system.get_material(material_name);
-		if (!object_material)
-		{
+		vk_util::Material *object_material = material_system.get_material(material_name);
+		if (!object_material) {
 			assets::AssetFile material_file;
 			bool loaded = assets::load_binary_file(asset_path(material_name).c_str(), material_file);
 
-			if (loaded)
-			{
+			if (loaded) {
 				assets::MaterialInfo material = assets::read_material_info(&material_file);
 
 				std::vector<std::string> textures;
 
-				auto base_color_tex = material.textures[ "baseColor" ];
-				if (base_color_tex.size() <= 3)
-				{
+				auto base_color_tex = material.textures["baseColor"];
+				if (base_color_tex.size() <= 3) {
 					// TODO: Figure out if this should be a white texture after all?
 					// texture = "Sponza/white.tx";
 					base_color_tex = "missing.tx";
 				}
 
 				loaded = load_image_to_cache(base_color_tex.c_str(), asset_path(base_color_tex).c_str());
-				if (!loaded)
-				{
+				if (!loaded) {
 					SPDLOG_ERROR("Failed to load base color texture {}", base_color_tex);
 				}
 
 				textures.push_back(base_color_tex);
 
-				auto ao_tex = material.textures[ "occlusion" ];
-				if (ao_tex.size() <= 3)
-				{
+				auto ao_tex = material.textures["occlusion"];
+				if (ao_tex.size() <= 3) {
 					ao_tex = "missing.tx";
 				}
 
 				loaded = load_image_to_cache(ao_tex.c_str(), asset_path(ao_tex).c_str());
-				if (!loaded)
-				{
+				if (!loaded) {
 					SPDLOG_ERROR("Failed to load ambient occlusion texture {}", ao_tex);
 				}
 
@@ -1076,22 +1015,18 @@ bool RenderManager::load_prefab(const char* path, const glm::mat4& root)
 				vk_util::MaterialData info;
 				info.parameters = nullptr;
 
-				if (material.transparency == assets::TransparencyMode::Transparent)
-				{
+				if (material.transparency == assets::TransparencyMode::Transparent) {
 					info.base_template = "texturedPBR_transparent";
-				}
-				else
-				{
+				} else {
 					info.base_template = "texturedPBR_opaque";
 				}
 
-				for (auto& texture : textures)
-				{
+				for (auto &texture : textures) {
 					vk::Sampler smooth_sampler;
 					VK_CHECK(device.createSampler(&sampler_info, nullptr, &smooth_sampler));
 
 					vk_util::SampledTexture tex;
-					tex.image_view = loaded_textures[ texture ].image_view;
+					tex.image_view = loaded_textures[texture].image_view;
 					tex.sampler = smooth_sampler;
 
 					info.textures.push_back(tex);
@@ -1099,13 +1034,10 @@ bool RenderManager::load_prefab(const char* path, const glm::mat4& root)
 
 				object_material = material_system.build_material(material_name, info);
 
-				if (!object_material)
-				{
+				if (!object_material) {
 					SPDLOG_ERROR("Error When building material {}", v.material_path);
 				}
-			}
-			else
-			{
+			} else {
 				SPDLOG_ERROR("Error When loading material at path {}", v.material_path);
 			}
 		}
@@ -1119,8 +1051,7 @@ bool RenderManager::load_prefab(const char* path, const glm::mat4& root)
 		glm::mat4 nodematrix{ 1.f };
 
 		auto matrix_it = node_worldmats.find(k);
-		if (matrix_it != node_worldmats.end())
-		{
+		if (matrix_it != node_worldmats.end()) {
 			auto nm = (*matrix_it).second;
 			memcpy(&nodematrix, &nm, sizeof(glm::mat4));
 		}
@@ -1149,9 +1080,8 @@ bool RenderManager::load_prefab(const char* path, const glm::mat4& root)
 	return true;
 }
 
-AllocatedBufferUntyped RenderManager::create_buffer(
-	size_t alloc_size, vk::BufferUsageFlags usage, vma::MemoryUsage memory_usage) const
-{
+AllocatedBufferUntyped RenderManager::create_buffer(const std::string &allocation_name, size_t alloc_size,
+		vk::BufferUsageFlags usage, vma::MemoryUsage memory_usage) const {
 	//allocate vertex buffer
 	vk::BufferCreateInfo buffer_info = {};
 	buffer_info.sType = vk::StructureType::eBufferCreateInfo;
@@ -1175,46 +1105,41 @@ AllocatedBufferUntyped RenderManager::create_buffer(
 	return new_buffer;
 }
 
-void RenderManager::reallocate_buffer(AllocatedBufferUntyped& buffer, size_t alloc_size, vk::BufferUsageFlags usage,
-	vma::MemoryUsage memory_usage, vk::MemoryPropertyFlags required_flags)
-{
+void RenderManager::reallocate_buffer(AllocatedBufferUntyped &buffer, size_t alloc_size, vk::BufferUsageFlags usage,
+		vma::MemoryUsage memory_usage, vk::MemoryPropertyFlags required_flags) {
 	// TODO: Add required_flags to create_buffer()
 	AllocatedBufferUntyped new_buffer = create_buffer("Reallocation of buffer", alloc_size, usage, memory_usage);
 
 	get_current_frame().frame_deletion_queue.push_function(
-		[ =, this ]() { allocator.destroyBuffer(buffer.buffer, buffer.allocation); });
+			[=, this]() { allocator.destroyBuffer(buffer.buffer, buffer.allocation); });
 
 	main_deletion_queue.push_function(
-		[ =, this ]() { allocator.destroyBuffer(new_buffer.buffer, new_buffer.allocation); });
+			[=, this]() { allocator.destroyBuffer(new_buffer.buffer, new_buffer.allocation); });
 
 	buffer = new_buffer;
 }
 
-size_t RenderManager::pad_uniform_buffer_size(size_t original_size) const
-{
+size_t RenderManager::pad_uniform_buffer_size(size_t original_size) const {
 	// Calculate required alignment based on minimum device offset alignment
 	size_t min_ubo_alignment = gpu_properties.limits.minUniformBufferOffsetAlignment;
 	size_t aligned_size = original_size;
-	if (min_ubo_alignment > 0)
-	{
+	if (min_ubo_alignment > 0) {
 		aligned_size = (aligned_size + min_ubo_alignment - 1) & ~(min_ubo_alignment - 1);
 	}
 	return aligned_size;
 }
 
-void RenderManager::unmap_buffer(AllocatedBufferUntyped& buffer) const
-{
+void RenderManager::unmap_buffer(AllocatedBufferUntyped &buffer) const {
 	allocator.unmapMemory(buffer.allocation);
 }
 
-void RenderManager::immediate_submit(std::function<void(vk::CommandBuffer)>&& function)
-{
+void RenderManager::immediate_submit(std::function<void(vk::CommandBuffer)> &&function) {
 	vk::CommandBuffer cmd = upload_context.command_buffer;
 
 	//begin the command buffer recording. We will use this command buffer exactly once before resetting, so we tell
 	//vulkan that
 	vk::CommandBufferBeginInfo cmd_begin_info =
-		vk_init::command_buffer_begin_info(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
+			vk_init::command_buffer_begin_info(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
 
 	VK_CHECK(cmd.begin(&cmd_begin_info));
 
@@ -1236,20 +1161,16 @@ void RenderManager::immediate_submit(std::function<void(vk::CommandBuffer)>&& fu
 	device.resetCommandPool(upload_context.command_pool);
 }
 
-std::string RenderManager::asset_path(std::string_view path)
-{
+std::string RenderManager::asset_path(std::string_view path) {
 	return std::string(ASSET_PATH) + std::string(path);
 }
 
-std::string RenderManager::shader_path(std::string_view path)
-{
+std::string RenderManager::shader_path(std::string_view path) {
 	return std::string(SHADER_PATH) + std::string(path);
 }
 
-void RenderManager::ready_cull_data(RenderScene::MeshPass& pass, vk::CommandBuffer cmd)
-{
-	if (pass.batches.empty())
-	{
+void RenderManager::ready_cull_data(RenderScene::MeshPass &pass, vk::CommandBuffer cmd) {
+	if (pass.batches.empty()) {
 		return;
 	}
 
@@ -1262,7 +1183,7 @@ void RenderManager::ready_cull_data(RenderScene::MeshPass& pass, vk::CommandBuff
 
 	{
 		vk::BufferMemoryBarrier barrier =
-			vk_init::buffer_barrier(pass.draw_indirect_buffer.buffer, graphics_queue_family);
+				vk_init::buffer_barrier(pass.draw_indirect_buffer.buffer, graphics_queue_family);
 		barrier.dstAccessMask = vk::AccessFlagBits::eShaderWrite | vk::AccessFlagBits::eShaderRead;
 		barrier.srcAccessMask = vk::AccessFlagBits::eTransferWrite;
 
@@ -1272,8 +1193,7 @@ void RenderManager::ready_cull_data(RenderScene::MeshPass& pass, vk::CommandBuff
 	}
 }
 
-RenderManager::Status RenderManager::startup(DisplayManager& display_manager, Camera* cam)
-{
+RenderManager::Status RenderManager::startup(DisplayManager &display_manager, Camera *cam) {
 	camera = cam;
 
 	// TODO: Handle failures
@@ -1306,14 +1226,12 @@ RenderManager::Status RenderManager::startup(DisplayManager& display_manager, Ca
 	return Status::Ok;
 }
 
-void RenderManager::shutdown()
-{
+void RenderManager::shutdown() {
 	//make sure the GPU has stopped doing its things
 	device.waitIdle();
 	main_deletion_queue.flush();
 
-	for (auto& frame : frames)
-	{
+	for (auto &frame : frames) {
 		frame.dynamic_descriptor_allocator->cleanup();
 	}
 
@@ -1326,31 +1244,24 @@ void RenderManager::shutdown()
 	instance.destroy();
 }
 
-FrameData& RenderManager::get_current_frame()
-{
-	return frames[ frame_number % FRAME_OVERLAP ];
+FrameData &RenderManager::get_current_frame() {
+	return frames[frame_number % FRAME_OVERLAP];
 }
 
-Mesh* RenderManager::get_mesh(const std::string& name)
-{
+Mesh *RenderManager::get_mesh(const std::string &name) {
 	auto it = meshes.find(name);
-	if (it == meshes.end())
-	{
+	if (it == meshes.end()) {
 		return nullptr;
-	}
-	else
-	{
+	} else {
 		return &(*it).second;
 	}
 }
 
-void RenderManager::load_images()
-{
+void RenderManager::load_images() {
 	load_image_to_cache("white", asset_path("missing.tx").c_str());
 }
 
-void RenderManager::draw(Camera& camera)
-{
+void RenderManager::draw(Camera &camera) {
 	//wait until the GPU has finished render the last frame. Timeout of 1 second
 	VK_CHECK(device.waitForFences(1, &get_current_frame().render_fence, true, 1000000000));
 	VK_CHECK(device.resetFences(1, &get_current_frame().render_fence));
@@ -1363,7 +1274,7 @@ void RenderManager::draw(Camera& camera)
 	//request image from the swapchain, one second timeout
 	uint32_t swapchain_image_index;
 	VK_CHECK(device.acquireNextImageKHR(
-		swapchain, 1000000000, get_current_frame().present_semaphore, nullptr, &swapchain_image_index));
+			swapchain, 1000000000, get_current_frame().present_semaphore, nullptr, &swapchain_image_index));
 
 	//now that we are sure that the commands finished executing, we can safely reset the command buffer to begin
 	//recording again.
@@ -1391,7 +1302,7 @@ void RenderManager::draw(Camera& camera)
 	vk::ClearValue depth_clear_value;
 	depth_clear_value.depthStencil.setDepth(1.0f);
 
-	vk::ClearValue clear_values [ ] = { color_clear_value, depth_clear_value };
+	vk::ClearValue clear_values[] = { color_clear_value, depth_clear_value };
 
 	post_cull_barriers.clear();
 	cull_ready_barriers.clear();
@@ -1401,7 +1312,7 @@ void RenderManager::draw(Camera& camera)
 	ready_cull_data(render_scene.forward_pass, cmd);
 
 	cmd.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eComputeShader, {}, 0, nullptr,
-		cull_ready_barriers.size(), cull_ready_barriers.data(), 0, nullptr);
+			cull_ready_barriers.size(), cull_ready_barriers.data(), 0, nullptr);
 
 	glm::vec3 cam_pos = { 0.f, 3.f, -10.f };
 
@@ -1410,7 +1321,7 @@ void RenderManager::draw(Camera& camera)
 	float aspect = (float)window_extent.width / (float)window_extent.height;
 	glm::mat4 projection = glm::perspective(glm::radians(70.f), aspect, 0.1f, 200.0f);
 
-	CullParams forward_cull {};
+	CullParams forward_cull{};
 	forward_cull.projmat = projection;
 	forward_cull.viewmat = view;
 	forward_cull.frustrum_cull = false;
@@ -1420,7 +1331,7 @@ void RenderManager::draw(Camera& camera)
 	execute_compute_cull(cmd, render_scene.forward_pass, forward_cull);
 
 	cmd.pipelineBarrier(vk::PipelineStageFlagBits::eComputeShader, vk::PipelineStageFlagBits::eDrawIndirect, {}, 0,
-		nullptr, post_cull_barriers.size(), post_cull_barriers.data(), 0, nullptr);
+			nullptr, post_cull_barriers.size(), post_cull_barriers.data(), 0, nullptr);
 
 	forward_pass(cmd);
 
@@ -1537,8 +1448,7 @@ void RenderManager::draw(Camera& camera)
 	frame_number++;
 }
 
-void RenderManager::forward_pass(vk::CommandBuffer cmd)
-{
+void RenderManager::forward_pass(vk::CommandBuffer cmd) {
 	//clear depth at 0
 	vk::ClearValue depth_clear;
 	depth_clear.depthStencil.depth = 0.f;
@@ -1546,7 +1456,7 @@ void RenderManager::forward_pass(vk::CommandBuffer cmd)
 	//start the main renderpass.
 	//We will use the clear color from above, and the framebuffer of the index the swapchain gave us
 	vk::RenderPassBeginInfo rp_info = vk_init::renderpass_begin_info(
-		render_pass, window_extent, forward_framebuffer /*framebuffers[swapchainImageIndex]*/);
+			render_pass, window_extent, forward_framebuffer /*framebuffers[swapchainImageIndex]*/);
 
 	//connect clear values
 	rp_info.clearValueCount = 2;
@@ -1554,9 +1464,9 @@ void RenderManager::forward_pass(vk::CommandBuffer cmd)
 	vk::ClearValue clear_value{};
 	clear_value.color.setFloat32({ 0.01f, 0.01f, 0.01f, 1.0f });
 
-	vk::ClearValue clear_values [ ] = { clear_value, depth_clear };
+	vk::ClearValue clear_values[] = { clear_value, depth_clear };
 
-	rp_info.pClearValues = &clear_values[ 0 ];
+	rp_info.pClearValues = &clear_values[0];
 	cmd.beginRenderPass(&rp_info, vk::SubpassContents::eInline);
 
 	vk::Viewport viewport;
@@ -1585,12 +1495,11 @@ void RenderManager::forward_pass(vk::CommandBuffer cmd)
 	cmd.endRenderPass();
 }
 
-void RenderManager::copy_render_to_swapchain(vk::CommandBuffer cmd, uint32_t swapchain_image_index)
-{
+void RenderManager::copy_render_to_swapchain(vk::CommandBuffer cmd, uint32_t swapchain_image_index) {
 	//start the main renderpass.
 	//We will use the clear color from above, and the framebuffer of the index the swapchain gave us
 	vk::RenderPassBeginInfo copy_rp =
-		vk_init::renderpass_begin_info(copy_pass, window_extent, framebuffers[ swapchain_image_index ]);
+			vk_init::renderpass_begin_info(copy_pass, window_extent, framebuffers[swapchain_image_index]);
 
 	cmd.beginRenderPass(&copy_rp, vk::SubpassContents::eInline);
 
@@ -1621,8 +1530,8 @@ void RenderManager::copy_render_to_swapchain(vk::CommandBuffer cmd, uint32_t swa
 
 	vk::DescriptorSet blit_set;
 	vk_util::DescriptorBuilder::begin(descriptor_layout_cache, get_current_frame().dynamic_descriptor_allocator)
-		.bind_image(0, &source_image, vk::DescriptorType::eCombinedImageSampler, vk::ShaderStageFlagBits::eFragment)
-		.build(blit_set);
+			.bind_image(0, &source_image, vk::DescriptorType::eCombinedImageSampler, vk::ShaderStageFlagBits::eFragment)
+			.build(blit_set);
 
 	cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, blit_pipeline_layout, 0, 1, &blit_set, 0, nullptr);
 

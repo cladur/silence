@@ -2,6 +2,7 @@
 #define SILENCE_VK_DEBUG_H
 
 #include "render_manager.h"
+#include <vulkan/vulkan_core.h>
 #include <typeindex>
 #include <vulkan/vulkan_enums.hpp>
 
@@ -17,6 +18,20 @@ private:
 		{ std::type_index(typeid(VkDevice)), vk::ObjectType::eDevice },
 		{ std::type_index(typeid(VkQueue)), vk::ObjectType::eQueue },
 		{ std::type_index(typeid(VkFramebuffer)), vk::ObjectType::eFramebuffer },
+		{ std::type_index(typeid(VkCommandBuffer)), vk::ObjectType::eCommandBuffer },
+		{ std::type_index(typeid(VkImage)), vk::ObjectType::eImage },
+		{ std::type_index(typeid(VkSampler)), vk::ObjectType::eSampler },
+		{ std::type_index(typeid(VkBuffer)), vk::ObjectType::eBuffer },
+		{ std::type_index(typeid(VkDeviceMemory)), vk::ObjectType::eDeviceMemory },
+		{ std::type_index(typeid(VkShaderModule)), vk::ObjectType::eShaderModule },
+		{ std::type_index(typeid(VkPipeline)), vk::ObjectType::ePipeline },
+		{ std::type_index(typeid(VkPipelineLayout)), vk::ObjectType::ePipelineLayout },
+		{ std::type_index(typeid(VkRenderPass)), vk::ObjectType::eRenderPass },
+		{ std::type_index(typeid(VkDescriptorSet)), vk::ObjectType::eDescriptorSet },
+		{ std::type_index(typeid(VkDescriptorSetLayout)), vk::ObjectType::eDescriptorSetLayout },
+		{ std::type_index(typeid(VkSemaphore)), vk::ObjectType::eSemaphore },
+		{ std::type_index(typeid(VkFence)), vk::ObjectType::eFence },
+		{ std::type_index(typeid(VkEvent)), vk::ObjectType::eEvent },
 	};
 
 public:
@@ -27,7 +42,7 @@ public:
 
 	static void setup_debugging(RenderManager *render_manager);
 
-	template <typename T> static void set_object_name(T object, const char *object_name) {
+	template <typename T> static void set_name(T object, const char *object_name) {
 		VkDebug *instance = get_instance();
 		vk::DebugUtilsObjectNameInfoEXT name_info;
 		auto casted_handle = uint64_t(static_cast<T::CType>(object));

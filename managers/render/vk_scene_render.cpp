@@ -342,7 +342,10 @@ void RenderManager::draw_objects_forward(vk::CommandBuffer cmd, RenderScene::Mes
 
 	scene_parameters.ambient_color = { sin(framed), 0, cos(framed), 1 };
 
-	//push data to dynmem
+	//push data to dynamic buffer
+	
+	get_current_frame().dynamic_data.reset();
+
 	uint32_t scene_data_offset = get_current_frame().dynamic_data.push(scene_parameters);
 
 	uint32_t camera_data_offset = get_current_frame().dynamic_data.push(cam_data);
@@ -381,6 +384,8 @@ void RenderManager::draw_objects_forward(vk::CommandBuffer cmd, RenderScene::Mes
 	std::vector<uint32_t> dynamic_offsets;
 	dynamic_offsets.push_back(camera_data_offset);
 	dynamic_offsets.push_back(scene_data_offset);
+
+	SPDLOG_INFO("{} ___ {}", camera_data_offset, scene_data_offset);
 	execute_draw_commands(cmd, pass, object_data_set, dynamic_offsets, global_set);
 }
 
