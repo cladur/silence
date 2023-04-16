@@ -278,11 +278,18 @@ void RenderManager::init_swapchain(DisplayManager &display_manager) {
 	// }
 
 	VK_CHECK(device.createSampler(&create_info, nullptr, &depth_sampler));
+	VkDebug::set_name(depth_sampler, "depth_sampler (init_swapchain)");
 
 	vk::SamplerCreateInfo sampler_info = vk_init::sampler_create_info(vk::Filter::eLinear);
 	sampler_info.mipmapMode = vk::SamplerMipmapMode::eLinear;
 
 	VK_CHECK(device.createSampler(&sampler_info, nullptr, &smooth_sampler));
+	VkDebug::set_name(depth_sampler, "smooth_sampler (init_swapchain)");
+
+	main_deletion_queue.push_function([=, this]() {
+		device.destroySampler(depth_sampler);
+		device.destroySampler(smooth_sampler);
+	});
 }
 
 void RenderManager::init_commands() {
@@ -455,6 +462,8 @@ void RenderManager::init_framebuffers() {
 	fwd_info.attachmentCount = 2;
 	VK_CHECK(device.createFramebuffer(&fwd_info, nullptr, &forward_framebuffer));
 	VkDebug::set_name(forward_framebuffer, "Forward Framebuffer");
+
+	main_deletion_queue.push_function([=]() { device.destroyFramebuffer(forward_framebuffer, nullptr); });
 	//create the framebuffers for the swapchain images. This will connect the render-pass to the images for
 	//render
 
@@ -662,10 +671,10 @@ void RenderManager::init_pipelines() {
 	blit_pipeline = pipeline_builder.build_pipeline(device, copy_pass);
 	blit_pipeline_layout = blit_effect->built_layout;
 
-	main_deletion_queue.push_function([&, this]() {
-		device.destroyPipeline(blit_pipeline);
-		device.destroyPipelineLayout(blit_pipeline_layout);
-	});
+	VkDebug::set_name(blit_pipeline, "Blit pipeline");
+	VkDebug::set_name(blit_pipeline_layout, "Blit pipeline layout");
+
+	main_deletion_queue.push_function([&]() { device.destroyPipeline(blit_pipeline); });
 
 	//load the compute shaders
 	load_compute_shader(shader_path("indirect_cull.comp.spv").c_str(), cull_pipeline, cull_layout);
@@ -696,13 +705,7 @@ bool RenderManager::load_compute_shader(const char *shader_path, vk::Pipeline &p
 	layout = compute_effect->built_layout;
 	pipeline = compute_builder.build_pipeline(device);
 
-	device.destroyShaderModule(compute_module.module, nullptr);
-
-	main_deletion_queue.push_function([=]() {
-		device.destroyPipeline(pipeline, nullptr);
-
-		device.destroyPipelineLayout(layout, nullptr);
-	});
+	main_deletion_queue.push_function([=]() { device.destroyPipeline(pipeline, nullptr); });
 
 	return true;
 }
@@ -1047,6 +1050,9 @@ bool RenderManager::load_prefab(const char *path, const glm::mat4 &root) {
 				for (auto &texture : textures) {
 					vk::Sampler smooth_sampler;
 					VK_CHECK(device.createSampler(&sampler_info, nullptr, &smooth_sampler));
+					VkDebug::set_name(smooth_sampler, std::format("Smooth Sampler for {}", texture).c_str());
+
+					main_deletion_queue.push_function([=]() { device.destroySampler(smooth_sampler); });
 
 					vk_util::SampledTexture tex;
 					tex.image_view = loaded_textures[texture].image_view;

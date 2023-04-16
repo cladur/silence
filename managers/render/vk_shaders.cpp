@@ -1,10 +1,13 @@
 #include "vk_shaders.h"
 #include "render/vk_initializers.h"
+#include "vk_debug.h"
 #include <vulkan/vulkan_core.h>
 
 #include <spirv_reflect.h>
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_handles.hpp>
+
+extern RenderManager render_manager;
 
 bool vk_util::load_shader_module(vk::Device device, const char *file_path, ShaderModule *out_shader_module) {
 	std::ifstream file(file_path, std::ios::ate | std::ios::binary);
@@ -46,8 +49,12 @@ bool vk_util::load_shader_module(vk::Device device, const char *file_path, Shade
 		return false;
 	}
 
+	VkDebug::set_name(shader_module, std::format("ShaderModule ({})", file_path).c_str());
+
 	out_shader_module->code = std::move(buffer);
 	out_shader_module->module = shader_module;
+
+	render_manager.main_deletion_queue.push_function([=]() { device.destroyShaderModule(shader_module); });
 
 	return true;
 }
@@ -207,6 +214,10 @@ void ShaderEffect::ShaderEffect::ShaderEffect::reflect_layout(
 		if (ly.create_info.bindingCount > 0) {
 			set_hashes[i] = vk_util::hash_descriptor_layout_info(&ly.create_info);
 			VK_CHECK(device.createDescriptorSetLayout(&ly.create_info, nullptr, &set_layouts[i]));
+			VkDebug::set_name(set_layouts[i], std::format("Set {} layout", i).c_str());
+
+			render_manager.main_deletion_queue.push_function(
+					[=]() { device.destroyDescriptorSetLayout(set_layouts[i]); });
 		} else {
 			set_hashes[i] = 0;
 			set_layouts[i] = VK_NULL_HANDLE;
@@ -232,6 +243,10 @@ void ShaderEffect::ShaderEffect::ShaderEffect::reflect_layout(
 	mesh_pipeline_layout_info.pSetLayouts = compacted_layouts.data();
 
 	VK_CHECK(device.createPipelineLayout(&mesh_pipeline_layout_info, nullptr, &built_layout));
+
+	VkDebug::set_name(built_layout, "ShaderEffect Pipeline Layout");
+
+	render_manager.main_deletion_queue.push_function([=]() { device.destroyPipelineLayout(built_layout); });
 }
 
 void ShaderEffect::ShaderEffect::ShaderEffect::fill_stages(

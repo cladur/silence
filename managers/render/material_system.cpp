@@ -1,6 +1,7 @@
 #include "material_system.h"
 
 #include "render/render_manager.h"
+#include "vk_debug.h"
 #include "vk_initializers.h"
 #include "vk_shaders.h"
 #include <vulkan/vulkan_enums.hpp>
@@ -247,6 +248,8 @@ vk_util::ShaderPass *vk_util::MaterialSystem::build_shader(
 	pipbuilder.set_shaders(effect);
 
 	pass->pipeline = pipbuilder.build_pipeline(manager->device, render_pass);
+	VkDebug::set_name(pass->pipeline, "Material pass pipeline");
+	manager->main_deletion_queue.push_function([=, this]() { manager->device.destroyPipeline(pass->pipeline); });
 
 	return pass;
 }

@@ -4,6 +4,7 @@
 #include "render_manager.h"
 #include <vulkan/vulkan_core.h>
 #include <typeindex>
+#include <typeinfo>
 #include <vulkan/vulkan_enums.hpp>
 
 class VkDebug {
@@ -13,25 +14,25 @@ private:
 	static VkDebug *instance;
 	static std::mutex mutex;
 	std::map<std::type_index, vk::ObjectType> object_map = {
-		{ std::type_index(typeid(VkInstance)), vk::ObjectType::eInstance },
-		{ std::type_index(typeid(VkPhysicalDevice)), vk::ObjectType::ePhysicalDevice },
-		{ std::type_index(typeid(VkDevice)), vk::ObjectType::eDevice },
-		{ std::type_index(typeid(VkQueue)), vk::ObjectType::eQueue },
-		{ std::type_index(typeid(VkFramebuffer)), vk::ObjectType::eFramebuffer },
-		{ std::type_index(typeid(VkCommandBuffer)), vk::ObjectType::eCommandBuffer },
-		{ std::type_index(typeid(VkImage)), vk::ObjectType::eImage },
-		{ std::type_index(typeid(VkSampler)), vk::ObjectType::eSampler },
-		{ std::type_index(typeid(VkBuffer)), vk::ObjectType::eBuffer },
-		{ std::type_index(typeid(VkDeviceMemory)), vk::ObjectType::eDeviceMemory },
-		{ std::type_index(typeid(VkShaderModule)), vk::ObjectType::eShaderModule },
-		{ std::type_index(typeid(VkPipeline)), vk::ObjectType::ePipeline },
-		{ std::type_index(typeid(VkPipelineLayout)), vk::ObjectType::ePipelineLayout },
-		{ std::type_index(typeid(VkRenderPass)), vk::ObjectType::eRenderPass },
-		{ std::type_index(typeid(VkDescriptorSet)), vk::ObjectType::eDescriptorSet },
-		{ std::type_index(typeid(VkDescriptorSetLayout)), vk::ObjectType::eDescriptorSetLayout },
-		{ std::type_index(typeid(VkSemaphore)), vk::ObjectType::eSemaphore },
-		{ std::type_index(typeid(VkFence)), vk::ObjectType::eFence },
-		{ std::type_index(typeid(VkEvent)), vk::ObjectType::eEvent },
+		{ std::type_index(typeid(vk::Instance)), vk::ObjectType::eInstance },
+		{ std::type_index(typeid(vk::PhysicalDevice)), vk::ObjectType::ePhysicalDevice },
+		{ std::type_index(typeid(vk::Device)), vk::ObjectType::eDevice },
+		{ std::type_index(typeid(vk::Queue)), vk::ObjectType::eQueue },
+		{ std::type_index(typeid(vk::Framebuffer)), vk::ObjectType::eFramebuffer },
+		{ std::type_index(typeid(vk::CommandBuffer)), vk::ObjectType::eCommandBuffer },
+		{ std::type_index(typeid(vk::Image)), vk::ObjectType::eImage },
+		{ std::type_index(typeid(vk::Sampler)), vk::ObjectType::eSampler },
+		{ std::type_index(typeid(vk::Buffer)), vk::ObjectType::eBuffer },
+		{ std::type_index(typeid(vk::DeviceMemory)), vk::ObjectType::eDeviceMemory },
+		{ std::type_index(typeid(vk::ShaderModule)), vk::ObjectType::eShaderModule },
+		{ std::type_index(typeid(vk::Pipeline)), vk::ObjectType::ePipeline },
+		{ std::type_index(typeid(vk::PipelineLayout)), vk::ObjectType::ePipelineLayout },
+		{ std::type_index(typeid(vk::RenderPass)), vk::ObjectType::eRenderPass },
+		{ std::type_index(typeid(vk::DescriptorSet)), vk::ObjectType::eDescriptorSet },
+		{ std::type_index(typeid(vk::DescriptorSetLayout)), vk::ObjectType::eDescriptorSetLayout },
+		{ std::type_index(typeid(vk::Semaphore)), vk::ObjectType::eSemaphore },
+		{ std::type_index(typeid(vk::Fence)), vk::ObjectType::eFence },
+		{ std::type_index(typeid(vk::Event)), vk::ObjectType::eEvent },
 	};
 
 public:

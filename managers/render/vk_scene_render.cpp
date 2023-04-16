@@ -344,7 +344,7 @@ void RenderManager::draw_objects_forward(vk::CommandBuffer cmd, RenderScene::Mes
 	scene_parameters.sunlight_direction = { sin(framed), 0, cos(framed), 1 };
 
 	//push data to dynamic buffer
-	
+
 	get_current_frame().dynamic_data.reset();
 
 	uint32_t scene_data_offset = get_current_frame().dynamic_data.push(scene_parameters);
@@ -386,7 +386,6 @@ void RenderManager::draw_objects_forward(vk::CommandBuffer cmd, RenderScene::Mes
 	dynamic_offsets.push_back(camera_data_offset);
 	dynamic_offsets.push_back(scene_data_offset);
 
-	SPDLOG_INFO("{} ___ {}", camera_data_offset, scene_data_offset);
 	execute_draw_commands(cmd, pass, object_data_set, dynamic_offsets, global_set);
 }
 
