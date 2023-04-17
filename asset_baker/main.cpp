@@ -36,7 +36,21 @@ fs::path ConverterState::convert_to_export_relative(const fs::path &path) const 
 bool convert_image(const fs::path &input, const fs::path &output) {
 	SPDLOG_INFO("Converting image {} to {}", input.string(), output.string());
 
-	auto result = system(fmt::format("toktx --encode etc1s {} {}", output.string(), input.string()).c_str());
+	// Check if input filename has "normal" in it, case insensitive
+	auto normal_pos = strcasestr(input.c_str(), "normal");
+	auto roughness_pos = strcasestr(input.c_str(), "roughness");
+	auto metallic_pos = strcasestr(input.c_str(), "metal");
+
+	std::string non_color_params;
+	if (normal_pos || roughness_pos || metallic_pos) {
+		non_color_params = "--assign_oetf linear --assign_primaries none";
+	}
+
+	// TODO: Add optional flag for using UASTC instead of ETC1S for higher quality + more quality options
+	// https://github.com/KhronosGroup/3D-Formats-Guidelines/blob/main/KTXArtistGuide.md#compression-examples
+
+	auto result = system(
+			fmt::format("toktx --encode etc1s {} {} {}", non_color_params, output.string(), input.string()).c_str());
 
 	return result == 0;
 }

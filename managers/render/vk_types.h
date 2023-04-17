@@ -1,7 +1,7 @@
 #ifndef SILENCE_VK_TYPES_H
 #define SILENCE_VK_TYPES_H
 
-#if 1
+#if 0
 #define VMA_DEBUG_LOG(format, ...)                                                                                     \
 	do {                                                                                                               \
 		printf(format, ##__VA_ARGS__);                                                                                 \
