@@ -1050,7 +1050,7 @@ bool RenderManager::load_prefab(const char *path, const glm::mat4 &root) {
 				for (auto &texture : textures) {
 					vk::Sampler smooth_sampler;
 					VK_CHECK(device.createSampler(&sampler_info, nullptr, &smooth_sampler));
-					VkDebug::set_name(smooth_sampler, std::format("Smooth Sampler for {}", texture).c_str());
+					VkDebug::set_name(smooth_sampler, fmt::format("Smooth Sampler for {}", texture).c_str());
 
 					main_deletion_queue.push_function([=]() { device.destroySampler(smooth_sampler); });
 
