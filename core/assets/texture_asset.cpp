@@ -1,5 +1,6 @@
 #include "texture_asset.h"
 
+#include <ktx.h>
 #include <lz4.h>
 #include <nlohmann/json.hpp>
 

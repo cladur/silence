@@ -3,9 +3,14 @@
 #include "mesh_asset.h"
 #include "prefab_asset.h"
 #include "texture_asset.h"
+#include <ktx.h>
+#include <vulkan/vulkan_core.h>
 #include <filesystem>
+#include <fstream>
 #include <glm/ext/matrix_transform.hpp>
 #include <string>
+#include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan_enums.hpp>
 
 #define TINYGLTF_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
@@ -31,33 +36,9 @@ fs::path ConverterState::convert_to_export_relative(const fs::path &path) const 
 bool convert_image(const fs::path &input, const fs::path &output) {
 	SPDLOG_INFO("Converting image {} to {}", input.string(), output.string());
 
-	int tex_width, tex_height, tex_channels;
+	auto result = system(fmt::format("toktx --encode etc1s {} {}", output.string(), input.string()).c_str());
 
-	stbi_set_flip_vertically_on_load(false);
-
-	stbi_uc *pixels =
-			stbi_load((const char *)input.u8string().c_str(), &tex_width, &tex_height, &tex_channels, STBI_rgb_alpha);
-
-	if (!pixels) {
-		SPDLOG_ERROR("Failed to load texture file {}", input.string());
-		return false;
-	}
-
-	int texture_size = tex_width * tex_height * 4;
-
-	TextureInfo tex_info;
-	tex_info.texture_size = texture_size;
-	tex_info.pixel_size[0] = tex_width;
-	tex_info.pixel_size[1] = tex_height;
-	tex_info.texture_format = TextureFormat::RGBA8;
-	tex_info.original_file = input.string();
-	assets::AssetFile new_image = assets::pack_texture(&tex_info, pixels);
-
-	stbi_image_free(pixels);
-
-	save_binary_file(output.string().c_str(), new_image);
-
-	return true;
+	return result == 0;
 }
 
 void pack_vertex(assets::VertexPNCV32 &new_vert, float vx, float vy, float vz, float nx, float ny, float nz, float ux,
@@ -318,7 +299,7 @@ void extract_gltf_materials(tinygltf::Model &model, const fs::path &input, const
 
 			fs::path base_color_path = output_folder.parent_path() / base_image.uri;
 
-			base_color_path.replace_extension(".tx");
+			base_color_path.replace_extension(".ktx2");
 
 			base_color_path = conv_state.convert_to_export_relative(base_color_path);
 
@@ -330,7 +311,7 @@ void extract_gltf_materials(tinygltf::Model &model, const fs::path &input, const
 
 			fs::path base_color_path = output_folder.parent_path() / base_image.uri;
 
-			base_color_path.replace_extension(".tx");
+			base_color_path.replace_extension(".ktx2");
 
 			base_color_path = conv_state.convert_to_export_relative(base_color_path);
 
@@ -343,7 +324,7 @@ void extract_gltf_materials(tinygltf::Model &model, const fs::path &input, const
 
 			fs::path base_color_path = output_folder.parent_path() / base_image.uri;
 
-			base_color_path.replace_extension(".tx");
+			base_color_path.replace_extension(".ktx2");
 
 			base_color_path = conv_state.convert_to_export_relative(base_color_path);
 
@@ -356,7 +337,7 @@ void extract_gltf_materials(tinygltf::Model &model, const fs::path &input, const
 
 			fs::path base_color_path = output_folder.parent_path() / base_image.uri;
 
-			base_color_path.replace_extension(".tx");
+			base_color_path.replace_extension(".ktx2");
 
 			base_color_path = conv_state.convert_to_export_relative(base_color_path);
 
@@ -369,7 +350,7 @@ void extract_gltf_materials(tinygltf::Model &model, const fs::path &input, const
 
 			fs::path base_color_path = output_folder.parent_path() / base_image.uri;
 
-			base_color_path.replace_extension(".tx");
+			base_color_path.replace_extension(".ktx2");
 
 			base_color_path = conv_state.convert_to_export_relative(base_color_path);
 
@@ -591,7 +572,7 @@ int main(int argc, char *argv[]) {
 			SPDLOG_INFO("found a texture");
 
 			auto new_path = p.path();
-			new_path.replace_extension(".tx");
+			new_path.replace_extension(".ktx2");
 
 			auto folder = export_path.parent_path() / new_path.filename().string();
 			convert_image(p.path(), folder);

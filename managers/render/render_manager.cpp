@@ -991,8 +991,8 @@ bool RenderManager::load_prefab(const char *path, const glm::mat4 &root) {
 				auto base_color_tex = material.textures["baseColor"];
 				if (base_color_tex.size() <= 3) {
 					// TODO: Figure out if this should be a white texture after all?
-					// texture = "Sponza/white.tx";
-					base_color_tex = "missing.tx";
+					// texture = "Sponza/white.ktx2";
+					base_color_tex = "missing.ktx2";
 				}
 
 				loaded = load_image_to_cache(base_color_tex.c_str(), asset_path(base_color_tex).c_str());
@@ -1004,7 +1004,7 @@ bool RenderManager::load_prefab(const char *path, const glm::mat4 &root) {
 
 				auto ao_tex = material.textures["occlusion"];
 				if (ao_tex.size() <= 3) {
-					ao_tex = "missing.tx";
+					ao_tex = "missing.ktx2";
 				}
 
 				loaded = load_image_to_cache(ao_tex.c_str(), asset_path(ao_tex).c_str());
@@ -1287,7 +1287,7 @@ Mesh *RenderManager::get_mesh(const std::string &name) {
 }
 
 void RenderManager::load_images() {
-	load_image_to_cache("white", asset_path("missing.tx").c_str());
+	load_image_to_cache("white", asset_path("missing.ktx2").c_str());
 }
 
 void RenderManager::draw(Camera &camera) {

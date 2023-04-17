@@ -7,45 +7,65 @@
 
 // #define STB_IMAGE_IMPLEMENTATION
 // #define STB_IMAGE_WRITE_IMPLEMENTATION
+#include <ktx.h>
 #include <stb_image.h>
 
 bool vk_util::load_image_from_asset(RenderManager &manager, const char *filename, AllocatedImage &out_image) {
-	assets::AssetFile file;
-	bool loaded = assets::load_binary_file(filename, file);
+	ktxTexture2 *ktx_texture;
+	KTX_error_code result;
 
-	if (!loaded) {
-		SPDLOG_ERROR("Couldn't load image asset {}", filename);
-		return false;
-	}
+	result = ktxTexture_CreateFromNamedFile(filename, KTX_TEXTURE_CREATE_NO_FLAGS, (ktxTexture **)&ktx_texture);
 
-	assets::TextureInfo texture_info = assets::read_texture_info(&file);
+	ktx_texture_transcode_fmt_e tf;
 
-	vk::DeviceSize image_size = texture_info.texture_size;
-	vk::Format image_format;
-	switch (texture_info.texture_format) {
-		case assets::TextureFormat::RGBA8:
-			image_format = vk::Format::eR8G8B8A8Unorm;
-			break;
-		default:
-			SPDLOG_ERROR("Encountered unsupported texture format while loading image asset {}", filename);
-			return false;
-	}
+	tf = KTX_TTF_BC3_RGBA;
+
+	result = ktxTexture2_TranscodeBasis(ktx_texture, tf, 0);
+
+	// Then use VkUpload or GLUpload to create a texture object on the GPU.
+
+	//	assets::AssetFile file;
+	//	bool loaded = assets::load_binary_file(filename, file);
+	//
+	//	if (!loaded) {
+	//		SPDLOG_ERROR("Couldn't load image asset {}", filename);
+	//		return false;
+	//	}
+	//
+	//	assets::TextureInfo texture_info = assets::read_texture_info(&file);
+	//
+	//	vk::DeviceSize image_size = texture_info.texture_size;
+	//	vk::Format image_format;
+	//	switch (texture_info.texture_format) {
+	//		case assets::TextureFormat::RGBA8:
+	//			image_format = vk::Format::eR8G8B8A8Unorm;
+	//			break;
+	//		default:
+	//			SPDLOG_ERROR("Encountered unsupported texture format while loading image asset {}", filename);
+	//			return false;
+	//	}
+
+	auto texture_size = ktxTexture_GetDataSize(ktxTexture(ktx_texture));
 
 	//allocate temporary buffer for holding texture data to upload
 	AllocatedBufferUntyped staging_buffer = manager.create_buffer(
-			"Staging buffer", image_size, vk::BufferUsageFlagBits::eTransferSrc, vma::MemoryUsage::eCpuOnly);
+			"Staging buffer", texture_size, vk::BufferUsageFlagBits::eTransferSrc, vma::MemoryUsage::eCpuOnly);
 
 	//copy data to buffer
 	void *data;
 	VK_CHECK(manager.allocator.mapMemory(staging_buffer.allocation, &data));
 
-	//	memcpy(data, pixel_ptr, static_cast<size_t>(image_size));
-	assets::unpack_texture(&texture_info, file.binary_blob.data(), file.binary_blob.size(), (char *)data);
+	auto texture_data = ktxTexture_GetData(ktxTexture(ktx_texture));
+
+	memcpy(data, texture_data, static_cast<size_t>(texture_size));
+
+	//memcpy(data, ktx_texture, static_cast<size_t>(texture_size));
+	//assets::unpack_texture(&texture_info, file.binary_blob.data(), file.binary_blob.size(), (char *)data);
 
 	manager.allocator.unmapMemory(staging_buffer.allocation);
 
-	out_image =
-			upload_image(manager, texture_info.pixel_size[0], texture_info.pixel_size[1], image_format, staging_buffer);
+	out_image = upload_image(manager, ktx_texture->baseWidth, ktx_texture->baseHeight,
+			static_cast<vk::Format>(ktx_texture->vkFormat), staging_buffer);
 
 	manager.allocator.destroyBuffer(staging_buffer.buffer, staging_buffer.allocation);
 
@@ -124,8 +144,8 @@ AllocatedImage vk_util::upload_image(RenderManager &manager, uint32_t tex_width,
 				nullptr, 0, nullptr, 1, &image_barrier_to_readable);
 	});
 
-	vk::ImageViewCreateInfo image_info = vk_init::image_view_create_info(
-			vk::Format::eR8G8B8A8Unorm, new_image.image, vk::ImageAspectFlagBits::eColor);
+	vk::ImageViewCreateInfo image_info =
+			vk_init::image_view_create_info(image_format, new_image.image, vk::ImageAspectFlagBits::eColor);
 
 	VK_CHECK(manager.device.createImageView(&image_info, nullptr, &new_image.default_view));
 

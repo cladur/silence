@@ -47,5 +47,8 @@
     "name" : "spirv-reflect",
     "version>=" : "1.3.236.0",
     "$comment" : "    # this is heuristically generated, and may not be correct\n\n    find_package(unofficial-spirv-reflect CONFIG REQUIRED)\n\n    target_link_libraries(main PRIVATE unofficial::spirv-reflect::spirv-reflect)\n"
+  }, {
+    "name" : "ktx",
+    "version>=" : "4.1.0"
   } ]
 }
