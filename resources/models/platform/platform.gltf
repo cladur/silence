@@ -1,0 +1,164 @@
+{
+    "asset" : {
+        "generator" : "Khronos glTF Blender I/O v3.2.40",
+        "version" : "2.0"
+    },
+    "scene" : 0,
+    "scenes" : [
+        {
+            "name" : "Scene",
+            "nodes" : [
+                0
+            ]
+        }
+    ],
+    "nodes" : [
+        {
+            "mesh" : 0,
+            "name" : "platform",
+            "translation" : [
+                0.22367143630981445,
+                0,
+                3.4792442321777344
+            ]
+        }
+    ],
+    "materials" : [
+        {
+            "doubleSided" : true,
+            "name" : "platform",
+            "normalTexture" : {
+                "index" : 0,
+                "scale" : 1.5
+            },
+            "occlusionTexture" : {
+                "index" : 1
+            },
+            "pbrMetallicRoughness" : {
+                "baseColorTexture" : {
+                    "index" : 2
+                },
+                "metallicRoughnessTexture" : {
+                    "index" : 1
+                }
+            }
+        }
+    ],
+    "meshes" : [
+        {
+            "name" : "Mesh.004",
+            "primitives" : [
+                {
+                    "attributes" : {
+                        "POSITION" : 0,
+                        "NORMAL" : 1,
+                        "TEXCOORD_0" : 2
+                    },
+                    "indices" : 3,
+                    "material" : 0
+                }
+            ]
+        }
+    ],
+    "textures" : [
+        {
+            "sampler" : 0,
+            "source" : 0
+        },
+        {
+            "sampler" : 0,
+            "source" : 1
+        },
+        {
+            "sampler" : 0,
+            "source" : 2
+        }
+    ],
+    "images" : [
+        {
+            "mimeType" : "image/png",
+            "name" : "platform_Normal",
+            "uri" : "tex/platform_Normal.png"
+        },
+        {
+            "mimeType" : "image/png",
+            "name" : "platform_Mixed_AO-platform_Roughness-platform_Metallic",
+            "uri" : "tex/platform_Mixed_AO-platform_Roughness-platform_Metallic.png"
+        },
+        {
+            "mimeType" : "image/png",
+            "name" : "platform_Base_color-platform_Opacity",
+            "uri" : "tex/platform_Base_color-platform_Opacity.png"
+        }
+    ],
+    "accessors" : [
+        {
+            "bufferView" : 0,
+            "componentType" : 5126,
+            "count" : 1550,
+            "max" : [
+                1.3431910276412964,
+                0.11423246562480927,
+                0.07910960167646408
+            ],
+            "min" : [
+                -1.3431824445724487,
+                -0.12086205929517746,
+                -1.695692777633667
+            ],
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 1,
+            "componentType" : 5126,
+            "count" : 1550,
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 2,
+            "componentType" : 5126,
+            "count" : 1550,
+            "type" : "VEC2"
+        },
+        {
+            "bufferView" : 3,
+            "componentType" : 5123,
+            "count" : 5796,
+            "type" : "SCALAR"
+        }
+    ],
+    "bufferViews" : [
+        {
+            "buffer" : 0,
+            "byteLength" : 18600,
+            "byteOffset" : 0
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 18600,
+            "byteOffset" : 18600
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 12400,
+            "byteOffset" : 37200
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 11592,
+            "byteOffset" : 49600
+        }
+    ],
+    "samplers" : [
+        {
+            "magFilter" : 9729,
+            "minFilter" : 9987
+        }
+    ],
+    "buffers" : [
+        {
+            "byteLength" : 61192,
+            "uri" : "platform.bin"
+        }
+    ]
+}
