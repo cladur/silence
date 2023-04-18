@@ -3,7 +3,6 @@
 
 #include "input_key.h"
 #include "magic_enum.hpp"
-#include "tracy/tracy.hpp"
 #include <GLFW/glfw3.h>
 #include <spdlog/spdlog.h>
 #include <functional>

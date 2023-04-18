@@ -3,7 +3,6 @@
 
 #include "ecs/systems/base_system.h"
 #include "fmod_studio.hpp"
-#include "tracy/tracy.hpp"
 
 class FmodListenerSystem : public BaseSystem {
 public:

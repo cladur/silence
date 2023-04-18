@@ -31,8 +31,6 @@
 #include "core/camera/camera.h"
 #include "render/debug/debug_drawing.h"
 
-#include "tracy/Tracy.hpp"
-
 RenderManager render_manager;
 DisplayManager display_manager;
 ECSManager ecs_manager;
