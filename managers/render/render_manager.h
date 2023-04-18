@@ -107,11 +107,8 @@ struct MeshObject {
 	uint32_t b_draw_shadow_pass : 1 = 0U;
 };
 
-struct MeshInstance {
-	Mesh *mesh;
-	vk_util::Material *material;
-	Handle<RenderObject> object_id;
-	bool registered = false;
+struct PrefabInstance {
+	std::vector<Handle<RenderObject>> object_ids;
 };
 
 struct GPUCameraData {
@@ -267,7 +264,7 @@ public:
 	void upload_mesh(Mesh &mesh);
 
 	bool load_image_to_cache(const char *name, const char *path);
-	bool load_prefab(const char *path, const glm::mat4 &root = glm::mat4(1.0f));
+	PrefabInstance load_prefab(const char *path, const glm::mat4 &root = glm::mat4(1.0f));
 
 	bool load_compute_shader(const char *shader_path, vk::Pipeline &pipeline, vk::PipelineLayout &layout);
 
@@ -290,6 +287,7 @@ public:
 	//default array of renderable objects
 	RenderScene render_scene;
 	std::unordered_map<std::string, Mesh> meshes;
+	bool needs_to_rebuild_objects = false;
 
 	// texture stuff
 	std::unordered_map<std::string, Texture> loaded_textures;

@@ -740,7 +740,7 @@ void RenderManager::init_scene() {
 	// 	vk_util::Material *new_mat = material_system.build_material("textured", textured_info);
 	// }
 
-	load_prefab(asset_path("DamagedHelmet/DamagedHelmet.pfb").c_str());
+	// load_prefab(asset_path("DamagedHelmet/DamagedHelmet.pfb").c_str());
 }
 
 void RenderManager::init_imgui(GLFWwindow *window) {
@@ -891,7 +891,7 @@ bool RenderManager::load_image_to_cache(const char *name, const char *path) {
 	return true;
 }
 
-bool RenderManager::load_prefab(const char *path, const glm::mat4 &root) {
+PrefabInstance RenderManager::load_prefab(const char *path, const glm::mat4 &root) {
 	auto pf = prefab_cache.find(path);
 	if (pf == prefab_cache.end()) {
 		assets::AssetFile file;
@@ -899,7 +899,7 @@ bool RenderManager::load_prefab(const char *path, const glm::mat4 &root) {
 
 		if (!loaded) {
 			SPDLOG_ERROR("Error When loading prefab file at path {}", path);
-			return false;
+			assert(false);
 		} else {
 			SPDLOG_INFO("Prefab {} loaded to cache", path);
 		}
@@ -1104,9 +1104,12 @@ bool RenderManager::load_prefab(const char *path, const glm::mat4 &root) {
 		//_renderables.push_back(load_mesh);
 	}
 
-	render_scene.register_object_batch(prefab_renderables.data(), static_cast<uint32_t>(prefab_renderables.size()));
+	auto handles = render_scene.register_object_batch(
+			prefab_renderables.data(), static_cast<uint32_t>(prefab_renderables.size()));
 
-	return true;
+	needs_to_rebuild_objects = true;
+
+	return PrefabInstance{ .object_ids = handles };
 }
 
 AllocatedBufferUntyped RenderManager::create_buffer(const std::string &allocation_name, size_t alloc_size,
@@ -1247,8 +1250,8 @@ RenderManager::Status RenderManager::startup(DisplayManager &display_manager, Ca
 
 	init_scene();
 
-	render_scene.build_batches();
-	render_scene.merge_meshes(this);
+	// render_scene.build_batches();
+	// render_scene.merge_meshes(this);
 
 	init_imgui(display_manager.window);
 
@@ -1291,6 +1294,12 @@ void RenderManager::load_images() {
 }
 
 void RenderManager::draw(Camera &camera) {
+	if (needs_to_rebuild_objects) {
+		render_scene.build_batches();
+		render_scene.merge_meshes(this);
+		needs_to_rebuild_objects = false;
+	}
+
 	//wait until the GPU has finished render the last frame. Timeout of 1 second
 	VK_CHECK(device.waitForFences(1, &get_current_frame().render_fence, true, 1000000000));
 	VK_CHECK(device.resetFences(1, &get_current_frame().render_fence));

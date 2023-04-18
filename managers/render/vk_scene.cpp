@@ -41,12 +41,14 @@ Handle<RenderObject> RenderScene::register_object(MeshObject *object) {
 	return handle;
 }
 
-void RenderScene::register_object_batch(MeshObject *first, uint32_t count) {
+std::vector<Handle<RenderObject>> RenderScene::register_object_batch(MeshObject *first, uint32_t count) {
 	renderables.reserve(count);
 
+	std::vector<Handle<RenderObject>> handles;
 	for (uint32_t i = 0; i < count; i++) {
-		register_object(&(first[i]));
+		handles.push_back(register_object(&(first[i])));
 	}
+	return handles;
 }
 
 void RenderScene::update_transform(Handle<RenderObject> object_id, const glm::mat4 &local_to_world) {

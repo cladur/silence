@@ -128,7 +128,7 @@ public:
 
 	Handle<RenderObject> register_object(MeshObject *object);
 
-	void register_object_batch(MeshObject *first, uint32_t count);
+	std::vector<Handle<RenderObject>> register_object_batch(MeshObject *first, uint32_t count);
 
 	void update_transform(Handle<RenderObject> object_id, const glm::mat4 &local_to_world);
 	void update_object(Handle<RenderObject> object_id);
@@ -176,6 +176,8 @@ public:
 	AllocatedBuffer<uint32_t> merged_index_buffer;
 
 	AllocatedBuffer<GPUObjectData> object_data_buffer;
+
+	bool new_objects_registered = false;
 };
 
 #endif // SILENCE_VK_SCENE_H

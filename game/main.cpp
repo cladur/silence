@@ -63,7 +63,7 @@ void default_ecs_manager_init() {
 	ecs_manager.register_component<Gravity>();
 	ecs_manager.register_component<Parent>();
 	ecs_manager.register_component<Children>();
-	ecs_manager.register_component<MeshInstance>();
+	ecs_manager.register_component<PrefabInstance>();
 	ecs_manager.register_component<FmodListener>();
 }
 
@@ -93,17 +93,8 @@ void demo_entities_init(std::vector<Entity> &entities) {
 								rand_rotation(random_generator)),
 						glm::vec3(scale, scale, scale) });
 
-		ecs_manager.add_component<MeshInstance>(
-				entity, { render_manager.get_mesh("box"), render_manager.material_system.get_material("textured") });
-		//});
-
-		// if (rand_material(random_generator) > 0.5f) {
-		// 	ecs_manager.add_component<MeshInstance>(
-		// 			entity, { render_manager.get_mesh("box"), render_manager.get_material("textured_mesh") });
-		// } else {
-		// 	ecs_manager.add_component<MeshInstance>(
-		// 			entity, { render_manager.get_mesh("box"), render_manager.get_material("default_mesh") });
-		// }
+		ecs_manager.add_component<PrefabInstance>(entity,
+				render_manager.load_prefab(RenderManager::asset_path("DamagedHelmet/DamagedHelmet.pfb").c_str()));
 	}
 
 	auto listener = ecs_manager.create_entity();
