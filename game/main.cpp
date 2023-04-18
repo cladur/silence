@@ -500,6 +500,8 @@ int main() {
 				target_frame_time) {
 			stop_time = std::chrono::high_resolution_clock::now();
 		}
+
+		FrameMark;
 	}
 
 	// Shut everything down, in reverse order.

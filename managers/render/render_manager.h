@@ -8,6 +8,8 @@
 
 #include "managers/display/display_manager.h"
 
+#include "tracy/TracyVulkan.hpp"
+
 #define VULKAN_HPP_NO_EXCEPTIONS
 #include "vulkan/vulkan.hpp"
 

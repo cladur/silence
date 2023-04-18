@@ -15,6 +15,7 @@ void FmodListenerSystem::startup() {
 }
 
 void FmodListenerSystem::update(float dt) {
+	ZoneScopedNC("FmodListenerSystem::update", 0xcacaca);
 	for (auto const &entity : entities) {
 		auto &transform = ecs_manager.get_component<Transform>(entity);
 		auto &listener = ecs_manager.get_component<FmodListener>(entity);

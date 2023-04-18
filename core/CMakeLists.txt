@@ -43,6 +43,7 @@ find_package(glm CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)
 find_package(magic_enum CONFIG REQUIRED)
+find_package(Tracy CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 
 target_link_libraries(${COMMON_LIB_NAME} INTERFACE
@@ -50,6 +51,7 @@ target_link_libraries(${COMMON_LIB_NAME} INTERFACE
         imgui::imgui
         glm::glm
         magic_enum::magic_enum
+        Tracy::TracyClient
         nlohmann_json::nlohmann_json
         )
 

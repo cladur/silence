@@ -143,6 +143,7 @@ void InputManager::remove_key_from_action(const std::string &action_name, InputK
 }
 
 void InputManager::process_input() {
+	ZoneScopedNC("InputManager::process_input", 0x87CEFA);
 	previous_key_state = key_state;
 	mouse_delta = mouse_position - last_mouse_position;
 	last_mouse_position = mouse_position;
