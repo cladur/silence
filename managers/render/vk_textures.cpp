@@ -10,6 +10,8 @@
 #include <ktx.h>
 #include <stb_image.h>
 
+extern RenderManager render_manager;
+
 bool vk_util::load_image_from_asset(RenderManager &manager, const char *filename, AllocatedImage &out_image) {
 	ktxTexture2 *ktx_texture;
 	KTX_error_code result;
@@ -18,32 +20,19 @@ bool vk_util::load_image_from_asset(RenderManager &manager, const char *filename
 
 	ktx_texture_transcode_fmt_e tf;
 
-	tf = KTX_TTF_BC3_RGBA;
+	auto device = render_manager.chosen_gpu;
+	vk::PhysicalDeviceFeatures features = device.getFeatures();
+
+	if (features.textureCompressionETC2) {
+		tf = KTX_TTF_ETC2_RGBA;
+	} else if (features.textureCompressionBC) {
+		tf = KTX_TTF_BC7_RGBA;
+	} else {
+		SPDLOG_ERROR("Vulkan implementation does not support any available transcode target.");
+		return false;
+	}
 
 	result = ktxTexture2_TranscodeBasis(ktx_texture, tf, 0);
-
-	// Then use VkUpload or GLUpload to create a texture object on the GPU.
-
-	//	assets::AssetFile file;
-	//	bool loaded = assets::load_binary_file(filename, file);
-	//
-	//	if (!loaded) {
-	//		SPDLOG_ERROR("Couldn't load image asset {}", filename);
-	//		return false;
-	//	}
-	//
-	//	assets::TextureInfo texture_info = assets::read_texture_info(&file);
-	//
-	//	vk::DeviceSize image_size = texture_info.texture_size;
-	//	vk::Format image_format;
-	//	switch (texture_info.texture_format) {
-	//		case assets::TextureFormat::RGBA8:
-	//			image_format = vk::Format::eR8G8B8A8Unorm;
-	//			break;
-	//		default:
-	//			SPDLOG_ERROR("Encountered unsupported texture format while loading image asset {}", filename);
-	//			return false;
-	//	}
 
 	auto texture_size = ktxTexture_GetDataSize(ktxTexture(ktx_texture));
 
@@ -58,9 +47,6 @@ bool vk_util::load_image_from_asset(RenderManager &manager, const char *filename
 	auto texture_data = ktxTexture_GetData(ktxTexture(ktx_texture));
 
 	memcpy(data, texture_data, static_cast<size_t>(texture_size));
-
-	//memcpy(data, ktx_texture, static_cast<size_t>(texture_size));
-	//assets::unpack_texture(&texture_info, file.binary_blob.data(), file.binary_blob.size(), (char *)data);
 
 	manager.allocator.unmapMemory(staging_buffer.allocation);
 

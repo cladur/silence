@@ -22,6 +22,15 @@ namespace tg = tinygltf;
 namespace fs = std::filesystem;
 using namespace assets;
 
+size_t find_case_insensitive(std::string data, std::string to_search, size_t pos = 0) {
+	// Convert complete given String to lower case
+	std::transform(data.begin(), data.end(), data.begin(), ::tolower);
+	// Convert complete given Sub String to lower case
+	std::transform(to_search.begin(), to_search.end(), to_search.begin(), ::tolower);
+	// Find sub string in given string
+	return data.find(to_search, pos);
+}
+
 struct ConverterState {
 	fs::path asset_path;
 	fs::path export_path;
@@ -37,9 +46,9 @@ bool convert_image(const fs::path &input, const fs::path &output) {
 	SPDLOG_INFO("Converting image {} to {}", input.string(), output.string());
 
 	// Check if input filename has "normal" in it, case insensitive
-	auto normal_pos = strcasestr(input.c_str(), "normal");
-	auto roughness_pos = strcasestr(input.c_str(), "roughness");
-	auto metallic_pos = strcasestr(input.c_str(), "metal");
+	auto normal_pos = find_case_insensitive(input.string(), "normal");
+	auto roughness_pos = find_case_insensitive(input.string(), "roughness");
+	auto metallic_pos = find_case_insensitive(input.string(), "metal");
 
 	std::string non_color_params;
 	if (normal_pos || roughness_pos || metallic_pos) {
