@@ -992,8 +992,8 @@ PrefabInstance RenderManager::load_prefab(const char *path, const glm::mat4 &roo
 				auto base_color_tex = material.textures["baseColor"];
 				loaded = load_image_to_cache(base_color_tex.c_str(), asset_path(base_color_tex).c_str());
 				if (!loaded) {
-					SPDLOG_WARN("Loaded black picture as base color texture {}", base_color_tex);
 					loaded = load_image_to_cache(base_color_tex.c_str(), black_texture_path.c_str());
+					SPDLOG_WARN("Loaded black picture as base color texture {}", base_color_tex);
 				}
 				textures.push_back(base_color_tex);
 
@@ -1001,8 +1001,8 @@ PrefabInstance RenderManager::load_prefab(const char *path, const glm::mat4 &roo
 				auto ao_tex = material.textures["occlusion"];
 				loaded = load_image_to_cache(ao_tex.c_str(), asset_path(ao_tex).c_str());
 				if (!loaded) {
-					SPDLOG_WARN("Loaded black picture as ambient occlusion texture {}", ao_tex);
 					loaded = load_image_to_cache(ao_tex.c_str(), black_texture_path.c_str());
+					SPDLOG_WARN("Loaded black picture as ambient occlusion texture {}", ao_tex);
 				}
 				textures.push_back(ao_tex);
 
@@ -1010,8 +1010,8 @@ PrefabInstance RenderManager::load_prefab(const char *path, const glm::mat4 &roo
 				auto normal_tex = material.textures["normals"];
 				loaded = load_image_to_cache(normal_tex.c_str(), asset_path(normal_tex).c_str());
 				if (!loaded) {
-					SPDLOG_WARN("Loaded black picture as normal texture {}", normal_tex);
 					loaded = load_image_to_cache(normal_tex.c_str(), black_texture_path.c_str());
+					SPDLOG_WARN("Loaded black picture as normal texture {}", normal_tex);
 				}
 				textures.push_back(normal_tex);
 
@@ -1020,8 +1020,8 @@ PrefabInstance RenderManager::load_prefab(const char *path, const glm::mat4 &roo
 				loaded =
 						load_image_to_cache(metallic_roughness_tex.c_str(), asset_path(metallic_roughness_tex).c_str());
 				if (!loaded) {
-					SPDLOG_WARN("Loaded black picture as metallicRoughness texture {}", metallic_roughness_tex);
 					loaded = load_image_to_cache(metallic_roughness_tex.c_str(), black_texture_path.c_str());
+					SPDLOG_WARN("Loaded black picture as metallicRoughness texture {}", metallic_roughness_tex);
 				}
 				textures.push_back(metallic_roughness_tex);
 
@@ -1029,8 +1029,8 @@ PrefabInstance RenderManager::load_prefab(const char *path, const glm::mat4 &roo
 				auto emissive_tex = material.textures["emissive"];
 				loaded = load_image_to_cache(emissive_tex.c_str(), asset_path(emissive_tex).c_str());
 				if (!loaded) {
-					SPDLOG_WARN("Loaded black picture as emissive texture {}", emissive_tex);
 					loaded = load_image_to_cache(emissive_tex.c_str(), black_texture_path.c_str());
+					SPDLOG_WARN("Loaded black picture as emissive texture {}", emissive_tex);
 				}
 				textures.push_back(emissive_tex);
 
