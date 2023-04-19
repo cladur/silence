@@ -985,56 +985,52 @@ PrefabInstance RenderManager::load_prefab(const char *path, const glm::mat4 &roo
 
 			if (loaded) {
 				assets::MaterialInfo material = assets::read_material_info(&material_file);
-
 				std::vector<std::string> textures;
+				std::string black_texture_path = "resources/assets_export/black.ktx2";
 
+				// BASE COLOR
 				auto base_color_tex = material.textures["baseColor"];
-				if (base_color_tex.size() <= 3) {
-					// TODO: Figure out if this should be a white texture after all?
-					// texture = "Sponza/white.ktx2";
-					base_color_tex = "missing.ktx2";
-				}
-
 				loaded = load_image_to_cache(base_color_tex.c_str(), asset_path(base_color_tex).c_str());
 				if (!loaded) {
-					SPDLOG_ERROR("Failed to load base color texture {}", base_color_tex);
+					SPDLOG_WARN("Loaded black picture as base color texture {}", base_color_tex);
+					loaded = load_image_to_cache(base_color_tex.c_str(), black_texture_path.c_str());
 				}
-
 				textures.push_back(base_color_tex);
 
+				// AMBIENT OCCLUSION
 				auto ao_tex = material.textures["occlusion"];
-				if (ao_tex.size() <= 3) {
-					ao_tex = "missing.ktx2";
-				}
-
 				loaded = load_image_to_cache(ao_tex.c_str(), asset_path(ao_tex).c_str());
 				if (!loaded) {
-					SPDLOG_ERROR("Failed to load ambient occlusion texture {}", ao_tex);
+					SPDLOG_WARN("Loaded black picture as ambient occlusion texture {}", ao_tex);
+					loaded = load_image_to_cache(ao_tex.c_str(), black_texture_path.c_str());
 				}
-
 				textures.push_back(ao_tex);
 
+				// NORMAL
 				auto normal_tex = material.textures["normals"];
 				loaded = load_image_to_cache(normal_tex.c_str(), asset_path(normal_tex).c_str());
-
 				if (!loaded) {
-					SPDLOG_ERROR("Failed to load normal texture {}", normal_tex);
+					SPDLOG_WARN("Loaded black picture as normal texture {}", normal_tex);
+					loaded = load_image_to_cache(normal_tex.c_str(), black_texture_path.c_str());
 				}
-
 				textures.push_back(normal_tex);
 
+				// METALLIC ROUGHNESS
 				auto metallic_roughness_tex = material.textures["metallicRoughness"];
 				loaded =
 						load_image_to_cache(metallic_roughness_tex.c_str(), asset_path(metallic_roughness_tex).c_str());
 				if (!loaded) {
-					SPDLOG_ERROR("Failed to load metallic roughness texture {}", metallic_roughness_tex);
+					SPDLOG_WARN("Loaded black picture as metallicRoughness texture {}", metallic_roughness_tex);
+					loaded = load_image_to_cache(metallic_roughness_tex.c_str(), black_texture_path.c_str());
 				}
 				textures.push_back(metallic_roughness_tex);
 
+				// EMISSIVE
 				auto emissive_tex = material.textures["emissive"];
 				loaded = load_image_to_cache(emissive_tex.c_str(), asset_path(emissive_tex).c_str());
 				if (!loaded) {
-					SPDLOG_ERROR("Failed to load emissive texture {}", emissive_tex);
+					SPDLOG_WARN("Loaded black picture as emissive texture {}", emissive_tex);
+					loaded = load_image_to_cache(emissive_tex.c_str(), black_texture_path.c_str());
 				}
 				textures.push_back(emissive_tex);
 

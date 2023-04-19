@@ -18,6 +18,11 @@ bool vk_util::load_image_from_asset(RenderManager &manager, const char *filename
 
 	result = ktxTexture_CreateFromNamedFile(filename, KTX_TEXTURE_CREATE_NO_FLAGS, (ktxTexture **)&ktx_texture);
 
+	if (result != KTX_SUCCESS) {
+		SPDLOG_ERROR("Failed to load texture asset: {}", filename);
+		return false;
+	}
+
 	ktx_texture_transcode_fmt_e tf;
 
 	auto device = render_manager.chosen_gpu;
