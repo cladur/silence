@@ -13,7 +13,15 @@ add_library(${RENDER_MANAGER_NAME} STATIC
         vk_shaders.cpp vk_shaders.h
         vk_scene.cpp vk_scene.h
         vk_push_buffer.cpp vk_push_buffer.h
-        vk_scene_render.cpp vk_debug.cpp vk_debug.h)
+        vk_scene_render.cpp vk_debug.cpp vk_debug.h
+        debug/debug_drawing.cpp debug/debug_drawing.h
+        ../animation/skinned_mesh.cpp ../animation/skinned_mesh.h
+        ../animation/skinned_model.cpp ../animation/skinned_model.h
+        ../animation/animation.cpp ../animation/animation.h
+        ../animation/joint.h
+        ../animation/bone.cpp ../animation/bone.h
+        ../animation/animator.cpp ../animation/animator.h
+        )
 
 # Include directories
 target_include_directories(${RENDER_MANAGER_NAME} PUBLIC ${MANAGER_DIR})

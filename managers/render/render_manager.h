@@ -12,6 +12,8 @@
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_handles.hpp>
 
+#include "tracy/TracyVulkan.hpp"
+
 #define VULKAN_HPP_NO_EXCEPTIONS
 #include "vulkan/vulkan.hpp"
 
@@ -109,6 +111,21 @@ struct MeshObject {
 
 struct PrefabInstance {
 	std::vector<Handle<RenderObject>> object_ids;
+
+	void serialize_json(nlohmann::json &j) {
+		// TODO good serialization
+		nlohmann::json::object_t obj;
+		// obj["mesh"] = "box";
+		// obj["material"] = "default_mesh";
+		j.push_back(nlohmann::json::object());
+		j.back()["prefab_instance"] = obj;
+	}
+
+	void deserialize_json(nlohmann::json &j) {
+		nlohmann::json obj = Serializaer::get_data("mesh_instance", j);
+		// mesh = render_manager.get_mesh(obj["mesh"]);
+		// material = render_manager.get_material(obj["material"]);
+	}
 };
 
 struct GPUCameraData {
@@ -203,6 +220,9 @@ public:
 	// MESHES
 	Mesh triangle_mesh;
 	Mesh box_mesh;
+	Mesh debug_box_mesh;
+	Mesh debug_sphere_mesh;
+	Mesh debug_line_mesh;
 
 	// DEPTH
 	AllocatedImage depth_image;
@@ -261,6 +281,10 @@ public:
 	void init_imgui(GLFWwindow *window);
 
 	void load_meshes();
+	void generate_debug_box_mesh();
+	void generate_debug_sphere_mesh();
+	void generate_debug_line_mesh();
+
 	void upload_mesh(Mesh &mesh);
 
 	bool load_image_to_cache(const char *name, const char *path);

@@ -2,6 +2,8 @@
 #define SILENCE_COMPONENT_ARRAY_INTERFACE_H
 
 #include "component_array_interface.h"
+#include "core/serialization.h"
+#include <memory>
 
 // An interface is needed so that the ComponentManager (seen later)
 // can tell a generic ComponentArray that an entity has been destroyed
@@ -18,6 +20,13 @@ public:
 		indexToEntityMap[new_index] = entity;
 		componentArray[new_index] = component;
 		size++;
+	}
+
+	void update_data(Entity entity, T component) {
+		assert(entityToIndexMap.find(entity) != entityToIndexMap.end() && "Component does not exist");
+
+		// Update existing entry
+		componentArray[entityToIndexMap[entity]] = component;
 	}
 
 	void remove_data(Entity entity) {
@@ -54,12 +63,25 @@ public:
 		}
 	}
 
-	bool has_component(Entity entity) {
+	bool has_component(Entity entity) override {
 		if (entityToIndexMap.find(entity) != entityToIndexMap.end()) {
 			return true;
 		}
 
 		return false;
+	}
+
+	void serialize_entity_json(nlohmann::json &json, Entity entity) override {
+		if (entityToIndexMap.find(entity) != entityToIndexMap.end()) {
+			// cast component to Serializable to get serialize_json method
+			serialize_component_json(componentArray[entityToIndexMap[entity]], json);
+		}
+	}
+
+	void serialize_component_json(T &component, nlohmann::json &json)
+		requires serialization::Serializable<T>
+	{
+		component.serialize_json(json);
 	}
 
 private:

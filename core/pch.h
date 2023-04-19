@@ -44,7 +44,9 @@
 #include "glm/gtc/quaternion.hpp"
 #include "imgui.h"
 #include "magic_enum.hpp"
+#include "nlohmann/json.hpp"
 #include "spdlog/spdlog.h"
+#include "tracy/tracy.hpp"
 #include <glm/gtc/matrix_transform.hpp>
 
 // our stuff

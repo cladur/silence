@@ -17,6 +17,7 @@ void ParentSystem::startup() {
 }
 
 void ParentSystem::update() {
+	ZoneScopedN("ParentSystem::update");
 	isolated_entities_system->update();
 	root_parent_system->update();
 }
