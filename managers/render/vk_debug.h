@@ -46,7 +46,7 @@ public:
 	template <typename T> static void set_name(T object, const char *object_name) {
 		VkDebug *instance = get_instance();
 		vk::DebugUtilsObjectNameInfoEXT name_info;
-		auto casted_handle = uint64_t(static_cast<T::CType>(object));
+		auto casted_handle = uint64_t(static_cast<typename T::CType>(object));
 		auto object_type = instance->object_map[std::type_index(typeid(T))];
 
 		name_info.sType = vk::StructureType::eDebugUtilsObjectNameInfoEXT;

@@ -133,6 +133,8 @@ public:
 
 	void fill_builders();
 
+	ShaderPass *debug_pass;
+
 private:
 	struct MaterialInfoHash {
 		std::size_t operator()(const MaterialData &k) const {
@@ -142,6 +144,7 @@ private:
 
 	PipelineBuilder forward_builder;
 	PipelineBuilder shadow_builder;
+	PipelineBuilder debug_builder;
 
 	std::unordered_map<std::string, EffectTemplate> template_cache;
 	std::unordered_map<std::string, Material *> materials;

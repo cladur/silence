@@ -7,8 +7,6 @@
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_handles.hpp>
 
-extern RenderManager render_manager;
-
 bool vk_util::load_shader_module(vk::Device device, const char *file_path, ShaderModule *out_shader_module) {
 	std::ifstream file(file_path, std::ios::ate | std::ios::binary);
 
@@ -54,7 +52,7 @@ bool vk_util::load_shader_module(vk::Device device, const char *file_path, Shade
 	out_shader_module->code = std::move(buffer);
 	out_shader_module->module = shader_module;
 
-	render_manager.main_deletion_queue.push_function([=]() { device.destroyShaderModule(shader_module); });
+	RenderManager::get()->main_deletion_queue.push_function([=]() { device.destroyShaderModule(shader_module); });
 
 	return true;
 }
@@ -216,7 +214,7 @@ void ShaderEffect::ShaderEffect::ShaderEffect::reflect_layout(
 			VK_CHECK(device.createDescriptorSetLayout(&ly.create_info, nullptr, &set_layouts[i]));
 			VkDebug::set_name(set_layouts[i], fmt::format("Set {} layout", i).c_str());
 
-			render_manager.main_deletion_queue.push_function(
+			RenderManager::get()->main_deletion_queue.push_function(
 					[=]() { device.destroyDescriptorSetLayout(set_layouts[i]); });
 		} else {
 			set_hashes[i] = 0;
@@ -246,7 +244,7 @@ void ShaderEffect::ShaderEffect::ShaderEffect::reflect_layout(
 
 	VkDebug::set_name(built_layout, "ShaderEffect Pipeline Layout");
 
-	render_manager.main_deletion_queue.push_function([=]() { device.destroyPipelineLayout(built_layout); });
+	RenderManager::get()->main_deletion_queue.push_function([=]() { device.destroyPipelineLayout(built_layout); });
 }
 
 void ShaderEffect::ShaderEffect::ShaderEffect::fill_stages(

@@ -30,9 +30,8 @@
 #include <fstream>
 
 #include "core/camera/camera.h"
-#include "render/debug/debug_drawing.h"
+#include "render/debug/debug_draw.h"
 
-RenderManager render_manager;
 DisplayManager display_manager;
 ECSManager ecs_manager;
 AudioManager audio_manager;
@@ -126,7 +125,8 @@ void demo_entities_init(std::vector<Entity> &entities) {
 				entity, ColliderAABB{ transform.get_position(), transform.get_scale(), true });
 
 		ecs_manager.add_component<PrefabInstance>(entity,
-				render_manager.load_prefab(RenderManager::asset_path("DamagedHelmet/DamagedHelmet.pfb").c_str()));
+				RenderManager::get()->load_prefab(
+						RenderManager::asset_path("DamagedHelmet/DamagedHelmet.pfb").c_str()));
 	}
 
 	auto listener = ecs_manager.create_entity();
@@ -237,7 +237,7 @@ bool display_manager_init() {
 }
 
 bool render_manager_init() {
-	auto render_manager_result = render_manager.startup(display_manager, &camera);
+	auto render_manager_result = RenderManager::get()->startup(display_manager, &camera);
 	if (render_manager_result == RenderManager::Status::Ok) {
 		SPDLOG_INFO("Initialized render manager");
 	} else {
@@ -484,16 +484,24 @@ int main() {
 		collision_system->update();
 
 		parent_system->update();
-		render_system->update(render_manager);
+		render_system->update(*RenderManager::get());
+
+		debug_draw::draw_line(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(10.0f, 0.0f, 0.0f));
+		debug_draw::draw_line(glm::vec3(0.0f, 5.0f, 0.0f), glm::vec3(10.0f, 0.0f, 0.0f));
+
+		debug_draw::draw_line(glm::vec3(0.0f, 5.0f, 10.0f), glm::vec3(10.0f, 0.0f, 2.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+
+		debug_draw::draw_box(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+		debug_draw::draw_box(glm::vec3(0.0f, 5.0f, 0.0f), glm::vec3(10.0f, 1.0f, 1.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 
 		// TODO: remove this when collision demo will be removed
 		for (auto sphere : spheres) {
 			auto &c = ecs_manager.get_component<ColliderSphere>(sphere);
-			DebugDraw::draw_sphere(c.center, c.radius);
+			debug_draw::draw_sphere(c.center, c.radius);
 		}
 
 		input_manager.process_input();
-		render_manager.draw(camera);
+		RenderManager::get()->draw(camera);
 
 		fmod_listener_system->update(dt);
 		audio_manager.update();
@@ -515,7 +523,7 @@ int main() {
 	SPDLOG_INFO("Shutting down engine subsystems...");
 	input_manager.shutdown();
 	audio_manager.shutdown();
-	render_manager.shutdown();
+	RenderManager::get()->shutdown();
 	display_manager.shutdown();
 
 	return 0;

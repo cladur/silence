@@ -1,5 +1,6 @@
 #include "material_system.h"
 
+#include "debug/debug_draw.h"
 #include "render/render_manager.h"
 #include "vk_debug.h"
 #include "vk_initializers.h"
@@ -174,11 +175,13 @@ void vk_util::MaterialSystem::build_default_templates() {
 
 	//default effects
 	ShaderEffect *textured_lit = build_effect(manager, "tri_mesh.vert.spv", "textured_lit.frag.spv");
+	ShaderEffect *debug_effect = build_effect(manager, "debug.vert.spv", "debug.frag.spv");
 	// ShaderEffect *default_lit = build_effect(manager, "tri_mesh_ssbo_instanced.vert.spv", "default_lit.frag.spv");
 	// ShaderEffect *opaque_shadowcast = build_effect(manager, "tri_mesh_ssbo_instanced_shadowcast.vert.spv", "");
 
 	//passes
 	ShaderPass *textured_lit_pass = build_shader(manager->render_pass, forward_builder, textured_lit);
+	debug_pass = build_shader(manager->render_pass, debug_builder, debug_effect);
 	// ShaderPass *default_lit_pass = build_shader(manager->render_pass, forward_builder, default_lit);
 	// ShaderPass *opaque_shadowcast_pass = build_shader(manager->shadow_pass, shadow_builder, opaque_shadowcast);
 
@@ -334,6 +337,32 @@ void vk_util::MaterialSystem::fill_builders() {
 
 		//default depthtesting
 		forward_builder.depth_stencil = vk_init::depth_stencil_create_info(true, true, vk::CompareOp::eGreaterOrEqual);
+
+		// OUR STUFF
+		forward_builder.viewport.x = 0.0f;
+		forward_builder.viewport.y = (float)manager->window_extent.height;
+		forward_builder.viewport.width = (float)manager->window_extent.width;
+		forward_builder.viewport.height = -(float)manager->window_extent.height;
+		forward_builder.viewport.minDepth = 0.0f;
+		forward_builder.viewport.maxDepth = 1.0f;
+
+		forward_builder.scissor.offset = vk::Offset2D(0, 0);
+		forward_builder.scissor.extent = manager->window_extent;
+	}
+	{
+		debug_builder.vertex_description = DebugVertex::get_vertex_description();
+
+		debug_builder.input_assembly = vk_init::input_assembly_create_info(vk::PrimitiveTopology::eLineList);
+
+		debug_builder.rasterizer = vk_init::rasterization_state_create_info(vk::PolygonMode::eLine);
+		debug_builder.rasterizer.cullMode = vk::CullModeFlagBits::eNone; //BACK_BIT;
+
+		debug_builder.multisampling = vk_init::multisampling_state_create_info();
+
+		debug_builder.color_blend_attachment = vk_init::color_blend_attachment_state();
+
+		//default depthtesting
+		debug_builder.depth_stencil = vk_init::depth_stencil_create_info(true, true, vk::CompareOp::eGreaterOrEqual);
 
 		// OUR STUFF
 		forward_builder.viewport.x = 0.0f;

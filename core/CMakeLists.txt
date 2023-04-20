@@ -28,7 +28,6 @@ add_library(${CORE_LIB_NAME} STATIC
         behavior_tree/decorator_nodes/repeater_node.h
         behavior_tree/decorator_nodes/retry_node.h
         behavior_tree/decorator_nodes/invert_node.h
-        components/mesh_instance_component.h
         serialization.h
         camera/camera.cpp camera/camera.h
         components/collider_tag_component.h

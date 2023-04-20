@@ -4,6 +4,7 @@
 #include "assets/prefab_asset.h"
 #include "core/camera/camera.h"
 
+#include "debug/debug_draw.h"
 #include "managers/display/display_manager.h"
 #include "material_system.h"
 #include "render_system.h"
@@ -175,6 +176,8 @@ struct FrameData {
 
 class RenderManager {
 public:
+	static RenderManager *get();
+
 	// INITIALIZATION
 	vk::Instance instance;
 	vk::DebugUtilsMessengerEXT debug_messenger; // Vulkan debug output handle
@@ -223,6 +226,9 @@ public:
 	Mesh debug_box_mesh;
 	Mesh debug_sphere_mesh;
 	Mesh debug_line_mesh;
+
+	std::vector<DebugVertex> debug_vertices;
+	AllocatedBuffer<DebugVertex> debug_vertex_buffer;
 
 	// DEPTH
 	AllocatedImage depth_image;
@@ -278,12 +284,10 @@ public:
 	void init_descriptors();
 	void init_pipelines();
 	void init_scene();
+	void init_debug_vertex_buffer();
 	void init_imgui(GLFWwindow *window);
 
 	void load_meshes();
-	void generate_debug_box_mesh();
-	void generate_debug_sphere_mesh();
-	void generate_debug_line_mesh();
 
 	void upload_mesh(Mesh &mesh);
 
@@ -331,6 +335,8 @@ public:
 	void execute_draw_commands(vk::CommandBuffer cmd, RenderScene::MeshPass &pass, vk::DescriptorSet object_data_set,
 			std::vector<uint32_t> dynamic_offsets, vk::DescriptorSet global_set);
 	void draw_objects_shadow(vk::CommandBuffer cmd, RenderScene::MeshPass &pass);
+	void draw_debug_vertices(
+			vk::CommandBuffer cmd, std::vector<uint32_t> dynamic_offsets, vk::DescriptorSet global_set);
 	void reduce_depth(vk::CommandBuffer cmd);
 	void execute_compute_cull(vk::CommandBuffer cmd, RenderScene::MeshPass &pass, CullParams &params);
 	void ready_cull_data(RenderScene::MeshPass &pass, vk::CommandBuffer cmd);

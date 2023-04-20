@@ -10,8 +10,6 @@
 #include <ktx.h>
 #include <stb_image.h>
 
-extern RenderManager render_manager;
-
 bool vk_util::load_image_from_asset(RenderManager &manager, const char *filename, AllocatedImage &out_image) {
 	ktxTexture2 *ktx_texture;
 	KTX_error_code result;
@@ -25,7 +23,7 @@ bool vk_util::load_image_from_asset(RenderManager &manager, const char *filename
 
 	ktx_texture_transcode_fmt_e tf;
 
-	auto device = render_manager.chosen_gpu;
+	auto device = RenderManager::get()->chosen_gpu;
 	vk::PhysicalDeviceFeatures features = device.getFeatures();
 
 	if (features.textureCompressionETC2) {

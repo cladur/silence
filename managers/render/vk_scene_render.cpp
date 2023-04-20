@@ -387,6 +387,8 @@ void RenderManager::draw_objects_forward(vk::CommandBuffer cmd, RenderScene::Mes
 	dynamic_offsets.push_back(scene_data_offset);
 
 	execute_draw_commands(cmd, pass, object_data_set, dynamic_offsets, global_set);
+
+	draw_debug_vertices(cmd, dynamic_offsets, global_set);
 }
 
 void RenderManager::execute_draw_commands(vk::CommandBuffer cmd, RenderScene::MeshPass &pass,
@@ -451,6 +453,31 @@ void RenderManager::execute_draw_commands(vk::CommandBuffer cmd, RenderScene::Me
 			cmd.drawIndexedIndirect(pass.draw_indirect_buffer.buffer, multibatch.first * sizeof(GPUIndirectObject),
 					multibatch.count, sizeof(GPUIndirectObject));
 		}
+	}
+}
+
+void RenderManager::draw_debug_vertices(
+		vk::CommandBuffer cmd, std::vector<uint32_t> dynamic_offsets, vk::DescriptorSet global_set) {
+	if (!debug_vertices.empty()) {
+		void *data;
+		VK_CHECK(allocator.mapMemory(debug_vertex_buffer.allocation, &data));
+		memcpy(data, debug_vertices.data(), debug_vertices.size() * sizeof(DebugVertex));
+		allocator.unmapMemory(debug_vertex_buffer.allocation);
+
+		vk::DeviceSize offset = 0;
+		cmd.bindVertexBuffers(0, 1, &debug_vertex_buffer.buffer, &offset);
+
+		auto debug_pass = material_system.debug_pass;
+		auto &debug_pipeline = debug_pass->pipeline;
+		auto &debug_pipeline_layout = debug_pass->layout;
+
+		cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, debug_pipeline);
+		cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, debug_pipeline_layout, 0, 1, &global_set,
+				dynamic_offsets.size(), dynamic_offsets.data());
+
+		cmd.draw(debug_vertices.size(), 1, 0, 0);
+
+		debug_vertices.clear();
 	}
 }
 

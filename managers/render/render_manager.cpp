@@ -12,6 +12,7 @@
 #include "vulkan-memory-allocator-hpp/vk_mem_alloc.hpp"
 
 #include "VkBootstrap.h"
+#include "debug/debug_draw.h"
 #include "render/material_system.h"
 #include "render/vk_descriptors.h"
 #include "render/vk_initializers.h"
@@ -25,6 +26,11 @@
 
 #define ASSET_PATH "resources/assets_export/"
 #define SHADER_PATH "resources/shaders/"
+
+RenderManager *RenderManager::get() {
+	static RenderManager render_manager{};
+	return &render_manager;
+}
 
 void RenderManager::init_vulkan(DisplayManager &display_manager) {
 	vkb::InstanceBuilder builder;
@@ -53,6 +59,7 @@ void RenderManager::init_vulkan(DisplayManager &display_manager) {
 
 	vk::PhysicalDeviceFeatures features = {};
 	features.multiDrawIndirect = VK_TRUE;
+	features.fillModeNonSolid = VK_TRUE;
 
 	selector.set_required_features(features);
 
@@ -630,24 +637,6 @@ void RenderManager::init_pipelines() {
 	blit_effect->add_stage(shader_cache.get_shader(shader_path("blit.frag.spv")), vk::ShaderStageFlagBits::eFragment);
 	blit_effect->reflect_layout(device, nullptr, 0);
 
-	// // debug shaders
-
-	// vk::ShaderModule debug_vert_shader;
-	// if (!load_shader_module("resources/shaders/debug.vert.spv", &debug_vert_shader)) {
-	// 	SPDLOG_ERROR("Error when building the debug vertex shader module");
-	// 	abort();
-	// } else {
-	// 	SPDLOG_INFO("Debug vertex shader successfully loaded");
-	// }
-
-	// vk::ShaderModule debug_frag_shader;
-	// if (!load_shader_module("resources/shaders/debug.frag.spv", &debug_frag_shader)) {
-	// 	SPDLOG_ERROR("Error when building the debug fragment shader module");
-	// 	abort();
-	// } else {
-	// 	SPDLOG_INFO("Debug fragment shader successfully loaded");
-	// }
-
 	//build the stage-create-info for both vertex and fragment stages. This lets the pipeline know the shader
 	//modules per stage
 	PipelineBuilder pipeline_builder;
@@ -707,60 +696,6 @@ void RenderManager::init_pipelines() {
 	load_compute_shader(shader_path("depth_reduce.comp.spv").c_str(), depth_reduce_pipeline, depth_reduce_layout);
 	load_compute_shader(shader_path("sparse_upload.comp.spv").c_str(), sparse_upload_pipeline, sparse_upload_layout);
 
-	// vk::PipelineLayout textured_mesh_pipeline_layout;
-	// VK_CHECK(device.createPipelineLayout(&textured_mesh_pipeline_layout_info, nullptr,
-	// &textured_mesh_pipeline_layout));
-
-	// pipeline_builder.shader_stages.clear();
-	// pipeline_builder.shader_stages.push_back(
-	// 		vk_init::pipeline_shader_stage_create_info(vk::ShaderStageFlagBits::eVertex, mesh_vertex_shader));
-
-	// //make sure that triangle_frag_shader is holding the compiled default_lit.frag
-	// pipeline_builder.shader_stages.push_back(
-	// 		vk_init::pipeline_shader_stage_create_info(vk::ShaderStageFlagBits::eFragment, textured_mesh_frag_shader));
-
-	// pipeline_builder.pipeline_layout = textured_mesh_pipeline_layout;
-	// vk::Pipeline textured_mesh_pipeline = pipeline_builder.build_pipeline(device, render_pass);
-	// create_material(textured_mesh_pipeline, textured_mesh_pipeline_layout, "textured_mesh");
-
-	// // DEBUG DRAWING STUFF
-
-	// //build the mesh pipeline
-	// //we start from just the default empty pipeline layout info
-	// vk::PipelineLayoutCreateInfo debug_pipeline_layout_info = vk_init::pipeline_layout_create_info();
-
-	// //push-constant setup
-	// debug_pipeline_layout_info.pPushConstantRanges = &push_constant;
-	// debug_pipeline_layout_info.pushConstantRangeCount = 1;
-
-	// //hook the global set layout
-	// vk::DescriptorSetLayout layouts[] = { global_set_layout, object_set_layout };
-
-	// debug_pipeline_layout_info.setLayoutCount = 2;
-	// debug_pipeline_layout_info.pSetLayouts = layouts;
-
-	// vk::PipelineLayout debug_pipeline_layout;
-	// VK_CHECK(device.createPipelineLayout(&debug_pipeline_layout_info, nullptr, &debug_pipeline_layout));
-
-	// pipeline_builder.input_assembly = vk_init::input_assembly_create_info(vk::PrimitiveTopology::eLineList);
-
-	// pipeline_builder.pipeline_layout = debug_pipeline_layout;
-
-	// pipeline_builder.shader_stages.clear();
-	// pipeline_builder.shader_stages.push_back(
-	// 		vk_init::pipeline_shader_stage_create_info(vk::ShaderStageFlagBits::eVertex, debug_vert_shader));
-
-	// //make sure that triangle_frag_shader is holding the compiled default_lit.frag
-	// pipeline_builder.shader_stages.push_back(
-	// 		vk_init::pipeline_shader_stage_create_info(vk::ShaderStageFlagBits::eFragment, debug_frag_shader));
-
-	// pipeline_builder.pipeline_layout = debug_pipeline_layout;
-	// vk::Pipeline debug_pipeline = pipeline_builder.build_pipeline(device, render_pass);
-	// create_material(debug_pipeline, debug_pipeline_layout, "debug_material");
-
-	// device.destroyShaderModule(debug_vert_shader, nullptr);
-	// device.destroyShaderModule(debug_frag_shader, nullptr);
-
 	main_deletion_queue.push_function([=, this]() {
 		device.destroyPipeline(mesh_pipeline);
 		device.destroyPipelineLayout(mesh_pipeline_layout);
@@ -793,6 +728,33 @@ bool RenderManager::load_compute_shader(const char *shader_path, vk::Pipeline &p
 	main_deletion_queue.push_function([=]() { device.destroyPipeline(pipeline, nullptr); });
 
 	return true;
+}
+
+void RenderManager::init_debug_vertex_buffer() {
+	const uint32_t max_debug_verts = 100000;
+
+	// Create vertex buffer from vertices
+	size_t buffer_size = max_debug_verts * sizeof(DebugVertex);
+	//allocate staging buffer
+	vk::BufferCreateInfo buffer_info = {};
+	buffer_info.sType = vk::StructureType::eBufferCreateInfo;
+	buffer_info.pNext = nullptr;
+
+	buffer_info.size = buffer_size;
+	buffer_info.usage = vk::BufferUsageFlagBits::eVertexBuffer;
+
+	//let the VMA library know that this data should be on CPU RAM
+	vma::AllocationCreateInfo vmaalloc_info = {};
+	vmaalloc_info.usage = vma::MemoryUsage::eCpuToGpu;
+
+	//allocate the buffer
+	VK_CHECK(allocator.createBuffer(
+			&buffer_info, &vmaalloc_info, &debug_vertex_buffer.buffer, &debug_vertex_buffer.allocation, nullptr));
+
+	VkDebug::set_name(debug_vertex_buffer.buffer, "Debug draw vertex buffer");
+
+	main_deletion_queue.push_function(
+			[=]() { allocator.destroyBuffer(debug_vertex_buffer.buffer, debug_vertex_buffer.allocation); });
 }
 
 void RenderManager::init_scene() {
@@ -884,106 +846,25 @@ void RenderManager::init_imgui(GLFWwindow *window) {
 }
 
 void RenderManager::load_meshes() {
-	triangle_mesh.vertices.resize(3);
+	// triangle_mesh.vertices.resize(3);
 
-	//vertex positions
-	triangle_mesh.vertices[0].position = { 1.f, 1.f, 0.0f };
-	triangle_mesh.vertices[1].position = { -1.f, 1.f, 0.0f };
-	triangle_mesh.vertices[2].position = { 0.f, -1.f, 0.0f };
+	// //vertex positions
+	// triangle_mesh.vertices[0].position = { 1.f, 1.f, 0.0f };
+	// triangle_mesh.vertices[1].position = { -1.f, 1.f, 0.0f };
+	// triangle_mesh.vertices[2].position = { 0.f, -1.f, 0.0f };
 
-	//vertex colors, all green
-	triangle_mesh.vertices[0].color = { 0.f, 1.f, 0.0f }; //pure green
-	triangle_mesh.vertices[1].color = { 0.f, 1.f, 0.0f }; //pure green
-	triangle_mesh.vertices[2].color = { 0.f, 1.f, 0.0f }; //pure green
+	// //vertex colors, all green
+	// triangle_mesh.vertices[0].color = { 0.f, 1.f, 0.0f }; //pure green
+	// triangle_mesh.vertices[1].color = { 0.f, 1.f, 0.0f }; //pure green
+	// triangle_mesh.vertices[2].color = { 0.f, 1.f, 0.0f }; //pure green
 
-	triangle_mesh.indices = { 0, 1, 2 };
+	// triangle_mesh.indices = { 0, 1, 2 };
 
-	//we don't care about the vertex normals
+	// //we don't care about the vertex normals
 
-	generate_debug_box_mesh();
-	generate_debug_sphere_mesh();
-	generate_debug_line_mesh();
+	// upload_mesh(triangle_mesh);
 
-	upload_mesh(triangle_mesh);
-	upload_mesh(debug_box_mesh);
-	upload_mesh(debug_sphere_mesh);
-	upload_mesh(debug_line_mesh);
-
-	meshes["triangle"] = triangle_mesh;
-	meshes["debug_box"] = debug_box_mesh;
-	meshes["debug_sphere"] = debug_sphere_mesh;
-	meshes["debug_line"] = debug_line_mesh;
-}
-
-void RenderManager::generate_debug_box_mesh() {
-	debug_box_mesh.vertices.resize(8);
-	// bottom face
-	debug_box_mesh.vertices[0].position = glm::vec3(-0.5f, -0.5f, -0.5f);
-	debug_box_mesh.vertices[1].position = glm::vec3(0.5f, -0.5f, -0.5f);
-	debug_box_mesh.vertices[2].position = glm::vec3(0.5f, -0.5f, 0.5f);
-	debug_box_mesh.vertices[3].position = glm::vec3(-0.5f, -0.5f, 0.5f);
-
-	// top face
-	debug_box_mesh.vertices[4].position = glm::vec3(-0.5f, 0.5f, -0.5f);
-	debug_box_mesh.vertices[5].position = glm::vec3(0.5f, 0.5f, -0.5f);
-	debug_box_mesh.vertices[6].position = glm::vec3(0.5f, 0.5f, 0.5f);
-	debug_box_mesh.vertices[7].position = glm::vec3(-0.5f, 0.5f, 0.5f);
-
-	// white color for best visibility. I dont know how to re-buffer vertex data on runtime so we'll stay with white
-	for (auto &vertex : debug_box_mesh.vertices) {
-		vertex.color = glm::vec3(1.f, 1.f, 1.f);
-	}
-
-	// indeces for LINE_LIST drawing a cube shape
-	debug_box_mesh.indices = { 0, 1, 1, 2, 2, 3, 3, 0, 4, 5, 5, 6, 6, 7, 7, 4, 0, 4, 1, 5, 2, 6, 3, 7 };
-}
-
-void RenderManager::generate_debug_sphere_mesh() {
-	// prepare sphere vertices
-	static const int x_segments = 16;
-	static const int y_segments = 16;
-	static const float pi = 3.14159265359f;
-
-	float x_segment_step = 2.f * pi / x_segments;
-	float y_segment_step = pi / y_segments;
-	float x_segment_angle = 0.f;
-	float y_segment_angle = 0.f;
-
-	float xy;
-	float z;
-
-	for (int y = 0; y <= y_segments; ++y) {
-		y_segment_angle = pi / 2.0f - (float)y * y_segment_step;
-		xy = cos(y_segment_angle); // assuming r=1
-		z = sin(y_segment_angle);
-
-		for (int x = 0; x <= x_segments; ++x) {
-			x_segment_angle = (float)x * x_segment_step;
-
-			float x_val = xy * cos(x_segment_angle);
-			float y_val = xy * sin(x_segment_angle);
-
-			Vertex vertex{};
-			vertex.position = glm::vec3(x_val, z, y_val);
-			vertex.color = glm::vec3(1.f, 1.f, 1.f);
-			debug_sphere_mesh.vertices.push_back(vertex);
-		}
-	}
-
-	// indeces for drawing a LINE LIST with lines going both ways
-	for (int y = 0; y < y_segments; ++y) {
-		for (int x = 0; x < x_segments; ++x) {
-			debug_sphere_mesh.indices.push_back(y * (x_segments + 1) + x);
-			debug_sphere_mesh.indices.push_back(y * (x_segments + 1) + x + 1);
-		}
-	}
-
-	for (int y = 0; y < y_segments; ++y) {
-		for (int x = 0; x < x_segments; ++x) {
-			debug_sphere_mesh.indices.push_back(y * (x_segments + 1) + x);
-			debug_sphere_mesh.indices.push_back((y + 1) * (x_segments + 1) + x);
-		}
-	}
+	// meshes["triangle"] = triangle_mesh;
 }
 
 void RenderManager::upload_mesh(Mesh &mesh) {
@@ -1206,6 +1087,7 @@ PrefabInstance RenderManager::load_prefab(const char *path, const glm::mat4 &roo
 				}
 
 				for (auto &texture : textures) {
+					// TODO: Check if we can reuse one sampler for multiple textures
 					vk::Sampler smooth_sampler;
 					VK_CHECK(device.createSampler(&sampler_info, nullptr, &smooth_sampler));
 					VkDebug::set_name(smooth_sampler, fmt::format("Smooth Sampler for {}", texture).c_str());
@@ -1403,13 +1285,12 @@ RenderManager::Status RenderManager::startup(DisplayManager &display_manager, Ca
 	init_descriptors();
 	init_pipelines();
 
+	init_debug_vertex_buffer();
+
 	load_images();
 	load_meshes();
 
 	init_scene();
-
-	// render_scene.build_batches();
-	// render_scene.merge_meshes(this);
 
 	init_imgui(display_manager.window);
 
@@ -1741,24 +1622,4 @@ void RenderManager::copy_render_to_swapchain(vk::CommandBuffer cmd, uint32_t swa
 	cmd.draw(3, 1, 0, 0);
 
 	cmd.endRenderPass();
-}
-
-void RenderManager::generate_debug_line_mesh() {
-	//create a mesh for debug lines
-	std::vector<Vertex> vertices;
-	std::vector<uint32_t> indices;
-
-	//create a line mesh
-	Vertex v1 = {};
-	v1.position = glm::vec3{ 0, 0, 0 };
-	v1.color = glm::vec3{ 1, 0, 0 };
-	debug_line_mesh.vertices.push_back(v1);
-
-	Vertex v2 = {};
-	v2.position = glm::vec3{ 1, 0, 0 };
-	v2.color = glm::vec3{ 0, 0, 1 };
-	debug_line_mesh.vertices.push_back(v2);
-
-	debug_line_mesh.indices.push_back(0);
-	debug_line_mesh.indices.push_back(1);
 }
