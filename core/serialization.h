@@ -8,10 +8,12 @@
 #include "components/collider_tag_component.h"
 #include "components/fmod_listener_component.h"
 #include "components/gravity_component.h"
-#include "components/mesh_instance_component.h"
 #include "components/parent_component.h"
 #include "components/rigidbody_component.h"
 #include "components/transform_component.h"
+
+// TODO: Move PrefabInstance to somewhere else
+#include "render/render_manager.h"
 
 #include <functional>
 #include <map>
@@ -30,7 +32,7 @@ concept Deserializable = requires(T t, nlohmann::json &j) {
 	{ t.deserialize_json(j) };
 };
 
-typedef std::variant<Children, Parent, Transform, RigidBody, FmodListener, Gravity, MeshInstance, ColliderTag,
+typedef std::variant<Children, Parent, Transform, RigidBody, FmodListener, Gravity, PrefabInstance, ColliderTag,
 		ColliderSphere, ColliderAABB, ColliderOBB>
 		variant_type;
 

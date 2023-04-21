@@ -82,6 +82,16 @@ void AudioManager::test_create_instance() {
 	//		event->getPath(path, 256, nullptr);
 	//		SPDLOG_INFO("Audio Manager: {}", path);
 	//	}
+	//	FMOD::Studio::EventDescription *event_description[10];
+	//	int *count = 0;
+	//	master_bank->getEventCount(count);
+	//	master_bank->getEventList(&event_description[0], 10, count);
+	//
+	//	for (auto &event : event_description) {
+	//		char path[256];
+	//		event->getPath(path, 256, nullptr);
+	//		SPDLOG_INFO("Audio Manager: {}", path);
+	//	}
 }
 
 void AudioManager::test_play_sound() {
@@ -122,8 +132,8 @@ void AudioManager::set_3d_listener_attributes(
 	FMOD_CHECK(system->setListenerAttributes(listener_id, &attributes));
 }
 
-void AudioManager::play_one_shot_3d(const EventReference &eventRef, glm::vec3 position, RigidBody *rigid_body) {
-	auto event_instance = create_event_instance(eventRef);
+void AudioManager::play_one_shot_3d(const EventReference &event_ref, glm::vec3 position, RigidBody *rigid_body) {
+	auto event_instance = create_event_instance(event_ref);
 	FMOD_3D_ATTRIBUTES attributes = to_3d_attributes(position, rigid_body);
 	event_instance->set3DAttributes(&attributes);
 	event_instance->start();
@@ -147,7 +157,7 @@ FMOD_GUID AudioManager::path_to_guid(const std::string &path) {
 	if (res != FMOD_OK) {
 		SPDLOG_ERROR("Audio Manager: Failed to get guid for {}. {}", path, FMOD_ErrorString(res));
 		char c[8] = { 0 };
-		return FMOD_GUID(0, 0, 0, "0000000");
+		return FMOD_GUID{ 0, 0, 0, "0000000" };
 	}
 	return guid;
 }

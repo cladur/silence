@@ -28,12 +28,13 @@ add_library(${CORE_LIB_NAME} STATIC
         behavior_tree/decorator_nodes/repeater_node.h
         behavior_tree/decorator_nodes/retry_node.h
         behavior_tree/decorator_nodes/invert_node.h
-        components/mesh_instance_component.h
         serialization.h
         camera/camera.cpp camera/camera.h
         components/collider_tag_component.h
         components/collider_aabb.h
-        components/collider_sphere.h components/collider_obb.h)
+        components/collider_sphere.h components/collider_obb.h
+        cvars/cvars.cpp cvars/cvars.h
+        )
 
 target_include_directories(${CORE_LIB_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 
@@ -60,3 +61,5 @@ target_link_libraries(${CORE_LIB_NAME} PRIVATE
         )
 
 target_precompile_headers(${COMMON_LIB_NAME} INTERFACE pch.h)
+
+add_subdirectory(assets)

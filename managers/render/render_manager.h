@@ -1,32 +1,68 @@
 #ifndef SILENCE_RENDER_MANAGER_H
 #define SILENCE_RENDER_MANAGER_H
 
+#include "assets/prefab_asset.h"
 #include "core/camera/camera.h"
 
-#include "magic_enum.hpp"
-#include <glm/glm.hpp>
-
+#include "debug/debug_draw.h"
 #include "managers/display/display_manager.h"
+#include "material_system.h"
+#include "render_system.h"
+#include "vk_push_buffer.h"
+#include "vk_types.h"
+#include <vulkan/vulkan_enums.hpp>
+#include <vulkan/vulkan_handles.hpp>
 
 #include "tracy/TracyVulkan.hpp"
 
 #define VULKAN_HPP_NO_EXCEPTIONS
 #include "vulkan/vulkan.hpp"
 
-#include "vulkan-memory-allocator-hpp/vk_mem_alloc.hpp"
+#include "vk_mesh.h"
+#include "vk_scene.h"
+#include "vk_shaders.h"
 
-#include "render/vk_mesh.h"
+namespace vk_util {
+class DescriptorLayoutCache;
+class DescriptorAllocator;
+class Material;
 
-#define VK_CHECK(x)                                                                                                    \
-	do {                                                                                                               \
-		vk::Result err = x;                                                                                            \
-		if (err != vk::Result::eSuccess) {                                                                             \
-			SPDLOG_ERROR("Detected Vulkan error: ({}) {}", magic_enum::enum_integer(err), magic_enum::enum_name(err)); \
-			abort();                                                                                                   \
-		}                                                                                                              \
-	} while (false)
+} //namespace vk_util
 
 constexpr unsigned int FRAME_OVERLAP = 2;
+
+struct CullParams {
+	glm::mat4 viewmat;
+	glm::mat4 projmat;
+	bool occlusion_cull;
+	bool frustrum_cull;
+	float draw_dist;
+	bool aabb;
+	glm::vec3 aabb_min;
+	glm::vec3 aabb_max;
+};
+
+struct /*alignas(16)*/ DrawCullData {
+	glm::mat4 view_mat;
+	float p00, p11, znear, zfar; // symmetric projection parameters
+	float frustum[4]; // data for left/right/top/bottom frustum planes
+	float lod_base, lod_step; // lod distance i = base * pow(step, i)
+	float pyramid_width, pyramid_height; // depth pyramid size in texels
+
+	uint32_t draw_count;
+
+	int culling_enabled;
+	int lod_enabled;
+	int occlusion_enabled;
+	int distance_check;
+	int aabb_check;
+	float aabb_min_x;
+	float aabb_min_y;
+	float aabb_min_z;
+	float aabb_max_x;
+	float aabb_max_y;
+	float aabb_max_z;
+};
 
 struct MeshPushConstants {
 	glm::vec4 data;
@@ -61,16 +97,36 @@ struct Texture {
 	vk::ImageView image_view;
 };
 
-struct Material {
-	vk::DescriptorSet texture_set{ VK_NULL_HANDLE }; //texture defaulted to null
-	vk::Pipeline pipeline;
-	vk::PipelineLayout pipeline_layout;
+struct MeshObject {
+	Mesh *mesh = nullptr;
+	vk_util::Material *material = nullptr;
+
+	uint32_t custom_sort_key{ 0 };
+	RenderBounds bounds{};
+
+	glm::mat4 transform_matrix{};
+
+	uint32_t b_draw_forward_pass : 1 = 0U;
+	uint32_t b_draw_shadow_pass : 1 = 0U;
 };
 
-struct RenderObject {
-	Mesh *mesh;
-	Material *material;
-	glm::mat4 transform_matrix;
+struct PrefabInstance {
+	std::vector<Handle<RenderObject>> object_ids;
+
+	void serialize_json(nlohmann::json &j) {
+		// TODO good serialization
+		nlohmann::json::object_t obj;
+		// obj["mesh"] = "box";
+		// obj["material"] = "default_mesh";
+		j.push_back(nlohmann::json::object());
+		j.back()["prefab_instance"] = obj;
+	}
+
+	void deserialize_json(nlohmann::json &j) {
+		nlohmann::json obj = Serializaer::get_data("mesh_instance", j);
+		// mesh = render_manager.get_mesh(obj["mesh"]);
+		// material = render_manager.get_material(obj["material"]);
+	}
 };
 
 struct GPUCameraData {
@@ -89,24 +145,39 @@ struct GPUSceneData {
 
 struct GPUObjectData {
 	glm::mat4 model_matrix;
+	glm::vec4 origin_rad; // bounds
+	glm::vec4 extents; // bounds
 };
 
 struct FrameData {
 	vk::Semaphore present_semaphore, render_semaphore;
 	vk::Fence render_fence;
 
+	DeletionQueue frame_deletion_queue;
+
 	vk::CommandPool command_pool; //the command pool for our commands
 	vk::CommandBuffer main_command_buffer; //the buffer we will record into
 
-	//buffer that holds a single GPUCameraData to use when render
-	AllocatedBuffer camera_buffer;
-	vk::DescriptorSet global_descriptor;
+	vk_util::DescriptorAllocator *dynamic_descriptor_allocator; //descriptor allocator for this frame
 
-	AllocatedBuffer object_buffer;
-	vk::DescriptorSet object_descriptor;
+	//buffer that holds a single GPUCameraData to use when render
+	AllocatedBufferUntyped camera_buffer;
+	//	vk::DescriptorSet global_descriptor;
+	//
+	AllocatedBufferUntyped object_buffer;
+	//	vk::DescriptorSet object_descriptor;
+
+	AllocatedBufferUntyped indirect_buffer;
+
+	AllocatedBufferUntyped dynamic_buffer;
+
+	vk_util::PushBuffer dynamic_data;
 };
 
 class RenderManager {
+public:
+	static RenderManager *get();
+
 	// INITIALIZATION
 	vk::Instance instance;
 	vk::DebugUtilsMessengerEXT debug_messenger; // Vulkan debug output handle
@@ -128,64 +199,107 @@ class RenderManager {
 	uint32_t graphics_queue_family; // family of that queue
 
 	// RENDERPASS
+	vk::RenderPass copy_pass;
 	vk::RenderPass render_pass;
+	vk::RenderPass shadow_pass;
 	std::vector<vk::Framebuffer> framebuffers;
 
 	// PIPELINE
 	vk::PipelineLayout mesh_pipeline_layout;
 	vk::Pipeline mesh_pipeline;
 
+	vk::PipelineLayout blit_pipeline_layout;
+	vk::Pipeline blit_pipeline;
+
+	vk::Pipeline cull_pipeline;
+	vk::PipelineLayout cull_layout;
+
+	vk::Pipeline sparse_upload_pipeline;
+	vk::PipelineLayout sparse_upload_layout;
+
+	vk::Pipeline depth_reduce_pipeline;
+	vk::PipelineLayout depth_reduce_layout;
+
+	tracy::VkCtx *tracy_context;
+
 	// MESHES
 	Mesh triangle_mesh;
 	Mesh box_mesh;
-    Mesh debug_box_mesh;
-    Mesh debug_sphere_mesh;
+	Mesh debug_box_mesh;
+	Mesh debug_sphere_mesh;
 	Mesh debug_line_mesh;
 
+	std::vector<DebugVertex> debug_vertices;
+	AllocatedBuffer<DebugVertex> debug_vertex_buffer;
+
 	// DEPTH
-	vk::ImageView depth_image_view;
 	AllocatedImage depth_image;
+
+	vk::Sampler shadow_sampler;
+	AllocatedImage shadow_image;
+
 	vk::Format depth_format;
 
 	// DESCRIPTORS
+	vk_util::DescriptorAllocator *descriptor_allocator;
+	vk_util::DescriptorLayoutCache *descriptor_layout_cache;
+
 	vk::DescriptorSetLayout global_set_layout;
 	vk::DescriptorSetLayout object_set_layout;
 	vk::DescriptorSetLayout single_texture_set_layout;
-	vk::DescriptorPool descriptor_pool;
 
 	vk::PhysicalDeviceProperties gpu_properties;
 
 	UploadContext upload_context;
 
 	GPUSceneData scene_parameters;
-	AllocatedBuffer scene_parameter_buffer;
+	AllocatedBufferUntyped scene_parameter_buffer;
 
 	vk::Extent2D window_extent;
+
+	vk_util::MaterialSystem material_system;
+	ShaderCache shader_cache;
+
+	vk::Sampler depth_sampler;
+	vk::ImageView depth_pyramid_mips[16] = {};
+	AllocatedImage depth_pyramid;
+	int depth_pyramid_width;
+	int depth_pyramid_height;
+	int depth_pyramid_levels;
+
+	std::vector<vk::BufferMemoryBarrier> upload_barriers;
+	std::vector<vk::BufferMemoryBarrier> cull_ready_barriers;
+	std::vector<vk::BufferMemoryBarrier> post_cull_barriers;
+
+	vk::Format render_format;
+	AllocatedImage raw_render_image;
+	vk::Sampler smooth_sampler;
+	vk::Framebuffer forward_framebuffer;
 
 	void init_vulkan(DisplayManager &display_manager);
 	void init_swapchain(DisplayManager &display_manager);
 	void init_commands();
-	void init_default_renderpass();
+	void init_forward_renderpass();
+	void init_copy_renderpass();
 	void init_framebuffers();
 	void init_sync_structures();
 	void init_descriptors();
 	void init_pipelines();
 	void init_scene();
+	void init_debug_vertex_buffer();
 	void init_imgui(GLFWwindow *window);
 
-	//loads a shader module from a spir-v file. Returns false if it errors
-	bool load_shader_module(const char *file_path, vk::ShaderModule *out_shader_module);
-
 	void load_meshes();
-    void generate_debug_box_mesh();
-    void generate_debug_sphere_mesh();
-	void generate_debug_line_mesh();
 
 	void upload_mesh(Mesh &mesh);
 
-	size_t pad_uniform_buffer_size(size_t original_size) const;
+	bool load_image_to_cache(const char *name, const char *path);
+	PrefabInstance load_prefab(const char *path, const glm::mat4 &root = glm::mat4(1.0f));
 
-public:
+	bool load_compute_shader(const char *shader_path, vk::Pipeline &pipeline, vk::PipelineLayout &layout);
+
+	[[nodiscard]] size_t pad_uniform_buffer_size(size_t original_size) const;
+
 	enum class Status {
 		Ok,
 		FailedToInitializeVulkan,
@@ -198,35 +312,66 @@ public:
 
 	vma::Allocator allocator;
 	DeletionQueue main_deletion_queue;
+	DeletionQueue late_deletion_queue;
 
 	//default array of renderable objects
-	std::vector<RenderObject> renderables;
-	std::unordered_map<std::string, Material> materials;
+	RenderScene render_scene;
 	std::unordered_map<std::string, Mesh> meshes;
+	bool needs_to_rebuild_objects = false;
 
 	// texture stuff
 	std::unordered_map<std::string, Texture> loaded_textures;
+	std::unordered_map<std::string, assets::PrefabInfo *> prefab_cache;
 
-	Status startup(DisplayManager &display_manager);
+	Status startup(DisplayManager &display_manager, Camera *cam);
 	void shutdown();
 
 	//getter for the frame we are render to right now.
 	FrameData &get_current_frame();
 
-	AllocatedBuffer create_buffer(size_t alloc_size, vk::BufferUsageFlags usage, vma::MemoryUsage memory_usage) const;
+	Camera *camera = nullptr;
+
+	// draw functions
+	void ready_mesh_draw(vk::CommandBuffer cmd);
+	void draw_objects_forward(vk::CommandBuffer cmd, RenderScene::MeshPass &pass);
+	void execute_draw_commands(vk::CommandBuffer cmd, RenderScene::MeshPass &pass, vk::DescriptorSet object_data_set,
+			std::vector<uint32_t> dynamic_offsets, vk::DescriptorSet global_set);
+	void draw_objects_shadow(vk::CommandBuffer cmd, RenderScene::MeshPass &pass);
+	void draw_debug_vertices(
+			vk::CommandBuffer cmd, std::vector<uint32_t> dynamic_offsets, vk::DescriptorSet global_set);
+	void reduce_depth(vk::CommandBuffer cmd);
+	void execute_compute_cull(vk::CommandBuffer cmd, RenderScene::MeshPass &pass, CullParams &params);
+	void ready_cull_data(RenderScene::MeshPass &pass, vk::CommandBuffer cmd);
+
+	void forward_pass(vk::CommandBuffer cmd);
+	void copy_render_to_swapchain(vk::CommandBuffer cmd, uint32_t swapchain_image_index);
+
+	[[nodiscard]] AllocatedBufferUntyped create_buffer(const std::string &allocation_name, size_t alloc_size,
+			vk::BufferUsageFlags usage, vma::MemoryUsage memory_usage) const;
+	void reallocate_buffer(AllocatedBufferUntyped &buffer, size_t alloc_size, vk::BufferUsageFlags usage,
+			vma::MemoryUsage memory_usage, vk::MemoryPropertyFlags required_flags = {});
+
+	template <typename T> T *map_buffer(AllocatedBuffer<T> &buffer);
+	void unmap_buffer(AllocatedBufferUntyped &buffer) const;
+
 	void immediate_submit(std::function<void(vk::CommandBuffer cmd)> &&function);
 
-	//create material and add it to the map
-	Material *create_material(vk::Pipeline pipeline, vk::PipelineLayout layout, const std::string &name);
-	//returns nullptr if it can't be found
-	Material *get_material(const std::string &name);
+	static std::string asset_path(std::string_view path);
+	static std::string shader_path(std::string_view path);
+
 	//returns nullptr if it can't be found
 	Mesh *get_mesh(const std::string &name);
 
 	void load_images();
 
 	void draw(Camera &camera);
-	void draw_objects(Camera &camera, vk::CommandBuffer cmd, RenderObject *first, int count);
+	void draw_objects(Camera &camera, vk::CommandBuffer cmd);
 };
+
+template <typename T> T *RenderManager::map_buffer(AllocatedBuffer<T> &buffer) {
+	void *data;
+	VK_CHECK(allocator.mapMemory(buffer.allocation, &data));
+	return (T *)data;
+}
 
 #endif //SILENCE_RENDER_MANAGER_H

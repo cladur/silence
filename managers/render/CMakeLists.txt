@@ -4,25 +4,40 @@ set(RENDER_MANAGER_NAME "silence_render_manager")
 add_library(${RENDER_MANAGER_NAME} STATIC
         render_manager.cpp render_manager.h
         vk_initializers.cpp vk_initializers.h
-        pipeline_builder.cpp pipeline_builder.h
+        material_system.cpp material_system.h
         vk_types.h
         vk_mesh.cpp vk_mesh.h
         vk_textures.cpp vk_textures.h
         render_system.cpp render_system.h
-        debug/debug_drawing.cpp debug/debug_drawing.h
-        ../animation/skinned_mesh.cpp ../animation/skinned_mesh.h ../animation/skinned_model.cpp ../animation/skinned_model.h ../animation/animation.cpp ../animation/animation.h ../animation/joint.h ../animation/bone.cpp ../animation/bone.h ../animation/bone.cpp ../animation/bone.cpp ../animation/bone.cpp ../animation/animator.cpp ../animation/animator.h ../animation/bone.cpp)
+        vk_descriptors.cpp vk_descriptors.h
+        vk_shaders.cpp vk_shaders.h
+        vk_scene.cpp vk_scene.h
+        vk_push_buffer.cpp vk_push_buffer.h
+        vk_scene_render.cpp vk_debug.cpp vk_debug.h
+        debug/debug_draw.cpp debug/debug_draw.h
+        ../animation/skinned_mesh.cpp ../animation/skinned_mesh.h
+        ../animation/skinned_model.cpp ../animation/skinned_model.h
+        ../animation/animation.cpp ../animation/animation.h
+        ../animation/joint.h
+        ../animation/bone.cpp ../animation/bone.h
+        ../animation/animator.cpp ../animation/animator.h
+        )
 
 # Include directories
 target_include_directories(${RENDER_MANAGER_NAME} PUBLIC ${MANAGER_DIR})
+
+find_package(unofficial-spirv-reflect CONFIG REQUIRED)
 
 # Link libraries
 
 target_link_libraries(${RENDER_MANAGER_NAME} PRIVATE
         silence_common
         silence_core
+        silence_assets
         Vulkan::Vulkan
         unofficial::vulkan-memory-allocator::vulkan-memory-allocator
         unofficial::VulkanMemoryAllocator-Hpp::VulkanMemoryAllocator-Hpp
         vk-bootstrap::vk-bootstrap
+        unofficial::spirv-reflect::spirv-reflect
         ${ECS_MANAGER_NAME}
         )

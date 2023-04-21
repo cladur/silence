@@ -1,16 +1,21 @@
 #include "render_manager.h"
+#include "asset_loader.h"
 #include "managers/display/display_manager.h"
-
-#include <fstream>
-
-#include <glm/gtx/transform.hpp>
+#include "render/vk_types.h"
+#include "vk_debug.h"
+#include <vulkan/vulkan_core.h>
+#include <vulkan-memory-allocator-hpp/vk_mem_alloc_enums.hpp>
+#include <vulkan/vulkan_handles.hpp>
+#include <vulkan/vulkan_structs.hpp>
 
 #define VMA_IMPLEMENTATION
 #include "vk_mem_alloc.h"
 #include "vulkan-memory-allocator-hpp/vk_mem_alloc.hpp"
 
-#include "cmake-build-debug/_deps/fetch_vk_bootstrap-src/src/VkBootstrap.h"
-#include "render/pipeline_builder.h"
+#include "VkBootstrap.h"
+#include "debug/debug_draw.h"
+#include "render/material_system.h"
+#include "render/vk_descriptors.h"
 #include "render/vk_initializers.h"
 #include "render/vk_textures.h"
 #include <spdlog/spdlog.h>
@@ -20,12 +25,21 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_vulkan.h"
 
+#define ASSET_PATH "resources/assets_export/"
+#define SHADER_PATH "resources/shaders/"
+
+RenderManager *RenderManager::get() {
+	static RenderManager render_manager{};
+	return &render_manager;
+}
+
 void RenderManager::init_vulkan(DisplayManager &display_manager) {
 	vkb::InstanceBuilder builder;
 	auto inst_ret = builder.set_app_name("Silence Vulkan Application")
 							.request_validation_layers()
 							.use_default_debug_messenger()
 							.require_api_version(1, 1, 0)
+							.enable_extension(VK_EXT_DEBUG_UTILS_EXTENSION_NAME)
 							.build();
 
 	if (!inst_ret) {
@@ -36,13 +50,24 @@ void RenderManager::init_vulkan(DisplayManager &display_manager) {
 
 	//store the instance
 	instance = vkb_inst.instance;
+
 	//store the debug messenger
 	debug_messenger = vkb_inst.debug_messenger;
 
 	surface = display_manager.create_surface(vkb_inst.instance);
 
 	vkb::PhysicalDeviceSelector selector{ vkb_inst };
-	auto physical_device_ret = selector.set_minimum_version(1, 1).set_surface(surface).select();
+
+	vk::PhysicalDeviceFeatures features = {};
+	features.multiDrawIndirect = VK_TRUE;
+	features.fillModeNonSolid = VK_TRUE;
+
+	selector.set_required_features(features);
+
+	auto physical_device_ret = selector.set_minimum_version(1, 1)
+									   .set_surface(surface)
+									   //    .add_required_extension(VK_EXT_SAMPLER_FILTER_MINMAX_EXTENSION_NAME)
+									   .select();
 
 	if (!physical_device_ret) {
 		SPDLOG_ERROR("Failed to find a suitable GPU. Error: {}", physical_device_ret.error().message());
@@ -57,6 +82,7 @@ void RenderManager::init_vulkan(DisplayManager &display_manager) {
 	shader_draw_parameters_features.sType = vk::StructureType::ePhysicalDeviceShaderDrawParametersFeatures;
 	shader_draw_parameters_features.pNext = nullptr;
 	shader_draw_parameters_features.shaderDrawParameters = VK_TRUE;
+
 	vkb::Device vkb_device = device_builder.add_pNext(&shader_draw_parameters_features).build().value();
 
 	// Get the VkDevice handle used in the rest of a Vulkan application
@@ -74,9 +100,32 @@ void RenderManager::init_vulkan(DisplayManager &display_manager) {
 	allocator_info.instance = instance;
 	VK_CHECK(vma::createAllocator(&allocator_info, &allocator));
 
+	VkDebug::setup_debugging(this);
+
 	gpu_properties = vkb_device.physical_device.properties;
 
 	main_deletion_queue.push_function([=, this]() { allocator.destroy(); });
+}
+
+uint32_t previous_pow2(uint32_t v) {
+	uint32_t r = 1;
+
+	while (r * 2 < v) {
+		r *= 2;
+	}
+
+	return r;
+}
+uint32_t get_image_mip_levels(uint32_t width, uint32_t height) {
+	uint32_t result = 1;
+
+	while (width > 1 || height > 1) {
+		result++;
+		width /= 2;
+		height /= 2;
+	}
+
+	return result;
 }
 
 void RenderManager::init_swapchain(DisplayManager &display_manager) {
@@ -107,34 +156,147 @@ void RenderManager::init_swapchain(DisplayManager &display_manager) {
 
 	main_deletion_queue.push_function([=, this]() { device.destroySwapchainKHR(swapchain); });
 
-	//depth image size will match the window
-	vk::Extent3D depth_image_extent = { window_extent.width, window_extent.height, 1 };
-
-	//hardcoding the depth format to 32-bit float
-	depth_format = vk::Format::eD32Sfloat;
-
-	//the depth image will be an image with the format we selected and Depth Attachment usage flag
-	vk::ImageCreateInfo dimg_info = vk_init::image_create_info(
-			depth_format, vk::ImageUsageFlagBits::eDepthStencilAttachment, depth_image_extent);
-
-	//for the depth image, we want to allocate it from GPU local memory
+	//for the render, depth and pyramid images, we want to allocate them from gpu local memory
 	vma::AllocationCreateInfo dimg_allocinfo = {};
 	dimg_allocinfo.usage = vma::MemoryUsage::eGpuOnly;
 	dimg_allocinfo.requiredFlags = vk::MemoryPropertyFlags(vk::MemoryPropertyFlagBits::eDeviceLocal);
 
+	// render image
+	{
+		//render image size will match the window
+		vk::Extent3D render_image_extent = { window_extent.width, window_extent.height, 1 };
+		render_format = vk::Format::eR32G32B32A32Sfloat;
+		vk::ImageCreateInfo ri_info = vk_init::image_create_info(render_format,
+				vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransferSrc |
+						vk::ImageUsageFlagBits::eSampled,
+				render_image_extent);
+
+		//allocate and create the image
+		VK_CHECK(allocator.createImage(
+				&ri_info, &dimg_allocinfo, &raw_render_image.image, &raw_render_image.allocation, nullptr));
+
+		//build a image-view for the depth image to use for rendering
+		vk::ImageViewCreateInfo dview_info =
+				vk_init::image_view_create_info(render_format, raw_render_image.image, vk::ImageAspectFlagBits::eColor);
+
+		VK_CHECK(device.createImageView(&dview_info, nullptr, &raw_render_image.default_view));
+
+		main_deletion_queue.push_function([=, this]() {
+			device.destroyImageView(raw_render_image.default_view);
+			allocator.destroyImage(raw_render_image.image, raw_render_image.allocation);
+		});
+	}
+
+	// depth image
+	{
+		//depth image size will match the window
+		vk::Extent3D depth_image_extent = { window_extent.width, window_extent.height, 1 };
+
+		//hardcoding the depth format to 32-bit float
+		depth_format = vk::Format::eD32Sfloat;
+
+		//the depth image will be an image with the format we selected and Depth Attachment usage flag
+		vk::ImageCreateInfo dimg_info = vk_init::image_create_info(depth_format,
+				vk::ImageUsageFlagBits::eDepthStencilAttachment | vk::ImageUsageFlagBits::eSampled, depth_image_extent);
+
+		//allocate and create the image
+		VK_CHECK(allocator.createImage(
+				&dimg_info, &dimg_allocinfo, &depth_image.image, &depth_image.allocation, nullptr));
+
+		//build an image-view for the depth image to use for render
+		vk::ImageViewCreateInfo dview_info =
+				vk_init::image_view_create_info(depth_format, depth_image.image, vk::ImageAspectFlagBits::eDepth);
+
+		VK_CHECK(device.createImageView(&dview_info, nullptr, &depth_image.default_view));
+
+		//add to deletion queues
+		main_deletion_queue.push_function([=, this]() {
+			device.destroyImageView(depth_image.default_view);
+			allocator.destroyImage(depth_image.image, depth_image.allocation);
+		});
+	}
+
+	// Note: previous_pow2 makes sure all reductions are at most by 2x2 which makes sure they are conservative
+	depth_pyramid_width = (int)previous_pow2(window_extent.width);
+	depth_pyramid_height = (int)previous_pow2(window_extent.height);
+	depth_pyramid_levels = (int)get_image_mip_levels(depth_pyramid_width, depth_pyramid_height);
+
+	vk::Extent3D pyramid_extent = { static_cast<uint32_t>(depth_pyramid_width),
+		static_cast<uint32_t>(depth_pyramid_height), 1 };
+	//the depth image will be a image with the format we selected and Depth Attachment usage flag
+	vk::ImageCreateInfo pyramid_info = vk_init::image_create_info(vk::Format::eR32Sfloat,
+			vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eStorage | vk::ImageUsageFlagBits::eTransferSrc,
+			pyramid_extent);
+
+	pyramid_info.mipLevels = depth_pyramid_levels;
+
 	//allocate and create the image
-	VK_CHECK(allocator.createImage(&dimg_info, &dimg_allocinfo, &depth_image.image, &depth_image.allocation, nullptr));
+	VK_CHECK(allocator.createImage(
+			&pyramid_info, &dimg_allocinfo, &depth_pyramid.image, &depth_pyramid.allocation, nullptr));
 
-	//build an image-view for the depth image to use for render
-	vk::ImageViewCreateInfo dview_info =
-			vk_init::image_view_create_info(depth_format, depth_image.image, vk::ImageAspectFlagBits::eDepth);
+	//build a image-view for the depth image to use for rendering
+	vk::ImageViewCreateInfo preview_info = vk_init::image_view_create_info(
+			vk::Format::eR32Sfloat, depth_pyramid.image, vk::ImageAspectFlagBits::eColor);
+	preview_info.subresourceRange.levelCount = depth_pyramid_levels;
 
-	VK_CHECK(device.createImageView(&dview_info, nullptr, &depth_image_view));
+	VK_CHECK(device.createImageView(&preview_info, nullptr, &depth_pyramid.default_view));
 
-	//add to deletion queues
+	for (int32_t i = 0; i < depth_pyramid_levels; ++i) {
+		vk::ImageViewCreateInfo level_info = vk_init::image_view_create_info(
+				vk::Format::eR32Sfloat, depth_pyramid.image, vk::ImageAspectFlagBits::eColor);
+		level_info.subresourceRange.levelCount = 1;
+		level_info.subresourceRange.baseMipLevel = i;
+
+		vk::ImageView pyramid;
+		VK_CHECK(device.createImageView(&level_info, nullptr, &pyramid));
+
+		depth_pyramid_mips[i] = pyramid;
+		assert(depth_pyramid_mips[i]);
+
+		main_deletion_queue.push_function([=, this]() { device.destroyImageView(pyramid); });
+	}
+
 	main_deletion_queue.push_function([=, this]() {
-		device.destroyImageView(depth_image_view);
-		allocator.destroyImage(depth_image.image, depth_image.allocation);
+		device.destroyImageView(depth_pyramid.default_view);
+		allocator.destroyImage(depth_pyramid.image, depth_pyramid.allocation);
+	});
+
+	vk::SamplerCreateInfo create_info = {};
+
+	auto reduction_mode = vk::SamplerReductionMode::eMin;
+
+	create_info.sType = vk::StructureType::eSamplerCreateInfo;
+	create_info.magFilter = vk::Filter::eLinear;
+	create_info.minFilter = vk::Filter::eLinear;
+	create_info.mipmapMode = vk::SamplerMipmapMode::eNearest;
+	create_info.addressModeU = vk::SamplerAddressMode::eClampToEdge;
+	create_info.addressModeV = vk::SamplerAddressMode::eClampToEdge;
+	create_info.addressModeW = vk::SamplerAddressMode::eClampToEdge;
+	create_info.minLod = 0;
+	create_info.maxLod = 16.f;
+
+	// TODO: check if this is supported
+	// vk::SamplerReductionModeCreateInfoEXT create_info_reduction = {};
+	// create_info_reduction.sType = vk::StructureType::eSamplerReductionModeCreateInfoEXT;
+
+	// if (reduction_mode != vk::SamplerReductionMode::eWeightedAverage) {
+	// 	create_info_reduction.reductionMode = reduction_mode;
+
+	// 	create_info.pNext = &create_info_reduction;
+	// }
+
+	VK_CHECK(device.createSampler(&create_info, nullptr, &depth_sampler));
+	VkDebug::set_name(depth_sampler, "depth_sampler (init_swapchain)");
+
+	vk::SamplerCreateInfo sampler_info = vk_init::sampler_create_info(vk::Filter::eLinear);
+	sampler_info.mipmapMode = vk::SamplerMipmapMode::eLinear;
+
+	VK_CHECK(device.createSampler(&sampler_info, nullptr, &smooth_sampler));
+	VkDebug::set_name(depth_sampler, "smooth_sampler (init_swapchain)");
+
+	main_deletion_queue.push_function([=, this]() {
+		device.destroySampler(depth_sampler);
+		device.destroySampler(smooth_sampler);
 	});
 }
 
@@ -144,11 +306,7 @@ void RenderManager::init_commands() {
 			graphics_queue_family, vk::CommandPoolCreateFlagBits::eResetCommandBuffer);
 
 	for (auto &frame : frames) {
-		auto command_pool_res = device.createCommandPool(command_pool_info);
-
-		VK_CHECK(command_pool_res.result);
-
-		frame.command_pool = command_pool_res.value;
+		frame.command_pool = device.createCommandPool(command_pool_info);
 
 		//allocate the default command buffer that we will use for render
 		vk::CommandBufferAllocateInfo cmd_alloc_info = vk_init::command_buffer_allocate_info(frame.command_pool, 1);
@@ -171,11 +329,11 @@ void RenderManager::init_commands() {
 	VK_CHECK(device.allocateCommandBuffers(&cmd_alloc_info, &upload_context.command_buffer));
 }
 
-void RenderManager::init_default_renderpass() {
+void RenderManager::init_forward_renderpass() {
 	// the renderpass will use this color attachment.
 	vk::AttachmentDescription color_attachment = {};
-	//the attachment will have the format needed by the swapchain
-	color_attachment.format = swapchain_image_format;
+	//the attachment will have the HDR format
+	color_attachment.format = vk::Format::eR32G32B32A32Sfloat;
 	//1 sample, we won't be doing MSAA
 	color_attachment.samples = vk::SampleCountFlagBits::e1;
 	// we Clear when this attachment is loaded
@@ -190,7 +348,7 @@ void RenderManager::init_default_renderpass() {
 	color_attachment.initialLayout = vk::ImageLayout::eUndefined;
 
 	//after the renderpass ends, the image has to be on a layout ready for display
-	color_attachment.finalLayout = vk::ImageLayout::ePresentSrcKHR;
+	color_attachment.finalLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
 
 	vk::AttachmentReference color_attachment_ref = {};
 	//attachment number will index into the pAttachments array in the parent renderpass itself
@@ -257,18 +415,65 @@ void RenderManager::init_default_renderpass() {
 	main_deletion_queue.push_function([=, this]() { device.destroyRenderPass(render_pass); });
 }
 
+void RenderManager::init_copy_renderpass() {
+	vk::AttachmentDescription color_attachment = {};
+	color_attachment.format = swapchain_image_format;
+	color_attachment.samples = vk::SampleCountFlagBits::e1;
+	color_attachment.loadOp = vk::AttachmentLoadOp::eDontCare;
+	color_attachment.storeOp = vk::AttachmentStoreOp::eStore;
+	color_attachment.stencilLoadOp = vk::AttachmentLoadOp::eDontCare;
+	color_attachment.stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
+	color_attachment.initialLayout = vk::ImageLayout::eUndefined;
+	color_attachment.finalLayout = vk::ImageLayout::ePresentSrcKHR;
+
+	vk::AttachmentReference color_attachment_ref = {};
+	color_attachment_ref.attachment = 0;
+	color_attachment_ref.layout = vk::ImageLayout::eColorAttachmentOptimal;
+
+	//we are going to create 1 subpass, which is the minimum you can do
+	vk::SubpassDescription subpass = {};
+	subpass.pipelineBindPoint = vk::PipelineBindPoint::eGraphics;
+	subpass.colorAttachmentCount = 1;
+	subpass.pColorAttachments = &color_attachment_ref;
+
+	//1 dependency, which is from "outside" into the subpass. And we can read or write color
+	vk::SubpassDependency dependency = {};
+	dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+	dependency.dstSubpass = 0;
+	dependency.srcStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput;
+	dependency.srcAccessMask = vk::AccessFlagBits::eNone;
+	dependency.dstStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput;
+	dependency.dstAccessMask = vk::AccessFlagBits::eColorAttachmentWrite;
+
+	vk::RenderPassCreateInfo render_pass_info = {};
+	render_pass_info.sType = vk::StructureType::eRenderPassCreateInfo;
+	//2 attachments from said array
+	render_pass_info.attachmentCount = 1;
+	render_pass_info.pAttachments = &color_attachment;
+	render_pass_info.subpassCount = 1;
+	render_pass_info.pSubpasses = &subpass;
+	//render_pass_info.dependencyCount = 1;
+	//render_pass_info.pDependencies = &dependency;
+
+	VK_CHECK(device.createRenderPass(&render_pass_info, nullptr, &copy_pass));
+
+	main_deletion_queue.push_function([=]() { device.destroyRenderPass(copy_pass, nullptr); });
+}
+
 void RenderManager::init_framebuffers() {
+	vk::FramebufferCreateInfo fwd_info = vk_init::framebuffer_create_info(render_pass, window_extent);
+	vk::ImageView attachments[2];
+	attachments[0] = raw_render_image.default_view;
+	attachments[1] = depth_image.default_view;
+
+	fwd_info.pAttachments = attachments;
+	fwd_info.attachmentCount = 2;
+	VK_CHECK(device.createFramebuffer(&fwd_info, nullptr, &forward_framebuffer));
+	VkDebug::set_name(forward_framebuffer, "Forward Framebuffer");
+
+	main_deletion_queue.push_function([=]() { device.destroyFramebuffer(forward_framebuffer, nullptr); });
 	//create the framebuffers for the swapchain images. This will connect the render-pass to the images for
 	//render
-	vk::FramebufferCreateInfo fb_info = {};
-	fb_info.sType = vk::StructureType::eFramebufferCreateInfo;
-	fb_info.pNext = nullptr;
-
-	fb_info.renderPass = render_pass;
-	fb_info.attachmentCount = 1;
-	fb_info.width = window_extent.width;
-	fb_info.height = window_extent.height;
-	fb_info.layers = 1;
 
 	//grab how many images we have in the swapchain
 	const uint32_t swapchain_imagecount = swapchain_images.size();
@@ -278,10 +483,9 @@ void RenderManager::init_framebuffers() {
 	for (int i = 0; i < swapchain_imagecount; i++) {
 		// We're reusing the same depth image view for all framebuffers, since we're only drawing one frame at a
 		// time
-		vk::ImageView attachments[2] = { swapchain_image_views[i], depth_image_view };
-
-		fb_info.pAttachments = &attachments[0];
-		fb_info.attachmentCount = 2;
+		vk::FramebufferCreateInfo fb_info = vk_init::framebuffer_create_info(copy_pass, window_extent);
+		fb_info.pAttachments = &swapchain_image_views[i];
+		fb_info.attachmentCount = 1;
 		VK_CHECK(device.createFramebuffer(&fb_info, nullptr, &framebuffers[i]));
 
 		main_deletion_queue.push_function([=, this]() {
@@ -289,6 +493,8 @@ void RenderManager::init_framebuffers() {
 			device.destroyImageView(swapchain_image_views[i]);
 		});
 	}
+
+	//main_deletion_queue.push_function([=, this]() { device.destroyFramebuffer(forward_framebuffer); });
 }
 
 void RenderManager::init_sync_structures() {
@@ -320,10 +526,16 @@ void RenderManager::init_sync_structures() {
 }
 
 void RenderManager::init_descriptors() {
+	descriptor_allocator = new vk_util::DescriptorAllocator();
+	descriptor_allocator->init(device);
+
+	descriptor_layout_cache = new vk_util::DescriptorLayoutCache();
+	descriptor_layout_cache->init(device);
+
 	const size_t scene_param_buffer_size = FRAME_OVERLAP * pad_uniform_buffer_size(sizeof(GPUSceneData));
 
-	scene_parameter_buffer = create_buffer(
-			scene_param_buffer_size, vk::BufferUsageFlagBits::eUniformBuffer, vma::MemoryUsage::eCpuToGpu);
+	scene_parameter_buffer = create_buffer("Scene parameter buffer", scene_param_buffer_size,
+			vk::BufferUsageFlagBits::eUniformBuffer, vma::MemoryUsage::eCpuToGpu);
 
 	//information about the binding.
 	vk::DescriptorSetLayoutBinding camera_bind = vk_init::descriptor_set_layout_binding(
@@ -346,21 +558,7 @@ void RenderManager::init_descriptors() {
 	//point to the camera buffer binding
 	setinfo.pBindings = bindings;
 
-	VK_CHECK(device.createDescriptorSetLayout(&setinfo, nullptr, &global_set_layout));
-
-	//create a descriptor pool that will hold 10 uniform buffers
-	std::vector<vk::DescriptorPoolSize> sizes = { { vk::DescriptorType::eUniformBuffer, 10 },
-		{ vk::DescriptorType::eUniformBufferDynamic, 10 }, { vk::DescriptorType::eStorageBuffer, 10 },
-		{ vk::DescriptorType::eCombinedImageSampler, 10 } };
-
-	vk::DescriptorPoolCreateInfo pool_info = {};
-	pool_info.sType = vk::StructureType::eDescriptorPoolCreateInfo;
-	pool_info.flags = {};
-	pool_info.maxSets = 10;
-	pool_info.poolSizeCount = (uint32_t)sizes.size();
-	pool_info.pPoolSizes = sizes.data();
-
-	VK_CHECK(device.createDescriptorPool(&pool_info, nullptr, &descriptor_pool));
+	global_set_layout = descriptor_layout_cache->create_descriptor_layout(&setinfo);
 
 	vk::DescriptorSetLayoutBinding object_bind = vk_init::descriptor_set_layout_binding(
 			vk::DescriptorType::eStorageBuffer, vk::ShaderStageFlagBits::eVertex, 0);
@@ -371,140 +569,74 @@ void RenderManager::init_descriptors() {
 	object_set_info.flags = {};
 	object_set_info.pBindings = &object_bind;
 
-	VK_CHECK(device.createDescriptorSetLayout(&object_set_info, nullptr, &object_set_layout));
+	object_set_layout = descriptor_layout_cache->create_descriptor_layout(&object_set_info);
 
-	vk::DescriptorSetLayoutBinding texture_bind = vk_init::descriptor_set_layout_binding(
+	vk::DescriptorSetLayoutBinding texture1_bind = vk_init::descriptor_set_layout_binding(
 			vk::DescriptorType::eCombinedImageSampler, vk::ShaderStageFlagBits::eFragment, 0);
+
+	vk::DescriptorSetLayoutBinding texture2_bind = vk_init::descriptor_set_layout_binding(
+			vk::DescriptorType::eCombinedImageSampler, vk::ShaderStageFlagBits::eFragment, 1);
+
+	vk::DescriptorSetLayoutBinding texture_binds[] = { texture1_bind, texture2_bind };
 
 	vk::DescriptorSetLayoutCreateInfo set3_info = {};
 	set3_info.sType = vk::StructureType::eDescriptorSetLayoutCreateInfo;
 	set3_info.pNext = nullptr;
-	set3_info.bindingCount = 1;
+	set3_info.bindingCount = 2;
 	set3_info.flags = {};
-	set3_info.pBindings = &texture_bind;
+	set3_info.pBindings = &texture_binds[0];
 
-	VK_CHECK(device.createDescriptorSetLayout(&set3_info, nullptr, &single_texture_set_layout));
+	single_texture_set_layout = descriptor_layout_cache->create_descriptor_layout(&set3_info);
 
 	for (auto &frame : frames) {
-		frame.camera_buffer = create_buffer(
-				sizeof(GPUCameraData), vk::BufferUsageFlagBits::eUniformBuffer, vma::MemoryUsage::eCpuToGpu);
+		frame.dynamic_descriptor_allocator = new vk_util::DescriptorAllocator();
+		frame.dynamic_descriptor_allocator->init(device);
+
+		frame.camera_buffer = create_buffer("Camera buffer", sizeof(GPUCameraData),
+				vk::BufferUsageFlagBits::eUniformBuffer, vma::MemoryUsage::eCpuToGpu);
 
 		// TODO: Move this constant somewhere else
 		const int max_objects = 10000;
-		frame.object_buffer = create_buffer(max_objects * sizeof(GPUObjectData),
+		frame.object_buffer = create_buffer("Object buffer", max_objects * sizeof(GPUObjectData),
 				vk::BufferUsageFlagBits::eStorageBuffer, vma::MemoryUsage::eCpuToGpu);
 
-		//allocate one descriptor set for each frames[i]
-		vk::DescriptorSetAllocateInfo alloc_info = {};
-		alloc_info.pNext = nullptr;
-		alloc_info.sType = vk::StructureType::eDescriptorSetAllocateInfo;
-		//using the pool we just set
-		alloc_info.descriptorPool = descriptor_pool;
-		//only 1 descriptor
-		alloc_info.descriptorSetCount = 1;
-		//using the global data layout
-		alloc_info.pSetLayouts = &global_set_layout;
+		// TODO: Move this constant somewhere else
+		const int max_commands = 10000;
 
-		// allocate the descriptor set
-		VK_CHECK(device.allocateDescriptorSets(&alloc_info, &frame.global_descriptor));
+		frame.indirect_buffer = create_buffer("Indirect buffer", max_commands * sizeof(vk::DrawIndexedIndirectCommand),
+				vk::BufferUsageFlagBits::eIndirectBuffer | vk::BufferUsageFlagBits::eTransferDst |
+						vk::BufferUsageFlagBits::eStorageBuffer,
+				vma::MemoryUsage::eCpuToGpu);
 
-		//allocate the descriptor set that will point to object buffer
-		vk::DescriptorSetAllocateInfo object_set_alloc = {};
-		object_set_alloc.pNext = nullptr;
-		object_set_alloc.sType = vk::StructureType::eDescriptorSetAllocateInfo;
-		object_set_alloc.descriptorPool = descriptor_pool;
-		object_set_alloc.descriptorSetCount = 1;
-		object_set_alloc.pSetLayouts = &object_set_layout;
-
-		VK_CHECK(device.allocateDescriptorSets(&object_set_alloc, &frame.object_descriptor));
-
-		//information about the buffer we want to point at in the descriptor
-		vk::DescriptorBufferInfo camera_info;
-		//it will be the camera buffer
-		camera_info.buffer = frame.camera_buffer.buffer;
-		//at 0 offset
-		camera_info.offset = 0;
-		//of the size of a camera data struct
-		camera_info.range = sizeof(GPUCameraData);
-
-		vk::DescriptorBufferInfo scene_info;
-		scene_info.buffer = scene_parameter_buffer.buffer;
-		scene_info.offset = 0;
-		scene_info.range = sizeof(GPUSceneData);
-
-		vk::DescriptorBufferInfo object_buffer_info;
-		object_buffer_info.buffer = frame.object_buffer.buffer;
-		object_buffer_info.offset = 0;
-		object_buffer_info.range = sizeof(GPUObjectData) * max_objects;
-
-		vk::WriteDescriptorSet camera_write = vk_init::write_descriptor_buffer(
-				vk::DescriptorType::eUniformBuffer, frame.global_descriptor, &camera_info, 0);
-		vk::WriteDescriptorSet scene_write = vk_init::write_descriptor_buffer(
-				vk::DescriptorType::eUniformBufferDynamic, frame.global_descriptor, &scene_info, 1);
-		VkWriteDescriptorSet object_write = vk_init::write_descriptor_buffer(
-				vk::DescriptorType::eStorageBuffer, frame.object_descriptor, &object_buffer_info, 0);
-
-		vk::WriteDescriptorSet set_writes[] = { camera_write, scene_write, object_write };
-
-		//update the descriptor set
-		device.updateDescriptorSets(3, set_writes, 0, nullptr);
+		// 1 megabyte of dynamic data buffer
+		frame.dynamic_buffer = create_buffer(
+				"Dynamic data buffer", 1000000, vk::BufferUsageFlagBits::eUniformBuffer, vma::MemoryUsage::eCpuOnly);
+		frame.dynamic_data.init(allocator, frame.dynamic_buffer, gpu_properties.limits.minUniformBufferOffsetAlignment);
 	}
 
 	main_deletion_queue.push_function([&]() {
-		device.destroyDescriptorSetLayout(global_set_layout, nullptr);
-		device.destroyDescriptorPool(descriptor_pool, nullptr);
 		allocator.destroyBuffer(scene_parameter_buffer.buffer, scene_parameter_buffer.allocation);
 
 		for (auto &frame : frames) {
 			allocator.destroyBuffer(frame.camera_buffer.buffer, frame.camera_buffer.allocation);
 			allocator.destroyBuffer(frame.object_buffer.buffer, frame.object_buffer.allocation);
+			allocator.destroyBuffer(frame.indirect_buffer.buffer, frame.indirect_buffer.allocation);
+			frame.dynamic_data.free(allocator);
+			allocator.destroyBuffer(frame.dynamic_buffer.buffer, frame.dynamic_buffer.allocation);
 		}
-
-		device.destroyDescriptorSetLayout(object_set_layout, nullptr);
-		device.destroyDescriptorSetLayout(single_texture_set_layout, nullptr);
 	});
 }
 
 void RenderManager::init_pipelines() {
-	vk::ShaderModule mesh_frag_shader;
-	if (!load_shader_module("resources/shaders/default_lit.frag.spv", &mesh_frag_shader)) {
-		SPDLOG_ERROR("Error when building the triangle fragment shader module");
-	} else {
-		SPDLOG_INFO("Triangle fragment shader successfully loaded");
-	}
+	material_system.init(this);
+	material_system.build_default_templates();
 
-	vk::ShaderModule textured_mesh_frag_shader;
-	if (!load_shader_module("resources/shaders/textured_lit.frag.spv", &textured_mesh_frag_shader)) {
-		SPDLOG_ERROR("Error when building the textured triangle fragment shader module");
-	} else {
-		SPDLOG_INFO("Textured triangle fragment shader successfully loaded");
-	}
-
-	vk::ShaderModule mesh_vertex_shader;
-	if (!load_shader_module("resources/shaders/tri_mesh.vert.spv", &mesh_vertex_shader)) {
-		SPDLOG_ERROR("Error when building the mesh vertex shader module");
-		abort();
-	} else {
-		SPDLOG_INFO("Triangle vertex shader successfully loaded");
-	}
-
-	// debug shaders
-
-	vk::ShaderModule debug_vert_shader;
-	if (!load_shader_module("resources/shaders/debug.vert.spv", &debug_vert_shader)) {
-		SPDLOG_ERROR("Error when building the debug vertex shader module");
-		abort();
-	} else {
-		SPDLOG_INFO("Debug vertex shader successfully loaded");
-	}
-
-	vk::ShaderModule debug_frag_shader;
-	if (!load_shader_module("resources/shaders/debug.frag.spv", &debug_frag_shader)) {
-		SPDLOG_ERROR("Error when building the debug fragment shader module");
-		abort();
-	} else {
-		SPDLOG_INFO("Debug fragment shader successfully loaded");
-	}
+	//fullscreen triangle pipeline for blits
+	auto *blit_effect = new ShaderEffect();
+	blit_effect->add_stage(
+			shader_cache.get_shader(shader_path("fullscreen.vert.spv")), vk::ShaderStageFlagBits::eVertex);
+	blit_effect->add_stage(shader_cache.get_shader(shader_path("blit.frag.spv")), vk::ShaderStageFlagBits::eFragment);
+	blit_effect->reflect_layout(device, nullptr, 0);
 
 	//build the stage-create-info for both vertex and fragment stages. This lets the pipeline know the shader
 	//modules per stage
@@ -518,7 +650,7 @@ void RenderManager::init_pipelines() {
 	pipeline_builder.input_assembly = vk_init::input_assembly_create_info(vk::PrimitiveTopology::eTriangleList);
 
 	//build viewport and scissor from the swapchain extents
-
+	//
 	// We flip the viewport's y-axis to match other's APIs coordinate system
 	// https://www.saschawillems.de/blog/2019/03/29/flipping-the-vulkan-viewport/
 	pipeline_builder.viewport.x = 0.0f;
@@ -533,6 +665,7 @@ void RenderManager::init_pipelines() {
 
 	//configure the rasterizer to draw_objects filled triangles
 	pipeline_builder.rasterizer = vk_init::rasterization_state_create_info(vk::PolygonMode::eFill);
+	pipeline_builder.rasterizer.cullMode = vk::CullModeFlagBits::eNone;
 
 	//we don't use multisampling, so just run the default one
 	pipeline_builder.multisampling = vk_init::multisampling_state_create_info();
@@ -541,181 +674,121 @@ void RenderManager::init_pipelines() {
 	pipeline_builder.color_blend_attachment = vk_init::color_blend_attachment_state();
 
 	//default depthtesting
-	pipeline_builder.depth_stencil = vk_init::depth_stencil_create_info(true, true, vk::CompareOp::eLessOrEqual);
+	pipeline_builder.depth_stencil = vk_init::depth_stencil_create_info(true, true, vk::CompareOp::eGreaterOrEqual);
 
-	//build the mesh pipeline
-	//we start from just the default empty pipeline layout info
-	vk::PipelineLayoutCreateInfo mesh_pipeline_layout_info = vk_init::pipeline_layout_create_info();
+	//build the blit pipeline
+	pipeline_builder.set_shaders(blit_effect);
 
-	//setup push constants
-	vk::PushConstantRange push_constant;
-	//this push constant range starts at the beginning
-	push_constant.offset = 0;
-	//this push constant range takes up the size of a MeshPushConstants struct
-	push_constant.size = sizeof(MeshPushConstants);
-	//this push constant range is accessible only in the vertex shader
-	push_constant.stageFlags = vk::ShaderStageFlagBits::eVertex;
+	//blit pipeline uses hardcoded triangle so no need for vertex input
+	pipeline_builder.clear_vertex_input();
 
-	//push-constant setup
-	mesh_pipeline_layout_info.pPushConstantRanges = &push_constant;
-	mesh_pipeline_layout_info.pushConstantRangeCount = 1;
+	pipeline_builder.depth_stencil = vk_init::depth_stencil_create_info(false, false, vk::CompareOp::eAlways);
 
-	//hook the global set layout
-	vk::DescriptorSetLayout set_layouts[] = { global_set_layout, object_set_layout };
+	blit_pipeline = pipeline_builder.build_pipeline(device, copy_pass);
+	blit_pipeline_layout = blit_effect->built_layout;
 
-	mesh_pipeline_layout_info.setLayoutCount = 2;
-	mesh_pipeline_layout_info.pSetLayouts = set_layouts;
+	VkDebug::set_name(blit_pipeline, "Blit pipeline");
+	VkDebug::set_name(blit_pipeline_layout, "Blit pipeline layout");
 
-	VK_CHECK(device.createPipelineLayout(&mesh_pipeline_layout_info, nullptr, &mesh_pipeline_layout));
+	main_deletion_queue.push_function([&]() { device.destroyPipeline(blit_pipeline); });
 
-	pipeline_builder.pipeline_layout = mesh_pipeline_layout;
-
-	VertexInputDescription vertex_description = Vertex::get_vertex_description();
-
-	//connect the pipeline builder vertex input info to the one we get from Vertex
-	pipeline_builder.vertex_input_info.pVertexAttributeDescriptions = vertex_description.attributes.data();
-	pipeline_builder.vertex_input_info.vertexAttributeDescriptionCount = vertex_description.attributes.size();
-
-	pipeline_builder.vertex_input_info.pVertexBindingDescriptions = vertex_description.bindings.data();
-	pipeline_builder.vertex_input_info.vertexBindingDescriptionCount = vertex_description.bindings.size();
-
-	//add the other shaders
-	pipeline_builder.shader_stages.push_back(
-			vk_init::pipeline_shader_stage_create_info(vk::ShaderStageFlagBits::eVertex, mesh_vertex_shader));
-
-	//make sure that triangle_frag_shader is holding the compiled default_lit.frag
-	pipeline_builder.shader_stages.push_back(
-			vk_init::pipeline_shader_stage_create_info(vk::ShaderStageFlagBits::eFragment, mesh_frag_shader));
-
-	//build the mesh triangle pipeline
-	mesh_pipeline = pipeline_builder.build_pipeline(device, render_pass);
-
-	create_material(mesh_pipeline, mesh_pipeline_layout, "default_mesh");
-
-	// create pipeline for textured render
-	vk::PipelineLayoutCreateInfo textured_mesh_pipeline_layout_info = mesh_pipeline_layout_info;
-	vk::DescriptorSetLayout set_layouts2[] = { global_set_layout, object_set_layout, single_texture_set_layout };
-	textured_mesh_pipeline_layout_info.setLayoutCount = 3;
-	textured_mesh_pipeline_layout_info.pSetLayouts = set_layouts2;
-
-	vk::PipelineLayout textured_mesh_pipeline_layout;
-	VK_CHECK(device.createPipelineLayout(&textured_mesh_pipeline_layout_info, nullptr, &textured_mesh_pipeline_layout));
-
-	pipeline_builder.shader_stages.clear();
-	pipeline_builder.shader_stages.push_back(
-			vk_init::pipeline_shader_stage_create_info(vk::ShaderStageFlagBits::eVertex, mesh_vertex_shader));
-
-	//make sure that triangle_frag_shader is holding the compiled default_lit.frag
-	pipeline_builder.shader_stages.push_back(
-			vk_init::pipeline_shader_stage_create_info(vk::ShaderStageFlagBits::eFragment, textured_mesh_frag_shader));
-
-	pipeline_builder.pipeline_layout = textured_mesh_pipeline_layout;
-	vk::Pipeline textured_mesh_pipeline = pipeline_builder.build_pipeline(device, render_pass);
-	create_material(textured_mesh_pipeline, textured_mesh_pipeline_layout, "textured_mesh");
-
-	// DEBUG DRAWING STUFF
-
-	//build the mesh pipeline
-	//we start from just the default empty pipeline layout info
-	vk::PipelineLayoutCreateInfo debug_pipeline_layout_info = vk_init::pipeline_layout_create_info();
-
-	//push-constant setup
-	debug_pipeline_layout_info.pPushConstantRanges = &push_constant;
-	debug_pipeline_layout_info.pushConstantRangeCount = 1;
-
-	//hook the global set layout
-	vk::DescriptorSetLayout layouts[] = { global_set_layout, object_set_layout };
-
-	debug_pipeline_layout_info.setLayoutCount = 2;
-	debug_pipeline_layout_info.pSetLayouts = layouts;
-
-	vk::PipelineLayout debug_pipeline_layout;
-	VK_CHECK(device.createPipelineLayout(&debug_pipeline_layout_info, nullptr, &debug_pipeline_layout));
-
-	pipeline_builder.input_assembly = vk_init::input_assembly_create_info(vk::PrimitiveTopology::eLineList);
-
-	pipeline_builder.pipeline_layout = debug_pipeline_layout;
-
-	pipeline_builder.shader_stages.clear();
-	pipeline_builder.shader_stages.push_back(
-			vk_init::pipeline_shader_stage_create_info(vk::ShaderStageFlagBits::eVertex, debug_vert_shader));
-
-	//make sure that triangle_frag_shader is holding the compiled default_lit.frag
-	pipeline_builder.shader_stages.push_back(
-			vk_init::pipeline_shader_stage_create_info(vk::ShaderStageFlagBits::eFragment, debug_frag_shader));
-
-	pipeline_builder.pipeline_layout = debug_pipeline_layout;
-	vk::Pipeline debug_pipeline = pipeline_builder.build_pipeline(device, render_pass);
-	create_material(debug_pipeline, debug_pipeline_layout, "debug_material");
-
-	device.destroyShaderModule(mesh_vertex_shader, nullptr);
-	device.destroyShaderModule(mesh_frag_shader, nullptr);
-	device.destroyShaderModule(textured_mesh_frag_shader, nullptr);
-	device.destroyShaderModule(debug_vert_shader, nullptr);
-	device.destroyShaderModule(debug_frag_shader, nullptr);
+	//load the compute shaders
+	load_compute_shader(shader_path("indirect_cull.comp.spv").c_str(), cull_pipeline, cull_layout);
+	load_compute_shader(shader_path("depth_reduce.comp.spv").c_str(), depth_reduce_pipeline, depth_reduce_layout);
+	load_compute_shader(shader_path("sparse_upload.comp.spv").c_str(), sparse_upload_pipeline, sparse_upload_layout);
 
 	main_deletion_queue.push_function([=, this]() {
 		device.destroyPipeline(mesh_pipeline);
 		device.destroyPipelineLayout(mesh_pipeline_layout);
-		device.destroyPipeline(textured_mesh_pipeline);
-		device.destroyPipelineLayout(textured_mesh_pipeline_layout);
-		device.destroyPipeline(debug_pipeline);
-		device.destroyPipelineLayout(debug_pipeline_layout);
 	});
 }
 
-void RenderManager::init_scene() {
-	RenderObject box = {};
-	box.mesh = get_mesh("box");
-	box.material = get_material("textured_mesh");
-	glm::mat4 rotation = glm::rotate(glm::mat4{ 1.0 }, glm::radians(45.0f), glm::vec3(0, 1, 0));
-	box.transform_matrix = glm::mat4{ 1.0f } * rotation;
+bool RenderManager::load_compute_shader(const char *shader_path, vk::Pipeline &pipeline, vk::PipelineLayout &layout) {
+	ShaderModule compute_module;
+	if (!vk_util::load_shader_module(device, shader_path, &compute_module))
 
-	renderables.push_back(box);
-
-	for (int x = -20; x <= 20; x++) {
-		for (int y = -20; y <= 20; y++) {
-			RenderObject tri = {};
-			tri.mesh = get_mesh("triangle");
-			tri.material = get_material("default_mesh");
-			glm::mat4 translation = glm::translate(glm::mat4{ 1.0 }, glm::vec3(x, 0, y));
-			glm::mat4 scale = glm::scale(glm::mat4{ 1.0 }, glm::vec3(0.2, 0.2, 0.2));
-			tri.transform_matrix = translation * scale;
-
-			renderables.push_back(tri);
-		}
+	{
+		std::cout << "Error when building compute shader shader module" << std::endl;
+		return false;
 	}
 
-	//create a sampler for the texture
-	vk::SamplerCreateInfo sampler_info = vk_init::sampler_create_info(vk::Filter::eNearest);
+	auto *compute_effect = new ShaderEffect();
 
-	vk::Sampler blocky_sampler;
-	VK_CHECK(device.createSampler(&sampler_info, nullptr, &blocky_sampler));
+	compute_effect->add_stage(&compute_module, vk::ShaderStageFlagBits::eCompute);
 
-	main_deletion_queue.push_function([=, this]() { device.destroySampler(blocky_sampler); });
+	compute_effect->reflect_layout(device, nullptr, 0);
 
-	Material *textured_mat = get_material("textured_mesh");
+	ComputePipelineBuilder compute_builder;
+	compute_builder.pipeline_layout = compute_effect->built_layout;
+	compute_builder.shader_stage =
+			vk_init::pipeline_shader_stage_create_info(vk::ShaderStageFlagBits::eCompute, compute_module.module);
 
-	//allocate the descriptor set for single-texture to use on the material
-	vk::DescriptorSetAllocateInfo alloc_info = {};
-	alloc_info.sType = vk::StructureType::eDescriptorSetAllocateInfo;
-	alloc_info.pNext = nullptr;
-	alloc_info.descriptorPool = descriptor_pool;
-	alloc_info.descriptorSetCount = 1;
-	alloc_info.pSetLayouts = &single_texture_set_layout;
+	layout = compute_effect->built_layout;
+	pipeline = compute_builder.build_pipeline(device);
 
-	VK_CHECK(device.allocateDescriptorSets(&alloc_info, &textured_mat->texture_set));
+	main_deletion_queue.push_function([=]() { device.destroyPipeline(pipeline, nullptr); });
 
-	//write to the descriptor set so that it points to our empire_diffuse texture
-	vk::DescriptorImageInfo image_buffer_info;
-	image_buffer_info.sampler = blocky_sampler;
-	image_buffer_info.imageView = loaded_textures["empire_diffuse"].image_view;
-	image_buffer_info.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+	return true;
+}
 
-	vk::WriteDescriptorSet texture1 = vk_init::write_descriptor_image(
-			vk::DescriptorType::eCombinedImageSampler, textured_mat->texture_set, &image_buffer_info, 0);
+void RenderManager::init_debug_vertex_buffer() {
+	const uint32_t max_debug_verts = 100000;
 
-	device.updateDescriptorSets(1, &texture1, 0, nullptr);
+	// Create vertex buffer from vertices
+	size_t buffer_size = max_debug_verts * sizeof(DebugVertex);
+	//allocate staging buffer
+	vk::BufferCreateInfo buffer_info = {};
+	buffer_info.sType = vk::StructureType::eBufferCreateInfo;
+	buffer_info.pNext = nullptr;
+
+	buffer_info.size = buffer_size;
+	buffer_info.usage = vk::BufferUsageFlagBits::eVertexBuffer;
+
+	//let the VMA library know that this data should be on CPU RAM
+	vma::AllocationCreateInfo vmaalloc_info = {};
+	vmaalloc_info.usage = vma::MemoryUsage::eCpuToGpu;
+
+	//allocate the buffer
+	VK_CHECK(allocator.createBuffer(
+			&buffer_info, &vmaalloc_info, &debug_vertex_buffer.buffer, &debug_vertex_buffer.allocation, nullptr));
+
+	VkDebug::set_name(debug_vertex_buffer.buffer, "Debug draw vertex buffer");
+
+	main_deletion_queue.push_function(
+			[=]() { allocator.destroyBuffer(debug_vertex_buffer.buffer, debug_vertex_buffer.allocation); });
+}
+
+void RenderManager::init_scene() {
+	// //create a sampler for the texture
+	// vk::SamplerCreateInfo sampler_info = vk_init::sampler_create_info(vk::Filter::eNearest);
+
+	// vk::Sampler blocky_sampler;
+	// VK_CHECK(device.createSampler(&sampler_info, nullptr, &blocky_sampler));
+
+	// sampler_info.mipmapMode = vk::SamplerMipmapMode::eLinear;
+	// // TODO: check this
+	// // sampler_info.mipLodBias = 2;
+	// sampler_info.maxLod = 30;
+	// sampler_info.minLod = 3;
+
+	// vk::Sampler smooth_sampler2;
+	// VK_CHECK(device.createSampler(&sampler_info, nullptr, &smooth_sampler2));
+
+	// {
+	// 	vk_util::MaterialData textured_info = {};
+	// 	textured_info.base_template = "textured";
+	// 	textured_info.parameters = nullptr;
+
+	// 	vk_util::SampledTexture white_tex = {};
+	// 	white_tex.sampler = smooth_sampler2;
+	// 	white_tex.image_view = loaded_textures["white"].image_view;
+
+	// 	textured_info.textures.push_back(white_tex);
+
+	// 	vk_util::Material *new_mat = material_system.build_material("textured", textured_info);
+	// }
+
+	// load_prefab(asset_path("DamagedHelmet/DamagedHelmet.pfb").c_str());
 }
 
 void RenderManager::init_imgui(GLFWwindow *window) {
@@ -773,250 +846,315 @@ void RenderManager::init_imgui(GLFWwindow *window) {
 	});
 }
 
-bool RenderManager::load_shader_module(const char *file_path, vk::ShaderModule *out_shader_module) {
-	std::ifstream file(file_path, std::ios::ate | std::ios::binary);
-
-	if (!file.is_open()) {
-		return false;
-	}
-
-	//find what the size of the file is by looking up the location of the cursor
-	//because the cursor is at the end, it gives the size directly in bytes
-	size_t file_size = (size_t)file.tellg();
-
-	//spirv expects the buffer to be on uint32, so make sure to reserve an int vector big
-	//enough for the entire file
-	std::vector<uint32_t> buffer(file_size / sizeof(uint32_t));
-
-	//put file cursor at beginning
-	file.seekg(0);
-
-	//load the entire file into the buffer
-	file.read((char *)buffer.data(), (std::streamsize)file_size);
-
-	//now that the file is loaded into the buffer, we can close it
-	file.close();
-
-	//create a new shader module, using the buffer we loaded
-	vk::ShaderModuleCreateInfo create_info = {};
-	create_info.sType = vk::StructureType::eShaderModuleCreateInfo;
-	create_info.pNext = nullptr;
-
-	//codeSize has to be in bytes, so multiply the ints in the buffer by size
-	//of int to know the real size of the buffer
-	create_info.codeSize = buffer.size() * sizeof(uint32_t);
-	create_info.pCode = buffer.data();
-
-	//check that the creation goes well.
-	vk::ShaderModule shader_module;
-	if (device.createShaderModule(&create_info, nullptr, &shader_module) != vk::Result::eSuccess) {
-		return false;
-	}
-	*out_shader_module = shader_module;
-
-	return true;
-}
-
 void RenderManager::load_meshes() {
-	triangle_mesh.vertices.resize(3);
+	// triangle_mesh.vertices.resize(3);
 
-	//vertex positions
-	triangle_mesh.vertices[0].position = { 1.f, 1.f, 0.0f };
-	triangle_mesh.vertices[1].position = { -1.f, 1.f, 0.0f };
-	triangle_mesh.vertices[2].position = { 0.f, -1.f, 0.0f };
+	// //vertex positions
+	// triangle_mesh.vertices[0].position = { 1.f, 1.f, 0.0f };
+	// triangle_mesh.vertices[1].position = { -1.f, 1.f, 0.0f };
+	// triangle_mesh.vertices[2].position = { 0.f, -1.f, 0.0f };
 
-	//vertex colors, all green
-	triangle_mesh.vertices[0].color = { 0.f, 1.f, 0.0f }; //pure green
-	triangle_mesh.vertices[1].color = { 0.f, 1.f, 0.0f }; //pure green
-	triangle_mesh.vertices[2].color = { 0.f, 1.f, 0.0f }; //pure green
+	// //vertex colors, all green
+	// triangle_mesh.vertices[0].color = { 0.f, 1.f, 0.0f }; //pure green
+	// triangle_mesh.vertices[1].color = { 0.f, 1.f, 0.0f }; //pure green
+	// triangle_mesh.vertices[2].color = { 0.f, 1.f, 0.0f }; //pure green
 
-	triangle_mesh.indices = { 0, 1, 2 };
+	// triangle_mesh.indices = { 0, 1, 2 };
 
-	//we don't care about the vertex normals
+	// //we don't care about the vertex normals
 
-	box_mesh.load_from_gltf("resources/models/BoxTextured.gltf");
+	// upload_mesh(triangle_mesh);
 
-	generate_debug_box_mesh();
-	generate_debug_sphere_mesh();
-	generate_debug_line_mesh();
-
-	upload_mesh(triangle_mesh);
-	upload_mesh(box_mesh);
-	upload_mesh(debug_box_mesh);
-	upload_mesh(debug_sphere_mesh);
-	upload_mesh(debug_line_mesh);
-
-	meshes["triangle"] = triangle_mesh;
-	meshes["box"] = box_mesh;
-	meshes["debug_box"] = debug_box_mesh;
-	meshes["debug_sphere"] = debug_sphere_mesh;
-	meshes["debug_line"] = debug_line_mesh;
-}
-
-void RenderManager::generate_debug_box_mesh() {
-	debug_box_mesh.vertices.resize(8);
-	// bottom face
-	debug_box_mesh.vertices[0].position = glm::vec3(-0.5f, -0.5f, -0.5f);
-	debug_box_mesh.vertices[1].position = glm::vec3(0.5f, -0.5f, -0.5f);
-	debug_box_mesh.vertices[2].position = glm::vec3(0.5f, -0.5f, 0.5f);
-	debug_box_mesh.vertices[3].position = glm::vec3(-0.5f, -0.5f, 0.5f);
-
-	// top face
-	debug_box_mesh.vertices[4].position = glm::vec3(-0.5f, 0.5f, -0.5f);
-	debug_box_mesh.vertices[5].position = glm::vec3(0.5f, 0.5f, -0.5f);
-	debug_box_mesh.vertices[6].position = glm::vec3(0.5f, 0.5f, 0.5f);
-	debug_box_mesh.vertices[7].position = glm::vec3(-0.5f, 0.5f, 0.5f);
-
-	// white color for best visibility. I dont know how to re-buffer vertex data on runtime so we'll stay with white
-	for (auto &vertex : debug_box_mesh.vertices) {
-		vertex.color = glm::vec3(1.f, 1.f, 1.f);
-	}
-
-	// indeces for LINE_LIST drawing a cube shape
-	debug_box_mesh.indices = { 0, 1, 1, 2, 2, 3, 3, 0, 4, 5, 5, 6, 6, 7, 7, 4, 0, 4, 1, 5, 2, 6, 3, 7 };
-}
-
-void RenderManager::generate_debug_sphere_mesh() {
-	// prepare sphere vertices
-	static const int X_SEGMENTS = 16;
-	static const int Y_SEGMENTS = 16;
-	static const float PI = 3.14159265359f;
-
-	float x_segment_step = 2.f * PI / X_SEGMENTS;
-	float y_segment_step = PI / Y_SEGMENTS;
-	float x_segment_angle = 0.f;
-	float y_segment_angle = 0.f;
-
-	float xy;
-	float z;
-
-	for (int y = 0; y <= Y_SEGMENTS; ++y) {
-		y_segment_angle = PI / 2.0f - (float)y * y_segment_step;
-		xy = cos(y_segment_angle); // assuming r=1
-		z = sin(y_segment_angle);
-
-		for (int x = 0; x <= X_SEGMENTS; ++x) {
-			x_segment_angle = (float)x * x_segment_step;
-
-			float x_val = xy * cos(x_segment_angle);
-			float y_val = xy * sin(x_segment_angle);
-
-			Vertex vertex;
-			vertex.position = glm::vec3(x_val, z, y_val);
-			vertex.color = glm::vec3(1.f, 1.f, 1.f);
-			debug_sphere_mesh.vertices.push_back(vertex);
-		}
-	}
-
-	// indeces for drawing a LINE LIST with lines going both ways
-	for (int y = 0; y < Y_SEGMENTS; ++y) {
-		for (int x = 0; x < X_SEGMENTS; ++x) {
-			debug_sphere_mesh.indices.push_back(y * (X_SEGMENTS + 1) + x);
-			debug_sphere_mesh.indices.push_back(y * (X_SEGMENTS + 1) + x + 1);
-		}
-	}
-
-	for (int y = 0; y < Y_SEGMENTS; ++y) {
-		for (int x = 0; x < X_SEGMENTS; ++x) {
-			debug_sphere_mesh.indices.push_back(y * (X_SEGMENTS + 1) + x);
-			debug_sphere_mesh.indices.push_back((y + 1) * (X_SEGMENTS + 1) + x);
-		}
-	}
+	// meshes["triangle"] = triangle_mesh;
 }
 
 void RenderManager::upload_mesh(Mesh &mesh) {
 	size_t buffer_size = mesh.vertices.size() * sizeof(Vertex);
 	//allocate staging buffer
-	vk::BufferCreateInfo staging_buffer_info = {};
-	staging_buffer_info.sType = vk::StructureType::eBufferCreateInfo;
-	staging_buffer_info.pNext = nullptr;
+	vk::BufferCreateInfo buffer_info = {};
+	buffer_info.sType = vk::StructureType::eBufferCreateInfo;
+	buffer_info.pNext = nullptr;
 
-	staging_buffer_info.size = buffer_size;
-	staging_buffer_info.usage = vk::BufferUsageFlagBits::eTransferSrc;
+	buffer_info.size = buffer_size;
+	buffer_info.usage = vk::BufferUsageFlagBits::eTransferSrc;
 
 	//let the VMA library know that this data should be on CPU RAM
 	vma::AllocationCreateInfo vmaalloc_info = {};
 	vmaalloc_info.usage = vma::MemoryUsage::eCpuOnly;
 
-	AllocatedBuffer staging_buffer;
-
-	//allocate the buffer
-	VK_CHECK(allocator.createBuffer(
-			&staging_buffer_info, &vmaalloc_info, &staging_buffer.buffer, &staging_buffer.allocation, nullptr));
-
-	void *data;
-	VK_CHECK(allocator.mapMemory(staging_buffer.allocation, &data));
-	memcpy(data, mesh.vertices.data(), mesh.vertices.size() * sizeof(Vertex));
-	allocator.unmapMemory(staging_buffer.allocation);
-
-	//allocate vertex buffer
-	vk::BufferCreateInfo buffer_info = {};
-	buffer_info.sType = vk::StructureType::eBufferCreateInfo;
-	//this is the total size, in bytes, of the buffer we are allocating
-	buffer_info.size = mesh.vertices.size() * sizeof(Vertex);
-	//this buffer is going to be used as a Vertex Buffer
-	buffer_info.usage = vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst;
-
-	//let the VMA library know that this data should be writeable by CPU, but also readable by GPU
-	vmaalloc_info.usage = vma::MemoryUsage::eGpuOnly;
-
 	//allocate the buffer
 	VK_CHECK(allocator.createBuffer(
 			&buffer_info, &vmaalloc_info, &mesh.vertex_buffer.buffer, &mesh.vertex_buffer.allocation, nullptr));
+
+	void *data;
+	VK_CHECK(allocator.mapMemory(mesh.vertex_buffer.allocation, &data));
+	memcpy(data, mesh.vertices.data(), mesh.vertices.size() * sizeof(Vertex));
+	allocator.unmapMemory(mesh.vertex_buffer.allocation);
 
 	//add the destruction of triangle mesh buffer to the deletion queue
 	main_deletion_queue.push_function(
 			[=, this]() { allocator.destroyBuffer(mesh.vertex_buffer.buffer, mesh.vertex_buffer.allocation); });
 
-	// copy vertex data
-	immediate_submit([=](vk::CommandBuffer cmd) {
-		vk::BufferCopy copy;
-		copy.dstOffset = 0;
-		copy.srcOffset = 0;
-		copy.size = buffer_size;
-		cmd.copyBuffer(staging_buffer.buffer, mesh.vertex_buffer.buffer, 1, &copy);
-	});
-
-	allocator.destroyBuffer(staging_buffer.buffer, staging_buffer.allocation);
-
-	// Recreate staging buffer, this time for indices
+	// Create new buffer, this time for indices
 	buffer_size = mesh.indices.size() * sizeof(uint32_t);
-	staging_buffer_info.size = buffer_size;
-	vmaalloc_info.usage = vma::MemoryUsage::eCpuOnly;
-
-	VK_CHECK(allocator.createBuffer(
-			&staging_buffer_info, &vmaalloc_info, &staging_buffer.buffer, &staging_buffer.allocation, nullptr));
-
-	VK_CHECK(allocator.mapMemory(staging_buffer.allocation, &data));
-	memcpy(data, mesh.indices.data(), mesh.indices.size() * sizeof(uint32_t));
-	allocator.unmapMemory(staging_buffer.allocation);
-
-	//allocate index buffer
-	vmaalloc_info.usage = vma::MemoryUsage::eGpuOnly;
-
 	buffer_info.size = buffer_size;
-	buffer_info.usage = vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst;
+
 	VK_CHECK(allocator.createBuffer(
 			&buffer_info, &vmaalloc_info, &mesh.index_buffer.buffer, &mesh.index_buffer.allocation, nullptr));
+
+	VK_CHECK(allocator.mapMemory(mesh.index_buffer.allocation, &data));
+	memcpy(data, mesh.indices.data(), mesh.indices.size() * sizeof(uint32_t));
+	allocator.unmapMemory(mesh.index_buffer.allocation);
 
 	//add the destruction of triangle mesh buffer to the deletion queue
 	main_deletion_queue.push_function(
 			[=, this]() { allocator.destroyBuffer(mesh.index_buffer.buffer, mesh.index_buffer.allocation); });
-
-	//copy index data
-	immediate_submit([=](vk::CommandBuffer cmd) {
-		vk::BufferCopy copy;
-		copy.dstOffset = 0;
-		copy.srcOffset = 0;
-		copy.size = buffer_size;
-		cmd.copyBuffer(staging_buffer.buffer, mesh.index_buffer.buffer, 1, &copy);
-	});
-
-	allocator.destroyBuffer(staging_buffer.buffer, staging_buffer.allocation);
 }
 
-AllocatedBuffer RenderManager::create_buffer(
-		size_t alloc_size, vk::BufferUsageFlags usage, vma::MemoryUsage memory_usage) const {
+bool RenderManager::load_image_to_cache(const char *name, const char *path) {
+	Texture newtex;
+
+	if (loaded_textures.find(name) != loaded_textures.end()) {
+		return true;
+	}
+
+	bool result = vk_util::load_image_from_asset(*this, path, newtex.image);
+
+	if (!result) {
+		SPDLOG_ERROR("Error When texture {} at path {}", name, path);
+		return false;
+	} else {
+		SPDLOG_INFO("Loaded texture {} at path {}", name, path);
+	}
+	newtex.image_view = newtex.image.default_view;
+	//VkImageViewCreateInfo imageinfo = vkinit::imageview_create_info(VK_FORMAT_R8G8B8A8_UNORM, newtex.image._image,
+	//VK_IMAGE_ASPECT_COLOR_BIT); imageinfo.subresourceRange.levelCount = newtex.image.mipLevels;
+	//vkCreateImageView(_device, &imageinfo, nullptr, &newtex.imageView);
+
+	loaded_textures[name] = newtex;
+	return true;
+}
+
+PrefabInstance RenderManager::load_prefab(const char *path, const glm::mat4 &root) {
+	auto pf = prefab_cache.find(path);
+	if (pf == prefab_cache.end()) {
+		assets::AssetFile file;
+		bool loaded = assets::load_binary_file(path, file);
+
+		if (!loaded) {
+			SPDLOG_ERROR("Error When loading prefab file at path {}", path);
+			assert(false);
+		} else {
+			SPDLOG_INFO("Prefab {} loaded to cache", path);
+		}
+
+		prefab_cache[path] = new assets::PrefabInfo;
+
+		*prefab_cache[path] = assets::read_prefab_info(&file);
+	}
+
+	assets::PrefabInfo *prefab = prefab_cache[path];
+
+	vk::SamplerCreateInfo sampler_info = vk_init::sampler_create_info(vk::Filter::eLinear);
+	sampler_info.mipmapMode = vk::SamplerMipmapMode::eLinear;
+
+	std::unordered_map<uint64_t, glm::mat4> node_worldmats;
+
+	std::vector<std::pair<uint64_t, glm::mat4>> pending_nodes;
+	for (auto &[k, v] : prefab->node_matrices) {
+		glm::mat4 nodematrix{ 1.f };
+
+		auto nm = prefab->matrices[v];
+		memcpy(&nodematrix, &nm, sizeof(glm::mat4));
+
+		//check if it has parents
+		auto matrix_it = prefab->node_parents.find(k);
+		if (matrix_it == prefab->node_parents.end()) {
+			//add to worldmats
+			node_worldmats[k] = root * nodematrix;
+		} else {
+			//enqueue
+			pending_nodes.emplace_back(k, nodematrix);
+		}
+	}
+
+	//process pending nodes list until it empties
+	while (!pending_nodes.empty()) {
+		for (int i = 0; i < pending_nodes.size(); i++) {
+			uint64_t node = pending_nodes[i].first;
+			uint64_t parent = prefab->node_parents[node];
+
+			//try to find parent in cache
+			auto matrix_it = node_worldmats.find(parent);
+			if (matrix_it != node_worldmats.end()) {
+				//transform with the parent
+				glm::mat4 nodematrix = (matrix_it)->second * pending_nodes[i].second;
+
+				node_worldmats[node] = nodematrix;
+
+				//remove from queue, pop last
+				pending_nodes[i] = pending_nodes.back();
+				pending_nodes.pop_back();
+				i--;
+			}
+		}
+	}
+
+	std::vector<MeshObject> prefab_renderables;
+	prefab_renderables.reserve(prefab->node_meshes.size());
+
+	for (auto &[k, v] : prefab->node_meshes) {
+		//load mesh
+
+		if (v.mesh_path.find("Sky") != std::string::npos) {
+			continue;
+		}
+
+		if (!get_mesh(v.mesh_path)) {
+			Mesh mesh{};
+			mesh.load_from_asset(asset_path(v.mesh_path).c_str());
+
+			upload_mesh(mesh);
+
+			meshes[v.mesh_path.c_str()] = mesh;
+		}
+
+		auto material_name = v.material_path.c_str();
+		//load material
+
+		vk_util::Material *object_material = material_system.get_material(material_name);
+		if (!object_material) {
+			assets::AssetFile material_file;
+			bool loaded = assets::load_binary_file(asset_path(material_name).c_str(), material_file);
+
+			if (loaded) {
+				assets::MaterialInfo material = assets::read_material_info(&material_file);
+				std::vector<std::string> textures;
+				std::string black_texture_path = "resources/assets_export/black.ktx2";
+
+				// BASE COLOR
+				auto base_color_tex = material.textures["baseColor"];
+				loaded = load_image_to_cache(base_color_tex.c_str(), asset_path(base_color_tex).c_str());
+				if (!loaded) {
+					loaded = load_image_to_cache(base_color_tex.c_str(), black_texture_path.c_str());
+					SPDLOG_WARN("Loaded black picture as base color texture {}", base_color_tex);
+				}
+				textures.push_back(base_color_tex);
+
+				// AMBIENT OCCLUSION
+				auto ao_tex = material.textures["occlusion"];
+				loaded = load_image_to_cache(ao_tex.c_str(), asset_path(ao_tex).c_str());
+				if (!loaded) {
+					loaded = load_image_to_cache(ao_tex.c_str(), black_texture_path.c_str());
+					SPDLOG_WARN("Loaded black picture as ambient occlusion texture {}", ao_tex);
+				}
+				textures.push_back(ao_tex);
+
+				// NORMAL
+				auto normal_tex = material.textures["normals"];
+				loaded = load_image_to_cache(normal_tex.c_str(), asset_path(normal_tex).c_str());
+				if (!loaded) {
+					loaded = load_image_to_cache(normal_tex.c_str(), black_texture_path.c_str());
+					SPDLOG_WARN("Loaded black picture as normal texture {}", normal_tex);
+				}
+				textures.push_back(normal_tex);
+
+				// METALLIC ROUGHNESS
+				auto metallic_roughness_tex = material.textures["metallicRoughness"];
+				loaded =
+						load_image_to_cache(metallic_roughness_tex.c_str(), asset_path(metallic_roughness_tex).c_str());
+				if (!loaded) {
+					loaded = load_image_to_cache(metallic_roughness_tex.c_str(), black_texture_path.c_str());
+					SPDLOG_WARN("Loaded black picture as metallicRoughness texture {}", metallic_roughness_tex);
+				}
+				textures.push_back(metallic_roughness_tex);
+
+				// EMISSIVE
+				auto emissive_tex = material.textures["emissive"];
+				loaded = load_image_to_cache(emissive_tex.c_str(), asset_path(emissive_tex).c_str());
+				if (!loaded) {
+					loaded = load_image_to_cache(emissive_tex.c_str(), black_texture_path.c_str());
+					SPDLOG_WARN("Loaded black picture as emissive texture {}", emissive_tex);
+				}
+				textures.push_back(emissive_tex);
+
+				vk_util::MaterialData info;
+				info.parameters = nullptr;
+
+				if (material.transparency == assets::TransparencyMode::Transparent) {
+					info.base_template = "texturedPBR_transparent";
+				} else {
+					info.base_template = "texturedPBR_opaque";
+				}
+
+				for (auto &texture : textures) {
+					// TODO: Check if we can reuse one sampler for multiple textures
+					vk::Sampler smooth_sampler;
+					VK_CHECK(device.createSampler(&sampler_info, nullptr, &smooth_sampler));
+					VkDebug::set_name(smooth_sampler, fmt::format("Smooth Sampler for {}", texture).c_str());
+
+					main_deletion_queue.push_function([=]() { device.destroySampler(smooth_sampler); });
+
+					vk_util::SampledTexture tex;
+					tex.image_view = loaded_textures[texture].image_view;
+					tex.sampler = smooth_sampler;
+
+					info.textures.push_back(tex);
+				}
+
+				object_material = material_system.build_material(material_name, info);
+
+				if (!object_material) {
+					SPDLOG_ERROR("Error When building material {}", v.material_path);
+				}
+			} else {
+				SPDLOG_ERROR("Error When loading material at path {}", v.material_path);
+			}
+		}
+
+		MeshObject load_mesh;
+		//transparent objects will be invisible
+
+		load_mesh.b_draw_forward_pass = true;
+		load_mesh.b_draw_shadow_pass = true;
+
+		glm::mat4 nodematrix{ 1.f };
+
+		auto matrix_it = node_worldmats.find(k);
+		if (matrix_it != node_worldmats.end()) {
+			auto nm = (*matrix_it).second;
+			memcpy(&nodematrix, &nm, sizeof(glm::mat4));
+		}
+
+		load_mesh.mesh = get_mesh(v.mesh_path);
+		load_mesh.transform_matrix = nodematrix;
+		load_mesh.material = object_material;
+
+		// TODO: implement this
+		// refresh_renderbounds(&load_mesh);
+
+		//sort key from location
+		auto lx = int(load_mesh.bounds.origin.x / 10.f);
+		auto ly = int(load_mesh.bounds.origin.y / 10.f);
+
+		uint32_t key = uint32_t(std::hash<int32_t>()(lx) ^ std::hash<int32_t>()(ly ^ 1337));
+
+		load_mesh.custom_sort_key = 0; // rng;// key;
+
+		prefab_renderables.push_back(load_mesh);
+		//_renderables.push_back(load_mesh);
+	}
+
+	auto handles = render_scene.register_object_batch(
+			prefab_renderables.data(), static_cast<uint32_t>(prefab_renderables.size()));
+
+	needs_to_rebuild_objects = true;
+
+	return PrefabInstance{ .object_ids = handles };
+}
+
+AllocatedBufferUntyped RenderManager::create_buffer(const std::string &allocation_name, size_t alloc_size,
+		vk::BufferUsageFlags usage, vma::MemoryUsage memory_usage) const {
 	//allocate vertex buffer
 	vk::BufferCreateInfo buffer_info = {};
 	buffer_info.sType = vk::StructureType::eBufferCreateInfo;
@@ -1027,13 +1165,31 @@ AllocatedBuffer RenderManager::create_buffer(
 
 	vma::AllocationCreateInfo vmaalloc_info = {};
 	vmaalloc_info.usage = memory_usage;
+	vmaalloc_info.pUserData = nullptr;
 
-	AllocatedBuffer new_buffer;
+	AllocatedBufferUntyped new_buffer;
 
 	//allocate the buffer
 	VK_CHECK(allocator.createBuffer(&buffer_info, &vmaalloc_info, &new_buffer.buffer, &new_buffer.allocation, nullptr));
 
+	vmaSetAllocationName(allocator, new_buffer.allocation, allocation_name.c_str());
+	new_buffer.size = alloc_size;
+
 	return new_buffer;
+}
+
+void RenderManager::reallocate_buffer(AllocatedBufferUntyped &buffer, size_t alloc_size, vk::BufferUsageFlags usage,
+		vma::MemoryUsage memory_usage, vk::MemoryPropertyFlags required_flags) {
+	// TODO: Add required_flags to create_buffer()
+	AllocatedBufferUntyped new_buffer = create_buffer("Reallocation of buffer", alloc_size, usage, memory_usage);
+
+	get_current_frame().frame_deletion_queue.push_function(
+			[=, this]() { allocator.destroyBuffer(buffer.buffer, buffer.allocation); });
+
+	main_deletion_queue.push_function(
+			[=, this]() { allocator.destroyBuffer(new_buffer.buffer, new_buffer.allocation); });
+
+	buffer = new_buffer;
 }
 
 size_t RenderManager::pad_uniform_buffer_size(size_t original_size) const {
@@ -1044,6 +1200,10 @@ size_t RenderManager::pad_uniform_buffer_size(size_t original_size) const {
 		aligned_size = (aligned_size + min_ubo_alignment - 1) & ~(min_ubo_alignment - 1);
 	}
 	return aligned_size;
+}
+
+void RenderManager::unmap_buffer(AllocatedBufferUntyped &buffer) const {
+	allocator.unmapMemory(buffer.allocation);
 }
 
 void RenderManager::immediate_submit(std::function<void(vk::CommandBuffer)> &&function) {
@@ -1059,7 +1219,7 @@ void RenderManager::immediate_submit(std::function<void(vk::CommandBuffer)> &&fu
 	//execute the function
 	function(cmd);
 
-	VK_CHECK(cmd.end());
+	cmd.end();
 
 	vk::SubmitInfo submit = vk_init::submit_info(&cmd);
 
@@ -1074,33 +1234,87 @@ void RenderManager::immediate_submit(std::function<void(vk::CommandBuffer)> &&fu
 	device.resetCommandPool(upload_context.command_pool);
 }
 
-RenderManager::Status RenderManager::startup(DisplayManager &display_manager) {
+std::string RenderManager::asset_path(std::string_view path) {
+	return std::string(ASSET_PATH) + std::string(path);
+}
+
+std::string RenderManager::shader_path(std::string_view path) {
+	return std::string(SHADER_PATH) + std::string(path);
+}
+
+void RenderManager::ready_cull_data(RenderScene::MeshPass &pass, vk::CommandBuffer cmd) {
+	if (pass.batches.empty()) {
+		return;
+	}
+
+	//copy from the cleared indirect buffer into the one we will use on rendering. This one happens every frame
+	vk::BufferCopy indirect_copy;
+	indirect_copy.dstOffset = 0;
+	indirect_copy.size = pass.batches.size() * sizeof(GPUIndirectObject);
+	indirect_copy.srcOffset = 0;
+	cmd.copyBuffer(pass.clear_indirect_buffer.buffer, pass.draw_indirect_buffer.buffer, 1, &indirect_copy);
+
+	{
+		vk::BufferMemoryBarrier barrier =
+				vk_init::buffer_barrier(pass.draw_indirect_buffer.buffer, graphics_queue_family);
+		barrier.dstAccessMask = vk::AccessFlagBits::eShaderWrite | vk::AccessFlagBits::eShaderRead;
+		barrier.srcAccessMask = vk::AccessFlagBits::eTransferWrite;
+
+		cull_ready_barriers.push_back(barrier);
+		//vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0, 0, nullptr,
+		//1, &barrier, 0, nullptr);
+	}
+}
+
+RenderManager::Status RenderManager::startup(DisplayManager &display_manager, Camera *cam) {
+	camera = cam;
+
 	// TODO: Handle failures
 	init_vulkan(display_manager);
+
+	shader_cache.init(device);
+	render_scene.init();
+
 	init_swapchain(display_manager);
-	init_commands();
-	init_default_renderpass();
+
+	init_forward_renderpass();
+	init_copy_renderpass();
+
 	init_framebuffers();
+	init_commands();
 	init_sync_structures();
 	init_descriptors();
 	init_pipelines();
-	load_meshes();
+
+	init_debug_vertex_buffer();
+
 	load_images();
+	load_meshes();
+
 	init_scene();
 
 	init_imgui(display_manager.window);
 
 	vk::CommandBuffer cmd = get_current_frame().main_command_buffer;
-	TracyVkContext(chosen_gpu, device, graphics_queue, cmd);
+	tracy_context = TracyVkContext(chosen_gpu, device, graphics_queue, cmd);
 
 	return Status::Ok;
 }
 
 void RenderManager::shutdown() {
 	//make sure the GPU has stopped doing its things
-	VK_CHECK(device.waitIdle());
+	device.waitIdle();
+
+	TracyVkDestroy(tracy_context);
 
 	main_deletion_queue.flush();
+
+	for (auto &frame : frames) {
+		frame.dynamic_descriptor_allocator->cleanup();
+	}
+
+	descriptor_allocator->cleanup();
+	descriptor_layout_cache->cleanup();
 
 	device.destroy();
 	instance.destroySurfaceKHR(surface);
@@ -1110,24 +1324,6 @@ void RenderManager::shutdown() {
 
 FrameData &RenderManager::get_current_frame() {
 	return frames[frame_number % FRAME_OVERLAP];
-}
-
-Material *RenderManager::create_material(vk::Pipeline pipeline, vk::PipelineLayout layout, const std::string &name) {
-	Material mat = {};
-	mat.pipeline = pipeline;
-	mat.pipeline_layout = layout;
-	materials[name] = mat;
-	return &materials[name];
-}
-
-Material *RenderManager::get_material(const std::string &name) {
-	//search for the object, and return nullptr if not found
-	auto it = materials.find(name);
-	if (it == materials.end()) {
-		return nullptr;
-	} else {
-		return &(*it).second;
-	}
 }
 
 Mesh *RenderManager::get_mesh(const std::string &name) {
@@ -1140,25 +1336,25 @@ Mesh *RenderManager::get_mesh(const std::string &name) {
 }
 
 void RenderManager::load_images() {
-	Texture texture = {};
-
-	vk_util::load_image_from_file(*this, "resources/models/CesiumLogoFlat.png", texture.image);
-
-	vk::ImageViewCreateInfo image_info = vk_init::image_view_create_info(
-			vk::Format::eR8G8B8A8Srgb, texture.image.image, vk::ImageAspectFlagBits::eColor);
-
-	VK_CHECK(device.createImageView(&image_info, nullptr, &texture.image_view));
-
-	main_deletion_queue.push_function([=, this]() { device.destroyImageView(texture.image_view); });
-
-	loaded_textures["empire_diffuse"] = texture;
+	load_image_to_cache("white", asset_path("missing.ktx2").c_str());
 }
 
 void RenderManager::draw(Camera &camera) {
 	ZoneNamedC(Zone1, 0xff0000, true);
+	if (needs_to_rebuild_objects) {
+		render_scene.build_batches();
+		render_scene.merge_meshes(this);
+		needs_to_rebuild_objects = false;
+	}
+
 	//wait until the GPU has finished render the last frame. Timeout of 1 second
 	VK_CHECK(device.waitForFences(1, &get_current_frame().render_fence, true, 1000000000));
 	VK_CHECK(device.resetFences(1, &get_current_frame().render_fence));
+
+	get_current_frame().frame_deletion_queue.flush();
+	get_current_frame().dynamic_descriptor_allocator->reset_pools();
+
+	// render_scene.build_batches();
 
 	//request image from the swapchain, one second timeout
 	uint32_t swapchain_image_index;
@@ -1167,7 +1363,7 @@ void RenderManager::draw(Camera &camera) {
 
 	//now that we are sure that the commands finished executing, we can safely reset the command buffer to begin
 	//recording again.
-	VK_CHECK(get_current_frame().main_command_buffer.reset());
+	get_current_frame().main_command_buffer.reset();
 
 	//naming it cmd for shorter writing
 	vk::CommandBuffer cmd = get_current_frame().main_command_buffer;
@@ -1193,6 +1389,94 @@ void RenderManager::draw(Camera &camera) {
 
 	vk::ClearValue clear_values[] = { color_clear_value, depth_clear_value };
 
+	post_cull_barriers.clear();
+	cull_ready_barriers.clear();
+
+	{
+		TracyVkZone(tracy_context, cmd, "Readying mesh data");
+
+		ready_mesh_draw(cmd);
+
+		ready_cull_data(render_scene.forward_pass, cmd);
+	}
+
+	cmd.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eComputeShader, {}, 0, nullptr,
+			cull_ready_barriers.size(), cull_ready_barriers.data(), 0, nullptr);
+
+	glm::vec3 cam_pos = { 0.f, 3.f, -10.f };
+
+	glm::mat4 view = glm::translate(glm::mat4(1.f), cam_pos);
+	//camera projection
+	float aspect = (float)window_extent.width / (float)window_extent.height;
+	glm::mat4 projection = glm::perspective(glm::radians(70.f), aspect, 0.1f, 200.0f);
+
+	{
+		TracyVkZone(tracy_context, cmd, "Compute cull");
+
+		CullParams forward_cull{};
+		forward_cull.projmat = projection;
+		forward_cull.viewmat = view;
+		forward_cull.frustrum_cull = false;
+		forward_cull.occlusion_cull = false;
+		forward_cull.draw_dist = 3000;
+		forward_cull.aabb = false;
+		execute_compute_cull(cmd, render_scene.forward_pass, forward_cull);
+	}
+
+	cmd.pipelineBarrier(vk::PipelineStageFlagBits::eComputeShader, vk::PipelineStageFlagBits::eDrawIndirect, {}, 0,
+			nullptr, post_cull_barriers.size(), post_cull_barriers.data(), 0, nullptr);
+
+	{
+		TracyVkZone(tracy_context, cmd, "Forward pass");
+		forward_pass(cmd);
+	}
+
+	{
+		TracyVkZone(tracy_context, cmd, "Reduce depth");
+		reduce_depth(cmd);
+	}
+
+	{
+		TracyVkZone(tracy_context, cmd, "Blit render to swapchain");
+		copy_render_to_swapchain(cmd, swapchain_image_index);
+	}
+
+	TracyVkCollect(tracy_context, get_current_frame().main_command_buffer);
+
+	cmd.end();
+
+	vk::SubmitInfo submit = vk_init::submit_info(&cmd);
+	vk::PipelineStageFlags wait_stage = vk::PipelineStageFlagBits::eColorAttachmentOutput;
+
+	submit.pWaitDstStageMask = &wait_stage;
+
+	submit.waitSemaphoreCount = 1;
+	submit.pWaitSemaphores = &get_current_frame().present_semaphore;
+
+	submit.signalSemaphoreCount = 1;
+	submit.pSignalSemaphores = &get_current_frame().render_semaphore;
+	//submit command buffer to the queue and execute it.
+	// _renderFence will now block until the graphic commands finish execution
+	VK_CHECK(graphics_queue.submit(1, &submit, get_current_frame().render_fence));
+
+	//prepare present
+	// this will put the image we just rendered to into the visible window.
+	// we want to wait on the _renderSemaphore for that,
+	// as its necessary that drawing commands have finished before the image is displayed to the user
+	vk::PresentInfoKHR present_info = vk_init::present_info();
+
+	present_info.pSwapchains = &swapchain;
+	present_info.swapchainCount = 1;
+
+	present_info.pWaitSemaphores = &get_current_frame().render_semaphore;
+	present_info.waitSemaphoreCount = 1;
+
+	present_info.pImageIndices = &swapchain_image_index;
+
+	VK_CHECK(graphics_queue.presentKHR(&present_info));
+
+	/*
+
 	//start the main renderpass.
 	//We will use the clear color from above, and the framebuffer of the index the swapchain gave us
 	vk::RenderPassBeginInfo rp_info = {};
@@ -1213,7 +1497,7 @@ void RenderManager::draw(Camera &camera) {
 
 	cmd.beginRenderPass(&rp_info, vk::SubpassContents::eInline);
 
-	draw_objects(camera, cmd, renderables.data(), (int)renderables.size());
+	draw_objects(camera, cmd);
 
 	{
 		ZoneNamedNC(Zone3, "ImGui", 0x980dd4, true);
@@ -1224,7 +1508,7 @@ void RenderManager::draw(Camera &camera) {
 
 	cmd.endRenderPass();
 	//finalize the command buffer (we can no longer add commands, but it can now be executed)
-	VK_CHECK(cmd.end());
+	cmd.end();
 
 	//prepare the submission to the queue.
 	//we want to wait on the _present_semaphore, as that semaphore is signaled when the swapchain is ready
@@ -1267,120 +1551,99 @@ void RenderManager::draw(Camera &camera) {
 	present_info.pImageIndices = &swapchain_image_index;
 
 	VK_CHECK(graphics_queue.presentKHR(&present_info));
+*/
 
 	frame_number++;
 }
 
-void RenderManager::draw_objects(Camera &camera, vk::CommandBuffer cmd, RenderObject *first, int count) {
-	ZoneNamedC(Zone2, 0x990000, true);
-	// TODO: Sort RenderObjects by material and mesh to reduce pipeline and descriptor set changes
+void RenderManager::forward_pass(vk::CommandBuffer cmd) {
+	//clear depth at 0
+	vk::ClearValue depth_clear;
+	depth_clear.depthStencil.depth = 0.f;
 
-	glm::mat4 view = camera.get_view_matrix();
-	//camera projection
-	static float aspect = (float)window_extent.width / (float)window_extent.height;
-	glm::mat4 projection = glm::perspective(glm::radians(camera.fov), aspect, 0.1f, 200.0f);
+	//start the main renderpass.
+	//We will use the clear color from above, and the framebuffer of the index the swapchain gave us
+	vk::RenderPassBeginInfo rp_info = vk_init::renderpass_begin_info(
+			render_pass, window_extent, forward_framebuffer /*framebuffers[swapchainImageIndex]*/);
 
-	//fill a GPU camera data struct
-	GPUCameraData cam_data = {};
-	cam_data.proj = projection;
-	cam_data.view = view;
-	cam_data.viewproj = projection * view;
+	//connect clear values
+	rp_info.clearValueCount = 2;
 
-	//and copy it to the buffer
-	void *data;
-	VK_CHECK(allocator.mapMemory(get_current_frame().camera_buffer.allocation, &data));
-	memcpy(data, &cam_data, sizeof(GPUCameraData));
-	allocator.unmapMemory(get_current_frame().camera_buffer.allocation);
+	vk::ClearValue clear_value{};
+	clear_value.color.setFloat32({ 0.01f, 0.01f, 0.01f, 1.0f });
 
-	float framed = ((float)frame_number / 30.f);
+	vk::ClearValue clear_values[] = { clear_value, depth_clear };
 
-	scene_parameters.ambient_color = { sin(framed), 0, cos(framed), 1 };
+	rp_info.pClearValues = &clear_values[0];
+	cmd.beginRenderPass(&rp_info, vk::SubpassContents::eInline);
 
-	char *scene_data;
-	VK_CHECK(allocator.mapMemory(scene_parameter_buffer.allocation, (void **)&scene_data));
-	unsigned int frame_index = frame_number % FRAME_OVERLAP;
-	scene_data += pad_uniform_buffer_size(sizeof(GPUSceneData)) * frame_index;
-	memcpy(scene_data, &scene_parameters, sizeof(GPUSceneData));
-	allocator.unmapMemory(scene_parameter_buffer.allocation);
+	vk::Viewport viewport;
+	viewport.x = 0.0f;
+	viewport.y = (float)window_extent.height;
+	viewport.width = (float)window_extent.width;
+	viewport.height = -(float)window_extent.height;
+	viewport.minDepth = 0.0f;
+	viewport.maxDepth = 1.0f;
 
-	void *object_data;
-	VK_CHECK(allocator.mapMemory(get_current_frame().object_buffer.allocation, &object_data));
-	auto *gpu_object_data = (GPUObjectData *)object_data;
-	for (int i = 0; i < count; i++) {
-		RenderObject &object = first[i];
-		//fill a GPU object data struct
-		gpu_object_data[i].model_matrix = object.transform_matrix;
-	}
-	allocator.unmapMemory(get_current_frame().object_buffer.allocation);
+	vk::Rect2D scissor;
+	scissor.setOffset({ 0, 0 });
+	scissor.extent = window_extent;
 
-	Mesh *last_mesh = nullptr;
-	Material *last_material = nullptr;
-	for (int i = 0; i < count; i++) {
-		RenderObject &object = first[i];
+	cmd.setViewport(0, 1, &viewport);
+	cmd.setScissor(0, 1, &scissor);
+	cmd.setDepthBias(0, 0, 0);
 
-		//only bind the pipeline if it doesn't match with the already bound one
-		if (object.material != last_material) {
-			cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, object.material->pipeline);
-			last_material = object.material;
+	draw_objects_forward(cmd, render_scene.forward_pass);
 
-			uint32_t uniform_offset = pad_uniform_buffer_size(sizeof(GPUSceneData)) * frame_index;
+	ImGui::Render();
 
-			// bind the descriptor set when changing pipeline
-			cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, object.material->pipeline_layout, 0, 1,
-					&get_current_frame().global_descriptor, 1, &uniform_offset);
+	ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmd);
 
-			// bind the object descriptor set
-			cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, object.material->pipeline_layout, 1, 1,
-					&get_current_frame().object_descriptor, 0, nullptr);
-
-			if (object.material->texture_set != (vk::DescriptorSet)VK_NULL_HANDLE) {
-				//texture descriptor
-				cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, object.material->pipeline_layout, 2, 1,
-						&object.material->texture_set, 0, nullptr);
-			}
-		}
-
-		glm::mat4 model = object.transform_matrix;
-		//final render matrix, that we are calculating on the cpu
-		glm::mat4 mesh_matrix = projection * view * model;
-
-		MeshPushConstants constants = {};
-		constants.render_matrix = object.transform_matrix;
-
-		//upload the mesh to the GPU via push constants
-		cmd.pushConstants(object.material->pipeline_layout, vk::ShaderStageFlagBits::eVertex, 0,
-				sizeof(MeshPushConstants), &constants);
-
-		//only bind the mesh if it's a different one from last bind
-		if (object.mesh != last_mesh) {
-			//bind the mesh vertex buffer with offset 0
-			vk::DeviceSize offset = 0;
-			cmd.bindVertexBuffers(0, 1, &object.mesh->vertex_buffer.buffer, &offset);
-			cmd.bindIndexBuffer(object.mesh->index_buffer.buffer, 0, vk::IndexType::eUint32);
-			last_mesh = object.mesh;
-		}
-		//we can now draw
-		// We're passing object's index as instanceCount, to easily pass integer to the shader
-		cmd.drawIndexed(object.mesh->indices.size(), 1, 0, 0, i);
-	}
+	//finalize the render pass
+	cmd.endRenderPass();
 }
 
-void RenderManager::generate_debug_line_mesh() {
-	//create a mesh for debug lines
-	std::vector<Vertex> vertices;
-	std::vector<uint32_t> indices;
+void RenderManager::copy_render_to_swapchain(vk::CommandBuffer cmd, uint32_t swapchain_image_index) {
+	//start the main renderpass.
+	//We will use the clear color from above, and the framebuffer of the index the swapchain gave us
+	vk::RenderPassBeginInfo copy_rp =
+			vk_init::renderpass_begin_info(copy_pass, window_extent, framebuffers[swapchain_image_index]);
 
-	//create a line mesh
-	Vertex v1 = {};
-	v1.position = glm::vec3{ 0, 0, 0 };
-	v1.color = glm::vec3{ 1, 0, 0 };
-	debug_line_mesh.vertices.push_back(v1);
+	cmd.beginRenderPass(&copy_rp, vk::SubpassContents::eInline);
 
-	Vertex v2 = {};
-	v2.position = glm::vec3{ 1, 0, 0 };
-	v2.color = glm::vec3{ 0, 0, 1 };
-	debug_line_mesh.vertices.push_back(v2);
+	vk::Viewport viewport;
+	viewport.x = 0.0f;
+	viewport.y = 0.0f;
+	viewport.width = (float)window_extent.width;
+	viewport.height = (float)window_extent.height;
+	viewport.minDepth = 0.0f;
+	viewport.maxDepth = 1.0f;
 
-	debug_line_mesh.indices.push_back(0);
-	debug_line_mesh.indices.push_back(1);
+	vk::Rect2D scissor;
+	scissor.setOffset({ 0, 0 });
+	scissor.extent = window_extent;
+
+	cmd.setViewport(0, 1, &viewport);
+	cmd.setScissor(0, 1, &scissor);
+
+	cmd.setDepthBias(0, 0, 0);
+
+	cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, blit_pipeline);
+
+	vk::DescriptorImageInfo source_image;
+	source_image.sampler = smooth_sampler;
+
+	source_image.imageView = raw_render_image.default_view;
+	source_image.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+
+	vk::DescriptorSet blit_set;
+	vk_util::DescriptorBuilder::begin(descriptor_layout_cache, get_current_frame().dynamic_descriptor_allocator)
+			.bind_image(0, &source_image, vk::DescriptorType::eCombinedImageSampler, vk::ShaderStageFlagBits::eFragment)
+			.build(blit_set);
+
+	cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, blit_pipeline_layout, 0, 1, &blit_set, 0, nullptr);
+
+	cmd.draw(3, 1, 0, 0);
+
+	cmd.endRenderPass();
 }
