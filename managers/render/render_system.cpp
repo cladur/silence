@@ -14,6 +14,8 @@ void RenderSystem::startup() {
 }
 
 void RenderSystem::update(RenderManager &render_manager) {
+	ZoneScopedN("RenderSystem::update");
+
 	for (auto const &entity : entities) {
 		auto &transform = ecs_manager.get_component<Transform>(entity);
 		auto &mesh_instance = ecs_manager.get_component<PrefabInstance>(entity);

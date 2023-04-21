@@ -3,6 +3,7 @@
 #include "managers/display/display_manager.h"
 #include "render/vk_types.h"
 #include "vk_debug.h"
+#include <vulkan/vulkan_core.h>
 #include <vulkan-memory-allocator-hpp/vk_mem_alloc_enums.hpp>
 #include <vulkan/vulkan_handles.hpp>
 #include <vulkan/vulkan_structs.hpp>
@@ -1391,9 +1392,13 @@ void RenderManager::draw(Camera &camera) {
 	post_cull_barriers.clear();
 	cull_ready_barriers.clear();
 
-	ready_mesh_draw(cmd);
+	{
+		TracyVkZone(tracy_context, cmd, "Readying mesh data");
 
-	ready_cull_data(render_scene.forward_pass, cmd);
+		ready_mesh_draw(cmd);
+
+		ready_cull_data(render_scene.forward_pass, cmd);
+	}
 
 	cmd.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eComputeShader, {}, 0, nullptr,
 			cull_ready_barriers.size(), cull_ready_barriers.data(), 0, nullptr);
@@ -1405,23 +1410,38 @@ void RenderManager::draw(Camera &camera) {
 	float aspect = (float)window_extent.width / (float)window_extent.height;
 	glm::mat4 projection = glm::perspective(glm::radians(70.f), aspect, 0.1f, 200.0f);
 
-	CullParams forward_cull{};
-	forward_cull.projmat = projection;
-	forward_cull.viewmat = view;
-	forward_cull.frustrum_cull = false;
-	forward_cull.occlusion_cull = false;
-	forward_cull.draw_dist = 3000;
-	forward_cull.aabb = false;
-	execute_compute_cull(cmd, render_scene.forward_pass, forward_cull);
+	{
+		TracyVkZone(tracy_context, cmd, "Compute cull");
+
+		CullParams forward_cull{};
+		forward_cull.projmat = projection;
+		forward_cull.viewmat = view;
+		forward_cull.frustrum_cull = false;
+		forward_cull.occlusion_cull = false;
+		forward_cull.draw_dist = 3000;
+		forward_cull.aabb = false;
+		execute_compute_cull(cmd, render_scene.forward_pass, forward_cull);
+	}
 
 	cmd.pipelineBarrier(vk::PipelineStageFlagBits::eComputeShader, vk::PipelineStageFlagBits::eDrawIndirect, {}, 0,
 			nullptr, post_cull_barriers.size(), post_cull_barriers.data(), 0, nullptr);
 
-	forward_pass(cmd);
+	{
+		TracyVkZone(tracy_context, cmd, "Forward pass");
+		forward_pass(cmd);
+	}
 
-	reduce_depth(cmd);
+	{
+		TracyVkZone(tracy_context, cmd, "Reduce depth");
+		reduce_depth(cmd);
+	}
 
-	copy_render_to_swapchain(cmd, swapchain_image_index);
+	{
+		TracyVkZone(tracy_context, cmd, "Blit render to swapchain");
+		copy_render_to_swapchain(cmd, swapchain_image_index);
+	}
+
+	TracyVkCollect(tracy_context, get_current_frame().main_command_buffer);
 
 	cmd.end();
 
@@ -1438,6 +1458,7 @@ void RenderManager::draw(Camera &camera) {
 	//submit command buffer to the queue and execute it.
 	// _renderFence will now block until the graphic commands finish execution
 	VK_CHECK(graphics_queue.submit(1, &submit, get_current_frame().render_fence));
+
 	//prepare present
 	// this will put the image we just rendered to into the visible window.
 	// we want to wait on the _renderSemaphore for that,
