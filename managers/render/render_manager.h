@@ -220,6 +220,8 @@ public:
 	vk::Pipeline depth_reduce_pipeline;
 	vk::PipelineLayout depth_reduce_layout;
 
+	tracy::VkCtx *tracy_context;
+
 	// MESHES
 	Mesh triangle_mesh;
 	Mesh box_mesh;

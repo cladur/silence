@@ -1295,7 +1295,7 @@ RenderManager::Status RenderManager::startup(DisplayManager &display_manager, Ca
 	init_imgui(display_manager.window);
 
 	vk::CommandBuffer cmd = get_current_frame().main_command_buffer;
-	TracyVkContext(chosen_gpu, device, graphics_queue, cmd);
+	tracy_context = TracyVkContext(chosen_gpu, device, graphics_queue, cmd);
 
 	return Status::Ok;
 }
@@ -1303,6 +1303,9 @@ RenderManager::Status RenderManager::startup(DisplayManager &display_manager, Ca
 void RenderManager::shutdown() {
 	//make sure the GPU has stopped doing its things
 	device.waitIdle();
+
+	TracyVkDestroy(tracy_context);
+
 	main_deletion_queue.flush();
 
 	for (auto &frame : frames) {
