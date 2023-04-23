@@ -90,7 +90,7 @@ void FontManager::load_font(const char *path, int size) {
 	//copy data to buffer
 	void *data;
 	VK_CHECK(manager->allocator.mapMemory(staging_buffer.allocation, &data));
-	memcpy(data, pixels, static_cast<size_t>(texture_size * sizeof(float)));
+	memcpy(data, pixels, static_cast<size_t>(texture_size));
 	manager->allocator.unmapMemory(staging_buffer.allocation);
 
 	font.character_atlas = vk_util::upload_image(*manager, tex_width, tex_height, vk::Format::eR8Unorm, staging_buffer);
