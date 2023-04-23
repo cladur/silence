@@ -176,12 +176,14 @@ void vk_util::MaterialSystem::build_default_templates() {
 	//default effects
 	ShaderEffect *textured_lit = build_effect(manager, "tri_mesh.vert.spv", "textured_lit.frag.spv");
 	ShaderEffect *debug_effect = build_effect(manager, "debug.vert.spv", "debug.frag.spv");
+	ShaderEffect *text_effect = build_effect(manager, "text.vert.spv", "text.frag.spv");
 	// ShaderEffect *default_lit = build_effect(manager, "tri_mesh_ssbo_instanced.vert.spv", "default_lit.frag.spv");
 	// ShaderEffect *opaque_shadowcast = build_effect(manager, "tri_mesh_ssbo_instanced_shadowcast.vert.spv", "");
 
 	//passes
 	ShaderPass *textured_lit_pass = build_shader(manager->render_pass, forward_builder, textured_lit);
 	debug_pass = build_shader(manager->render_pass, debug_builder, debug_effect);
+	text_pass = build_shader(manager->render_pass, text_builder, text_effect);
 	// ShaderPass *default_lit_pass = build_shader(manager->render_pass, forward_builder, default_lit);
 	// ShaderPass *opaque_shadowcast_pass = build_shader(manager->shadow_pass, shadow_builder, opaque_shadowcast);
 
@@ -374,5 +376,34 @@ void vk_util::MaterialSystem::fill_builders() {
 
 		forward_builder.scissor.offset = vk::Offset2D(0, 0);
 		forward_builder.scissor.extent = manager->window_extent;
+	}
+	{
+		text_builder.vertex_description = TextVertex::get_vertex_description();
+
+		text_builder.input_assembly = vk_init::input_assembly_create_info(vk::PrimitiveTopology::eTriangleList);
+
+		text_builder.rasterizer = vk_init::rasterization_state_create_info(vk::PolygonMode::eFill);
+		text_builder.rasterizer.cullMode = vk::CullModeFlagBits::eNone; //BACK_BIT;
+
+		text_builder.multisampling = vk_init::multisampling_state_create_info();
+
+		text_builder.color_blend_attachment = vk_init::color_blend_attachment_state();
+		text_builder.color_blend_attachment.blendEnable = VK_TRUE;
+		text_builder.color_blend_attachment.srcColorBlendFactor = vk::BlendFactor::eSrcAlpha;
+		text_builder.color_blend_attachment.dstColorBlendFactor = vk::BlendFactor::eOneMinusSrcAlpha;
+
+		//default depthtesting
+		text_builder.depth_stencil = vk_init::depth_stencil_create_info(true, true, vk::CompareOp::eGreaterOrEqual);
+
+		// OUR STUFF
+		text_builder.viewport.x = 0.0f;
+		text_builder.viewport.y = (float)manager->window_extent.height;
+		text_builder.viewport.width = (float)manager->window_extent.width;
+		text_builder.viewport.height = -(float)manager->window_extent.height;
+		text_builder.viewport.minDepth = 0.0f;
+		text_builder.viewport.maxDepth = 1.0f;
+
+		text_builder.scissor.offset = vk::Offset2D(0, 0);
+		text_builder.scissor.extent = manager->window_extent;
 	}
 }

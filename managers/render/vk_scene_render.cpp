@@ -5,6 +5,7 @@
 #include "vk_shaders.h"
 #include <vulkan-memory-allocator-hpp/vk_mem_alloc_enums.hpp>
 #include <vulkan/vulkan_enums.hpp>
+#include <vulkan/vulkan_handles.hpp>
 
 AutoCVarFloat cvar_draw_distance("render.draw_distance", "Distance cull", 5000);
 
@@ -389,6 +390,7 @@ void RenderManager::draw_objects_forward(vk::CommandBuffer cmd, RenderScene::Mes
 	execute_draw_commands(cmd, pass, object_data_set, dynamic_offsets, global_set);
 
 	draw_debug_vertices(cmd, dynamic_offsets, global_set);
+	draw_text_vertices(cmd, dynamic_offsets, global_set);
 }
 
 void RenderManager::execute_draw_commands(vk::CommandBuffer cmd, RenderScene::MeshPass &pass,
@@ -478,6 +480,48 @@ void RenderManager::draw_debug_vertices(
 		cmd.draw(debug_vertices.size(), 1, 0, 0);
 
 		debug_vertices.clear();
+	}
+}
+
+void RenderManager::draw_text_vertices(
+		vk::CommandBuffer cmd, std::vector<uint32_t> dynamic_offsets, vk::DescriptorSet global_set) {
+	if (!text_vertices.empty()) {
+		void *data;
+		VK_CHECK(allocator.mapMemory(text_vertex_buffer.allocation, &data));
+		memcpy(data, text_vertices.data(), text_vertices.size() * sizeof(TextVertex));
+		allocator.unmapMemory(text_vertex_buffer.allocation);
+
+		vk::DeviceSize offset = 0;
+		cmd.bindVertexBuffers(0, 1, &text_vertex_buffer.buffer, &offset);
+
+		auto text_pass = material_system.text_pass;
+		auto &text_pipeline = text_pass->pipeline;
+		auto &text_pipeline_layout = text_pass->layout;
+
+		cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, text_pipeline);
+		cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, text_pipeline_layout, 0, 1, &global_set,
+				dynamic_offsets.size(), dynamic_offsets.data());
+
+		Font *font = &FontManager::get()->fonts.begin()->second;
+
+		vk::DescriptorImageInfo source_image;
+		source_image.sampler = font->sampler;
+
+		source_image.imageView = font->character_atlas.default_view;
+		source_image.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+
+		vk::DescriptorSet object_data_set;
+		vk_util::DescriptorBuilder::begin(descriptor_layout_cache, get_current_frame().dynamic_descriptor_allocator)
+				.bind_image(
+						0, &source_image, vk::DescriptorType::eCombinedImageSampler, vk::ShaderStageFlagBits::eFragment)
+				.build(object_data_set);
+
+		cmd.bindDescriptorSets(
+				vk::PipelineBindPoint::eGraphics, text_pipeline_layout, 1, 1, &object_data_set, 0, nullptr);
+
+		cmd.draw(text_vertices.size(), 1, 0, 0);
+
+		text_vertices.clear();
 	}
 }
 

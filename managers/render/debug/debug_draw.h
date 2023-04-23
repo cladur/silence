@@ -1,5 +1,5 @@
-#ifndef SILENCE_DEBUG_DRAWING_H
-#define SILENCE_DEBUG_DRAWING_H
+#ifndef SILENCE_DEBUG_DRAW_H
+#define SILENCE_DEBUG_DRAW_H
 
 #include "render/material_system.h"
 #include <vulkan/vulkan_handles.hpp>
@@ -26,4 +26,4 @@ void draw_sphere(const glm::vec3 &center, float radius, const glm::vec3 &color =
 
 }; //namespace debug_draw
 
-#endif //SILENCE_DEBUG_DRAWING_H
+#endif //SILENCE_DEBUG_DRAW_H

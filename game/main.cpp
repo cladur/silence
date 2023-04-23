@@ -1,5 +1,6 @@
 #include "audio/audio_manager.h"
 #include "display/display_manager.h"
+#include "font/font_manager.h"
 #include "input/input_manager.h"
 #include "render/render_manager.h"
 
@@ -20,19 +21,22 @@
 #include "ecs/systems/parent_system.h"
 #include "ecs/systems/physics_system.h"
 
+#include "font/font_manager.h"
+
 #include "audio/fmod_listener_system.h"
 #include "components/fmod_listener_component.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_vulkan.h"
 #include "scene/scene_manager.h"
 #include "serialization.h"
+#include <imgui.h>
 #include <spdlog/spdlog.h>
 #include <fstream>
 
 #include "core/camera/camera.h"
 #include "render/debug/debug_draw.h"
+#include "render/text/text_draw.h"
 
-DisplayManager display_manager;
 ECSManager ecs_manager;
 AudioManager audio_manager;
 InputManager input_manager;
@@ -224,7 +228,7 @@ void demo_collision_obb(std::vector<Entity> &entities) {
 }
 
 bool display_manager_init() {
-	auto display_manager_result = display_manager.startup();
+	auto display_manager_result = DisplayManager::get()->startup();
 	if (display_manager_result == DisplayManager::Status::Ok) {
 		SPDLOG_INFO("Initialized display manager");
 	} else {
@@ -237,7 +241,7 @@ bool display_manager_init() {
 }
 
 bool render_manager_init() {
-	auto render_manager_result = RenderManager::get()->startup(display_manager, &camera);
+	auto render_manager_result = RenderManager::get()->startup(&camera);
 	if (render_manager_result == RenderManager::Status::Ok) {
 		SPDLOG_INFO("Initialized render manager");
 	} else {
@@ -305,7 +309,7 @@ int main() {
 	SPDLOG_INFO("Starting up engine systems...");
 
 	display_manager_init();
-	input_manager.startup(display_manager.window);
+	input_manager.startup();
 	render_manager_init();
 
 	setup_imgui_style();
@@ -324,6 +328,7 @@ int main() {
 	parent_system->startup();
 	render_system->startup();
 	fmod_listener_system->startup();
+	FontManager::get()->startup();
 
 	std::vector<Entity> entities(50);
 	demo_entities_init(entities);
@@ -343,6 +348,8 @@ int main() {
 	audio_manager.load_bank("Ambience");
 	audio_manager.load_sample_data();
 
+	FontManager::get()->load_font("resources/fonts/PoltawskiNowy.ttf", 48);
+
 	//Map inputs
 	default_mappings();
 
@@ -361,7 +368,7 @@ int main() {
 	char load_file_name[128] = "scene.json";
 	char save_file_name[128] = "scene.json";
 
-	float target_frame_time = 1.0f / (float)display_manager.get_refresh_rate();
+	float target_frame_time = 1.0f / (float)DisplayManager::get()->get_refresh_rate();
 	float dt = target_frame_time;
 
 	// TEST FOR 3D AUDIO
@@ -375,11 +382,11 @@ int main() {
 		// GAME LOGIC
 		auto start_time = std::chrono::high_resolution_clock::now();
 
-		display_manager.poll_events();
+		DisplayManager::get()->poll_events();
 
 		if (input_manager.is_action_just_pressed("debug_menu")) {
 			in_debug_menu = !in_debug_menu;
-			display_manager.capture_mouse(!in_debug_menu);
+			DisplayManager::get()->capture_mouse(!in_debug_menu);
 		}
 
 		if (!in_debug_menu) {
@@ -473,7 +480,7 @@ int main() {
 			CVarSystem::get()->draw_imgui_editor();
 		}
 
-		if (display_manager.window_should_close()) {
+		if (DisplayManager::get()->window_should_close()) {
 			should_run = false;
 		}
 
@@ -485,6 +492,24 @@ int main() {
 
 		parent_system->update();
 		render_system->update(*RenderManager::get());
+
+		ImGui::Begin("Text Demo");
+
+		static char buffer[128] = { 'H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd', '!' };
+		static float scale = 1.0f;
+		static float position[3] = { 0.0f, 0.0f, 0.0f };
+		static glm::vec3 color = { 1.0f, 1.0f, 1.0f };
+		static bool screenspace = false;
+		ImGui::InputText("Text", buffer, 128);
+		ImGui::InputFloat("Scale", &scale);
+		ImGui::InputFloat3("Position", position);
+		ImGui::InputFloat3("Color", &color.x);
+		ImGui::Checkbox("Screenspace", &screenspace);
+
+		ImGui::End();
+
+		text_draw::draw_text(
+				std::string(buffer), screenspace, glm::vec3(position[0], position[1], position[2]), color, scale);
 
 		debug_draw::draw_line(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(10.0f, 0.0f, 0.0f));
 		debug_draw::draw_line(glm::vec3(0.0f, 5.0f, 0.0f), glm::vec3(10.0f, 0.0f, 0.0f));
@@ -524,7 +549,7 @@ int main() {
 	input_manager.shutdown();
 	audio_manager.shutdown();
 	RenderManager::get()->shutdown();
-	display_manager.shutdown();
+	DisplayManager::get()->shutdown();
 
 	return 0;
 }
