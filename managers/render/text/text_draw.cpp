@@ -96,6 +96,7 @@ void draw_text(const std::string &text, bool is_screen_space, const glm::vec3 &p
 
 		float xpos = x + character.bearing.x * scale * aspect;
 		float ypos = position.y - (y_size - character.bearing.y) * scale;
+		float zpos = position.z;
 
 		float w = x_size * scale * aspect;
 		float h = y_size * scale;
@@ -108,12 +109,12 @@ void draw_text(const std::string &text, bool is_screen_space, const glm::vec3 &p
 		int ss = is_screen_space ? 1 : 0;
 
 		//update the vertex buffer
-		render_manager->text_vertices.push_back({ { xpos, ypos + h, 0 }, { uv_x_min, uv_y_max }, color, ss });
-		render_manager->text_vertices.push_back({ { xpos, ypos, 0 }, { uv_x_min, uv_y_min }, color, ss });
-		render_manager->text_vertices.push_back({ { xpos + w, ypos, 0 }, { uv_x_max, uv_y_min }, color, ss });
-		render_manager->text_vertices.push_back({ { xpos, ypos + h, 0 }, { uv_x_min, uv_y_max }, color, ss });
-		render_manager->text_vertices.push_back({ { xpos + w, ypos, 0 }, { uv_x_max, uv_y_min }, color, ss });
-		render_manager->text_vertices.push_back({ { xpos + w, ypos + h, 0 }, { uv_x_max, uv_y_max }, color, ss });
+		render_manager->text_vertices.push_back({ { xpos, ypos + h, zpos }, { uv_x_min, uv_y_max }, color, ss });
+		render_manager->text_vertices.push_back({ { xpos, ypos, zpos }, { uv_x_min, uv_y_min }, color, ss });
+		render_manager->text_vertices.push_back({ { xpos + w, ypos, zpos }, { uv_x_max, uv_y_min }, color, ss });
+		render_manager->text_vertices.push_back({ { xpos, ypos + h, zpos }, { uv_x_min, uv_y_max }, color, ss });
+		render_manager->text_vertices.push_back({ { xpos + w, ypos, zpos }, { uv_x_max, uv_y_min }, color, ss });
+		render_manager->text_vertices.push_back({ { xpos + w, ypos + h, zpos }, { uv_x_max, uv_y_max }, color, ss });
 
 		// now advance cursors for next glyph (note that advance is number of 1/64 pixels)
 		x += (character.advance >> 6) * scale * aspect; // bitshift by 6 to get value in pixels (2^6 = 64)
