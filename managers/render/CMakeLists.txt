@@ -15,6 +15,7 @@ add_library(${RENDER_MANAGER_NAME} STATIC
         vk_push_buffer.cpp vk_push_buffer.h
         vk_scene_render.cpp vk_debug.cpp vk_debug.h
         debug/debug_draw.cpp debug/debug_draw.h
+        text/text_draw.cpp text/text_draw.h
         ../animation/skinned_mesh.cpp ../animation/skinned_mesh.h
         ../animation/skinned_model.cpp ../animation/skinned_model.h
         ../animation/animation.cpp ../animation/animation.h

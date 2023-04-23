@@ -1,9 +1,11 @@
 #include "display_manager.h"
 
-#include <cassert>
-
-extern DisplayManager display_manager;
 extern InputManager *input_manager;
+
+DisplayManager *DisplayManager::get() {
+	static DisplayManager display_manager;
+	return &display_manager;
+}
 
 DisplayManager::Status DisplayManager::startup() {
 	if (!glfwInit()) {
@@ -58,8 +60,8 @@ bool DisplayManager::window_should_close() const {
 	return glfwWindowShouldClose(window);
 }
 
-std::pair<int, int> DisplayManager::get_framebuffer_size() const {
+glm::vec2 DisplayManager::get_framebuffer_size() const {
 	int width, height;
 	glfwGetFramebufferSize(window, &width, &height);
-	return std::make_pair(width, height);
+	return { width, height };
 }

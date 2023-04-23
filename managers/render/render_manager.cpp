@@ -1,10 +1,10 @@
 #include "render_manager.h"
-#include "asset_loader.h"
-#include "managers/display/display_manager.h"
-#include "render/vk_types.h"
-#include "vk_debug.h"
+
+#include "VkBootstrap.h"
+
 #include <vulkan/vulkan_core.h>
 #include <vulkan-memory-allocator-hpp/vk_mem_alloc_enums.hpp>
+#include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_handles.hpp>
 #include <vulkan/vulkan_structs.hpp>
 
@@ -12,14 +12,16 @@
 #include "vk_mem_alloc.h"
 #include "vulkan-memory-allocator-hpp/vk_mem_alloc.hpp"
 
-#include "VkBootstrap.h"
-#include "debug/debug_draw.h"
-#include "render/material_system.h"
-#include "render/vk_descriptors.h"
-#include "render/vk_initializers.h"
-#include "render/vk_textures.h"
-#include <spdlog/spdlog.h>
-#include <vulkan/vulkan_enums.hpp>
+#include "asset_loader.h"
+
+#include "managers/display/display_manager.h"
+
+#include "material_system.h"
+#include "vk_debug.h"
+#include "vk_descriptors.h"
+#include "vk_initializers.h"
+#include "vk_textures.h"
+#include "vk_types.h"
 
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
@@ -33,7 +35,7 @@ RenderManager *RenderManager::get() {
 	return &render_manager;
 }
 
-void RenderManager::init_vulkan(DisplayManager &display_manager) {
+void RenderManager::init_vulkan() {
 	vkb::InstanceBuilder builder;
 	auto inst_ret = builder.set_app_name("Silence Vulkan Application")
 							.request_validation_layers()
@@ -54,7 +56,7 @@ void RenderManager::init_vulkan(DisplayManager &display_manager) {
 	//store the debug messenger
 	debug_messenger = vkb_inst.debug_messenger;
 
-	surface = display_manager.create_surface(vkb_inst.instance);
+	surface = DisplayManager::get()->create_surface(vkb_inst.instance);
 
 	vkb::PhysicalDeviceSelector selector{ vkb_inst };
 
@@ -128,10 +130,10 @@ uint32_t get_image_mip_levels(uint32_t width, uint32_t height) {
 	return result;
 }
 
-void RenderManager::init_swapchain(DisplayManager &display_manager) {
-	auto window_size = display_manager.get_framebuffer_size();
-	window_extent.width = window_size.first;
-	window_extent.height = window_size.second;
+void RenderManager::init_swapchain() {
+	auto window_size = DisplayManager::get()->get_framebuffer_size();
+	window_extent.width = (uint32_t)window_size.x;
+	window_extent.height = (uint32_t)window_size.y;
 
 	vkb::SwapchainBuilder swapchain_builder{ chosen_gpu, device, surface };
 
@@ -758,40 +760,37 @@ void RenderManager::init_debug_vertex_buffer() {
 			[=]() { allocator.destroyBuffer(debug_vertex_buffer.buffer, debug_vertex_buffer.allocation); });
 }
 
-void RenderManager::init_scene() {
-	// //create a sampler for the texture
-	// vk::SamplerCreateInfo sampler_info = vk_init::sampler_create_info(vk::Filter::eNearest);
+void RenderManager::init_text_vertex_buffer() {
+	const uint32_t max_text_verts = 100000;
 
-	// vk::Sampler blocky_sampler;
-	// VK_CHECK(device.createSampler(&sampler_info, nullptr, &blocky_sampler));
+	// Create vertex buffer from vertices
+	size_t buffer_size = max_text_verts * sizeof(TextVertex);
+	//allocate staging buffer
+	vk::BufferCreateInfo buffer_info = {};
+	buffer_info.sType = vk::StructureType::eBufferCreateInfo;
+	buffer_info.pNext = nullptr;
 
-	// sampler_info.mipmapMode = vk::SamplerMipmapMode::eLinear;
-	// // TODO: check this
-	// // sampler_info.mipLodBias = 2;
-	// sampler_info.maxLod = 30;
-	// sampler_info.minLod = 3;
+	buffer_info.size = buffer_size;
+	buffer_info.usage = vk::BufferUsageFlagBits::eVertexBuffer;
 
-	// vk::Sampler smooth_sampler2;
-	// VK_CHECK(device.createSampler(&sampler_info, nullptr, &smooth_sampler2));
+	//let the VMA library know that this data should be on CPU RAM
+	vma::AllocationCreateInfo vmaalloc_info = {};
+	vmaalloc_info.usage = vma::MemoryUsage::eCpuToGpu;
 
-	// {
-	// 	vk_util::MaterialData textured_info = {};
-	// 	textured_info.base_template = "textured";
-	// 	textured_info.parameters = nullptr;
+	//allocate the buffer
+	VK_CHECK(allocator.createBuffer(
+			&buffer_info, &vmaalloc_info, &text_vertex_buffer.buffer, &text_vertex_buffer.allocation, nullptr));
 
-	// 	vk_util::SampledTexture white_tex = {};
-	// 	white_tex.sampler = smooth_sampler2;
-	// 	white_tex.image_view = loaded_textures["white"].image_view;
+	VkDebug::set_name(text_vertex_buffer.buffer, "Text draw vertex buffer");
 
-	// 	textured_info.textures.push_back(white_tex);
-
-	// 	vk_util::Material *new_mat = material_system.build_material("textured", textured_info);
-	// }
-
-	// load_prefab(asset_path("DamagedHelmet/DamagedHelmet.pfb").c_str());
+	main_deletion_queue.push_function(
+			[=]() { allocator.destroyBuffer(text_vertex_buffer.buffer, text_vertex_buffer.allocation); });
 }
 
-void RenderManager::init_imgui(GLFWwindow *window) {
+void RenderManager::init_scene() {
+}
+
+void RenderManager::init_imgui() {
 	//1: create descriptor pool for IMGUI
 	// the size of the pool is very oversize, but it's copied from imgui demo itself.
 	vk::DescriptorPoolSize pool_sizes[] = { { vk::DescriptorType::eSampler, 1000 },
@@ -818,7 +817,7 @@ void RenderManager::init_imgui(GLFWwindow *window) {
 	ImGui::CreateContext();
 
 	//this initializes imgui for GLFW
-	ImGui_ImplGlfw_InitForVulkan(window, true);
+	ImGui_ImplGlfw_InitForVulkan(DisplayManager::get()->window, true);
 
 	//this initializes imgui for Vulkan
 	ImGui_ImplVulkan_InitInfo init_info = {};
@@ -1266,16 +1265,16 @@ void RenderManager::ready_cull_data(RenderScene::MeshPass &pass, vk::CommandBuff
 	}
 }
 
-RenderManager::Status RenderManager::startup(DisplayManager &display_manager, Camera *cam) {
+RenderManager::Status RenderManager::startup(Camera *cam) {
 	camera = cam;
 
 	// TODO: Handle failures
-	init_vulkan(display_manager);
+	init_vulkan();
 
 	shader_cache.init(device);
 	render_scene.init();
 
-	init_swapchain(display_manager);
+	init_swapchain();
 
 	init_forward_renderpass();
 	init_copy_renderpass();
@@ -1287,13 +1286,14 @@ RenderManager::Status RenderManager::startup(DisplayManager &display_manager, Ca
 	init_pipelines();
 
 	init_debug_vertex_buffer();
+	init_text_vertex_buffer();
 
 	load_images();
 	load_meshes();
 
 	init_scene();
 
-	init_imgui(display_manager.window);
+	init_imgui();
 
 	vk::CommandBuffer cmd = get_current_frame().main_command_buffer;
 	tracy_context = TracyVkContext(chosen_gpu, device, graphics_queue, cmd);

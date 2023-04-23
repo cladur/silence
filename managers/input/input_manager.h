@@ -32,7 +32,7 @@ private:
 	void poll_gamepads();
 
 public:
-	void startup(GLFWwindow *window);
+	void startup();
 	void shutdown();
 
 	void add_action(const std::string &action_name);

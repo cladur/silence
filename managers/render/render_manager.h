@@ -4,8 +4,12 @@
 #include "assets/prefab_asset.h"
 #include "core/camera/camera.h"
 
+#include "display/display_manager.h"
+#include "font/font_manager.h"
+
 #include "debug/debug_draw.h"
-#include "managers/display/display_manager.h"
+#include "text/text_draw.h"
+
 #include "material_system.h"
 #include "render_system.h"
 #include "vk_push_buffer.h"
@@ -26,7 +30,6 @@ namespace vk_util {
 class DescriptorLayoutCache;
 class DescriptorAllocator;
 class Material;
-
 } //namespace vk_util
 
 constexpr unsigned int FRAME_OVERLAP = 2;
@@ -222,15 +225,11 @@ public:
 
 	tracy::VkCtx *tracy_context;
 
-	// MESHES
-	Mesh triangle_mesh;
-	Mesh box_mesh;
-	Mesh debug_box_mesh;
-	Mesh debug_sphere_mesh;
-	Mesh debug_line_mesh;
-
 	std::vector<DebugVertex> debug_vertices;
 	AllocatedBuffer<DebugVertex> debug_vertex_buffer;
+
+	std::vector<TextVertex> text_vertices;
+	AllocatedBuffer<TextVertex> text_vertex_buffer;
 
 	// DEPTH
 	AllocatedImage depth_image;
@@ -276,8 +275,8 @@ public:
 	vk::Sampler smooth_sampler;
 	vk::Framebuffer forward_framebuffer;
 
-	void init_vulkan(DisplayManager &display_manager);
-	void init_swapchain(DisplayManager &display_manager);
+	void init_vulkan();
+	void init_swapchain();
 	void init_commands();
 	void init_forward_renderpass();
 	void init_copy_renderpass();
@@ -287,7 +286,8 @@ public:
 	void init_pipelines();
 	void init_scene();
 	void init_debug_vertex_buffer();
-	void init_imgui(GLFWwindow *window);
+	void init_text_vertex_buffer();
+	void init_imgui();
 
 	void load_meshes();
 
@@ -323,7 +323,7 @@ public:
 	std::unordered_map<std::string, Texture> loaded_textures;
 	std::unordered_map<std::string, assets::PrefabInfo *> prefab_cache;
 
-	Status startup(DisplayManager &display_manager, Camera *cam);
+	Status startup(Camera *cam);
 	void shutdown();
 
 	//getter for the frame we are render to right now.
@@ -339,6 +339,7 @@ public:
 	void draw_objects_shadow(vk::CommandBuffer cmd, RenderScene::MeshPass &pass);
 	void draw_debug_vertices(
 			vk::CommandBuffer cmd, std::vector<uint32_t> dynamic_offsets, vk::DescriptorSet global_set);
+	void draw_text_vertices(vk::CommandBuffer cmd, std::vector<uint32_t> dynamic_offsets, vk::DescriptorSet global_set);
 	void reduce_depth(vk::CommandBuffer cmd);
 	void execute_compute_cull(vk::CommandBuffer cmd, RenderScene::MeshPass &pass, CullParams &params);
 	void ready_cull_data(RenderScene::MeshPass &pass, vk::CommandBuffer cmd);
