@@ -392,8 +392,8 @@ void vk_util::MaterialSystem::fill_builders() {
 		text_builder.color_blend_attachment.srcColorBlendFactor = vk::BlendFactor::eSrcAlpha;
 		text_builder.color_blend_attachment.dstColorBlendFactor = vk::BlendFactor::eOneMinusSrcAlpha;
 
-		//default depthtesting
-		text_builder.depth_stencil = vk_init::depth_stencil_create_info(true, true, vk::CompareOp::eGreaterOrEqual);
+		// We don't do depth testing for text.
+		text_builder.depth_stencil = vk_init::depth_stencil_create_info(false, false, vk::CompareOp::eGreaterOrEqual);
 
 		// OUR STUFF
 		text_builder.viewport.x = 0.0f;
