@@ -12,8 +12,12 @@
 #include "components/rigidbody_component.h"
 #include "components/transform_component.h"
 
+#ifdef USE_OPENGL
+#include "opengl/opengl_manager.h"
+#else
 // TODO: Move PrefabInstance to somewhere else
 #include "render/render_manager.h"
+#endif
 
 #include <functional>
 #include <map>

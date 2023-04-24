@@ -1,6 +1,8 @@
 #ifndef SILENCE_TYPES_H
 #define SILENCE_TYPES_H
 
+#define USE_OPENGL
+
 // ECS
 
 // Entity = id

@@ -56,7 +56,9 @@ void RenderManager::init_vulkan() {
 	//store the debug messenger
 	debug_messenger = vkb_inst.debug_messenger;
 
+#ifndef USE_OPENGL
 	surface = DisplayManager::get()->create_surface(vkb_inst.instance);
+#endif
 
 	vkb::PhysicalDeviceSelector selector{ vkb_inst };
 

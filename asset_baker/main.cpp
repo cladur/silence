@@ -64,8 +64,8 @@ bool convert_image(const fs::path &input, const fs::path &output) {
 	return result == 0;
 }
 
-void pack_vertex(assets::VertexPNCV32 &new_vert, float vx, float vy, float vz, float nx, float ny, float nz, float ux,
-		float uy) {
+void pack_vertex(
+		assets::VertexPNV32 &new_vert, float vx, float vy, float vz, float nx, float ny, float nz, float ux, float uy) {
 	new_vert.position[0] = vx;
 	new_vert.position[1] = vy;
 	new_vert.position[2] = vz;
@@ -73,10 +73,6 @@ void pack_vertex(assets::VertexPNCV32 &new_vert, float vx, float vy, float vz, f
 	new_vert.normal[0] = nx;
 	new_vert.normal[1] = ny;
 	new_vert.normal[2] = nz;
-
-	new_vert.color[0] = nx;
-	new_vert.color[1] = ny;
-	new_vert.color[2] = nz;
 
 	new_vert.uv[0] = ux;
 	new_vert.uv[1] = 1 - uy;
@@ -139,7 +135,7 @@ void unpack_gltf_buffer(tg::Model &model, tg::Accessor &accesor, std::vector<uin
 	}
 }
 
-void extract_gltf_vertices(tg::Primitive &primitive, tg::Model &model, std::vector<assets::VertexPNCV32> &vertices) {
+void extract_gltf_vertices(tg::Primitive &primitive, tg::Model &model, std::vector<assets::VertexPNV32> &vertices) {
 	tg::Accessor &pos_accesor = model.accessors[primitive.attributes["POSITION"]];
 
 	vertices.resize(pos_accesor.count);
@@ -178,10 +174,6 @@ void extract_gltf_vertices(tg::Primitive &primitive, tg::Model &model, std::vect
 				vertices[i].normal[0] = *(dtf + (i * 3) + 0);
 				vertices[i].normal[1] = *(dtf + (i * 3) + 1);
 				vertices[i].normal[2] = *(dtf + (i * 3) + 2);
-
-				vertices[i].color[0] = *(dtf + (i * 3) + 0);
-				vertices[i].color[1] = *(dtf + (i * 3) + 1);
-				vertices[i].color[2] = *(dtf + (i * 3) + 2);
 			} else {
 				assert(false);
 			}
@@ -258,8 +250,8 @@ bool extract_gltf_meshes(
 	for (auto mesh_index = 0; mesh_index < model.meshes.size(); mesh_index++) {
 		auto &mesh = model.meshes[mesh_index];
 
-		using VertexFormat = assets::VertexPNCV32;
-		auto vertex_format_enum = assets::VertexFormat::PNCV32;
+		using VertexFormat = assets::VertexPNV32;
+		auto vertex_format_enum = assets::VertexFormat::PNV32;
 
 		std::vector<VertexFormat> vertices;
 		std::vector<uint32_t> indices;

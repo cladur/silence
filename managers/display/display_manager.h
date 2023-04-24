@@ -1,9 +1,16 @@
 #ifndef SILENCE_DISPLAY_MANAGER_H
 #define SILENCE_DISPLAY_MANAGER_H
 
+#include <glad/glad.h>
+
+#ifdef USE_OPENGL
+#define GLFW_INCLUDE_NONE
+#else
 #define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
 #include <vulkan/vulkan.h>
+#endif
+
+#include <GLFW/glfw3.h>
 
 #include "managers/input/input_key.h"
 #include "managers/input/input_manager.h"
@@ -28,7 +35,9 @@ public:
 
 	[[nodiscard]] int get_refresh_rate() const;
 
+#ifndef USE_OPENGL
 	VkSurfaceKHR create_surface(VkInstance &instance) const;
+#endif
 
 	[[nodiscard]] glm::vec2 get_framebuffer_size() const;
 	void poll_events();

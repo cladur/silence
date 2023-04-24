@@ -28,6 +28,7 @@ public:
 			float yaw = 90.0f, float pitch = 0.0f);
 
 	[[nodiscard]] glm::mat4 get_view_matrix() const;
+	[[nodiscard]] glm::vec3 get_position() const;
 
 	void move_forward(float dt);
 	void move_right(float dt);

@@ -6,6 +6,13 @@ set(CMAKE_CXX_STANDARD 20)
 # We set the exe output directory to build directory, so that it'll be next to the DLLs.
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
+set(USE_OPENGL TRUE)
+if(USE_OPENGL)
+        add_compile_definitions(USE_OPENGL)
+endif()
+
+SET(VCPKG_OVERLAY_PORTS "${CMAKE_SOURCE_DIR}/modules/overlay-ports/imguizmo/")
+
 include_directories(${PROJECT_SOURCE_DIR})
 
 add_subdirectory(thirdparty)

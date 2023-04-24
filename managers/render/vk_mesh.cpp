@@ -72,8 +72,8 @@ bool Mesh::load_from_asset(const char *filename) {
 	indices.clear();
 
 	// Load vertices
-	auto *unpacked_vertices = (assets::VertexPNCV32 *)loaded_vertices.data();
-	vertices.resize(loaded_vertices.size() / sizeof(assets::VertexPNCV32));
+	auto *unpacked_vertices = (assets::VertexPNV32 *)loaded_vertices.data();
+	vertices.resize(loaded_vertices.size() / sizeof(assets::VertexPNV32));
 
 	for (size_t i = 0; i < vertices.size(); i++) {
 		vertices[i].position[0] = unpacked_vertices[i].position[0];
