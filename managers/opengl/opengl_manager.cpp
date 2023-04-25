@@ -10,6 +10,10 @@
 #define ASSET_PATH "resources/assets_export/"
 #define SHADER_PATH "resources/shaders/"
 
+extern Camera camera;
+
+AutoCVarFloat cvar_draw_distance("render.draw_distance", "Distance cull", 5000);
+
 std::string asset_path(std::string_view path) {
 	return std::string(ASSET_PATH) + std::string(path);
 }
@@ -65,11 +69,20 @@ void OpenglManager::draw() {
 	glad_glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	DisplayManager *display_manager = DisplayManager::get();
+	glm::vec2 window_extent = display_manager->get_framebuffer_size();
+	projection =
+			glm::perspective(glm::radians(70.0f), window_extent.x / window_extent.y, 0.1f, cvar_draw_distance.get());
+	view = camera.get_view_matrix();
+	camera_pos = camera.get_position();
+
 	// Enable depth testing
 	glEnable(GL_DEPTH_TEST);
 
 	unlit_pass.draw();
 
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	text_draw.draw();
 
 	// IMGUI
@@ -84,7 +97,6 @@ void OpenglManager::draw() {
 		glfwMakeContextCurrent(backup_current_context);
 	}
 
-	DisplayManager *display_manager = DisplayManager::get();
 	glfwSwapBuffers(display_manager->window);
 }
 

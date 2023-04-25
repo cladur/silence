@@ -21,6 +21,10 @@ private:
 	std::vector<ModelInstance> model_instances;
 
 public:
+	glm::mat4 projection;
+	glm::mat4 view;
+	glm::vec3 camera_pos;
+
 	TextDraw text_draw;
 
 	// Render passes
@@ -32,7 +36,6 @@ public:
 	void shutdown();
 	void draw();
 
-	void load_mesh(const char *path);
 	void load_model(const char *path);
 	void load_texture(const char *path);
 
