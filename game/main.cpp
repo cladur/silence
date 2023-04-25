@@ -95,7 +95,7 @@ void default_ecs_manager_init() {
 	ecs_manager.register_component<Gravity>();
 	ecs_manager.register_component<Parent>();
 	ecs_manager.register_component<Children>();
-	ecs_manager.register_component<PrefabInstance>();
+	ecs_manager.register_component<ModelInstance>();
 	ecs_manager.register_component<FmodListener>();
 	ecs_manager.register_component<ColliderTag>();
 	ecs_manager.register_component<ColliderSphere>();
@@ -133,7 +133,7 @@ void demo_entities_init(std::vector<Entity> &entities) {
 		ColliderComponentsFactory::add_collider_component(
 				entity, ColliderAABB{ transform.get_position(), transform.get_scale(), true });
 
-		// ecs_manager.add_component<PrefabInstance>(entity,
+		// ecs_manager.add_component<ModelInstance>(entity,
 		// 		RenderManager::get()->load_prefab(
 		// 				RenderManager::asset_path("DamagedHelmet/DamagedHelmet.pfb").c_str()));
 	}

@@ -7,9 +7,9 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 set(USE_OPENGL TRUE)
-if(USE_OPENGL)
-        add_compile_definitions(USE_OPENGL)
-endif()
+if (USE_OPENGL)
+    add_compile_definitions(USE_OPENGL)
+endif ()
 
 SET(VCPKG_OVERLAY_PORTS "${CMAKE_SOURCE_DIR}/modules/overlay-ports/imguizmo/")
 
@@ -29,15 +29,15 @@ if (NOT GLSL_VALIDATOR)
 endif ()
 
 file(GLOB_RECURSE GLSL_SOURCE_FILES
-        "${PROJECT_SOURCE_DIR}/resources/shaders/*.frag"
-        "${PROJECT_SOURCE_DIR}/resources/shaders/*.vert"
-        "${PROJECT_SOURCE_DIR}/resources/shaders/*.comp"
+        "${PROJECT_SOURCE_DIR}/resources/vk_shaders/*.frag"
+        "${PROJECT_SOURCE_DIR}/resources/vk_shaders/*.vert"
+        "${PROJECT_SOURCE_DIR}/resources/vk_shaders/*.comp"
         )
 
 foreach (GLSL ${GLSL_SOURCE_FILES})
     message(STATUS "BUILDING SHADER")
     get_filename_component(FILE_NAME ${GLSL} NAME)
-    set(SPIRV "${PROJECT_SOURCE_DIR}/resources/shaders/${FILE_NAME}.spv")
+    set(SPIRV "${PROJECT_SOURCE_DIR}/resources/vk_shaders/${FILE_NAME}.spv")
     # message(STATUS ${GLSL})
     # add_custom_command(
     #         OUTPUT ${SPIRV}

@@ -15,7 +15,7 @@
 #ifdef USE_OPENGL
 #include "opengl/opengl_manager.h"
 #else
-// TODO: Move PrefabInstance to somewhere else
+// TODO: Move ModelInstance to somewhere else
 #include "render/render_manager.h"
 #endif
 
@@ -36,7 +36,7 @@ concept Deserializable = requires(T t, nlohmann::json &j) {
 	{ t.deserialize_json(j) };
 };
 
-typedef std::variant<Children, Parent, Transform, RigidBody, FmodListener, Gravity, PrefabInstance, ColliderTag,
+typedef std::variant<Children, Parent, Transform, RigidBody, FmodListener, Gravity, ModelInstance, ColliderTag,
 		ColliderSphere, ColliderAABB, ColliderOBB>
 		variant_type;
 

@@ -2,7 +2,7 @@
 
 #include "ktx.h"
 
-void Texture::load_from_file(const char *path) {
+void Texture::load_from_asset(const char *path) {
 	ktxTexture2 *ktx_texture;
 	KTX_error_code result;
 	ktx_size_t offset;

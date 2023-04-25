@@ -8,7 +8,7 @@
 
 #include "camera/camera.h"
 
-struct PrefabInstance {
+struct ModelInstance {
 	std::vector<uint32_t> mesh_ids;
 
 	void serialize_json(nlohmann::json &j) {
@@ -29,18 +29,23 @@ struct PrefabInstance {
 
 class OpenglManager {
 private:
-	// std::vector<Mesh> meshes;
-	// std::vector<PrefabInstance> prefab_instances;
+	std::unordered_map<std::string, Texture> textures;
+	std::unordered_map<std::string, Mesh> meshes;
+	std::unordered_map<std::string, Model> models;
+	std::vector<ModelInstance> model_instances;
 
 public:
-	Mesh mesh;
+	Model model;
 	Shader shader;
-	Texture texture;
 	static OpenglManager *get();
 
 	void startup();
 	void shutdown();
 	void draw(Camera &camera);
+
+	void load_mesh(const char *path);
+	void load_model(const char *path);
+	void load_texture(const char *path);
 
 	void update_transform(uint32_t object_id, glm::mat4 const &transform);
 };

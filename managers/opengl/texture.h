@@ -9,7 +9,7 @@ struct Texture {
 	uint32_t height;
 	uint32_t channels;
 
-	void load_from_file(const char *path);
+	void load_from_asset(const char *path);
 };
 
 #endif // SILENCE_TEXTURE_H

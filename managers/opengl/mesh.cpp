@@ -5,7 +5,6 @@
 #include "assets/mesh_asset.h"
 
 #include "shader.h"
-#include <_types/_uint32_t.h>
 
 int TextureTypeToTextureUnit(std::string type) {
 	if (type == "albedo_map") {
@@ -28,19 +27,12 @@ int TextureTypeToTextureUnit(std::string type) {
 }
 
 void Mesh::draw(Shader &shader) {
-	// for (auto &texture : textures) {
-	// 	if (texture.type == "emission_map") {
-	// 		shader.set_bool("has_emission_map", true);
-	// 	}
-	// 	if (texture.type == "ao_map") {
-	// 		shader.set_bool("has_ao_map", true);
-	// 	}
-	// 	int texture_unit = TextureTypeToTextureUnit(texture.type);
-	// 	glActiveTexture(GL_TEXTURE0 + texture_unit);
-	// 	shader.set_int(texture.type, texture_unit);
-	// 	glBindTexture(GL_TEXTURE_2D, texture.id);
-	// }
-	// glActiveTexture(GL_TEXTURE0);
+	for (int i = 0; i < textures.size(); i++) {
+		if (textures_present[i]) {
+			glActiveTexture(GL_TEXTURE0 + i);
+			glBindTexture(GL_TEXTURE_2D, textures[i].id);
+		}
+	}
 
 	// draw mesh
 	glBindVertexArray(vao);

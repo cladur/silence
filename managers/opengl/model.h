@@ -5,23 +5,17 @@
 
 class Model {
 public:
-	Model(const char *path) {
-		load_from_asset(path);
-	}
-
 	void draw(Shader &shader);
+	void load_from_asset(const char *path);
 
 	bool is_refractive = false;
-	glm::mat4 transform_matrix{};
+	glm::mat4 root{};
 
 	std::vector<Mesh> meshes;
-	std::vector<Texture> textures_loaded;
 
 private:
 	// model data
 	std::string directory;
-
-	void load_from_asset(std::string path);
 };
 
 #endif // SILENCE_MODEL_H

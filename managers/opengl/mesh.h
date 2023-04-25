@@ -16,7 +16,9 @@ public:
 	// mesh data
 	std::vector<MeshVertex> vertices;
 	std::vector<uint32_t> indices;
-	std::vector<Texture> textures;
+	// PBR: [0] = albedo, [1] = ao, [2] = normal, [3] = metallic | roughness, [4] = emissive
+	std::array<Texture, 5> textures;
+	std::array<bool, 5> textures_present;
 
 	void draw(Shader &shader);
 	void setup_mesh();

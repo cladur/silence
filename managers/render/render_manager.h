@@ -113,7 +113,7 @@ struct MeshObject {
 	uint32_t b_draw_shadow_pass : 1 = 0U;
 };
 
-struct PrefabInstance {
+struct ModelInstance {
 	std::vector<Handle<RenderObject>> object_ids;
 
 	void serialize_json(nlohmann::json &j) {
@@ -294,7 +294,7 @@ public:
 	void upload_mesh(Mesh &mesh);
 
 	bool load_image_to_cache(const char *name, const char *path);
-	PrefabInstance load_prefab(const char *path, const glm::mat4 &root = glm::mat4(1.0f));
+	ModelInstance load_prefab(const char *path, const glm::mat4 &root = glm::mat4(1.0f));
 
 	bool load_compute_shader(const char *shader_path, vk::Pipeline &pipeline, vk::PipelineLayout &layout);
 

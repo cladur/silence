@@ -6,6 +6,17 @@
 #include "imgui_impl_opengl3.h"
 #define IMGUI_DEFINE_MATH_OPERATORS
 
+#define ASSET_PATH "resources/assets_export/"
+#define SHADER_PATH "resources/shaders/"
+
+std::string asset_path(std::string_view path) {
+	return std::string(ASSET_PATH) + std::string(path);
+}
+
+std::string shader_path(std::string_view path) {
+	return std::string(SHADER_PATH) + std::string(path);
+}
+
 OpenglManager *OpenglManager::get() {
 	static OpenglManager opengl_manager;
 	return &opengl_manager;
@@ -40,9 +51,8 @@ void OpenglManager::startup() {
 	ImGuiStyle &style = ImGui::GetStyle();
 	style.Colors[ImGuiCol_WindowBg].w = 1.0f;
 
-	mesh.load_from_asset("resources/assets_export/Duck_GLTF/MESH_0_LOD3spShape.mesh");
 	shader.load_from_files("resources/shaders/unlit.vert", "resources/shaders/unlit.frag");
-	texture.load_from_file("resources/assets_export/DuckCM.ktx2");
+	model.load_from_asset(asset_path("DamagedHelmet/DamagedHelmet.pfb").c_str());
 }
 
 void OpenglManager::shutdown() {
@@ -56,6 +66,9 @@ void OpenglManager::draw(Camera &camera) {
 	glad_glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	// Enable depth testing
+	glEnable(GL_DEPTH_TEST);
+
 	// Draw meshes
 	shader.use();
 	shader.set_mat4("view", camera.get_view_matrix());
@@ -64,9 +77,11 @@ void OpenglManager::draw(Camera &camera) {
 	shader.set_mat4("model", glm::mat4(1.0f));
 	shader.set_vec3("camPos", camera.get_position());
 	shader.set_int("albedo_map", 0);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture.id);
-	mesh.draw(shader);
+	shader.set_int("ao_map", 1);
+	shader.set_int("normal_map", 2);
+	shader.set_int("metallic_roughness_map", 3);
+	shader.set_int("emissive_map", 4);
+	model.draw(shader);
 
 	// IMGUI
 	ImGui::Render();
@@ -81,6 +96,33 @@ void OpenglManager::draw(Camera &camera) {
 	}
 
 	glfwSwapBuffers(display_manager->window);
+}
+
+void OpenglManager::load_mesh(const char *path) {
+	if (meshes.find(path) != meshes.end()) {
+		return;
+	}
+	Mesh mesh = {};
+	mesh.load_from_asset(asset_path(path).c_str());
+	meshes[path] = mesh;
+}
+
+void OpenglManager::load_model(const char *path) {
+	if (models.find(path) != models.end()) {
+		return;
+	}
+	Model model = {};
+	model.load_from_asset(asset_path(path).c_str());
+	models[path] = model;
+}
+
+void OpenglManager::load_texture(const char *path) {
+	if (textures.find(path) != textures.end()) {
+		return;
+	}
+	Texture texture = {};
+	texture.load_from_asset(asset_path(path).c_str());
+	textures[path] = texture;
 }
 
 void OpenglManager::update_transform(uint32_t object_id, glm::mat4 const &transform) {
