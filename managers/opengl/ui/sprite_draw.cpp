@@ -50,9 +50,15 @@ void SpriteDraw::draw() {
 		auto t = SpriteManager::get()->get_sprite_texture(sprite.texture_name);
 		int textured = !sprite.texture_name.empty();
 
-		shader.use();
 		OpenglManager *opengl_manager = OpenglManager::get();
-		shader.set_mat4("projection", opengl_manager->projection);
+		glm::mat4 proj = opengl_manager->projection;
+		if (sprite.vertices[0].is_screen_space == 1) {
+			glm::vec2 window_size = DisplayManager::get()->get_framebuffer_size();
+			proj = glm::ortho(0.0f, window_size.x, 0.0f, window_size.y);
+		}
+
+		shader.use();
+		shader.set_mat4("projection", proj);
 		shader.set_mat4("view", opengl_manager->view);
 		shader.set_int("textured", textured);
 		shader.set_int("sprite_texture", 0);
@@ -81,26 +87,26 @@ Sprite sprite_draw::default_vertex_data(
 
 	float aspect = 1.0f;
 
-	if (is_screen_space) {
-		glm::vec2 window_size = DisplayManager::get()->get_framebuffer_size();
-		aspect = window_size.y / window_size.x;
-	}
+//	if (is_screen_space) {
+//		glm::vec2 window_size = DisplayManager::get()->get_framebuffer_size();
+//		aspect = window_size.y / window_size.x;
+//	}
 
 	float sprite_x_aspect = 1.0f;
 	float sprite_y_aspect = 1.0f;
 
 	if (sprite_x_size > sprite_y_size) {
-		sprite_y_aspect = sprite_y_size / sprite_x_size;
+		sprite_y_aspect = sprite_x_size / sprite_y_size;
 	}
 	else {
-		sprite_x_aspect = sprite_x_size / sprite_y_size;
+		sprite_x_aspect = sprite_y_size / sprite_x_size;
 	}
 
 	float x = position.x * aspect;
 	float y = position.y;
 
-	float w = size.x / 2.0f * aspect * sprite_x_aspect;
-	float h = size.y / 2.0f * sprite_y_aspect;
+	float w = size.x / 2.0f * aspect * sprite_y_aspect;
+	float h = size.y / 2.0f * sprite_x_aspect;
 
 	//update the vertices
 	sprite.vertices[0] = { { x - w, y + h, 0.0f }, color, { 0.0f, 0.0f }, is_screen_space }; // 0
@@ -131,8 +137,6 @@ void sprite_draw::draw_sprite(const glm::vec2 &position, const glm::vec2 &size, 
 		const char *texture_name, bool is_screen_space) {
 
 	Texture t = SpriteManager::get()->get_sprite_texture(texture_name);
-
-
 
 	Sprite sprite = default_vertex_data(position, size, (float)t.width, (float)t.height, color, is_screen_space);
 	sprite.texture_name = texture_name;

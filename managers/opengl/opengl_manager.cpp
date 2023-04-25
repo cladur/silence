@@ -83,14 +83,15 @@ void OpenglManager::draw() {
 
 	unlit_pass.draw();
 
+	debug_draw.draw();
+
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	text_draw.draw();
 
+	// ui needs to go last, later to be a different render target
 	sprite_draw.draw();
 	glDisable(GL_BLEND);
-
-	debug_draw.draw();
 
 	// IMGUI
 	ImGui::Render();
