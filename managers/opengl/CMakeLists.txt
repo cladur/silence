@@ -11,6 +11,7 @@ add_library(${OPENGL_MANAGER_NAME} STATIC
         material.cpp material.h
         render_pass.cpp render_pass.h
         text/text_draw.cpp text/text_draw.h
+        debug/debug_draw.cpp debug/debug_draw.h
         )
 
 # Include directories

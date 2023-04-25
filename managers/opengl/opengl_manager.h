@@ -8,6 +8,7 @@
 #include "shader.h"
 #include "texture.h"
 
+#include "debug/debug_draw.h"
 #include "text/text_draw.h"
 
 #include "camera/camera.h"
@@ -26,6 +27,7 @@ public:
 	glm::vec3 camera_pos;
 
 	TextDraw text_draw;
+	DebugDraw debug_draw;
 
 	// Render passes
 	UnlitPass unlit_pass;

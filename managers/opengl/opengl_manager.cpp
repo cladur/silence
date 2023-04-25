@@ -57,6 +57,7 @@ void OpenglManager::startup() {
 	style.Colors[ImGuiCol_WindowBg].w = 1.0f;
 
 	text_draw.startup();
+	debug_draw.startup();
 
 	unlit_pass.startup();
 }
@@ -84,6 +85,9 @@ void OpenglManager::draw() {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	text_draw.draw();
+	glDisable(GL_BLEND);
+
+	debug_draw.draw();
 
 	// IMGUI
 	ImGui::Render();
