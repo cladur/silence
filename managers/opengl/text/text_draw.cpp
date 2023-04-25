@@ -126,8 +126,6 @@ void draw_text(const std::string &text, bool is_screen_space, const glm::vec3 &p
 		float uv_y_min = character.y_max / font->texture_size.y;
 		float uv_y_max = character.y_min / font->texture_size.y;
 
-		SPDLOG_INFO("uv y min: {}, uv y max: {}", uv_y_min, uv_y_max);
-		SPDLOG_INFO("uv x min {}, uv x max: {}", uv_x_min, uv_x_max);
 		int ss = is_screen_space ? 1 : 0;
 
 		//update the vertices
