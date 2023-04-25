@@ -12,6 +12,7 @@
 #include "text/text_draw.h"
 
 #include "camera/camera.h"
+#include "opengl/ui/sprite_draw.h"
 
 class OpenglManager {
 private:
@@ -28,6 +29,7 @@ public:
 
 	TextDraw text_draw;
 	DebugDraw debug_draw;
+	SpriteDraw sprite_draw;
 
 	// Render passes
 	UnlitPass unlit_pass;
