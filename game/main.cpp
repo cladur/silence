@@ -1,6 +1,7 @@
 #include "audio/audio_manager.h"
 #include "display/display_manager.h"
 #include "input/input_manager.h"
+#include "opengl/render_handle.h"
 
 #ifdef USE_OPENGL
 #include "imgui_impl_opengl3.h"
@@ -95,7 +96,7 @@ void default_ecs_manager_init() {
 	ecs_manager.register_component<Gravity>();
 	ecs_manager.register_component<Parent>();
 	ecs_manager.register_component<Children>();
-	ecs_manager.register_component<ModelInstance>();
+	ecs_manager.register_component<RenderHandle>();
 	ecs_manager.register_component<FmodListener>();
 	ecs_manager.register_component<ColliderTag>();
 	ecs_manager.register_component<ColliderSphere>();
@@ -133,9 +134,9 @@ void demo_entities_init(std::vector<Entity> &entities) {
 		ColliderComponentsFactory::add_collider_component(
 				entity, ColliderAABB{ transform.get_position(), transform.get_scale(), true });
 
-		// ecs_manager.add_component<ModelInstance>(entity,
-		// 		RenderManager::get()->load_prefab(
-		// 				RenderManager::asset_path("DamagedHelmet/DamagedHelmet.pfb").c_str()));
+		Handle<ModelInstance> hndl =
+				OpenglManager::get()->add_instance("DamagedHelmet/DamagedHelmet.pfb", MATERIAL_TYPE_UNLIT);
+		ecs_manager.add_component<RenderHandle>(entity, RenderHandle{ .handle = hndl });
 	}
 
 	auto listener = ecs_manager.create_entity();
@@ -153,9 +154,6 @@ void demo_entities_init(std::vector<Entity> &entities) {
 
 	ColliderComponentsFactory::add_collider_component(
 			floor, ColliderAABB{ transform.get_position(), transform.get_scale(), false });
-
-	// ecs_manager.add_component<MeshInstance>(
-	// 		floor, { render_manager.get_mesh("box"), render_manager.get_material("default_mesh") });
 
 	entities.push_back(floor);
 }
@@ -221,9 +219,6 @@ void demo_collision_obb(std::vector<Entity> &entities) {
 		c.is_movable = true;
 
 		ColliderComponentsFactory::add_collider_component(entity, c);
-
-		// ecs_manager.add_component<MeshInstance>(
-		// 		entity, { render_manager.get_mesh("box"), render_manager.get_material("default_mesh") });
 
 		ecs_manager.add_component<Gravity>(entity, { glm::vec3(0.0f, rand_gravity(random_generator), 0.0f) });
 
@@ -499,7 +494,7 @@ int main() {
 
 		parent_system->update();
 #ifdef USE_OPENGL
-		// opengl_system->update();
+		opengl_system->update();
 #else
 		render_system->update(*RenderManager::get());
 #endif
@@ -540,7 +535,7 @@ int main() {
 		input_manager.process_input();
 
 #ifdef USE_OPENGL
-		OpenglManager::get()->draw(camera);
+		OpenglManager::get()->draw();
 #else
 		RenderManager::get()->draw(camera);
 #endif

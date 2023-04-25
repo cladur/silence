@@ -20,7 +20,7 @@ const Entity MAX_CHILDREN = 255;
 
 // Serialization help
 
-class Serializaer {
+class Serializer {
 public:
 	static nlohmann::json get_data(std::string component_name, nlohmann::json &j) {
 		nlohmann::json obj;

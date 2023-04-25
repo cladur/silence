@@ -10,7 +10,7 @@ struct ColliderTag {
 	}
 
 	void deserialize_json(nlohmann::json &j) {
-		nlohmann::json obj = Serializaer::get_data("collider_tag", j);
+		nlohmann::json obj = Serializer::get_data("collider_tag", j);
 	}
 };
 

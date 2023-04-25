@@ -18,7 +18,7 @@ struct Children {
 	}
 
 	void deserialize_json(nlohmann::json &j) {
-		nlohmann::json obj = Serializaer::get_data("children", j);
+		nlohmann::json obj = Serializer::get_data("children", j);
 		children_count = obj["children_count"];
 		for (int i = 0; i < children_count; i++) {
 			children[i] = obj["children"][i];

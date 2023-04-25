@@ -126,7 +126,7 @@ struct ModelInstance {
 	}
 
 	void deserialize_json(nlohmann::json &j) {
-		nlohmann::json obj = Serializaer::get_data("mesh_instance", j);
+		nlohmann::json obj = Serializer::get_data("mesh_instance", j);
 		// mesh = render_manager.get_mesh(obj["mesh"]);
 		// material = render_manager.get_material(obj["material"]);
 	}

@@ -8,6 +8,8 @@ add_library(${OPENGL_MANAGER_NAME} STATIC
         shader.cpp shader.h
         model.cpp model.h
         texture.cpp texture.h
+        material.cpp material.h
+        render_pass.cpp render_pass.h
         )
 
 # Include directories

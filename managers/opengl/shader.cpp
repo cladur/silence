@@ -29,7 +29,7 @@ void Shader::load_from_files(const char *vertex_path, const char *fragment_path,
 
 		// if geometry shader path is present, also load a geometry shader
 		if (geometry_path != nullptr) {
-			g_shader_file.open("resources/shaders/" + std::string(geometry_path));
+			g_shader_file.open(std::string(geometry_path));
 			std::stringstream g_shader_stream;
 			g_shader_stream << g_shader_file.rdbuf();
 			g_shader_file.close();

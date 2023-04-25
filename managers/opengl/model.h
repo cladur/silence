@@ -5,7 +5,7 @@
 
 class Model {
 public:
-	void draw(Shader &shader);
+	void draw(MaterialType material_type);
 	void load_from_asset(const char *path);
 
 	bool is_refractive = false;

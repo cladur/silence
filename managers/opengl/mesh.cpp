@@ -26,11 +26,19 @@ int TextureTypeToTextureUnit(std::string type) {
 	return 0;
 }
 
-void Mesh::draw(Shader &shader) {
-	for (int i = 0; i < textures.size(); i++) {
-		if (textures_present[i]) {
-			glActiveTexture(GL_TEXTURE0 + i);
-			glBindTexture(GL_TEXTURE_2D, textures[i].id);
+void Mesh::draw(MaterialType material_type) {
+	switch (material_type) {
+		case MATERIAL_TYPE_UNLIT: {
+			bind_textures_unlit();
+			break;
+		}
+		case MATERIAL_TYPE_PBR: {
+			bind_textures_pbr();
+			break;
+		}
+		default: {
+			SPDLOG_ERROR("Unknown material type: {}", material_type);
+			assert(false);
 		}
 	}
 
@@ -38,6 +46,23 @@ void Mesh::draw(Shader &shader) {
 	glBindVertexArray(vao);
 	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
 	glBindVertexArray(0);
+}
+
+void Mesh::bind_textures_pbr() {
+	for (int i = 0; i < textures.size(); i++) {
+		if (textures_present[i]) {
+			glActiveTexture(GL_TEXTURE0 + i);
+			glBindTexture(GL_TEXTURE_2D, textures[i].id);
+		}
+	}
+}
+
+void Mesh::bind_textures_unlit() {
+	// Just albedo
+	if (textures_present[0]) {
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, textures[0].id);
+	}
 }
 
 void Mesh::setup_mesh() {

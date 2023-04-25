@@ -13,16 +13,11 @@
 #include "components/transform_component.h"
 
 #ifdef USE_OPENGL
-#include "opengl/opengl_manager.h"
+#include "opengl/render_handle.h"
 #else
 // TODO: Move ModelInstance to somewhere else
 #include "render/render_manager.h"
 #endif
-
-#include <functional>
-#include <map>
-#include <string>
-#include <variant>
 
 namespace serialization {
 
@@ -36,7 +31,7 @@ concept Deserializable = requires(T t, nlohmann::json &j) {
 	{ t.deserialize_json(j) };
 };
 
-typedef std::variant<Children, Parent, Transform, RigidBody, FmodListener, Gravity, ModelInstance, ColliderTag,
+typedef std::variant<Children, Parent, Transform, RigidBody, FmodListener, Gravity, RenderHandle, ColliderTag,
 		ColliderSphere, ColliderAABB, ColliderOBB>
 		variant_type;
 

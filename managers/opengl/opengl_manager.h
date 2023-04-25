@@ -1,53 +1,49 @@
 #ifndef SILENCE_OPENGL_MANAGER_H
 #define SILENCE_OPENGL_MANAGER_H
 
+#include "material.h"
 #include "mesh.h"
 #include "model.h"
+#include "render_pass.h"
 #include "shader.h"
 #include "texture.h"
 
 #include "camera/camera.h"
 
-struct ModelInstance {
-	std::vector<uint32_t> mesh_ids;
-
-	void serialize_json(nlohmann::json &j) {
-		// TODO good serialization
-		nlohmann::json::object_t obj;
-		// obj["mesh"] = "box";
-		// obj["material"] = "default_mesh";
-		j.push_back(nlohmann::json::object());
-		j.back()["prefab_instance"] = obj;
-	}
-
-	void deserialize_json(nlohmann::json &j) {
-		nlohmann::json obj = Serializaer::get_data("mesh_instance", j);
-		// mesh = render_manager.get_mesh(obj["mesh"]);
-		// material = render_manager.get_material(obj["material"]);
-	}
-};
-
 class OpenglManager {
 private:
 	std::unordered_map<std::string, Texture> textures;
-	std::unordered_map<std::string, Mesh> meshes;
-	std::unordered_map<std::string, Model> models;
+	std::vector<Model> models;
+	std::unordered_map<std::string, Handle<Model>> name_to_model;
+
 	std::vector<ModelInstance> model_instances;
 
 public:
 	Model model;
 	Shader shader;
+
+	MaterialUnlit material_unlit;
+	UnlitPass unlit_pass;
+
 	static OpenglManager *get();
 
 	void startup();
 	void shutdown();
-	void draw(Camera &camera);
+	void draw();
 
 	void load_mesh(const char *path);
 	void load_model(const char *path);
 	void load_texture(const char *path);
 
-	void update_transform(uint32_t object_id, glm::mat4 const &transform);
+	Model &get_model(Handle<Model> handle);
+	ModelInstance &get_model_instance(Handle<ModelInstance> handle);
+
+	Handle<ModelInstance> add_instance(
+			const char *path, MaterialType material_type = MATERIAL_TYPE_PBR, bool in_shadow_pass = true);
+	void remove_instance(Handle<ModelInstance> handle);
+
+	void update_instance_passes(Handle<ModelInstance> handle, MaterialType material_type, bool in_shadow_pass);
+	void update_instance_transform(Handle<ModelInstance> handle, glm::mat4 const &transform);
 };
 
 #endif // SILENCE_OPENGL_MANAGER_H

@@ -4,6 +4,7 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+#include "opengl/material.h"
 #define IMGUI_DEFINE_MATH_OPERATORS
 
 #define ASSET_PATH "resources/assets_export/"
@@ -51,17 +52,17 @@ void OpenglManager::startup() {
 	ImGuiStyle &style = ImGui::GetStyle();
 	style.Colors[ImGuiCol_WindowBg].w = 1.0f;
 
-	shader.load_from_files("resources/shaders/unlit.vert", "resources/shaders/unlit.frag");
-	model.load_from_asset(asset_path("DamagedHelmet/DamagedHelmet.pfb").c_str());
+	// shader.load_from_files("resources/shaders/unlit.vert", "resources/shaders/unlit.frag");
+	// model.load_from_asset(asset_path("DamagedHelmet/DamagedHelmet.pfb").c_str());
+	// material_unlit.startup();
+	unlit_pass.startup();
+	// add_instance("DamagedHelmet/DamagedHelmet.pfb", MATERIAL_TYPE_UNLIT);
 }
 
 void OpenglManager::shutdown() {
 }
 
-void OpenglManager::draw(Camera &camera) {
-	DisplayManager *display_manager = DisplayManager::get();
-	glm::vec2 window_extent = display_manager->get_framebuffer_size();
-
+void OpenglManager::draw() {
 	// Clear the screen
 	glad_glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -69,19 +70,7 @@ void OpenglManager::draw(Camera &camera) {
 	// Enable depth testing
 	glEnable(GL_DEPTH_TEST);
 
-	// Draw meshes
-	shader.use();
-	shader.set_mat4("view", camera.get_view_matrix());
-	glm::mat4 projection = glm::perspective(glm::radians(70.0f), window_extent.x / window_extent.y, 0.1f, 100.0f);
-	shader.set_mat4("projection", projection);
-	shader.set_mat4("model", glm::mat4(1.0f));
-	shader.set_vec3("camPos", camera.get_position());
-	shader.set_int("albedo_map", 0);
-	shader.set_int("ao_map", 1);
-	shader.set_int("normal_map", 2);
-	shader.set_int("metallic_roughness_map", 3);
-	shader.set_int("emissive_map", 4);
-	model.draw(shader);
+	unlit_pass.draw();
 
 	// IMGUI
 	ImGui::Render();
@@ -95,25 +84,22 @@ void OpenglManager::draw(Camera &camera) {
 		glfwMakeContextCurrent(backup_current_context);
 	}
 
+	DisplayManager *display_manager = DisplayManager::get();
 	glfwSwapBuffers(display_manager->window);
 }
 
-void OpenglManager::load_mesh(const char *path) {
-	if (meshes.find(path) != meshes.end()) {
-		return;
-	}
-	Mesh mesh = {};
-	mesh.load_from_asset(asset_path(path).c_str());
-	meshes[path] = mesh;
-}
-
 void OpenglManager::load_model(const char *path) {
-	if (models.find(path) != models.end()) {
+	if (name_to_model.find(path) != name_to_model.end()) {
 		return;
 	}
 	Model model = {};
 	model.load_from_asset(asset_path(path).c_str());
-	models[path] = model;
+
+	models.push_back(model);
+	Handle<Model> handle = {};
+	handle.id = models.size() - 1;
+
+	name_to_model[path] = handle;
 }
 
 void OpenglManager::load_texture(const char *path) {
@@ -125,6 +111,49 @@ void OpenglManager::load_texture(const char *path) {
 	textures[path] = texture;
 }
 
-void OpenglManager::update_transform(uint32_t object_id, glm::mat4 const &transform) {
+Model &OpenglManager::get_model(Handle<Model> handle) {
+	return models[handle.id];
+}
+
+ModelInstance &OpenglManager::get_model_instance(Handle<ModelInstance> handle) {
+	return model_instances[handle.id];
+}
+
+Handle<ModelInstance> OpenglManager::add_instance(const char *path, MaterialType material_type, bool in_shadow_pass) {
+	load_model(path);
+
+	ModelInstance model_instance = {};
+	model_instance.transform = glm::mat4(1.0f);
+
+	Handle<ModelInstance> handle = {};
+	handle.id = model_instances.size();
+
+	model_instances.push_back(model_instance);
+
+	switch (material_type) {
+		case MATERIAL_TYPE_UNLIT: {
+			unlit_pass.add_instance(handle);
+			break;
+		}
+		default: {
+			assert(false);
+		}
+	}
+
+	return handle;
+}
+
+void OpenglManager::remove_instance(Handle<ModelInstance> handle) {
+	model_instances.erase(model_instances.begin() + handle.id);
+	unlit_pass.remove_instance(handle);
+}
+
+void OpenglManager::update_instance_passes(
+		Handle<ModelInstance> handle, MaterialType material_type, bool in_shadow_pass) {
 	// TODO
+	assert(false);
+}
+
+void OpenglManager::update_instance_transform(Handle<ModelInstance> handle, glm::mat4 const &transform) {
+	get_model_instance(handle).transform = transform;
 }
