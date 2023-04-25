@@ -8,6 +8,8 @@
 #include "shader.h"
 #include "texture.h"
 
+#include "text/text_draw.h"
+
 #include "camera/camera.h"
 
 class OpenglManager {
@@ -19,10 +21,9 @@ private:
 	std::vector<ModelInstance> model_instances;
 
 public:
-	Model model;
-	Shader shader;
+	TextDraw text_draw;
 
-	MaterialUnlit material_unlit;
+	// Render passes
 	UnlitPass unlit_pass;
 
 	static OpenglManager *get();

@@ -52,11 +52,9 @@ void OpenglManager::startup() {
 	ImGuiStyle &style = ImGui::GetStyle();
 	style.Colors[ImGuiCol_WindowBg].w = 1.0f;
 
-	// shader.load_from_files("resources/shaders/unlit.vert", "resources/shaders/unlit.frag");
-	// model.load_from_asset(asset_path("DamagedHelmet/DamagedHelmet.pfb").c_str());
-	// material_unlit.startup();
+	text_draw.startup();
+
 	unlit_pass.startup();
-	// add_instance("DamagedHelmet/DamagedHelmet.pfb", MATERIAL_TYPE_UNLIT);
 }
 
 void OpenglManager::shutdown() {
@@ -71,6 +69,8 @@ void OpenglManager::draw() {
 	glEnable(GL_DEPTH_TEST);
 
 	unlit_pass.draw();
+
+	text_draw.draw();
 
 	// IMGUI
 	ImGui::Render();

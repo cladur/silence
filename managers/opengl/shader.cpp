@@ -1,6 +1,7 @@
 #include "shader.h"
 
-void Shader::load_from_files(const char *vertex_path, const char *fragment_path, const char *geometry_path) {
+void Shader::load_from_files(
+		const std::string &vertex_path, const std::string &fragment_path, const std::string &geometry_path) {
 	// 1. retrieve the vertex/fragment source code from filePath
 	std::string vertex_code;
 	std::string fragment_code;
@@ -14,8 +15,8 @@ void Shader::load_from_files(const char *vertex_path, const char *fragment_path,
 	g_shader_file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 	try {
 		// open files
-		v_shader_file.open(std::string(vertex_path));
-		f_shader_file.open(std::string(fragment_path));
+		v_shader_file.open(vertex_path);
+		f_shader_file.open(fragment_path);
 		std::stringstream v_shader_stream, f_shader_stream;
 		// read file's buffer contents into streams
 		v_shader_stream << v_shader_file.rdbuf();
@@ -28,8 +29,8 @@ void Shader::load_from_files(const char *vertex_path, const char *fragment_path,
 		fragment_code = f_shader_stream.str();
 
 		// if geometry shader path is present, also load a geometry shader
-		if (geometry_path != nullptr) {
-			g_shader_file.open(std::string(geometry_path));
+		if (!geometry_path.empty()) {
+			g_shader_file.open(geometry_path);
 			std::stringstream g_shader_stream;
 			g_shader_stream << g_shader_file.rdbuf();
 			g_shader_file.close();
@@ -61,7 +62,7 @@ void Shader::load_from_files(const char *vertex_path, const char *fragment_path,
 
 	// if geometry shader is given, compile geometry shader
 	unsigned int geometry;
-	if (geometry_path != nullptr) {
+	if (!geometry_path.empty()) {
 		const char *g_shader_code = geometry_code.c_str();
 		geometry = glCreateShader(GL_GEOMETRY_SHADER);
 		glShaderSource(geometry, 1, &g_shader_code, nullptr);
@@ -73,7 +74,7 @@ void Shader::load_from_files(const char *vertex_path, const char *fragment_path,
 	id = glCreateProgram();
 	glAttachShader(id, vertex);
 	glAttachShader(id, fragment);
-	if (geometry_path != nullptr) {
+	if (!geometry_path.empty()) {
 		glAttachShader(id, geometry);
 	}
 	glLinkProgram(id);
@@ -87,7 +88,7 @@ void Shader::load_from_files(const char *vertex_path, const char *fragment_path,
 	// delete the shaders as they're linked into our program now and no longer necessary
 	glDeleteShader(vertex);
 	glDeleteShader(fragment);
-	if (geometry_path != nullptr) {
+	if (!geometry_path.empty()) {
 		glDeleteShader(geometry);
 	}
 }

@@ -1,14 +1,13 @@
 #include "audio/audio_manager.h"
 #include "display/display_manager.h"
+#include "font/font_manager.h"
 #include "input/input_manager.h"
-#include "opengl/render_handle.h"
 
 #ifdef USE_OPENGL
 #include "imgui_impl_opengl3.h"
 #include "opengl/opengl_manager.h"
 #include "opengl/opengl_system.h"
 #else
-#include "font/font_manager.h"
 #include "imgui_impl_vulkan.h"
 #include "render/render_manager.h"
 #include "render/render_system.h"
@@ -22,6 +21,7 @@
 #include "components/parent_component.h"
 #include "components/rigidbody_component.h"
 #include "components/transform_component.h"
+#include "opengl/render_handle.h"
 
 #include "ecs/ecs_manager.h"
 #include "ecs/systems/collider_components_factory.h"
@@ -326,7 +326,7 @@ int main() {
 	collision_system->startup();
 	parent_system->startup();
 	fmod_listener_system->startup();
-	// FontManager::get()->startup();
+	FontManager::get()->startup();
 
 	std::vector<Entity> entities(50);
 	demo_entities_init(entities);
@@ -346,7 +346,7 @@ int main() {
 	audio_manager.load_bank("Ambience");
 	audio_manager.load_sample_data();
 
-	// FontManager::get()->load_font("resources/fonts/PoltawskiNowy.ttf", 48);
+	FontManager::get()->load_font("resources/fonts/PoltawskiNowy.ttf", 48);
 
 	//Map inputs
 	default_mappings();
@@ -514,8 +514,8 @@ int main() {
 
 		ImGui::End();
 
-		// text_draw::draw_text(
-		// 		std::string(buffer), screenspace, glm::vec3(position[0], position[1], position[2]), color, scale);
+		text_draw::draw_text(
+				std::string(buffer), screenspace, glm::vec3(position[0], position[1], position[2]), color, scale);
 
 		// debug_draw::draw_line(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(10.0f, 0.0f, 0.0f));
 		// debug_draw::draw_line(glm::vec3(0.0f, 5.0f, 0.0f), glm::vec3(10.0f, 0.0f, 0.0f));

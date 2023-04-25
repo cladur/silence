@@ -11,7 +11,7 @@ extern Camera camera;
 AutoCVarFloat cvar_draw_distance("render.draw_distance", "Distance cull", 5000);
 
 void MaterialUnlit::startup() {
-	shader.load_from_files("resources/shaders/unlit.vert", "resources/shaders/unlit.frag");
+	shader.load_from_files(shader_path("unlit.vert"), shader_path("unlit.frag"));
 }
 
 void MaterialUnlit::bind_resources() {

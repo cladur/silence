@@ -67,7 +67,7 @@
     },
     {
       "name": "ktx",
-      "version>=": "4.1.0-rc3#1"
+      "version>=": "4.1.0"
     },
     {
       "name": "tracy",

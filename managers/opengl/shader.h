@@ -9,7 +9,8 @@ public:
 	unsigned int id;
 
 	// constructor reads and builds the shader
-	void load_from_files(const char *vertex_path, const char *fragment_path, const char *geometry_path = nullptr);
+	void load_from_files(
+			const std::string &vertex_path, const std::string &fragment_path, const std::string &geometry_path = "");
 	// use/activate the shader
 	void use();
 	// utility uniform functions
