@@ -31,6 +31,7 @@ public:
 
 	// Render passes
 	UnlitPass unlit_pass;
+	PBRPass pbr_pass;
 
 	static OpenglManager *get();
 

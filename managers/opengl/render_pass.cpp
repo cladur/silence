@@ -29,3 +29,18 @@ void UnlitPass::draw() {
 		model.draw(MATERIAL_TYPE_UNLIT);
 	}
 }
+
+void PBRPass::startup() {
+	material.startup();
+}
+
+void PBRPass::draw() {
+	OpenglManager *opengl_manager = OpenglManager::get();
+	material.bind_resources();
+	for (auto &handle : instance_handles) {
+		ModelInstance &instance = opengl_manager->get_model_instance(handle);
+		material.bind_instance_resources(instance);
+		Model &model = opengl_manager->get_model(instance.model_handle);
+		model.draw(MATERIAL_TYPE_PBR);
+	}
+}

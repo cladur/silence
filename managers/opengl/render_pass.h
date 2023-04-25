@@ -5,11 +5,6 @@
 #include "model.h"
 #include "model_instance.h"
 
-struct InstanceInfo {
-	bool in_forward_pass;
-	bool in_shadow_pass;
-};
-
 class RenderPass {
 public:
 	std::vector<Handle<ModelInstance>> instance_handles;
@@ -24,6 +19,13 @@ public:
 class UnlitPass : public RenderPass {
 public:
 	MaterialUnlit material;
+	void startup() override;
+	void draw() override;
+};
+
+class PBRPass : public RenderPass {
+public:
+	MaterialPBR material;
 	void startup() override;
 	void draw() override;
 };

@@ -134,8 +134,7 @@ void demo_entities_init(std::vector<Entity> &entities) {
 		ColliderComponentsFactory::add_collider_component(
 				entity, ColliderAABB{ transform.get_position(), transform.get_scale(), true });
 
-		Handle<ModelInstance> hndl =
-				OpenglManager::get()->add_instance("DamagedHelmet/DamagedHelmet.pfb", MATERIAL_TYPE_UNLIT);
+		Handle<ModelInstance> hndl = OpenglManager::get()->add_instance("DamagedHelmet/DamagedHelmet.pfb");
 		ecs_manager.add_component<RenderHandle>(entity, RenderHandle{ .handle = hndl });
 	}
 
