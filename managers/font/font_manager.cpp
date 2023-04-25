@@ -81,6 +81,8 @@ void FontManager::load_font(const char *path, int size) {
 		pen_x += bmp->width + 1;
 	}
 
+#ifdef USE_OPENGL
+#else
 	RenderManager *manager = RenderManager::get();
 
 	//allocate temporary buffer for holding texture data to upload
@@ -106,6 +108,7 @@ void FontManager::load_font(const char *path, int size) {
 	manager->main_deletion_queue.push_function([=]() { manager->device.destroySampler(font.sampler); });
 
 	manager->allocator.destroyBuffer(staging_buffer.buffer, staging_buffer.allocation);
+#endif
 
 	free(pixels);
 	FT_Done_Face(face);

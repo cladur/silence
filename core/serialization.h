@@ -12,13 +12,12 @@
 #include "components/rigidbody_component.h"
 #include "components/transform_component.h"
 
-// TODO: Move PrefabInstance to somewhere else
+#ifdef USE_OPENGL
+#include "opengl/render_handle.h"
+#else
+// TODO: Move ModelInstance to somewhere else
 #include "render/render_manager.h"
-
-#include <functional>
-#include <map>
-#include <string>
-#include <variant>
+#endif
 
 namespace serialization {
 
@@ -32,7 +31,7 @@ concept Deserializable = requires(T t, nlohmann::json &j) {
 	{ t.deserialize_json(j) };
 };
 
-typedef std::variant<Children, Parent, Transform, RigidBody, FmodListener, Gravity, PrefabInstance, ColliderTag,
+typedef std::variant<Children, Parent, Transform, RigidBody, FmodListener, Gravity, RenderHandle, ColliderTag,
 		ColliderSphere, ColliderAABB, ColliderOBB>
 		variant_type;
 

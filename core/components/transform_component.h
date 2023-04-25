@@ -42,7 +42,7 @@ public:
 	}
 
 	void deserialize_json(nlohmann::json &j) {
-		nlohmann::json obj = Serializaer::get_data("transform", j);
+		nlohmann::json obj = Serializer::get_data("transform", j);
 
 		position.x = obj["position"]["x"];
 		position.y = obj["position"]["y"];

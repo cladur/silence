@@ -4,8 +4,8 @@
 #include <nlohmann/json.hpp>
 
 assets::VertexFormat parse_mesh_format(const char *f) {
-	if (strcmp(f, "PNCV32") == 0) {
-		return assets::VertexFormat::PNCV32;
+	if (strcmp(f, "PNV32") == 0) {
+		return assets::VertexFormat::PNV32;
 	} else if (strcmp(f, "P32N8C8V16") == 0) {
 		return assets::VertexFormat::P32N8C8V16;
 	} else {
@@ -61,7 +61,7 @@ void assets::unpack_mesh(
 	memcpy(index_buffer, decompressed_buffer.data() + info->vertex_buffer_size, info->index_buffer_size);
 }
 
-assets::AssetFile assets::pack_mesh(MeshInfo *info, char *vertexData, char *indexData) {
+assets::AssetFile assets::pack_mesh(MeshInfo *info, char *vertex_data, char *index_data) {
 	AssetFile file;
 	file.type[0] = 'M';
 	file.type[1] = 'E';
@@ -72,7 +72,7 @@ assets::AssetFile assets::pack_mesh(MeshInfo *info, char *vertexData, char *inde
 	nlohmann::json metadata;
 	if (info->vertex_format == VertexFormat::P32N8C8V16) {
 		metadata["vertex_format"] = "P32N8C8V16";
-	} else if (info->vertex_format == VertexFormat::PNCV32) {
+	} else if (info->vertex_format == VertexFormat::PNV32) {
 		metadata["vertex_format"] = "PNCV_F32";
 	}
 	metadata["vertex_buffer_size"] = info->vertex_buffer_size;
@@ -101,10 +101,10 @@ assets::AssetFile assets::pack_mesh(MeshInfo *info, char *vertexData, char *inde
 	merged_buffer.resize(fullsize);
 
 	//copy vertex buffer
-	memcpy(merged_buffer.data(), vertexData, info->vertex_buffer_size);
+	memcpy(merged_buffer.data(), vertex_data, info->vertex_buffer_size);
 
 	//copy index buffer
-	memcpy(merged_buffer.data() + info->vertex_buffer_size, indexData, info->index_buffer_size);
+	memcpy(merged_buffer.data() + info->vertex_buffer_size, index_data, info->index_buffer_size);
 
 	//compress buffer and copy it into the file struct
 	size_t compress_staging = LZ4_compressBound(static_cast<int>(fullsize));
@@ -122,7 +122,7 @@ assets::AssetFile assets::pack_mesh(MeshInfo *info, char *vertexData, char *inde
 	return file;
 }
 
-assets::MeshBounds assets::calculate_bounds(VertexPNCV32 *vertices, size_t count) {
+assets::MeshBounds assets::calculate_bounds(VertexPNV32 *vertices, size_t count) {
 	MeshBounds bounds{};
 
 	float min[3] = { std::numeric_limits<float>::max(), std::numeric_limits<float>::max(),

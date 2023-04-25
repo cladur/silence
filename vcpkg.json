@@ -1,61 +1,87 @@
 {
-  "name" : "silence",
-  "version-string" : "1.0.0",
-  "builtin-baseline" : "464f782e269afe54243b156e5b240c11f7d2d7f3",
-  "dependencies" : [ {
-    "name" : "spdlog",
-    "version>=" : "1.11.0",
-    "$comment" : "    # this is heuristically generated, and may not be correct\n\n    find_package(spdlog CONFIG REQUIRED)\n\n    target_link_libraries(main PRIVATE spdlog::spdlog spdlog::spdlog_header_only)\n"
-  }, {
-    "name" : "glfw3",
-    "version>=" : "3.3.8#2"
-  }, {
-    "name" : "magic-enum",
-    "version>=" : "0.8.2",
-    "$comment" : "    # this is heuristically generated, and may not be correct\n\n    find_package(magic_enum CONFIG REQUIRED)\n\n    target_link_libraries(main PRIVATE magic_enum::magic_enum)\n"
-  }, {
-    "name" : "vulkan-hpp",
-    "version>=" : "1.3.231#1"
-  }, {
-    "name" : "vulkan-memory-allocator-hpp",
-    "version>=" : "3.0.1",
-    "$comment" : "    # this is heuristically generated, and may not be correct\n\n    find_package(unofficial-vulkan-memory-allocator-hpp CONFIG REQUIRED)\n\n    target_link_libraries(main PRIVATE unofficial::VulkanMemoryAllocator-Hpp::VulkanMemoryAllocator-Hpp)\n"
-  }, {
-    "name" : "glm",
-    "version>=" : "0.9.9.8#2",
-    "$comment" : "    # this is heuristically generated, and may not be correct\n\n    find_package(glm CONFIG REQUIRED)\n\n    target_link_libraries(main PRIVATE glm::glm)\n"
-  }, {
-    "name" : "vulkan-memory-allocator",
-    "version>=" : "3.0.1",
-    "$comment" : "    # this is heuristically generated, and may not be correct\n\n    find_package(unofficial-vulkan-memory-allocator CONFIG REQUIRED)\n\n    target_link_libraries(main PRIVATE unofficial::vulkan-memory-allocator::vulkan-memory-allocator)\n"
-  }, {
-    "name" : "tinygltf",
-    "version>=" : "2.8.4"
-  }, {
-    "name" : "imgui",
-    "version>=" : "1.89.3",
-    "features" : [ "docking-experimental", "glfw-binding", "vulkan-binding" ]
-  }, {
-    "name" : "nlohmann-json",
-    "version>=" : "3.11.2",
-    "$comment" : "    find_package(nlohmann_json CONFIG REQUIRED)\n\n    target_link_libraries(main PRIVATE nlohmann_json::nlohmann_json)\n"
-  }, {
-    "name" : "lz4",
-    "version>=" : "1.9.4#1",
-    "$comment" : "    # this is heuristically generated, and may not be correct\n\n    find_package(lz4 CONFIG REQUIRED)\n\n    target_link_libraries(main PRIVATE lz4::lz4)\n"
-  }, {
-    "name" : "spirv-reflect",
-    "version>=" : "1.3.236.0",
-    "$comment" : "    # this is heuristically generated, and may not be correct\n\n    find_package(unofficial-spirv-reflect CONFIG REQUIRED)\n\n    target_link_libraries(main PRIVATE unofficial::spirv-reflect::spirv-reflect)\n"
-  }, {
-    "name" : "ktx",
-    "version>=" : "4.1.0"
-  }, {
-    "name" : "tracy",
-    "version>=" : "0.9.0#3",
-    "$comment" : "    # this is heuristically generated, and may not be correct\n\n    find_package(Tracy CONFIG REQUIRED)\n\n    target_link_libraries(main PRIVATE Tracy::TracyClient)\n"
-  }, {
-    "name" : "freetype",
-    "version>=" : "2.12.1#3"
-  } ]
+  "name": "silence",
+  "version-string": "1.0.0",
+  "builtin-baseline": "464f782e269afe54243b156e5b240c11f7d2d7f3",
+  "dependencies": [
+    {
+      "name": "spdlog",
+      "version>=": "1.11.0",
+      "$comment": "    # this is heuristically generated, and may not be correct\n\n    find_package(spdlog CONFIG REQUIRED)\n\n    target_link_libraries(main PRIVATE spdlog::spdlog spdlog::spdlog_header_only)\n"
+    },
+    {
+      "name": "glfw3",
+      "version>=": "3.3.8#2"
+    },
+    {
+      "name": "magic-enum",
+      "version>=": "0.8.2",
+      "$comment": "    # this is heuristically generated, and may not be correct\n\n    find_package(magic_enum CONFIG REQUIRED)\n\n    target_link_libraries(main PRIVATE magic_enum::magic_enum)\n"
+    },
+    {
+      "name": "vulkan-hpp",
+      "version>=": "1.3.231#1"
+    },
+    {
+      "name": "vulkan-memory-allocator-hpp",
+      "version>=": "3.0.1",
+      "$comment": "    # this is heuristically generated, and may not be correct\n\n    find_package(unofficial-vulkan-memory-allocator-hpp CONFIG REQUIRED)\n\n    target_link_libraries(main PRIVATE unofficial::VulkanMemoryAllocator-Hpp::VulkanMemoryAllocator-Hpp)\n"
+    },
+    {
+      "name": "glm",
+      "version>=": "0.9.9.8#2",
+      "$comment": "    # this is heuristically generated, and may not be correct\n\n    find_package(glm CONFIG REQUIRED)\n\n    target_link_libraries(main PRIVATE glm::glm)\n"
+    },
+    {
+      "name": "vulkan-memory-allocator",
+      "version>=": "3.0.1",
+      "$comment": "    # this is heuristically generated, and may not be correct\n\n    find_package(unofficial-vulkan-memory-allocator CONFIG REQUIRED)\n\n    target_link_libraries(main PRIVATE unofficial::vulkan-memory-allocator::vulkan-memory-allocator)\n"
+    },
+    {
+      "name": "tinygltf",
+      "version>=": "2.8.4"
+    },
+    {
+      "name": "imgui",
+      "version>=": "1.89.3",
+      "features": [
+        "docking-experimental",
+        "glfw-binding",
+        "vulkan-binding",
+        "opengl3-binding"
+      ]
+    },
+    {
+      "name": "nlohmann-json",
+      "version>=": "3.11.2",
+      "$comment": "    find_package(nlohmann_json CONFIG REQUIRED)\n\n    target_link_libraries(main PRIVATE nlohmann_json::nlohmann_json)\n"
+    },
+    {
+      "name": "lz4",
+      "version>=": "1.9.4#1",
+      "$comment": "    # this is heuristically generated, and may not be correct\n\n    find_package(lz4 CONFIG REQUIRED)\n\n    target_link_libraries(main PRIVATE lz4::lz4)\n"
+    },
+    {
+      "name": "spirv-reflect",
+      "version>=": "1.3.236.0",
+      "$comment": "    # this is heuristically generated, and may not be correct\n\n    find_package(unofficial-spirv-reflect CONFIG REQUIRED)\n\n    target_link_libraries(main PRIVATE unofficial::spirv-reflect::spirv-reflect)\n"
+    },
+    {
+      "name": "ktx",
+      "version>=": "4.1.0-rc3#1"
+    },
+    {
+      "name": "tracy",
+      "version>=": "0.9.0#3",
+      "$comment": "    # this is heuristically generated, and may not be correct\n\n    find_package(Tracy CONFIG REQUIRED)\n\n    target_link_libraries(main PRIVATE Tracy::TracyClient)\n"
+    },
+    {
+      "name": "freetype",
+      "version>=": "2.12.1#3"
+    },
+    {
+      "name": "glad",
+      "version>=": "0.1.36",
+      "$comment": "    # this is heuristically generated, and may not be correct\n\n    find_package(glad CONFIG REQUIRED)\n\n    target_link_libraries(main PRIVATE glad::glad)\n"
+    }
+  ]
 }
