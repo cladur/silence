@@ -46,10 +46,10 @@ void MaterialPBR::bind_resources() {
 	shader.set_vec3("lightPositions[2]", glm::vec3(0.0f, 0.0f, 0.0f));
 	shader.set_vec3("lightPositions[3]", opengl_manager->camera_pos);
 
-	shader.set_vec3("lightColor[0]", glm::vec3(0.0f, 0.0f, 0.0f));
-	shader.set_vec3("lightColor[1]", glm::vec3(0.0f, 0.0f, 0.0f));
-	shader.set_vec3("lightColor[2]", glm::vec3(0.0f, 0.0f, 0.0f));
-	shader.set_vec3("lightColor[3]", glm::vec3(1.0f, 1.0f, 1.0f));
+	shader.set_vec3("lightColors[0]", glm::vec3(0.0f, 0.0f, 0.0f));
+	shader.set_vec3("lightColors[1]", glm::vec3(0.0f, 0.0f, 0.0f));
+	shader.set_vec3("lightColors[2]", glm::vec3(0.0f, 0.0f, 0.0f));
+	shader.set_vec3("lightColors[3]", glm::vec3(1.0f, 1.0f, 1.0f));
 }
 
 void MaterialPBR::bind_instance_resources(ModelInstance &instance) {
