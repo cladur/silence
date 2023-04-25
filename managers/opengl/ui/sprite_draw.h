@@ -6,7 +6,6 @@ struct SpriteVertex {
 	glm::vec3 position;
 	glm::vec3 color;
 	glm::vec2 uv;
-	int textured;
 	int is_screen_space;
 };
 
@@ -31,8 +30,16 @@ public:
 };
 
 namespace sprite_draw {
+ 	Sprite default_vertex_data(
+		const glm::vec2 &position,
+		const glm::vec2 &size,
+		float sprite_x_size,
+		float sprite_y_size,
+		const glm::vec3 &color,
+		bool is_screen_space);
 	// draws a single colored quad. If is screen spaced, the scale represents pixel scale.
 	void draw_colored(const glm::vec2 &position, const glm::vec2 &size, const glm::vec3 &color, bool is_screen_space);
+	void draw_sprite(const glm::vec2 &position, const glm::vec2 &size, const glm::vec3 &color, const char *texture_name, bool is_screen_space);
 }
 
 #endif //SILENCE_SPRITE_DRAW_H

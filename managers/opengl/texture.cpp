@@ -27,6 +27,8 @@ void Texture::load_from_asset(const char *path) {
 	ktx_texture_transcode_fmt_e tf = KTX_TTF_RGBA32;
 
 	result = ktxTexture2_TranscodeBasis(ktx_texture, tf, 0);
+    width = ktx_texture->baseWidth;
+	height = ktx_texture->baseHeight;
 
 	glGenTextures(1, &id);
 	glBindTexture(GL_TEXTURE_2D, id);

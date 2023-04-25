@@ -3,12 +3,10 @@
 layout(location = 0) in vec3 aPos;
 layout(location = 1) in vec3 aColor;
 layout(location = 2) in vec2 aTexCoords;
-layout(location = 3) in int textured;
-layout(location = 4) in int is_screen_space;
+layout(location = 3) in int is_screen_space;
 
 out vec2 TexCoords;
 out vec3 Color;
-out int Textured;
 
 uniform mat4 projection;
 uniform mat4 view;
@@ -22,5 +20,4 @@ void main() {
 
     TexCoords = aTexCoords;
     Color = aColor;
-    Textured = textured;
 }

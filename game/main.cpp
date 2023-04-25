@@ -40,6 +40,7 @@
 #include <fstream>
 
 #include "core/camera/camera.h"
+#include "opengl/ui/sprite_manager.h"
 // #include "render/debug/debug_draw.h"
 // #include "render/text/text_draw.h"
 
@@ -299,6 +300,7 @@ int main() {
 	input_manager.startup();
 #ifdef USE_OPENGL
 	OpenglManager::get()->startup();
+	SpriteManager::get()->startup();
 #else
 	RenderManager::get()->startup();
 #endif
@@ -317,6 +319,11 @@ int main() {
 #ifdef USE_OPENGL
 	auto opengl_system = ecs_manager.register_system<OpenglSystem>();
 	opengl_system->startup();
+
+	SpriteManager::get()->load_sprite_texture("ui_width", "ui_width.ktx2");
+	SpriteManager::get()->load_sprite_texture("ui_height", "ui_height.ktx2");
+	SpriteManager::get()->load_sprite_texture("ui_test", "ui_test.ktx2");
+
 #else
 	auto render_system = ecs_manager.register_system<RenderSystem>();
 	render_system->startup();
@@ -516,16 +523,40 @@ int main() {
 
 		text_draw::draw_text(
 				std::string(buffer), screenspace, glm::vec3(position[0], position[1], position[2]), color, scale);
+//
+//		debug_draw::draw_line(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(10.0f, 0.0f, 0.0f));
+//		debug_draw::draw_line(glm::vec3(0.0f, 5.0f, 0.0f), glm::vec3(10.0f, 0.0f, 0.0f));
+//
+//		debug_draw::draw_line(glm::vec3(0.0f, 5.0f, 10.0f), glm::vec3(10.0f, 0.0f, 2.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+//
+//		debug_draw::draw_box(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+//		debug_draw::draw_box(glm::vec3(0.0f, 5.0f, 0.0f), glm::vec3(10.0f, 1.0f, 1.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 
-		debug_draw::draw_line(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(10.0f, 0.0f, 0.0f));
-		debug_draw::draw_line(glm::vec3(0.0f, 5.0f, 0.0f), glm::vec3(10.0f, 0.0f, 0.0f));
-
-		debug_draw::draw_line(glm::vec3(0.0f, 5.0f, 10.0f), glm::vec3(10.0f, 0.0f, 2.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-
-		debug_draw::draw_box(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-		debug_draw::draw_box(glm::vec3(0.0f, 5.0f, 0.0f), glm::vec3(10.0f, 1.0f, 1.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-
-		sprite_draw::draw_colored(glm::vec3(0.0f, 5.0f, 0.0f), glm::vec2(2.0f, 2.0f), glm::vec3(0.4531f, 0.643f, 0.8134f), false);
+		sprite_draw::draw_colored(glm::vec3(0.0f, 3.0f, 0.0f), glm::vec2(2.0f, 2.0f), glm::vec3(0.4531f, 0.643f, 0.8134f), false);
+		sprite_draw::draw_sprite(
+				glm::vec3(-3.0f, 3.0f, 0.0f),
+				glm::vec2(2.0f, 2.0f),
+				glm::vec3(1.0f),
+				"ui_width",
+				false);
+		sprite_draw::draw_sprite(
+				glm::vec3(0.0f, -2.0f, 0.0f),
+				glm::vec2(2.0f, 2.0f),
+				glm::vec3(1.0f),
+				"ui_height",
+				false);
+		sprite_draw::draw_sprite(
+				glm::vec3(3.0f, 3.0f, 0.0f),
+				glm::vec2(2.0f, 2.0f),
+				glm::vec3(1.0f),
+				"ui_test",
+				false);
+		sprite_draw::draw_sprite(
+				glm::vec3(3.0f, -2.0f, 0.0f),
+				glm::vec2(2.0f, 2.0f),
+				glm::vec3(1.0f),
+				"missing_asf",
+				false);
 
 		// TODO: remove this when collision demo will be removed
 		for (auto sphere : spheres) {
@@ -562,6 +593,7 @@ int main() {
 	input_manager.shutdown();
 	audio_manager.shutdown();
 #ifdef USE_OPENGL
+	SpriteManager::get()->shutdown();
 	OpenglManager::get()->shutdown();
 #else
 	RenderManager::get()->shutdown();
