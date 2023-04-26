@@ -84,7 +84,10 @@ void OpenglManager::draw() {
 
 	unlit_pass.draw();
 	pbr_pass.draw();
+
+	glDepthFunc(GL_LEQUAL);
 	skybox_pass.draw();
+	glDepthFunc(GL_LESS);
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

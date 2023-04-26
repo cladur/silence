@@ -65,6 +65,7 @@ void MaterialSkybox::bind_resources() {
 	shader.use();
 	shader.set_int("environment_map", 0);
 	shader.set_mat4("view", opengl_manager->view);
+	shader.set_mat4("projection", opengl_manager->projection);
 }
 
 void MaterialSkybox::bind_instance_resources(ModelInstance &instance) {
