@@ -49,6 +49,11 @@ InputManager input_manager;
 
 Camera camera(glm::vec3(0.0f, 0.0f, -25.0f));
 
+extern "C" {
+__declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
+__declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
+}
+
 bool in_debug_menu = true;
 
 void default_mappings() {
@@ -506,16 +511,20 @@ int main() {
 		static float position[3] = { 0.0f, 0.0f, 0.0f };
 		static glm::vec3 color = { 1.0f, 1.0f, 1.0f };
 		static bool screenspace = false;
+		static bool centered_x = false;
+		static bool centered_y = false;
 		ImGui::InputText("Text", buffer, 128);
 		ImGui::InputFloat("Scale", &scale);
 		ImGui::InputFloat3("Position", position);
 		ImGui::InputFloat3("Color", &color.x);
 		ImGui::Checkbox("Screenspace", &screenspace);
+		ImGui::Checkbox("Center X", &centered_x);
+		ImGui::Checkbox("Center Y", &centered_y);
 
 		ImGui::End();
 
-		text_draw::draw_text(
-				std::string(buffer), screenspace, glm::vec3(position[0], position[1], position[2]), color, scale);
+		text_draw::draw_text(std::string(buffer), screenspace, glm::vec3(position[0], position[1], position[2]), color,
+				scale, nullptr, centered_x, centered_y);
 
 		debug_draw::draw_line(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(10.0f, 0.0f, 0.0f));
 		debug_draw::draw_line(glm::vec3(0.0f, 5.0f, 0.0f), glm::vec3(10.0f, 0.0f, 0.0f));
