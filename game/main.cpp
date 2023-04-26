@@ -324,6 +324,8 @@ int main() {
 	SpriteManager::get()->load_sprite_texture("ui_height", "ui_height.ktx2");
 	SpriteManager::get()->load_sprite_texture("ui_test", "ui_test.ktx2");
 	SpriteManager::get()->load_sprite_texture("kek", "kek.ktx2");
+	SpriteManager::get()->load_sprite_texture("pointer", "gun_sight.ktx2");
+	SpriteManager::get()->load_sprite_texture("skull", "skull_emoji.ktx2");
 
 #else
 	auto render_system = ecs_manager.register_system<RenderSystem>();
@@ -535,29 +537,69 @@ int main() {
 
 //		sprite_draw::draw_colored(glm::vec3(0.0f, 3.0f, 0.0f), glm::vec2(2.0f, 2.0f), glm::vec3(0.4531f, 0.643f, 0.8134f), false);
 		sprite_draw::draw_sprite(
-				glm::vec3(640.0f, 650.0f, 0.0f),
+				glm::vec3(0.0f, 0.0f, 0.0f),
+				glm::vec2(100.0f, 100.0f),
+				glm::vec3(0.543f, 0.413, 0.8134f),
+				"pointer",
+				true,
+				sprite_draw::Alignment::CENTER);
+		sprite_draw::draw_sprite(
+				glm::vec3(0.0f, -70.0f, 0.0f),
 				glm::vec2(140.0f, 140.0f),
 				glm::vec3(1.0f),
 				"ui_width",
-				true);
+				true,
+				sprite_draw::Alignment::TOP);
 		sprite_draw::draw_sprite(
-				glm::vec3(50.0f, 360.0f, 0.0f),
+				glm::vec3(50.0f, 0.0f, 0.0f),
 				glm::vec2(100.0f, 100.0f),
 				glm::vec3(1.0f),
 				"ui_height",
-				true);
+				true,
+				sprite_draw::Alignment::LEFT);
 		sprite_draw::draw_sprite(
-				glm::vec3(1160.0f, 600.0f, 0.0f),
+				glm::vec3(-100.0f, 0.0f, 0.0f),
 				glm::vec2(200.0f, 200.0f),
 				glm::vec3(1.0f),
 				"kek",
-				true);
+				true,
+				sprite_draw::Alignment::RIGHT);
 		sprite_draw::draw_sprite(
-				glm::vec3(1160.0f, 120.0f, 0.0f),
+				glm::vec3(0.0f, 100.0f, 0.0f),
 				glm::vec2(200.0f, 200.0f),
 				glm::vec3(1.0f),
 				"missing_asf",
-				true);
+				true,
+				sprite_draw::Alignment::BOTTOM);
+
+		sprite_draw::draw_sprite(
+				glm::vec3(50.0f, -50.0f, 0.0f),
+				glm::vec2(100.0f, 100.0f),
+				glm::vec3(0.345f, 0.531, 0.9345f),
+				"skull",
+				true,
+				sprite_draw::Alignment::TOP_LEFT);
+		sprite_draw::draw_sprite(
+				glm::vec3(-50.0f, -50.0f, 0.0f),
+				glm::vec2(100.0f, 100.0f),
+				glm::vec3(0.545f, 0.231, 0.725f),
+				"skull",
+				true,
+				sprite_draw::Alignment::TOP_RIGHT);
+		sprite_draw::draw_sprite(
+				glm::vec3(50.0f, 50.0f, 0.0f),
+				glm::vec2(100.0f, 100.0f),
+				glm::vec3(1.0f),
+				"skull",
+				true,
+				sprite_draw::Alignment::BOTTOM_LEFT);
+		sprite_draw::draw_sprite(
+				glm::vec3(-50.0f, 50.0f, 0.0f),
+				glm::vec2(100.0f, 100.0f),
+				glm::vec3(0.123f, 0.52, 0.347f),
+				"skull",
+				true,
+				sprite_draw::Alignment::BOTTOM_RIGHT);
 
 		// TODO: remove this when collision demo will be removed
 		for (auto sphere : spheres) {

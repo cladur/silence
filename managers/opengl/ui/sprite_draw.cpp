@@ -134,11 +134,51 @@ void sprite_draw::draw_colored(const glm::vec2 &position, const glm::vec2 &size,
 }
 
 void sprite_draw::draw_sprite(const glm::vec2 &position, const glm::vec2 &size, const glm::vec3 &color,
-		const char *texture_name, bool is_screen_space) {
+		const char *texture_name, bool is_screen_space, Alignment alignment) {
 
 	Texture t = SpriteManager::get()->get_sprite_texture(texture_name);
 
-	Sprite sprite = default_vertex_data(position, size, (float)t.width, (float)t.height, color, is_screen_space);
+	glm::vec2 aligned_position = position;
+
+	// alignment only makes sense in screen space
+	if (is_screen_space)
+	{
+		glm::vec2 window_size = DisplayManager::get()->get_framebuffer_size();
+		switch (alignment) {
+			case Alignment::CENTER:
+				aligned_position.x += window_size.x / 2.0f;
+				aligned_position.y += window_size.y / 2.0f;
+				break;
+			case Alignment::TOP:
+				aligned_position.x += window_size.x / 2.0f;
+				aligned_position.y += window_size.y;
+				break;
+			case Alignment::BOTTOM:
+				aligned_position.x += window_size.x / 2.0f;
+				break;
+			case Alignment::LEFT:
+				aligned_position.y += window_size.y / 2.0f;
+				break;
+			case Alignment::RIGHT:
+				aligned_position.x += window_size.x;
+				aligned_position.y += window_size.y / 2.0f;
+				break;
+			case Alignment::TOP_LEFT:
+				aligned_position.y += window_size.y;
+				break;
+			case Alignment::TOP_RIGHT:
+				aligned_position.x += window_size.x;
+				aligned_position.y += window_size.y;
+				break;
+			case Alignment::BOTTOM_LEFT:
+				break;
+			case Alignment::BOTTOM_RIGHT:
+				aligned_position.x += window_size.x;
+				break;
+		}
+	}
+
+	Sprite sprite = default_vertex_data(aligned_position, size, (float)t.width, (float)t.height, color, is_screen_space);
 	sprite.texture_name = texture_name;
 	auto manager = OpenglManager::get();
 	manager->sprite_draw.sprites.push_back(sprite);

@@ -30,6 +30,19 @@ public:
 };
 
 namespace sprite_draw {
+
+	enum class Alignment {
+		TOP,
+		BOTTOM,
+		LEFT,
+		RIGHT,
+		CENTER,
+		TOP_LEFT,
+		TOP_RIGHT,
+		BOTTOM_LEFT,
+		BOTTOM_RIGHT,
+	};
+
  	Sprite default_vertex_data(
 		const glm::vec2 &position,
 		const glm::vec2 &size,
@@ -39,7 +52,8 @@ namespace sprite_draw {
 		bool is_screen_space);
 	// draws a single colored quad. If is screen spaced, the scale represents pixel scale.
 	void draw_colored(const glm::vec2 &position, const glm::vec2 &size, const glm::vec3 &color, bool is_screen_space);
-	void draw_sprite(const glm::vec2 &position, const glm::vec2 &size, const glm::vec3 &color, const char *texture_name, bool is_screen_space);
+	void draw_sprite(const glm::vec2 &position, const glm::vec2 &size, const glm::vec3 &color,
+			const char *texture_name, bool is_screen_space, Alignment alignment = Alignment::CENTER);
 }
 
 #endif //SILENCE_SPRITE_DRAW_H
