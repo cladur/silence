@@ -4,6 +4,7 @@
 #include "material.h"
 #include "model.h"
 #include "model_instance.h"
+#include "skybox.h"
 
 class RenderPass {
 public:
@@ -33,9 +34,7 @@ public:
 class SkyboxPass : public RenderPass {
 public:
 	MaterialSkybox material;
-	Texture texture = {};
-
-	unsigned int vao, vbo;
+	Skybox skybox;
 
 	void startup() override;
 	void draw() override;

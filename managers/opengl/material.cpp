@@ -40,6 +40,10 @@ void MaterialPBR::bind_resources() {
 	shader.set_int("normal_map", 2);
 	shader.set_int("metallic_roughness_map", 3);
 	shader.set_int("emissive_map", 4);
+	shader.set_int("irradiance_map", 5);
+
+	glActiveTexture(GL_TEXTURE5);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, opengl_manager->skybox_pass.skybox.irradiance_map.id);
 
 	shader.set_vec3("lightPositions[0]", glm::vec3(0.0f, 0.0f, 0.0f));
 	shader.set_vec3("lightPositions[1]", glm::vec3(0.0f, 0.0f, 0.0f));
@@ -57,7 +61,7 @@ void MaterialPBR::bind_instance_resources(ModelInstance &instance) {
 }
 
 void MaterialSkybox::startup() {
-	shader.load_from_files(shader_path("skybox.vert"), shader_path("skybox.frag"));
+	shader.load_from_files(shader_path("cubemap.vert"), shader_path("skybox.frag"));
 }
 
 void MaterialSkybox::bind_resources() {

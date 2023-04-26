@@ -11,7 +11,8 @@ if (USE_OPENGL)
     add_compile_definitions(USE_OPENGL)
 endif ()
 
-SET(VCPKG_OVERLAY_PORTS "${CMAKE_SOURCE_DIR}/modules/overlay-ports/imguizmo/")
+find_package(glad CONFIG REQUIRED)
+find_package(glfw3 CONFIG REQUIRED)
 
 include_directories(${PROJECT_SOURCE_DIR})
 

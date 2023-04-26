@@ -18,6 +18,8 @@
 #define TINYGLTF_NOEXCEPTION // optional. disable exception handling.
 #include "tiny_gltf.h"
 
+#include "opengl_context.h"
+
 namespace tg = tinygltf;
 namespace fs = std::filesystem;
 using namespace assets;
@@ -565,7 +567,20 @@ int main(int argc, char *argv[]) {
 
 	const fs::path &asset_dir = path / "assets";
 	const fs::path &export_dir = path / "assets_export";
+	const fs::path &tmp_dir = path / "assets_tmp";
 	const fs::path &cubemap_dir = path / "cubemaps";
+
+	if (!fs::is_directory(export_dir)) {
+		fs::create_directory(export_dir);
+	}
+
+	if (!fs::is_directory(tmp_dir)) {
+		fs::create_directory(tmp_dir);
+	}
+
+	if (!fs::is_directory(cubemap_dir)) {
+		fs::create_directory(cubemap_dir);
+	}
 
 	ConverterState conv_state;
 	conv_state.asset_path = path;
@@ -639,19 +654,44 @@ int main(int argc, char *argv[]) {
 		auto nz = p.path() / "nz.png";
 
 		auto relative = p.path().lexically_proximate(cubemap_dir);
-		auto export_path = export_dir / "cubemaps";
+		auto filename = p.path().filename().string();
+		auto export_path = export_dir / "cubemaps" / filename;
 
 		if (!fs::is_directory(export_path)) {
 			fs::create_directory(export_path);
 		}
 
-		auto filename = p.path().filename().string();
-
-		fs::path output = export_path / (filename + ".ktx2");
+		fs::path output = export_path / "environment_map.ktx2";
 
 		auto input = fmt::format(
 				"{} {} {} {} {} {}", px.string(), nx.string(), py.string(), ny.string(), pz.string(), nz.string());
 
-		auto result = system(fmt::format("toktx --encode etc1s --cubemap {} {}", output.string(), input).c_str());
+		auto result = system(fmt::format("toktx --encode uastc --cubemap {} {}", output.string(), input).c_str());
+	}
+
+	//convert skyboxes
+	OpenGLContext context = {};
+	context.startup();
+
+	for (auto &p : fs::directory_iterator(export_dir / "cubemaps")) {
+		SPDLOG_INFO("Loading cubemap at {}", p.path().string());
+
+		auto file = p.path() / "environment_map.ktx2";
+
+		context.generate_irradiance_map(file.generic_string(), tmp_dir.generic_string());
+
+		auto px = tmp_dir / "px.png";
+		auto nx = tmp_dir / "nx.png";
+		auto py = tmp_dir / "py.png";
+		auto ny = tmp_dir / "ny.png";
+		auto pz = tmp_dir / "pz.png";
+		auto nz = tmp_dir / "nz.png";
+
+		fs::path output = p.path() / "irradiance_map.ktx2";
+
+		auto input = fmt::format(
+				"{} {} {} {} {} {}", px.string(), nx.string(), py.string(), ny.string(), pz.string(), nz.string());
+
+		auto result = system(fmt::format("toktx --encode uastc --cubemap {} {}", output.string(), input).c_str());
 	}
 }

@@ -79,6 +79,8 @@ void OpenglManager::draw() {
 	view = camera.get_view_matrix();
 	camera_pos = camera.get_position();
 
+	ImGui::End();
+
 	// Enable depth testing
 	glEnable(GL_DEPTH_TEST);
 
