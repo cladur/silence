@@ -9,8 +9,9 @@
 #include <fstream>
 #include <glm/ext/matrix_transform.hpp>
 #include <string>
-#include <vulkan/vulkan.hpp>
-#include <vulkan/vulkan_enums.hpp>
+
+//#include <vulkan/vulkan.hpp>
+//#include <vulkan/vulkan_enums.hpp>
 
 #define TINYGLTF_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
