@@ -12,10 +12,12 @@ class OpenGLContext {
 private:
 	GLFWwindow *window;
 	Shader irradiance_shader;
+	Shader prefilter_shader;
+	Shader brdf_shader;
 
 public:
 	void startup();
-	void generate_irradiance_map(const std::string &path, const std::string &export_dir);
+	void process_cubemap(const std::string &path, const std::string &export_dir);
 };
 
 #endif //SILENCE_OPENGL_CONTEXT_H

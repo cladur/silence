@@ -36,6 +36,8 @@ void OpenglManager::startup() {
 	}
 	SPDLOG_INFO("Successfully initialized OpenGL loader!");
 
+	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+
 	// Setup Dear ImGui binding
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -78,8 +80,6 @@ void OpenglManager::draw() {
 			glm::perspective(glm::radians(70.0f), window_extent.x / window_extent.y, 0.1f, cvar_draw_distance.get());
 	view = camera.get_view_matrix();
 	camera_pos = camera.get_position();
-
-	ImGui::End();
 
 	// Enable depth testing
 	glEnable(GL_DEPTH_TEST);

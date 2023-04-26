@@ -48,8 +48,7 @@ void PBRPass::draw() {
 void SkyboxPass::startup() {
 	material.startup();
 	skybox.startup();
-	skybox.load_skybox_map(asset_path("cubemaps/football/environment_map.ktx2"));
-	skybox.load_irradiance_map(asset_path("cubemaps/football/irradiance_map.ktx2"));
+	skybox.load_from_directory(asset_path("cubemaps/night_sky"));
 }
 
 void SkyboxPass::draw() {

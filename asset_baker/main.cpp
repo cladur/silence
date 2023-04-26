@@ -60,8 +60,9 @@ bool convert_image(const fs::path &input, const fs::path &output) {
 	// TODO: Add optional flag for using UASTC instead of ETC1S for higher quality + more quality options
 	// https://github.com/KhronosGroup/3D-Formats-Guidelines/blob/main/KTXArtistGuide.md#compression-examples
 
-	auto result = system(
-			fmt::format("toktx --encode etc1s {} {} {}", non_color_params, output.string(), input.string()).c_str());
+	auto result = system(fmt::format(
+			"toktx --encode etc1s --clevel 4 --qlevel 255 {} {} {}", non_color_params, output.string(), input.string())
+								 .c_str());
 
 	return result == 0;
 }
@@ -642,7 +643,6 @@ int main(int argc, char *argv[]) {
 			extract_gltf_nodes(model, p.path(), folder, conv_state);
 		}
 	}
-
 	for (auto &p : fs::directory_iterator(cubemap_dir)) {
 		SPDLOG_INFO("Loading cubemap at {}", p.path().string());
 
@@ -678,7 +678,7 @@ int main(int argc, char *argv[]) {
 
 		auto file = p.path() / "environment_map.ktx2";
 
-		context.generate_irradiance_map(file.generic_string(), tmp_dir.generic_string());
+		context.process_cubemap(file.generic_string(), tmp_dir.generic_string());
 
 		auto px = tmp_dir / "px.png";
 		auto nx = tmp_dir / "nx.png";
@@ -687,11 +687,46 @@ int main(int argc, char *argv[]) {
 		auto pz = tmp_dir / "pz.png";
 		auto nz = tmp_dir / "nz.png";
 
+		// Create irradiance map texture
 		fs::path output = p.path() / "irradiance_map.ktx2";
 
-		auto input = fmt::format(
+		std::string input = fmt::format(
 				"{} {} {} {} {} {}", px.string(), nx.string(), py.string(), ny.string(), pz.string(), nz.string());
 
 		auto result = system(fmt::format("toktx --encode uastc --cubemap {} {}", output.string(), input).c_str());
+
+		// Create prefilter map texture
+		output = p.path() / "prefilter_map.ktx2";
+
+		input.clear();
+		for (int i = 0; i < 5; i++) {
+			input += (tmp_dir / ("mip_" + std::to_string(i) + "_px.png ")).string();
+		}
+		for (int i = 0; i < 5; i++) {
+			input += (tmp_dir / ("mip_" + std::to_string(i) + "_nx.png ")).string();
+		}
+		for (int i = 0; i < 5; i++) {
+			input += (tmp_dir / ("mip_" + std::to_string(i) + "_py.png ")).string();
+		}
+		for (int i = 0; i < 5; i++) {
+			input += (tmp_dir / ("mip_" + std::to_string(i) + "_ny.png ")).string();
+		}
+		for (int i = 0; i < 5; i++) {
+			input += (tmp_dir / ("mip_" + std::to_string(i) + "_pz.png ")).string();
+		}
+		for (int i = 0; i < 5; i++) {
+			input += (tmp_dir / ("mip_" + std::to_string(i) + "_nz.png ")).string();
+		}
+
+		result = system(fmt::format("toktx --encode uastc --levels 5 --convert_oetf linear --mipmap --cubemap {} {}",
+				output.string(), input)
+								.c_str());
+
+		// Create brdf lut texture
+		output = p.path() / "brdf_lut.ktx2";
+
+		auto brdf_input = tmp_dir / "brdf_lut.png";
+
+		result = system(fmt::format("toktx --encode uastc {} {}", output.string(), brdf_input.string()).c_str());
 	}
 }

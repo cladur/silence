@@ -40,10 +40,17 @@ void MaterialPBR::bind_resources() {
 	shader.set_int("normal_map", 2);
 	shader.set_int("metallic_roughness_map", 3);
 	shader.set_int("emissive_map", 4);
+
 	shader.set_int("irradiance_map", 5);
+	shader.set_int("prefilter_map", 6);
+	shader.set_int("brdf_lut", 7);
 
 	glActiveTexture(GL_TEXTURE5);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, opengl_manager->skybox_pass.skybox.irradiance_map.id);
+	glActiveTexture(GL_TEXTURE6);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, opengl_manager->skybox_pass.skybox.prefilter_map.id);
+	glActiveTexture(GL_TEXTURE7);
+	glBindTexture(GL_TEXTURE_2D, opengl_manager->skybox_pass.skybox.brdf_lut.id);
 
 	shader.set_vec3("lightPositions[0]", glm::vec3(0.0f, 0.0f, 0.0f));
 	shader.set_vec3("lightPositions[1]", glm::vec3(0.0f, 0.0f, 0.0f));

@@ -9,7 +9,7 @@ struct Texture {
 	uint32_t height;
 	uint32_t channels;
 
-	void load_from_asset(const std::string &path);
+	void load_from_asset(const std::string &path, GLenum format = GL_RGBA);
 };
 
 #endif // SILENCE_TEXTURE_H
