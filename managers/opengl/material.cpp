@@ -55,3 +55,17 @@ void MaterialPBR::bind_resources() {
 void MaterialPBR::bind_instance_resources(ModelInstance &instance) {
 	shader.set_mat4("model", instance.transform);
 }
+
+void MaterialSkybox::startup() {
+	shader.load_from_files(shader_path("skybox.vert"), shader_path("skybox.frag"));
+}
+
+void MaterialSkybox::bind_resources() {
+	OpenglManager *opengl_manager = OpenglManager::get();
+	shader.use();
+	shader.set_int("environment_map", 0);
+	shader.set_mat4("view", opengl_manager->view);
+}
+
+void MaterialSkybox::bind_instance_resources(ModelInstance &instance) {
+}

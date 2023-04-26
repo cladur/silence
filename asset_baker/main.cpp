@@ -557,26 +557,27 @@ void extract_gltf_nodes(tinygltf::Model &model, const fs::path &input, const fs:
 
 int main(int argc, char *argv[]) {
 	if (argc < 2) {
-		SPDLOG_ERROR("You need to put a asset directory as an argument");
+		SPDLOG_ERROR("You need to put a resources directory as an argument");
 		return 1;
 	}
 
 	fs::path path{ argv[1] };
 
-	const fs::path &directory = path;
-	const fs::path &export_dir = path.parent_path() / "assets_export";
+	const fs::path &asset_dir = path / "assets";
+	const fs::path &export_dir = path / "assets_export";
+	const fs::path &cubemap_dir = path / "cubemaps";
 
 	ConverterState conv_state;
 	conv_state.asset_path = path;
 	conv_state.export_path = export_dir;
 
-	SPDLOG_INFO("Loading asset directory at {}", directory.string());
+	SPDLOG_INFO("Loading asset asset_dir at {}", asset_dir.string());
 	SPDLOG_INFO("Saving baked assets to {}", export_dir.string());
 
-	for (auto &p : fs::recursive_directory_iterator(directory)) {
+	for (auto &p : fs::recursive_directory_iterator(asset_dir)) {
 		SPDLOG_INFO("File: {}", p.path().string());
 
-		auto relative = p.path().lexically_proximate(directory);
+		auto relative = p.path().lexically_proximate(asset_dir);
 		auto export_path = export_dir / relative;
 
 		if (!fs::is_directory(export_path.parent_path())) {
@@ -625,5 +626,32 @@ int main(int argc, char *argv[]) {
 			extract_gltf_materials(model, p.path(), folder, conv_state);
 			extract_gltf_nodes(model, p.path(), folder, conv_state);
 		}
+	}
+
+	for (auto &p : fs::directory_iterator(cubemap_dir)) {
+		SPDLOG_INFO("Loading cubemap at {}", p.path().string());
+
+		auto px = p.path() / "px.png";
+		auto nx = p.path() / "nx.png";
+		auto py = p.path() / "py.png";
+		auto ny = p.path() / "ny.png";
+		auto pz = p.path() / "pz.png";
+		auto nz = p.path() / "nz.png";
+
+		auto relative = p.path().lexically_proximate(cubemap_dir);
+		auto export_path = export_dir / "cubemaps";
+
+		if (!fs::is_directory(export_path)) {
+			fs::create_directory(export_path);
+		}
+
+		auto filename = p.path().filename().string();
+
+		fs::path output = export_path / (filename + ".ktx2");
+
+		auto input = fmt::format(
+				"{} {} {} {} {} {}", px.string(), nx.string(), py.string(), ny.string(), pz.string(), nz.string());
+
+		auto result = system(fmt::format("toktx --encode etc1s --cubemap {} {}", output.string(), input).c_str());
 	}
 }

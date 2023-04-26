@@ -30,4 +30,15 @@ public:
 	void draw() override;
 };
 
+class SkyboxPass : public RenderPass {
+public:
+	MaterialSkybox material;
+	Texture texture = {};
+
+	unsigned int vao, vbo;
+
+	void startup() override;
+	void draw() override;
+};
+
 #endif // SILENCE_RENDER_PASS_H
