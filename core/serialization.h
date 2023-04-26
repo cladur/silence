@@ -11,6 +11,7 @@
 #include "components/mesh_instance_component.h"
 #include "components/parent_component.h"
 #include "components/rigidbody_component.h"
+#include "components/static_tag_component.h"
 #include "components/transform_component.h"
 
 #include <functional>
@@ -31,7 +32,7 @@ concept Deserializable = requires(T t, nlohmann::json &j) {
 };
 
 typedef std::variant<Children, Parent, Transform, RigidBody, FmodListener, Gravity, MeshInstance, ColliderTag,
-		ColliderSphere, ColliderAABB, ColliderOBB>
+		StaticTag, ColliderSphere, ColliderAABB, ColliderOBB>
 		variant_type;
 
 template <typename T>

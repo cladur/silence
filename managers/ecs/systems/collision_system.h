@@ -35,14 +35,17 @@ public:
 	void startup();
 	void update();
 
+	void resolve_collision(Entity movable_object, const std::set<Entity> &static_entities);
+
 private:
+	friend class BSPSystem;
 	bool is_overlap(ColliderSphere &a, ColliderSphere &b);
 	void resolve_collision_sphere(Entity e1, Entity e2);
 
 	bool is_overlap(ColliderAABB &a, ColliderAABB &b);
 	void resolve_collision_aabb(Entity e1, Entity e2);
 
-	glm::vec3 is_overlap(ColliderAABB &aabb, ColliderSphere &sphere);
+	glm::vec3 is_overlap(ColliderAABB &a, ColliderSphere &b);
 	void resolve_aabb_sphere(Entity aabb, Entity sphere);
 
 	glm::vec3 is_overlap(ColliderOBB &a, ColliderOBB &b);
@@ -53,6 +56,8 @@ private:
 
 	glm::vec3 is_overlap(ColliderOBB &a, ColliderAABB &b);
 	void resolve_obb_aabb(Entity obb, Entity aabb);
+
+	bool is_collision_candidate(const glm::vec3 &p1, const glm::vec3 &r1, const glm::vec3 &p2, const glm::vec3 &r2);
 };
 
 #endif //SILENCE_COLLISION_SYSTEM_H

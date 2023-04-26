@@ -5,7 +5,6 @@ struct ColliderSphere {
 	// Center of collider
 	glm::vec3 center;
 	float radius;
-	bool is_movable;
 
 	void serialize_json(nlohmann::json &j) {
 		nlohmann::json::object_t obj;
@@ -14,7 +13,6 @@ struct ColliderSphere {
 		obj["center"]["y"] = center.y;
 		obj["center"]["z"] = center.z;
 		obj["radius"] = radius;
-		obj["is_movable"] = is_movable;
 		j.push_back(nlohmann::json::object());
 		j.back()["collider_sphere"] = obj;
 	}
@@ -25,7 +23,6 @@ struct ColliderSphere {
 		center.y = obj["center"]["y"];
 		center.z = obj["center"]["z"];
 		radius = obj["radius"];
-		is_movable = obj["is_movable"];
 	}
 };
 

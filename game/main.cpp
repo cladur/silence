@@ -16,6 +16,7 @@
 #include "render/render_system.h"
 
 #include "ecs/ecs_manager.h"
+#include "ecs/systems/bsp_system.h"
 #include "ecs/systems/collider_components_factory.h"
 #include "ecs/systems/collision_system.h"
 #include "ecs/systems/parent_system.h"
@@ -89,6 +90,7 @@ void default_ecs_manager_init() {
 	ecs_manager.register_component<MeshInstance>();
 	ecs_manager.register_component<FmodListener>();
 	ecs_manager.register_component<ColliderTag>();
+	ecs_manager.register_component<StaticTag>();
 	ecs_manager.register_component<ColliderSphere>();
 	ecs_manager.register_component<ColliderAABB>();
 	ecs_manager.register_component<ColliderOBB>();
@@ -121,7 +123,7 @@ void demo_entities_init(std::vector<Entity> &entities) {
 		ecs_manager.add_component(entity, transform);
 
 		ColliderComponentsFactory::add_collider_component(
-				entity, ColliderAABB{ transform.get_position(), transform.get_scale(), true });
+				entity, ColliderAABB{ transform.get_position(), transform.get_scale() });
 
 		ecs_manager.add_component<MeshInstance>(
 				entity, { render_manager.get_mesh("box"), render_manager.get_material("default_mesh") });
@@ -141,7 +143,7 @@ void demo_entities_init(std::vector<Entity> &entities) {
 	ecs_manager.add_component(floor, transform);
 
 	ColliderComponentsFactory::add_collider_component(
-			floor, ColliderAABB{ transform.get_position(), transform.get_scale(), false });
+			floor, ColliderAABB{ transform.get_position(), transform.get_scale() });
 
 	ecs_manager.add_component<MeshInstance>(
 			floor, { render_manager.get_mesh("box"), render_manager.get_material("default_mesh") });
@@ -152,15 +154,14 @@ void demo_entities_init(std::vector<Entity> &entities) {
 void demo_collision_init(Entity &entity) {
 	entity = ecs_manager.create_entity();
 
-	Transform transform = Transform{ glm::vec3(0.0f), glm::vec3(45.0f), glm::vec3(1.0f) };
+	Transform transform = Transform{ glm::vec3(0.0f, 0.0f, -20.0f), glm::vec3(45.0f), glm::vec3(1.0f) };
 	ecs_manager.add_component(entity, transform);
 
 	ColliderOBB c{};
 	c.center = transform.get_position();
 	c.range = transform.get_scale();
 	c.set_orientation(transform.get_euler_rot());
-	c.is_movable = true;
-	ColliderComponentsFactory::add_collider_component(entity, c);
+	ColliderComponentsFactory::add_collider_component(entity, c, true);
 
 	ecs_manager.add_component<MeshInstance>(
 			entity, { render_manager.get_mesh("box"), render_manager.get_material("default_mesh") });
@@ -180,7 +181,7 @@ void demo_collision_sphere(std::vector<Entity> &entities) {
 		ecs_manager.add_component(entity, transform);
 
 		ColliderComponentsFactory::add_collider_component(
-				entity, ColliderSphere{ transform.get_position(), transform.get_scale().x, true });
+				entity, ColliderSphere{ transform.get_position(), transform.get_scale().x });
 
 		ecs_manager.add_component<Gravity>(entity, { glm::vec3(0.0f, rand_gravity(random_generator), 0.0f) });
 
@@ -207,7 +208,6 @@ void demo_collision_obb(std::vector<Entity> &entities) {
 		c.center = transform.get_position();
 		c.range = transform.get_scale();
 		c.set_orientation(transform.get_euler_rot());
-		c.is_movable = true;
 
 		ColliderComponentsFactory::add_collider_component(entity, c);
 
@@ -313,6 +313,7 @@ int main() {
 	default_ecs_manager_init();
 	auto physics_system = ecs_manager.register_system<PhysicsSystem>();
 	auto collision_system = ecs_manager.register_system<CollisionSystem>();
+	auto bsp_system = ecs_manager.register_system<BSPSystem>();
 	auto parent_system = ecs_manager.register_system<ParentSystem>();
 	auto render_system = ecs_manager.register_system<RenderSystem>();
 	auto fmod_listener_system = ecs_manager.register_system<FmodListenerSystem>();
@@ -323,13 +324,13 @@ int main() {
 	render_system->startup();
 	fmod_listener_system->startup();
 
-	std::vector<Entity> entities(50);
+	std::vector<Entity> entities(500);
 	demo_entities_init(entities);
 
-	std::vector<Entity> spheres(10);
+	std::vector<Entity> spheres(500);
 	demo_collision_sphere(spheres);
 
-	std::vector<Entity> obbs(10);
+	std::vector<Entity> obbs(200);
 	demo_collision_obb(obbs);
 
 	Entity collision_tester;
@@ -370,6 +371,8 @@ int main() {
 
 	bool should_run = true;
 	nlohmann::json scene;
+
+	bsp_system->build_tree(10);
 	while (should_run) {
 		// GAME LOGIC
 		auto start_time = std::chrono::high_resolution_clock::now();
@@ -475,6 +478,7 @@ int main() {
 		}
 
 		collision_system->update();
+		bsp_system->update(*collision_system.get());
 
 		parent_system->update();
 		render_system->update(render_manager);

@@ -5,7 +5,6 @@ struct ColliderOBB {
 	glm::vec3 center;
 	glm::vec3 orientation[2];
 	glm::vec3 range;
-	bool is_movable;
 
 	void serialize_json(nlohmann::json &j) {
 		nlohmann::json::object_t obj;
@@ -26,7 +25,6 @@ struct ColliderOBB {
 		obj["range"]["x"] = range.x;
 		obj["range"]["y"] = range.y;
 		obj["range"]["z"] = range.z;
-		obj["is_movable"] = is_movable;
 		j.push_back(nlohmann::json::object());
 		j.back()["collider_obb"] = obj;
 	}
@@ -45,7 +43,24 @@ struct ColliderOBB {
 		range.x = obj["range"]["x"];
 		range.y = obj["range"]["y"];
 		range.z = obj["range"]["z"];
-		is_movable = obj["is_movable"];
+	}
+
+	void setup_range(const std::vector<glm::vec3> &vertices) {
+		glm::vec3 min(std::numeric_limits<float>::max());
+		glm::vec3 max(-std::numeric_limits<float>::max());
+
+		for (const glm::vec3 vertex : vertices) {
+			for (int32_t i = 0; i < 3; ++i) {
+				if (min[i] > vertex[i]) {
+					min[i] = vertex[i];
+				}
+
+				if (max[i] < vertex[i]) {
+					max[i] = vertex[i];
+				}
+			}
+		}
+		range = (max - min) * 0.5f;
 	}
 
 	glm::mat3 get_orientation_matrix() const {
