@@ -387,7 +387,8 @@ int main() {
 
 	// test for ui elements
 	UISlider slider_test = UISlider(0.0f, 0.0f, 1.0f, false);
-	slider_test.size = glm::vec2(200.0f, 20.0f);
+	slider_test.size = glm::vec2(20.0f, 200.0f);
+	slider_test.slider_alignment = SliderAlignment::TOP_TO_BOTTOM;
 	float slider_value = 0.0f;
 
 	bool should_run = true;
@@ -551,63 +552,63 @@ int main() {
 //				"pointer",
 //				true,
 //				sprite_draw::Alignment::CENTER);
-		sprite_draw::draw_sprite(
-				glm::vec3(0.0f, -70.0f, 0.0f),
-				glm::vec2(140.0f, 140.0f),
-				glm::vec3(1.0f),
-				"ui_width",
-				true,
-				sprite_draw::Alignment::TOP);
-		sprite_draw::draw_sprite(
-				glm::vec3(50.0f, 0.0f, 0.0f),
-				glm::vec2(100.0f, 100.0f),
-				glm::vec3(1.0f),
-				"ui_height",
-				true,
-				sprite_draw::Alignment::LEFT);
-		sprite_draw::draw_sprite(
-				glm::vec3(-100.0f, 0.0f, 0.0f),
-				glm::vec2(200.0f, 200.0f),
-				glm::vec3(1.0f),
-				"kek",
-				true,
-				sprite_draw::Alignment::RIGHT);
-		sprite_draw::draw_sprite(
-				glm::vec3(0.0f, 100.0f, 0.0f),
-				glm::vec2(200.0f, 200.0f),
-				glm::vec3(1.0f),
-				"missing_asf",
-				true,
-				sprite_draw::Alignment::BOTTOM);
-
-		sprite_draw::draw_sprite(
-				glm::vec3(50.0f, -50.0f, 0.0f),
-				glm::vec2(100.0f, 100.0f),
-				glm::vec3(0.345f, 0.531, 0.9345f),
-				"skull",
-				true,
-				sprite_draw::Alignment::TOP_LEFT);
-		sprite_draw::draw_sprite(
-				glm::vec3(-50.0f, -50.0f, 0.0f),
-				glm::vec2(100.0f, 100.0f),
-				glm::vec3(0.545f, 0.231, 0.725f),
-				"skull",
-				true,
-				sprite_draw::Alignment::TOP_RIGHT);
-		sprite_draw::draw_sprite(
-				glm::vec3(50.0f, 50.0f, 0.0f),
-				glm::vec2(100.0f, 100.0f),
-				glm::vec3(1.0f),
-				"skull",
-				true,
-				sprite_draw::Alignment::BOTTOM_LEFT);
-		sprite_draw::draw_sprite(
-				glm::vec3(-50.0f, 50.0f, 0.0f),
-				glm::vec2(100.0f, 100.0f),
-				glm::vec3(0.123f, 0.52, 0.347f),
-				"skull",
-				true,
-				sprite_draw::Alignment::BOTTOM_RIGHT);
+//		sprite_draw::draw_sprite(
+//				glm::vec3(0.0f, -70.0f, 0.0f),
+//				glm::vec2(140.0f, 140.0f),
+//				glm::vec3(1.0f),
+//				"ui_width",
+//				true,
+//				sprite_draw::Alignment::TOP);
+//		sprite_draw::draw_sprite(
+//				glm::vec3(50.0f, 0.0f, 0.0f),
+//				glm::vec2(100.0f, 100.0f),
+//				glm::vec3(1.0f),
+//				"ui_height",
+//				true,
+//				sprite_draw::Alignment::LEFT);
+//		sprite_draw::draw_sprite(
+//				glm::vec3(-100.0f, 0.0f, 0.0f),
+//				glm::vec2(200.0f, 200.0f),
+//				glm::vec3(1.0f),
+//				"kek",
+//				true,
+//				sprite_draw::Alignment::RIGHT);
+//		sprite_draw::draw_sprite(
+//				glm::vec3(0.0f, 100.0f, 0.0f),
+//				glm::vec2(200.0f, 200.0f),
+//				glm::vec3(1.0f),
+//				"missing_asf",
+//				true,
+//				sprite_draw::Alignment::BOTTOM);
+//
+//		sprite_draw::draw_sprite(
+//				glm::vec3(50.0f, -50.0f, 0.0f),
+//				glm::vec2(100.0f, 100.0f),
+//				glm::vec3(0.345f, 0.531, 0.9345f),
+//				"skull",
+//				true,
+//				sprite_draw::Alignment::TOP_LEFT);
+//		sprite_draw::draw_sprite(
+//				glm::vec3(-50.0f, -50.0f, 0.0f),
+//				glm::vec2(100.0f, 100.0f),
+//				glm::vec3(0.545f, 0.231, 0.725f),
+//				"skull",
+//				true,
+//				sprite_draw::Alignment::TOP_RIGHT);
+//		sprite_draw::draw_sprite(
+//				glm::vec3(50.0f, 50.0f, 0.0f),
+//				glm::vec2(100.0f, 100.0f),
+//				glm::vec3(1.0f),
+//				"skull",
+//				true,
+//				sprite_draw::Alignment::BOTTOM_LEFT);
+//		sprite_draw::draw_sprite(
+//				glm::vec3(-50.0f, 50.0f, 0.0f),
+//				glm::vec2(100.0f, 100.0f),
+//				glm::vec3(0.123f, 0.52, 0.347f),
+//				"skull",
+//				true,
+//				sprite_draw::Alignment::BOTTOM_RIGHT);
 
 		slider_test.value = slider_value;
 		slider_test.draw();

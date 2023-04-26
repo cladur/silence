@@ -18,13 +18,16 @@ void UISlider::draw() {
 			new_position.x = position.x - (size.x - new_size.x) / 2.0f;
 			break;
 		case SliderAlignment::RIGHT_TO_LEFT:
-			new_size.x = (max - value) / (max - min) * size.x;
+			new_size.x = (value - min) / (max - min) * size.x;
+			new_position.x = position.x + (size.x - new_size.x) / 2.0f;
 			break;
 		case SliderAlignment::TOP_TO_BOTTOM:
 			new_size.y = (value - min) / (max - min) * size.y;
+			new_position.y = position.y + (size.y - new_size.y) / 2.0f;
 			break;
 		case SliderAlignment::BOTTOM_TO_TOP:
-			new_size.y = (max - value) / (max - min) * size.y;
+			new_size.y = (value - min) / (max - min) * size.y;
+			new_position.y = position.y - (size.y - new_size.y) / 2.0f;
 			break;
 	}
 
