@@ -41,6 +41,7 @@
 
 #include "core/camera/camera.h"
 #include "opengl/ui/sprite_manager.h"
+#include "opengl/ui/ui_elements/ui_slider.h"
 // #include "render/debug/debug_draw.h"
 // #include "render/text/text_draw.h"
 
@@ -384,6 +385,11 @@ int main() {
 	EventReference test_pluck = EventReference("test_pluck");
 	// #################
 
+	// test for ui elements
+	UISlider slider_test = UISlider(0.0f, 0.0f, 1.0f, false);
+	slider_test.size = glm::vec2(200.0f, 20.0f);
+	float slider_value = 0.0f;
+
 	bool should_run = true;
 	nlohmann::json scene;
 	while (should_run) {
@@ -481,6 +487,8 @@ int main() {
 		if (ImGui::Button("Play pluck")) {
 			audio_manager.play_one_shot_3d(test_pluck, sound_position);
 		}
+
+		ImGui::SliderFloat("Slider test", &slider_value, 0.0f, 1.0f);
 		// 3D SOUND DEMO
 
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
@@ -536,13 +544,13 @@ int main() {
 //		debug_draw::draw_box(glm::vec3(0.0f, 5.0f, 0.0f), glm::vec3(10.0f, 1.0f, 1.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 
 //		sprite_draw::draw_colored(glm::vec3(0.0f, 3.0f, 0.0f), glm::vec2(2.0f, 2.0f), glm::vec3(0.4531f, 0.643f, 0.8134f), false);
-		sprite_draw::draw_sprite(
-				glm::vec3(0.0f, 0.0f, 0.0f),
-				glm::vec2(100.0f, 100.0f),
-				glm::vec3(0.543f, 0.413, 0.8134f),
-				"pointer",
-				true,
-				sprite_draw::Alignment::CENTER);
+//		sprite_draw::draw_sprite(
+//				glm::vec3(0.0f, 0.0f, 0.0f),
+//				glm::vec2(100.0f, 100.0f),
+//				glm::vec3(0.543f, 0.413, 0.8134f),
+//				"pointer",
+//				true,
+//				sprite_draw::Alignment::CENTER);
 		sprite_draw::draw_sprite(
 				glm::vec3(0.0f, -70.0f, 0.0f),
 				glm::vec2(140.0f, 140.0f),
@@ -600,6 +608,9 @@ int main() {
 				"skull",
 				true,
 				sprite_draw::Alignment::BOTTOM_RIGHT);
+
+		slider_test.value = slider_value;
+		slider_test.draw();
 
 		// TODO: remove this when collision demo will be removed
 		for (auto sphere : spheres) {

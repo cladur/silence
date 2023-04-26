@@ -78,7 +78,8 @@ Sprite sprite_draw::default_vertex_data(
 		float sprite_x_size,
 		float sprite_y_size,
 		const glm::vec3 &color,
-		bool is_screen_space) {
+		bool is_screen_space,
+		Alignment alignment) {
 	Sprite sprite = {};
 	sprite.vertices.resize(4);
 	sprite.indices.resize(6);
@@ -87,60 +88,8 @@ Sprite sprite_draw::default_vertex_data(
 
 	float aspect = 1.0f;
 
-//	if (is_screen_space) {
-//		glm::vec2 window_size = DisplayManager::get()->get_framebuffer_size();
-//		aspect = window_size.y / window_size.x;
-//	}
-
-	float sprite_x_aspect = 1.0f;
-	float sprite_y_aspect = 1.0f;
-
-	if (sprite_x_size > sprite_y_size) {
-		sprite_y_aspect = sprite_x_size / sprite_y_size;
-	}
-	else {
-		sprite_x_aspect = sprite_y_size / sprite_x_size;
-	}
-
-	float x = position.x * aspect;
-	float y = position.y;
-
-	float w = size.x / 2.0f * aspect * sprite_y_aspect;
-	float h = size.y / 2.0f * sprite_x_aspect;
-
-	//update the vertices
-	sprite.vertices[0] = { { x - w, y + h, 0.0f }, color, { 0.0f, 0.0f }, is_screen_space }; // 0
-	sprite.vertices[1] = { { x - w, y - h, 0.0f }, color, { 0.0f, 1.0f }, is_screen_space }; // 1
-	sprite.vertices[2] = { { x + w, y - h, 0.0f }, color, { 1.0f, 1.0f }, is_screen_space }; // 2
-	sprite.vertices[3] = { { x + w, y + h, 0.0f }, color, { 1.0f, 0.0f }, is_screen_space }; // 3
-
-	//update the indices
-	uint32_t index = 0;
-	sprite.indices[index++] = 0;
-	sprite.indices[index++] = 1;
-	sprite.indices[index++] = 2;
-	sprite.indices[index++] = 0;
-	sprite.indices[index++] = 2;
-	sprite.indices[index++] = 3;
-
-	return sprite;
-}
-
-void sprite_draw::draw_colored(const glm::vec2 &position, const glm::vec2 &size, const glm::vec3 &color, bool is_screen_space) {
-
-	Sprite sprite = default_vertex_data(position, size, 1.0f, 1.0f, color, is_screen_space);
-	auto manager = OpenglManager::get();
-	manager->sprite_draw.sprites.push_back(sprite);
-}
-
-void sprite_draw::draw_sprite(const glm::vec2 &position, const glm::vec2 &size, const glm::vec3 &color,
-		const char *texture_name, bool is_screen_space, Alignment alignment) {
-
-	Texture t = SpriteManager::get()->get_sprite_texture(texture_name);
-
 	glm::vec2 aligned_position = position;
 
-	// alignment only makes sense in screen space
 	if (is_screen_space)
 	{
 		glm::vec2 window_size = DisplayManager::get()->get_framebuffer_size();
@@ -178,7 +127,54 @@ void sprite_draw::draw_sprite(const glm::vec2 &position, const glm::vec2 &size, 
 		}
 	}
 
-	Sprite sprite = default_vertex_data(aligned_position, size, (float)t.width, (float)t.height, color, is_screen_space);
+	float sprite_x_aspect = 1.0f;
+	float sprite_y_aspect = 1.0f;
+
+	if (sprite_x_size > sprite_y_size) {
+		sprite_y_aspect = sprite_x_size / sprite_y_size;
+	}
+	else {
+		sprite_x_aspect = sprite_y_size / sprite_x_size;
+	}
+
+	float x = aligned_position.x * aspect;
+	float y = aligned_position.y;
+
+	float w = size.x / 2.0f * aspect * sprite_y_aspect;
+	float h = size.y / 2.0f * sprite_x_aspect;
+
+	//update the vertices
+	sprite.vertices[0] = { { x - w, y + h, 0.0f }, color, { 0.0f, 0.0f }, is_screen_space }; // 0
+	sprite.vertices[1] = { { x - w, y - h, 0.0f }, color, { 0.0f, 1.0f }, is_screen_space }; // 1
+	sprite.vertices[2] = { { x + w, y - h, 0.0f }, color, { 1.0f, 1.0f }, is_screen_space }; // 2
+	sprite.vertices[3] = { { x + w, y + h, 0.0f }, color, { 1.0f, 0.0f }, is_screen_space }; // 3
+
+	//update the indices
+	uint32_t index = 0;
+	sprite.indices[index++] = 0;
+	sprite.indices[index++] = 1;
+	sprite.indices[index++] = 2;
+	sprite.indices[index++] = 0;
+	sprite.indices[index++] = 2;
+	sprite.indices[index++] = 3;
+
+	return sprite;
+}
+
+void sprite_draw::draw_colored(const glm::vec2 &position, const glm::vec2 &size, const glm::vec3 &color,
+		bool is_screen_space, Alignment alignment) {
+
+	Sprite sprite = default_vertex_data(position, size, 1.0f, 1.0f, color, is_screen_space, alignment);
+	auto manager = OpenglManager::get();
+	manager->sprite_draw.sprites.push_back(sprite);
+}
+
+void sprite_draw::draw_sprite(const glm::vec2 &position, const glm::vec2 &size, const glm::vec3 &color,
+		const char *texture_name, bool is_screen_space, Alignment alignment) {
+
+	Texture t = SpriteManager::get()->get_sprite_texture(texture_name);
+
+	Sprite sprite = default_vertex_data(position, size, (float)t.width, (float)t.height, color, is_screen_space, alignment);
 	sprite.texture_name = texture_name;
 	auto manager = OpenglManager::get();
 	manager->sprite_draw.sprites.push_back(sprite);
