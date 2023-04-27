@@ -1,5 +1,6 @@
 #include "skybox.h"
 
+#include "display/display_manager.h"
 #include "shader.h"
 #include "utils.h"
 
@@ -51,5 +52,7 @@ void Skybox::load_from_directory(const std::string &path) {
 	utils::render_quad();
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glViewport(0, 0, 1280, 720);
+
+	glm::vec2 framebuffer_size = DisplayManager::get()->get_framebuffer_size();
+	glViewport(0, 0, framebuffer_size.x, framebuffer_size.y);
 }
