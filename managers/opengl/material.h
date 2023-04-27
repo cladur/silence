@@ -24,4 +24,18 @@ public:
 	void bind_instance_resources(ModelInstance &instance) override;
 };
 
+class MaterialPBR : public Material {
+public:
+	void startup() override;
+	void bind_resources() override;
+	void bind_instance_resources(ModelInstance &instance) override;
+};
+
+class MaterialSkybox : public Material {
+public:
+	void startup() override;
+	void bind_resources() override;
+	void bind_instance_resources(ModelInstance &instance) override;
+};
+
 #endif // SILENCE_MATERIAL_H

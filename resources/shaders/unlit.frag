@@ -6,10 +6,6 @@ in vec3 Normal;
 
 // material parameters
 uniform sampler2D albedo_map;
-uniform sampler2D ao_map;
-uniform sampler2D normal_map;
-uniform sampler2D metallic_roughness_map;
-uniform sampler2D emissive_map;
 
 uniform vec3 camPos;
 

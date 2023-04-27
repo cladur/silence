@@ -18,6 +18,8 @@
 #define TINYGLTF_NOEXCEPTION // optional. disable exception handling.
 #include "tiny_gltf.h"
 
+#include "opengl_context.h"
+
 namespace tg = tinygltf;
 namespace fs = std::filesystem;
 using namespace assets;
@@ -58,8 +60,9 @@ bool convert_image(const fs::path &input, const fs::path &output) {
 	// TODO: Add optional flag for using UASTC instead of ETC1S for higher quality + more quality options
 	// https://github.com/KhronosGroup/3D-Formats-Guidelines/blob/main/KTXArtistGuide.md#compression-examples
 
-	auto result = system(
-			fmt::format("toktx --encode etc1s {} {} {}", non_color_params, output.string(), input.string()).c_str());
+	auto result = system(fmt::format(
+			"toktx --encode etc1s --clevel 4 --qlevel 255 {} {} {}", non_color_params, output.string(), input.string())
+								 .c_str());
 
 	return result == 0;
 }
@@ -557,26 +560,40 @@ void extract_gltf_nodes(tinygltf::Model &model, const fs::path &input, const fs:
 
 int main(int argc, char *argv[]) {
 	if (argc < 2) {
-		SPDLOG_ERROR("You need to put a asset directory as an argument");
+		SPDLOG_ERROR("You need to put a resources directory as an argument");
 		return 1;
 	}
 
 	fs::path path{ argv[1] };
 
-	const fs::path &directory = path;
-	const fs::path &export_dir = path.parent_path() / "assets_export";
+	const fs::path &asset_dir = path / "assets";
+	const fs::path &export_dir = path / "assets_export";
+	const fs::path &tmp_dir = path / "assets_tmp";
+	const fs::path &cubemap_dir = path / "cubemaps";
+
+	if (!fs::is_directory(export_dir)) {
+		fs::create_directory(export_dir);
+	}
+
+	if (!fs::is_directory(tmp_dir)) {
+		fs::create_directory(tmp_dir);
+	}
+
+	if (!fs::is_directory(cubemap_dir)) {
+		fs::create_directory(cubemap_dir);
+	}
 
 	ConverterState conv_state;
 	conv_state.asset_path = path;
 	conv_state.export_path = export_dir;
 
-	SPDLOG_INFO("Loading asset directory at {}", directory.string());
+	SPDLOG_INFO("Loading asset asset_dir at {}", asset_dir.string());
 	SPDLOG_INFO("Saving baked assets to {}", export_dir.string());
 
-	for (auto &p : fs::recursive_directory_iterator(directory)) {
+	for (auto &p : fs::recursive_directory_iterator(asset_dir)) {
 		SPDLOG_INFO("File: {}", p.path().string());
 
-		auto relative = p.path().lexically_proximate(directory);
+		auto relative = p.path().lexically_proximate(asset_dir);
 		auto export_path = export_dir / relative;
 
 		if (!fs::is_directory(export_path.parent_path())) {
@@ -625,5 +642,91 @@ int main(int argc, char *argv[]) {
 			extract_gltf_materials(model, p.path(), folder, conv_state);
 			extract_gltf_nodes(model, p.path(), folder, conv_state);
 		}
+	}
+	for (auto &p : fs::directory_iterator(cubemap_dir)) {
+		SPDLOG_INFO("Loading cubemap at {}", p.path().string());
+
+		auto px = p.path() / "px.png";
+		auto nx = p.path() / "nx.png";
+		auto py = p.path() / "py.png";
+		auto ny = p.path() / "ny.png";
+		auto pz = p.path() / "pz.png";
+		auto nz = p.path() / "nz.png";
+
+		auto relative = p.path().lexically_proximate(cubemap_dir);
+		auto filename = p.path().filename().string();
+		auto export_path = export_dir / "cubemaps" / filename;
+
+		if (!fs::is_directory(export_path)) {
+			fs::create_directory(export_path);
+		}
+
+		fs::path output = export_path / "environment_map.ktx2";
+
+		auto input = fmt::format(
+				"{} {} {} {} {} {}", px.string(), nx.string(), py.string(), ny.string(), pz.string(), nz.string());
+
+		auto result = system(fmt::format("toktx --encode uastc --cubemap {} {}", output.string(), input).c_str());
+	}
+
+	//convert skyboxes
+	OpenGLContext context = {};
+	context.startup();
+
+	for (auto &p : fs::directory_iterator(export_dir / "cubemaps")) {
+		SPDLOG_INFO("Loading cubemap at {}", p.path().string());
+
+		auto file = p.path() / "environment_map.ktx2";
+
+		context.process_cubemap(file.generic_string(), tmp_dir.generic_string());
+
+		auto px = tmp_dir / "px.png";
+		auto nx = tmp_dir / "nx.png";
+		auto py = tmp_dir / "py.png";
+		auto ny = tmp_dir / "ny.png";
+		auto pz = tmp_dir / "pz.png";
+		auto nz = tmp_dir / "nz.png";
+
+		// Create irradiance map texture
+		fs::path output = p.path() / "irradiance_map.ktx2";
+
+		std::string input = fmt::format(
+				"{} {} {} {} {} {}", px.string(), nx.string(), py.string(), ny.string(), pz.string(), nz.string());
+
+		auto result = system(fmt::format("toktx --encode uastc --cubemap {} {}", output.string(), input).c_str());
+
+		// Create prefilter map texture
+		output = p.path() / "prefilter_map.ktx2";
+
+		input.clear();
+		for (int i = 0; i < 5; i++) {
+			input += (tmp_dir / ("mip_" + std::to_string(i) + "_px.png ")).string();
+		}
+		for (int i = 0; i < 5; i++) {
+			input += (tmp_dir / ("mip_" + std::to_string(i) + "_nx.png ")).string();
+		}
+		for (int i = 0; i < 5; i++) {
+			input += (tmp_dir / ("mip_" + std::to_string(i) + "_py.png ")).string();
+		}
+		for (int i = 0; i < 5; i++) {
+			input += (tmp_dir / ("mip_" + std::to_string(i) + "_ny.png ")).string();
+		}
+		for (int i = 0; i < 5; i++) {
+			input += (tmp_dir / ("mip_" + std::to_string(i) + "_pz.png ")).string();
+		}
+		for (int i = 0; i < 5; i++) {
+			input += (tmp_dir / ("mip_" + std::to_string(i) + "_nz.png ")).string();
+		}
+
+		result = system(fmt::format("toktx --encode uastc --levels 5 --convert_oetf linear --mipmap --cubemap {} {}",
+				output.string(), input)
+								.c_str());
+
+		// Create brdf lut texture
+		output = p.path() / "brdf_lut.ktx2";
+
+		auto brdf_input = tmp_dir / "brdf_lut.png";
+
+		result = system(fmt::format("toktx --encode uastc {} {}", output.string(), brdf_input.string()).c_str());
 	}
 }
