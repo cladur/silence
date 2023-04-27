@@ -70,12 +70,16 @@ void OpenglManager::shutdown() {
 }
 
 void OpenglManager::draw() {
+	DisplayManager *display_manager = DisplayManager::get();
+	glm::vec2 window_extent = display_manager->get_framebuffer_size();
+	if (display_manager->is_window_resizable) {
+		glViewport(0, 0, (int)window_extent.x, (int)window_extent.y);
+	}
+
 	// Clear the screen
 	glad_glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	DisplayManager *display_manager = DisplayManager::get();
-	glm::vec2 window_extent = display_manager->get_framebuffer_size();
 	projection =
 			glm::perspective(glm::radians(70.0f), window_extent.x / window_extent.y, 0.1f, cvar_draw_distance.get());
 	view = camera.get_view_matrix();
