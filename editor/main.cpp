@@ -2,6 +2,7 @@
 #include "display/display_manager.h"
 #include "font/font_manager.h"
 #include "input/input_manager.h"
+#include "opengl/material.h"
 
 #ifdef USE_OPENGL
 #include "imgui_impl_opengl3.h"
@@ -115,7 +116,7 @@ void demo_entities_init(std::vector<Entity> &entities) {
 		ColliderComponentsFactory::add_collider_component(
 				entity, ColliderAABB{ transform.get_position(), transform.get_scale(), true });
 
-		Handle<ModelInstance> hndl = OpenglManager::get()->add_instance("woodenBox/woodenBox.pfb");
+		Handle<ModelInstance> hndl = OpenglManager::get()->add_instance("woodenBox/woodenBox.pfb", MATERIAL_TYPE_UNLIT);
 		//		Handle<ModelInstance> hndl = OpenglManager::get()->add_instance("electricBox/electricBox.pfb");
 		//		Handle<ModelInstance> hndl = OpenglManager::get()->add_instance("Agent/agent_idle.pfb");
 		ecs_manager.add_component<RenderHandle>(entity, RenderHandle{ .handle = hndl });
