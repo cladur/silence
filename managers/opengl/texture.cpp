@@ -22,11 +22,12 @@ void Texture::load_from_asset(const std::string &path, bool pregenerated_mipmaps
 	bool bc7_supported = false;
 	bool s3tc_supported = false;
 
-	int NumberOfExtensions;
-	glGetIntegerv(GL_NUM_EXTENSIONS, &NumberOfExtensions);
-	for (int i = 0; i < NumberOfExtensions; i++) {
+	int number_of_extensions;
+	glGetIntegerv(GL_NUM_EXTENSIONS, &number_of_extensions);
+	for (int i = 0; i < number_of_extensions; i++) {
 		const char *ccc = (const char *)glGetStringi(GL_EXTENSIONS, i);
-		if (strcmp(ccc, "GL_EXT_texture_compression_bptc") == 0) {
+		if ((strcmp(ccc, "GL_EXT_texture_compression_bptc") == 0) ||
+				(strcmp(ccc, "GL_ARB_texture_compression_bptc") == 0)) {
 			bc7_supported = true;
 		} else if (strcmp(ccc, "GL_EXT_texture_compression_s3tc") == 0) {
 			s3tc_supported = true;
