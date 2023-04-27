@@ -664,6 +664,10 @@ int main(int argc, char *argv[]) {
 		auto filename = p.path().filename().string();
 		auto export_path = export_dir / "cubemaps" / filename;
 
+		if (!fs::is_directory(export_path.parent_path())) {
+			fs::create_directory(export_path.parent_path());
+		}
+
 		if (!fs::is_directory(export_path)) {
 			fs::create_directory(export_path);
 		}
