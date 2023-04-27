@@ -7,10 +7,9 @@
 #include <vulkan/vulkan_core.h>
 #include <filesystem>
 #include <fstream>
+#include <future>
 #include <glm/ext/matrix_transform.hpp>
 #include <string>
-#include <vulkan/vulkan.hpp>
-#include <vulkan/vulkan_enums.hpp>
 
 #define TINYGLTF_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
@@ -45,24 +44,28 @@ fs::path ConverterState::convert_to_export_relative(const fs::path &path) const 
 }
 
 bool convert_image(const fs::path &input, const fs::path &output) {
-	SPDLOG_INFO("Converting image {} to {}", input.string(), output.string());
-
-	// Check if input filename has "normal" in it, case insensitive
+	// Check if input filename has "normal" in it, case-insensitive
 	auto normal_pos = find_case_insensitive(input.string(), "normal");
 	auto roughness_pos = find_case_insensitive(input.string(), "roughness");
 	auto metallic_pos = find_case_insensitive(input.string(), "metal");
 
-	std::string non_color_params;
-	if (normal_pos || roughness_pos || metallic_pos) {
-		non_color_params = "--assign_oetf linear --assign_primaries none";
-	}
-
 	// TODO: Add optional flag for using UASTC instead of ETC1S for higher quality + more quality options
 	// https://github.com/KhronosGroup/3D-Formats-Guidelines/blob/main/KTXArtistGuide.md#compression-examples
 
-	auto result = system(fmt::format(
-			"toktx --encode etc1s --clevel 4 --qlevel 255 {} {} {}", non_color_params, output.string(), input.string())
-								 .c_str());
+	std::string params;
+	std::string hq_params;
+
+	if (normal_pos || roughness_pos || metallic_pos) {
+		params = "--encode uastc --uastc_quality 0 --uastc_rdo_l 2.0 --zcmp 16";
+		hq_params = "--encode uastc --uastc_quality 3 --uastc_rdo_l .5 --uastc_rdo_d 32768 --zcmp 16";
+	} else {
+		params = "--encode etc1s --clevel 4 --qlevel 255";
+		hq_params = "--encode uastc --uastc_quality 2 --uastc_rdo_l 1.0 --uastc_rdo_d 32768 --zcmp 16";
+	}
+
+	auto result = system(fmt::format("toktx --t2 {} {} {}", params, output.string(), input.string()).c_str());
+
+	SPDLOG_INFO("Converted image {} ", input.string());
 
 	return result == 0;
 }
@@ -590,6 +593,8 @@ int main(int argc, char *argv[]) {
 	SPDLOG_INFO("Loading asset asset_dir at {}", asset_dir.string());
 	SPDLOG_INFO("Saving baked assets to {}", export_dir.string());
 
+	std::vector<std::future<void>> futures = {};
+
 	for (auto &p : fs::recursive_directory_iterator(asset_dir)) {
 		SPDLOG_INFO("File: {}", p.path().string());
 
@@ -607,7 +612,8 @@ int main(int argc, char *argv[]) {
 			new_path.replace_extension(".ktx2");
 
 			auto folder = export_path.parent_path() / new_path.filename().string();
-			convert_image(p.path(), folder);
+
+			futures.push_back(std::async([p, folder]() { convert_image(p.path(), folder); }));
 		}
 		if (p.path().extension() == ".gltf") {
 			SPDLOG_INFO("found a glTF model");
@@ -643,6 +649,7 @@ int main(int argc, char *argv[]) {
 			extract_gltf_nodes(model, p.path(), folder, conv_state);
 		}
 	}
+
 	for (auto &p : fs::directory_iterator(cubemap_dir)) {
 		SPDLOG_INFO("Loading cubemap at {}", p.path().string());
 
@@ -728,5 +735,9 @@ int main(int argc, char *argv[]) {
 		auto brdf_input = tmp_dir / "brdf_lut.png";
 
 		result = system(fmt::format("toktx --encode uastc {} {}", output.string(), brdf_input.string()).c_str());
+	}
+
+	for (auto &f : futures) {
+		f.wait();
 	}
 }

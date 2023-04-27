@@ -12,6 +12,7 @@ public:
 	Texture irradiance_map;
 	Texture prefilter_map;
 	Texture brdf_lut;
+	unsigned int brdf_lut_texture;
 
 	void draw() const;
 

@@ -6,10 +6,12 @@ in vec3 Normal;
 
 // material parameters
 uniform sampler2D albedo_map;
-uniform sampler2D ao_map;
 uniform sampler2D normal_map;
-uniform sampler2D metallic_roughness_map;
+uniform sampler2D ao_metallic_roughness_map;
 uniform sampler2D emissive_map;
+
+uniform bool has_ao_map;
+uniform bool has_emissive_map;
 
 uniform samplerCube irradiance_map;
 uniform samplerCube prefilter_map;
@@ -91,10 +93,15 @@ vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
 // ----------------------------------------------------------------------------
 void main()
 {
-    vec3 albedo     = pow(texture(albedo_map, TexCoords).rgb, vec3(2.2));
-    float ao        = texture(ao_map, TexCoords).r;
-    float metallic = texture(metallic_roughness_map, TexCoords).b;
-    float roughness = texture(metallic_roughness_map, TexCoords).g;
+    vec3 albedo = pow(texture(albedo_map, TexCoords).rgb, vec3(2.2));
+    vec3 ao_metallic_roughness = texture(ao_metallic_roughness_map, TexCoords).rgb;
+    float roughness = ao_metallic_roughness.g;
+    float metallic = ao_metallic_roughness.b;
+
+    float ao = 1.0;
+    if (has_ao_map) {
+        ao = ao_metallic_roughness.r;
+    }
 
     vec3 N = getNormalFromMap();
     vec3 V = normalize(camPos - WorldPos);
@@ -162,6 +169,10 @@ void main()
     vec3 ambient = (kD * diffuse + specular) * ao;
 
     vec3 color = ambient + Lo;
+
+    if (has_emissive_map) {
+        color += texture(emissive_map, TexCoords).rgb;
+    }
 
     // HDR tonemapping
     color = color / (color + vec3(1.0));

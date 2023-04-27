@@ -26,7 +26,10 @@ void UnlitPass::draw() {
 		ModelInstance &instance = opengl_manager->get_model_instance(handle);
 		material.bind_instance_resources(instance);
 		Model &model = opengl_manager->get_model(instance.model_handle);
-		model.draw(MATERIAL_TYPE_UNLIT);
+		for (auto &mesh : model.meshes) {
+			material.bind_mesh_resources(mesh);
+			mesh.draw();
+		}
 	}
 }
 
@@ -41,14 +44,17 @@ void PBRPass::draw() {
 		ModelInstance &instance = opengl_manager->get_model_instance(handle);
 		material.bind_instance_resources(instance);
 		Model &model = opengl_manager->get_model(instance.model_handle);
-		model.draw(MATERIAL_TYPE_PBR);
+		for (auto &mesh : model.meshes) {
+			material.bind_mesh_resources(mesh);
+			mesh.draw();
+		}
 	}
 }
 
 void SkyboxPass::startup() {
 	material.startup();
 	skybox.startup();
-	skybox.load_from_directory(asset_path("cubemaps/night_sky"));
+	skybox.load_from_directory(asset_path("cubemaps/venice_sunset"));
 }
 
 void SkyboxPass::draw() {

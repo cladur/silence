@@ -2,7 +2,7 @@
 
 #include "ktx.h"
 
-void Texture::load_from_asset(const std::string &path, GLenum format) {
+void Texture::load_from_asset(const std::string &path, bool pregenerated_mipmaps) {
 	ktxTexture2 *ktx_texture;
 	KTX_error_code result;
 	ktx_uint8_t *image;
@@ -15,12 +15,7 @@ void Texture::load_from_asset(const std::string &path, GLenum format) {
 
 	// TODO: Support different formats (vkFormat -> GL format)
 	ktx_texture_transcode_fmt_e tf = KTX_TTF_RGBA32;
-	if (format == GL_RGBA) {
-		tf = KTX_TTF_RGBA32;
-	}
-	if (format == GL_RG) {
-		tf = KTX_TTF_BC5_RG;
-	}
+	GLenum format = GL_RGBA;
 
 	result = ktxTexture2_TranscodeBasis(ktx_texture, tf, 0);
 
@@ -38,16 +33,25 @@ void Texture::load_from_asset(const std::string &path, GLenum format) {
 					SPDLOG_ERROR("Couldn't get image offset from cubemap {}", path);
 				}
 
+				unsigned int width = ktx_texture->baseWidth * std::pow(0.5, level);
+				unsigned int height = ktx_texture->baseHeight * std::pow(0.5, level);
+
 				void *data = ktx_texture->pData + offset;
 
-				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, format, ktx_texture->baseWidth,
-						ktx_texture->baseHeight, 0, format, GL_UNSIGNED_BYTE, data);
+				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, format, width, height, 0, format,
+						GL_UNSIGNED_BYTE, data);
+
+				// Generate mipmaps if there's only one level
+				// or "generate" them to allocate the space for them if they are pregenerated
+				if ((ktx_texture->numLevels == 1 || pregenerated_mipmaps) && level == 0) {
+					glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+				}
 			}
 		}
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	} else {
 		glGenTextures(1, &id);
@@ -57,8 +61,9 @@ void Texture::load_from_asset(const std::string &path, GLenum format) {
 				GL_UNSIGNED_BYTE, ktx_texture->pData);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glGenerateMipmap(GL_TEXTURE_2D);
 	}
 
 	width = ktx_texture->baseWidth;
