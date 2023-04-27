@@ -17,6 +17,11 @@ void Texture::load_from_asset(const std::string &path, bool pregenerated_mipmaps
 	ktx_texture_transcode_fmt_e tf = KTX_TTF_RGBA32;
 	GLenum format = GL_RGBA;
 
+	// tf = KTX_TTF_BC7_RGBA;
+	// format = GL_COMPRESSED_RGBA_BPTC_UNORM;
+	tf = KTX_TTF_ETC2_RGBA;
+	format = GL_COMPRESSED_RGBA8_ETC2_EAC;
+
 	result = ktxTexture2_TranscodeBasis(ktx_texture, tf, 0);
 
 	GLenum target;
@@ -33,13 +38,15 @@ void Texture::load_from_asset(const std::string &path, bool pregenerated_mipmaps
 					SPDLOG_ERROR("Couldn't get image offset from cubemap {}", path);
 				}
 
+				ktx_size_t size = ktxTexture_GetImageSize(reinterpret_cast<ktxTexture *>(ktx_texture), level);
+
 				unsigned int width = ktx_texture->baseWidth * std::pow(0.5, level);
 				unsigned int height = ktx_texture->baseHeight * std::pow(0.5, level);
 
 				void *data = ktx_texture->pData + offset;
 
-				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, format, width, height, 0, format,
-						GL_UNSIGNED_BYTE, data);
+				glCompressedTexImage2D(
+						GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, format, width, height, 0, size, data);
 
 				// Generate mipmaps if there's only one level
 				// or "generate" them to allocate the space for them if they are pregenerated
@@ -57,8 +64,9 @@ void Texture::load_from_asset(const std::string &path, bool pregenerated_mipmaps
 		glGenTextures(1, &id);
 		glBindTexture(GL_TEXTURE_2D, id);
 
-		glTexImage2D(GL_TEXTURE_2D, 0, format, ktx_texture->baseWidth, ktx_texture->baseHeight, 0, format,
-				GL_UNSIGNED_BYTE, ktx_texture->pData);
+		ktx_size_t size = ktxTexture_GetImageSize(reinterpret_cast<ktxTexture *>(ktx_texture), 0);
+
+		glCompressedTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, size, ktx_texture->pData);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);

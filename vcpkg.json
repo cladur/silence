@@ -81,6 +81,7 @@
     {
       "name": "glad",
       "version>=": "0.1.36",
+      "features": ["extensions"],
       "$comment": "    # this is heuristically generated, and may not be correct\n\n    find_package(glad CONFIG REQUIRED)\n\n    target_link_libraries(main PRIVATE glad::glad)\n"
     }
   ]

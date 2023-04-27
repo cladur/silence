@@ -245,9 +245,6 @@ int main() {
 	RenderManager::get()->startup();
 #endif
 
-	// nie dla psa 😔
-	// setup_imgui_style();
-
 	// ECS ----------------------------------------
 
 	default_ecs_manager_init();
@@ -317,6 +314,9 @@ int main() {
 		auto start_time = std::chrono::high_resolution_clock::now();
 
 		DisplayManager::get()->poll_events();
+
+		// ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
+		ImGui::DockSpace(ImGui::GetID("MyDockspace"));
 
 		if (input_manager.is_action_just_pressed("debug_menu")) {
 			in_debug_menu = !in_debug_menu;
