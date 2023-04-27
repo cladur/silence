@@ -123,18 +123,18 @@ void demo_entities_init(std::vector<Entity> &entities) {
 		ecs_manager.add_component(entity,
 				RigidBody{ .velocity = glm::vec3(0.0f, 0.0f, 0.0f), .acceleration = glm::vec3(0.0f, 0.0f, 0.0f) });
 
-		Transform transform =
-				Transform{ glm::vec3(rand_position(random_generator), rand_position(random_generator) + 40.0f,
-								   rand_position(random_generator)),
-					glm::vec3(rand_rotation(random_generator), rand_rotation(random_generator),
-							rand_rotation(random_generator)),
-					glm::vec3(1.0f) };
+		Transform transform = Transform{ glm::vec3(rand_position(random_generator),
+												 rand_position(random_generator) + 40.0f,
+												 rand_position(random_generator)),
+			glm::vec3(rand_rotation(random_generator), -50.0f, rand_rotation(random_generator)), glm::vec3(4.0f) };
 		ecs_manager.add_component(entity, transform);
 
 		ColliderComponentsFactory::add_collider_component(
 				entity, ColliderAABB{ transform.get_position(), transform.get_scale(), true });
 
-		Handle<ModelInstance> hndl = OpenglManager::get()->add_instance("DamagedHelmet/DamagedHelmet.pfb");
+		Handle<ModelInstance> hndl = OpenglManager::get()->add_instance("woodenBox/woodenBox.pfb");
+		//		Handle<ModelInstance> hndl = OpenglManager::get()->add_instance("electricBox/electricBox.pfb");
+		//		Handle<ModelInstance> hndl = OpenglManager::get()->add_instance("Agent/agent_idle.pfb");
 		ecs_manager.add_component<RenderHandle>(entity, RenderHandle{ .handle = hndl });
 	}
 
