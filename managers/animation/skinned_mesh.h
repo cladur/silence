@@ -15,8 +15,8 @@ public:
 
 	SkinnedMesh(const std::vector<SkinnedVertex> &vertices, const std::vector<uint32_t> &indices);
 
-	AllocatedBuffer vertex_buffer;
-	AllocatedBuffer index_buffer;
+	AllocatedBuffer<SkinnedVertex> vertex_buffer;
+	AllocatedBuffer<SkinnedVertex> index_buffer;
 };
 
 #endif //SILENCE_SKINNED_MESH_H

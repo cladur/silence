@@ -46,8 +46,28 @@
       "features": [
         "docking-experimental",
         "glfw-binding",
-        "vulkan-binding"
+        "vulkan-binding",
+        "opengl3-binding"
       ]
+    },
+    {
+      "name": "nlohmann-json",
+      "version>=": "3.11.2",
+      "$comment": "    find_package(nlohmann_json CONFIG REQUIRED)\n\n    target_link_libraries(main PRIVATE nlohmann_json::nlohmann_json)\n"
+    },
+    {
+      "name": "lz4",
+      "version>=": "1.9.4#1",
+      "$comment": "    # this is heuristically generated, and may not be correct\n\n    find_package(lz4 CONFIG REQUIRED)\n\n    target_link_libraries(main PRIVATE lz4::lz4)\n"
+    },
+    {
+      "name": "spirv-reflect",
+      "version>=": "1.3.236.0",
+      "$comment": "    # this is heuristically generated, and may not be correct\n\n    find_package(unofficial-spirv-reflect CONFIG REQUIRED)\n\n    target_link_libraries(main PRIVATE unofficial::spirv-reflect::spirv-reflect)\n"
+    },
+    {
+      "name": "ktx",
+      "version>=": "4.1.0"
     },
     {
       "name": "tracy",
@@ -55,8 +75,13 @@
       "$comment": "    # this is heuristically generated, and may not be correct\n\n    find_package(Tracy CONFIG REQUIRED)\n\n    target_link_libraries(main PRIVATE Tracy::TracyClient)\n"
     },
     {
-      "name": "nlohmann-json",
-      "version>=": "3.11.2"
+      "name": "freetype",
+      "version>=": "2.12.1#3"
+    },
+    {
+      "name": "glad",
+      "version>=": "0.1.36",
+      "$comment": "    # this is heuristically generated, and may not be correct\n\n    find_package(glad CONFIG REQUIRED)\n\n    target_link_libraries(main PRIVATE glad::glad)\n"
     }
   ]
 }

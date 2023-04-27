@@ -3,7 +3,6 @@
 
 const float YAW = -90.0f;
 const float PITCH = 0.0f;
-const float SPEED = 100.0f;
 const float SENSITIVITY = 16.0f;
 const float FOV = 60.0f;
 
@@ -29,6 +28,7 @@ public:
 			float yaw = 90.0f, float pitch = 0.0f);
 
 	[[nodiscard]] glm::mat4 get_view_matrix() const;
+	[[nodiscard]] glm::vec3 get_position() const;
 
 	void move_forward(float dt);
 	void move_right(float dt);

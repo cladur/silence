@@ -1,19 +1,27 @@
 #include "audio/audio_manager.h"
 #include "display/display_manager.h"
+#include "font/font_manager.h"
 #include "input/input_manager.h"
+
+#ifdef USE_OPENGL
+#include "imgui_impl_opengl3.h"
+#include "opengl/opengl_manager.h"
+#include "opengl/opengl_system.h"
+#else
+#include "imgui_impl_vulkan.h"
 #include "render/render_manager.h"
+#include "render/render_system.h"
+#endif
 
 #include "components/children_component.h"
 #include "components/collider_aabb.h"
 #include "components/collider_obb.h"
 #include "components/collider_sphere.h"
 #include "components/gravity_component.h"
-#include "components/mesh_instance_component.h"
 #include "components/parent_component.h"
 #include "components/rigidbody_component.h"
 #include "components/transform_component.h"
-
-#include "render/render_system.h"
+#include "opengl/render_handle.h"
 
 #include "ecs/ecs_manager.h"
 #include "ecs/systems/collider_components_factory.h"
@@ -24,20 +32,22 @@
 #include "audio/fmod_listener_system.h"
 #include "components/fmod_listener_component.h"
 #include "imgui_impl_glfw.h"
-#include "imgui_impl_vulkan.h"
+
 #include "scene/scene_manager.h"
 #include "serialization.h"
+#include <imgui.h>
 #include <spdlog/spdlog.h>
 #include <fstream>
 
 #include "core/camera/camera.h"
-#include "render/debug/debug_drawing.h"
+// #include "render/debug/debug_draw.h"
+// #include "render/text/text_draw.h"
 
-RenderManager render_manager;
-DisplayManager display_manager;
 ECSManager ecs_manager;
 AudioManager audio_manager;
 InputManager input_manager;
+
+Camera camera(glm::vec3(0.0f, 0.0f, -25.0f));
 
 bool in_debug_menu = true;
 
@@ -86,7 +96,7 @@ void default_ecs_manager_init() {
 	ecs_manager.register_component<Gravity>();
 	ecs_manager.register_component<Parent>();
 	ecs_manager.register_component<Children>();
-	ecs_manager.register_component<MeshInstance>();
+	ecs_manager.register_component<RenderHandle>();
 	ecs_manager.register_component<FmodListener>();
 	ecs_manager.register_component<ColliderTag>();
 	ecs_manager.register_component<ColliderSphere>();
@@ -101,6 +111,7 @@ void demo_entities_init(std::vector<Entity> &entities) {
 	std::uniform_real_distribution<float> rand_scale(3.0f, 5.0f);
 	std::uniform_real_distribution<float> rand_color(0.0f, 1.0f);
 	std::uniform_real_distribution<float> rand_gravity(-40.0f, -20.0f);
+	std::uniform_real_distribution<float> rand_material(0.0f, 1.0f);
 
 	float scale = rand_scale(random_generator);
 
@@ -123,8 +134,9 @@ void demo_entities_init(std::vector<Entity> &entities) {
 		ColliderComponentsFactory::add_collider_component(
 				entity, ColliderAABB{ transform.get_position(), transform.get_scale(), true });
 
-		ecs_manager.add_component<MeshInstance>(
-				entity, { render_manager.get_mesh("box"), render_manager.get_material("default_mesh") });
+		Handle<ModelInstance> hndl =
+				OpenglManager::get()->add_instance("DamagedHelmet/DamagedHelmet.pfb", MATERIAL_TYPE_UNLIT);
+		ecs_manager.add_component<RenderHandle>(entity, RenderHandle{ .handle = hndl });
 	}
 
 	auto listener = ecs_manager.create_entity();
@@ -143,9 +155,6 @@ void demo_entities_init(std::vector<Entity> &entities) {
 	ColliderComponentsFactory::add_collider_component(
 			floor, ColliderAABB{ transform.get_position(), transform.get_scale(), false });
 
-	ecs_manager.add_component<MeshInstance>(
-			floor, { render_manager.get_mesh("box"), render_manager.get_material("default_mesh") });
-
 	entities.push_back(floor);
 }
 
@@ -162,8 +171,8 @@ void demo_collision_init(Entity &entity) {
 	c.is_movable = true;
 	ColliderComponentsFactory::add_collider_component(entity, c);
 
-	ecs_manager.add_component<MeshInstance>(
-			entity, { render_manager.get_mesh("box"), render_manager.get_material("default_mesh") });
+	// ecs_manager.add_component<MeshInstance>(
+	// 		entity, { render_manager.get_mesh("box"), render_manager.get_material("default_mesh") });
 }
 
 void demo_collision_sphere(std::vector<Entity> &entities) {
@@ -211,9 +220,6 @@ void demo_collision_obb(std::vector<Entity> &entities) {
 
 		ColliderComponentsFactory::add_collider_component(entity, c);
 
-		ecs_manager.add_component<MeshInstance>(
-				entity, { render_manager.get_mesh("box"), render_manager.get_material("default_mesh") });
-
 		ecs_manager.add_component<Gravity>(entity, { glm::vec3(0.0f, rand_gravity(random_generator), 0.0f) });
 
 		ecs_manager.add_component(entity,
@@ -222,25 +228,12 @@ void demo_collision_obb(std::vector<Entity> &entities) {
 }
 
 bool display_manager_init() {
-	auto display_manager_result = display_manager.startup();
+	auto display_manager_result = DisplayManager::get()->startup();
 	if (display_manager_result == DisplayManager::Status::Ok) {
 		SPDLOG_INFO("Initialized display manager");
 	} else {
 		SPDLOG_ERROR("Failed to initialize the display manager. Status: ({}) {}",
 				magic_enum::enum_integer(display_manager_result), magic_enum::enum_name(display_manager_result));
-		return false;
-	}
-
-	return true;
-}
-
-bool render_manager_init() {
-	auto render_manager_result = render_manager.startup(display_manager);
-	if (render_manager_result == RenderManager::Status::Ok) {
-		SPDLOG_INFO("Initialized render manager");
-	} else {
-		SPDLOG_ERROR("Failed to initialize the render manager. Status: ({}) {}",
-				magic_enum::enum_integer(render_manager_result), magic_enum::enum_name(render_manager_result));
 		return false;
 	}
 
@@ -276,16 +269,16 @@ void destroy_all_entities(const std::vector<Entity> &entities) {
 	}
 }
 
-void handle_camera(Camera &camera, float dt) {
+void handle_camera(Camera &cam, float dt) {
 	float forward = input_manager.get_axis("move_backward", "move_forward");
 	float right = input_manager.get_axis("move_left", "move_right");
 	float up = input_manager.get_axis("move_down", "move_up");
-	camera.move_forward(forward * dt);
-	camera.move_right(right * dt);
-	camera.move_up(up * dt);
+	cam.move_forward(forward * dt);
+	cam.move_right(right * dt);
+	cam.move_up(up * dt);
 
 	glm::vec2 mouse_delta = input_manager.get_mouse_delta();
-	camera.rotate(mouse_delta.x * dt, mouse_delta.y * dt);
+	cam.rotate(mouse_delta.x * dt, mouse_delta.y * dt);
 }
 
 void handle_collider_movement(Entity entity, float dt) {
@@ -293,7 +286,7 @@ void handle_collider_movement(Entity entity, float dt) {
 	float right = -input_manager.get_axis("collider_left", "collider_right");
 	float up = -input_manager.get_axis("collider_down", "collider_up");
 
-	Transform &t = ecs_manager.get_component<Transform>(entity);
+	auto &t = ecs_manager.get_component<Transform>(entity);
 
 	const float speed = 5.0f;
 	t.add_position(glm::vec3(forward, up, right) * speed * dt);
@@ -303,10 +296,15 @@ int main() {
 	SPDLOG_INFO("Starting up engine systems...");
 
 	display_manager_init();
-	input_manager.startup(display_manager.window);
-	render_manager_init();
+	input_manager.startup();
+#ifdef USE_OPENGL
+	OpenglManager::get()->startup();
+#else
+	RenderManager::get()->startup();
+#endif
 
-	setup_imgui_style();
+	// nie dla psa 😔
+	// setup_imgui_style();
 
 	// ECS ----------------------------------------
 
@@ -314,14 +312,21 @@ int main() {
 	auto physics_system = ecs_manager.register_system<PhysicsSystem>();
 	auto collision_system = ecs_manager.register_system<CollisionSystem>();
 	auto parent_system = ecs_manager.register_system<ParentSystem>();
-	auto render_system = ecs_manager.register_system<RenderSystem>();
 	auto fmod_listener_system = ecs_manager.register_system<FmodListenerSystem>();
+
+#ifdef USE_OPENGL
+	auto opengl_system = ecs_manager.register_system<OpenglSystem>();
+	opengl_system->startup();
+#else
+	auto render_system = ecs_manager.register_system<RenderSystem>();
+	render_system->startup();
+#endif
 
 	physics_system->startup();
 	collision_system->startup();
 	parent_system->startup();
-	render_system->startup();
 	fmod_listener_system->startup();
+	FontManager::get()->startup();
 
 	std::vector<Entity> entities(50);
 	demo_entities_init(entities);
@@ -341,12 +346,13 @@ int main() {
 	audio_manager.load_bank("Ambience");
 	audio_manager.load_sample_data();
 
+	FontManager::get()->load_font("resources/fonts/PoltawskiNowy.ttf", 48);
+
 	//Map inputs
 	default_mappings();
 
-	Camera camera(glm::vec3(0.0f, 0.0f, -25.0f));
-
 	// Run the game.
+	bool show_cvar_editor = false;
 	bool show_ecs_logs = false;
 	bool show_demo_window = false;
 	bool physics_system_enabled = false;
@@ -360,7 +366,7 @@ int main() {
 	char load_file_name[128] = "scene.json";
 	char save_file_name[128] = "scene.json";
 
-	float target_frame_time = 1.0f / display_manager.get_refresh_rate();
+	float target_frame_time = 1.0f / (float)DisplayManager::get()->get_refresh_rate();
 	float dt = target_frame_time;
 
 	// TEST FOR 3D AUDIO
@@ -374,11 +380,11 @@ int main() {
 		// GAME LOGIC
 		auto start_time = std::chrono::high_resolution_clock::now();
 
-		display_manager.poll_events();
+		DisplayManager::get()->poll_events();
 
 		if (input_manager.is_action_just_pressed("debug_menu")) {
 			in_debug_menu = !in_debug_menu;
-			display_manager.capture_mouse(!in_debug_menu);
+			DisplayManager::get()->capture_mouse(!in_debug_menu);
 		}
 
 		if (!in_debug_menu) {
@@ -387,7 +393,11 @@ int main() {
 		handle_collider_movement(collision_tester, dt);
 
 		//imgui new frame
+#ifdef USE_OPENGL
+		ImGui_ImplOpenGL3_NewFrame();
+#else
 		ImGui_ImplVulkan_NewFrame();
+#endif
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
@@ -398,6 +408,8 @@ int main() {
 		ImGui::Checkbox("Show console ecs logs", &show_ecs_logs);
 
 		ImGui::Checkbox("Show demo window", &show_demo_window);
+
+		ImGui::Checkbox("Show CVAR editor", &show_cvar_editor);
 
 		ImGui::Checkbox("Physics system", &physics_system_enabled);
 
@@ -466,7 +478,11 @@ int main() {
 
 		ImGui::End();
 
-		if (display_manager.window_should_close()) {
+		if (show_cvar_editor) {
+			CVarSystem::get()->draw_imgui_editor();
+		}
+
+		if (DisplayManager::get()->window_should_close()) {
 			should_run = false;
 		}
 
@@ -477,16 +493,51 @@ int main() {
 		collision_system->update();
 
 		parent_system->update();
-		render_system->update(render_manager);
+#ifdef USE_OPENGL
+		opengl_system->update();
+#else
+		render_system->update(*RenderManager::get());
+#endif
+
+		ImGui::Begin("Text Demo");
+
+		static char buffer[128] = { 'H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd', '!' };
+		static float scale = 1.0f;
+		static float position[3] = { 0.0f, 0.0f, 0.0f };
+		static glm::vec3 color = { 1.0f, 1.0f, 1.0f };
+		static bool screenspace = false;
+		ImGui::InputText("Text", buffer, 128);
+		ImGui::InputFloat("Scale", &scale);
+		ImGui::InputFloat3("Position", position);
+		ImGui::InputFloat3("Color", &color.x);
+		ImGui::Checkbox("Screenspace", &screenspace);
+
+		ImGui::End();
+
+		text_draw::draw_text(
+				std::string(buffer), screenspace, glm::vec3(position[0], position[1], position[2]), color, scale);
+
+		debug_draw::draw_line(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(10.0f, 0.0f, 0.0f));
+		debug_draw::draw_line(glm::vec3(0.0f, 5.0f, 0.0f), glm::vec3(10.0f, 0.0f, 0.0f));
+
+		debug_draw::draw_line(glm::vec3(0.0f, 5.0f, 10.0f), glm::vec3(10.0f, 0.0f, 2.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+
+		debug_draw::draw_box(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+		debug_draw::draw_box(glm::vec3(0.0f, 5.0f, 0.0f), glm::vec3(10.0f, 1.0f, 1.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 
 		// TODO: remove this when collision demo will be removed
 		for (auto sphere : spheres) {
-			ColliderSphere &c = ecs_manager.get_component<ColliderSphere>(sphere);
-			DebugDraw::draw_sphere(c.center, c.radius);
+			auto &c = ecs_manager.get_component<ColliderSphere>(sphere);
+			debug_draw::draw_sphere(c.center, c.radius);
 		}
 
 		input_manager.process_input();
-		render_manager.draw(camera);
+
+#ifdef USE_OPENGL
+		OpenglManager::get()->draw();
+#else
+		RenderManager::get()->draw(camera);
+#endif
 
 		fmod_listener_system->update(dt);
 		audio_manager.update();
@@ -508,8 +559,12 @@ int main() {
 	SPDLOG_INFO("Shutting down engine subsystems...");
 	input_manager.shutdown();
 	audio_manager.shutdown();
-	render_manager.shutdown();
-	display_manager.shutdown();
+#ifdef USE_OPENGL
+	OpenglManager::get()->shutdown();
+#else
+	RenderManager::get()->shutdown();
+#endif
+	DisplayManager::get()->shutdown();
 
 	return 0;
 }

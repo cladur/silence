@@ -1,8 +1,10 @@
 #include "camera.h"
 
+AutoCVarFloat cvar_camera_speed("camera.speed", "Camera Speed", 50);
+AutoCVarFloat cvar_camera_sensitivity("camera.sensitivity", "Camera Sensitivity", 50);
+
 Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch) :
 		front(glm::vec3(0.0f, 0.0f, -1.0f)),
-		movement_speed(SPEED),
 		mouse_sensitivity(SENSITIVITY),
 		fov(FOV),
 		position(position),
@@ -14,23 +16,33 @@ Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch) :
 
 glm::mat4 Camera::get_view_matrix() const {
 	glm::vec3 temp_position = position;
+#ifndef USE_OPENGL
 	temp_position.y *= -1.f;
+#endif
 	return glm::lookAt(temp_position, temp_position + front, up);
 }
 
+[[nodiscard]] glm::vec3 Camera::get_position() const {
+	return position;
+}
+
 void Camera::move_forward(float dt) {
-	glm::vec3 diff = front * dt * movement_speed;
+	glm::vec3 diff = front * dt * cvar_camera_speed.get();
+#ifndef USE_OPENGL
 	diff.y *= -1.f;
+#endif
 	position += diff;
 }
 
 void Camera::move_right(float dt) {
-	position += right * dt * movement_speed;
+	position += right * dt * cvar_camera_speed.get();
 }
 
 void Camera::move_up(float dt) {
-	glm::vec3 diff = up * dt * movement_speed;
+	glm::vec3 diff = up * dt * cvar_camera_speed.get();
+#ifndef USE_OPENGL
 	diff.y *= -1.f;
+#endif
 	position += diff;
 }
 

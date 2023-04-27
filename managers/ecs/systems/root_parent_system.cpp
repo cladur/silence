@@ -2,9 +2,18 @@
 #include "components/children_component.h"
 #include "components/transform_component.h"
 #include "ecs/ecs_manager.h"
+#include <components/parent_component.h>
 extern ECSManager ecs_manager;
 
 void RootParentSystem::startup() {
+	Signature blacklist;
+	Signature whitelist;
+	whitelist.set(ecs_manager.get_component_type<Transform>());
+	whitelist.set(ecs_manager.get_component_type<Children>());
+
+	blacklist.set(ecs_manager.get_component_type<Parent>());
+	ecs_manager.set_system_component_whitelist<RootParentSystem>(whitelist);
+	ecs_manager.set_system_component_blacklist<RootParentSystem>(blacklist);
 }
 
 void RootParentSystem::update() {

@@ -1,12 +1,19 @@
 #ifndef SILENCE_DISPLAY_MANAGER_H
 #define SILENCE_DISPLAY_MANAGER_H
 
+#include <glad/glad.h>
+
+#ifdef USE_OPENGL
+#define GLFW_INCLUDE_NONE
+#else
 #define GLFW_INCLUDE_VULKAN
+#include <vulkan/vulkan.h>
+#endif
+
+#include <GLFW/glfw3.h>
+
 #include "managers/input/input_key.h"
 #include "managers/input/input_manager.h"
-#include <GLFW/glfw3.h>
-#include <unordered_map>
-#include <utility>
 
 class DisplayManager {
 public:
@@ -19,6 +26,8 @@ public:
 
 	GLFWwindow *window;
 
+	static DisplayManager *get();
+
 	Status startup();
 	void shutdown();
 
@@ -26,9 +35,11 @@ public:
 
 	[[nodiscard]] int get_refresh_rate() const;
 
+#ifndef USE_OPENGL
 	VkSurfaceKHR create_surface(VkInstance &instance) const;
+#endif
 
-	[[nodiscard]] std::pair<int, int> get_framebuffer_size() const;
+	[[nodiscard]] glm::vec2 get_framebuffer_size() const;
 	void poll_events();
 	[[nodiscard]] bool window_should_close() const;
 };

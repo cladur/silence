@@ -1,5 +1,7 @@
 #include "input_manager.h"
 
+#include "display/display_manager.h"
+
 bool InputManager::is_action_valid(const std::string &action_name) {
 	if (!actions.contains(action_name)) {
 		SPDLOG_WARN("Action {} does not exist", action_name);
@@ -58,7 +60,9 @@ void InputManager::poll_gamepads() {
 	}
 }
 
-void InputManager::startup(GLFWwindow *window) {
+void InputManager::startup() {
+	GLFWwindow *window = DisplayManager::get()->window;
+
 	glfwSetWindowUserPointer(window, this);
 	for (int i = GLFW_JOYSTICK_1; i < GLFW_JOYSTICK_16; i++) {
 		glfwSetJoystickUserPointer(i, this);
