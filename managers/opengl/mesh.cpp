@@ -4,65 +4,11 @@
 
 #include "assets/mesh_asset.h"
 
-#include "shader.h"
-
-int TextureTypeToTextureUnit(std::string type) {
-	if (type == "albedo_map") {
-		return 3;
-	} else if (type == "normal_map") {
-		return 4;
-	} else if (type == "metallic_map") {
-		return 5;
-	} else if (type == "roughness_map") {
-		return 6;
-	} else if (type == "ao_map") {
-		return 7;
-	} else if (type == "emission_map") {
-		return 8;
-	}
-
-	SPDLOG_ERROR("Unknown texture type: {}", type);
-	assert(false);
-	return 0;
-}
-
-void Mesh::draw(MaterialType material_type) {
-	switch (material_type) {
-		case MATERIAL_TYPE_UNLIT: {
-			bind_textures_unlit();
-			break;
-		}
-		case MATERIAL_TYPE_PBR: {
-			bind_textures_pbr();
-			break;
-		}
-		default: {
-			SPDLOG_ERROR("Unknown material type: {}", material_type);
-			assert(false);
-		}
-	}
-
+void Mesh::draw() {
 	// draw mesh
 	glBindVertexArray(vao);
 	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
 	glBindVertexArray(0);
-}
-
-void Mesh::bind_textures_pbr() {
-	for (int i = 0; i < textures.size(); i++) {
-		if (textures_present[i]) {
-			glActiveTexture(GL_TEXTURE0 + i);
-			glBindTexture(GL_TEXTURE_2D, textures[i].id);
-		}
-	}
-}
-
-void Mesh::bind_textures_unlit() {
-	// Just albedo
-	if (textures_present[0]) {
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, textures[0].id);
-	}
 }
 
 void Mesh::setup_mesh() {

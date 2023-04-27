@@ -491,7 +491,8 @@ void CVarSystemImpl::edit_parameter(CVarParameter *p, float text_width) {
 				label(p->name.c_str(), text_width);
 				ImGui::PushID(p->name.c_str());
 				if (drag_flag) {
-					ImGui::InputFloat("", get_cvar_array<float>()->get_current_ptr(p->array_index), 0, 0, "%.3f");
+					ImGui::DragFloat("", get_cvar_array<float>()->get_current_ptr(p->array_index), 0.05f, -FLT_MAX,
+							+FLT_MAX, "%.3f");
 				} else {
 					ImGui::InputFloat("", get_cvar_array<float>()->get_current_ptr(p->array_index), 0, 0, "%.3f");
 				}

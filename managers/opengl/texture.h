@@ -9,7 +9,7 @@ struct Texture {
 	uint32_t height;
 	uint32_t channels;
 
-	void load_from_asset(const char *path);
+	void load_from_asset(const std::string &path, bool pregenerated_mipmaps = false);
 };
 
 #endif // SILENCE_TEXTURE_H

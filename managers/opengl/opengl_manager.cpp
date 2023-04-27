@@ -36,6 +36,8 @@ void OpenglManager::startup() {
 	}
 	SPDLOG_INFO("Successfully initialized OpenGL loader!");
 
+	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+
 	// Setup Dear ImGui binding
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -60,18 +62,24 @@ void OpenglManager::startup() {
 	debug_draw.startup();
 
 	unlit_pass.startup();
+	pbr_pass.startup();
+	skybox_pass.startup();
 }
 
 void OpenglManager::shutdown() {
 }
 
 void OpenglManager::draw() {
+	DisplayManager *display_manager = DisplayManager::get();
+	glm::vec2 window_extent = display_manager->get_framebuffer_size();
+	if (display_manager->is_window_resizable) {
+		glViewport(0, 0, (int)window_extent.x, (int)window_extent.y);
+	}
+
 	// Clear the screen
 	glad_glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	DisplayManager *display_manager = DisplayManager::get();
-	glm::vec2 window_extent = display_manager->get_framebuffer_size();
 	projection =
 			glm::perspective(glm::radians(70.0f), window_extent.x / window_extent.y, 0.1f, cvar_draw_distance.get());
 	view = camera.get_view_matrix();
@@ -81,6 +89,11 @@ void OpenglManager::draw() {
 	glEnable(GL_DEPTH_TEST);
 
 	unlit_pass.draw();
+	pbr_pass.draw();
+
+	glDepthFunc(GL_LEQUAL);
+	skybox_pass.draw();
+	glDepthFunc(GL_LESS);
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -149,6 +162,10 @@ Handle<ModelInstance> OpenglManager::add_instance(const char *path, MaterialType
 	switch (material_type) {
 		case MATERIAL_TYPE_UNLIT: {
 			unlit_pass.add_instance(handle);
+			break;
+		}
+		case MATERIAL_TYPE_PBR: {
+			pbr_pass.add_instance(handle);
 			break;
 		}
 		default: {

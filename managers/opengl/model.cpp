@@ -5,14 +5,6 @@
 
 #include "opengl_manager.h"
 
-unsigned int TextureFromFile(const char *path, const std::string &directory, bool gamma = false);
-
-void Model::draw(MaterialType material_type) {
-	for (Mesh &mesh : meshes) {
-		mesh.draw(material_type);
-	}
-}
-
 void Model::load_from_asset(const char *path) {
 	OpenglManager *opengl_manager = OpenglManager::get();
 
@@ -99,36 +91,35 @@ void Model::load_from_asset(const char *path) {
 			mesh.textures_present[0] = true;
 		}
 
-		// AMBIENT OCCLUSION
-		if (material.textures.contains("occlusion")) {
-			Texture ao = {};
-			ao.load_from_asset(asset_path(material.textures["occlusion"]).c_str());
-			mesh.textures[1] = ao;
-			mesh.textures_present[1] = true;
-		}
-
 		// NORMAL
 		if (material.textures.contains("normals")) {
 			Texture normal = {};
 			normal.load_from_asset(asset_path(material.textures["normals"]).c_str());
-			mesh.textures[2] = normal;
-			mesh.textures_present[2] = true;
+			mesh.textures[1] = normal;
+			mesh.textures_present[1] = true;
 		}
 
 		// METALLIC ROUGHNESS
 		if (material.textures.contains("metallicRoughness")) {
 			Texture met_rough = {};
 			met_rough.load_from_asset(asset_path(material.textures["metallicRoughness"]).c_str());
-			mesh.textures[3] = met_rough;
-			mesh.textures_present[3] = true;
+			mesh.textures[2] = met_rough;
+			mesh.textures_present[2] = true;
+
+			// AMBIENT OCCLUSION
+			if (material.textures.contains("occlusion")) {
+				// We assume that the occlusion map is bundled alongside the metallic roughness map, and don't load it
+				// in here
+				mesh.has_ao_map = true;
+			}
 		}
 
 		// EMISSIVE
 		if (material.textures.contains("emissive")) {
 			Texture emissive = {};
 			emissive.load_from_asset(asset_path(material.textures["emissive"]).c_str());
-			mesh.textures[4] = emissive;
-			mesh.textures_present[4] = true;
+			mesh.textures[3] = emissive;
+			mesh.textures_present[3] = true;
 		}
 
 		meshes.push_back(mesh);

@@ -8,7 +8,7 @@ DisplayManager *DisplayManager::get() {
 	return &display_manager;
 }
 
-DisplayManager::Status DisplayManager::startup() {
+DisplayManager::Status DisplayManager::startup(bool resizable) {
 	if (!glfwInit()) {
 		return Status::FailedToInitializeGlfw;
 	}
@@ -24,7 +24,8 @@ DisplayManager::Status DisplayManager::startup() {
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 #endif
 
-	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+	is_window_resizable = resizable;
+	glfwWindowHint(GLFW_RESIZABLE, resizable);
 	window = glfwCreateWindow(1280, 720, "Silence Game", nullptr, nullptr);
 
 #ifdef USE_OPENGL

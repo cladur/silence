@@ -5,10 +5,8 @@
 
 class Model {
 public:
-	void draw(MaterialType material_type);
 	void load_from_asset(const char *path);
 
-	bool is_refractive = false;
 	glm::mat4 root{};
 
 	std::vector<Mesh> meshes;
