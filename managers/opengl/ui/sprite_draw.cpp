@@ -39,6 +39,10 @@ void SpriteDraw::startup() {
 
 void SpriteDraw::draw() {
 	// this is probably super inefficient, but i had no clue how to manage multiple textures in a single batched draw call
+	// sort the sprites based on distance to camera to avoid transparency issues
+	std::sort(sprites.begin(), sprites.end(), [](const Sprite &a, const Sprite &b) {
+		return a.vertices[0].position.z < b.vertices[0].position.z;
+	});
 
 	for (auto &sprite : sprites) {
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -73,7 +77,7 @@ void SpriteDraw::draw() {
 }
 
 Sprite sprite_draw::default_vertex_data(
-		const glm::vec2 &position,
+		const glm::vec3 &position,
 		const glm::vec2 &size,
 		float sprite_x_size,
 		float sprite_y_size,
@@ -90,8 +94,7 @@ Sprite sprite_draw::default_vertex_data(
 
 	glm::vec2 aligned_position = position;
 
-	if (is_screen_space)
-	{
+	if (is_screen_space && alignment != Alignment::NONE) {
 		glm::vec2 window_size = DisplayManager::get()->get_framebuffer_size();
 		switch (alignment) {
 			case Alignment::CENTER:
@@ -124,6 +127,8 @@ Sprite sprite_draw::default_vertex_data(
 			case Alignment::BOTTOM_RIGHT:
 				aligned_position.x += window_size.x;
 				break;
+			default:
+				break;
 		}
 	}
 
@@ -139,15 +144,16 @@ Sprite sprite_draw::default_vertex_data(
 
 	float x = aligned_position.x * aspect;
 	float y = aligned_position.y;
+	float z = position.z;
 
 	float w = size.x / 2.0f * aspect * sprite_y_aspect;
 	float h = size.y / 2.0f * sprite_x_aspect;
 
 	//update the vertices
-	sprite.vertices[0] = { { x - w, y + h, 0.0f }, color, { 0.0f, 0.0f }, is_screen_space }; // 0
-	sprite.vertices[1] = { { x - w, y - h, 0.0f }, color, { 0.0f, 1.0f }, is_screen_space }; // 1
-	sprite.vertices[2] = { { x + w, y - h, 0.0f }, color, { 1.0f, 1.0f }, is_screen_space }; // 2
-	sprite.vertices[3] = { { x + w, y + h, 0.0f }, color, { 1.0f, 0.0f }, is_screen_space }; // 3
+	sprite.vertices[0] = { { x - w, y + h, z}, color, { 0.0f, 0.0f }, is_screen_space }; // 0
+	sprite.vertices[1] = { { x - w, y - h, z }, color, { 0.0f, 1.0f }, is_screen_space }; // 1
+	sprite.vertices[2] = { { x + w, y - h, z }, color, { 1.0f, 1.0f }, is_screen_space }; // 2
+	sprite.vertices[3] = { { x + w, y + h, z }, color, { 1.0f, 0.0f }, is_screen_space }; // 3
 
 	//update the indices
 	uint32_t index = 0;
@@ -161,7 +167,7 @@ Sprite sprite_draw::default_vertex_data(
 	return sprite;
 }
 
-void sprite_draw::draw_colored(const glm::vec2 &position, const glm::vec2 &size, const glm::vec3 &color,
+void sprite_draw::draw_colored(const glm::vec3 &position, const glm::vec2 &size, const glm::vec3 &color,
 		bool is_screen_space, Alignment alignment) {
 
 	Sprite sprite = default_vertex_data(position, size, 1.0f, 1.0f, color, is_screen_space, alignment);
@@ -169,7 +175,7 @@ void sprite_draw::draw_colored(const glm::vec2 &position, const glm::vec2 &size,
 	manager->sprite_draw.sprites.push_back(sprite);
 }
 
-void sprite_draw::draw_sprite(const glm::vec2 &position, const glm::vec2 &size, const glm::vec3 &color,
+void sprite_draw::draw_sprite(const glm::vec3 &position, const glm::vec2 &size, const glm::vec3 &color,
 		const char *texture_name, bool is_screen_space, Alignment alignment) {
 
 	Texture t = SpriteManager::get()->get_sprite_texture(texture_name);

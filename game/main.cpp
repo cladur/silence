@@ -41,6 +41,8 @@
 
 #include "core/camera/camera.h"
 #include "opengl/ui/sprite_manager.h"
+#include "opengl/ui/ui_elements/ui_anchor.h"
+#include "opengl/ui/ui_elements/ui_image.h"
 #include "opengl/ui/ui_elements/ui_slider.h"
 // #include "render/debug/debug_draw.h"
 // #include "render/text/text_draw.h"
@@ -327,6 +329,7 @@ int main() {
 	SpriteManager::get()->load_sprite_texture("kek", "kek.ktx2");
 	SpriteManager::get()->load_sprite_texture("pointer", "gun_sight.ktx2");
 	SpriteManager::get()->load_sprite_texture("skull", "skull_emoji.ktx2");
+	SpriteManager::get()->load_sprite_texture("anchor_debug", "anchor_debug.ktx2");
 
 #else
 	auto render_system = ecs_manager.register_system<RenderSystem>();
@@ -385,11 +388,23 @@ int main() {
 	EventReference test_pluck = EventReference("test_pluck");
 	// #################
 
+
 	// test for ui elements
+
+	// UI ANCHOR
+	UIAnchor anchor = UIAnchor(0.5f, 0.5f);
+
+	// SLIDER
 	UISlider slider_test = UISlider(0.0f, 0.0f, 1.0f, false);
-	slider_test.size = glm::vec2(20.0f, 200.0f);
-	slider_test.slider_alignment = SliderAlignment::TOP_TO_BOTTOM;
+	slider_test.position = glm::vec3(200.0f, 0.0f, 0.0f);
+	slider_test.size = glm::vec2(200.0f, 20.0f);
+	slider_test.slider_alignment = SliderAlignment::LEFT_TO_RIGHT;
 	float slider_value = 0.0f;
+	anchor.add_child(slider_test);
+
+	// IMAGE
+	UIImage image = UIImage(glm::vec3(-200.0f, 0.0f, 0.0f), glm::vec2(100.0f, 100.0f), "skull");
+	anchor.add_child(image);
 
 	bool should_run = true;
 	nlohmann::json scene;
@@ -611,7 +626,8 @@ int main() {
 //				sprite_draw::Alignment::BOTTOM_RIGHT);
 
 		slider_test.value = slider_value;
-		slider_test.draw();
+		//slider_test.draw();
+		anchor.draw();
 
 		// TODO: remove this when collision demo will be removed
 		for (auto sphere : spheres) {

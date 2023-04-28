@@ -22,6 +22,7 @@ public:
 	~UISlider();
 
 	void draw() override;
+	void draw(glm::vec3 parent_position, glm::vec2 parent_size) override;
 };
 
 #endif //SILENCE_UI_SLIDER_H

@@ -86,6 +86,8 @@ void OpenglManager::draw() {
 	debug_draw.draw();
 
 	glEnable(GL_BLEND);
+//	glEnable(GL_ALPHA_TEST);
+//	glAlphaFunc(GL_LESS, 0.1);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	text_draw.draw();
 

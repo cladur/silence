@@ -13,7 +13,7 @@ add_library(${OPENGL_MANAGER_NAME} STATIC
         text/text_draw.cpp text/text_draw.h
         ui/sprite_manager.cpp ui/sprite_manager.h ui/sprite_draw.cpp ui/sprite_draw.h
         debug/debug_draw.cpp debug/debug_draw.h
-        ui/ui_elements/ui_slider.cpp ui/ui_elements/ui_slider.h ui/ui_elements/ui_element.cpp ui/ui_elements/ui_element.h)
+        ui/ui_elements/ui_slider.cpp ui/ui_elements/ui_slider.h ui/ui_elements/ui_element.cpp ui/ui_elements/ui_element.h ui/ui_elements/ui_anchor.cpp ui/ui_elements/ui_anchor.h ui/ui_elements/ui_image.cpp ui/ui_elements/ui_image.h)
 
 # Include directories
 target_include_directories(${OPENGL_MANAGER_NAME} PUBLIC ${MANAGER_DIR})
