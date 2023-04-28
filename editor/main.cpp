@@ -317,7 +317,7 @@ int main() {
 		DisplayManager::get()->poll_events();
 
 		// ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
-		ImGui::DockSpace(ImGui::GetID("MyDockspace"));
+		// ImGui::DockSpace(ImGui::GetID("MyDockspace"));
 
 		if (input_manager.is_action_just_pressed("debug_menu")) {
 			in_debug_menu = !in_debug_menu;
