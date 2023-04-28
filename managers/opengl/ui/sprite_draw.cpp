@@ -46,6 +46,11 @@ void SpriteDraw::draw() {
 
 	for (auto &sprite : sprites) {
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+		OpenglManager *opengl_manager = OpenglManager::get();
+		glm::mat4 view = opengl_manager->view;
+		glm::mat4 proj = opengl_manager->projection;
+
 		glBufferSubData(GL_ARRAY_BUFFER, 0, sprite.vertices.size() * sizeof(SpriteVertex), &sprite.vertices[0]);
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
@@ -54,8 +59,6 @@ void SpriteDraw::draw() {
 		auto t = SpriteManager::get()->get_sprite_texture(sprite.texture_name);
 		int textured = !sprite.texture_name.empty();
 
-		OpenglManager *opengl_manager = OpenglManager::get();
-		glm::mat4 proj = opengl_manager->projection;
 		if (sprite.vertices[0].is_screen_space == 1) {
 			glm::vec2 window_size = DisplayManager::get()->get_framebuffer_size();
 			proj = glm::ortho(0.0f, window_size.x, 0.0f, window_size.y);
@@ -63,9 +66,21 @@ void SpriteDraw::draw() {
 
 		shader.use();
 		shader.set_mat4("projection", proj);
-		shader.set_mat4("view", opengl_manager->view);
+		shader.set_mat4("view", view);
 		shader.set_int("textured", textured);
 		shader.set_int("sprite_texture", 0);
+		if (sprite.billboard) {
+			auto right = glm::vec3(view[0][0], view[1][0], view[2][0]);
+			auto up = glm::vec3(view[0][1], view[1][1], view[2][1]);
+			shader.set_vec3("camera_right", right);
+			shader.set_vec3("camera_up", up);
+			shader.set_vec2("size", sprite.size);
+			shader.set_vec3("billboard_center", sprite.position);
+			shader.set_int("is_billboard", 1);
+		} else
+		{
+			shader.set_int("is_billboard", 0);
+		}
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, t.id);
 
@@ -186,4 +201,17 @@ void sprite_draw::draw_sprite(const glm::vec3 &position, const glm::vec2 &size, 
 	manager->sprite_draw.sprites.push_back(sprite);
 }
 
+void sprite_draw::draw_sprite_billboard(const glm::vec3 &position, const glm::vec2 &size, const glm::vec3 &color, const char *texture_name) {
+	Texture t = SpriteManager::get()->get_sprite_texture(texture_name);
 
+	Sprite sprite = default_vertex_data(glm::vec3(0.0f), size, (float)t.width, (float)t.height, color, false, sprite_draw::Alignment::NONE);
+
+	auto view = OpenglManager::get()->view;
+
+	sprite.texture_name = texture_name;
+	sprite.billboard = true;
+	sprite.size = size / 2.0f;
+	sprite.position = position;
+	auto manager = OpenglManager::get();
+	manager->sprite_draw.sprites.push_back(sprite);
+}

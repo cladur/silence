@@ -403,8 +403,13 @@ int main() {
 	anchor.add_child(slider_test);
 
 	// IMAGE
-	UIImage image = UIImage(glm::vec3(-200.0f, 0.0f, 0.0f), glm::vec2(100.0f, 100.0f), "skull");
-	anchor.add_child(image);
+	UIImage image = UIImage(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(1.0f, 1.0f), "skull");
+	image.is_screen_space = false;
+	//anchor.add_child(image);
+
+	UIImage billboard_test = UIImage(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(1.0f, 1.0f), "missing");
+	billboard_test.is_screen_space = false;
+	billboard_test.is_billboard = true;
 
 	bool should_run = true;
 	nlohmann::json scene;
@@ -627,7 +632,10 @@ int main() {
 
 		slider_test.value = slider_value;
 		//slider_test.draw();
-		anchor.draw();
+		//anchor.draw();
+		image.draw();
+
+		billboard_test.draw();
 
 		// TODO: remove this when collision demo will be removed
 		for (auto sphere : spheres) {

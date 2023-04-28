@@ -7,7 +7,12 @@ UIImage::UIImage(glm::vec2 position, glm::vec2 size, const std::string& texture_
 }
 
 void UIImage::draw() {
-	sprite_draw::draw_sprite(position, size, color, texture_name.c_str(), is_screen_space, alignment);
+	if (is_billboard)
+	{
+		sprite_draw::draw_sprite_billboard(position, size, color, texture_name.c_str());
+	} else {
+		sprite_draw::draw_sprite(position, size, color, texture_name.c_str(), is_screen_space, alignment);
+	}
 
 	for (auto& child : children) {
 		child->draw(position, size);

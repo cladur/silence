@@ -6,9 +6,10 @@ class UIElement {
 public:
 	glm::vec3 position = glm::vec3(0.0f);
 	glm::vec2 size = glm::vec2(1.0f);
-	glm::vec4 color = glm::vec4(1.0f);
+	glm::vec3 color = glm::vec3(1.0f);
 	std::string texture_name;
 	bool is_screen_space = true;
+	bool is_billboard = false;
 	sprite_draw::Alignment alignment = sprite_draw::Alignment::NONE;
 	std::vector<UIElement*> children;
 

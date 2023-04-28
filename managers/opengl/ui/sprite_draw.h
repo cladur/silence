@@ -11,7 +11,10 @@ struct SpriteVertex {
 
 struct Sprite {
 	std::vector<SpriteVertex> vertices;
+	glm::vec2 size;
+	glm::vec3 position;
 	std::vector<uint32_t> indices;
+	bool billboard = false;
 	glm::mat4 transform;
 	std::string texture_name;
 };
@@ -52,6 +55,7 @@ void draw_colored(const glm::vec3 &position, const glm::vec2 &size, const glm::v
 		Alignment alignment = Alignment::CENTER);
 void draw_sprite(const glm::vec3 &position, const glm::vec2 &size, const glm::vec3 &color, const char *texture_name,
 		bool is_screen_space, Alignment alignment = Alignment::CENTER);
+void draw_sprite_billboard(const glm::vec3 &position, const glm::vec2 &size, const glm::vec3 &color, const char *texture_name);
 
 }
 #endif //SILENCE_SPRITE_DRAW_H
