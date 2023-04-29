@@ -41,6 +41,8 @@ public:
 	VkSurfaceKHR create_surface(VkInstance &instance) const;
 #endif
 
+	[[nodiscard]] bool was_window_resized() const;
+
 	[[nodiscard]] glm::vec2 get_framebuffer_size() const;
 	void poll_events();
 	[[nodiscard]] bool window_should_close() const;

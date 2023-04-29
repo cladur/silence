@@ -68,6 +68,16 @@ VkSurfaceKHR DisplayManager::create_surface(VkInstance &instance) const {
 }
 #endif
 
+[[nodiscard]] bool DisplayManager::was_window_resized() const {
+	static glm::vec2 last_framebuffer_size = get_framebuffer_size();
+	glm::vec2 framebuffer_size = get_framebuffer_size();
+	if (framebuffer_size != last_framebuffer_size) {
+		last_framebuffer_size = framebuffer_size;
+		return true;
+	}
+	return false;
+}
+
 void DisplayManager::poll_events() {
 	ZoneScopedN("DisplayManager::poll_events");
 	glfwPollEvents();

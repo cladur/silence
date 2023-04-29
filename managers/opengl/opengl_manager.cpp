@@ -5,6 +5,7 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 #include "opengl/material.h"
+#include <glad/glad.h>
 #define IMGUI_DEFINE_MATH_OPERATORS
 
 #define ASSET_PATH "resources/assets_export/"
@@ -64,6 +65,9 @@ void OpenglManager::startup() {
 	unlit_pass.startup();
 	pbr_pass.startup();
 	skybox_pass.startup();
+
+	glm::vec2 window_extent = display_manager->get_framebuffer_size();
+	render_framebuffer.startup(window_extent.x, window_extent.y);
 }
 
 void OpenglManager::shutdown() {
@@ -72,9 +76,12 @@ void OpenglManager::shutdown() {
 void OpenglManager::draw() {
 	DisplayManager *display_manager = DisplayManager::get();
 	glm::vec2 window_extent = display_manager->get_framebuffer_size();
-	if (display_manager->is_window_resizable) {
+	if (display_manager->is_window_resizable && display_manager->was_window_resized()) {
 		glViewport(0, 0, (int)window_extent.x, (int)window_extent.y);
+		render_framebuffer.resize(window_extent.x, window_extent.y);
 	}
+
+	render_framebuffer.bind();
 
 	// Clear the screen
 	glad_glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
@@ -101,6 +108,8 @@ void OpenglManager::draw() {
 	glDisable(GL_BLEND);
 
 	debug_draw.draw();
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	// IMGUI
 	ImGui::Render();
@@ -136,7 +145,7 @@ void OpenglManager::load_texture(const char *path) {
 		return;
 	}
 	Texture texture = {};
-	texture.load_from_asset(asset_path(path).c_str());
+	texture.load_from_asset(asset_path(path));
 	textures[path] = texture;
 }
 

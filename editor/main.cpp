@@ -314,10 +314,25 @@ int main() {
 		// GAME LOGIC
 		auto start_time = std::chrono::high_resolution_clock::now();
 
+		//imgui new frame
+#ifdef USE_OPENGL
+		ImGui_ImplOpenGL3_NewFrame();
+#else
+		ImGui_ImplVulkan_NewFrame();
+#endif
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+
 		DisplayManager::get()->poll_events();
 
-		// ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
-		// ImGui::DockSpace(ImGui::GetID("MyDockspace"));
+		// ImGui::DockSpaceOverViewport(ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
+
+		ImGui::Begin("Viewport");
+
+		uint32_t render_image = OpenglManager::get()->render_framebuffer.get_texture_id();
+		ImGui::Image((void *)(intptr_t)render_image, ImVec2(1280, 720), ImVec2(0, 1), ImVec2(1, 0));
+
+		ImGui::End();
 
 		if (input_manager.is_action_just_pressed("debug_menu")) {
 			in_debug_menu = !in_debug_menu;
@@ -327,15 +342,6 @@ int main() {
 		if (!in_debug_menu) {
 			handle_camera(camera, dt);
 		}
-
-		//imgui new frame
-#ifdef USE_OPENGL
-		ImGui_ImplOpenGL3_NewFrame();
-#else
-		ImGui_ImplVulkan_NewFrame();
-#endif
-		ImGui_ImplGlfw_NewFrame();
-		ImGui::NewFrame();
 
 		ImGui::Begin("Settings");
 

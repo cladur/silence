@@ -1,6 +1,7 @@
 #ifndef SILENCE_OPENGL_MANAGER_H
 #define SILENCE_OPENGL_MANAGER_H
 
+#include "framebuffer.h"
 #include "material.h"
 #include "mesh.h"
 #include "model.h"
@@ -33,6 +34,9 @@ public:
 	UnlitPass unlit_pass;
 	PBRPass pbr_pass;
 	SkyboxPass skybox_pass;
+
+	// Framebuffers
+	Framebuffer render_framebuffer;
 
 	static OpenglManager *get();
 
