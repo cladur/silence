@@ -12,26 +12,30 @@ struct VertexInputDescription {
 
 struct Vertex {
 	glm::vec3 position;
-	[[maybe_unused]] float padding1;
 	glm::vec3 normal;
-	[[maybe_unused]] float padding2;
 	glm::vec3 color;
-	[[maybe_unused]] float padding3;
 	glm::vec2 uv;
-	[[maybe_unused]] float padding4;
-	[[maybe_unused]] float padding5;
 
 	static VertexInputDescription get_vertex_description();
+};
+
+struct RenderBounds {
+	glm::vec3 origin;
+	float radius;
+	glm::vec3 extents;
+	bool valid;
 };
 
 struct Mesh {
 	std::vector<Vertex> vertices;
 	std::vector<uint32_t> indices;
 
-	AllocatedBuffer vertex_buffer;
-	AllocatedBuffer index_buffer;
+	AllocatedBufferUntyped vertex_buffer;
+	AllocatedBufferUntyped index_buffer;
 
-	bool load_from_gltf(const char *filename);
+	RenderBounds bounds;
+
+	bool load_from_asset(const char *filename);
 };
 
 #endif //SILENCE_VK_MESH_H

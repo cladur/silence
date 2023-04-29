@@ -28,14 +28,18 @@ add_library(${CORE_LIB_NAME} STATIC
         behavior_tree/decorator_nodes/repeater_node.h
         behavior_tree/decorator_nodes/retry_node.h
         behavior_tree/decorator_nodes/invert_node.h
-        components/mesh_instance_component.h
         serialization.h
         camera/camera.cpp camera/camera.h
         components/collider_tag_component.h
         components/static_tag_component.h
         components/collider_aabb.h
         components/collider_sphere.h
-        components/collider_obb.h)
+        components/collider_obb.h
+        components/collider_sphere.h
+        components/collider_obb.h
+        cvars/cvars.cpp
+        cvars/cvars.h
+        )
 
 target_include_directories(${CORE_LIB_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 
@@ -45,6 +49,7 @@ find_package(glm CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)
 find_package(magic_enum CONFIG REQUIRED)
+find_package(Tracy CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 
 target_link_libraries(${COMMON_LIB_NAME} INTERFACE
@@ -52,6 +57,7 @@ target_link_libraries(${COMMON_LIB_NAME} INTERFACE
         imgui::imgui
         glm::glm
         magic_enum::magic_enum
+        Tracy::TracyClient
         nlohmann_json::nlohmann_json
         )
 
@@ -60,3 +66,5 @@ target_link_libraries(${CORE_LIB_NAME} PRIVATE
         )
 
 target_precompile_headers(${COMMON_LIB_NAME} INTERFACE pch.h)
+
+add_subdirectory(assets)

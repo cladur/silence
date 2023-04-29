@@ -19,4 +19,9 @@ imgui.ini
 # FMOD stuff
 thirdparty/fmod/api
 thirdparty/fmod/plugins
-test.json
+
+# Asset files
+*.tx
+*.mesh
+resources/assets_export
+resources/assets_tmp

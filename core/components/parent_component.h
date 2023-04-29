@@ -21,7 +21,7 @@ struct Parent {
 	}
 
 	void deserialize_json(nlohmann::json &j) {
-		nlohmann::json obj = Serializaer::get_data("parent", j);
+		nlohmann::json obj = Serializer::get_data("parent", j);
 		parent = obj["parent"];
 	}
 };

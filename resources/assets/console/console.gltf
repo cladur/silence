@@ -1,0 +1,164 @@
+{
+    "asset" : {
+        "generator" : "Khronos glTF Blender I/O v3.2.40",
+        "version" : "2.0"
+    },
+    "scene" : 0,
+    "scenes" : [
+        {
+            "name" : "Scene",
+            "nodes" : [
+                0
+            ]
+        }
+    ],
+    "nodes" : [
+        {
+            "mesh" : 0,
+            "name" : "console",
+            "translation" : [
+                -2.0311338901519775,
+                0,
+                1.0036113262176514
+            ]
+        }
+    ],
+    "materials" : [
+        {
+            "doubleSided" : true,
+            "name" : "console",
+            "normalTexture" : {
+                "index" : 0,
+                "scale" : 1.5
+            },
+            "occlusionTexture" : {
+                "index" : 1
+            },
+            "pbrMetallicRoughness" : {
+                "baseColorTexture" : {
+                    "index" : 2
+                },
+                "metallicRoughnessTexture" : {
+                    "index" : 1
+                }
+            }
+        }
+    ],
+    "meshes" : [
+        {
+            "name" : "Mesh.003",
+            "primitives" : [
+                {
+                    "attributes" : {
+                        "POSITION" : 0,
+                        "NORMAL" : 1,
+                        "TEXCOORD_0" : 2
+                    },
+                    "indices" : 3,
+                    "material" : 0
+                }
+            ]
+        }
+    ],
+    "textures" : [
+        {
+            "sampler" : 0,
+            "source" : 0
+        },
+        {
+            "sampler" : 0,
+            "source" : 1
+        },
+        {
+            "sampler" : 0,
+            "source" : 2
+        }
+    ],
+    "images" : [
+        {
+            "mimeType" : "image/png",
+            "name" : "console_Normal",
+            "uri" : "tex/console_Normal.png"
+        },
+        {
+            "mimeType" : "image/png",
+            "name" : "console_Mixed_AO-console_Roughness-console_Metallic",
+            "uri" : "tex/console_Mixed_AO-console_Roughness-console_Metallic.png"
+        },
+        {
+            "mimeType" : "image/png",
+            "name" : "console_Base_color-console_Opacity",
+            "uri" : "tex/console_Base_color-console_Opacity.png"
+        }
+    ],
+    "accessors" : [
+        {
+            "bufferView" : 0,
+            "componentType" : 5126,
+            "count" : 1162,
+            "max" : [
+                0.25,
+                0.0561675950884819,
+                0.15000000596046448
+            ],
+            "min" : [
+                -0.25,
+                8.344452240294231e-09,
+                -0.15000000596046448
+            ],
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 1,
+            "componentType" : 5126,
+            "count" : 1162,
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 2,
+            "componentType" : 5126,
+            "count" : 1162,
+            "type" : "VEC2"
+        },
+        {
+            "bufferView" : 3,
+            "componentType" : 5123,
+            "count" : 5592,
+            "type" : "SCALAR"
+        }
+    ],
+    "bufferViews" : [
+        {
+            "buffer" : 0,
+            "byteLength" : 13944,
+            "byteOffset" : 0
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 13944,
+            "byteOffset" : 13944
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 9296,
+            "byteOffset" : 27888
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 11184,
+            "byteOffset" : 37184
+        }
+    ],
+    "samplers" : [
+        {
+            "magFilter" : 9729,
+            "minFilter" : 9987
+        }
+    ],
+    "buffers" : [
+        {
+            "byteLength" : 48368,
+            "uri" : "console.bin"
+        }
+    ]
+}

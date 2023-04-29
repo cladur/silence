@@ -1,0 +1,175 @@
+{
+    "asset" : {
+        "generator" : "Khronos glTF Blender I/O v3.2.40",
+        "version" : "2.0"
+    },
+    "scene" : 0,
+    "scenes" : [
+        {
+            "name" : "Scene",
+            "nodes" : [
+                0
+            ]
+        }
+    ],
+    "nodes" : [
+        {
+            "mesh" : 0,
+            "name" : "camera01"
+        }
+    ],
+    "materials" : [
+        {
+            "doubleSided" : true,
+            "emissiveFactor" : [
+                1,
+                1,
+                1
+            ],
+            "emissiveTexture" : {
+                "index" : 0
+            },
+            "name" : "cam1",
+            "normalTexture" : {
+                "index" : 1
+            },
+            "occlusionTexture" : {
+                "index" : 2
+            },
+            "pbrMetallicRoughness" : {
+                "baseColorTexture" : {
+                    "index" : 3
+                },
+                "metallicRoughnessTexture" : {
+                    "index" : 2
+                }
+            }
+        }
+    ],
+    "meshes" : [
+        {
+            "name" : "Mesh.014",
+            "primitives" : [
+                {
+                    "attributes" : {
+                        "POSITION" : 0,
+                        "NORMAL" : 1,
+                        "TEXCOORD_0" : 2
+                    },
+                    "indices" : 3,
+                    "material" : 0
+                }
+            ]
+        }
+    ],
+    "textures" : [
+        {
+            "sampler" : 0,
+            "source" : 0
+        },
+        {
+            "sampler" : 0,
+            "source" : 1
+        },
+        {
+            "sampler" : 0,
+            "source" : 2
+        },
+        {
+            "sampler" : 0,
+            "source" : 3
+        }
+    ],
+    "images" : [
+        {
+            "mimeType" : "image/png",
+            "name" : "cam1_Emissive",
+            "uri" : "tex/cam1_Emissive.png"
+        },
+        {
+            "mimeType" : "image/png",
+            "name" : "cam1_Normal",
+            "uri" : "tex/cam1_Normal.png"
+        },
+        {
+            "mimeType" : "image/png",
+            "name" : "AO-cam1_Roughness-cam1_Metallic",
+            "uri" : "tex/AO-cam1_Roughness-cam1_Metallic.png"
+        },
+        {
+            "mimeType" : "image/png",
+            "name" : "cam1_Base_color-cam1_Opacity",
+            "uri" : "tex/cam1_Base_color-cam1_Opacity.png"
+        }
+    ],
+    "accessors" : [
+        {
+            "bufferView" : 0,
+            "componentType" : 5126,
+            "count" : 2226,
+            "max" : [
+                -1.4291969537734985,
+                0.12791818380355835,
+                0.9791992902755737
+            ],
+            "min" : [
+                -1.5526963472366333,
+                -0.013980569317936897,
+                0.6620193719863892
+            ],
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 1,
+            "componentType" : 5126,
+            "count" : 2226,
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 2,
+            "componentType" : 5126,
+            "count" : 2226,
+            "type" : "VEC2"
+        },
+        {
+            "bufferView" : 3,
+            "componentType" : 5123,
+            "count" : 9348,
+            "type" : "SCALAR"
+        }
+    ],
+    "bufferViews" : [
+        {
+            "buffer" : 0,
+            "byteLength" : 26712,
+            "byteOffset" : 0
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 26712,
+            "byteOffset" : 26712
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 17808,
+            "byteOffset" : 53424
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 18696,
+            "byteOffset" : 71232
+        }
+    ],
+    "samplers" : [
+        {
+            "magFilter" : 9729,
+            "minFilter" : 9987
+        }
+    ],
+    "buffers" : [
+        {
+            "byteLength" : 89928,
+            "uri" : "camera1.bin"
+        }
+    ]
+}

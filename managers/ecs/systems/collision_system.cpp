@@ -18,6 +18,8 @@ void CollisionSystem::startup() {
 }
 
 void CollisionSystem::update() {
+	ZoneScopedN("CollisionSystem::update");
+
 	CollisionFlag first, second;
 	for (auto it1 = entities.begin(); it1 != entities.end(); ++it1) {
 		Entity e1 = std::ref(*it1);

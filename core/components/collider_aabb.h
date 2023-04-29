@@ -22,7 +22,7 @@ struct ColliderAABB {
 	}
 
 	void deserialize_json(nlohmann::json &j) {
-		nlohmann::json obj = Serializaer::get_data("collider_aabb", j);
+		nlohmann::json obj = Serializer::get_data("collider_aabb", j);
 		center.x = obj["center"]["x"];
 		center.y = obj["center"]["y"];
 		center.z = obj["center"]["z"];

@@ -20,7 +20,7 @@ struct RigidBody {
 	}
 
 	void deserialize_json(nlohmann::json &j) {
-		nlohmann::json obj = Serializaer::get_data("rigidbody", j);
+		nlohmann::json obj = Serializer::get_data("rigidbody", j);
 		velocity.x = obj["velocity"]["x"];
 		velocity.y = obj["velocity"]["y"];
 		velocity.z = obj["velocity"]["z"];

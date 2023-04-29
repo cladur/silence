@@ -8,16 +8,17 @@
 #include "components/collider_tag_component.h"
 #include "components/fmod_listener_component.h"
 #include "components/gravity_component.h"
-#include "components/mesh_instance_component.h"
 #include "components/parent_component.h"
 #include "components/rigidbody_component.h"
 #include "components/static_tag_component.h"
 #include "components/transform_component.h"
 
-#include <functional>
-#include <map>
-#include <string>
-#include <variant>
+#ifdef USE_OPENGL
+#include "opengl/render_handle.h"
+#else
+// TODO: Move ModelInstance to somewhere else
+#include "render/render_manager.h"
+#endif
 
 namespace serialization {
 
@@ -31,7 +32,7 @@ concept Deserializable = requires(T t, nlohmann::json &j) {
 	{ t.deserialize_json(j) };
 };
 
-typedef std::variant<Children, Parent, Transform, RigidBody, FmodListener, Gravity, MeshInstance, ColliderTag,
+typedef std::variant<Children, Parent, Transform, RigidBody, FmodListener, Gravity, RenderHandle, ColliderTag,
 		StaticTag, ColliderSphere, ColliderAABB, ColliderOBB>
 		variant_type;
 

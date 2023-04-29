@@ -1,5 +1,7 @@
 #include "input_manager.h"
 
+#include "display/display_manager.h"
+
 bool InputManager::is_action_valid(const std::string &action_name) {
 	if (!actions.contains(action_name)) {
 		SPDLOG_WARN("Action {} does not exist", action_name);
@@ -58,7 +60,9 @@ void InputManager::poll_gamepads() {
 	}
 }
 
-void InputManager::startup(GLFWwindow *window) {
+void InputManager::startup() {
+	GLFWwindow *window = DisplayManager::get()->window;
+
 	glfwSetWindowUserPointer(window, this);
 	for (int i = GLFW_JOYSTICK_1; i < GLFW_JOYSTICK_16; i++) {
 		glfwSetJoystickUserPointer(i, this);
@@ -143,6 +147,7 @@ void InputManager::remove_key_from_action(const std::string &action_name, InputK
 }
 
 void InputManager::process_input() {
+	ZoneScopedNC("InputManager::process_input", 0x87CEFA);
 	previous_key_state = key_state;
 	mouse_delta = mouse_position - last_mouse_position;
 	last_mouse_position = mouse_position;

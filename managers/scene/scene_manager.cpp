@@ -35,9 +35,7 @@ void SceneManager::save_json_to_file(const std::string &file_name, const nlohman
 SceneManager *SceneManager::get_instance() {
 	std::lock_guard<std::mutex> lock(mutex);
 	if (instance == nullptr) {
-		if (instance == nullptr) {
-			instance = new SceneManager();
-		}
+		instance = new SceneManager();
 	}
 	return instance;
 }

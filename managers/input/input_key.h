@@ -1,8 +1,8 @@
 #ifndef SILENCE_INPUT_KEY_H
 #define SILENCE_INPUT_KEY_H
 
+#define GLFW_INCLUDE_NONE
 #include "GLFW/glfw3.h"
-#include <string>
 
 enum class InputKey {
 	UNKNOWN,
