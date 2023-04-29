@@ -18,7 +18,6 @@
 #include "components/parent_component.h"
 #include "components/rigidbody_component.h"
 #include "components/transform_component.h"
-#include "managers/render/ecs/render_handle.h"
 
 #include "ecs/ecs_manager.h"
 #include "ecs/systems/collider_components_factory.h"
@@ -109,7 +108,7 @@ void default_ecs_manager_init() {
 	ecs_manager.register_component<Gravity>();
 	ecs_manager.register_component<Parent>();
 	ecs_manager.register_component<Children>();
-	ecs_manager.register_component<RenderHandle>();
+	ecs_manager.register_component<ModelInstance>();
 	ecs_manager.register_component<FmodListener>();
 	ecs_manager.register_component<ColliderTag>();
 	ecs_manager.register_component<ColliderSphere>();
@@ -146,10 +145,11 @@ void demo_entities_init(std::vector<Entity> &entities) {
 		ColliderComponentsFactory::add_collider_component(
 				entity, ColliderAABB{ transform.get_position(), transform.get_scale(), true });
 
-		Handle<ModelInstance> hndl = RenderManager::get()->add_instance("woodenBox/woodenBox.pfb", MATERIAL_TYPE_UNLIT);
+		// Handle<ModelInstance> hndl = RenderManager::get()->add_instance("woodenBox/woodenBox.pfb",
+		// MATERIAL_TYPE_UNLIT);
 		//		Handle<ModelInstance> hndl = RenderManager::get()->add_instance("electricBox/electricBox.pfb");
 		//		Handle<ModelInstance> hndl = RenderManager::get()->add_instance("Agent/agent_idle.pfb");
-		ecs_manager.add_component<RenderHandle>(entity, RenderHandle{ .handle = hndl });
+		ecs_manager.add_component<ModelInstance>(entity, ModelInstance("woodenBox/woodenBox.pfb"));
 	}
 
 	auto listener = ecs_manager.create_entity();
@@ -568,9 +568,9 @@ int main() {
 				ImGui::Text("Rot: %.3f, %.3f, %.3f", rot.x, rot.y, rot.z);
 				ImGui::Text("Scale: %.3f, %.3f, %.3f", scale.x, scale.y, scale.z);
 			}
-			if (ecs_manager.has_component<RenderHandle>(active_entity)) {
-				auto &render_handle = ecs_manager.get_component<RenderHandle>(active_entity);
-				ImGui::Text("Render handle: %d", render_handle.handle.id);
+			if (ecs_manager.has_component<ModelInstance>(active_entity)) {
+				auto &model_instance = ecs_manager.get_component<ModelInstance>(active_entity);
+				ImGui::Text("Model handle: %d", model_instance.model_handle.id);
 			}
 		} else {
 			ImGui::Text("No entity selected");

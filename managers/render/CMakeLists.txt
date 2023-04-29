@@ -15,6 +15,7 @@ add_library(${OPENGL_MANAGER_NAME} STATIC
         text/text_draw.cpp text/text_draw.h
         debug/debug_draw.cpp debug/debug_draw.h
         ecs/render_system.cpp ecs/render_system.h
+        ecs/model_instance.cpp ecs/model_instance.h
         )
 
 # Include directories

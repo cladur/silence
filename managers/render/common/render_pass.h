@@ -1,17 +1,20 @@
 #ifndef SILENCE_RENDER_PASS_H
 #define SILENCE_RENDER_PASS_H
 
+#include "components/transform_component.h"
 #include "managers/render/ecs/model_instance.h"
 #include "material.h"
 #include "model.h"
 #include "skybox.h"
 
+struct DrawCommand {
+	ModelInstance *model_instance;
+	Transform *transform;
+};
+
 class RenderPass {
 public:
-	std::vector<Handle<ModelInstance>> instance_handles;
-
-	void add_instance(Handle<ModelInstance> handle);
-	void remove_instance(Handle<ModelInstance> handle);
+	std::vector<DrawCommand> draw_commands;
 
 	virtual void startup() = 0;
 	virtual void draw() = 0;

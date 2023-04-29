@@ -2,16 +2,14 @@
 
 #include "core/components/transform_component.h"
 #include "ecs/ecs_manager.h"
-
 #include "managers/render/render_manager.h"
-#include "render_handle.h"
 
 extern ECSManager ecs_manager;
 
 void RenderSystem::startup() {
 	Signature signature;
 	signature.set(ecs_manager.get_component_type<Transform>());
-	signature.set(ecs_manager.get_component_type<RenderHandle>());
+	signature.set(ecs_manager.get_component_type<ModelInstance>());
 	ecs_manager.set_system_component_whitelist<RenderSystem>(signature);
 }
 
@@ -20,10 +18,8 @@ void RenderSystem::update() {
 
 	for (auto const &entity : entities) {
 		auto &transform = ecs_manager.get_component<Transform>(entity);
-		auto &render_handle = ecs_manager.get_component<RenderHandle>(entity);
+		auto &model_instance = ecs_manager.get_component<ModelInstance>(entity);
 
-		if (transform.is_changed_this_frame()) {
-			render_manager.update_instance_transform(render_handle.handle, transform.get_global_model_matrix());
-		}
+		render_manager.queue_draw(&model_instance, &transform);
 	}
 }

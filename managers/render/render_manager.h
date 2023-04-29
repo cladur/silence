@@ -1,14 +1,15 @@
 #ifndef SILENCE_RENDER_MANAGER_H
 #define SILENCE_RENDER_MANAGER_H
 
-#include "managers/render/common/framebuffer.h"
-#include "managers/render/common/material.h"
-#include "managers/render/common/mesh.h"
-#include "managers/render/common/model.h"
-#include "managers/render/common/render_pass.h"
-#include "managers/render/common/shader.h"
-#include "managers/render/common/texture.h"
+#include "common/framebuffer.h"
+#include "common/material.h"
+#include "common/mesh.h"
+#include "common/model.h"
+#include "common/render_pass.h"
+#include "common/shader.h"
+#include "common/texture.h"
 
+#include "components/transform_component.h"
 #include "debug/debug_draw.h"
 #include "text/text_draw.h"
 
@@ -20,7 +21,7 @@ private:
 	std::vector<Model> models;
 	std::unordered_map<std::string, Handle<Model>> name_to_model;
 
-	std::vector<ModelInstance> model_instances;
+	std::vector<DrawCommand> draw_commands;
 
 public:
 	glm::mat4 projection;
@@ -31,6 +32,7 @@ public:
 	DebugDraw debug_draw;
 
 	// Render passes
+	RenderPass *default_pass;
 	UnlitPass unlit_pass;
 	PBRPass pbr_pass;
 	SkyboxPass skybox_pass;
@@ -48,18 +50,12 @@ public:
 
 	void resize_framebuffer(uint32_t width, uint32_t height);
 
-	void load_model(const char *path);
+	Handle<Model> load_model(const char *path);
 	void load_texture(const char *path);
 
 	Model &get_model(Handle<Model> handle);
-	ModelInstance &get_model_instance(Handle<ModelInstance> handle);
 
-	Handle<ModelInstance> add_instance(
-			const char *path, MaterialType material_type = MATERIAL_TYPE_PBR, bool in_shadow_pass = true);
-	void remove_instance(Handle<ModelInstance> handle);
-
-	void update_instance_passes(Handle<ModelInstance> handle, MaterialType material_type, bool in_shadow_pass);
-	void update_instance_transform(Handle<ModelInstance> handle, glm::mat4 const &transform);
+	void queue_draw(ModelInstance *model_instance, Transform *transform);
 };
 
 #endif // SILENCE_RENDER_MANAGER_H

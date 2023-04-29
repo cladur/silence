@@ -1,5 +1,6 @@
 #include "render_manager.h"
 
+#include "components/transform_component.h"
 #include "display/display_manager.h"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
@@ -66,6 +67,7 @@ void RenderManager::startup() {
 	unlit_pass.startup();
 	pbr_pass.startup();
 	skybox_pass.startup();
+	default_pass = &pbr_pass;
 
 	glm::vec2 window_extent = display_manager->get_framebuffer_size();
 	render_framebuffer.startup(window_extent.x, window_extent.y);
@@ -140,10 +142,11 @@ void RenderManager::draw() {
 	glfwSwapBuffers(display_manager->window);
 }
 
-void RenderManager::load_model(const char *path) {
+Handle<Model> RenderManager::load_model(const char *path) {
 	if (name_to_model.find(path) != name_to_model.end()) {
-		return;
+		return name_to_model[path];
 	}
+
 	Model model = {};
 	model.load_from_asset(asset_path(path).c_str());
 
@@ -152,6 +155,7 @@ void RenderManager::load_model(const char *path) {
 	handle.id = models.size() - 1;
 
 	name_to_model[path] = handle;
+	return handle;
 }
 
 void RenderManager::load_texture(const char *path) {
@@ -167,49 +171,23 @@ Model &RenderManager::get_model(Handle<Model> handle) {
 	return models[handle.id];
 }
 
-ModelInstance &RenderManager::get_model_instance(Handle<ModelInstance> handle) {
-	return model_instances[handle.id];
-}
+void RenderManager::queue_draw(ModelInstance *model_instance, Transform *transform) {
+	DrawCommand draw_command = {};
+	draw_command.model_instance = model_instance;
+	draw_command.transform = transform;
 
-Handle<ModelInstance> RenderManager::add_instance(const char *path, MaterialType material_type, bool in_shadow_pass) {
-	load_model(path);
-
-	ModelInstance model_instance = {};
-	model_instance.transform = glm::mat4(1.0f);
-
-	Handle<ModelInstance> handle = {};
-	handle.id = model_instances.size();
-
-	model_instances.push_back(model_instance);
-
-	switch (material_type) {
-		case MATERIAL_TYPE_UNLIT: {
-			unlit_pass.add_instance(handle);
+	switch (model_instance->material_type) {
+		case MaterialType::Default: {
+			default_pass->draw_commands.push_back(draw_command);
 			break;
 		}
-		case MATERIAL_TYPE_PBR: {
-			pbr_pass.add_instance(handle);
+		case MaterialType::Unlit: {
+			unlit_pass.draw_commands.push_back(draw_command);
 			break;
 		}
-		default: {
-			assert(false);
+		case MaterialType::PBR: {
+			pbr_pass.draw_commands.push_back(draw_command);
+			break;
 		}
 	}
-
-	return handle;
-}
-
-void RenderManager::remove_instance(Handle<ModelInstance> handle) {
-	model_instances.erase(model_instances.begin() + handle.id);
-	unlit_pass.remove_instance(handle);
-}
-
-void RenderManager::update_instance_passes(
-		Handle<ModelInstance> handle, MaterialType material_type, bool in_shadow_pass) {
-	// TODO
-	assert(false);
-}
-
-void RenderManager::update_instance_transform(Handle<ModelInstance> handle, glm::mat4 const &transform) {
-	get_model_instance(handle).transform = transform;
 }

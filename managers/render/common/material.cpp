@@ -21,8 +21,8 @@ void MaterialUnlit::bind_resources() {
 	shader.set_int("albedo_map", 0);
 }
 
-void MaterialUnlit::bind_instance_resources(ModelInstance &instance) {
-	shader.set_mat4("model", instance.transform);
+void MaterialUnlit::bind_instance_resources(ModelInstance &instance, Transform &transform) {
+	shader.set_mat4("model", transform.get_global_model_matrix());
 }
 
 void MaterialUnlit::bind_mesh_resources(Mesh &mesh) {
@@ -85,8 +85,8 @@ void MaterialPBR::bind_resources() {
 	shader.set_vec3("lightColors[3]", glm::vec3(1.0f, 1.0f, 1.0f));
 }
 
-void MaterialPBR::bind_instance_resources(ModelInstance &instance) {
-	shader.set_mat4("model", instance.transform);
+void MaterialPBR::bind_instance_resources(ModelInstance &instance, Transform &transform) {
+	shader.set_mat4("model", transform.get_global_model_matrix());
 }
 
 void MaterialPBR::bind_mesh_resources(Mesh &mesh) {
@@ -121,5 +121,5 @@ void MaterialSkybox::bind_resources() {
 	shader.set_mat4("projection", render_manager->projection);
 }
 
-void MaterialSkybox::bind_instance_resources(ModelInstance &instance) {
+void MaterialSkybox::bind_instance_resources(ModelInstance &instance, Transform &transform) {
 }

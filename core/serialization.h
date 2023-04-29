@@ -13,7 +13,7 @@
 #include "components/rigidbody_component.h"
 #include "components/transform_component.h"
 
-#include "managers/render/ecs/render_handle.h"
+#include "managers/render/ecs/model_instance.h"
 
 namespace serialization {
 
@@ -27,7 +27,7 @@ concept Deserializable = requires(T t, nlohmann::json &j) {
 	{ t.deserialize_json(j) };
 };
 
-typedef std::variant<Children, Parent, Transform, RigidBody, FmodListener, Gravity, RenderHandle, Name, ColliderTag,
+typedef std::variant<Children, Parent, Transform, RigidBody, FmodListener, Gravity, ModelInstance, Name, ColliderTag,
 		ColliderSphere, ColliderAABB, ColliderOBB>
 		variant_type;
 
