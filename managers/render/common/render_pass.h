@@ -1,9 +1,9 @@
 #ifndef SILENCE_RENDER_PASS_H
 #define SILENCE_RENDER_PASS_H
 
+#include "managers/render/ecs/model_instance.h"
 #include "material.h"
 #include "model.h"
-#include "model_instance.h"
 #include "skybox.h"
 
 class RenderPass {

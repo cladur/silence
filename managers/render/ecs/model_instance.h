@@ -1,7 +1,7 @@
 #ifndef SILENCE_MODEL_INSTANCE_H
 #define SILENCE_MODEL_INSTANCE_H
 
-#include "model.h"
+#include "managers/render/common/model.h"
 
 template <typename T> struct Handle {
 	uint32_t id;

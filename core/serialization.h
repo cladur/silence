@@ -13,7 +13,7 @@
 #include "components/rigidbody_component.h"
 #include "components/transform_component.h"
 
-#include "render/render_handle.h"
+#include "managers/render/ecs/render_handle.h"
 
 namespace serialization {
 

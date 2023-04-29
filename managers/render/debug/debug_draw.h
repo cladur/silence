@@ -1,7 +1,7 @@
 #ifndef SILENCE_DEBUG_DRAW_H
 #define SILENCE_DEBUG_DRAW_H
 
-#include "render/shader.h"
+#include "managers/render/common/shader.h"
 
 class RenderManager;
 

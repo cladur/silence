@@ -1,5 +1,5 @@
 #include "render_pass.h"
-#include "render/material.h"
+#include "material.h"
 #include "render/render_manager.h"
 
 void RenderPass::add_instance(Handle<ModelInstance> handle) {

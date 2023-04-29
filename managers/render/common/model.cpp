@@ -3,7 +3,7 @@
 #include "assets/material_asset.h"
 #include "assets/prefab_asset.h"
 
-#include "render_manager.h"
+#include "managers/render/render_manager.h"
 
 void Model::load_from_asset(const char *path) {
 	RenderManager *render_manager = RenderManager::get();

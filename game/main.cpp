@@ -2,11 +2,11 @@
 #include "display/display_manager.h"
 #include "font/font_manager.h"
 #include "input/input_manager.h"
-#include "render/material.h"
+#include "managers/render/common/material.h"
 
 #include "imgui_impl_opengl3.h"
+#include "managers/render/ecs/render_system.h"
 #include "render/render_manager.h"
-#include "render/render_system.h"
 
 #include "components/children_component.h"
 #include "components/collider_aabb.h"
@@ -16,7 +16,7 @@
 #include "components/parent_component.h"
 #include "components/rigidbody_component.h"
 #include "components/transform_component.h"
-#include "render/render_handle.h"
+#include "managers/render/ecs/render_handle.h"
 
 #include "ecs/ecs_manager.h"
 #include "ecs/systems/collider_components_factory.h"
