@@ -75,16 +75,18 @@ void TextDraw::draw() {
 
 namespace text_draw {
 
-void draw_text_2d(const std::string &text, const glm::vec2 &position, const glm::vec3 &color, float scale, Font *font) {
+void draw_text_2d(const std::string &text, const glm::vec2 &position, const glm::vec3 &color, float scale, Font *font,
+		bool center_x, bool center_y) {
 	draw_text(text, true, glm::vec3(position, 0.0f), color, scale, font);
 }
 
-void draw_text_3d(const std::string &text, const glm::vec3 &position, const glm::vec3 &color, float scale, Font *font) {
-	draw_text(text, false, position, color, scale, font);
+void draw_text_3d(const std::string &text, const glm::vec3 &position, const glm::vec3 &color, float scale, Font *font,
+		bool center_x, bool center_y) {
+	draw_text(text, false, position, color, scale, font, center_x, center_y);
 }
 
 void draw_text(const std::string &text, bool is_screen_space, const glm::vec3 &position, const glm::vec3 &color,
-		float scale, Font *font) {
+		float scale, Font *font, bool center_x, bool center_y) {
 	if (font == nullptr) {
 		font = &FontManager::get()->fonts.begin()->second;
 	}
@@ -97,7 +99,38 @@ void draw_text(const std::string &text, bool is_screen_space, const glm::vec3 &p
 	// But whatever
 	scale *= 0.02f;
 
+	// We're scaling down the font even more if it's in screenspace coords, cause they are just [-1; 1]
+	float screen_space_scale = 0.1f;
+
 	float x = position.x;
+	if (center_x) {
+		float text_width = 0.0f;
+		for (char c : text) {
+			Character character = font->characters[c];
+			if (is_screen_space) {
+				text_width += (character.advance >> 6) * scale * screen_space_scale / 2;
+			} else {
+				text_width += (character.advance >> 6) * scale;
+			}
+		}
+		x -= text_width / 2.0f;
+	}
+
+	float y = position.y;
+	if (center_y) {
+		float text_height = 0.0f;
+		for (char c : text) {
+			Character character = font->characters[c];
+			if (text_height < (character.y_max - character.y_min) * scale) {
+				if (is_screen_space) {
+					text_height = (character.y_max - character.y_min) * scale * screen_space_scale / 2;
+				} else {
+					text_height = (character.y_max - character.y_min) * scale;
+				}
+			}
+		}
+		y -= text_height / 2.0f;
+	}
 
 	float aspect = 1.0;
 
@@ -105,7 +138,7 @@ void draw_text(const std::string &text, bool is_screen_space, const glm::vec3 &p
 		glm::vec2 window_size = DisplayManager::get()->get_framebuffer_size();
 		aspect = window_size.y / window_size.x;
 		// We're scaling down the font even more if it's in screenspace coords, cause they are just [-1; 1]
-		scale *= 0.1f;
+		scale *= screen_space_scale;
 	}
 
 	for (char c : text) {
@@ -115,7 +148,7 @@ void draw_text(const std::string &text, bool is_screen_space, const glm::vec3 &p
 		float y_size = character.y_max - character.y_min;
 
 		float xpos = x + character.bearing.x * scale * aspect;
-		float ypos = position.y - (y_size - character.bearing.y) * scale;
+		float ypos = y - (y_size - character.bearing.y) * scale;
 		float zpos = position.z;
 
 		float w = x_size * scale * aspect;

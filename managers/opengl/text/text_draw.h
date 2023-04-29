@@ -29,14 +29,17 @@ public:
 namespace text_draw {
 
 void draw_text_2d(const std::string &text, const glm::vec2 &position,
-		const glm::vec3 &color = glm::vec3(1.0f, 1.0f, 1.0f), float scale = 1.0f, Font *font = nullptr);
+		const glm::vec3 &color = glm::vec3(1.0f, 1.0f, 1.0f), float scale = 1.0f, Font *font = nullptr,
+		bool center_x = false, bool center_y = false);
 
 void draw_text_3d(const std::string &text, const glm::vec3 &position,
-		const glm::vec3 &color = glm::vec3(1.0f, 1.0f, 1.0f), float scale = 1.0f, Font *font = nullptr);
+		const glm::vec3 &color = glm::vec3(1.0f, 1.0f, 1.0f), float scale = 1.0f, Font *font = nullptr,
+		bool center_x = false, bool center_y = false);
 
 // Draw a text at "position" with "color" and "scale". If "font" is nullptr, the first loaded font will be used.
 void draw_text(const std::string &text, bool is_screen_space, const glm::vec3 &position,
-		const glm::vec3 &color = glm::vec3(1.0f, 1.0f, 1.0f), float scale = 1.0f, Font *font = nullptr);
+		const glm::vec3 &color = glm::vec3(1.0f, 1.0f, 1.0f), float scale = 1.0f, Font *font = nullptr,
+		bool center_x = false, bool center_y = false);
 
 } //namespace text_draw
 
