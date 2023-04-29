@@ -46,6 +46,7 @@ void OpenglManager::startup() {
 	(void)io;
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable; // Enable Docking
 	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable Multi-Viewport / Platform Windows
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
 	io.ConfigWindowsMoveFromTitleBarOnly = true;
 
 	DisplayManager *display_manager = DisplayManager::get();
@@ -68,18 +69,28 @@ void OpenglManager::startup() {
 
 	glm::vec2 window_extent = display_manager->get_framebuffer_size();
 	render_framebuffer.startup(window_extent.x, window_extent.y);
+	render_extent = window_extent;
 }
 
 void OpenglManager::shutdown() {
 }
 
+void OpenglManager::resize_framebuffer(uint32_t width, uint32_t height) {
+	glViewport(0, 0, (int)width, (int)height);
+	render_framebuffer.resize(width, height);
+
+	render_extent = glm::vec2(width, height);
+}
+
 void OpenglManager::draw() {
 	DisplayManager *display_manager = DisplayManager::get();
 	glm::vec2 window_extent = display_manager->get_framebuffer_size();
-	if (display_manager->is_window_resizable && display_manager->was_window_resized()) {
-		glViewport(0, 0, (int)window_extent.x, (int)window_extent.y);
-		render_framebuffer.resize(window_extent.x, window_extent.y);
-	}
+
+	//	// Resize the viewport if the window was resized
+	//	if (display_manager->is_window_resizable && display_manager->was_window_resized()) {
+	//		glViewport(0, 0, (int)window_extent.x, (int)window_extent.y);
+	//		render_framebuffer.resize(window_extent.x, window_extent.y);
+	//	}
 
 	render_framebuffer.bind();
 
@@ -88,7 +99,7 @@ void OpenglManager::draw() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	projection =
-			glm::perspective(glm::radians(70.0f), window_extent.x / window_extent.y, 0.1f, cvar_draw_distance.get());
+			glm::perspective(glm::radians(70.0f), render_extent.x / render_extent.y, 0.1f, cvar_draw_distance.get());
 	view = camera.get_view_matrix();
 	camera_pos = camera.get_position();
 
@@ -110,6 +121,9 @@ void OpenglManager::draw() {
 	debug_draw.draw();
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	glad_glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// IMGUI
 	ImGui::Render();

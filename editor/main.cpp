@@ -42,6 +42,8 @@
 
 #include "core/camera/camera.h"
 
+#include <nfd.h>
+
 ECSManager ecs_manager;
 AudioManager audio_manager;
 InputManager input_manager;
@@ -268,6 +270,8 @@ int main() {
 	fmod_listener_system->startup();
 	FontManager::get()->startup();
 
+	NFD_Init();
+
 	std::vector<Entity> entities(50);
 	demo_entities_init(entities);
 
@@ -325,12 +329,92 @@ int main() {
 
 		DisplayManager::get()->poll_events();
 
-		// ImGui::DockSpaceOverViewport(ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
+		ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
+
+		// Add menu bar flag and disable everything else
+		ImGuiWindowFlags flags2 = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoMove |
+				ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoSavedSettings |
+				ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_MenuBar;
+
+		ImGuiWindowFlags flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoScrollWithMouse |
+				ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoTitleBar;
+
+		//		if (ImGui::Begin("StatusBar", nullptr, flags)) {
+		//			if (ImGui::BeginMenuBar()) {
+		//				if (ImGui::BeginMenu("Rage")) {
+		//					ImGui::MenuItem("Exit", NULL, &should_run);
+		//					ImGui::EndMenu();
+		//				}
+		//
+		//				ImGui::Button("Test button");
+		//				ImGui::EndMenuBar();
+		//			}
+		//			ImGui::End();
+		//		}
+
+		ImGui::BeginMainMenuBar();
+
+		if (ImGui::BeginMenu("File")) {
+			if (ImGui::MenuItem("Save")) {
+				SPDLOG_INFO("Saving scene...");
+			}
+			if (ImGui::MenuItem("Save as...")) {
+				SPDLOG_INFO("Saving scene...");
+				nfdchar_t *outPath;
+				nfdfilteritem_t filterItem[2] = { { "Source code", "c,cpp,cc" }, { "Headers", "h,hpp" } };
+				nfdresult_t result = NFD_OpenDialog(&outPath, filterItem, 2, NULL);
+				if (result == NFD_OKAY) {
+					puts("Success!");
+					puts(outPath);
+					NFD_FreePath(outPath);
+				} else if (result == NFD_CANCEL) {
+					puts("User pressed cancel.");
+				} else {
+					printf("Error: %s\n", NFD_GetError());
+				}
+			}
+			if (ImGui::MenuItem("Load")) {
+				SPDLOG_INFO("Loading scene...");
+			}
+			if (ImGui::MenuItem("Exit")) {
+				should_run = false;
+			}
+			ImGui::EndMenu();
+		}
+
+		ImGui::EndMainMenuBar();
 
 		ImGui::Begin("Viewport");
 
+		// Get viewport size
+		static ImVec2 last_viewport_size = ImVec2(0, 0);
+		ImVec2 viewport_size = ImGui::GetContentRegionAvail();
+		if (viewport_size.x != last_viewport_size.x || viewport_size.y != last_viewport_size.y) {
+			// Resize the framebuffer
+			OpenglManager::get()->resize_framebuffer(viewport_size.x, viewport_size.y);
+			last_viewport_size = viewport_size;
+		}
+
 		uint32_t render_image = OpenglManager::get()->render_framebuffer.get_texture_id();
-		ImGui::Image((void *)(intptr_t)render_image, ImVec2(1280, 720), ImVec2(0, 1), ImVec2(1, 0));
+		ImGui::Image((void *)(intptr_t)render_image, viewport_size, ImVec2(0, 1), ImVec2(1, 0));
+
+		ImGui::End();
+
+		ImGui::Begin("Scene");
+
+		ImGui::Text("TODO: List entities");
+
+		ImGui::End();
+
+		ImGui::Begin("Inspector");
+
+		ImGui::Text("TODO: Show entity info");
+
+		ImGui::End();
+
+		ImGui::Begin("Resources");
+
+		ImGui::Text("TODO: List resources");
 
 		ImGui::End();
 
@@ -394,24 +478,6 @@ int main() {
 #else
 		render_system->update(*RenderManager::get());
 #endif
-
-		ImGui::Begin("Text Demo");
-
-		static char buffer[128] = { 'H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd', '!' };
-		static float scale = 1.0f;
-		static float position[3] = { 0.0f, 0.0f, 0.0f };
-		static glm::vec3 color = { 1.0f, 1.0f, 1.0f };
-		static bool screenspace = false;
-		ImGui::InputText("Text", buffer, 128);
-		ImGui::InputFloat("Scale", &scale);
-		ImGui::InputFloat3("Position", position);
-		ImGui::InputFloat3("Color", &color.x);
-		ImGui::Checkbox("Screenspace", &screenspace);
-
-		ImGui::End();
-
-		text_draw::draw_text(
-				std::string(buffer), screenspace, glm::vec3(position[0], position[1], position[2]), color, scale);
 
 		debug_draw::draw_line(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(10.0f, 0.0f, 0.0f));
 		debug_draw::draw_line(glm::vec3(0.0f, 5.0f, 0.0f), glm::vec3(10.0f, 0.0f, 0.0f));

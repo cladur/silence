@@ -14,6 +14,7 @@ target_link_libraries(${EDITOR_NAME} PRIVATE
         silence_scene_manager
         silence_input_manager
         silence_font_manager
+        nfd
         )
 
 if (USE_OPENGL)

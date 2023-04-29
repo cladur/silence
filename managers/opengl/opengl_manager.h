@@ -38,11 +38,15 @@ public:
 	// Framebuffers
 	Framebuffer render_framebuffer;
 
+	glm::vec2 render_extent;
+
 	static OpenglManager *get();
 
 	void startup();
 	void shutdown();
 	void draw();
+
+	void resize_framebuffer(uint32_t width, uint32_t height);
 
 	void load_model(const char *path);
 	void load_texture(const char *path);
