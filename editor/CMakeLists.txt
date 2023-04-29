@@ -1,6 +1,8 @@
 set(EDITOR_NAME "silence_editor")
 
 add_executable(${EDITOR_NAME}
+        editor.cpp editor.h
+        gui.cpp
         main.cpp
         )
 

@@ -58,12 +58,12 @@ void TextDraw::draw() {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
 	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, indices.size() * sizeof(uint32_t), &indices[0]);
 
-	RenderManager *render_manager = RenderManager::get();
-	shader.set_mat4("projection", render_manager->projection);
-	shader.set_mat4("view", render_manager->view);
+	RenderManager &render_manager = RenderManager::get();
+	shader.set_mat4("projection", render_manager.projection);
+	shader.set_mat4("view", render_manager.view);
 	shader.set_int("font_atlas_map", 0);
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, FontManager::get()->fonts.begin()->second.texture);
+	glBindTexture(GL_TEXTURE_2D, FontManager::get().fonts.begin()->second.texture);
 
 	glBindVertexArray(vao);
 	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
@@ -86,11 +86,11 @@ void draw_text_3d(const std::string &text, const glm::vec3 &position, const glm:
 void draw_text(const std::string &text, bool is_screen_space, const glm::vec3 &position, const glm::vec3 &color,
 		float scale, Font *font) {
 	if (font == nullptr) {
-		font = &FontManager::get()->fonts.begin()->second;
+		font = &FontManager::get().fonts.begin()->second;
 	}
 
-	RenderManager *render_manager = RenderManager::get();
-	TextDraw &text_draw = render_manager->text_draw;
+	RenderManager &render_manager = RenderManager::get();
+	TextDraw &text_draw = render_manager.text_draw;
 
 	// We're scaling the text by arbitrary amount
 	// Correct way to do it would be to calculate it based on the font size which we loaded using FreeType
@@ -102,7 +102,7 @@ void draw_text(const std::string &text, bool is_screen_space, const glm::vec3 &p
 	float aspect = 1.0;
 
 	if (is_screen_space) {
-		glm::vec2 window_size = DisplayManager::get()->get_framebuffer_size();
+		glm::vec2 window_size = DisplayManager::get().get_framebuffer_size();
 		aspect = window_size.y / window_size.x;
 		// We're scaling down the font even more if it's in screenspace coords, cause they are just [-1; 1]
 		scale *= 0.1f;

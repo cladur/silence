@@ -4,9 +4,8 @@
 #include "components/transform_component.h"
 #include "ecs/ecs_manager.h"
 
-extern ECSManager ecs_manager;
-
 void PhysicsSystem::startup() {
+	ECSManager &ecs_manager = ECSManager::get();
 	Signature signature;
 	signature.set(ecs_manager.get_component_type<Gravity>());
 	signature.set(ecs_manager.get_component_type<RigidBody>());
@@ -16,6 +15,7 @@ void PhysicsSystem::startup() {
 
 void PhysicsSystem::update(float dt) {
 	ZoneScopedN("PhysicsSystem::update");
+	ECSManager &ecs_manager = ECSManager::get();
 	for (auto const &entity : entities) {
 		auto &rigid_body = ecs_manager.get_component<RigidBody>(entity);
 		auto &transform = ecs_manager.get_component<Transform>(entity);

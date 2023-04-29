@@ -5,9 +5,8 @@
 #include "components/collider_tag_component.h"
 #include "ecs/ecs_manager.h"
 
-extern ECSManager ecs_manager;
-
 void CollisionSystem::startup() {
+	ECSManager &ecs_manager = ECSManager::get();
 	Signature signature;
 	signature.set(ecs_manager.get_component_type<ColliderTag>());
 	ecs_manager.set_system_component_whitelist<CollisionSystem>(signature);
@@ -15,6 +14,7 @@ void CollisionSystem::startup() {
 
 void CollisionSystem::update() { //TODO: Optimize update because now it's O(n^2) :(
 	ZoneScopedN("CollisionSystem::update");
+	ECSManager &ecs_manager = ECSManager::get();
 
 	CollisionFlag first, second;
 	for (auto it1 = entities.begin(); it1 != entities.end(); ++it1) {
@@ -85,6 +85,7 @@ bool CollisionSystem::is_overlap(ColliderSphere &a, ColliderSphere &b) {
 }
 
 void CollisionSystem::resolve_collision_sphere(Entity e1, Entity e2) {
+	ECSManager &ecs_manager = ECSManager::get();
 	ColliderSphere &c1 = ecs_manager.get_component<ColliderSphere>(e1);
 	ColliderSphere &c2 = ecs_manager.get_component<ColliderSphere>(e2);
 	Transform *t1;
@@ -145,6 +146,7 @@ bool CollisionSystem::is_overlap(ColliderAABB &a, ColliderAABB &b) {
 }
 
 void CollisionSystem::resolve_collision_aabb(Entity e1, Entity e2) {
+	ECSManager &ecs_manager = ECSManager::get();
 	ColliderAABB &c1 = ecs_manager.get_component<ColliderAABB>(e1);
 	ColliderAABB &c2 = ecs_manager.get_component<ColliderAABB>(e2);
 	Transform *t1;
@@ -232,6 +234,7 @@ glm::vec3 CollisionSystem::is_overlap(ColliderAABB &aabb, ColliderSphere &sphere
 }
 
 void CollisionSystem::resolve_aabb_sphere(Entity aabb, Entity sphere) {
+	ECSManager &ecs_manager = ECSManager::get();
 	ColliderAABB &c1 = ecs_manager.get_component<ColliderAABB>(aabb);
 	ColliderSphere &c2 = ecs_manager.get_component<ColliderSphere>(sphere);
 	Transform *t1;
@@ -322,6 +325,7 @@ glm::vec3 CollisionSystem::is_overlap(ColliderOBB &a, ColliderOBB &b) {
 }
 
 void CollisionSystem::resolve_collision_obb(Entity e1, Entity e2) {
+	ECSManager &ecs_manager = ECSManager::get();
 	ColliderOBB &c1 = ecs_manager.get_component<ColliderOBB>(e1);
 	ColliderOBB &c2 = ecs_manager.get_component<ColliderOBB>(e2);
 	Transform *t1;
@@ -393,6 +397,7 @@ glm::vec3 CollisionSystem::is_overlap(ColliderOBB &a, ColliderSphere &b) {
 }
 
 void CollisionSystem::resolve_obb_sphere(Entity obb, Entity sphere) {
+	ECSManager &ecs_manager = ECSManager::get();
 	ColliderOBB &c1 = ecs_manager.get_component<ColliderOBB>(obb);
 	ColliderSphere &c2 = ecs_manager.get_component<ColliderSphere>(sphere);
 	Transform *t1;
@@ -486,6 +491,7 @@ glm::vec3 CollisionSystem::is_overlap(ColliderOBB &a, ColliderAABB &b) {
 }
 
 void CollisionSystem::resolve_obb_aabb(Entity obb, Entity aabb) {
+	ECSManager &ecs_manager = ECSManager::get();
 	ColliderOBB &c1 = ecs_manager.get_component<ColliderOBB>(obb);
 	ColliderAABB &c2 = ecs_manager.get_component<ColliderAABB>(aabb);
 	Transform *t1;

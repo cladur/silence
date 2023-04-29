@@ -5,6 +5,11 @@
 #include "components/parent_component.h"
 #include "serialization.h"
 
+ECSManager &ECSManager::get() {
+	static ECSManager instance;
+	return instance;
+}
+
 void ECSManager::startup() {
 	// Create pointers to each manager
 	component_manager = std::make_unique<ComponentManager>();

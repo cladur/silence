@@ -53,6 +53,6 @@ void Skybox::load_from_directory(const std::string &path) {
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	glm::vec2 framebuffer_size = DisplayManager::get()->get_framebuffer_size();
+	glm::vec2 framebuffer_size = DisplayManager::get().get_framebuffer_size();
 	glViewport(0, 0, framebuffer_size.x, framebuffer_size.y);
 }

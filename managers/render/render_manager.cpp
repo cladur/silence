@@ -12,8 +12,6 @@
 #define ASSET_PATH "resources/assets_export/"
 #define SHADER_PATH "resources/shaders/"
 
-extern Camera camera;
-
 AutoCVarFloat cvar_draw_distance("render.draw_distance", "Distance cull", 5000);
 
 std::string asset_path(std::string_view path) {
@@ -24,9 +22,9 @@ std::string shader_path(std::string_view path) {
 	return std::string(SHADER_PATH) + std::string(path);
 }
 
-RenderManager *RenderManager::get() {
+RenderManager &RenderManager::get() {
 	static RenderManager render_manager;
-	return &render_manager;
+	return render_manager;
 }
 
 void RenderManager::startup() {
@@ -50,9 +48,9 @@ void RenderManager::startup() {
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
 	io.ConfigWindowsMoveFromTitleBarOnly = true;
 
-	DisplayManager *display_manager = DisplayManager::get();
+	DisplayManager &display_manager = DisplayManager::get();
 
-	ImGui_ImplGlfw_InitForOpenGL(display_manager->window, true);
+	ImGui_ImplGlfw_InitForOpenGL(display_manager.window, true);
 	const char *glsl_version = "#version 410";
 	ImGui_ImplOpenGL3_Init(glsl_version);
 
@@ -69,7 +67,7 @@ void RenderManager::startup() {
 	skybox_pass.startup();
 	default_pass = &pbr_pass;
 
-	glm::vec2 window_extent = display_manager->get_framebuffer_size();
+	glm::vec2 window_extent = display_manager.get_framebuffer_size();
 	render_framebuffer.startup(window_extent.x, window_extent.y);
 	render_extent = window_extent;
 }
@@ -84,9 +82,9 @@ void RenderManager::resize_framebuffer(uint32_t width, uint32_t height) {
 	render_extent = glm::vec2(width, height);
 }
 
-void RenderManager::draw() {
-	DisplayManager *display_manager = DisplayManager::get();
-	glm::vec2 window_extent = display_manager->get_framebuffer_size();
+void RenderManager::draw(Camera &camera) {
+	DisplayManager &display_manager = DisplayManager::get();
+	glm::vec2 window_extent = display_manager.get_framebuffer_size();
 
 	//	// Resize the viewport if the window was resized
 	//	if (display_manager->is_window_resizable && display_manager->was_window_resized()) {
@@ -145,7 +143,7 @@ void RenderManager::draw() {
 		glfwMakeContextCurrent(backup_current_context);
 	}
 
-	glfwSwapBuffers(display_manager->window);
+	glfwSwapBuffers(display_manager.window);
 }
 
 Handle<Model> RenderManager::load_model(const char *path) {

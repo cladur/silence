@@ -7,11 +7,11 @@
 #include "types.h"
 #include <spdlog/spdlog.h>
 
-extern ECSManager ecs_manager;
-
 class ColliderComponentsFactory {
 public:
 	template <typename T> static void add_collider_component(Entity entity, const T &collider_component) {
+		ECSManager &ecs_manager = ECSManager::get();
+
 		if (ecs_manager.has_component<ColliderTag>(entity)) {
 			SPDLOG_WARN("Failed to add collider component, object already has collider component");
 			return;
@@ -26,6 +26,7 @@ public:
 	}
 
 	template <typename T> static void remove_collider_component(Entity entity) {
+		ECSManager &ecs_manager = ECSManager::get();
 		ecs_manager.remove_component<ColliderTag>(entity);
 		ecs_manager.remove_component<T>(entity);
 	}

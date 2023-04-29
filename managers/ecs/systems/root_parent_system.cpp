@@ -3,9 +3,9 @@
 #include "components/transform_component.h"
 #include "ecs/ecs_manager.h"
 #include <components/parent_component.h>
-extern ECSManager ecs_manager;
 
 void RootParentSystem::startup() {
+	ECSManager &ecs_manager = ECSManager::get();
 	Signature blacklist;
 	Signature whitelist;
 	whitelist.set(ecs_manager.get_component_type<Transform>());
@@ -17,6 +17,7 @@ void RootParentSystem::startup() {
 }
 
 void RootParentSystem::update() {
+	ECSManager &ecs_manager = ECSManager::get();
 	for (auto const &entity : entities) {
 		auto &transform = ecs_manager.get_component<Transform>(entity);
 		transform.update_global_model_matrix();
@@ -26,6 +27,7 @@ void RootParentSystem::update() {
 }
 
 void RootParentSystem::update_children(Entity parent, glm::mat4 parent_model) { // NOLINT(misc-no-recursion)
+	ECSManager &ecs_manager = ECSManager::get();
 	auto children = ecs_manager.get_component<Children>(parent);
 
 	for (int i = 0; i < children.children_count; i++) {

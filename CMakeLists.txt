@@ -16,7 +16,7 @@ add_subdirectory(core)
 add_subdirectory(managers)
 add_subdirectory(asset_baker)
 add_subdirectory(editor)
-add_subdirectory(game)
+# add_subdirectory(game)
 
 
 # Commented out till we bring back Vulkan

@@ -13,6 +13,7 @@ private:
 	std::unique_ptr<SystemManager> system_manager;
 
 public:
+	static ECSManager &get();
 	void startup();
 
 	// Entity methods

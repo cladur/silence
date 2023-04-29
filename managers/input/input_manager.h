@@ -32,6 +32,8 @@ private:
 	void poll_gamepads();
 
 public:
+	static InputManager &get();
+
 	void startup();
 	void shutdown();
 

@@ -3,9 +3,9 @@
 
 extern InputManager *input_manager;
 
-DisplayManager *DisplayManager::get() {
+DisplayManager &DisplayManager::get() {
 	static DisplayManager display_manager;
-	return &display_manager;
+	return display_manager;
 }
 
 DisplayManager::Status DisplayManager::startup(bool resizable) {

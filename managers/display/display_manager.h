@@ -24,7 +24,7 @@ public:
 
 	bool is_window_resizable;
 
-	static DisplayManager *get();
+	static DisplayManager &get();
 
 	Status startup(bool resizable = false);
 	void shutdown();

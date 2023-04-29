@@ -3,9 +3,9 @@
 
 #include "glad/glad.h"
 
-FontManager *FontManager::get() {
+FontManager &FontManager::get() {
 	static FontManager instance;
-	return &instance;
+	return instance;
 }
 
 void FontManager::startup() {

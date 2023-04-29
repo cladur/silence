@@ -42,11 +42,11 @@ public:
 
 	glm::vec2 render_extent;
 
-	static RenderManager *get();
+	static RenderManager &get();
 
 	void startup();
 	void shutdown();
-	void draw();
+	void draw(Camera &camera);
 
 	void resize_framebuffer(uint32_t width, uint32_t height);
 

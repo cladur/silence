@@ -8,7 +8,7 @@
 void Model::load_from_asset(const char *path) {
 	name = path;
 
-	RenderManager *render_manager = RenderManager::get();
+	RenderManager &render_manager = RenderManager::get();
 
 	assets::AssetFile file;
 	bool loaded = assets::load_binary_file(path, file);

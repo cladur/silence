@@ -22,7 +22,7 @@ class FontManager {
 public:
 	std::map<std::string, Font> fonts;
 
-	static FontManager *get();
+	static FontManager &get();
 
 	void startup();
 	void shutdown();

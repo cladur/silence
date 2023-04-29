@@ -7,13 +7,13 @@ void UnlitPass::startup() {
 }
 
 void UnlitPass::draw() {
-	RenderManager *render_manager = RenderManager::get();
+	RenderManager &render_manager = RenderManager::get();
 	material.bind_resources();
 	for (auto &cmd : draw_commands) {
 		ModelInstance &instance = *cmd.model_instance;
 		Transform &transform = *cmd.transform;
 		material.bind_instance_resources(instance, transform);
-		Model &model = render_manager->get_model(instance.model_handle);
+		Model &model = render_manager.get_model(instance.model_handle);
 		for (auto &mesh : model.meshes) {
 			material.bind_mesh_resources(mesh);
 			mesh.draw();
@@ -27,13 +27,13 @@ void PBRPass::startup() {
 }
 
 void PBRPass::draw() {
-	RenderManager *render_manager = RenderManager::get();
+	RenderManager &render_manager = RenderManager::get();
 	material.bind_resources();
 	for (auto &cmd : draw_commands) {
 		ModelInstance &instance = *cmd.model_instance;
 		Transform &transform = *cmd.transform;
 		material.bind_instance_resources(instance, transform);
-		Model &model = render_manager->get_model(instance.model_handle);
+		Model &model = render_manager.get_model(instance.model_handle);
 		for (auto &mesh : model.meshes) {
 			material.bind_mesh_resources(mesh);
 			mesh.draw();
@@ -49,7 +49,7 @@ void SkyboxPass::startup() {
 }
 
 void SkyboxPass::draw() {
-	RenderManager *render_manager = RenderManager::get();
+	RenderManager &render_manager = RenderManager::get();
 	material.bind_resources();
 	skybox.draw();
 }

@@ -4,9 +4,8 @@
 #include <components/children_component.h>
 #include <components/parent_component.h>
 
-extern ECSManager ecs_manager;
-
 void IsolatedEntitiesSystem::startup() {
+	ECSManager &ecs_manager = ECSManager::get();
 	Signature blacklist;
 	Signature whitelist;
 	blacklist.set(ecs_manager.get_component_type<Children>());
@@ -17,6 +16,7 @@ void IsolatedEntitiesSystem::startup() {
 	ecs_manager.set_system_component_whitelist<IsolatedEntitiesSystem>(whitelist);
 }
 void IsolatedEntitiesSystem::update() {
+	ECSManager &ecs_manager = ECSManager::get();
 	for (auto const &entity : entities) {
 		ecs_manager.get_component<Transform>(entity).update_global_model_matrix();
 	}

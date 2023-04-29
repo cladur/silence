@@ -221,7 +221,7 @@ void demo_collision_obb(std::vector<Entity> &entities) {
 }
 
 bool display_manager_init() {
-	auto display_manager_result = DisplayManager::get()->startup();
+	auto display_manager_result = DisplayManager::get().startup();
 	if (display_manager_result == DisplayManager::Status::Ok) {
 		SPDLOG_INFO("Initialized display manager");
 	} else {
@@ -350,7 +350,7 @@ int main() {
 	char load_file_name[128] = "scene.json";
 	char save_file_name[128] = "scene.json";
 
-	float target_frame_time = 1.0f / (float)DisplayManager::get()->get_refresh_rate();
+	float target_frame_time = 1.0f / (float)DisplayManager::get().get_refresh_rate();
 	float dt = target_frame_time;
 
 	// TEST FOR 3D AUDIO
@@ -364,11 +364,11 @@ int main() {
 		// GAME LOGIC
 		auto start_time = std::chrono::high_resolution_clock::now();
 
-		DisplayManager::get()->poll_events();
+		DisplayManager::get().poll_events();
 
 		if (input_manager.is_action_just_pressed("debug_menu")) {
 			in_debug_menu = !in_debug_menu;
-			DisplayManager::get()->capture_mouse(!in_debug_menu);
+			DisplayManager::get().capture_mouse(!in_debug_menu);
 		}
 
 		if (!in_debug_menu) {
@@ -462,7 +462,7 @@ int main() {
 			CVarSystem::get()->draw_imgui_editor();
 		}
 
-		if (DisplayManager::get()->window_should_close()) {
+		if (DisplayManager::get().window_should_close()) {
 			should_run = false;
 		}
 
@@ -509,7 +509,7 @@ int main() {
 
 		input_manager.process_input();
 
-		RenderManager::get()->draw();
+		RenderManager::get()->draw(camera);
 
 		fmod_listener_system->update(dt);
 		audio_manager.update();
@@ -532,7 +532,7 @@ int main() {
 	input_manager.shutdown();
 	audio_manager.shutdown();
 	RenderManager::get()->shutdown();
-	DisplayManager::get()->shutdown();
+	DisplayManager::get().shutdown();
 
 	return 0;
 }

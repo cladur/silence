@@ -6,9 +6,8 @@
 #include "isolated_entities_system.h"
 #include "root_parent_system.h"
 
-extern ECSManager ecs_manager;
-
 void ParentSystem::startup() {
+	ECSManager &ecs_manager = ECSManager::get();
 	isolated_entities_system = ecs_manager.register_system<IsolatedEntitiesSystem>();
 	isolated_entities_system->startup();
 
@@ -17,6 +16,7 @@ void ParentSystem::startup() {
 }
 
 void ParentSystem::update() {
+	ECSManager &ecs_manager = ECSManager::get();
 	ZoneScopedN("ParentSystem::update");
 	isolated_entities_system->update();
 	root_parent_system->update();

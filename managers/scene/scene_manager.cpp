@@ -5,8 +5,6 @@
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
 
-extern ECSManager ecs_manager;
-
 SceneManager::SceneManager() {
 	instance = this;
 	class_map = serialization::IdToClassConstructor{};
@@ -14,11 +12,13 @@ SceneManager::SceneManager() {
 
 void SceneManager::load_scene_from_json_file(
 		nlohmann::json &scene_json, const std::string &scene_name, std::vector<Entity> &entities) {
+	ECSManager &ecs_manager = ECSManager::get();
 	entities.clear();
 	ecs_manager.deserialize_entities_json(scene_json, entities);
 }
 nlohmann::json SceneManager::save_scene(const std::vector<Entity> &entities) {
 	nlohmann::json scene_json = nlohmann::json::array();
+	ECSManager &ecs_manager = ECSManager::get();
 	for (auto const &entity : entities) {
 		scene_json.push_back(nlohmann::json::object());
 		ecs_manager.serialize_entity_json(scene_json.back(), entity);

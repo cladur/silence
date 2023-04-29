@@ -4,9 +4,8 @@
 #include "ecs/ecs_manager.h"
 #include "managers/render/render_manager.h"
 
-extern ECSManager ecs_manager;
-
 void RenderSystem::startup() {
+	ECSManager &ecs_manager = ECSManager::get();
 	Signature signature;
 	signature.set(ecs_manager.get_component_type<Transform>());
 	signature.set(ecs_manager.get_component_type<ModelInstance>());
@@ -14,7 +13,8 @@ void RenderSystem::startup() {
 }
 
 void RenderSystem::update() {
-	RenderManager &render_manager = *RenderManager::get();
+	ECSManager &ecs_manager = ECSManager::get();
+	RenderManager &render_manager = RenderManager::get();
 
 	for (auto const &entity : entities) {
 		auto &transform = ecs_manager.get_component<Transform>(entity);
