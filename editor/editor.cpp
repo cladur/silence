@@ -1,6 +1,7 @@
 #include "editor.h"
 #include "ecs/ecs_manager.h"
 #include "input/input_manager.h"
+#include "render/render_manager.h"
 
 void default_mappings() {
 	InputManager &input_manager = InputManager::get();
@@ -166,6 +167,18 @@ void Editor::startup() {
 
 	// Native file dialog
 	NFD_Init();
+
+	// Default scene
+	create_scene("Default");
+
+	Entity entity = ecs_manager.create_entity();
+
+	ecs_manager.add_component<Transform>(
+			entity, Transform{ glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f) });
+
+	ecs_manager.add_component<ModelInstance>(entity, ModelInstance("woodenBox/woodenBox.mdl"));
+
+	scenes[0].entities.push_back(entity);
 }
 
 void Editor::shutdown() {
@@ -256,11 +269,15 @@ void Editor::update(float dt) {
 	ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
 
 	imgui_menu_bar();
-	imgui_viewport();
-	imgui_scene();
 	imgui_resources();
 	imgui_inspector();
 	imgui_settings();
+	// imgui_scene();
+
+	for (auto &scene : scenes) {
+		// scene.update();
+		imgui_viewport(scene);
+	}
 
 	debug_draw::draw_line(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(10.0f, 0.0f, 0.0f));
 	debug_draw::draw_line(glm::vec3(0.0f, 5.0f, 0.0f), glm::vec3(10.0f, 0.0f, 0.0f));
@@ -274,5 +291,16 @@ void Editor::update(float dt) {
 	render_system->update();
 	input_manager.process_input();
 
-	render_manager.draw(camera);
+	render_manager.draw();
+}
+
+void Editor::create_scene(const std::string &name) {
+	Scene scene = {};
+	scene.name = name;
+
+	// Create RenderScene for scene
+	RenderManager &render_manager = RenderManager::get();
+	scene.render_scene = render_manager.create_render_scene();
+
+	scenes.push_back(scene);
 }

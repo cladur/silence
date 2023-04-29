@@ -10,11 +10,9 @@ private:
 	serialization::IdToClassConstructor class_map;
 
 public:
-	SceneManager();
-	SceneManager(SceneManager &other) = delete;
-	void operator=(const SceneManager &) = delete;
-	static SceneManager *get_instance();
+	static SceneManager &get();
 
+	// Serialization
 	static void load_scene_from_json_file(
 			nlohmann::json &scene_json, const std::string &scene_name, std::vector<Entity> &entities);
 	static nlohmann::json save_scene(const std::vector<Entity> &entities);
@@ -22,7 +20,7 @@ public:
 	static serialization::IdToClassConstructor &get_class_map();
 
 	template <typename T> static void add_component_to_map(ComponentType id) {
-		get_instance()->class_map[id] = &serialization::create_instance<T>;
+		get().class_map[id] = &serialization::create_instance<T>;
 	}
 };
 

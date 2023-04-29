@@ -6,6 +6,7 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 #include "managers/render/common/material.h"
+#include "render/render_scene.h"
 #include <glad/glad.h>
 #define IMGUI_DEFINE_MATH_OPERATORS
 
@@ -58,31 +59,19 @@ void RenderManager::startup() {
 	ImGui::StyleColorsDark();
 	ImGuiStyle &style = ImGui::GetStyle();
 	style.Colors[ImGuiCol_WindowBg].w = 1.0f;
-
-	text_draw.startup();
-	debug_draw.startup();
-
-	unlit_pass.startup();
-	pbr_pass.startup();
-	skybox_pass.startup();
-	default_pass = &pbr_pass;
-
-	glm::vec2 window_extent = display_manager.get_framebuffer_size();
-	render_framebuffer.startup(window_extent.x, window_extent.y);
-	render_extent = window_extent;
 }
 
 void RenderManager::shutdown() {
 }
 
-void RenderManager::resize_framebuffer(uint32_t width, uint32_t height) {
-	glViewport(0, 0, (int)width, (int)height);
-	render_framebuffer.resize(width, height);
-
-	render_extent = glm::vec2(width, height);
+RenderScene *RenderManager::create_render_scene() {
+	RenderScene render_scene;
+	render_scene.startup();
+	render_scenes.push_back(render_scene);
+	return &render_scenes.back();
 }
 
-void RenderManager::draw(Camera &camera) {
+void RenderManager::draw() {
 	DisplayManager &display_manager = DisplayManager::get();
 	glm::vec2 window_extent = display_manager.get_framebuffer_size();
 
@@ -92,39 +81,9 @@ void RenderManager::draw(Camera &camera) {
 	//		render_framebuffer.resize(window_extent.x, window_extent.y);
 	//	}
 
-	// Draw grid
-	for (int i = -10; i <= 10; i++) {
-		debug_draw::draw_line(glm::vec3(i, 0, -10), glm::vec3(i, 0, 10), glm::vec4(0.5, 0.5, 0.5, 1));
-		debug_draw::draw_line(glm::vec3(-10, 0, i), glm::vec3(10, 0, i), glm::vec4(0.5, 0.5, 0.5, 1));
+	for (RenderScene &scene : render_scenes) {
+		scene.draw();
 	}
-
-	render_framebuffer.bind();
-
-	// Clear the screen
-	glad_glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	projection =
-			glm::perspective(glm::radians(70.0f), render_extent.x / render_extent.y, 0.1f, cvar_draw_distance.get());
-	view = camera.get_view_matrix();
-	camera_pos = camera.get_position();
-
-	// Enable depth testing
-	glEnable(GL_DEPTH_TEST);
-
-	unlit_pass.draw();
-	pbr_pass.draw();
-
-	glDepthFunc(GL_LEQUAL);
-	skybox_pass.draw();
-	glDepthFunc(GL_LESS);
-
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	text_draw.draw();
-	glDisable(GL_BLEND);
-
-	debug_draw.draw();
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -173,25 +132,4 @@ void RenderManager::load_texture(const char *path) {
 
 Model &RenderManager::get_model(Handle<Model> handle) {
 	return models[handle.id];
-}
-
-void RenderManager::queue_draw(ModelInstance *model_instance, Transform *transform) {
-	DrawCommand draw_command = {};
-	draw_command.model_instance = model_instance;
-	draw_command.transform = transform;
-
-	switch (model_instance->material_type) {
-		case MaterialType::Default: {
-			default_pass->draw_commands.push_back(draw_command);
-			break;
-		}
-		case MaterialType::Unlit: {
-			unlit_pass.draw_commands.push_back(draw_command);
-			break;
-		}
-		case MaterialType::PBR: {
-			pbr_pass.draw_commands.push_back(draw_command);
-			break;
-		}
-	}
 }

@@ -23,8 +23,6 @@ void Framebuffer::startup(uint32_t width, uint32_t height) {
 	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	SPDLOG_INFO("{} {}", width, height);
 }
 
 void Framebuffer::bind() {

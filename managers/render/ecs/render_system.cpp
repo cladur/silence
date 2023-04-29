@@ -16,10 +16,10 @@ void RenderSystem::update() {
 	ECSManager &ecs_manager = ECSManager::get();
 	RenderManager &render_manager = RenderManager::get();
 
-	for (auto const &entity : entities) {
-		auto &transform = ecs_manager.get_component<Transform>(entity);
-		auto &model_instance = ecs_manager.get_component<ModelInstance>(entity);
+	// for (auto const &entity : entities) {
+	// 	auto &transform = ecs_manager.get_component<Transform>(entity);
+	// 	auto &model_instance = ecs_manager.get_component<ModelInstance>(entity);
 
-		render_manager.queue_draw(&model_instance, &transform);
-	}
+	// 	render_manager.queue_draw(&model_instance, &transform);
+	// }
 }

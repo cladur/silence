@@ -44,6 +44,8 @@
 #include <nfd.h>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "scene.h"
+
 class Editor {
 public:
 	// Systems
@@ -70,19 +72,24 @@ public:
 	bool show_demo_window = false;
 	bool should_run = true;
 
-	// GUI
-	void imgui_menu_bar();
-	void imgui_inspector();
-	void imgui_scene();
-	void imgui_viewport();
-	void imgui_resources();
-	void imgui_settings();
+	// Scenes
+	std::vector<Scene> scenes;
 
 	static Editor *get();
 	void startup();
 	void shutdown();
 	void run();
 	void update(float dt);
+
+	// GUI
+	void imgui_menu_bar();
+	void imgui_inspector();
+	void imgui_scene(Scene &scene);
+	void imgui_viewport(Scene &scene);
+	void imgui_resources();
+	void imgui_settings();
+
+	void create_scene(const std::string &name);
 };
 
 #endif //SILENCE_EDITOR_H

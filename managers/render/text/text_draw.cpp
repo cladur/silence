@@ -59,8 +59,8 @@ void TextDraw::draw() {
 	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, indices.size() * sizeof(uint32_t), &indices[0]);
 
 	RenderManager &render_manager = RenderManager::get();
-	shader.set_mat4("projection", render_manager.projection);
-	shader.set_mat4("view", render_manager.view);
+	// shader.set_mat4("projection", render_manager.projection);
+	// shader.set_mat4("view", render_manager.view);
 	shader.set_int("font_atlas_map", 0);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, FontManager::get().fonts.begin()->second.texture);
@@ -90,7 +90,7 @@ void draw_text(const std::string &text, bool is_screen_space, const glm::vec3 &p
 	}
 
 	RenderManager &render_manager = RenderManager::get();
-	TextDraw &text_draw = render_manager.text_draw;
+	// TextDraw &text_draw = render_manager.text_draw;
 
 	// We're scaling the text by arbitrary amount
 	// Correct way to do it would be to calculate it based on the font size which we loaded using FreeType
@@ -128,20 +128,20 @@ void draw_text(const std::string &text, bool is_screen_space, const glm::vec3 &p
 
 		int ss = is_screen_space ? 1 : 0;
 
-		//update the vertices
-		text_draw.vertices.push_back({ { xpos, ypos + h, zpos }, color, { uv_x_min, uv_y_max }, ss }); // 0
-		text_draw.vertices.push_back({ { xpos, ypos, zpos }, color, { uv_x_min, uv_y_min }, ss }); // 1
-		text_draw.vertices.push_back({ { xpos + w, ypos, zpos }, color, { uv_x_max, uv_y_min }, ss }); // 2
-		text_draw.vertices.push_back({ { xpos + w, ypos + h, zpos }, color, { uv_x_max, uv_y_max }, ss }); // 3
+		// //update the vertices
+		// text_draw.vertices.push_back({ { xpos, ypos + h, zpos }, color, { uv_x_min, uv_y_max }, ss }); // 0
+		// text_draw.vertices.push_back({ { xpos, ypos, zpos }, color, { uv_x_min, uv_y_min }, ss }); // 1
+		// text_draw.vertices.push_back({ { xpos + w, ypos, zpos }, color, { uv_x_max, uv_y_min }, ss }); // 2
+		// text_draw.vertices.push_back({ { xpos + w, ypos + h, zpos }, color, { uv_x_max, uv_y_max }, ss }); // 3
 
-		//update the indices
-		uint32_t index = text_draw.vertices.size() - 4;
-		text_draw.indices.push_back(index + 0);
-		text_draw.indices.push_back(index + 1);
-		text_draw.indices.push_back(index + 2);
-		text_draw.indices.push_back(index + 0);
-		text_draw.indices.push_back(index + 2);
-		text_draw.indices.push_back(index + 3);
+		// //update the indices
+		// uint32_t index = text_draw.vertices.size() - 4;
+		// text_draw.indices.push_back(index + 0);
+		// text_draw.indices.push_back(index + 1);
+		// text_draw.indices.push_back(index + 2);
+		// text_draw.indices.push_back(index + 0);
+		// text_draw.indices.push_back(index + 2);
+		// text_draw.indices.push_back(index + 3);
 
 		// now advance cursors for next glyph (note that advance is number of 1/64 pixels)
 		x += (character.advance >> 6) * scale * aspect; // bitshift by 6 to get value in pixels (2^6 = 64)

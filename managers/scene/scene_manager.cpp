@@ -5,11 +5,6 @@
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
 
-SceneManager::SceneManager() {
-	instance = this;
-	class_map = serialization::IdToClassConstructor{};
-}
-
 void SceneManager::load_scene_from_json_file(
 		nlohmann::json &scene_json, const std::string &scene_name, std::vector<Entity> &entities) {
 	ECSManager &ecs_manager = ECSManager::get();
@@ -32,16 +27,14 @@ void SceneManager::save_json_to_file(const std::string &file_name, const nlohman
 	file.close();
 	SPDLOG_INFO("Saved scene to file {}", file_name);
 }
-SceneManager *SceneManager::get_instance() {
+SceneManager &SceneManager::get() {
 	std::lock_guard<std::mutex> lock(mutex);
-	if (instance == nullptr) {
-		instance = new SceneManager();
-	}
+	static SceneManager instance;
 	return instance;
 }
 
 SceneManager *SceneManager::instance = nullptr;
 serialization::IdToClassConstructor &SceneManager::get_class_map() {
-	return get_instance()->class_map;
+	return get().class_map;
 }
 std::mutex SceneManager::mutex;

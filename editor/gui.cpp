@@ -79,7 +79,7 @@ void Editor::imgui_inspector() {
 	ImGui::End();
 }
 
-void Editor::imgui_scene() {
+void Editor::imgui_scene(Scene &scene) {
 	ImGui::Begin("Scene");
 
 	// for (auto &entity : entities) {
@@ -134,7 +134,7 @@ void Editor::imgui_scene() {
 
 	ImGui::End();
 }
-void Editor::imgui_viewport() {
+void Editor::imgui_viewport(Scene &scene) {
 	RenderManager &render_manager = RenderManager::get();
 	ECSManager &ecs_manager = ECSManager::get();
 
@@ -172,11 +172,11 @@ void Editor::imgui_viewport() {
 	ImVec2 viewport_size = ImGui::GetContentRegionAvail();
 	if (viewport_size.x != last_viewport_size.x || viewport_size.y != last_viewport_size.y) {
 		// Resize the framebuffer
-		render_manager.resize_framebuffer(viewport_size.x, viewport_size.y);
+		scene.render_scene->resize_framebuffer(viewport_size.x, viewport_size.y);
 		last_viewport_size = viewport_size;
 	}
 
-	uint32_t render_image = render_manager.render_framebuffer.get_texture_id();
+	uint32_t render_image = scene.render_scene->render_framebuffer.get_texture_id();
 	ImGui::Image((void *)(intptr_t)render_image, viewport_size, ImVec2(0, 1), ImVec2(1, 0));
 
 	// Draw gizmo
@@ -184,8 +184,8 @@ void Editor::imgui_viewport() {
 	ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, viewport_size.x, viewport_size.y);
 	ImGuizmo::SetDrawlist();
 
-	glm::mat4 *view = &render_manager.view;
-	glm::mat4 *projection = &render_manager.projection;
+	glm::mat4 *view = &scene.render_scene->view;
+	glm::mat4 *projection = &scene.render_scene->projection;
 
 	if (!entities_selected.empty()) {
 		// If we have entities selected, we want to take their average position and use that as the pivot point

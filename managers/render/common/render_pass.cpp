@@ -6,9 +6,9 @@ void UnlitPass::startup() {
 	material.startup();
 }
 
-void UnlitPass::draw() {
+void UnlitPass::draw(RenderScene &scene) {
 	RenderManager &render_manager = RenderManager::get();
-	material.bind_resources();
+	material.bind_resources(scene);
 	for (auto &cmd : draw_commands) {
 		ModelInstance &instance = *cmd.model_instance;
 		Transform &transform = *cmd.transform;
@@ -26,9 +26,9 @@ void PBRPass::startup() {
 	material.startup();
 }
 
-void PBRPass::draw() {
+void PBRPass::draw(RenderScene &scene) {
 	RenderManager &render_manager = RenderManager::get();
-	material.bind_resources();
+	material.bind_resources(scene);
 	for (auto &cmd : draw_commands) {
 		ModelInstance &instance = *cmd.model_instance;
 		Transform &transform = *cmd.transform;
@@ -48,8 +48,8 @@ void SkyboxPass::startup() {
 	skybox.load_from_directory(asset_path("cubemaps/venice_sunset"));
 }
 
-void SkyboxPass::draw() {
+void SkyboxPass::draw(RenderScene &scene) {
 	RenderManager &render_manager = RenderManager::get();
-	material.bind_resources();
+	material.bind_resources(scene);
 	skybox.draw();
 }

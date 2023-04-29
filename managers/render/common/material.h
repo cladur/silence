@@ -6,6 +6,7 @@
 
 struct ModelInstance;
 struct Mesh;
+struct RenderScene;
 
 enum class MaterialType { Default, Unlit, PBR };
 
@@ -15,14 +16,14 @@ public:
 
 	virtual void startup() = 0;
 	// TODO: Shutdown
-	virtual void bind_resources() = 0;
+	virtual void bind_resources(RenderScene &scene) = 0;
 	virtual void bind_instance_resources(ModelInstance &instance, Transform &transform) = 0;
 };
 
 class MaterialUnlit : public Material {
 public:
 	void startup() override;
-	void bind_resources() override;
+	void bind_resources(RenderScene &scene) override;
 	void bind_instance_resources(ModelInstance &instance, Transform &transform) override;
 	void bind_mesh_resources(Mesh &mesh);
 };
@@ -30,7 +31,7 @@ public:
 class MaterialPBR : public Material {
 public:
 	void startup() override;
-	void bind_resources() override;
+	void bind_resources(RenderScene &scene) override;
 	void bind_instance_resources(ModelInstance &instance, Transform &transform) override;
 	void bind_mesh_resources(Mesh &mesh);
 };
@@ -38,7 +39,7 @@ public:
 class MaterialSkybox : public Material {
 public:
 	void startup() override;
-	void bind_resources() override;
+	void bind_resources(RenderScene &scene) override;
 	void bind_instance_resources(ModelInstance &instance, Transform &transform) override;
 };
 

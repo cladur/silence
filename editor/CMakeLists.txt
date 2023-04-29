@@ -4,6 +4,7 @@ add_executable(${EDITOR_NAME}
         editor.cpp editor.h
         gui.cpp
         main.cpp
+        scene.h
         )
 
 # Define the link libraries

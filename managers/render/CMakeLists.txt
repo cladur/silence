@@ -3,6 +3,7 @@ set(OPENGL_MANAGER_NAME "silence_render_manager")
 # Libraries
 add_library(${OPENGL_MANAGER_NAME} STATIC
         render_manager.cpp render_manager.h
+        render_scene.cpp render_scene.h
         common/mesh.cpp common/mesh.h
         common/shader.cpp common/shader.h
         common/model.cpp common/model.h

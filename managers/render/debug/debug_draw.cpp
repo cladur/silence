@@ -43,8 +43,8 @@ void DebugDraw::draw() {
 	glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(DebugVertex), &vertices[0]);
 
 	RenderManager &render_manager = RenderManager::get();
-	shader.set_mat4("projection", render_manager.projection);
-	shader.set_mat4("view", render_manager.view);
+	// shader.set_mat4("projection", render_manager.projection);
+	// shader.set_mat4("view", render_manager.view);
 
 	glBindVertexArray(vao);
 	glDrawArrays(GL_LINES, 0, vertices.size());
@@ -58,8 +58,8 @@ namespace debug_draw {
 void draw_line(const glm::vec3 &from, const glm::vec3 &to, const glm::vec3 &color) {
 	RenderManager &render_manager = RenderManager::get();
 
-	render_manager.debug_draw.vertices.push_back({ from, color });
-	render_manager.debug_draw.vertices.push_back({ to, color });
+	// render_manager.debug_draw.vertices.push_back({ from, color });
+	// render_manager.debug_draw.vertices.push_back({ to, color });
 }
 
 // Draw a box with center at "center" and scale "scale".
