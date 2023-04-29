@@ -42,7 +42,9 @@
 
 #include "core/camera/camera.h"
 
+#include <ImGuizmo.h>
 #include <nfd.h>
+#include <glm/gtc/type_ptr.hpp>
 
 ECSManager ecs_manager;
 AudioManager audio_manager;
@@ -50,7 +52,11 @@ InputManager input_manager;
 
 Camera camera(glm::vec3(0.0f, 0.0f, -25.0f));
 
-bool in_debug_menu = true;
+bool controlling_camera = false;
+bool viewport_hovered = false;
+
+ImGuizmo::OPERATION current_gizmo_operation(ImGuizmo::TRANSLATE);
+ImGuizmo::MODE current_gizmo_mode(ImGuizmo::WORLD);
 
 void default_mappings() {
 	input_manager.add_action("debug_menu");
@@ -69,11 +75,16 @@ void default_mappings() {
 	input_manager.add_key_to_action("move_right", InputKey::D);
 	input_manager.add_key_to_action("move_right", InputKey::GAMEPAD_LEFT_STICK_X_POSITIVE);
 	input_manager.add_action("move_up");
-	input_manager.add_key_to_action("move_up", InputKey::SPACE);
+	input_manager.add_key_to_action("move_up", InputKey::E);
 	input_manager.add_key_to_action("move_up", InputKey::GAMEPAD_BUTTON_A);
 	input_manager.add_action("move_down");
-	input_manager.add_key_to_action("move_down", InputKey::LEFT_SHIFT);
+	input_manager.add_key_to_action("move_down", InputKey::Q);
 	input_manager.add_key_to_action("move_down", InputKey::GAMEPAD_BUTTON_B);
+	input_manager.add_action("move_faster");
+	input_manager.add_key_to_action("move_faster", InputKey::LEFT_SHIFT);
+
+	input_manager.add_action("control_camera");
+	input_manager.add_key_to_action("control_camera", InputKey::MOUSE_RIGHT);
 }
 
 void default_ecs_manager_init() {
@@ -229,6 +240,11 @@ void handle_camera(Camera &cam, float dt) {
 	float forward = input_manager.get_axis("move_backward", "move_forward");
 	float right = input_manager.get_axis("move_left", "move_right");
 	float up = input_manager.get_axis("move_down", "move_up");
+
+	if (input_manager.is_action_pressed("move_faster")) {
+		dt *= 4.0f;
+	}
+
 	cam.move_forward(forward * dt);
 	cam.move_right(right * dt);
 	cam.move_up(up * dt);
@@ -331,27 +347,6 @@ int main() {
 
 		ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
 
-		// Add menu bar flag and disable everything else
-		ImGuiWindowFlags flags2 = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoMove |
-				ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoSavedSettings |
-				ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_MenuBar;
-
-		ImGuiWindowFlags flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoScrollWithMouse |
-				ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoTitleBar;
-
-		//		if (ImGui::Begin("StatusBar", nullptr, flags)) {
-		//			if (ImGui::BeginMenuBar()) {
-		//				if (ImGui::BeginMenu("Rage")) {
-		//					ImGui::MenuItem("Exit", NULL, &should_run);
-		//					ImGui::EndMenu();
-		//				}
-		//
-		//				ImGui::Button("Test button");
-		//				ImGui::EndMenuBar();
-		//			}
-		//			ImGui::End();
-		//		}
-
 		ImGui::BeginMainMenuBar();
 
 		if (ImGui::BeginMenu("File")) {
@@ -359,22 +354,22 @@ int main() {
 				SPDLOG_INFO("Saving scene...");
 			}
 			if (ImGui::MenuItem("Save as...")) {
-				SPDLOG_INFO("Saving scene...");
-				nfdchar_t *outPath;
-				nfdfilteritem_t filterItem[2] = { { "Source code", "c,cpp,cc" }, { "Headers", "h,hpp" } };
-				nfdresult_t result = NFD_OpenDialog(&outPath, filterItem, 2, NULL);
+				SPDLOG_INFO("Saving scene as...");
+			}
+			if (ImGui::MenuItem("Load")) {
+				SPDLOG_INFO("Loading scene...");
+				nfdchar_t *out_path;
+				nfdfilteritem_t filter_item[2] = { { "Source code", "c,cpp,cc" }, { "Headers", "h,hpp" } };
+				nfdresult_t result = NFD_OpenDialog(&out_path, filter_item, 2, nullptr);
 				if (result == NFD_OKAY) {
 					puts("Success!");
-					puts(outPath);
-					NFD_FreePath(outPath);
+					puts(out_path);
+					NFD_FreePath(out_path);
 				} else if (result == NFD_CANCEL) {
 					puts("User pressed cancel.");
 				} else {
 					printf("Error: %s\n", NFD_GetError());
 				}
-			}
-			if (ImGui::MenuItem("Load")) {
-				SPDLOG_INFO("Loading scene...");
 			}
 			if (ImGui::MenuItem("Exit")) {
 				should_run = false;
@@ -385,6 +380,8 @@ int main() {
 		ImGui::EndMainMenuBar();
 
 		ImGui::Begin("Viewport");
+
+		viewport_hovered = ImGui::IsWindowHovered();
 
 		// Get viewport size
 		static ImVec2 last_viewport_size = ImVec2(0, 0);
@@ -397,6 +394,36 @@ int main() {
 
 		uint32_t render_image = OpenglManager::get()->render_framebuffer.get_texture_id();
 		ImGui::Image((void *)(intptr_t)render_image, viewport_size, ImVec2(0, 1), ImVec2(1, 0));
+
+		// Draw gizmo
+		ImGuiIO &io = ImGui::GetIO();
+		ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, viewport_size.x, viewport_size.y);
+		ImGuizmo::SetDrawlist();
+
+		OpenglManager *opengl_manager = OpenglManager::get();
+
+		glm::mat4 *view = &opengl_manager->view;
+		glm::mat4 *projection = &opengl_manager->projection;
+		glm::mat4 temp_matrix = glm::mat4(1.0f);
+
+		if (ImGuizmo::Manipulate(glm::value_ptr(*view), glm::value_ptr(*projection), current_gizmo_operation,
+					current_gizmo_mode, glm::value_ptr(temp_matrix), nullptr, nullptr)) {
+			// Gizmo handles our final world transform, but we need to update our local transform (pos, orient, scale)
+			// In order to do that, we extract the local transform from the world transform, by multiplying by the
+			// inverse of the parent's world transform From there, we can decompose the local transform into its
+			// components (pos, orient, scale)
+			glm::vec3 skew;
+			glm::vec4 perspective;
+			// if (last_selected->parent)
+			// 	glm::decompose(glm::inverse(last_selected->parent->transform.modelMatrix) * tempMatrix,
+			// 			last_selected->transform.scale, last_selected->transform.orient, last_selected->transform.pos,
+			// 			skew, perspective);
+			// else
+			// 	glm::decompose(temp_matrix, last_selected->transform.scale, last_selected->transform.orient,
+			// 			last_selected->transform.pos, skew, perspective);
+
+			// last_selected->transform.isDirty = true;
+		}
 
 		ImGui::End();
 
@@ -418,18 +445,18 @@ int main() {
 
 		ImGui::End();
 
-		if (input_manager.is_action_just_pressed("debug_menu")) {
-			in_debug_menu = !in_debug_menu;
-			DisplayManager::get()->capture_mouse(!in_debug_menu);
+		if ((viewport_hovered && input_manager.is_action_pressed("control_camera") || controlling_camera)) {
+			controlling_camera = true;
+			handle_camera(camera, dt);
+			DisplayManager::get()->capture_mouse(true);
 		}
 
-		if (!in_debug_menu) {
-			handle_camera(camera, dt);
+		if (input_manager.is_action_just_released("control_camera")) {
+			controlling_camera = false;
+			DisplayManager::get()->capture_mouse(false);
 		}
 
 		ImGui::Begin("Settings");
-
-		ImGui::Text("%s", fmt::format("In debug menu: {}", in_debug_menu).c_str());
 
 		ImGui::Checkbox("Show console ecs logs", &show_ecs_logs);
 

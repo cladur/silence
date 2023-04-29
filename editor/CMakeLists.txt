@@ -15,6 +15,7 @@ target_link_libraries(${EDITOR_NAME} PRIVATE
         silence_input_manager
         silence_font_manager
         nfd
+        imguizmo
         )
 
 if (USE_OPENGL)

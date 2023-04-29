@@ -1,6 +1,6 @@
 #include "camera.h"
 
-AutoCVarFloat cvar_camera_speed("camera.speed", "Camera Speed", 50, CVarFlags::EditFloatDrag);
+AutoCVarFloat cvar_camera_speed("camera.speed", "Camera Speed", 25, CVarFlags::EditFloatDrag);
 AutoCVarFloat cvar_camera_sensitivity("camera.sensitivity", "Camera Sensitivity", 50, CVarFlags::EditFloatDrag);
 
 Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch) :
@@ -39,7 +39,7 @@ void Camera::move_right(float dt) {
 }
 
 void Camera::move_up(float dt) {
-	glm::vec3 diff = up * dt * cvar_camera_speed.get();
+	glm::vec3 diff = glm::vec3(0.0f, 1.0f, 0.0f) * dt * cvar_camera_speed.get();
 #ifndef USE_OPENGL
 	diff.y *= -1.f;
 #endif
