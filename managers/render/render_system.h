@@ -8,7 +8,7 @@ class RenderManager;
 class RenderSystem : public BaseSystem {
 public:
 	void startup();
-	void update(RenderManager &render_manager);
+	void update();
 };
 
 #endif //SILENCE_RENDER_SYSTEM_H

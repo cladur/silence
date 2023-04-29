@@ -12,7 +12,7 @@ target_link_libraries(${ASSET_BAKER_NAME} PRIVATE
         silence_assets
         silence_font_manager
         silence_display_manager
-        silence_opengl_manager
+        silence_render_manager
         glfw
         glad::glad
         )

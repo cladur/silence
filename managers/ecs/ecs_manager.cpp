@@ -4,7 +4,6 @@
 #include "components/children_component.h"
 #include "components/parent_component.h"
 #include "serialization.h"
-#include <spdlog/spdlog.h>
 
 void ECSManager::startup() {
 	// Create pointers to each manager

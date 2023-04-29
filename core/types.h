@@ -1,8 +1,6 @@
 #ifndef SILENCE_TYPES_H
 #define SILENCE_TYPES_H
 
-#define USE_OPENGL
-
 std::string asset_path(std::string_view path);
 std::string shader_path(std::string_view path);
 

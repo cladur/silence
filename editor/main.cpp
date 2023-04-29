@@ -2,18 +2,12 @@
 #include "display/display_manager.h"
 #include "font/font_manager.h"
 #include "input/input_manager.h"
-#include "opengl/material.h"
+#include "render/material.h"
 #include <string>
 
-#ifdef USE_OPENGL
 #include "imgui_impl_opengl3.h"
-#include "opengl/opengl_manager.h"
-#include "opengl/opengl_system.h"
-#else
-#include "imgui_impl_vulkan.h"
 #include "render/render_manager.h"
 #include "render/render_system.h"
-#endif
 
 #include "components/children_component.h"
 #include "components/collider_aabb.h"
@@ -24,7 +18,7 @@
 #include "components/parent_component.h"
 #include "components/rigidbody_component.h"
 #include "components/transform_component.h"
-#include "opengl/render_handle.h"
+#include "render/render_handle.h"
 
 #include "ecs/ecs_manager.h"
 #include "ecs/systems/collider_components_factory.h"
@@ -152,9 +146,9 @@ void demo_entities_init(std::vector<Entity> &entities) {
 		ColliderComponentsFactory::add_collider_component(
 				entity, ColliderAABB{ transform.get_position(), transform.get_scale(), true });
 
-		Handle<ModelInstance> hndl = OpenglManager::get()->add_instance("woodenBox/woodenBox.pfb", MATERIAL_TYPE_UNLIT);
-		//		Handle<ModelInstance> hndl = OpenglManager::get()->add_instance("electricBox/electricBox.pfb");
-		//		Handle<ModelInstance> hndl = OpenglManager::get()->add_instance("Agent/agent_idle.pfb");
+		Handle<ModelInstance> hndl = RenderManager::get()->add_instance("woodenBox/woodenBox.pfb", MATERIAL_TYPE_UNLIT);
+		//		Handle<ModelInstance> hndl = RenderManager::get()->add_instance("electricBox/electricBox.pfb");
+		//		Handle<ModelInstance> hndl = RenderManager::get()->add_instance("Agent/agent_idle.pfb");
 		ecs_manager.add_component<RenderHandle>(entity, RenderHandle{ .handle = hndl });
 	}
 
@@ -281,11 +275,7 @@ int main() {
 
 	display_manager_init();
 	input_manager.startup();
-#ifdef USE_OPENGL
-	OpenglManager::get()->startup();
-#else
 	RenderManager::get()->startup();
-#endif
 
 	// ECS ----------------------------------------
 
@@ -295,13 +285,8 @@ int main() {
 	auto parent_system = ecs_manager.register_system<ParentSystem>();
 	auto fmod_listener_system = ecs_manager.register_system<FmodListenerSystem>();
 
-#ifdef USE_OPENGL
-	auto opengl_system = ecs_manager.register_system<OpenglSystem>();
-	opengl_system->startup();
-#else
 	auto render_system = ecs_manager.register_system<RenderSystem>();
 	render_system->startup();
-#endif
 
 	physics_system->startup();
 	collision_system->startup();
@@ -358,11 +343,7 @@ int main() {
 		auto start_time = std::chrono::high_resolution_clock::now();
 
 		//imgui new frame
-#ifdef USE_OPENGL
 		ImGui_ImplOpenGL3_NewFrame();
-#else
-		ImGui_ImplVulkan_NewFrame();
-#endif
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
@@ -454,11 +435,11 @@ int main() {
 		ImVec2 viewport_size = ImGui::GetContentRegionAvail();
 		if (viewport_size.x != last_viewport_size.x || viewport_size.y != last_viewport_size.y) {
 			// Resize the framebuffer
-			OpenglManager::get()->resize_framebuffer(viewport_size.x, viewport_size.y);
+			RenderManager::get()->resize_framebuffer(viewport_size.x, viewport_size.y);
 			last_viewport_size = viewport_size;
 		}
 
-		uint32_t render_image = OpenglManager::get()->render_framebuffer.get_texture_id();
+		uint32_t render_image = RenderManager::get()->render_framebuffer.get_texture_id();
 		ImGui::Image((void *)(intptr_t)render_image, viewport_size, ImVec2(0, 1), ImVec2(1, 0));
 
 		// Draw gizmo
@@ -466,10 +447,10 @@ int main() {
 		ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, viewport_size.x, viewport_size.y);
 		ImGuizmo::SetDrawlist();
 
-		OpenglManager *opengl_manager = OpenglManager::get();
+		RenderManager *render_manager = RenderManager::get();
 
-		glm::mat4 *view = &opengl_manager->view;
-		glm::mat4 *projection = &opengl_manager->projection;
+		glm::mat4 *view = &render_manager->view;
+		glm::mat4 *projection = &render_manager->projection;
 
 		if (!entities_selected.empty()) {
 			// If we have entities selected, we want to take their average position and use that as the pivot point
@@ -589,7 +570,7 @@ int main() {
 			}
 			if (ecs_manager.has_component<RenderHandle>(active_entity)) {
 				auto &render_handle = ecs_manager.get_component<RenderHandle>(active_entity);
-				ImGui::Text("Render handle: %d", render_handle.handle);
+				ImGui::Text("Render handle: %d", render_handle.handle.id);
 			}
 		} else {
 			ImGui::Text("No entity selected");
@@ -658,11 +639,7 @@ int main() {
 		collision_system->update();
 
 		parent_system->update();
-#ifdef USE_OPENGL
-		opengl_system->update();
-#else
-		render_system->update(*RenderManager::get());
-#endif
+		render_system->update();
 
 		debug_draw::draw_line(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(10.0f, 0.0f, 0.0f));
 		debug_draw::draw_line(glm::vec3(0.0f, 5.0f, 0.0f), glm::vec3(10.0f, 0.0f, 0.0f));
@@ -674,11 +651,7 @@ int main() {
 
 		input_manager.process_input();
 
-#ifdef USE_OPENGL
-		OpenglManager::get()->draw();
-#else
-		RenderManager::get()->draw(camera);
-#endif
+		RenderManager::get()->draw();
 
 		fmod_listener_system->update(dt);
 		audio_manager.update();
@@ -700,11 +673,7 @@ int main() {
 	SPDLOG_INFO("Shutting down engine subsystems...");
 	input_manager.shutdown();
 	audio_manager.shutdown();
-#ifdef USE_OPENGL
-	OpenglManager::get()->shutdown();
-#else
 	RenderManager::get()->shutdown();
-#endif
 	DisplayManager::get()->shutdown();
 
 	return 0;

@@ -3,27 +3,28 @@
 
 #include "font/font_manager.h"
 
-#include "render/material_system.h"
-#include <vulkan/vulkan_handles.hpp>
-
-class RenderManager;
+#include "render/shader.h"
 
 struct TextVertex {
 	glm::vec3 position;
-	glm::vec2 uv;
 	glm::vec3 color;
+	glm::vec2 uv;
 	int is_screen_space;
-
-	static VertexInputDescription get_vertex_description();
 };
 
-// struct RenderText {
-// 	std::string text;
-// 	glm::vec2 position;
-// 	glm::vec3 color;
-// 	float scale;
-// 	Font *font;
-// };
+class TextDraw {
+private:
+	//  render data
+	unsigned int vao, vbo, ebo;
+	Shader shader;
+
+public:
+	std::vector<TextVertex> vertices;
+	std::vector<uint32_t> indices;
+
+	void startup();
+	void draw();
+};
 
 namespace text_draw {
 
@@ -37,6 +38,6 @@ void draw_text_3d(const std::string &text, const glm::vec3 &position,
 void draw_text(const std::string &text, bool is_screen_space, const glm::vec3 &position,
 		const glm::vec3 &color = glm::vec3(1.0f, 1.0f, 1.0f), float scale = 1.0f, Font *font = nullptr);
 
-}; //namespace text_draw
+} //namespace text_draw
 
 #endif //SILENCE_TEXT_DRAW_H

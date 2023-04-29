@@ -6,7 +6,7 @@
 
 #include <glad/glad.h>
 
-#include "opengl/shader.h"
+#include "render/shader.h"
 
 class OpenGLContext {
 private:

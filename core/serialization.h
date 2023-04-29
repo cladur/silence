@@ -13,12 +13,7 @@
 #include "components/rigidbody_component.h"
 #include "components/transform_component.h"
 
-#ifdef USE_OPENGL
-#include "opengl/render_handle.h"
-#else
-// TODO: Move ModelInstance to somewhere else
-#include "render/render_manager.h"
-#endif
+#include "render/render_handle.h"
 
 namespace serialization {
 

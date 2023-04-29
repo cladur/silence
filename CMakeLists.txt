@@ -6,11 +6,6 @@ set(CMAKE_CXX_STANDARD 20)
 # We set the exe output directory to build directory, so that it'll be next to the DLLs.
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
-set(USE_OPENGL TRUE)
-if (USE_OPENGL)
-    add_compile_definitions(USE_OPENGL)
-endif ()
-
 find_package(glad CONFIG REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 

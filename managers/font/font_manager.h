@@ -1,11 +1,6 @@
 #ifndef SILENCE_FONT_MANAGER_H
 #define SILENCE_FONT_MANAGER_H
 
-#ifndef USE_OPENGL
-#include "render/material_system.h"
-#include "render/vk_types.h"
-#endif
-
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
@@ -17,12 +12,7 @@ struct Character {
 
 struct Font {
 	glm::vec2 texture_size;
-#ifdef USE_OPENGL
 	uint32_t texture;
-#else
-	AllocatedImage character_atlas;
-	vk::Sampler sampler;
-#endif
 	std::map<char, Character> characters;
 };
 

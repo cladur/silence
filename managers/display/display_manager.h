@@ -3,12 +3,8 @@
 
 #include <glad/glad.h>
 
-#ifdef USE_OPENGL
 #define GLFW_INCLUDE_NONE
-#else
-#define GLFW_INCLUDE_VULKAN
 #include <vulkan/vulkan.h>
-#endif
 
 #include <GLFW/glfw3.h>
 
@@ -36,10 +32,6 @@ public:
 	void capture_mouse(bool capture) const;
 
 	[[nodiscard]] int get_refresh_rate() const;
-
-#ifndef USE_OPENGL
-	VkSurfaceKHR create_surface(VkInstance &instance) const;
-#endif
 
 	[[nodiscard]] bool was_window_resized() const;
 

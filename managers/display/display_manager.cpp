@@ -13,24 +13,16 @@ DisplayManager::Status DisplayManager::startup(bool resizable) {
 		return Status::FailedToInitializeGlfw;
 	}
 
-	// No need to create context since we're using Vulkan, not OpenGL(ES).
-
-#ifdef USE_OPENGL
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // 3.2+ only
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // Required on Mac
-#else
-	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-#endif
 
 	is_window_resizable = resizable;
 	glfwWindowHint(GLFW_RESIZABLE, resizable);
 	window = glfwCreateWindow(1280, 720, "Silence Game", nullptr, nullptr);
 
-#ifdef USE_OPENGL
 	glfwMakeContextCurrent(window);
-#endif
 
 	if (!window) {
 		glfwTerminate();
@@ -56,17 +48,6 @@ int DisplayManager::get_refresh_rate() const {
 	const GLFWvidmode *mode = glfwGetVideoMode(monitor);
 	return mode->refreshRate;
 }
-
-#ifndef USE_OPENGL
-VkSurfaceKHR DisplayManager::create_surface(VkInstance &instance) const {
-	VkSurfaceKHR surface;
-	VkResult err = glfwCreateWindowSurface(instance, window, nullptr, &surface);
-	if (err) {
-		assert(false);
-	}
-	return surface;
-}
-#endif
 
 [[nodiscard]] bool DisplayManager::was_window_resized() const {
 	static glm::vec2 last_framebuffer_size = get_framebuffer_size();

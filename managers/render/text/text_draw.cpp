@@ -1,57 +1,76 @@
 #include "text_draw.h"
 
 #include "display/display_manager.h"
+#include "render/render_manager.h"
 
-#include "render/vk_debug.h"
-#include <render/render_manager.h>
-#include <render/vk_initializers.h>
-#include <vulkan/vulkan_handles.hpp>
+const uint32_t MAX_CHARACTERS = 1000;
+const uint32_t MAX_VERTEX_COUNT = 4 * MAX_CHARACTERS;
+const uint32_t MAX_INDEX_COUNT = 6 * MAX_CHARACTERS;
 
-VertexInputDescription TextVertex::get_vertex_description() {
-	VertexInputDescription description;
+void TextDraw::startup() {
+	glGenVertexArrays(1, &vao);
+	glGenBuffers(1, &vbo);
+	glGenBuffers(1, &ebo);
 
-	//we will have just 1 vertex buffer binding, with a per-vertex rate
-	vk::VertexInputBindingDescription main_binding = {};
-	main_binding.binding = 0;
-	main_binding.stride = sizeof(TextVertex);
-	main_binding.inputRate = vk::VertexInputRate::eVertex;
+	glBindVertexArray(vao);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-	description.bindings.push_back(main_binding);
+	glBufferData(GL_ARRAY_BUFFER, MAX_VERTEX_COUNT * sizeof(TextVertex), nullptr, GL_DYNAMIC_DRAW);
 
-	//Position will be stored at Location 0
-	vk::VertexInputAttributeDescription position_attribute = {};
-	position_attribute.binding = 0;
-	position_attribute.location = 0;
-	position_attribute.format = vk::Format::eR32G32B32Sfloat;
-	position_attribute.offset = offsetof(TextVertex, position);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, MAX_INDEX_COUNT * sizeof(uint32_t), nullptr, GL_DYNAMIC_DRAW);
 
-	//UV will be stored at Location 1
-	vk::VertexInputAttributeDescription uv_attribute = {};
-	uv_attribute.binding = 0;
-	uv_attribute.location = 1;
-	uv_attribute.format = vk::Format::eR32G32Sfloat;
-	uv_attribute.offset = offsetof(TextVertex, uv);
+	// vertex positions
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(TextVertex), (void *)nullptr);
+	// vertex color
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(TextVertex), (void *)offsetof(TextVertex, color));
+	// vertex uv
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(TextVertex), (void *)offsetof(TextVertex, uv));
+	// is screen space
+	glEnableVertexAttribArray(3);
+	glVertexAttribIPointer(3, 1, GL_INT, sizeof(TextVertex), (void *)offsetof(TextVertex, is_screen_space));
 
-	//Color will be stored at Location 2
-	vk::VertexInputAttributeDescription color_attribute = {};
-	color_attribute.binding = 0;
-	color_attribute.location = 2;
-	color_attribute.format = vk::Format::eR32G32B32Sfloat;
-	color_attribute.offset = offsetof(TextVertex, color);
+	glBindVertexArray(0);
 
-	//Is screen space will be stored at Location 3
-	vk::VertexInputAttributeDescription is_screen_space_attribute = {};
-	is_screen_space_attribute.binding = 0;
-	is_screen_space_attribute.location = 3;
-	is_screen_space_attribute.format = vk::Format::eR32Sint;
-	is_screen_space_attribute.offset = offsetof(TextVertex, is_screen_space);
+	shader.load_from_files(shader_path("text.vert"), shader_path("text.frag"));
+}
 
-	description.attributes.push_back(position_attribute);
-	description.attributes.push_back(uv_attribute);
-	description.attributes.push_back(color_attribute);
-	description.attributes.push_back(is_screen_space_attribute);
+void TextDraw::draw() {
+	if (vertices.empty() || indices.empty()) {
+		return;
+	}
 
-	return description;
+	// TODO: Dynamically resize buffers?
+	if (vertices.size() > MAX_VERTEX_COUNT || indices.size() > MAX_INDEX_COUNT) {
+		SPDLOG_ERROR("Too many characters to draw!!!");
+		return;
+	}
+
+	shader.use();
+
+	// update buffers
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(TextVertex), &vertices[0]);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, indices.size() * sizeof(uint32_t), &indices[0]);
+
+	RenderManager *render_manager = RenderManager::get();
+	shader.set_mat4("projection", render_manager->projection);
+	shader.set_mat4("view", render_manager->view);
+	shader.set_int("font_atlas_map", 0);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, FontManager::get()->fonts.begin()->second.texture);
+
+	glBindVertexArray(vao);
+	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
+	glBindVertexArray(0);
+
+	vertices.clear();
+	indices.clear();
 }
 
 namespace text_draw {
@@ -66,11 +85,12 @@ void draw_text_3d(const std::string &text, const glm::vec3 &position, const glm:
 
 void draw_text(const std::string &text, bool is_screen_space, const glm::vec3 &position, const glm::vec3 &color,
 		float scale, Font *font) {
-	auto render_manager = RenderManager::get();
-
 	if (font == nullptr) {
 		font = &FontManager::get()->fonts.begin()->second;
 	}
+
+	RenderManager *render_manager = RenderManager::get();
+	TextDraw &text_draw = render_manager->text_draw;
 
 	// We're scaling the text by arbitrary amount
 	// Correct way to do it would be to calculate it based on the font size which we loaded using FreeType
@@ -108,17 +128,24 @@ void draw_text(const std::string &text, bool is_screen_space, const glm::vec3 &p
 
 		int ss = is_screen_space ? 1 : 0;
 
-		//update the vertex buffer
-		render_manager->text_vertices.push_back({ { xpos, ypos + h, zpos }, { uv_x_min, uv_y_max }, color, ss });
-		render_manager->text_vertices.push_back({ { xpos, ypos, zpos }, { uv_x_min, uv_y_min }, color, ss });
-		render_manager->text_vertices.push_back({ { xpos + w, ypos, zpos }, { uv_x_max, uv_y_min }, color, ss });
-		render_manager->text_vertices.push_back({ { xpos, ypos + h, zpos }, { uv_x_min, uv_y_max }, color, ss });
-		render_manager->text_vertices.push_back({ { xpos + w, ypos, zpos }, { uv_x_max, uv_y_min }, color, ss });
-		render_manager->text_vertices.push_back({ { xpos + w, ypos + h, zpos }, { uv_x_max, uv_y_max }, color, ss });
+		//update the vertices
+		text_draw.vertices.push_back({ { xpos, ypos + h, zpos }, color, { uv_x_min, uv_y_max }, ss }); // 0
+		text_draw.vertices.push_back({ { xpos, ypos, zpos }, color, { uv_x_min, uv_y_min }, ss }); // 1
+		text_draw.vertices.push_back({ { xpos + w, ypos, zpos }, color, { uv_x_max, uv_y_min }, ss }); // 2
+		text_draw.vertices.push_back({ { xpos + w, ypos + h, zpos }, color, { uv_x_max, uv_y_max }, ss }); // 3
+
+		//update the indices
+		uint32_t index = text_draw.vertices.size() - 4;
+		text_draw.indices.push_back(index + 0);
+		text_draw.indices.push_back(index + 1);
+		text_draw.indices.push_back(index + 2);
+		text_draw.indices.push_back(index + 0);
+		text_draw.indices.push_back(index + 2);
+		text_draw.indices.push_back(index + 3);
 
 		// now advance cursors for next glyph (note that advance is number of 1/64 pixels)
 		x += (character.advance >> 6) * scale * aspect; // bitshift by 6 to get value in pixels (2^6 = 64)
 	}
 }
 
-}; //namespace text_draw
+} //namespace text_draw

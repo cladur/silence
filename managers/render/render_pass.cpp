@@ -1,6 +1,6 @@
 #include "render_pass.h"
-#include "opengl/material.h"
-#include "opengl/opengl_manager.h"
+#include "render/material.h"
+#include "render/render_manager.h"
 
 void RenderPass::add_instance(Handle<ModelInstance> handle) {
 	instance_handles.push_back(handle);
@@ -20,12 +20,12 @@ void UnlitPass::startup() {
 }
 
 void UnlitPass::draw() {
-	OpenglManager *opengl_manager = OpenglManager::get();
+	RenderManager *render_manager = RenderManager::get();
 	material.bind_resources();
 	for (auto &handle : instance_handles) {
-		ModelInstance &instance = opengl_manager->get_model_instance(handle);
+		ModelInstance &instance = render_manager->get_model_instance(handle);
 		material.bind_instance_resources(instance);
-		Model &model = opengl_manager->get_model(instance.model_handle);
+		Model &model = render_manager->get_model(instance.model_handle);
 		for (auto &mesh : model.meshes) {
 			material.bind_mesh_resources(mesh);
 			mesh.draw();
@@ -38,12 +38,12 @@ void PBRPass::startup() {
 }
 
 void PBRPass::draw() {
-	OpenglManager *opengl_manager = OpenglManager::get();
+	RenderManager *render_manager = RenderManager::get();
 	material.bind_resources();
 	for (auto &handle : instance_handles) {
-		ModelInstance &instance = opengl_manager->get_model_instance(handle);
+		ModelInstance &instance = render_manager->get_model_instance(handle);
 		material.bind_instance_resources(instance);
-		Model &model = opengl_manager->get_model(instance.model_handle);
+		Model &model = render_manager->get_model(instance.model_handle);
 		for (auto &mesh : model.meshes) {
 			material.bind_mesh_resources(mesh);
 			mesh.draw();
@@ -58,7 +58,7 @@ void SkyboxPass::startup() {
 }
 
 void SkyboxPass::draw() {
-	OpenglManager *opengl_manager = OpenglManager::get();
+	RenderManager *render_manager = RenderManager::get();
 	material.bind_resources();
 	skybox.draw();
 }
