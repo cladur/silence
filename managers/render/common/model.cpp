@@ -1,7 +1,7 @@
 #include "model.h"
 
 #include "assets/material_asset.h"
-#include "assets/prefab_asset.h"
+#include "assets/model_asset.h"
 
 #include "managers/render/render_manager.h"
 
@@ -13,26 +13,26 @@ void Model::load_from_asset(const char *path) {
 	assets::AssetFile file;
 	bool loaded = assets::load_binary_file(path, file);
 	if (!loaded) {
-		SPDLOG_ERROR("Error When loading prefab file at path {}", path);
+		SPDLOG_ERROR("Error When loading model file at path {}", path);
 		assert(false);
 	} else {
-		SPDLOG_INFO("Prefab {} loaded to cache", path);
+		SPDLOG_INFO("Model {} loaded to cache", path);
 	}
 
-	assets::PrefabInfo prefab = assets::read_prefab_info(&file);
+	assets::ModelInfo model = assets::read_model_info(&file);
 
 	std::unordered_map<uint64_t, glm::mat4> node_worldmats;
 
 	std::vector<std::pair<uint64_t, glm::mat4>> pending_nodes;
-	for (auto &[k, v] : prefab.node_matrices) {
+	for (auto &[k, v] : model.node_matrices) {
 		glm::mat4 nodematrix{ 1.f };
 
-		auto nm = prefab.matrices[v];
+		auto nm = model.matrices[v];
 		memcpy(&nodematrix, &nm, sizeof(glm::mat4));
 
 		//check if it has parents
-		auto matrix_it = prefab.node_parents.find(k);
-		if (matrix_it == prefab.node_parents.end()) {
+		auto matrix_it = model.node_parents.find(k);
+		if (matrix_it == model.node_parents.end()) {
 			//add to worldmats
 			node_worldmats[k] = root * nodematrix;
 		} else {
@@ -45,7 +45,7 @@ void Model::load_from_asset(const char *path) {
 	while (!pending_nodes.empty()) {
 		for (int i = 0; i < pending_nodes.size(); i++) {
 			uint64_t node = pending_nodes[i].first;
-			uint64_t parent = prefab.node_parents[node];
+			uint64_t parent = model.node_parents[node];
 
 			//try to find parent in cache
 			auto matrix_it = node_worldmats.find(parent);
@@ -63,10 +63,10 @@ void Model::load_from_asset(const char *path) {
 		}
 	}
 
-	std::vector<Mesh> prefab_renderables;
-	prefab_renderables.reserve(prefab.node_meshes.size());
+	std::vector<Mesh> model_renderables;
+	model_renderables.reserve(model.node_meshes.size());
 
-	for (auto &[k, v] : prefab.node_meshes) {
+	for (auto &[k, v] : model.node_meshes) {
 		//load mesh
 
 		Mesh mesh{};

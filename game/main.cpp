@@ -126,10 +126,10 @@ void demo_entities_init(std::vector<Entity> &entities) {
 		ColliderComponentsFactory::add_collider_component(
 				entity, ColliderAABB{ transform.get_position(), transform.get_scale(), true });
 
-		// Handle<ModelInstance> hndl = RenderManager::get()->add_instance("woodenBox/woodenBox.pfb");
-		//		Handle<ModelInstance> hndl = RenderManager::get()->add_instance("electricBox/electricBox.pfb");
-		// Handle<ModelInstance> hndl = RenderManager::get()->add_instance("Agent/agent_idle.pfb");
-		ecs_manager.add_component<ModelInstance>(entity, ModelInstance("woodenBox/woodenBox.pfb"));
+		// Handle<ModelInstance> hndl = RenderManager::get()->add_instance("woodenBox/woodenBox.mdl");
+		//		Handle<ModelInstance> hndl = RenderManager::get()->add_instance("electricBox/electricBox.mdl");
+		// Handle<ModelInstance> hndl = RenderManager::get()->add_instance("Agent/agent_idle.mdl");
+		ecs_manager.add_component<ModelInstance>(entity, ModelInstance("woodenBox/woodenBox.mdl"));
 	}
 
 	auto listener = ecs_manager.create_entity();

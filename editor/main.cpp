@@ -145,9 +145,9 @@ void demo_entities_init(std::vector<Entity> &entities) {
 		ColliderComponentsFactory::add_collider_component(
 				entity, ColliderAABB{ transform.get_position(), transform.get_scale(), true });
 
-		//		Handle<ModelInstance> hndl = RenderManager::get()->add_instance("electricBox/electricBox.pfb");
-		//		Handle<ModelInstance> hndl = RenderManager::get()->add_instance("Agent/agent_idle.pfb");
-		ecs_manager.add_component<ModelInstance>(entity, ModelInstance("woodenBox/woodenBox.pfb"));
+		//		Handle<ModelInstance> hndl = RenderManager::get()->add_instance("electricBox/electricBox.mdl");
+		//		Handle<ModelInstance> hndl = RenderManager::get()->add_instance("Agent/agent_idle.mdl");
+		ecs_manager.add_component<ModelInstance>(entity, ModelInstance("woodenBox/woodenBox.mdl"));
 	}
 
 	auto listener = ecs_manager.create_entity();
@@ -560,7 +560,7 @@ int main() {
 				ImGui::Text("Entity %d", active_entity);
 			}
 			if (ecs_manager.has_component<Transform>(active_entity)) {
-				if (ImGui::TreeNode("Transform")) {
+				if (ImGui::TreeNodeEx("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
 					auto &transform = ecs_manager.get_component<Transform>(active_entity);
 					glm::vec3 pos = transform.get_position();
 					glm::vec3 rot = transform.get_euler_rot();
@@ -573,7 +573,7 @@ int main() {
 				}
 			}
 			if (ecs_manager.has_component<ModelInstance>(active_entity)) {
-				if (ImGui::TreeNode("ModelInstance")) {
+				if (ImGui::TreeNodeEx("ModelInstance", ImGuiTreeNodeFlags_DefaultOpen)) {
 					auto &model_instance = ecs_manager.get_component<ModelInstance>(active_entity);
 					ImGui::Text("Model: %s", render_manager->get_model(model_instance.model_handle).name.c_str());
 					ImGui::Text("Material: %s", magic_enum::enum_name(model_instance.material_type).data());

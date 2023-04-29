@@ -4,7 +4,7 @@
 
 ModelInstance::ModelInstance() {
 	RenderManager &render_manager = *RenderManager::get();
-	model_handle = render_manager.load_model("woodenBox/woodenBox.pfb");
+	model_handle = render_manager.load_model("woodenBox/woodenBox.mdl");
 	material_type = MaterialType::Default;
 }
 
@@ -19,7 +19,7 @@ void ModelInstance::serialize_json(nlohmann::json &j) {
 	// obj["mesh"] = "box";
 	// obj["material"] = "default_mesh";
 	j.push_back(nlohmann::json::object());
-	j.back()["prefab_instance"] = obj;
+	j.back()["model_instance"] = obj;
 }
 
 void ModelInstance::deserialize_json(nlohmann::json &j) {

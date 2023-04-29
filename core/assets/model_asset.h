@@ -5,7 +5,7 @@
 
 namespace assets {
 
-struct PrefabInfo {
+struct ModelInfo {
 	//points to matrix array in the blob
 	std::unordered_map<uint64_t, int> node_matrices;
 	std::unordered_map<uint64_t, std::string> node_names;
@@ -22,8 +22,8 @@ struct PrefabInfo {
 	std::vector<std::array<float, 16>> matrices;
 };
 
-PrefabInfo read_prefab_info(AssetFile *file);
-AssetFile pack_prefab(const PrefabInfo &info);
+ModelInfo read_model_info(AssetFile *file);
+AssetFile pack_model(const ModelInfo &info);
 
 } //namespace assets
 
