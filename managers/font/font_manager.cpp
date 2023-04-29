@@ -1,9 +1,12 @@
 #include "font_manager.h"
 #include <freetype/freetype.h>
 
+#ifndef USE_OPENGL
 #include "render/vk_debug.h"
 #include "render/vk_initializers.h"
 #include "render/vk_textures.h"
+#endif
+#include "glad/glad.h"
 
 FontManager *FontManager::get() {
 	static FontManager instance;
