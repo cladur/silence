@@ -398,18 +398,23 @@ int main() {
 	UISlider slider_test = UISlider(0.0f, 0.0f, 1.0f, false);
 	slider_test.position = glm::vec3(200.0f, 0.0f, 0.0f);
 	slider_test.size = glm::vec2(200.0f, 20.0f);
-	slider_test.slider_alignment = SliderAlignment::LEFT_TO_RIGHT;
+	slider_test.slider_alignment = sprite_draw::SliderAlignment::LEFT_TO_RIGHT;
 	float slider_value = 0.0f;
 	anchor.add_child(slider_test);
 
 	// IMAGE
-	UIImage image = UIImage(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(1.0f, 1.0f), "skull");
+	UIImage image = UIImage(glm::vec3(-2.0f, 0.0f, 0.0f), glm::vec2(3.0f, 3.0f), "skull");
 	image.is_screen_space = false;
+	image.is_billboard = true;
 	//anchor.add_child(image);
 
-	UIImage billboard_test = UIImage(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(1.0f, 1.0f), "missing");
+	UISlider billboard_test = UISlider(0.0f, 0.0f, 1.0f, false);
+	billboard_test.position = glm::vec3(0.0f, 0.0f, 0.0f);
+	billboard_test.size = glm::vec2(0.5f, 4.0f);
+	billboard_test.slider_alignment = sprite_draw::SliderAlignment::BOTTOM_TO_TOP;
 	billboard_test.is_screen_space = false;
 	billboard_test.is_billboard = true;
+	billboard_test.color = glm::vec3(0.142f, 0.531f, 0.8534f);
 
 	bool should_run = true;
 	nlohmann::json scene;
@@ -630,11 +635,34 @@ int main() {
 //				true,
 //				sprite_draw::Alignment::BOTTOM_RIGHT);
 
-		slider_test.value = slider_value;
+		//slider_test.value = slider_value;
 		//slider_test.draw();
 		//anchor.draw();
 		image.draw();
+		billboard_test.value = slider_value;
 
+		billboard_test.position = glm::vec3(0.0f, 0.0f, 0.0f);
+		billboard_test.size = glm::vec2(0.5f, 4.0f);
+		billboard_test.slider_alignment = sprite_draw::SliderAlignment::BOTTOM_TO_TOP;
+		billboard_test.color = glm::vec3(0.0f, 1.0f, 1.0f);
+		billboard_test.draw();
+
+		billboard_test.position = glm::vec3(0.0f, -5.0f, 0.0f);
+		billboard_test.size = glm::vec2(0.5f, 4.0f);
+		billboard_test.slider_alignment = sprite_draw::SliderAlignment::TOP_TO_BOTTOM;
+		billboard_test.color = glm::vec3(1.0f, 1.0f, 1.0f);
+		billboard_test.draw();
+
+		billboard_test.position = glm::vec3(10.0f, 2.0f, 0.0f);
+		billboard_test.size = glm::vec2(4.0f, 0.5f);
+		billboard_test.slider_alignment = sprite_draw::SliderAlignment::LEFT_TO_RIGHT;
+		billboard_test.color = glm::vec3(1.0f, 1.0f, 0.0f);
+		billboard_test.draw();
+
+		billboard_test.position = glm::vec3(10.0f, -2.0f, 0.0f);
+		billboard_test.size = glm::vec2(4.0f, 0.5f);
+		billboard_test.color = glm::vec3(1.0f, 0.0f, 1.0f);
+		billboard_test.slider_alignment = sprite_draw::SliderAlignment::RIGHT_TO_LEFT;
 		billboard_test.draw();
 
 		// TODO: remove this when collision demo will be removed

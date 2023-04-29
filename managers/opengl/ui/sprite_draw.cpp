@@ -40,6 +40,8 @@ void SpriteDraw::startup() {
 void SpriteDraw::draw() {
 	// this is probably super inefficient, but i had no clue how to manage multiple textures in a single batched draw call
 	// sort the sprites based on distance to camera to avoid transparency issues
+	auto cam_pos = OpenglManager::get()->camera_pos;
+
 	std::sort(sprites.begin(), sprites.end(), [](const Sprite &a, const Sprite &b) {
 		return a.vertices[0].position.z < b.vertices[0].position.z;
 	});
@@ -72,8 +74,10 @@ void SpriteDraw::draw() {
 		if (sprite.billboard) {
 			auto right = glm::vec3(view[0][0], view[1][0], view[2][0]);
 			auto up = glm::vec3(view[0][1], view[1][1], view[2][1]);
+			auto look = glm::vec3(view[0][2], view[1][2], view[2][2]);
 			shader.set_vec3("camera_right", right);
 			shader.set_vec3("camera_up", up);
+			shader.set_vec3("camera_look", look);
 			shader.set_vec2("size", sprite.size);
 			shader.set_vec3("billboard_center", sprite.position);
 			shader.set_int("is_billboard", 1);
@@ -209,6 +213,80 @@ void sprite_draw::draw_sprite_billboard(const glm::vec3 &position, const glm::ve
 	auto view = OpenglManager::get()->view;
 
 	sprite.texture_name = texture_name;
+	sprite.billboard = true;
+	sprite.size = size / 2.0f;
+	sprite.position = position;
+	auto manager = OpenglManager::get();
+	manager->sprite_draw.sprites.push_back(sprite);
+}
+
+void sprite_draw::draw_colored_billboard(const glm::vec3 &position, const glm::vec2 &size, const glm::vec3 &color) {
+	Sprite sprite = default_vertex_data(glm::vec3(0.0f), size, 1.0f, 1.0f, color, false, sprite_draw::Alignment::NONE);
+
+	sprite.billboard = true;
+	sprite.size = size / 2.0f;
+	sprite.position = position;
+	auto manager = OpenglManager::get();
+	manager->sprite_draw.sprites.push_back(sprite);
+}
+
+void sprite_draw::draw_slider_billboard(const glm::vec3 &position, float add_z, const glm::vec2 &size, const glm::vec3 &color, float value, SliderAlignment slider_alignment) {
+	Sprite sprite = {};
+	sprite.vertices.resize(4);
+	sprite.indices.resize(6);
+	sprite.transform = glm::mat4(1.0f);
+	sprite.texture_name = "";
+
+	float x = 0.0f;
+	float y = 0.0f;
+	float z = add_z;
+
+	float w = size.x / 2.0f;
+	float h = size.y / 2.0f;
+
+	switch (slider_alignment) {
+		case SliderAlignment::LEFT_TO_RIGHT:
+			sprite.vertices[0] = { { x - w, y + h, z}, color, { 0.0f, 0.0f }, false };
+			sprite.vertices[1] = { { x - w, y - h, z }, color, { 0.0f, 1.0f }, false };
+			sprite.vertices[2] = { { x - w + (size.x * value), y - h, z }, color, { 1.0f, 1.0f }, false };
+			sprite.vertices[3] = { { x - w + (size.x * value), y + h, z }, color, { 1.0f, 0.0f }, false };
+			break;
+		case SliderAlignment::RIGHT_TO_LEFT:
+			sprite.vertices[0] = { { x + w, y + h, z}, color, { 0.0f, 0.0f }, false };
+			sprite.vertices[1] = { { x + w, y - h, z }, color, { 0.0f, 1.0f }, false };
+			sprite.vertices[2] = { { x + w - (size.x * value), y - h, z }, color, { 1.0f, 1.0f }, false };
+			sprite.vertices[3] = { { x + w - (size.x * value), y + h, z }, color, { 1.0f, 0.0f }, false };
+			break;
+		case SliderAlignment::TOP_TO_BOTTOM:
+			sprite.vertices[0] = { { x - w, y + h, z } , color, { 0.0f, 0.0f }, false };
+			sprite.vertices[1] = { { x - w, y + h - (size.y * value), z } , color, { 0.0f, 1.0f }, false };
+			sprite.vertices[2] = { { x + w, y + h - (size.y * value), z } , color, { 1.0f, 1.0f }, false };
+			sprite.vertices[3] = { { x + w, y + h, z } , color, { 1.0f, 0.0f }, false };
+			break;
+		case SliderAlignment::BOTTOM_TO_TOP:
+			sprite.vertices[0] = { { x - w, y - h, z } , color, { 0.0f, 0.0f }, false };
+			sprite.vertices[1] = { { x - w, y - h + (size.y * value), z } , color, { 0.0f, 1.0f }, false };
+			sprite.vertices[2] = { { x + w, y - h + (size.y * value), z } , color, { 1.0f, 1.0f }, false };
+			sprite.vertices[3] = { { x + w, y - h, z } , color, { 1.0f, 0.0f }, false };
+			break;
+
+		default:
+			sprite.vertices[0] = { { x - w, y + h, z }, color, { 0.0f, 0.0f }, false };
+			sprite.vertices[1] = { { x - w, y - h, z }, color, { 0.0f, 1.0f }, false };
+			sprite.vertices[2] = { { x + w, y - h, z }, color, { 1.0f, 1.0f }, false };
+			sprite.vertices[3] = { { x + w, y + h, z }, color, { 1.0f, 0.0f }, false };
+			break;
+	}
+
+	//update the indices
+	uint32_t index = 0;
+	sprite.indices[index++] = 0;
+	sprite.indices[index++] = 1;
+	sprite.indices[index++] = 2;
+	sprite.indices[index++] = 0;
+	sprite.indices[index++] = 2;
+	sprite.indices[index++] = 3;
+
 	sprite.billboard = true;
 	sprite.size = size / 2.0f;
 	sprite.position = position;

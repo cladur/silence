@@ -2,6 +2,7 @@
 #define SILENCE_SPRITE_DRAW_H
 
 #include <opengl/shader.h>
+
 struct SpriteVertex {
 	glm::vec3 position;
 	glm::vec3 color;
@@ -47,15 +48,27 @@ enum class Alignment {
 	NONE,
 };
 
+enum class SliderAlignment {
+	LEFT_TO_RIGHT,
+	RIGHT_TO_LEFT,
+	TOP_TO_BOTTOM,
+	BOTTOM_TO_TOP
+};
+
 Sprite default_vertex_data(const glm::vec3 &position, const glm::vec2 &size, float sprite_x_size, float sprite_y_size,
 		const glm::vec3 &color, bool is_screen_space, Alignment alignment = Alignment::CENTER);
 
 // draws a single colored quad. If is screen spaced, the scale represents pixel scale.
 void draw_colored(const glm::vec3 &position, const glm::vec2 &size, const glm::vec3 &color, bool is_screen_space,
 		Alignment alignment = Alignment::CENTER);
+void draw_colored_billboard(const glm::vec3 &position, const glm::vec2 &size, const glm::vec3 &color);
 void draw_sprite(const glm::vec3 &position, const glm::vec2 &size, const glm::vec3 &color, const char *texture_name,
 		bool is_screen_space, Alignment alignment = Alignment::CENTER);
 void draw_sprite_billboard(const glm::vec3 &position, const glm::vec2 &size, const glm::vec3 &color, const char *texture_name);
 
+void draw_slider_billboard(const glm::vec3 &position, float add_z, const glm::vec2 &size,
+		const glm::vec3 &color, float value, SliderAlignment slider_alignment);
+
 }
+
 #endif //SILENCE_SPRITE_DRAW_H

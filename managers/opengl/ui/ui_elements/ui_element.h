@@ -1,7 +1,8 @@
 #ifndef SILENCE_UI_ELEMENT_H
 #define SILENCE_UI_ELEMENT_H
 
-#include <opengl/ui/sprite_draw.h>
+#include "opengl/ui/sprite_draw.h"
+
 class UIElement {
 public:
 	glm::vec3 position = glm::vec3(0.0f);
@@ -10,8 +11,8 @@ public:
 	std::string texture_name;
 	bool is_screen_space = true;
 	bool is_billboard = false;
-	sprite_draw::Alignment alignment = sprite_draw::Alignment::NONE;
 	std::vector<UIElement*> children;
+	sprite_draw::Alignment alignment = sprite_draw::Alignment::NONE;
 
 	virtual void draw();
 	virtual void draw(glm::vec3 parent_position, glm::vec2 parent_size);
