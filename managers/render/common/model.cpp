@@ -6,6 +6,8 @@
 #include "managers/render/render_manager.h"
 
 void Model::load_from_asset(const char *path) {
+	name = path;
+
 	RenderManager *render_manager = RenderManager::get();
 
 	assets::AssetFile file;
@@ -86,7 +88,7 @@ void Model::load_from_asset(const char *path) {
 		// BASE COLOR
 		if (material.textures.contains("baseColor")) {
 			Texture albedo = {};
-			albedo.load_from_asset(asset_path(material.textures["baseColor"]).c_str());
+			albedo.load_from_asset(asset_path(material.textures["baseColor"]));
 			mesh.textures[0] = albedo;
 			mesh.textures_present[0] = true;
 		}
@@ -94,7 +96,7 @@ void Model::load_from_asset(const char *path) {
 		// NORMAL
 		if (material.textures.contains("normals")) {
 			Texture normal = {};
-			normal.load_from_asset(asset_path(material.textures["normals"]).c_str());
+			normal.load_from_asset(asset_path(material.textures["normals"]));
 			mesh.textures[1] = normal;
 			mesh.textures_present[1] = true;
 		}
@@ -102,7 +104,7 @@ void Model::load_from_asset(const char *path) {
 		// METALLIC ROUGHNESS
 		if (material.textures.contains("metallicRoughness")) {
 			Texture met_rough = {};
-			met_rough.load_from_asset(asset_path(material.textures["metallicRoughness"]).c_str());
+			met_rough.load_from_asset(asset_path(material.textures["metallicRoughness"]));
 			mesh.textures[2] = met_rough;
 			mesh.textures_present[2] = true;
 
@@ -117,7 +119,7 @@ void Model::load_from_asset(const char *path) {
 		// EMISSIVE
 		if (material.textures.contains("emissive")) {
 			Texture emissive = {};
-			emissive.load_from_asset(asset_path(material.textures["emissive"]).c_str());
+			emissive.load_from_asset(asset_path(material.textures["emissive"]));
 			mesh.textures[3] = emissive;
 			mesh.textures_present[3] = true;
 		}

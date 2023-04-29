@@ -119,10 +119,10 @@ void default_ecs_manager_init() {
 
 void demo_entities_init(std::vector<Entity> &entities) {
 	std::default_random_engine random_generator; // NOLINT(cert-msc51-cpp)
-	std::uniform_real_distribution<float> rand_position(-40.0f, 40.0f);
+	std::uniform_real_distribution<float> rand_position(-20.0f, 20.0f);
 	std::uniform_real_distribution<float> rand_rotation(0.0f, 0.0f);
 	std::uniform_real_distribution<float> rand_scale(3.0f, 5.0f);
-	std::uniform_real_distribution<float> rand_gravity(-40.0f, -20.0f);
+	std::uniform_real_distribution<float> rand_gravity(-9.8f, -9.8f);
 
 	float scale = rand_scale(random_generator);
 
@@ -137,16 +137,14 @@ void demo_entities_init(std::vector<Entity> &entities) {
 				RigidBody{ .velocity = glm::vec3(0.0f, 0.0f, 0.0f), .acceleration = glm::vec3(0.0f, 0.0f, 0.0f) });
 
 		Transform transform = Transform{ glm::vec3(rand_position(random_generator),
-												 rand_position(random_generator) + 40.0f,
+												 rand_position(random_generator) + 20.0f,
 												 rand_position(random_generator)),
-			glm::vec3(rand_rotation(random_generator), -50.0f, rand_rotation(random_generator)), glm::vec3(4.0f) };
+			glm::vec3(rand_rotation(random_generator), -50.0f, rand_rotation(random_generator)), glm::vec3(1.0f) };
 		ecs_manager.add_component(entity, transform);
 
 		ColliderComponentsFactory::add_collider_component(
 				entity, ColliderAABB{ transform.get_position(), transform.get_scale(), true });
 
-		// Handle<ModelInstance> hndl = RenderManager::get()->add_instance("woodenBox/woodenBox.pfb",
-		// MATERIAL_TYPE_UNLIT);
 		//		Handle<ModelInstance> hndl = RenderManager::get()->add_instance("electricBox/electricBox.pfb");
 		//		Handle<ModelInstance> hndl = RenderManager::get()->add_instance("Agent/agent_idle.pfb");
 		ecs_manager.add_component<ModelInstance>(entity, ModelInstance("woodenBox/woodenBox.pfb"));
@@ -558,19 +556,30 @@ int main() {
 			if (ecs_manager.has_component<Name>(active_entity)) {
 				Name &name = ecs_manager.get_component<Name>(active_entity);
 				ImGui::Text("%s", name.name.c_str());
+			} else {
+				ImGui::Text("Entity %d", active_entity);
 			}
 			if (ecs_manager.has_component<Transform>(active_entity)) {
-				auto &transform = ecs_manager.get_component<Transform>(active_entity);
-				glm::vec3 pos = transform.get_position();
-				glm::vec3 rot = transform.get_euler_rot();
-				glm::vec3 scale = transform.get_scale();
-				ImGui::Text("Pos: %.3f, %.3f, %.3f", pos.x, pos.y, pos.z);
-				ImGui::Text("Rot: %.3f, %.3f, %.3f", rot.x, rot.y, rot.z);
-				ImGui::Text("Scale: %.3f, %.3f, %.3f", scale.x, scale.y, scale.z);
+				if (ImGui::TreeNode("Transform")) {
+					auto &transform = ecs_manager.get_component<Transform>(active_entity);
+					glm::vec3 pos = transform.get_position();
+					glm::vec3 rot = transform.get_euler_rot();
+					glm::vec3 scale = transform.get_scale();
+					ImGui::Text("Pos: %.3f, %.3f, %.3f", pos.x, pos.y, pos.z);
+					ImGui::Text("Rot: %.3f, %.3f, %.3f", rot.x, rot.y, rot.z);
+					ImGui::Text("Scale: %.3f, %.3f, %.3f", scale.x, scale.y, scale.z);
+
+					ImGui::TreePop();
+				}
 			}
 			if (ecs_manager.has_component<ModelInstance>(active_entity)) {
-				auto &model_instance = ecs_manager.get_component<ModelInstance>(active_entity);
-				ImGui::Text("Model handle: %d", model_instance.model_handle.id);
+				if (ImGui::TreeNode("ModelInstance")) {
+					auto &model_instance = ecs_manager.get_component<ModelInstance>(active_entity);
+					ImGui::Text("Model: %s", render_manager->get_model(model_instance.model_handle).name.c_str());
+					ImGui::Text("Material: %s", magic_enum::enum_name(model_instance.material_type).data());
+
+					ImGui::TreePop();
+				}
 			}
 		} else {
 			ImGui::Text("No entity selected");

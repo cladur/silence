@@ -94,6 +94,12 @@ void RenderManager::draw() {
 	//		render_framebuffer.resize(window_extent.x, window_extent.y);
 	//	}
 
+	// Draw grid
+	for (int i = -10; i <= 10; i++) {
+		debug_draw::draw_line(glm::vec3(i, 0, -10), glm::vec3(i, 0, 10), glm::vec4(0.5, 0.5, 0.5, 1));
+		debug_draw::draw_line(glm::vec3(-10, 0, i), glm::vec3(10, 0, i), glm::vec4(0.5, 0.5, 0.5, 1));
+	}
+
 	render_framebuffer.bind();
 
 	// Clear the screen

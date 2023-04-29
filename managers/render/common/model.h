@@ -7,6 +7,7 @@ class Model {
 public:
 	void load_from_asset(const char *path);
 
+	std::string name;
 	glm::mat4 root{};
 
 	std::vector<Mesh> meshes;
