@@ -2,13 +2,16 @@
 #define SILENCE_INSPECTOR_GUI_H
 
 #include "ecs/ecs_manager.h"
+#include "render/render_manager.h"
 #include <cstdint>
 class Inspector {
 private:
 	ECSManager &ecs_manager = ECSManager::get();
+	RenderManager &render_manager = RenderManager::get();
 
-	void (*show_component_functions[11])(Entity entity);
+	void (*show_component_functions[12])(Entity entity);
 	void show_component(Entity entity, int signature_index);
+	void show_name(Entity entity);
 	void show_transform(Entity entity);
 	void show_rigidbody(Entity entity);
 	void show_gravity(Entity entity);

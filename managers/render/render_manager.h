@@ -42,6 +42,8 @@ public:
 	void load_texture(const char *path);
 
 	Model &get_model(Handle<Model> handle);
+	Handle<Model> get_model_handle(std::string name);
+	std::vector<Model> &get_models();
 };
 
 #endif // SILENCE_RENDER_MANAGER_H

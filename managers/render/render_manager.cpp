@@ -19,6 +19,16 @@ std::string asset_path(std::string_view path) {
 	return std::string(ASSET_PATH) + std::string(path);
 }
 
+std::string remove_asset_path(std::string_view path) {
+	std::size_t asset_path_pos = path.find(ASSET_PATH);
+
+	if (asset_path_pos != std::string::npos) {
+		return std::string(path).substr(asset_path_pos + std::strlen(ASSET_PATH));
+	}
+
+	return std::string(path);
+}
+
 std::string shader_path(std::string_view path) {
 	return std::string(SHADER_PATH) + std::string(path);
 }
@@ -118,6 +128,10 @@ Handle<Model> RenderManager::load_model(const char *path) {
 	handle.id = models.size() - 1;
 
 	name_to_model[path] = handle;
+	SPDLOG_WARN("Loaded model {}", path);
+	for (auto name : name_to_model) {
+		SPDLOG_WARN("Model: {} Id: {}", name.first, name.second.id);
+	}
 	return handle;
 }
 
@@ -132,4 +146,18 @@ void RenderManager::load_texture(const char *path) {
 
 Model &RenderManager::get_model(Handle<Model> handle) {
 	return models[handle.id];
+}
+std::vector<Model> &RenderManager::get_models() {
+	return models;
+}
+Handle<Model> RenderManager::get_model_handle(std::string name) {
+	bool found_asset_path = name.find(ASSET_PATH) != std::string::npos;
+	if (found_asset_path) {
+		name = remove_asset_path(name);
+	}
+	SPDLOG_INFO("Looking for model {}", name);
+	for (auto name_to_model : name_to_model) {
+		SPDLOG_INFO("Model: {} Id: {}", name_to_model.first, name_to_model.second.id);
+	}
+	return name_to_model[name];
 }

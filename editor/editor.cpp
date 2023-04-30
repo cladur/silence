@@ -135,6 +135,7 @@ void Editor::startup() {
 	RenderManager::get().startup();
 
 	ECSManager &ecs_manager = ECSManager::get();
+	RenderManager &render_manager = RenderManager::get();
 
 	// Components
 	ecs_manager.register_component<Name>();
@@ -178,6 +179,9 @@ void Editor::startup() {
 			entity, Transform{ glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f) });
 
 	ecs_manager.add_component<ModelInstance>(entity, ModelInstance("woodenBox/woodenBox.mdl"));
+
+	render_manager.load_model("cardboardBox/console.mdl");
+	render_manager.load_model("electricBox2/electricBox2.mdl");
 
 	scenes[0].entities.push_back(entity);
 }
