@@ -121,9 +121,9 @@ void Editor::imgui_viewport(Scene &scene) {
 	RenderManager &render_manager = RenderManager::get();
 	ECSManager &ecs_manager = ECSManager::get();
 
-	ImGui::Begin("Viewport");
+	ImGui::Begin(scene.name.c_str());
 
-	viewport_hovered = ImGui::IsWindowHovered();
+	scene.viewport_hovered = ImGui::IsWindowHovered();
 
 	if (ImGui::Button("Select")) {
 	}
@@ -151,15 +151,16 @@ void Editor::imgui_viewport(Scene &scene) {
 	}
 
 	// Get viewport size
-	static ImVec2 last_viewport_size = ImVec2(0, 0);
 	ImVec2 viewport_size = ImGui::GetContentRegionAvail();
-	if (viewport_size.x != last_viewport_size.x || viewport_size.y != last_viewport_size.y) {
+	if (viewport_size.x != scene.last_viewport_size.x || viewport_size.y != scene.last_viewport_size.y) {
 		// Resize the framebuffer
-		scene.render_scene->resize_framebuffer(viewport_size.x, viewport_size.y);
-		last_viewport_size = viewport_size;
+		scene.get_render_scene().resize_framebuffer(viewport_size.x, viewport_size.y);
+		scene.last_viewport_size = viewport_size;
 	}
 
-	uint32_t render_image = scene.render_scene->render_framebuffer.get_texture_id();
+	SPDLOG_INFO("SCENE {} VIEWPORT_SIZE {} {}", scene.name, viewport_size.x, viewport_size.y);
+
+	uint32_t render_image = scene.get_render_scene().render_framebuffer.get_texture_id();
 	ImGui::Image((void *)(intptr_t)render_image, viewport_size, ImVec2(0, 1), ImVec2(1, 0));
 
 	// Draw gizmo
@@ -167,8 +168,8 @@ void Editor::imgui_viewport(Scene &scene) {
 	ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, viewport_size.x, viewport_size.y);
 	ImGuizmo::SetDrawlist();
 
-	glm::mat4 *view = &scene.render_scene->view;
-	glm::mat4 *projection = &scene.render_scene->projection;
+	glm::mat4 *view = &scene.get_render_scene().view;
+	glm::mat4 *projection = &scene.get_render_scene().projection;
 
 	if (!entities_selected.empty()) {
 		// If we have entities selected, we want to take their average position and use that as the pivot point

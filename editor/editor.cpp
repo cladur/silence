@@ -103,24 +103,6 @@ void demo_entities_init(std::vector<Entity> &entities) {
 	entities.push_back(floor);
 }
 
-void handle_camera(Camera &cam, float dt) {
-	InputManager &input_manager = InputManager::get();
-	float forward = input_manager.get_axis("move_backward", "move_forward");
-	float right = input_manager.get_axis("move_left", "move_right");
-	float up = input_manager.get_axis("move_down", "move_up");
-
-	if (input_manager.is_action_pressed("move_faster")) {
-		dt *= 3.0f;
-	}
-
-	cam.move_forward(forward * dt);
-	cam.move_right(right * dt);
-	cam.move_up(up * dt);
-
-	glm::vec2 mouse_delta = input_manager.get_mouse_delta();
-	cam.rotate(mouse_delta.x * dt, mouse_delta.y * dt);
-}
-
 Editor *Editor::get() {
 	static Editor editor;
 	return &editor;
@@ -178,12 +160,23 @@ void Editor::startup() {
 	ecs_manager.add_component<Transform>(
 			entity, Transform{ glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f) });
 
-	ecs_manager.add_component<ModelInstance>(entity, ModelInstance("woodenBox/woodenBox.mdl"));
+	ecs_manager.add_component<ModelInstance>(entity, ModelInstance("woodenBox/woodenBox.mdl", MaterialType::PBR));
 
 	render_manager.load_model("cardboardBox/console.mdl");
 	render_manager.load_model("electricBox2/electricBox2.mdl");
 
 	scenes[0].entities.push_back(entity);
+
+	create_scene("Another Scene");
+
+	entity = ecs_manager.create_entity();
+
+	ecs_manager.add_component<Transform>(
+			entity, Transform{ glm::vec3(0.0f, 3.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f) });
+
+	ecs_manager.add_component<ModelInstance>(entity, ModelInstance("electricBox/electricBox.mdl", MaterialType::PBR));
+
+	scenes[1].entities.push_back(entity);
 }
 
 void Editor::shutdown() {
@@ -232,35 +225,23 @@ void Editor::update(float dt) {
 	DisplayManager::get().poll_events();
 
 	// Handle current gizmo operation
-	if (!controlling_camera) {
-		if (input_manager.is_action_just_pressed("translate_mode")) {
-			current_gizmo_operation = ImGuizmo::TRANSLATE;
-		} else if (input_manager.is_action_just_pressed("rotate_mode")) {
-			current_gizmo_operation = ImGuizmo::ROTATE;
-		} else if (input_manager.is_action_just_pressed("scale_mode")) {
-			current_gizmo_operation = ImGuizmo::SCALE;
-		}
-
-		if (input_manager.is_action_just_pressed("toggle_gizmo_mode")) {
-			if (current_gizmo_mode == ImGuizmo::WORLD) {
-				current_gizmo_mode = ImGuizmo::LOCAL;
-			} else {
-				current_gizmo_mode = ImGuizmo::WORLD;
-			}
-		}
-	}
-
-	// Handle camera movement
-	if ((viewport_hovered && input_manager.is_action_pressed("control_camera") || controlling_camera)) {
-		controlling_camera = true;
-		handle_camera(scenes[0].camera, dt);
-		display_manager.capture_mouse(true);
-	}
-
-	if (input_manager.is_action_just_released("control_camera")) {
-		controlling_camera = false;
-		display_manager.capture_mouse(false);
-	}
+	//	if (!controlling_camera) {
+	//		if (input_manager.is_action_just_pressed("translate_mode")) {
+	//			current_gizmo_operation = ImGuizmo::TRANSLATE;
+	//		} else if (input_manager.is_action_just_pressed("rotate_mode")) {
+	//			current_gizmo_operation = ImGuizmo::ROTATE;
+	//		} else if (input_manager.is_action_just_pressed("scale_mode")) {
+	//			current_gizmo_operation = ImGuizmo::SCALE;
+	//		}
+	//
+	//		if (input_manager.is_action_just_pressed("toggle_gizmo_mode")) {
+	//			if (current_gizmo_mode == ImGuizmo::WORLD) {
+	//				current_gizmo_mode = ImGuizmo::LOCAL;
+	//			} else {
+	//				current_gizmo_mode = ImGuizmo::WORLD;
+	//			}
+	//		}
+	//	}
 
 	if (show_cvar_editor) {
 		CVarSystem::get()->draw_imgui_editor();
@@ -280,7 +261,7 @@ void Editor::update(float dt) {
 	imgui_scene(scenes[current_scene]);
 
 	for (auto &scene : scenes) {
-		scene.update();
+		scene.update(dt);
 		imgui_viewport(scene);
 	}
 
@@ -305,7 +286,7 @@ void Editor::create_scene(const std::string &name) {
 
 	// Create RenderScene for scene
 	RenderManager &render_manager = RenderManager::get();
-	scene.render_scene = render_manager.create_render_scene();
+	scene.render_scene_idx = render_manager.create_render_scene();
 
 	scenes.push_back(scene);
 }

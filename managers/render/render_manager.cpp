@@ -74,11 +74,11 @@ void RenderManager::startup() {
 void RenderManager::shutdown() {
 }
 
-RenderScene *RenderManager::create_render_scene() {
+uint32_t RenderManager::create_render_scene() {
 	RenderScene render_scene;
 	render_scene.startup();
 	render_scenes.push_back(render_scene);
-	return &render_scenes.back();
+	return render_scenes.size() - 1;
 }
 
 void RenderManager::draw() {

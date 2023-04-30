@@ -31,7 +31,7 @@ public:
 
 	void startup();
 	void shutdown();
-	RenderScene *create_render_scene();
+	uint32_t create_render_scene();
 
 	void draw();
 	void draw_scene(RenderScene &render_scene);

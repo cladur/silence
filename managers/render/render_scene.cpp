@@ -19,6 +19,7 @@ void RenderScene::startup() {
 
 void RenderScene::draw() {
 	render_framebuffer.bind();
+	glViewport(0, 0, (int)render_extent.x, (int)render_extent.y);
 
 	// Draw grid
 	for (int i = -10; i <= 10; i++) {
@@ -55,7 +56,6 @@ void RenderScene::draw() {
 }
 
 void RenderScene::resize_framebuffer(uint32_t width, uint32_t height) {
-	glViewport(0, 0, (int)width, (int)height);
 	render_framebuffer.resize(width, height);
 
 	render_extent = glm::vec2(width, height);
