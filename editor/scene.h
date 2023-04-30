@@ -3,20 +3,27 @@
 
 #include "camera/camera.h"
 #include "ecs/ecs_manager.h"
+#include "imgui.h"
 #include "render/render_scene.h"
+
 
 struct Scene {
 	std::string name;
 	bool is_active = false;
+
+	bool viewport_hovered = false;
+	bool controlling_camera = false;
+	ImVec2 last_viewport_size = ImVec2(0, 0);
 
 	Camera camera = Camera(glm::vec3(0.0f, 0.0f, 3.0f));
 	bool is_prefab;
 
 	std::vector<Entity> entities;
 
-	RenderScene *render_scene;
+	uint32_t render_scene_idx;
 
-	void update();
+	void update(float dt);
+	RenderScene &get_render_scene();
 };
 
 #endif //SILENCE_SCENE_H

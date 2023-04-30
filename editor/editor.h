@@ -56,8 +56,6 @@ public:
 
 	// Viewport
 	bool controlling_camera = false;
-	bool viewport_hovered = false;
-	Camera camera;
 
 	// Selection
 	std::vector<Entity> entities_selected;
