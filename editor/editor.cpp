@@ -137,6 +137,7 @@ void Editor::startup() {
 	ECSManager &ecs_manager = ECSManager::get();
 
 	// Components
+	ecs_manager.register_component<Name>();
 	ecs_manager.register_component<Transform>();
 	ecs_manager.register_component<RigidBody>();
 	ecs_manager.register_component<Gravity>();

@@ -5,7 +5,7 @@ add_executable(${EDITOR_NAME}
         gui.cpp
         main.cpp
         scene.cpp scene.h
-        )
+        inspector_gui.cpp inspector_gui.h)
 
 # Define the link libraries
 target_link_libraries(${EDITOR_NAME} PRIVATE

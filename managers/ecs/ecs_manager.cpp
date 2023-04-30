@@ -123,3 +123,6 @@ void ECSManager::deserialize_entities_json(nlohmann::json &json, std::vector<Ent
 		}
 	}
 }
+Signature ECSManager::get_entity_signature(Entity entity) {
+	return entity_manager->get_signature(entity);
+}

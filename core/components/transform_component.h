@@ -6,9 +6,6 @@
 #include <glm/ext/matrix_transform.hpp>
 struct Transform {
 private:
-	glm::vec3 position{};
-	glm::vec3 euler_rot{};
-	glm::vec3 scale{};
 	bool changed;
 	bool changed_this_frame = false;
 
@@ -23,6 +20,9 @@ private:
 	}
 
 public:
+	glm::vec3 position{};
+	glm::vec3 euler_rot{};
+	glm::vec3 scale{};
 	void serialize_json(nlohmann::json &j) {
 		nlohmann::json obj;
 		obj["position"] = nlohmann::json::object();

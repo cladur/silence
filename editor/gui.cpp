@@ -1,5 +1,6 @@
 #include "ecs/ecs_manager.h"
 #include "editor.h"
+#include "inspector_gui.h"
 
 void Editor::imgui_menu_bar() {
 	ImGui::BeginMainMenuBar();
@@ -38,40 +39,21 @@ void Editor::imgui_menu_bar() {
 void Editor::imgui_inspector() {
 	ECSManager &ecs_manager = ECSManager::get();
 	RenderManager &render_manager = RenderManager::get();
+	Inspector inspector = Inspector();
 
 	ImGui::Begin("Inspector");
 
+	for (auto &entity : scenes[0].entities) {
+		if (ImGui::Selectable(fmt::format("Entity {}", entity).c_str())) {
+			entities_selected.push_back(entity);
+		}
+	}
+
 	if (!entities_selected.empty()) {
 		Entity active_entity = entities_selected.back();
-		// List all components of entity
-		if (ecs_manager.has_component<Name>(active_entity)) {
-			Name &name = ecs_manager.get_component<Name>(active_entity);
-			ImGui::Text("%s", name.name.c_str());
-		} else {
-			ImGui::Text("Entity %d", active_entity);
-		}
-		if (ecs_manager.has_component<Transform>(active_entity)) {
-			if (ImGui::TreeNodeEx("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
-				auto &transform = ecs_manager.get_component<Transform>(active_entity);
-				glm::vec3 pos = transform.get_position();
-				glm::vec3 rot = transform.get_euler_rot();
-				glm::vec3 scale = transform.get_scale();
-				ImGui::Text("Pos: %.3f, %.3f, %.3f", pos.x, pos.y, pos.z);
-				ImGui::Text("Rot: %.3f, %.3f, %.3f", rot.x, rot.y, rot.z);
-				ImGui::Text("Scale: %.3f, %.3f, %.3f", scale.x, scale.y, scale.z);
-
-				ImGui::TreePop();
-			}
-		}
-		if (ecs_manager.has_component<ModelInstance>(active_entity)) {
-			if (ImGui::TreeNodeEx("ModelInstance", ImGuiTreeNodeFlags_DefaultOpen)) {
-				auto &model_instance = ecs_manager.get_component<ModelInstance>(active_entity);
-				ImGui::Text("Model: %s", render_manager.get_model(model_instance.model_handle).name.c_str());
-				ImGui::Text("Material: %s", magic_enum::enum_name(model_instance.material_type).data());
-
-				ImGui::TreePop();
-			}
-		}
+		Transform &transform = ecs_manager.get_component<Transform>(active_entity);
+		SPDLOG_INFO("{}", transform.position.x);
+		inspector.show_components(active_entity);
 	} else {
 		ImGui::Text("No entity selected");
 	}
