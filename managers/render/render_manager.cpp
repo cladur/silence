@@ -128,10 +128,6 @@ Handle<Model> RenderManager::load_model(const char *path) {
 	handle.id = models.size() - 1;
 
 	name_to_model[path] = handle;
-	SPDLOG_WARN("Loaded model {}", path);
-	for (auto name : name_to_model) {
-		SPDLOG_WARN("Model: {} Id: {}", name.first, name.second.id);
-	}
 	return handle;
 }
 
@@ -154,10 +150,6 @@ Handle<Model> RenderManager::get_model_handle(std::string name) {
 	bool found_asset_path = name.find(ASSET_PATH) != std::string::npos;
 	if (found_asset_path) {
 		name = remove_asset_path(name);
-	}
-	SPDLOG_INFO("Looking for model {}", name);
-	for (auto name_to_model : name_to_model) {
-		SPDLOG_INFO("Model: {} Id: {}", name_to_model.first, name_to_model.second.id);
 	}
 	return name_to_model[name];
 }

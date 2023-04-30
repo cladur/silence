@@ -158,8 +158,6 @@ void Editor::imgui_viewport(Scene &scene) {
 		scene.last_viewport_size = viewport_size;
 	}
 
-	SPDLOG_INFO("SCENE {} VIEWPORT_SIZE {} {}", scene.name, viewport_size.x, viewport_size.y);
-
 	uint32_t render_image = scene.get_render_scene().render_framebuffer.get_texture_id();
 	ImGui::Image((void *)(intptr_t)render_image, viewport_size, ImVec2(0, 1), ImVec2(1, 0));
 

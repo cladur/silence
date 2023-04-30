@@ -252,6 +252,8 @@ void Editor::update(float dt) {
 	}
 
 	// GUI
+	ImGuiIO &io = ImGui::GetIO();
+	io.ConfigFlags |= ImGuiTreeNodeFlags_SpanAvailWidth;
 	ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
 
 	imgui_menu_bar();
