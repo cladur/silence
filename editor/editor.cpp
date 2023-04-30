@@ -273,7 +273,7 @@ void Editor::update(float dt) {
 	imgui_resources();
 	imgui_inspector();
 	imgui_settings();
-	// imgui_scene();
+	imgui_scene(scenes[current_scene]);
 
 	for (auto &scene : scenes) {
 		scene.update();

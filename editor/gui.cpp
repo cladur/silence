@@ -51,8 +51,7 @@ void Editor::imgui_inspector() {
 
 	if (!entities_selected.empty()) {
 		Entity active_entity = entities_selected.back();
-		Transform &transform = ecs_manager.get_component<Transform>(active_entity);
-		SPDLOG_INFO("{}", transform.position.x);
+		auto &transform = ecs_manager.get_component<Transform>(active_entity);
 		inspector.show_components(active_entity);
 	} else {
 		ImGui::Text("No entity selected");
@@ -63,56 +62,58 @@ void Editor::imgui_inspector() {
 
 void Editor::imgui_scene(Scene &scene) {
 	ImGui::Begin("Scene");
+	ECSManager &ecs_manager = ECSManager::get();
+	InputManager &input_manager = InputManager::get();
 
-	// for (auto &entity : entities) {
-	// 	std::string entity_name = std::to_string(entity);
-	// 	if (ecs_manager.has_component<Name>(entity)) {
-	// 		entity_name = ecs_manager.get_component<Name>(entity).name;
-	// 	}
+	for (auto &entity : scene.entities) {
+		std::string entity_name = std::to_string(entity);
+		if (ecs_manager.has_component<Name>(entity)) {
+			entity_name = ecs_manager.get_component<Name>(entity).name;
+		}
 
-	// 	static ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick |
-	// 			ImGuiTreeNodeFlags_SpanAvailWidth;
+		static ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick |
+				ImGuiTreeNodeFlags_SpanAvailWidth;
 
-	// 	ImGuiTreeNodeFlags node_flags = base_flags;
+		ImGuiTreeNodeFlags node_flags = base_flags;
 
-	// 	const bool is_selected =
-	// 			(std::find(entities_selected.begin(), entities_selected.end(), entity) != entities_selected.end());
+		const bool is_selected =
+				(std::find(entities_selected.begin(), entities_selected.end(), entity) != entities_selected.end());
 
-	// 	if (is_selected) {
-	// 		node_flags |= ImGuiTreeNodeFlags_Selected;
-	// 	}
+		if (is_selected) {
+			node_flags |= ImGuiTreeNodeFlags_Selected;
+		}
 
-	// 	bool node_open = ImGui::TreeNodeEx(entity_name.c_str(), node_flags);
+		bool node_open = ImGui::TreeNodeEx(entity_name.c_str(), node_flags);
 
-	// 	if (ImGui::IsItemClicked()) {
-	// 		if (input_manager.is_action_pressed("select_multiple")) {
-	// 			if (is_selected) {
-	// 				entities_selected.erase(std::remove(entities_selected.begin(), entities_selected.end(), entity),
-	// 						entities_selected.end());
-	// 			} else {
-	// 				entities_selected.push_back(entity);
-	// 			}
-	// 		} else if (input_manager.is_action_pressed("select_rows") && last_entity_selected != 0) {
-	// 			// Select all entities between last_entity_selected and entity
-	// 			entities_selected.clear();
-	// 			uint32_t min = std::min(last_entity_selected, entity);
-	// 			uint32_t max = std::max(last_entity_selected, entity);
-	// 			for (uint32_t i = min; i <= max; i++) {
-	// 				entities_selected.push_back(i);
-	// 			}
-	// 		} else {
-	// 			entities_selected.clear();
-	// 			entities_selected.push_back(entity);
-	// 		}
-	// 		last_entity_selected = entity;
-	// 	}
+		if (ImGui::IsItemClicked()) {
+			if (input_manager.is_action_pressed("select_multiple")) {
+				if (is_selected) {
+					entities_selected.erase(std::remove(entities_selected.begin(), entities_selected.end(), entity),
+							entities_selected.end());
+				} else {
+					entities_selected.push_back(entity);
+				}
+			} else if (input_manager.is_action_pressed("select_rows") && last_entity_selected != 0) {
+				// Select all entities between last_entity_selected and entity
+				entities_selected.clear();
+				uint32_t min = std::min(last_entity_selected, entity);
+				uint32_t max = std::max(last_entity_selected, entity);
+				for (uint32_t i = min; i <= max; i++) {
+					entities_selected.push_back(i);
+				}
+			} else {
+				entities_selected.clear();
+				entities_selected.push_back(entity);
+			}
+			last_entity_selected = entity;
+		}
 
-	// 	if (node_open) {
-	// 		ImGui::Text("TODO: Show entity children?");
+		if (node_open) {
+			ImGui::Text("TODO: Show entity children?");
 
-	// 		ImGui::TreePop();
-	// 	}
-	// }
+			ImGui::TreePop();
+		}
+	}
 
 	ImGui::End();
 }

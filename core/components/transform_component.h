@@ -93,7 +93,7 @@ public:
 	}
 
 	void set_changed(bool changed) {
-		changed = changed;
+		this->changed = changed;
 	}
 
 	void set_position(glm::vec3 new_position) {

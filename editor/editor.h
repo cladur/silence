@@ -74,6 +74,7 @@ public:
 
 	// Scenes
 	std::vector<Scene> scenes;
+	int current_scene = 0;
 
 	static Editor *get();
 	void startup();
