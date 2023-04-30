@@ -248,7 +248,7 @@ void Editor::update(float dt) {
 	// Handle camera movement
 	if ((viewport_hovered && input_manager.is_action_pressed("control_camera") || controlling_camera)) {
 		controlling_camera = true;
-		handle_camera(camera, dt);
+		handle_camera(scenes[0].camera, dt);
 		display_manager.capture_mouse(true);
 	}
 
@@ -275,7 +275,7 @@ void Editor::update(float dt) {
 	// imgui_scene();
 
 	for (auto &scene : scenes) {
-		// scene.update();
+		scene.update();
 		imgui_viewport(scene);
 	}
 

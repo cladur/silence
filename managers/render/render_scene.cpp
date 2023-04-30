@@ -40,7 +40,7 @@ void RenderScene::draw() {
 	unlit_pass.draw(*this);
 	pbr_pass.draw(*this);
 
-	if (draw_skybox) {
+	if (true) {
 		glDepthFunc(GL_LEQUAL);
 		skybox_pass.draw(*this);
 		glDepthFunc(GL_LESS);
@@ -68,7 +68,7 @@ void RenderScene::queue_draw(ModelInstance *model_instance, Transform *transform
 
 	switch (model_instance->material_type) {
 		case MaterialType::Default: {
-			default_pass->draw_commands.push_back(draw_command);
+			unlit_pass.draw_commands.push_back(draw_command);
 			break;
 		}
 		case MaterialType::Unlit: {
