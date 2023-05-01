@@ -281,11 +281,24 @@ void Editor::imgui_viewport(Scene &scene) {
 		// } else {
 		auto &transform = ecs_manager.get_component<Transform>(scene.entities_selected[0]);
 		temp_matrix = transform.get_global_model_matrix();
-		// float snap[3] = { 1.0f, 1.0f, 1.0f };
 		// }
 
+		float *snap = nullptr;
+		static float snap_values[3] = { 0.0f, 0.0f, 0.0f };
+
+		if (io.KeyCtrl || use_snapping) {
+			if (current_gizmo_operation == ImGuizmo::ROTATE) {
+				snap_values[0] = snap_values[1] = snap_values[2] = rotation_snap;
+			} else if (current_gizmo_operation == ImGuizmo::TRANSLATE) {
+				snap_values[0] = snap_values[1] = snap_values[2] = translation_snap;
+			} else if (current_gizmo_operation == ImGuizmo::SCALE) {
+				snap_values[0] = snap_values[1] = snap_values[2] = scale_snap * 0.01f;
+			}
+			snap = snap_values;
+		}
+
 		if (ImGuizmo::Manipulate(glm::value_ptr(*view), glm::value_ptr(*projection), current_gizmo_operation,
-					current_gizmo_mode, glm::value_ptr(temp_matrix), nullptr, nullptr)) {
+					current_gizmo_mode, glm::value_ptr(temp_matrix), nullptr, snap)) {
 			// Gizmo handles our final world transform, but we need to update our local transform (pos, orient,
 			// scale) In order to do that, we extract the local transform from the world transform, by
 			// multiplying by the inverse of the parent's world transform From there, we can decompose the local
@@ -361,6 +374,32 @@ void Editor::imgui_viewport(Scene &scene) {
 			current_gizmo_mode = ImGuizmo::WORLD;
 		}
 	}
+	ImGui::SameLine();
+
+	// SNAPPING
+	if (use_snapping) {
+		ImGui::PushStyleColor(ImGuiCol_Button, active_color);
+		push_count++;
+	}
+	if (ImGui::Button(ICON_MD_STRAIGHTEN)) {
+		use_snapping = !use_snapping;
+	}
+	ImGui::PopStyleColor(push_count);
+	push_count = 0;
+	ImGui::SameLine();
+
+	if (ImGui::Button(ICON_MD_TUNE)) {
+		ImGui::OpenPopup("Gizmo Settings");
+	}
+
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 8));
+	if (ImGui::BeginPopup("Gizmo Settings")) {
+		ImGui::InputFloat("Translation", &translation_snap, 0.1f);
+		ImGui::InputFloat("Rotation", &rotation_snap, 0.1f);
+		ImGui::InputFloat("Scale (%)", &scale_snap, 0.1f);
+		ImGui::EndPopup();
+	}
+	ImGui::PopStyleVar();
 
 	ImGui::End();
 

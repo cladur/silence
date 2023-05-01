@@ -49,6 +49,8 @@ void default_mappings() {
 	input_manager.add_key_to_action("scale_mode", InputKey::R);
 	input_manager.add_action("toggle_gizmo_mode");
 	input_manager.add_key_to_action("toggle_gizmo_mode", InputKey::T);
+	input_manager.add_action("toggle_snapping");
+	input_manager.add_key_to_action("toggle_snapping", InputKey::Y);
 
 	input_manager.add_action("delete");
 	input_manager.add_key_to_action("delete", InputKey::BACKSPACE);
@@ -361,6 +363,10 @@ void Editor::update(float dt) {
 			} else {
 				current_gizmo_mode = ImGuizmo::WORLD;
 			}
+		}
+
+		if (input_manager.is_action_just_pressed("toggle_snapping")) {
+			use_snapping = !use_snapping;
 		}
 	}
 

@@ -61,6 +61,10 @@ public:
 	// Gizmos
 	ImGuizmo::OPERATION current_gizmo_operation = ImGuizmo::TRANSLATE;
 	ImGuizmo::MODE current_gizmo_mode = ImGuizmo::WORLD;
+	bool use_snapping = false;
+	float translation_snap = 1.0f;
+	float rotation_snap = 15.0f;
+	float scale_snap = 10.0f;
 
 	// Misc
 	ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoCollapse;
