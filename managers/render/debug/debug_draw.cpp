@@ -42,9 +42,8 @@ void DebugDraw::draw() {
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(DebugVertex), &vertices[0]);
 
-	RenderManager &render_manager = RenderManager::get();
-	// shader.set_mat4("projection", render_manager.projection);
-	// shader.set_mat4("view", render_manager.view);
+	shader.set_mat4("projection", projection);
+	shader.set_mat4("view", view);
 
 	glBindVertexArray(vao);
 	glDrawArrays(GL_LINES, 0, vertices.size());
@@ -53,17 +52,13 @@ void DebugDraw::draw() {
 	vertices.clear();
 }
 
-namespace debug_draw {
-
-void draw_line(const glm::vec3 &from, const glm::vec3 &to, const glm::vec3 &color) {
-	RenderManager &render_manager = RenderManager::get();
-
-	// render_manager.debug_draw.vertices.push_back({ from, color });
-	// render_manager.debug_draw.vertices.push_back({ to, color });
+void DebugDraw::draw_line(const glm::vec3 &from, const glm::vec3 &to, const glm::vec3 &color) {
+	vertices.push_back({ from, color });
+	vertices.push_back({ to, color });
 }
 
 // Draw a box with center at "center" and scale "scale".
-void draw_box(const glm::vec3 &center, const glm::vec3 &scale, const glm::vec3 &color) {
+void DebugDraw::draw_box(const glm::vec3 &center, const glm::vec3 &scale, const glm::vec3 &color) {
 	// Generate a box mesh, using draw_line to draw the lines
 	glm::vec3 vertices[8] = { glm::vec3(
 									  center.x - scale.x / 2.0f, center.y - scale.y / 2.0f, center.z - scale.z / 2.0f),
@@ -90,7 +85,7 @@ void draw_box(const glm::vec3 &center, const glm::vec3 &scale, const glm::vec3 &
 }
 
 // Draw a sphere with center at "center" and radius "radius".
-void draw_sphere(const glm::vec3 &center, float radius, const glm::vec3 &color) {
+void DebugDraw::draw_sphere(const glm::vec3 &center, float radius, const glm::vec3 &color) {
 	// Generate a sphere mesh, using draw_line to draw the lines
 	const int num_segments = 8; // number of horizontal segments
 	const int num_rings = 4; // number of vertical rings
@@ -123,5 +118,3 @@ void draw_sphere(const glm::vec3 &center, float radius, const glm::vec3 &color) 
 		}
 	}
 }
-
-}; //namespace debug_draw

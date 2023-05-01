@@ -18,13 +18,14 @@ struct Scene {
 	std::vector<Entity> entities_selected;
 	Entity last_entity_selected = 0;
 
-	Camera camera = Camera(glm::vec3(0.0f, 0.0f, 3.0f));
+	Camera camera;
 	bool is_prefab;
 
 	std::vector<Entity> entities;
 
 	uint32_t render_scene_idx;
 
+	Scene();
 	void update(float dt);
 	RenderScene &get_render_scene();
 };

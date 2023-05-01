@@ -18,17 +18,21 @@ void RenderScene::startup() {
 }
 
 void RenderScene::draw() {
+	text_draw.render_extent = render_extent;
+	debug_draw.projection = projection;
+	debug_draw.view = view;
+
 	render_framebuffer.bind();
 	glViewport(0, 0, (int)render_extent.x, (int)render_extent.y);
 
 	// Draw grid
 	for (int i = -10; i <= 10; i++) {
-		debug_draw::draw_line(glm::vec3(i, 0, -10), glm::vec3(i, 0, 10), glm::vec4(0.5, 0.5, 0.5, 1));
-		debug_draw::draw_line(glm::vec3(-10, 0, i), glm::vec3(10, 0, i), glm::vec4(0.5, 0.5, 0.5, 1));
+		debug_draw.draw_line(glm::vec3(i, 0, -10), glm::vec3(i, 0, 10), glm::vec4(0.5, 0.5, 0.5, 1));
+		debug_draw.draw_line(glm::vec3(-10, 0, i), glm::vec3(10, 0, i), glm::vec4(0.5, 0.5, 0.5, 1));
 	}
 
 	// Clear the screen
-	glad_glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+	glad_glClearColor(0.275f, 0.275f, 0.275f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	projection = glm::perspective(glm::radians(70.0f), render_extent.x / render_extent.y, 0.1f, 5000.0f);
@@ -41,18 +45,18 @@ void RenderScene::draw() {
 	unlit_pass.draw(*this);
 	pbr_pass.draw(*this);
 
-	if (true) {
+	if (draw_skybox) {
 		glDepthFunc(GL_LEQUAL);
 		skybox_pass.draw(*this);
 		glDepthFunc(GL_LESS);
 	}
 
+	debug_draw.draw();
+
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	text_draw.draw();
 	glDisable(GL_BLEND);
-
-	debug_draw.draw();
 }
 
 void RenderScene::resize_framebuffer(uint32_t width, uint32_t height) {

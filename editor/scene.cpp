@@ -24,12 +24,31 @@ void handle_camera(Camera &cam, float dt) {
 	cam.rotate(mouse_delta.x * dt, mouse_delta.y * dt);
 }
 
+Scene::Scene() {
+	camera = Camera(glm::vec3(-4.0f, 2.6f, -4.0f));
+	camera.yaw = 45.0f;
+	camera.pitch = -20.0f;
+	camera.update_camera_vectors();
+}
+
 void Scene::update(float dt) {
 	ECSManager &ecs_manager = ECSManager::get();
 	InputManager &input_manager = InputManager::get();
 	DisplayManager &display_manager = DisplayManager::get();
 
+	Editor::get()->viewport_hovered |= viewport_hovered;
+
 	get_render_scene().camera = camera;
+
+	get_render_scene().debug_draw.draw_line(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(10.0f, 0.0f, 0.0f));
+	get_render_scene().debug_draw.draw_line(glm::vec3(0.0f, 5.0f, 0.0f), glm::vec3(10.0f, 0.0f, 0.0f));
+
+	get_render_scene().debug_draw.draw_line(
+			glm::vec3(0.0f, 5.0f, 10.0f), glm::vec3(10.0f, 0.0f, 2.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+
+	get_render_scene().debug_draw.draw_box(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+	get_render_scene().debug_draw.draw_box(
+			glm::vec3(0.0f, 5.0f, 0.0f), glm::vec3(10.0f, 1.0f, 1.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 
 	// Handle camera movement
 	if ((viewport_hovered && input_manager.is_action_pressed("control_camera") || controlling_camera)) {

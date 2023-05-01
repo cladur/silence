@@ -141,6 +141,8 @@ void Editor::imgui_scene(Scene &scene) {
 				}
 			}
 
+			// TODO: Add icons for different types of entities
+			// Or, a seperate column that displays all components of the entity (sort of like the visibility icon)
 			bool node_open = ImGui::TreeNodeEx(name.c_str(), node_flags);
 
 			if (window_focused) {
@@ -233,16 +235,8 @@ void Editor::imgui_viewport(Scene &scene) {
 	cursor.x += 4;
 	cursor.y += 2;
 	ImGui::SetCursorPos(cursor);
-	// ImGui::SetWindowFontScale(1.4f);
 
 	ImVec4 active_color = ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive);
-
-	ImRect clip_rect;
-	clip_rect.Min.x = ImGui::GetWindowContentRegionMin().x - 50;
-	clip_rect.Min.y = ImGui::GetWindowContentRegionMin().y - 50;
-	clip_rect.Max.x = ImGui::GetWindowContentRegionMax().x + 50;
-	clip_rect.Max.y = ImGui::GetWindowContentRegionMax().y + 50;
-	ImGui::PushClipRect(clip_rect.Min, clip_rect.Max, false);
 
 	if (ImGui::Button(ICON_MD_ADS_CLICK)) {
 	}
@@ -296,8 +290,6 @@ void Editor::imgui_viewport(Scene &scene) {
 			current_gizmo_mode = ImGuizmo::WORLD;
 		}
 	}
-
-	ImGui::PopClipRect();
 
 	// Get viewport size
 	ImVec2 viewport_size = ImGui::GetContentRegionAvail();

@@ -35,7 +35,6 @@ public:
 	void move_up(float dt);
 	void rotate(float x_offset, float y_offset);
 
-private:
 	void update_camera_vectors();
 };
 

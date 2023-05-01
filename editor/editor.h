@@ -56,6 +56,7 @@ public:
 
 	// Viewport
 	bool controlling_camera = false;
+	bool viewport_hovered = false;
 
 	// Gizmos
 	ImGuizmo::OPERATION current_gizmo_operation = ImGuizmo::TRANSLATE;

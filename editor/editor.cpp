@@ -346,7 +346,7 @@ void Editor::update(float dt) {
 	DisplayManager::get().poll_events();
 
 	// Handle current gizmo operation
-	if (!controlling_camera) {
+	if (!controlling_camera && viewport_hovered) {
 		if (input_manager.is_action_just_pressed("translate_mode")) {
 			current_gizmo_operation = ImGuizmo::TRANSLATE;
 		} else if (input_manager.is_action_just_pressed("rotate_mode")) {
@@ -382,20 +382,13 @@ void Editor::update(float dt) {
 	imgui_inspector(scenes[active_scene]);
 	imgui_scene(scenes[active_scene]);
 
+	viewport_hovered = false;
 	for (auto &scene : scenes) {
 		if (scene.is_visible) {
 			scene.update(dt);
 		}
 		imgui_viewport(scene);
 	}
-
-	debug_draw::draw_line(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(10.0f, 0.0f, 0.0f));
-	debug_draw::draw_line(glm::vec3(0.0f, 5.0f, 0.0f), glm::vec3(10.0f, 0.0f, 0.0f));
-
-	debug_draw::draw_line(glm::vec3(0.0f, 5.0f, 10.0f), glm::vec3(10.0f, 0.0f, 2.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-
-	debug_draw::draw_box(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-	debug_draw::draw_box(glm::vec3(0.0f, 5.0f, 0.0f), glm::vec3(10.0f, 1.0f, 1.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 
 	parent_system->update();
 	render_system->update();

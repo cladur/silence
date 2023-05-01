@@ -1,6 +1,5 @@
 #include "text_draw.h"
 
-#include "display/display_manager.h"
 #include "render/render_manager.h"
 
 const uint32_t MAX_CHARACTERS = 1000;
@@ -73,24 +72,21 @@ void TextDraw::draw() {
 	indices.clear();
 }
 
-namespace text_draw {
-
-void draw_text_2d(const std::string &text, const glm::vec2 &position, const glm::vec3 &color, float scale, Font *font) {
+void TextDraw::draw_text_2d(
+		const std::string &text, const glm::vec2 &position, const glm::vec3 &color, float scale, Font *font) {
 	draw_text(text, true, glm::vec3(position, 0.0f), color, scale, font);
 }
 
-void draw_text_3d(const std::string &text, const glm::vec3 &position, const glm::vec3 &color, float scale, Font *font) {
+void TextDraw::draw_text_3d(
+		const std::string &text, const glm::vec3 &position, const glm::vec3 &color, float scale, Font *font) {
 	draw_text(text, false, position, color, scale, font);
 }
 
-void draw_text(const std::string &text, bool is_screen_space, const glm::vec3 &position, const glm::vec3 &color,
-		float scale, Font *font) {
+void TextDraw::draw_text(const std::string &text, bool is_screen_space, const glm::vec3 &position,
+		const glm::vec3 &color, float scale, Font *font) {
 	if (font == nullptr) {
 		font = &FontManager::get().fonts.begin()->second;
 	}
-
-	RenderManager &render_manager = RenderManager::get();
-	// TextDraw &text_draw = render_manager.text_draw;
 
 	// We're scaling the text by arbitrary amount
 	// Correct way to do it would be to calculate it based on the font size which we loaded using FreeType
@@ -102,8 +98,7 @@ void draw_text(const std::string &text, bool is_screen_space, const glm::vec3 &p
 	float aspect = 1.0;
 
 	if (is_screen_space) {
-		glm::vec2 window_size = DisplayManager::get().get_framebuffer_size();
-		aspect = window_size.y / window_size.x;
+		aspect = render_extent.y / render_extent.x;
 		// We're scaling down the font even more if it's in screenspace coords, cause they are just [-1; 1]
 		scale *= 0.1f;
 	}
@@ -129,23 +124,21 @@ void draw_text(const std::string &text, bool is_screen_space, const glm::vec3 &p
 		int ss = is_screen_space ? 1 : 0;
 
 		// //update the vertices
-		// text_draw.vertices.push_back({ { xpos, ypos + h, zpos }, color, { uv_x_min, uv_y_max }, ss }); // 0
-		// text_draw.vertices.push_back({ { xpos, ypos, zpos }, color, { uv_x_min, uv_y_min }, ss }); // 1
-		// text_draw.vertices.push_back({ { xpos + w, ypos, zpos }, color, { uv_x_max, uv_y_min }, ss }); // 2
-		// text_draw.vertices.push_back({ { xpos + w, ypos + h, zpos }, color, { uv_x_max, uv_y_max }, ss }); // 3
+		vertices.push_back({ { xpos, ypos + h, zpos }, color, { uv_x_min, uv_y_max }, ss }); // 0
+		vertices.push_back({ { xpos, ypos, zpos }, color, { uv_x_min, uv_y_min }, ss }); // 1
+		vertices.push_back({ { xpos + w, ypos, zpos }, color, { uv_x_max, uv_y_min }, ss }); // 2
+		vertices.push_back({ { xpos + w, ypos + h, zpos }, color, { uv_x_max, uv_y_max }, ss }); // 3
 
 		// //update the indices
-		// uint32_t index = text_draw.vertices.size() - 4;
-		// text_draw.indices.push_back(index + 0);
-		// text_draw.indices.push_back(index + 1);
-		// text_draw.indices.push_back(index + 2);
-		// text_draw.indices.push_back(index + 0);
-		// text_draw.indices.push_back(index + 2);
-		// text_draw.indices.push_back(index + 3);
+		uint32_t index = vertices.size() - 4;
+		indices.push_back(index + 0);
+		indices.push_back(index + 1);
+		indices.push_back(index + 2);
+		indices.push_back(index + 0);
+		indices.push_back(index + 2);
+		indices.push_back(index + 3);
 
 		// now advance cursors for next glyph (note that advance is number of 1/64 pixels)
 		x += (character.advance >> 6) * scale * aspect; // bitshift by 6 to get value in pixels (2^6 = 64)
 	}
 }
-
-} //namespace text_draw
