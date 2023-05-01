@@ -92,6 +92,19 @@ bool ECSManager::has_child(Entity parent, Entity child) {
 	}
 	return false;
 }
+
+bool ECSManager::reparent(Entity new_parent, Entity child) {
+	remove_child(get_component<Parent>(child).parent, child);
+
+	if (has_component<Transform>(new_parent) && has_component<Transform>(child)) {
+		auto &child_transform = get_component<Transform>(child);
+		auto &parent_transform = get_component<Transform>(new_parent);
+		child_transform.reparent_to(parent_transform);
+	}
+
+	return add_child(new_parent, child);
+}
+
 void ECSManager::serialize_entity_json(nlohmann::json &json, Entity entity) {
 	json["entity"] = entity;
 	json["signature"] = entity_manager->get_signature(entity).to_string();

@@ -156,6 +156,15 @@ public:
 
 		changed = false;
 	}
+
+	void reparent_to(Transform &new_parent) {
+		auto relative_affine = glm::inverse(new_parent.get_global_model_matrix()) * get_global_model_matrix();
+		position = glm::vec3(relative_affine[3]);
+		orientation = glm::quat(relative_affine);
+		scale = glm::vec3(
+				glm::length(relative_affine[0]), glm::length(relative_affine[1]), glm::length(relative_affine[2]));
+		changed = true;
+	}
 };
 
 #endif //SILENCE_TRANSFORM_H

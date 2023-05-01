@@ -84,6 +84,7 @@ public:
 	bool add_child(Entity parent, Entity child);
 	bool remove_child(Entity parent, Entity child);
 	bool has_child(Entity parent, Entity child);
+	bool reparent(Entity new_parent, Entity child);
 	void serialize_entity_json(nlohmann::json &json, Entity entity);
 	void deserialize_entities_json(nlohmann::json &json, std::vector<Entity> &entities);
 
