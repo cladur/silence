@@ -26,6 +26,7 @@ private:
 	void show_collidersphere(Entity entity);
 	void show_collideraabb(Entity entity);
 	void show_colliderobb(Entity entity);
+	bool show_vec3(const char *label, glm::vec3 &vec3);
 
 public:
 	void show_components(Entity entity);
