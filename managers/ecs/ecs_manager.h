@@ -12,7 +12,10 @@ private:
 	std::unique_ptr<EntityManager> entity_manager;
 	std::unique_ptr<SystemManager> system_manager;
 
-	std::unordered_map<int, std::function<void(Entity entity)>> component_map;
+	// Maps with add/has component function calls that use id of component instead of object. Component has the same id
+	// as its index in the vector of component_names which are added when component is registered
+	std::unordered_map<int, std::function<void(Entity entity)>> add_component_map;
+	std::unordered_map<int, std::function<bool(Entity entity)>> has_component_map;
 
 	std::vector<std::string> component_names;
 
@@ -35,7 +38,8 @@ public:
 		int type_id = component_names.size();
 		component_names.emplace_back(type_name);
 
-		component_map[type_id] = [this](Entity entity) { add_component(entity, T{}); };
+		add_component_map[type_id] = [this](Entity entity) { add_component(entity, T{}); };
+		has_component_map[type_id] = [this](Entity entity) { return has_component<T>(entity); };
 	}
 
 	template <typename T> void add_component(Entity entity, T component) {
@@ -102,6 +106,7 @@ public:
 	void print_components();
 
 	void add_component(Entity entity, int component_id);
+	bool has_component(Entity entity, int component_id);
 
 	Signature get_entity_signature(Entity entity);
 };
