@@ -12,6 +12,8 @@ private:
 	std::unique_ptr<EntityManager> entity_manager;
 	std::unique_ptr<SystemManager> system_manager;
 
+	std::vector<std::string> component_names;
+
 public:
 	static ECSManager &get();
 	void startup();
@@ -24,6 +26,10 @@ public:
 	// Component methods
 	template <typename T> void register_component() {
 		component_manager->register_component<T>();
+		std::string type_name = typeid(T).name();
+		size_t pos = type_name.find(" ");
+		type_name = type_name.substr(pos + 1);
+		component_names.push_back(type_name);
 	}
 
 	template <typename T> void add_component(Entity entity, T component) {
@@ -87,6 +93,7 @@ public:
 	bool reparent(Entity new_parent, Entity child);
 	void serialize_entity_json(nlohmann::json &json, Entity entity);
 	void deserialize_entities_json(nlohmann::json &json, std::vector<Entity> &entities);
+	void print_components();
 
 	Signature get_entity_signature(Entity entity);
 };

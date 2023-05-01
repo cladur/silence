@@ -139,3 +139,9 @@ void ECSManager::deserialize_entities_json(nlohmann::json &json, std::vector<Ent
 Signature ECSManager::get_entity_signature(Entity entity) {
 	return entity_manager->get_signature(entity);
 }
+void ECSManager::print_components() {
+	int i = 0;
+	for (auto name : component_names) {
+		SPDLOG_INFO("ID: {}  Name: {}", i++, name);
+	}
+}
