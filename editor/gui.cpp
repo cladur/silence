@@ -2,6 +2,7 @@
 #include "editor.h"
 #include "inspector_gui.h"
 #include <imgui.h>
+#include <imgui_stdlib.h>
 
 void Editor::imgui_menu_bar() {
 	ImGui::BeginMainMenuBar();
@@ -46,6 +47,15 @@ void Editor::imgui_inspector(Scene &scene) {
 
 	if (scene.last_entity_selected > 0) {
 		Entity active_entity = scene.last_entity_selected;
+		if (ecs_manager.has_component<Name>(active_entity)) {
+			auto &name = ecs_manager.get_component<Name>(active_entity);
+			ImGui::SetNextItemWidth(-FLT_MIN);
+			ImGui::InputText("##", &name.name);
+		} else {
+			ImGui::Text("<Unnamed Entity %d>", active_entity);
+		}
+		ImGui::Spacing();
+		ImGui::Spacing();
 		inspector.show_components(active_entity);
 	} else {
 		ImGui::Text("No entity selected");

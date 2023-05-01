@@ -1,5 +1,7 @@
 #include "inspector_gui.h"
 #include <imgui.h>
+#include <imgui_stdlib.h>
+
 void Inspector::show_components(Entity entity) {
 	ECSManager &ecs_manager = ECSManager::get();
 	Signature signature = ecs_manager.get_entity_signature(entity);
@@ -55,6 +57,7 @@ void Inspector::show_component(Entity entity, int signature_index) {
 }
 void Inspector::show_name(Entity entity) {
 }
+
 void Inspector::show_transform(Entity entity) {
 	auto &transform = ecs_manager.get_component<Transform>(entity);
 	bool changed = false;
