@@ -221,7 +221,15 @@ void Editor::imgui_viewport(Scene &scene) {
 	ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0);
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
 
+	ImVec2 viewport_start = ImGui::GetCursorPos();
+
 	ImGui::Begin(scene.name.c_str());
+	auto viewport_min_region = ImGui::GetWindowContentRegionMin();
+	auto viewport_max_region = ImGui::GetWindowContentRegionMax();
+	auto viewport_offset = ImGui::GetWindowPos();
+	glm::vec2 viewport_bounds[2];
+	viewport_bounds[0] = { viewport_min_region.x + viewport_offset.x, viewport_min_region.y + viewport_offset.y };
+	viewport_bounds[1] = { viewport_max_region.x + viewport_offset.x, viewport_max_region.y + viewport_offset.y };
 
 	scene.viewport_hovered = ImGui::IsWindowHovered();
 	scene.is_visible = !ImGui::IsWindowCollapsed();
@@ -231,8 +239,6 @@ void Editor::imgui_viewport(Scene &scene) {
 		uint32_t our_scene_idx = get_scene_index(scene.name);
 		active_scene = our_scene_idx;
 	}
-
-	ImVec2 viewport_offset = ImGui::GetCursorPos();
 
 	// Get viewport size
 	ImVec2 viewport_size = ImGui::GetContentRegionAvail();
@@ -247,7 +253,10 @@ void Editor::imgui_viewport(Scene &scene) {
 
 	// Draw gizmo
 	ImGuiIO &io = ImGui::GetIO();
-	ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, viewport_size.x, viewport_size.y);
+	// ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, viewport_size.x, viewport_size.y);
+	ImGuizmo::SetRect(viewport_bounds[0].x, viewport_bounds[0].y, viewport_bounds[1].x - viewport_bounds[0].x,
+			viewport_bounds[1].y - viewport_bounds[0].y);
+
 	ImGuizmo::SetDrawlist();
 
 	glm::mat4 *view = &scene.get_render_scene().view;
@@ -294,9 +303,9 @@ void Editor::imgui_viewport(Scene &scene) {
 		}
 	}
 
-	viewport_offset.x += 4;
-	viewport_offset.y += 2;
-	ImGui::SetCursorPos(viewport_offset);
+	viewport_start.x += 4;
+	viewport_start.y += 2;
+	ImGui::SetCursorPos(viewport_start);
 
 	ImVec4 active_color = ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive);
 
