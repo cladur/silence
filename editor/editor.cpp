@@ -145,7 +145,7 @@ void bootleg_unity_theme() {
 	colors[ImGuiCol_ResizeGripActive] = ImVec4(0.40f, 0.44f, 0.47f, 1.00f);
 	colors[ImGuiCol_Tab] = ImVec4(0.16f, 0.16f, 0.16f, 0.52f);
 	colors[ImGuiCol_TabHovered] = ImVec4(0.19f, 0.19f, 0.19f, 1.00f);
-	colors[ImGuiCol_TabActive] = ImVec4(0.24f, 0.24f, 0.24f, 0.36f);
+	colors[ImGuiCol_TabActive] = ImVec4(0.24f, 0.24f, 0.24f, 1.00f);
 	colors[ImGuiCol_TabUnfocused] = ImVec4(0.16f, 0.16f, 0.16f, 0.52f);
 	colors[ImGuiCol_TabUnfocusedActive] = ImVec4(0.24f, 0.24f, 0.24f, 1.00f);
 	colors[ImGuiCol_DockingPreview] = ImVec4(0.16f, 0.16f, 0.16f, 1.00f);
@@ -290,12 +290,12 @@ void Editor::startup() {
 
 	scenes[1].entities.push_back(entity);
 
-	entity = ecs_manager.create_entity();
-
-	ecs_manager.add_component<Transform>(
-			entity, Transform{ glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f) });
-
-	scenes[1].entities.push_back(entity);
+	for (int i = 0; i < 10; i++) {
+		entity = ecs_manager.create_entity();
+		ecs_manager.add_component<Transform>(
+				entity, Transform{ glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f) });
+		scenes[1].entities.push_back(entity);
+	}
 
 	bootleg_unity_theme();
 }

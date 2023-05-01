@@ -70,17 +70,19 @@ void Editor::imgui_inspector(Scene &scene) {
 
 void Editor::imgui_scene(Scene &scene) {
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+	// ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
+	ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(0, 0));
 
 	ImGui::Begin("Scene");
 	ECSManager &ecs_manager = ECSManager::get();
 	InputManager &input_manager = InputManager::get();
 
-	static ImGuiTableFlags flags = ImGuiTableFlags_BordersV | ImGuiTableFlags_RowBg | ImGuiTableFlags_NoBordersInBody;
+	static ImGuiTableFlags flags = ImGuiTableFlags_NoBordersInBody;
 
 	if (ImGui::BeginTable("Scene", 2, flags)) {
-		ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_None);
-		ImGui::TableSetupColumn("##", ImGuiTableColumnFlags_WidthFixed, 20.0f);
-		ImGui::TableHeadersRow();
+		ImGui::TableSetupColumn("##", ImGuiTableColumnFlags_None);
+		ImGui::TableSetupColumn("##", ImGuiTableColumnFlags_WidthFixed, 15.0f);
+		// ImGui::TableHeadersRow();
 
 		for (auto &entity : scene.entities) {
 			ImGui::TableNextRow();
@@ -90,73 +92,105 @@ void Editor::imgui_scene(Scene &scene) {
 			if (ecs_manager.has_component<Name>(entity)) {
 				name = ecs_manager.get_component<Name>(entity).name;
 			}
+			static ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow |
+					ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanFullWidth;
 
-			if (ImGui::TreeNodeEx(name.c_str(), ImGuiTreeNodeFlags_SpanFullWidth)) {
-				ImGui::TreePop();
+			ImGuiTreeNodeFlags node_flags = base_flags;
+
+			bool is_selected = (std::find(scene.entities_selected.begin(), scene.entities_selected.end(), entity) !=
+					scene.entities_selected.end());
+
+			if (is_selected) {
+				node_flags |= ImGuiTreeNodeFlags_Selected;
+			}
+
+			bool is_leaf = true;
+			if (is_leaf) {
+				node_flags |= ImGuiTreeNodeFlags_Leaf;
+			}
+
+			bool window_focused = ImGui::IsWindowFocused();
+
+			if (window_focused) {
+				ImVec4 blue = ImVec4(43.0f / 255.0f, 93.0f / 255.0f, 134.0f / 255.0f, 1.0f);
+				if (is_selected) {
+					ImGui::PushStyleColor(ImGuiCol_HeaderHovered, blue);
+				}
+				ImGui::PushStyleColor(ImGuiCol_Header, blue);
+			} else {
+				if (is_selected) {
+					ImGui::PushStyleColor(
+							ImGuiCol_Header, ImVec4(77.0f / 255.0f, 77.0f / 255.0f, 77.0f / 255.0f, 1.0f));
+				}
+			}
+
+			bool node_open = ImGui::TreeNodeEx(name.c_str(), node_flags);
+
+			if (window_focused) {
+				if (is_selected) {
+					ImGui::PopStyleColor();
+				}
+				ImGui::PopStyleColor();
+			} else {
+				if (is_selected) {
+					ImGui::PopStyleColor();
+				}
+			}
+
+			if (ImGui::IsItemClicked()) {
+				if (input_manager.is_action_pressed("select_multiple")) {
+					if (is_selected) {
+						scene.entities_selected.erase(
+								std::remove(scene.entities_selected.begin(), scene.entities_selected.end(), entity),
+								scene.entities_selected.end());
+					} else {
+						scene.entities_selected.push_back(entity);
+					}
+				} else if (input_manager.is_action_pressed("select_rows") && scene.last_entity_selected != 0) {
+					// Select all entities between last_entity_selected and entity
+					scene.entities_selected.clear();
+					uint32_t min = std::min(scene.last_entity_selected, entity);
+					uint32_t max = std::max(scene.last_entity_selected, entity);
+					for (uint32_t i = min; i <= max; i++) {
+						scene.entities_selected.push_back(i);
+					}
+				} else {
+					scene.entities_selected.clear();
+					scene.entities_selected.push_back(entity);
+				}
+				scene.last_entity_selected = entity;
 			}
 
 			ImGui::TableNextColumn();
 			static bool visible = true;
-			ImGui::Checkbox("##", &visible);
+			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0, 0, 0, 0));
+			ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0, 0, 0, 0));
+			ImGui::PushStyleColor(ImGuiCol_BorderShadow, ImVec4(0, 0, 0, 0));
+
+			if (visible) {
+				if (ImGui::Button(ICON_MD_VISIBILITY, ImVec2(15, 15))) {
+					visible = false;
+				}
+			} else {
+				if (ImGui::Button(ICON_MD_VISIBILITY_OFF, ImVec2(15, 15))) {
+					visible = true;
+				}
+			}
+
+			if (node_open) {
+				ImGui::TreePop();
+			}
+
+			ImGui::PopStyleColor(4);
 		}
 
 		ImGui::EndTable();
 	}
 
-	// for (auto &entity : scene.entities) {
-	// 	std::string entity_name = std::to_string(entity);
-	// 	if (ecs_manager.has_component<Name>(entity)) {
-	// 		entity_name = ecs_manager.get_component<Name>(entity).name;
-	// 	}
-
-	// 	static ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick |
-	// 			ImGuiTreeNodeFlags_SpanAvailWidth;
-
-	// 	ImGuiTreeNodeFlags node_flags = base_flags;
-
-	// 	const bool is_selected = (std::find(scene.entities_selected.begin(), scene.entities_selected.end(), entity) !=
-	// 			scene.entities_selected.end());
-
-	// 	if (is_selected) {
-	// 		node_flags |= ImGuiTreeNodeFlags_Selected;
-	// 	}
-
-	// 	bool node_open = ImGui::TreeNodeEx(entity_name.c_str(), node_flags);
-
-	// 	if (ImGui::IsItemClicked()) {
-	// 		if (input_manager.is_action_pressed("select_multiple")) {
-	// 			if (is_selected) {
-	// 				scene.entities_selected.erase(
-	// 						std::remove(scene.entities_selected.begin(), scene.entities_selected.end(), entity),
-	// 						scene.entities_selected.end());
-	// 			} else {
-	// 				scene.entities_selected.push_back(entity);
-	// 			}
-	// 		} else if (input_manager.is_action_pressed("select_rows") && scene.last_entity_selected != 0) {
-	// 			// Select all entities between last_entity_selected and entity
-	// 			scene.entities_selected.clear();
-	// 			uint32_t min = std::min(scene.last_entity_selected, entity);
-	// 			uint32_t max = std::max(scene.last_entity_selected, entity);
-	// 			for (uint32_t i = min; i <= max; i++) {
-	// 				scene.entities_selected.push_back(i);
-	// 			}
-	// 		} else {
-	// 			scene.entities_selected.clear();
-	// 			scene.entities_selected.push_back(entity);
-	// 		}
-	// 		scene.last_entity_selected = entity;
-	// 	}
-
-	// 	if (node_open) {
-	// 		ImGui::Text("TODO: Show entity children?");
-
-	// 		ImGui::TreePop();
-	// 	}
-	// }
-
 	ImGui::End();
 
-	ImGui::PopStyleVar();
+	ImGui::PopStyleVar(2);
 }
 void Editor::imgui_viewport(Scene &scene) {
 	RenderManager &render_manager = RenderManager::get();
