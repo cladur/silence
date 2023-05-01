@@ -1,6 +1,7 @@
 #include "scene.h"
 #include "display/display_manager.h"
 #include "ecs/ecs_manager.h"
+#include "editor.h"
 #include "input/input_manager.h"
 #include "render/ecs/model_instance.h"
 #include "render/render_manager.h"
@@ -33,12 +34,14 @@ void Scene::update(float dt) {
 	// Handle camera movement
 	if ((viewport_hovered && input_manager.is_action_pressed("control_camera") || controlling_camera)) {
 		controlling_camera = true;
+		Editor::get()->controlling_camera = true;
 		handle_camera(camera, dt);
 		display_manager.capture_mouse(true);
 	}
 
 	if (input_manager.is_action_just_released("control_camera")) {
 		controlling_camera = false;
+		Editor::get()->controlling_camera = false;
 		display_manager.capture_mouse(false);
 	}
 

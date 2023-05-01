@@ -1,6 +1,6 @@
 #include "camera.h"
 
-AutoCVarFloat cvar_camera_speed("camera.speed", "Camera Speed", 25, CVarFlags::EditFloatDrag);
+AutoCVarFloat cvar_camera_speed("camera.speed", "Camera Speed", 10, CVarFlags::EditFloatDrag);
 AutoCVarFloat cvar_camera_sensitivity("camera.sensitivity", "Camera Sensitivity", 50, CVarFlags::EditFloatDrag);
 
 Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch) :
