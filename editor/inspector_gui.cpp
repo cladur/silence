@@ -78,17 +78,17 @@ void Inspector::show_transform(Entity entity) {
 		ImGui::TableSetColumnIndex(0);
 		ImGui::Text("Position");
 		ImGui::TableSetColumnIndex(1);
-		changed |= ImGui::DragFloat3("##", &transform.position.x, 0.1f);
+		changed |= ImGui::DragFloat3("##Position", &transform.position.x, 0.1f);
 		ImGui::TableNextRow();
 		ImGui::TableSetColumnIndex(0);
 		ImGui::Text("Rotation");
 		ImGui::TableSetColumnIndex(1);
-		changed |= ImGui::DragFloat3("##", &transform.euler_rot.x, 0.1f);
+		changed |= ImGui::DragFloat3("##Rotation", &transform.euler_rot.x, 0.1f);
 		ImGui::TableNextRow();
 		ImGui::TableSetColumnIndex(0);
 		ImGui::Text("Scale");
 		ImGui::TableSetColumnIndex(1);
-		changed |= ImGui::DragFloat3("##", &transform.scale.x, 0.1f);
+		changed |= ImGui::DragFloat3("##Scale", &transform.scale.x, 0.1f);
 
 		if (changed) {
 			transform.set_changed(true);
