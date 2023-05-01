@@ -350,12 +350,14 @@ void Editor::update(float dt) {
 
 	imgui_menu_bar();
 	imgui_resources();
-	imgui_inspector();
 	imgui_settings();
-	imgui_scene(scenes[current_scene]);
+	imgui_inspector(scenes[active_scene]);
+	imgui_scene(scenes[active_scene]);
 
 	for (auto &scene : scenes) {
-		scene.update(dt);
+		if (scene.is_visible) {
+			scene.update(dt);
+		}
 		imgui_viewport(scene);
 	}
 
@@ -383,4 +385,13 @@ void Editor::create_scene(const std::string &name) {
 	scene.render_scene_idx = render_manager.create_render_scene();
 
 	scenes.push_back(scene);
+}
+
+uint32_t Editor::get_scene_index(const std::string &name) {
+	for (int i = 0; i < scenes.size(); i++) {
+		if (scenes[i].name == name) {
+			return i;
+		}
+	}
+	return 0;
 }

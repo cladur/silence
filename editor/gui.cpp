@@ -37,7 +37,7 @@ void Editor::imgui_menu_bar() {
 	ImGui::EndMainMenuBar();
 }
 
-void Editor::imgui_inspector() {
+void Editor::imgui_inspector(Scene &scene) {
 	ECSManager &ecs_manager = ECSManager::get();
 	RenderManager &render_manager = RenderManager::get();
 	Inspector inspector = Inspector();
@@ -46,12 +46,12 @@ void Editor::imgui_inspector() {
 
 	for (auto &entity : scenes[0].entities) {
 		if (ImGui::Selectable(fmt::format("Entity {}", entity).c_str())) {
-			entities_selected.push_back(entity);
+			scene.entities_selected.push_back(entity);
 		}
 	}
 
-	if (!entities_selected.empty()) {
-		Entity active_entity = entities_selected.back();
+	if (!scene.entities_selected.empty()) {
+		Entity active_entity = scene.entities_selected.back();
 		auto &transform = ecs_manager.get_component<Transform>(active_entity);
 		inspector.show_components(active_entity);
 	} else {
@@ -77,8 +77,8 @@ void Editor::imgui_scene(Scene &scene) {
 
 		ImGuiTreeNodeFlags node_flags = base_flags;
 
-		const bool is_selected =
-				(std::find(entities_selected.begin(), entities_selected.end(), entity) != entities_selected.end());
+		const bool is_selected = (std::find(scene.entities_selected.begin(), scene.entities_selected.end(), entity) !=
+				scene.entities_selected.end());
 
 		if (is_selected) {
 			node_flags |= ImGuiTreeNodeFlags_Selected;
@@ -89,24 +89,25 @@ void Editor::imgui_scene(Scene &scene) {
 		if (ImGui::IsItemClicked()) {
 			if (input_manager.is_action_pressed("select_multiple")) {
 				if (is_selected) {
-					entities_selected.erase(std::remove(entities_selected.begin(), entities_selected.end(), entity),
-							entities_selected.end());
+					scene.entities_selected.erase(
+							std::remove(scene.entities_selected.begin(), scene.entities_selected.end(), entity),
+							scene.entities_selected.end());
 				} else {
-					entities_selected.push_back(entity);
+					scene.entities_selected.push_back(entity);
 				}
-			} else if (input_manager.is_action_pressed("select_rows") && last_entity_selected != 0) {
+			} else if (input_manager.is_action_pressed("select_rows") && scene.last_entity_selected != 0) {
 				// Select all entities between last_entity_selected and entity
-				entities_selected.clear();
-				uint32_t min = std::min(last_entity_selected, entity);
-				uint32_t max = std::max(last_entity_selected, entity);
+				scene.entities_selected.clear();
+				uint32_t min = std::min(scene.last_entity_selected, entity);
+				uint32_t max = std::max(scene.last_entity_selected, entity);
 				for (uint32_t i = min; i <= max; i++) {
-					entities_selected.push_back(i);
+					scene.entities_selected.push_back(i);
 				}
 			} else {
-				entities_selected.clear();
-				entities_selected.push_back(entity);
+				scene.entities_selected.clear();
+				scene.entities_selected.push_back(entity);
 			}
-			last_entity_selected = entity;
+			scene.last_entity_selected = entity;
 		}
 
 		if (node_open) {
@@ -127,6 +128,13 @@ void Editor::imgui_viewport(Scene &scene) {
 	ImGui::Begin(scene.name.c_str());
 
 	scene.viewport_hovered = ImGui::IsWindowHovered();
+	scene.is_visible = !ImGui::IsWindowCollapsed();
+
+	// If ImGui window is focused
+	if (ImGui::IsWindowFocused()) {
+		uint32_t our_scene_idx = get_scene_index(scene.name);
+		active_scene = our_scene_idx;
+	}
 
 	ImVec2 cursor = ImGui::GetCursorPos();
 	cursor.x += 4;
@@ -177,24 +185,24 @@ void Editor::imgui_viewport(Scene &scene) {
 	glm::mat4 *view = &scene.get_render_scene().view;
 	glm::mat4 *projection = &scene.get_render_scene().projection;
 
-	if (!entities_selected.empty()) {
+	if (!scene.entities_selected.empty()) {
 		// If we have entities selected, we want to take their average position and use that as the pivot point
 		// for the gizmo
 
 		glm::mat4 temp_matrix = glm::mat4(1.0f);
 
-		if (entities_selected.size() > 1) {
+		if (scene.entities_selected.size() > 1) {
 			auto average_position = glm::vec3(0.0f);
-			for (auto &entity : entities_selected) {
+			for (auto &entity : scene.entities_selected) {
 				if (ecs_manager.has_component<Transform>(entity)) {
 					auto &transform = ecs_manager.get_component<Transform>(entity);
 					average_position += transform.get_position();
 				}
 			}
 
-			temp_matrix = glm::translate(glm::mat4(1.0f), average_position / (float)entities_selected.size());
+			temp_matrix = glm::translate(glm::mat4(1.0f), average_position / (float)scene.entities_selected.size());
 		} else {
-			auto &transform = ecs_manager.get_component<Transform>(entities_selected[0]);
+			auto &transform = ecs_manager.get_component<Transform>(scene.entities_selected[0]);
 			temp_matrix = transform.get_global_model_matrix();
 		}
 

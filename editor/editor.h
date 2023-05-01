@@ -57,10 +57,6 @@ public:
 	// Viewport
 	bool controlling_camera = false;
 
-	// Selection
-	std::vector<Entity> entities_selected;
-	Entity last_entity_selected = 0;
-
 	// Gizmos
 	ImGuizmo::OPERATION current_gizmo_operation = ImGuizmo::TRANSLATE;
 	ImGuizmo::MODE current_gizmo_mode = ImGuizmo::WORLD;
@@ -72,7 +68,7 @@ public:
 
 	// Scenes
 	std::vector<Scene> scenes;
-	int current_scene = 0;
+	uint32_t active_scene = 0;
 
 	static Editor *get();
 	void startup();
@@ -82,13 +78,14 @@ public:
 
 	// GUI
 	void imgui_menu_bar();
-	void imgui_inspector();
+	void imgui_inspector(Scene &scene);
 	void imgui_scene(Scene &scene);
 	void imgui_viewport(Scene &scene);
 	void imgui_resources();
 	void imgui_settings();
 
 	void create_scene(const std::string &name);
+	uint32_t get_scene_index(const std::string &name);
 };
 
 #endif //SILENCE_EDITOR_H
