@@ -70,28 +70,45 @@ void Editor::imgui_inspector(Scene &scene) {
 
 void Editor::imgui_scene(Scene &scene) {
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-	// ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
 	ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(0, 0));
 
 	ImGui::Begin("Scene");
 	ECSManager &ecs_manager = ECSManager::get();
 	InputManager &input_manager = InputManager::get();
 
+	ImVec2 cursor_pos = ImGui::GetCursorPos();
+	cursor_pos.x += 4;
+	cursor_pos.y += 4;
+	ImGui::SetCursorPos(cursor_pos);
+
+	ImGui::Button(ICON_MD_ADD, ImVec2(20, 20));
+	ImGui::SameLine();
+	float avail_x = ImGui::GetContentRegionAvail().x;
+	static ImGuiTextFilter filter;
+	filter.Draw("##", avail_x - 5);
+
+	ImGui::Separator();
+
 	static ImGuiTableFlags flags = ImGuiTableFlags_NoBordersInBody;
 
 	if (ImGui::BeginTable("Scene", 2, flags)) {
-		ImGui::TableSetupColumn("##", ImGuiTableColumnFlags_None);
+		ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_None);
 		ImGui::TableSetupColumn("##", ImGuiTableColumnFlags_WidthFixed, 15.0f);
 		// ImGui::TableHeadersRow();
 
 		for (auto &entity : scene.entities) {
-			ImGui::TableNextRow();
-			ImGui::TableNextColumn();
-
 			std::string name = std::to_string(entity);
 			if (ecs_manager.has_component<Name>(entity)) {
 				name = ecs_manager.get_component<Name>(entity).name;
 			}
+
+			if (!filter.PassFilter(name.c_str())) {
+				continue;
+			}
+
+			ImGui::TableNextRow();
+			ImGui::TableNextColumn();
+
 			static ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow |
 					ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanFullWidth;
 
@@ -167,6 +184,7 @@ void Editor::imgui_scene(Scene &scene) {
 			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0, 0, 0, 0));
 			ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0, 0, 0, 0));
 			ImGui::PushStyleColor(ImGuiCol_BorderShadow, ImVec4(0, 0, 0, 0));
+			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
 
 			if (visible) {
 				if (ImGui::Button(ICON_MD_VISIBILITY, ImVec2(15, 15))) {
@@ -182,6 +200,7 @@ void Editor::imgui_scene(Scene &scene) {
 				ImGui::TreePop();
 			}
 
+			ImGui::PopStyleVar();
 			ImGui::PopStyleColor(4);
 		}
 
