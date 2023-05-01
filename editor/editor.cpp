@@ -4,8 +4,9 @@
 #include "render/render_manager.h"
 #include <imgui.h>
 
-void default_mappings() {
-	InputManager &input_manager = InputManager::get();
+void default_mappings()
+{
+	InputManager& input_manager = InputManager::get();
 	input_manager.add_action("move_forward");
 	input_manager.add_key_to_action("move_forward", InputKey::W);
 	input_manager.add_key_to_action("move_forward", InputKey::GAMEPAD_LEFT_STICK_Y_POSITIVE);
@@ -50,8 +51,9 @@ void default_mappings() {
 	input_manager.add_key_to_action("delete", InputKey::BACKSPACE);
 }
 
-void demo_entities_init(std::vector<Entity> &entities) {
-	ECSManager &ecs_manager = ECSManager::get();
+void demo_entities_init(std::vector<Entity>& entities)
+{
+	ECSManager& ecs_manager = ECSManager::get();
 
 	std::default_random_engine random_generator; // NOLINT(cert-msc51-cpp)
 	std::uniform_real_distribution<float> rand_position(-20.0f, 20.0f);
@@ -61,7 +63,8 @@ void demo_entities_init(std::vector<Entity> &entities) {
 
 	float scale = rand_scale(random_generator);
 
-	for (unsigned int &entity : entities) {
+	for (unsigned int& entity : entities)
+	{
 		entity = ecs_manager.create_entity();
 
 		ecs_manager.add_component<Name>(entity, Name("Entity " + std::to_string(entity)));
@@ -69,16 +72,16 @@ void demo_entities_init(std::vector<Entity> &entities) {
 		ecs_manager.add_component<Gravity>(entity, { glm::vec3(0.0f, rand_gravity(random_generator), 0.0f) });
 
 		ecs_manager.add_component(entity,
-				RigidBody{ .velocity = glm::vec3(0.0f, 0.0f, 0.0f), .acceleration = glm::vec3(0.0f, 0.0f, 0.0f) });
+			RigidBody { .velocity = glm::vec3(0.0f, 0.0f, 0.0f), .acceleration = glm::vec3(0.0f, 0.0f, 0.0f) });
 
-		Transform transform = Transform{ glm::vec3(rand_position(random_generator),
+		Transform transform = Transform { glm::vec3(rand_position(random_generator),
 												 rand_position(random_generator) + 20.0f,
 												 rand_position(random_generator)),
 			glm::vec3(rand_rotation(random_generator), -50.0f, rand_rotation(random_generator)), glm::vec3(1.0f) };
 		ecs_manager.add_component(entity, transform);
 
 		ColliderComponentsFactory::add_collider_component(
-				entity, ColliderAABB{ transform.get_position(), transform.get_scale(), true });
+			entity, ColliderAABB { transform.get_position(), transform.get_scale(), true });
 
 		//		Handle<ModelInstance> hndl = RenderManager::get()->add_instance("electricBox/electricBox.mdl");
 		//		Handle<ModelInstance> hndl = RenderManager::get()->add_instance("Agent/agent_idle.mdl");
@@ -86,30 +89,122 @@ void demo_entities_init(std::vector<Entity> &entities) {
 	}
 
 	auto listener = ecs_manager.create_entity();
-	ecs_manager.add_component(listener, Transform{ glm::vec3(0.0f, 0.0f, -25.0f), glm::vec3(0.0f), glm::vec3(1.0f) });
+	ecs_manager.add_component(listener, Transform { glm::vec3(0.0f, 0.0f, -25.0f), glm::vec3(0.0f), glm::vec3(1.0f) });
 	// Later on attach FmodListener component to camera
 	ecs_manager.add_component<FmodListener>(listener,
-			FmodListener{ .listener_id = SILENCE_FMOD_LISTENER_DEBUG_CAMERA,
-					.prev_frame_position = glm::vec3(0.0f, 0.0f, -25.0f) });
+		FmodListener { .listener_id = SILENCE_FMOD_LISTENER_DEBUG_CAMERA,
+				.prev_frame_position = glm::vec3(0.0f, 0.0f, -25.0f) });
 	entities.push_back(listener);
 
 	Entity floor = ecs_manager.create_entity();
 
-	Transform transform = Transform{ glm::vec3(0.0f, -20.0f, 0.0f), glm::vec3(0.0f), glm::vec3(20.0f, 1.0f, 20.0f) };
+	Transform transform = Transform { glm::vec3(0.0f, -20.0f, 0.0f), glm::vec3(0.0f), glm::vec3(20.0f, 1.0f, 20.0f) };
 	ecs_manager.add_component(floor, transform);
 
 	ColliderComponentsFactory::add_collider_component(
-			floor, ColliderAABB{ transform.get_position(), transform.get_scale(), false });
+		floor, ColliderAABB { transform.get_position(), transform.get_scale(), false });
 
 	entities.push_back(floor);
 }
 
-Editor *Editor::get() {
+void bootleg_unity_theme()
+{
+	ImVec4* colors = ImGui::GetStyle().Colors;
+	colors[ ImGuiCol_Text ] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
+	colors[ ImGuiCol_TextDisabled ] = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
+	colors[ ImGuiCol_WindowBg ] = ImVec4(0.22f, 0.22f, 0.22f, 1.00f);
+	colors[ ImGuiCol_ChildBg ] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+	colors[ ImGuiCol_PopupBg ] = ImVec4(0.19f, 0.19f, 0.19f, 0.92f);
+	colors[ ImGuiCol_Border ] = ImVec4(0.13f, 0.13f, 0.13f, 1.00f);
+	colors[ ImGuiCol_BorderShadow ] = ImVec4(0.00f, 0.00f, 0.00f, 0.06f);
+	colors[ ImGuiCol_FrameBg ] = ImVec4(0.16f, 0.16f, 0.16f, 1.00f);
+	colors[ ImGuiCol_FrameBgHovered ] = ImVec4(0.20f, 0.20f, 0.20f, 1.00f);
+	colors[ ImGuiCol_FrameBgActive ] = ImVec4(0.24f, 0.24f, 0.24f, 1.00f);
+	colors[ ImGuiCol_TitleBg ] = ImVec4(0.16f, 0.16f, 0.16f, 1.00f);
+	colors[ ImGuiCol_TitleBgActive ] = ImVec4(0.16f, 0.16f, 0.16f, 1.00f);
+	colors[ ImGuiCol_TitleBgCollapsed ] = ImVec4(0.16f, 0.16f, 0.16f, 1.00f);
+	colors[ ImGuiCol_MenuBarBg ] = ImVec4(0.10f, 0.10f, 0.10f, 1.00f);
+	colors[ ImGuiCol_ScrollbarBg ] = ImVec4(0.21f, 0.21f, 0.21f, 0.54f);
+	colors[ ImGuiCol_ScrollbarGrab ] = ImVec4(0.37f, 0.37f, 0.37f, 0.54f);
+	colors[ ImGuiCol_ScrollbarGrabHovered ] = ImVec4(0.41f, 0.41f, 0.41f, 0.54f);
+	colors[ ImGuiCol_ScrollbarGrabActive ] = ImVec4(0.37f, 0.37f, 0.37f, 0.54f);
+	colors[ ImGuiCol_CheckMark ] = ImVec4(0.90f, 0.90f, 0.90f, 1.00f);
+	colors[ ImGuiCol_SliderGrab ] = ImVec4(0.34f, 0.34f, 0.34f, 0.54f);
+	colors[ ImGuiCol_SliderGrabActive ] = ImVec4(0.56f, 0.56f, 0.56f, 0.54f);
+	colors[ ImGuiCol_Button ] = ImVec4(0.05f, 0.05f, 0.05f, 0.54f);
+	colors[ ImGuiCol_ButtonHovered ] = ImVec4(0.19f, 0.19f, 0.19f, 0.54f);
+	colors[ ImGuiCol_ButtonActive ] = ImVec4(0.20f, 0.22f, 0.23f, 1.00f);
+	colors[ ImGuiCol_Header ] = ImVec4(0.24f, 0.24f, 0.24f, 1.00f);
+	colors[ ImGuiCol_HeaderHovered ] = ImVec4(0.28f, 0.28f, 0.28f, 1.00f);
+	colors[ ImGuiCol_HeaderActive ] = ImVec4(0.24f, 0.24f, 0.24f, 0.33f);
+	colors[ ImGuiCol_Separator ] = ImVec4(0.10f, 0.10f, 0.10f, 1.00f);
+	colors[ ImGuiCol_SeparatorHovered ] = ImVec4(0.10f, 0.10f, 0.10f, 1.00f);
+	colors[ ImGuiCol_SeparatorActive ] = ImVec4(0.10f, 0.10f, 0.10f, 1.00f);
+	colors[ ImGuiCol_ResizeGrip ] = ImVec4(0.28f, 0.28f, 0.28f, 0.29f);
+	colors[ ImGuiCol_ResizeGripHovered ] = ImVec4(0.44f, 0.44f, 0.44f, 0.29f);
+	colors[ ImGuiCol_ResizeGripActive ] = ImVec4(0.40f, 0.44f, 0.47f, 1.00f);
+	colors[ ImGuiCol_Tab ] = ImVec4(0.16f, 0.16f, 0.16f, 0.52f);
+	colors[ ImGuiCol_TabHovered ] = ImVec4(0.19f, 0.19f, 0.19f, 1.00f);
+	colors[ ImGuiCol_TabActive ] = ImVec4(0.24f, 0.24f, 0.24f, 0.36f);
+	colors[ ImGuiCol_TabUnfocused ] = ImVec4(0.16f, 0.16f, 0.16f, 0.52f);
+	colors[ ImGuiCol_TabUnfocusedActive ] = ImVec4(0.24f, 0.24f, 0.24f, 1.00f);
+	colors[ ImGuiCol_DockingPreview ] = ImVec4(0.16f, 0.16f, 0.16f, 1.00f);
+	colors[ ImGuiCol_DockingEmptyBg ] = ImVec4(0.07f, 0.07f, 0.07f, 1.00f);
+	colors[ ImGuiCol_PlotLines ] = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
+	colors[ ImGuiCol_PlotLinesHovered ] = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
+	colors[ ImGuiCol_PlotHistogram ] = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
+	colors[ ImGuiCol_PlotHistogramHovered ] = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
+	colors[ ImGuiCol_TableHeaderBg ] = ImVec4(0.00f, 0.00f, 0.00f, 0.52f);
+	colors[ ImGuiCol_TableBorderStrong ] = ImVec4(0.00f, 0.00f, 0.00f, 0.52f);
+	colors[ ImGuiCol_TableBorderLight ] = ImVec4(0.28f, 0.28f, 0.28f, 0.29f);
+	colors[ ImGuiCol_TableRowBg ] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+	colors[ ImGuiCol_TableRowBgAlt ] = ImVec4(1.00f, 1.00f, 1.00f, 0.06f);
+	colors[ ImGuiCol_TextSelectedBg ] = ImVec4(0.20f, 0.22f, 0.23f, 1.00f);
+	colors[ ImGuiCol_DragDropTarget ] = ImVec4(0.33f, 0.67f, 0.86f, 1.00f);
+	colors[ ImGuiCol_NavHighlight ] = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
+	colors[ ImGuiCol_NavWindowingHighlight ] = ImVec4(0.71f, 0.71f, 0.71f, 0.70f);
+	colors[ ImGuiCol_NavWindowingDimBg ] = ImVec4(1.00f, 0.00f, 0.00f, 0.20f);
+	colors[ ImGuiCol_ModalWindowDimBg ] = ImVec4(1.00f, 0.00f, 0.00f, 0.35f);
+
+	ImGuiStyle& style = ImGui::GetStyle();
+	style.WindowPadding = ImVec2(8.00f, 8.00f);
+	style.FramePadding = ImVec2(5.00f, 2.00f);
+	style.CellPadding = ImVec2(6.00f, 6.00f);
+	style.ItemSpacing = ImVec2(6.00f, 6.00f);
+	style.ItemInnerSpacing = ImVec2(6.00f, 6.00f);
+	style.TouchExtraPadding = ImVec2(0.00f, 0.00f);
+	style.IndentSpacing = 25;
+	style.ScrollbarSize = 15;
+	style.GrabMinSize = 10;
+	style.WindowBorderSize = 1;
+	style.ChildBorderSize = 1;
+	style.PopupBorderSize = 1;
+	style.FrameBorderSize = 1;
+	style.TabBorderSize = 1;
+	style.WindowRounding = 7;
+	style.ChildRounding = 4;
+	style.FrameRounding = 2;
+	style.PopupRounding = 4;
+	style.ScrollbarRounding = 9;
+	style.GrabRounding = 3;
+	style.LogSliderDeadzone = 4;
+	style.TabRounding = 4;
+
+	ImGuiIO& io = ImGui::GetIO();
+	ImFontConfig config;
+	config.OversampleH = 4;
+	config.OversampleV = 4;
+	ImFont* font = io.Fonts->AddFontFromFileTTF("resources/fonts/Lato-Regular.ttf", 15, &config);
+}
+
+Editor* Editor::get()
+{
 	static Editor editor;
 	return &editor;
 }
 
-void Editor::startup() {
+void Editor::startup()
+{
 	// Managers
 	SPDLOG_INFO("Starting up engine systems...");
 	DisplayManager::get().startup(true);
@@ -117,8 +212,8 @@ void Editor::startup() {
 	ECSManager::get().startup();
 	RenderManager::get().startup();
 
-	ECSManager &ecs_manager = ECSManager::get();
-	RenderManager &render_manager = RenderManager::get();
+	ECSManager& ecs_manager = ECSManager::get();
+	RenderManager& render_manager = RenderManager::get();
 
 	// Components
 	ecs_manager.register_component<Name>();
@@ -159,28 +254,31 @@ void Editor::startup() {
 	Entity entity = ecs_manager.create_entity();
 
 	ecs_manager.add_component<Transform>(
-			entity, Transform{ glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f) });
+		entity, Transform { glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f) });
 
 	ecs_manager.add_component<ModelInstance>(entity, ModelInstance("woodenBox/woodenBox.mdl", MaterialType::PBR));
 
 	render_manager.load_model("cardboardBox/console.mdl");
 	render_manager.load_model("electricBox2/electricBox2.mdl");
 
-	scenes[0].entities.push_back(entity);
+	scenes[ 0 ].entities.push_back(entity);
 
 	create_scene("Another Scene");
 
 	entity = ecs_manager.create_entity();
 
 	ecs_manager.add_component<Transform>(
-			entity, Transform{ glm::vec3(0.0f, 3.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f) });
+		entity, Transform { glm::vec3(0.0f, 3.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f) });
 
 	ecs_manager.add_component<ModelInstance>(entity, ModelInstance("electricBox/electricBox.mdl", MaterialType::PBR));
 
-	scenes[1].entities.push_back(entity);
+	scenes[ 1 ].entities.push_back(entity);
+
+	bootleg_unity_theme();
 }
 
-void Editor::shutdown() {
+void Editor::shutdown()
+{
 	// Shut everything down, in reverse order.
 	SPDLOG_INFO("Shutting down engine subsystems...");
 	InputManager::get().shutdown();
@@ -188,12 +286,14 @@ void Editor::shutdown() {
 	DisplayManager::get().shutdown();
 }
 
-void Editor::run() {
+void Editor::run()
+{
 	float target_frame_time = 1.0f / (float)DisplayManager::get().get_refresh_rate();
 	float dt = target_frame_time;
 
 	nlohmann::json scene;
-	while (should_run) {
+	while (should_run)
+	{
 		auto start_time = std::chrono::high_resolution_clock::now();
 
 		// GAME LOGIC
@@ -204,7 +304,8 @@ void Editor::run() {
 		// TODO: This is a hack to make sure we don't go over the target frame time.
 		// We need to make calculate dt properly and make target frame time changeable.
 		while (std::chrono::duration<float, std::chrono::seconds::period>(stop_time - start_time).count() <
-				target_frame_time) {
+			target_frame_time)
+		{
 			stop_time = std::chrono::high_resolution_clock::now();
 		}
 
@@ -212,11 +313,12 @@ void Editor::run() {
 	}
 }
 
-void Editor::update(float dt) {
-	InputManager &input_manager = InputManager::get();
-	DisplayManager &display_manager = DisplayManager::get();
-	RenderManager &render_manager = RenderManager::get();
-	ECSManager &ecs_manager = ECSManager::get();
+void Editor::update(float dt)
+{
+	InputManager& input_manager = InputManager::get();
+	DisplayManager& display_manager = DisplayManager::get();
+	RenderManager& render_manager = RenderManager::get();
+	ECSManager& ecs_manager = ECSManager::get();
 
 	//imgui new frame
 	ImGui_ImplOpenGL3_NewFrame();
@@ -244,27 +346,32 @@ void Editor::update(float dt) {
 	//		}
 	//	}
 
-	if (show_cvar_editor) {
+	if (show_cvar_editor)
+	{
 		CVarSystem::get()->draw_imgui_editor();
 	}
 
-	if (display_manager.window_should_close()) {
+	if (display_manager.window_should_close())
+	{
 		should_run = false;
 	}
 
 	// GUI
-	ImGuiIO &io = ImGui::GetIO();
-	io.ConfigFlags |= ImGuiTreeNodeFlags_SpanFullWidth;
+	ImGuiIO& io = ImGui::GetIO();
 	ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
 
 	imgui_menu_bar();
 	imgui_resources();
-	imgui_inspector();
 	imgui_settings();
-	imgui_scene(scenes[current_scene]);
+	imgui_inspector(scenes[ active_scene ]);
+	imgui_scene(scenes[ active_scene ]);
 
-	for (auto &scene : scenes) {
-		scene.update(dt);
+	for (auto& scene : scenes)
+	{
+		if (scene.is_visible)
+		{
+			scene.update(dt);
+		}
 		imgui_viewport(scene);
 	}
 
@@ -283,13 +390,26 @@ void Editor::update(float dt) {
 	render_manager.draw();
 }
 
-void Editor::create_scene(const std::string &name) {
+void Editor::create_scene(const std::string& name)
+{
 	Scene scene = {};
 	scene.name = name;
 
 	// Create RenderScene for scene
-	RenderManager &render_manager = RenderManager::get();
+	RenderManager& render_manager = RenderManager::get();
 	scene.render_scene_idx = render_manager.create_render_scene();
 
 	scenes.push_back(scene);
+}
+
+uint32_t Editor::get_scene_index(const std::string& name)
+{
+	for (int i = 0; i < scenes.size(); i++)
+	{
+		if (scenes[ i ].name == name)
+		{
+			return i;
+		}
+	}
+	return 0;
 }
