@@ -12,6 +12,8 @@ private:
 	std::unique_ptr<EntityManager> entity_manager;
 	std::unique_ptr<SystemManager> system_manager;
 
+	std::unordered_map<int, std::function<void(Entity entity)>> component_map;
+
 	std::vector<std::string> component_names;
 
 public:
@@ -26,10 +28,14 @@ public:
 	// Component methods
 	template <typename T> void register_component() {
 		component_manager->register_component<T>();
+
 		std::string type_name = typeid(T).name();
 		size_t pos = type_name.find(" ");
 		type_name = type_name.substr(pos + 1);
-		component_names.push_back(type_name);
+		int type_id = component_names.size();
+		component_names.emplace_back(type_name);
+
+		component_map[type_id] = [this](Entity entity) { add_component(entity, T{}); };
 	}
 
 	template <typename T> void add_component(Entity entity, T component) {
@@ -94,6 +100,8 @@ public:
 	void serialize_entity_json(nlohmann::json &json, Entity entity);
 	void deserialize_entities_json(nlohmann::json &json, std::vector<Entity> &entities);
 	void print_components();
+
+	void add_component(Entity entity, int component_id);
 
 	Signature get_entity_signature(Entity entity);
 };

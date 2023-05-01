@@ -145,3 +145,6 @@ void ECSManager::print_components() {
 		SPDLOG_INFO("ID: {}  Name: {}", i++, name);
 	}
 }
+void ECSManager::add_component(Entity entity, int component_id) {
+	component_map[component_id](entity);
+}
