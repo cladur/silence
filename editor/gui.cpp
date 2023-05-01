@@ -299,20 +299,22 @@ void Editor::imgui_viewport(Scene &scene) {
 
 		if (ImGuizmo::Manipulate(glm::value_ptr(*view), glm::value_ptr(*projection), current_gizmo_operation,
 					current_gizmo_mode, glm::value_ptr(temp_matrix), nullptr, snap)) {
-			// Gizmo handles our final world transform, but we need to update our local transform (pos, orient,
-			// scale) In order to do that, we extract the local transform from the world transform, by
-			// multiplying by the inverse of the parent's world transform From there, we can decompose the local
-			// transform into its components (pos, orient, scale)
 			glm::vec3 skew;
 			glm::vec4 perspective;
-			// if (last_selected->parent) {
-			// 	glm::decompose(glm::inverse(last_selected->parent->transform.modelMatrix) * tempMatrix,
-			// 			last_selected->transform.scale, last_selected->transform.orient, last_selected->transform.pos,
-			// 			skew, perspective);
-			// } else {
-			glm::decompose(temp_matrix, transform.scale, transform.orientation, transform.position, skew, perspective);
+			if (ecs_manager.has_component<Parent>(scene.entities_selected[0])) {
+				// Gizmo handles our final world transform, but we need to update our local transform (pos, orient,
+				// scale) In order to do that, we extract the local transform from the world transform, by
+				// multiplying by the inverse of the parent's world transform From there, we can decompose the local
+				// transform into its components (pos, orient, scale)
+				auto &parent = ecs_manager.get_component<Parent>(scene.entities_selected[0]).parent;
+				auto parent_matrix = ecs_manager.get_component<Transform>(parent).get_global_model_matrix();
+				glm::decompose(glm::inverse(parent_matrix) * temp_matrix, transform.scale, transform.orientation,
+						transform.position, skew, perspective);
+			} else {
+				glm::decompose(
+						temp_matrix, transform.scale, transform.orientation, transform.position, skew, perspective);
+			}
 			transform.set_changed(true);
-			// }
 		}
 	}
 

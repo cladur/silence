@@ -284,11 +284,26 @@ void Editor::startup() {
 	entity = ecs_manager.create_entity();
 
 	ecs_manager.add_component<Transform>(
-			entity, Transform{ glm::vec3(0.0f, 3.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f) });
+			entity, Transform{ glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f) });
 
 	ecs_manager.add_component<ModelInstance>(entity, ModelInstance("electricBox/electricBox.mdl", MaterialType::PBR));
 
 	ecs_manager.add_component<Name>(entity, Name("Electric Box"));
+
+	scenes[1].entities.push_back(entity);
+
+	Entity parent = entity;
+
+	entity = ecs_manager.create_entity();
+
+	ecs_manager.add_component<Transform>(
+			entity, Transform{ glm::vec3(0.0f, 3.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f) });
+
+	ecs_manager.add_component<ModelInstance>(entity, ModelInstance("woodenBox/woodenBox.mdl", MaterialType::PBR));
+
+	ecs_manager.add_component<Name>(entity, Name("Wooden Box"));
+
+	ecs_manager.add_child(parent, entity);
 
 	scenes[1].entities.push_back(entity);
 
