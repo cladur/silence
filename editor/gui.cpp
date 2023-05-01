@@ -1,21 +1,25 @@
+#include "ImGuizmo.h"
 #include "ecs/ecs_manager.h"
 #include "editor.h"
 #include "inspector_gui.h"
 #include <imgui.h>
+#include <imgui_internal.h>
 #include <imgui_stdlib.h>
+
+#include "IconsMaterialDesign.h"
 
 void Editor::imgui_menu_bar() {
 	ImGui::BeginMainMenuBar();
 
 	if (ImGui::BeginMenu("File")) {
-		if (ImGui::MenuItem("Save")) {
+		if (ImGui::MenuItem(ICON_MD_SAVE " Save")) {
 			SPDLOG_INFO("Saving scene...");
 		}
-		if (ImGui::MenuItem("Save as...")) {
+		if (ImGui::MenuItem(ICON_MD_SAVE " Save as...")) {
 			SPDLOG_INFO("Saving scene as...");
 		}
-		if (ImGui::MenuItem("Load")) {
-			SPDLOG_INFO("Loading scene...");
+		if (ImGui::MenuItem(ICON_MD_FOLDER_OPEN " Load")) {
+			SPDLOG_INFO(ICON_MD_CLOSE "Loading scene...");
 			nfdchar_t *out_path;
 			nfdfilteritem_t filter_item[2] = { { "Source code", "c,cpp,cc" }, { "Headers", "h,hpp" } };
 			nfdresult_t result = NFD_OpenDialog(&out_path, filter_item, 2, nullptr);
@@ -29,7 +33,7 @@ void Editor::imgui_menu_bar() {
 				printf("Error: %s\n", NFD_GetError());
 			}
 		}
-		if (ImGui::MenuItem("Exit")) {
+		if (ImGui::MenuItem(ICON_MD_CLOSE " Exit")) {
 			should_run = false;
 		}
 		ImGui::EndMenu();
@@ -65,67 +69,100 @@ void Editor::imgui_inspector(Scene &scene) {
 }
 
 void Editor::imgui_scene(Scene &scene) {
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+
 	ImGui::Begin("Scene");
 	ECSManager &ecs_manager = ECSManager::get();
 	InputManager &input_manager = InputManager::get();
 
-	for (auto &entity : scene.entities) {
-		std::string entity_name = std::to_string(entity);
-		if (ecs_manager.has_component<Name>(entity)) {
-			entity_name = ecs_manager.get_component<Name>(entity).name;
-		}
+	static ImGuiTableFlags flags = ImGuiTableFlags_BordersV | ImGuiTableFlags_RowBg | ImGuiTableFlags_NoBordersInBody;
 
-		static ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick |
-				ImGuiTreeNodeFlags_SpanAvailWidth;
+	if (ImGui::BeginTable("Scene", 2, flags)) {
+		ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_None);
+		ImGui::TableSetupColumn("##", ImGuiTableColumnFlags_WidthFixed, 20.0f);
+		ImGui::TableHeadersRow();
 
-		ImGuiTreeNodeFlags node_flags = base_flags;
+		for (auto &entity : scene.entities) {
+			ImGui::TableNextRow();
+			ImGui::TableNextColumn();
 
-		const bool is_selected = (std::find(scene.entities_selected.begin(), scene.entities_selected.end(), entity) !=
-				scene.entities_selected.end());
-
-		if (is_selected) {
-			node_flags |= ImGuiTreeNodeFlags_Selected;
-		}
-
-		bool node_open = ImGui::TreeNodeEx(entity_name.c_str(), node_flags);
-
-		if (ImGui::IsItemClicked()) {
-			if (input_manager.is_action_pressed("select_multiple")) {
-				if (is_selected) {
-					scene.entities_selected.erase(
-							std::remove(scene.entities_selected.begin(), scene.entities_selected.end(), entity),
-							scene.entities_selected.end());
-				} else {
-					scene.entities_selected.push_back(entity);
-				}
-			} else if (input_manager.is_action_pressed("select_rows") && scene.last_entity_selected != 0) {
-				// Select all entities between last_entity_selected and entity
-				scene.entities_selected.clear();
-				uint32_t min = std::min(scene.last_entity_selected, entity);
-				uint32_t max = std::max(scene.last_entity_selected, entity);
-				for (uint32_t i = min; i <= max; i++) {
-					scene.entities_selected.push_back(i);
-				}
-			} else {
-				scene.entities_selected.clear();
-				scene.entities_selected.push_back(entity);
+			std::string name = std::to_string(entity);
+			if (ecs_manager.has_component<Name>(entity)) {
+				name = ecs_manager.get_component<Name>(entity).name;
 			}
-			scene.last_entity_selected = entity;
+
+			if (ImGui::TreeNodeEx(name.c_str(), ImGuiTreeNodeFlags_SpanFullWidth)) {
+				ImGui::TreePop();
+			}
+
+			ImGui::TableNextColumn();
+			static bool visible = true;
+			ImGui::Checkbox("##", &visible);
 		}
 
-		if (node_open) {
-			ImGui::Text("TODO: Show entity children?");
-
-			ImGui::TreePop();
-		}
+		ImGui::EndTable();
 	}
 
+	// for (auto &entity : scene.entities) {
+	// 	std::string entity_name = std::to_string(entity);
+	// 	if (ecs_manager.has_component<Name>(entity)) {
+	// 		entity_name = ecs_manager.get_component<Name>(entity).name;
+	// 	}
+
+	// 	static ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick |
+	// 			ImGuiTreeNodeFlags_SpanAvailWidth;
+
+	// 	ImGuiTreeNodeFlags node_flags = base_flags;
+
+	// 	const bool is_selected = (std::find(scene.entities_selected.begin(), scene.entities_selected.end(), entity) !=
+	// 			scene.entities_selected.end());
+
+	// 	if (is_selected) {
+	// 		node_flags |= ImGuiTreeNodeFlags_Selected;
+	// 	}
+
+	// 	bool node_open = ImGui::TreeNodeEx(entity_name.c_str(), node_flags);
+
+	// 	if (ImGui::IsItemClicked()) {
+	// 		if (input_manager.is_action_pressed("select_multiple")) {
+	// 			if (is_selected) {
+	// 				scene.entities_selected.erase(
+	// 						std::remove(scene.entities_selected.begin(), scene.entities_selected.end(), entity),
+	// 						scene.entities_selected.end());
+	// 			} else {
+	// 				scene.entities_selected.push_back(entity);
+	// 			}
+	// 		} else if (input_manager.is_action_pressed("select_rows") && scene.last_entity_selected != 0) {
+	// 			// Select all entities between last_entity_selected and entity
+	// 			scene.entities_selected.clear();
+	// 			uint32_t min = std::min(scene.last_entity_selected, entity);
+	// 			uint32_t max = std::max(scene.last_entity_selected, entity);
+	// 			for (uint32_t i = min; i <= max; i++) {
+	// 				scene.entities_selected.push_back(i);
+	// 			}
+	// 		} else {
+	// 			scene.entities_selected.clear();
+	// 			scene.entities_selected.push_back(entity);
+	// 		}
+	// 		scene.last_entity_selected = entity;
+	// 	}
+
+	// 	if (node_open) {
+	// 		ImGui::Text("TODO: Show entity children?");
+
+	// 		ImGui::TreePop();
+	// 	}
+	// }
+
 	ImGui::End();
+
+	ImGui::PopStyleVar();
 }
 void Editor::imgui_viewport(Scene &scene) {
 	RenderManager &render_manager = RenderManager::get();
 	ECSManager &ecs_manager = ECSManager::get();
 
+	ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0);
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
 
 	ImGui::Begin(scene.name.c_str());
@@ -141,33 +178,73 @@ void Editor::imgui_viewport(Scene &scene) {
 
 	ImVec2 cursor = ImGui::GetCursorPos();
 	cursor.x += 4;
-	cursor.y += 4;
+	cursor.y += 2;
 	ImGui::SetCursorPos(cursor);
+	// ImGui::SetWindowFontScale(1.4f);
 
-	if (ImGui::Button("Select")) {
+	ImVec4 active_color = ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive);
+
+	ImRect clip_rect;
+	clip_rect.Min.x = ImGui::GetWindowContentRegionMin().x - 50;
+	clip_rect.Min.y = ImGui::GetWindowContentRegionMin().y - 50;
+	clip_rect.Max.x = ImGui::GetWindowContentRegionMax().x + 50;
+	clip_rect.Max.y = ImGui::GetWindowContentRegionMax().y + 50;
+	ImGui::PushClipRect(clip_rect.Min, clip_rect.Max, false);
+
+	if (ImGui::Button(ICON_MD_ADS_CLICK)) {
 	}
 	ImGui::SameLine();
-	if (ImGui::Button("Move")) {
+
+	int push_count = 0;
+	if (current_gizmo_operation == ImGuizmo::TRANSLATE) {
+		ImGui::PushStyleColor(ImGuiCol_Button, active_color);
+		push_count++;
+	}
+	if (ImGui::Button(ICON_MD_OPEN_WITH)) {
 		current_gizmo_operation = ImGuizmo::TRANSLATE;
 	}
+	ImGui::PopStyleColor(push_count);
+	push_count = 0;
 	ImGui::SameLine();
-	if (ImGui::Button("Rotate")) {
+
+	if (current_gizmo_operation == ImGuizmo::ROTATE) {
+		ImGui::PushStyleColor(ImGuiCol_Button, active_color);
+		push_count++;
+	}
+	if (ImGui::Button(ICON_MD_ROTATE_LEFT)) {
 		current_gizmo_operation = ImGuizmo::ROTATE;
 	}
+	ImGui::PopStyleColor(push_count);
+	push_count = 0;
 	ImGui::SameLine();
-	if (ImGui::Button("Scale")) {
+
+	if (current_gizmo_operation == ImGuizmo::SCALE) {
+		ImGui::PushStyleColor(ImGuiCol_Button, active_color);
+		push_count++;
+	}
+	if (ImGui::Button(ICON_MD_OPEN_IN_FULL)) {
 		current_gizmo_operation = ImGuizmo::SCALE;
 	}
+	ImGui::PopStyleColor(push_count);
+	push_count = 0;
 	ImGui::SameLine();
+
+	ImGui::PushStyleColor(ImGuiCol_Separator, ImVec4(0.345f, 0.345f, 0.345f, 1.0f));
+	ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
+	ImGui::PopStyleColor();
+	ImGui::SameLine();
+
 	if (current_gizmo_mode == ImGuizmo::WORLD) {
-		if (ImGui::Button("World")) {
+		if (ImGui::Button(ICON_MD_PUBLIC " World")) {
 			current_gizmo_mode = ImGuizmo::LOCAL;
 		}
 	} else {
-		if (ImGui::Button("Local")) {
+		if (ImGui::Button(ICON_MD_HOME " Local")) {
 			current_gizmo_mode = ImGuizmo::WORLD;
 		}
 	}
+
+	ImGui::PopClipRect();
 
 	// Get viewport size
 	ImVec2 viewport_size = ImGui::GetContentRegionAvail();
@@ -232,6 +309,7 @@ void Editor::imgui_viewport(Scene &scene) {
 
 	ImGui::End();
 
+	ImGui::PopStyleVar();
 	ImGui::PopStyleVar();
 }
 

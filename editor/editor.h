@@ -62,6 +62,7 @@ public:
 	ImGuizmo::MODE current_gizmo_mode = ImGuizmo::WORLD;
 
 	// Misc
+	ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoCollapse;
 	bool show_cvar_editor = false;
 	bool show_demo_window = false;
 	bool should_run = true;

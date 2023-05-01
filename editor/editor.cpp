@@ -3,6 +3,10 @@
 #include "input/input_manager.h"
 #include "render/render_manager.h"
 #include <imgui.h>
+#include <imgui_internal.h>
+
+#include "IconsMaterialDesign.h"
+// #include "IconsFontAwesome5.h"
 
 void default_mappings() {
 	InputManager &input_manager = InputManager::get();
@@ -127,9 +131,9 @@ void bootleg_unity_theme() {
 	colors[ImGuiCol_CheckMark] = ImVec4(0.90f, 0.90f, 0.90f, 1.00f);
 	colors[ImGuiCol_SliderGrab] = ImVec4(0.34f, 0.34f, 0.34f, 0.54f);
 	colors[ImGuiCol_SliderGrabActive] = ImVec4(0.56f, 0.56f, 0.56f, 0.54f);
-	colors[ImGuiCol_Button] = ImVec4(0.05f, 0.05f, 0.05f, 0.54f);
-	colors[ImGuiCol_ButtonHovered] = ImVec4(0.19f, 0.19f, 0.19f, 0.54f);
-	colors[ImGuiCol_ButtonActive] = ImVec4(0.20f, 0.22f, 0.23f, 1.00f);
+	colors[ImGuiCol_Button] = ImVec4(0.35f, 0.35f, 0.35f, 1.00f);
+	colors[ImGuiCol_ButtonHovered] = ImVec4(0.40f, 0.40f, 0.40f, 1.00f);
+	colors[ImGuiCol_ButtonActive] = ImVec4(0.28f, 0.38f, 0.49f, 1.00f);
 	colors[ImGuiCol_Header] = ImVec4(0.24f, 0.24f, 0.24f, 1.00f);
 	colors[ImGuiCol_HeaderHovered] = ImVec4(0.28f, 0.28f, 0.28f, 1.00f);
 	colors[ImGuiCol_HeaderActive] = ImVec4(0.24f, 0.24f, 0.24f, 0.33f);
@@ -184,13 +188,27 @@ void bootleg_unity_theme() {
 	style.ScrollbarRounding = 9;
 	style.GrabRounding = 2;
 	style.LogSliderDeadzone = 4;
-	style.TabRounding = 4;
+	style.TabRounding = 2;
 
 	ImGuiIO &io = ImGui::GetIO();
 	ImFontConfig config;
 	config.OversampleH = 4;
 	config.OversampleV = 4;
+	float base_font_size = 15.0f;
 	ImFont *font = io.Fonts->AddFontFromFileTTF("resources/fonts/Lato-Regular.ttf", 15, &config);
+
+	// Setup ImGui icons
+	static const ImWchar icons_ranges[] = { ICON_MIN_MD, ICON_MAX_16_MD, 0 };
+	float icon_font_size = base_font_size * 2.0f / 3.0f;
+	ImFontConfig icons_config;
+	icons_config.MergeMode = true;
+	icons_config.PixelSnapH = true;
+	icons_config.OversampleH = 4;
+	icons_config.OversampleV = 4;
+	icons_config.GlyphMinAdvanceX = icon_font_size;
+
+	io.Fonts->AddFontFromFileTTF(
+			"resources/fonts/MaterialIcons-Regular.ttf", icon_font_size, &icons_config, icons_ranges);
 }
 
 Editor *Editor::get() {
@@ -328,23 +346,23 @@ void Editor::update(float dt) {
 	DisplayManager::get().poll_events();
 
 	// Handle current gizmo operation
-	//	if (!controlling_camera) {
-	//		if (input_manager.is_action_just_pressed("translate_mode")) {
-	//			current_gizmo_operation = ImGuizmo::TRANSLATE;
-	//		} else if (input_manager.is_action_just_pressed("rotate_mode")) {
-	//			current_gizmo_operation = ImGuizmo::ROTATE;
-	//		} else if (input_manager.is_action_just_pressed("scale_mode")) {
-	//			current_gizmo_operation = ImGuizmo::SCALE;
-	//		}
-	//
-	//		if (input_manager.is_action_just_pressed("toggle_gizmo_mode")) {
-	//			if (current_gizmo_mode == ImGuizmo::WORLD) {
-	//				current_gizmo_mode = ImGuizmo::LOCAL;
-	//			} else {
-	//				current_gizmo_mode = ImGuizmo::WORLD;
-	//			}
-	//		}
-	//	}
+	if (!controlling_camera) {
+		if (input_manager.is_action_just_pressed("translate_mode")) {
+			current_gizmo_operation = ImGuizmo::TRANSLATE;
+		} else if (input_manager.is_action_just_pressed("rotate_mode")) {
+			current_gizmo_operation = ImGuizmo::ROTATE;
+		} else if (input_manager.is_action_just_pressed("scale_mode")) {
+			current_gizmo_operation = ImGuizmo::SCALE;
+		}
+
+		if (input_manager.is_action_just_pressed("toggle_gizmo_mode")) {
+			if (current_gizmo_mode == ImGuizmo::WORLD) {
+				current_gizmo_mode = ImGuizmo::LOCAL;
+			} else {
+				current_gizmo_mode = ImGuizmo::WORLD;
+			}
+		}
+	}
 
 	if (show_cvar_editor) {
 		CVarSystem::get()->draw_imgui_editor();
@@ -356,7 +374,7 @@ void Editor::update(float dt) {
 
 	// GUI
 	ImGuiIO &io = ImGui::GetIO();
-	ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
+	ImGui::DockSpaceOverViewport(ImGui::GetMainViewport(), ImGuiDockNodeFlags_NoWindowMenuButton);
 
 	imgui_menu_bar();
 	imgui_resources();
