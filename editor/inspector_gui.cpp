@@ -62,7 +62,7 @@ void Inspector::show_name(Entity entity) {
 void Inspector::show_transform(Entity entity) {
 	auto &transform = ecs_manager.get_component<Transform>(entity);
 	bool changed = false;
-	if (ImGui::CollapsingHeader("Transform"), tree_flags) {
+	if (ImGui::CollapsingHeader("Transform", tree_flags)) {
 		float available_width = ImGui::GetContentRegionAvail().x;
 		ImGui::BeginTable("Transform", 2);
 		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
@@ -120,7 +120,7 @@ void Inspector::show_children(Entity entity) {
 void Inspector::show_modelinstance(Entity entity) {
 	auto &modelinstance = ecs_manager.get_component<ModelInstance>(entity);
 	auto models = render_manager.get_models();
-	if (ImGui::CollapsingHeader("ModelInstance"), tree_flags) {
+	if (ImGui::CollapsingHeader("Model Instance", tree_flags)) {
 		std::string name = render_manager.get_model(modelinstance.model_handle).name;
 		std::size_t last_slash_pos = name.find_last_of("/\\");
 
