@@ -404,11 +404,12 @@ void Editor::update(float dt) {
 	imgui_scene(scenes[active_scene]);
 
 	viewport_hovered = false;
-	for (auto &scene : scenes) {
+	for (int i = 0; i < scenes.size(); i++) {
+		Scene &scene = scenes[i];
 		if (scene.is_visible) {
 			scene.update(dt);
 		}
-		imgui_viewport(scene);
+		imgui_viewport(scene, i);
 	}
 
 	parent_system->update();

@@ -214,7 +214,7 @@ void Editor::imgui_scene(Scene &scene) {
 
 	ImGui::PopStyleVar(2);
 }
-void Editor::imgui_viewport(Scene &scene) {
+void Editor::imgui_viewport(Scene &scene, uint32_t scene_index) {
 	RenderManager &render_manager = RenderManager::get();
 	ECSManager &ecs_manager = ECSManager::get();
 
@@ -224,12 +224,17 @@ void Editor::imgui_viewport(Scene &scene) {
 	ImVec2 viewport_start = ImGui::GetCursorPos();
 
 	ImGui::Begin(scene.name.c_str());
+	ImGuizmo::SetDrawlist();
+	// We need to set unique ID to each viewport, otherwise modifying the transform of one viewport will affect all
+	ImGuizmo::SetID((int)scene_index);
 	auto viewport_min_region = ImGui::GetWindowContentRegionMin();
 	auto viewport_max_region = ImGui::GetWindowContentRegionMax();
 	auto viewport_offset = ImGui::GetWindowPos();
 	glm::vec2 viewport_bounds[2];
 	viewport_bounds[0] = { viewport_min_region.x + viewport_offset.x, viewport_min_region.y + viewport_offset.y };
 	viewport_bounds[1] = { viewport_max_region.x + viewport_offset.x, viewport_max_region.y + viewport_offset.y };
+	ImGuizmo::SetRect(viewport_bounds[0].x, viewport_bounds[0].y, viewport_bounds[1].x - viewport_bounds[0].x,
+			viewport_bounds[1].y - viewport_bounds[0].y);
 
 	scene.viewport_hovered = ImGui::IsWindowHovered();
 	scene.is_visible = !ImGui::IsWindowCollapsed();
@@ -253,11 +258,6 @@ void Editor::imgui_viewport(Scene &scene) {
 
 	// Draw gizmo
 	ImGuiIO &io = ImGui::GetIO();
-	// ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, viewport_size.x, viewport_size.y);
-	ImGuizmo::SetRect(viewport_bounds[0].x, viewport_bounds[0].y, viewport_bounds[1].x - viewport_bounds[0].x,
-			viewport_bounds[1].y - viewport_bounds[0].y);
-
-	ImGuizmo::SetDrawlist();
 
 	glm::mat4 *view = &scene.get_render_scene().view;
 	glm::mat4 *projection = &scene.get_render_scene().projection;

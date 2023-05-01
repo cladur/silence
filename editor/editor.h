@@ -86,7 +86,7 @@ public:
 	void imgui_menu_bar();
 	void imgui_inspector(Scene &scene);
 	void imgui_scene(Scene &scene);
-	void imgui_viewport(Scene &scene);
+	void imgui_viewport(Scene &scene, uint32_t scene_index);
 	void imgui_resources();
 	void imgui_settings();
 
