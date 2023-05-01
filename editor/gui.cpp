@@ -1,6 +1,7 @@
 #include "ecs/ecs_manager.h"
 #include "editor.h"
 #include "inspector_gui.h"
+#include <imgui.h>
 
 void Editor::imgui_menu_bar() {
 	ImGui::BeginMainMenuBar();
@@ -121,9 +122,16 @@ void Editor::imgui_viewport(Scene &scene) {
 	RenderManager &render_manager = RenderManager::get();
 	ECSManager &ecs_manager = ECSManager::get();
 
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
+
 	ImGui::Begin(scene.name.c_str());
 
 	scene.viewport_hovered = ImGui::IsWindowHovered();
+
+	ImVec2 cursor = ImGui::GetCursorPos();
+	cursor.x += 4;
+	cursor.y += 4;
+	ImGui::SetCursorPos(cursor);
 
 	if (ImGui::Button("Select")) {
 	}
@@ -212,6 +220,8 @@ void Editor::imgui_viewport(Scene &scene) {
 	}
 
 	ImGui::End();
+
+	ImGui::PopStyleVar();
 }
 
 void Editor::imgui_resources() {
