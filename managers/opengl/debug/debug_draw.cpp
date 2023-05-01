@@ -101,11 +101,11 @@ void draw_sphere(const glm::vec3 &center, float radius, const glm::vec3 &color) 
 	// generate vertices
 	float vertices[num_rings + 1][num_segments + 1][3];
 	for (int i = 0; i <= num_rings; i++) {
-		float radius = sin(i * delta_ring);
+		float r = radius * sin(i * delta_ring);
 		for (int j = 0; j <= num_segments; j++) {
-			vertices[i][j][0] = radius * cos(j * delta_segment) + center.x;
-			vertices[i][j][1] = cos(i * delta_ring) + center.y;
-			vertices[i][j][2] = radius * sin(j * delta_segment) + center.z;
+			vertices[i][j][0] = r * cos(j * delta_segment) + center.x;
+			vertices[i][j][1] = radius * cos(i * delta_ring) + center.y;
+			vertices[i][j][2] = r * sin(j * delta_segment) + center.z;
 		}
 	}
 

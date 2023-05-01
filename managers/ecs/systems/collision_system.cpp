@@ -148,28 +148,20 @@ bool CollisionSystem::is_overlap(ColliderSphere &a, ColliderSphere &b) {
 }
 
 void CollisionSystem::resolve_collision_sphere(Entity e1, Entity e2) {
-	ColliderSphere &c1 = ecs_manager.get_component<ColliderSphere>(e1);
-	ColliderSphere &c2 = ecs_manager.get_component<ColliderSphere>(e2);
-	Transform *t1;
-	Transform *t2;
+	ColliderSphere &temp_c1 = ecs_manager.get_component<ColliderSphere>(e1);
+	ColliderSphere &temp_c2 = ecs_manager.get_component<ColliderSphere>(e2);
+	Transform &t1 = ecs_manager.get_component<Transform>(e1);
+	Transform &t2 = ecs_manager.get_component<Transform>(e2);
+
+	ColliderSphere c1;
+	ColliderSphere c2;
+	c1.center = temp_c1.center + t1.get_position();
+	c2.center = temp_c2.center + t2.get_position();
+	c1.radius = temp_c1.radius * t1.get_scale().x;
+	c2.radius = temp_c2.radius * t2.get_scale().x;
 
 	bool is_movable1 = !ecs_manager.has_component<StaticTag>(e1);
 	bool is_movable2 = !ecs_manager.has_component<StaticTag>(e2);
-	if (!(is_movable1 || is_movable2)) {
-		return;
-	} else if (is_movable1 && is_movable2) {
-		t1 = &ecs_manager.get_component<Transform>(e1);
-		c1.center = t1->get_position();
-
-		t2 = &ecs_manager.get_component<Transform>(e2);
-		c2.center = t2->get_position();
-	} else if (is_movable1) {
-		t1 = &ecs_manager.get_component<Transform>(e1);
-		c1.center = t1->get_position();
-	} else {
-		t2 = &ecs_manager.get_component<Transform>(e2);
-		c2.center = t2->get_position();
-	}
 
 	if (!is_collision_candidate(c1.center, glm::vec3(c1.radius), c2.center, glm::vec3(c2.radius))) {
 		return;
@@ -186,12 +178,12 @@ void CollisionSystem::resolve_collision_sphere(Entity e1, Entity e2) {
 		// Value defining how fast the body will move other body
 		// 1 means that the bodies has same speed while pushing
 		const float slide_speed = 0.5f;
-		t1->add_position(offset * slide_speed);
-		t2->add_position(-offset * (1.0f - slide_speed));
+		t1.add_position(offset * slide_speed);
+		t2.add_position(-offset * (1.0f - slide_speed));
 	} else if (is_movable1) {
-		t1->add_position(offset);
+		t1.add_position(offset);
 	} else {
-		t2->add_position(-offset);
+		t2.add_position(-offset);
 	}
 }
 
@@ -280,23 +272,23 @@ void CollisionSystem::resolve_collision_aabb(Entity e1, Entity e2) {
 	}
 }
 
-glm::vec3 CollisionSystem::is_overlap(ColliderAABB &aabb, ColliderSphere &sphere) {
-	const glm::vec3 min = aabb.min();
-	const glm::vec3 max = aabb.max();
+glm::vec3 CollisionSystem::is_overlap(ColliderAABB &a, ColliderSphere &b) {
+	const glm::vec3 min = a.min();
+	const glm::vec3 max = a.max();
 	// Calculate nearest point AABB and Sphere center
-	const glm::vec3 closest_point = glm::vec3(std::clamp(sphere.center.x, min.x, max.x),
-			std::clamp(sphere.center.y, min.y, max.y), std::clamp(sphere.center.z, min.z, max.z));
+	const glm::vec3 closest_point = glm::vec3(std::clamp(b.center.x, min.x, max.x),
+			std::clamp(b.center.y, min.y, max.y), std::clamp(b.center.z, min.z, max.z));
 
-	const glm::vec3 direction = closest_point - sphere.center;
+	const glm::vec3 direction = closest_point - b.center;
 	const float distance = glm::length(direction);
 
-	const float length = sphere.radius - distance;
+	const float length = b.radius - distance;
 
-	if (distance < sphere.radius) {
-		if (direction != glm::vec3(0.0f)) {
+	if (distance < b.radius) {
+		if (glm::dot(direction, direction) < 0.001f) {
+			return glm::vec3(0.0f, 1.0f, 0.0f) * length;
+		} else {
 			return glm::normalize(direction) * length;
-		} else { //TODO: FIX this shit properly
-			return glm::normalize(closest_point) * length;
 		}
 	}
 
@@ -374,7 +366,7 @@ glm::vec3 CollisionSystem::is_overlap(ColliderOBB &a, ColliderOBB &b) {
 	float max_overlap = -std::numeric_limits<float>::max();
 	glm::vec3 separation(0.0f);
 	for (const glm::vec3 &axis : axes) {
-		if (axis == glm::vec3(0.0f)) {
+		if (glm::dot(axis, axis) < 0.001f) {
 			continue;
 		}
 		const float overlap = fabs(glm::dot(distance, axis)) -
@@ -465,12 +457,13 @@ glm::vec3 CollisionSystem::is_overlap(ColliderOBB &a, ColliderSphere &b) {
 	const float length = b.radius - distance;
 
 	if (distance < b.radius) {
-		if (direction != glm::vec3(0.0f)) {
+		if (glm::dot(direction, direction) < 0.001f) {
+			return glm::vec3(0.0f, 1.0f, 0.0f) * length;
+		} else {
 			return glm::normalize(direction) * length;
-		} else { //TODO: FIX this shit properly
-			return glm::normalize(closest_point_world) * length;
 		}
 	}
+
 	return glm::vec3(0.0f);
 }
 
@@ -548,7 +541,7 @@ glm::vec3 CollisionSystem::is_overlap(ColliderOBB &a, ColliderAABB &b) {
 	float max_overlap = -std::numeric_limits<float>::max();
 	glm::vec3 separation(0.0f);
 	for (const glm::vec3 &axis : axes) {
-		if (axis == glm::vec3(0.0f)) {
+		if (glm::dot(axis, axis) < 0.001f) {
 			continue;
 		}
 		const float overlap = fabs(glm::dot(distance, axis)) -
@@ -569,6 +562,7 @@ glm::vec3 CollisionSystem::is_overlap(ColliderOBB &a, ColliderAABB &b) {
 	if (glm::dot(separation, distance) > 0.0f) {
 		separation = -separation;
 	}
+
 	return glm::normalize(separation) * max_overlap;
 }
 

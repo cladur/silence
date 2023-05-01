@@ -130,16 +130,19 @@ void demo_entities_init(std::vector<Entity> &entities) {
 		ecs_manager.add_component(entity,
 				RigidBody{ .velocity = glm::vec3(0.0f, 0.0f, 0.0f), .acceleration = glm::vec3(0.0f, 0.0f, 0.0f) });
 
-		Transform transform = Transform{ glm::vec3(rand_position(random_generator),
-												 rand_position(random_generator) + 40.0f,
-												 rand_position(random_generator)),
-			glm::vec3(rand_rotation(random_generator), -50.0f, rand_rotation(random_generator)), glm::vec3(4.0f) };
+		Transform transform =
+				Transform{ glm::vec3(rand_position(random_generator), rand_position(random_generator) + 40.0f,
+								   rand_position(random_generator)),
+					glm::vec3(0.0f), glm::vec3(4.0f) };
 		ecs_manager.add_component(entity, transform);
 
-		ColliderComponentsFactory::add_collider_component(
-				entity, ColliderAABB{ transform.get_position(), transform.get_scale() });
-
 		Handle<ModelInstance> hndl = OpenglManager::get()->add_instance("woodenBox/woodenBox.pfb");
+		Handle<Model> hndl_model = OpenglManager::get()->get_model_instance(hndl).model_handle;
+
+		ColliderAABB collider = { transform.get_position(), transform.get_scale() };
+		collider.setup_collider(OpenglManager::get()->get_model(hndl_model).meshes[0].get_position_vertices());
+		collider.range *= transform.get_scale();
+		ColliderComponentsFactory::add_collider_component(entity, collider, true);
 		//		Handle<ModelInstance> hndl = OpenglManager::get()->add_instance("electricBox/electricBox.pfb");
 		//		Handle<ModelInstance> hndl = OpenglManager::get()->add_instance("Agent/agent_idle.pfb");
 		ecs_manager.add_component<RenderHandle>(entity, RenderHandle{ .handle = hndl });
@@ -155,27 +158,39 @@ void demo_entities_init(std::vector<Entity> &entities) {
 
 	Entity floor = ecs_manager.create_entity();
 
-	Transform transform = Transform{ glm::vec3(0.0f, -20.0f, 0.0f), glm::vec3(0.0f), glm::vec3(20.0f, 1.0f, 20.0f) };
+	Transform transform = Transform{ glm::vec3(0.0f, -20.0f, 0.0f), glm::vec3(0.0f), glm::vec3(80.0f, 4.0f, 80.0f) };
 	ecs_manager.add_component(floor, transform);
 
-	ColliderComponentsFactory::add_collider_component(
-			floor, ColliderAABB{ transform.get_position(), transform.get_scale() });
+	Handle<ModelInstance> hndl = OpenglManager::get()->add_instance("woodenBox/woodenBox.pfb");
+	Handle<Model> hndl_model = OpenglManager::get()->get_model_instance(hndl).model_handle;
 
+	ColliderAABB collider = { transform.get_position(), transform.get_scale() };
+	collider.setup_collider(OpenglManager::get()->get_model(hndl_model).meshes[0].get_position_vertices());
+	collider.range *= transform.get_scale();
+	ColliderComponentsFactory::add_collider_component(floor, collider);
+
+	ecs_manager.add_component<RenderHandle>(floor, RenderHandle{ .handle = hndl });
 	entities.push_back(floor);
 }
 
 void demo_collision_init(Entity &entity) {
 	entity = ecs_manager.create_entity();
 
-	Transform transform = Transform{ glm::vec3(0.0f, 0.0f, -20.0f), glm::vec3(45.0f), glm::vec3(1.0f) };
+	Transform transform = Transform{ glm::vec3(0.0f, 0.0f, -20.0f), glm::vec3(45.0f), glm::vec3(4.0f) };
 	ecs_manager.add_component(entity, transform);
+
+	Handle<ModelInstance> hndl = OpenglManager::get()->add_instance("woodenBox/woodenBox.pfb");
+	Handle<Model> hndl_model = OpenglManager::get()->get_model_instance(hndl).model_handle;
 
 	ColliderOBB c{};
 	c.center = transform.get_position();
-	c.range = transform.get_scale();
+	c.setup_range(OpenglManager::get()->get_model(hndl_model).meshes[0].get_position_vertices());
+	c.range *= transform.get_scale();
 	c.set_orientation(transform.get_euler_rot());
+
 	ColliderComponentsFactory::add_collider_component(entity, c, true);
 
+	ecs_manager.add_component<RenderHandle>(entity, RenderHandle{ .handle = hndl });
 	// ecs_manager.add_component<MeshInstance>(
 	// 		entity, { render_manager.get_mesh("box"), render_manager.get_material("default_mesh") });
 }
@@ -190,7 +205,7 @@ void demo_collision_sphere(std::vector<Entity> &entities) {
 
 		Transform transform = Transform{ glm::vec3(rand_position(random_generator), rand_position(random_generator),
 												 rand_position(random_generator)),
-			glm::vec3(0.0f), glm::vec3(1.0f) };
+			glm::vec3(0.0f), glm::vec3(4.0f) };
 		ecs_manager.add_component(entity, transform);
 
 		ColliderComponentsFactory::add_collider_component(
@@ -228,6 +243,9 @@ void demo_collision_obb(std::vector<Entity> &entities) {
 
 		ecs_manager.add_component(entity,
 				RigidBody{ .velocity = glm::vec3(0.0f, 0.0f, 0.0f), .acceleration = glm::vec3(0.0f, 0.0f, 0.0f) });
+
+		Handle<ModelInstance> hndl = OpenglManager::get()->add_instance("woodenBox/woodenBox.pfb");
+		ecs_manager.add_component<RenderHandle>(entity, RenderHandle{ .handle = hndl });
 	}
 }
 
@@ -285,14 +303,18 @@ void handle_camera(Camera &cam, float dt) {
 	cam.rotate(mouse_delta.x * dt, mouse_delta.y * dt);
 }
 
+AutoCVarFloat cvar_tester_rot_x("rot.x", "Rotation X", 45.0f, CVarFlags::EditFloatDrag);
+AutoCVarFloat cvar_tester_rot_y("rot.y", "Rotation Y", 45.0f, CVarFlags::EditFloatDrag);
+AutoCVarFloat cvar_tester_rot_z("rot.z", "Rotation Z", 45.0f, CVarFlags::EditFloatDrag);
+
 void handle_collider_movement(Entity entity, float dt) {
 	float forward = -input_manager.get_axis("collider_backward", "collider_forward");
 	float right = -input_manager.get_axis("collider_left", "collider_right");
 	float up = -input_manager.get_axis("collider_down", "collider_up");
 
 	auto &t = ecs_manager.get_component<Transform>(entity);
-
-	const float speed = 5.0f;
+	t.set_euler_rot({ cvar_tester_rot_x.get(), cvar_tester_rot_y.get(), cvar_tester_rot_z.get() });
+	const float speed = 10.0f;
 	t.add_position(glm::vec3(forward, up, right) * speed * dt);
 }
 
@@ -333,13 +355,13 @@ int main() {
 	fmod_listener_system->startup();
 	FontManager::get()->startup();
 
-	std::vector<Entity> entities(500);
+	std::vector<Entity> entities(20);
 	demo_entities_init(entities);
 
-	std::vector<Entity> spheres(500);
+	std::vector<Entity> spheres(20);
 	demo_collision_sphere(spheres);
 
-	std::vector<Entity> obbs(200);
+	std::vector<Entity> obbs(100);
 	demo_collision_obb(obbs);
 
 	Entity collision_tester;

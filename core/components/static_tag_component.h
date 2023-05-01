@@ -10,7 +10,7 @@ struct StaticTag {
 	}
 
 	void deserialize_json(nlohmann::json &j) {
-		nlohmann::json obj = Serializaer::get_data("static_tag", j);
+		nlohmann::json obj = Serializer::get_data("static_tag", j);
 	}
 };
 
