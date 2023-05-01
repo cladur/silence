@@ -5,6 +5,7 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <imgui_stdlib.h>
+#include <glm/gtx/matrix_decompose.hpp>
 
 #include "IconsMaterialDesign.h"
 
@@ -231,10 +232,71 @@ void Editor::imgui_viewport(Scene &scene) {
 		active_scene = our_scene_idx;
 	}
 
-	ImVec2 cursor = ImGui::GetCursorPos();
-	cursor.x += 4;
-	cursor.y += 2;
-	ImGui::SetCursorPos(cursor);
+	ImVec2 viewport_offset = ImGui::GetCursorPos();
+
+	// Get viewport size
+	ImVec2 viewport_size = ImGui::GetContentRegionAvail();
+	if (viewport_size.x != scene.last_viewport_size.x || viewport_size.y != scene.last_viewport_size.y) {
+		// Resize the framebuffer
+		scene.get_render_scene().resize_framebuffer(viewport_size.x, viewport_size.y);
+		scene.last_viewport_size = viewport_size;
+	}
+
+	uint32_t render_image = scene.get_render_scene().render_framebuffer.get_texture_id();
+	ImGui::Image((void *)(intptr_t)render_image, viewport_size, ImVec2(0, 1), ImVec2(1, 0));
+
+	// Draw gizmo
+	ImGuiIO &io = ImGui::GetIO();
+	ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, viewport_size.x, viewport_size.y);
+	ImGuizmo::SetDrawlist();
+
+	glm::mat4 *view = &scene.get_render_scene().view;
+	glm::mat4 *projection = &scene.get_render_scene().projection;
+
+	if (!scene.entities_selected.empty()) {
+		// If we have entities selected, we want to take their average position and use that as the pivot point
+		// for the gizmo
+
+		glm::mat4 temp_matrix = glm::mat4(1.0f);
+
+		// if (scene.entities_selected.size() > 1) {
+		// 	auto average_position = glm::vec3(0.0f);
+		// 	for (auto &entity : scene.entities_selected) {
+		// 		if (ecs_manager.has_component<Transform>(entity)) {
+		// 			auto &transform = ecs_manager.get_component<Transform>(entity);
+		// 			average_position += transform.get_position();
+		// 		}
+		// 	}
+
+		// 	temp_matrix = glm::translate(glm::mat4(1.0f), average_position / (float)scene.entities_selected.size());
+		// } else {
+		auto &transform = ecs_manager.get_component<Transform>(scene.entities_selected[0]);
+		temp_matrix = transform.get_global_model_matrix();
+		// float snap[3] = { 1.0f, 1.0f, 1.0f };
+		// }
+
+		if (ImGuizmo::Manipulate(glm::value_ptr(*view), glm::value_ptr(*projection), current_gizmo_operation,
+					current_gizmo_mode, glm::value_ptr(temp_matrix), nullptr, nullptr)) {
+			// Gizmo handles our final world transform, but we need to update our local transform (pos, orient,
+			// scale) In order to do that, we extract the local transform from the world transform, by
+			// multiplying by the inverse of the parent's world transform From there, we can decompose the local
+			// transform into its components (pos, orient, scale)
+			glm::vec3 skew;
+			glm::vec4 perspective;
+			// if (last_selected->parent) {
+			// 	glm::decompose(glm::inverse(last_selected->parent->transform.modelMatrix) * tempMatrix,
+			// 			last_selected->transform.scale, last_selected->transform.orient, last_selected->transform.pos,
+			// 			skew, perspective);
+			// } else {
+			glm::decompose(temp_matrix, transform.scale, transform.orientation, transform.position, skew, perspective);
+			transform.set_changed(true);
+			// }
+		}
+	}
+
+	viewport_offset.x += 4;
+	viewport_offset.y += 2;
+	ImGui::SetCursorPos(viewport_offset);
 
 	ImVec4 active_color = ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive);
 
@@ -288,67 +350,6 @@ void Editor::imgui_viewport(Scene &scene) {
 	} else {
 		if (ImGui::Button(ICON_MD_HOME " Local")) {
 			current_gizmo_mode = ImGuizmo::WORLD;
-		}
-	}
-
-	// Get viewport size
-	ImVec2 viewport_size = ImGui::GetContentRegionAvail();
-	if (viewport_size.x != scene.last_viewport_size.x || viewport_size.y != scene.last_viewport_size.y) {
-		// Resize the framebuffer
-		scene.get_render_scene().resize_framebuffer(viewport_size.x, viewport_size.y);
-		scene.last_viewport_size = viewport_size;
-	}
-
-	uint32_t render_image = scene.get_render_scene().render_framebuffer.get_texture_id();
-	ImGui::Image((void *)(intptr_t)render_image, viewport_size, ImVec2(0, 1), ImVec2(1, 0));
-
-	// Draw gizmo
-	ImGuiIO &io = ImGui::GetIO();
-	ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, viewport_size.x, viewport_size.y);
-	ImGuizmo::SetDrawlist();
-
-	glm::mat4 *view = &scene.get_render_scene().view;
-	glm::mat4 *projection = &scene.get_render_scene().projection;
-
-	if (!scene.entities_selected.empty()) {
-		// If we have entities selected, we want to take their average position and use that as the pivot point
-		// for the gizmo
-
-		glm::mat4 temp_matrix = glm::mat4(1.0f);
-
-		if (scene.entities_selected.size() > 1) {
-			auto average_position = glm::vec3(0.0f);
-			for (auto &entity : scene.entities_selected) {
-				if (ecs_manager.has_component<Transform>(entity)) {
-					auto &transform = ecs_manager.get_component<Transform>(entity);
-					average_position += transform.get_position();
-				}
-			}
-
-			temp_matrix = glm::translate(glm::mat4(1.0f), average_position / (float)scene.entities_selected.size());
-		} else {
-			auto &transform = ecs_manager.get_component<Transform>(scene.entities_selected[0]);
-			temp_matrix = transform.get_global_model_matrix();
-		}
-
-		if (ImGuizmo::Manipulate(glm::value_ptr(*view), glm::value_ptr(*projection), current_gizmo_operation,
-					current_gizmo_mode, glm::value_ptr(temp_matrix), nullptr, nullptr)) {
-			// Gizmo handles our final world transform, but we need to update our local transform (pos, orient,
-			// scale) In order to do that, we extract the local transform from the world transform, by
-			// multiplying by the inverse of the parent's world transform From there, we can decompose the local
-			// transform into its components (pos, orient, scale)
-			glm::vec3 skew;
-			glm::vec4 perspective;
-			// if (last_selected->parent) {
-			// 	glm::decompose(glm::inverse(last_selected->parent->transform.modelMatrix) * tempMatrix,
-			// 			last_selected->transform.scale, last_selected->transform.orient,
-			// 			last_selected->transform.pos, skew, perspective);
-			// } else {
-			// 	glm::decompose(temp_matrix, last_selected->transform.scale, last_selected->transform.orient,
-			// 			last_selected->transform.pos, skew, perspective);
-			// }
-
-			// last_selected->transform.isDirty = true;
 		}
 	}
 

@@ -13,8 +13,6 @@
 #define ASSET_PATH "resources/assets_export/"
 #define SHADER_PATH "resources/shaders/"
 
-AutoCVarFloat cvar_draw_distance("render.draw_distance", "Distance cull", 5000);
-
 std::string asset_path(std::string_view path) {
 	return std::string(ASSET_PATH) + std::string(path);
 }

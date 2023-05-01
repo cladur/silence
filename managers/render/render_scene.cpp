@@ -3,6 +3,9 @@
 #include "cvars/cvars.h"
 #include "render_manager.h"
 
+AutoCVarFloat cvar_fov = AutoCVarFloat("render.fov", "field of view", 70.0f);
+AutoCVarFloat cvar_draw_distance("render.draw_distance", "Distance cull", 5000);
+
 void RenderScene::startup() {
 	unlit_pass.startup();
 	pbr_pass.startup();
@@ -35,7 +38,7 @@ void RenderScene::draw() {
 	glad_glClearColor(0.275f, 0.275f, 0.275f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	projection = glm::perspective(glm::radians(70.0f), render_extent.x / render_extent.y, 0.1f, 5000.0f);
+	projection = glm::perspective(glm::radians(cvar_fov.get()), render_extent.x / render_extent.y, 0.1f, cvar_draw_distance.get());
 	view = camera.get_view_matrix();
 	camera_pos = camera.get_position();
 

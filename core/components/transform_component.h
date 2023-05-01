@@ -4,6 +4,7 @@
 #include "types.h"
 #include <spdlog/spdlog.h>
 #include <glm/ext/matrix_transform.hpp>
+#include <glm/gtc/quaternion.hpp>
 struct Transform {
 private:
 	bool changed;
@@ -21,7 +22,7 @@ private:
 
 public:
 	glm::vec3 position{};
-	glm::vec3 euler_rot{};
+	glm::quat orientation{};
 	glm::vec3 scale{};
 	void serialize_json(nlohmann::json &j) {
 		nlohmann::json obj;
@@ -31,9 +32,10 @@ public:
 		obj["position"]["x"] = position.x;
 		obj["position"]["y"] = position.y;
 		obj["position"]["z"] = position.z;
-		obj["euler_rot"]["x"] = euler_rot.x;
-		obj["euler_rot"]["y"] = euler_rot.y;
-		obj["euler_rot"]["z"] = euler_rot.z;
+		obj["orientation"]["x"] = orientation.x;
+		obj["orientation"]["y"] = orientation.y;
+		obj["orientation"]["z"] = orientation.z;
+		obj["orientation"]["w"] = orientation.w;
 		obj["scale"]["x"] = scale.x;
 		obj["scale"]["y"] = scale.y;
 		obj["scale"]["z"] = scale.z;
@@ -47,9 +49,10 @@ public:
 		position.x = obj["position"]["x"];
 		position.y = obj["position"]["y"];
 		position.z = obj["position"]["z"];
-		euler_rot.x = obj["euler_rot"]["x"];
-		euler_rot.y = obj["euler_rot"]["y"];
-		euler_rot.z = obj["euler_rot"]["z"];
+		orientation.x = obj["orientation"]["x"];
+		orientation.y = obj["orientation"]["y"];
+		orientation.z = obj["orientation"]["z"];
+		orientation.w = obj["orientation"]["w"];
 		scale.x = obj["scale"]["x"];
 		scale.y = obj["scale"]["y"];
 		scale.z = obj["scale"]["z"];
@@ -57,14 +60,14 @@ public:
 	//constructor
 	Transform(glm::vec3 position, glm::vec3 euler_rot, glm::vec3 scale) {
 		this->position = position;
-		this->euler_rot = euler_rot;
+		this->orientation = glm::quat(euler_rot);
 		this->scale = scale;
 		this->changed = true;
 	}
 
 	Transform() {
 		this->position = glm::vec3(0.0f, 0.0f, 0.0f);
-		this->euler_rot = glm::vec3(0.0f, 0.0f, 0.0f);
+		this->orientation = glm::quat();
 		this->scale = glm::vec3(1.0f, 1.0f, 1.0f);
 		this->changed = true;
 	}
@@ -73,7 +76,10 @@ public:
 		return position;
 	}
 	[[nodiscard]] glm::vec3 get_euler_rot() const {
-		return euler_rot;
+		return glm::eulerAngles(orientation);
+	}
+	[[nodiscard]] glm::quat get_orientation() const {
+		return orientation;
 	}
 	[[nodiscard]] glm::vec3 get_scale() const {
 		return scale;
@@ -105,11 +111,11 @@ public:
 		this->changed = true;
 	}
 	void set_euler_rot(glm::vec3 new_euler_rot) {
-		this->euler_rot = new_euler_rot;
+		this->orientation = glm::quat(new_euler_rot);
 		this->changed = true;
 	}
 	void add_euler_rot(glm::vec3 add_euler_rot) {
-		this->euler_rot += add_euler_rot;
+		this->orientation *= glm::quat(add_euler_rot);
 		this->changed = true;
 	}
 	void set_scale(glm::vec3 new_scale) {
@@ -144,19 +150,9 @@ public:
 	}
 
 	void calculate_local_model_matrix() {
-		const glm::mat4 transform_x =
-				glm::rotate(glm::mat4(1.0f), glm::radians(euler_rot.x), glm::vec3(1.0f, 0.0f, 0.0f));
-		const glm::mat4 transform_y =
-				glm::rotate(glm::mat4(1.0f), glm::radians(euler_rot.y), glm::vec3(0.0f, 1.0f, 0.0f));
-		const glm::mat4 transform_z =
-				glm::rotate(glm::mat4(1.0f), glm::radians(euler_rot.z), glm::vec3(0.0f, 0.0f, 1.0f));
-
-		// Y * X * Z
-		const glm::mat4 roation_matrix = transform_y * transform_x * transform_z;
-
 		// translation * rotation * scale (also known as TRS matrix)
-		this->local_model_matrix =
-				glm::translate(glm::mat4(1.0f), position) * roation_matrix * glm::scale(glm::mat4(1.0f), scale);
+		this->local_model_matrix = glm::translate(glm::mat4(1.0f), position) * glm::mat4_cast(orientation) *
+				glm::scale(glm::mat4(1.0f), scale);
 
 		changed = false;
 	}

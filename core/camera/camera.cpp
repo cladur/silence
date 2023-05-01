@@ -6,7 +6,6 @@ AutoCVarFloat cvar_camera_sensitivity("camera.sensitivity", "Camera Sensitivity"
 Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch) :
 		front(glm::vec3(0.0f, 0.0f, -1.0f)),
 		mouse_sensitivity(SENSITIVITY),
-		fov(FOV),
 		position(position),
 		up(up),
 		yaw(yaw),

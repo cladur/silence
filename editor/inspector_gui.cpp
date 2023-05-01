@@ -1,6 +1,7 @@
 #include "inspector_gui.h"
 #include <imgui.h>
 #include <imgui_stdlib.h>
+#include <glm/gtc/quaternion.hpp>
 
 void Inspector::show_components(Entity entity) {
 	ECSManager &ecs_manager = ECSManager::get();
@@ -61,15 +62,21 @@ void Inspector::show_name(Entity entity) {
 void Inspector::show_transform(Entity entity) {
 	auto &transform = ecs_manager.get_component<Transform>(entity);
 	bool changed = false;
-	if (ImGui::CollapsingHeader("Transform")) {
+	if (ImGui::CollapsingHeader("Transform"), tree_flags) {
 		float available_width = ImGui::GetContentRegionAvail().x;
 		ImGui::BeginTable("Transform", 2);
 		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+
+		glm::vec3 euler_rot = glm::degrees(transform.get_euler_rot());
+		glm::vec3 prev_euler_rot = euler_rot;
+
 		changed |= show_vec3("Position", transform.position);
-		changed |= show_vec3("Rotation", transform.euler_rot);
+		changed |= show_vec3("Rotation", euler_rot, 1.0f);
 		changed |= show_vec3("Scale", transform.scale);
 
 		if (changed) {
+			glm::vec3 change = euler_rot - prev_euler_rot;
+			transform.add_euler_rot(glm::radians(change));
 			transform.set_changed(true);
 		}
 		ImGui::EndTable();
@@ -113,7 +120,7 @@ void Inspector::show_children(Entity entity) {
 void Inspector::show_modelinstance(Entity entity) {
 	auto &modelinstance = ecs_manager.get_component<ModelInstance>(entity);
 	auto models = render_manager.get_models();
-	if (ImGui::CollapsingHeader("ModelInstance")) {
+	if (ImGui::CollapsingHeader("ModelInstance"), tree_flags) {
 		std::string name = render_manager.get_model(modelinstance.model_handle).name;
 		std::size_t last_slash_pos = name.find_last_of("/\\");
 
@@ -214,13 +221,13 @@ void Inspector::show_colliderobb(Entity entity) {
 		ImGui::TreePop();
 	}
 }
-bool Inspector::show_vec3(const char *label, glm::vec3 &vec3) {
+bool Inspector::show_vec3(const char *label, glm::vec3 &vec3, float speed) {
 	bool changed = false;
 	ImGui::TableNextRow();
 	ImGui::TableSetColumnIndex(0);
 	ImGui::Text("%s", label);
 	ImGui::TableSetColumnIndex(1);
 	ImGui::SetNextItemWidth(-FLT_MIN);
-	changed |= ImGui::DragFloat3(fmt::format("##{}", label).c_str(), &vec3.x, 0.1f);
+	changed |= ImGui::DragFloat3(fmt::format("##{}", label).c_str(), &vec3.x, speed);
 	return changed;
 }

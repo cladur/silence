@@ -4,7 +4,6 @@
 const float YAW = -90.0f;
 const float PITCH = 0.0f;
 const float SENSITIVITY = 16.0f;
-const float FOV = 60.0f;
 
 class Camera {
 	glm::vec3 position;
@@ -18,8 +17,6 @@ class Camera {
 	float zoom;
 
 public:
-	float fov;
-
 	//euler angles
 	float yaw;
 	float pitch;
