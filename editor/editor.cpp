@@ -221,7 +221,7 @@ Editor *Editor::get() {
 void Editor::startup() {
 	// Managers
 	SPDLOG_INFO("Starting up engine systems...");
-	DisplayManager::get().startup(true);
+	DisplayManager::get().startup("Silence Engine", true);
 	InputManager::get().startup();
 	ECSManager::get().startup();
 	RenderManager::get().startup();

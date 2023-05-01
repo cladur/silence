@@ -8,7 +8,7 @@ DisplayManager &DisplayManager::get() {
 	return display_manager;
 }
 
-DisplayManager::Status DisplayManager::startup(bool resizable) {
+DisplayManager::Status DisplayManager::startup(const std::string &window_name, bool resizable) {
 	if (!glfwInit()) {
 		return Status::FailedToInitializeGlfw;
 	}
@@ -20,7 +20,7 @@ DisplayManager::Status DisplayManager::startup(bool resizable) {
 
 	is_window_resizable = resizable;
 	glfwWindowHint(GLFW_RESIZABLE, resizable);
-	window = glfwCreateWindow(1280, 720, "Silence Game", nullptr, nullptr);
+	window = glfwCreateWindow(1280, 720, window_name.c_str(), nullptr, nullptr);
 
 	glfwMakeContextCurrent(window);
 

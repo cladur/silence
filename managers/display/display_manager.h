@@ -24,7 +24,7 @@ public:
 
 	static DisplayManager &get();
 
-	Status startup(bool resizable = false);
+	Status startup(const std::string &window_name, bool resizable = false);
 	void shutdown();
 
 	void capture_mouse(bool capture) const;
