@@ -4,8 +4,6 @@
 #include <glad/glad.h>
 
 #define GLFW_INCLUDE_NONE
-#include <vulkan/vulkan.h>
-
 #include <GLFW/glfw3.h>
 
 #include "managers/input/input_key.h"

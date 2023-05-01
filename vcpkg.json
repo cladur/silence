@@ -42,7 +42,7 @@
     },
     {
       "name": "imgui",
-      "version>=": "1.89.3",
+      "version>=": "1.89.4",
       "features": [
         "docking-experimental",
         "glfw-binding",

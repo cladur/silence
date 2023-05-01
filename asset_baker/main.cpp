@@ -4,7 +4,6 @@
 #include "model_asset.h"
 #include "texture_asset.h"
 #include <ktx.h>
-#include <vulkan/vulkan_core.h>
 #include <filesystem>
 #include <fstream>
 #include <future>
