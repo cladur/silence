@@ -9,18 +9,19 @@ void Inspector::show_components(Entity entity) {
 	} else {
 		entity_name = fmt::format("Entity {}", entity);
 	}
-	if (ImGui::TreeNode(entity_name.c_str())) {
-		if (ImGui::TreeNode("Components")) {
-			Signature signature = ecs_manager.get_entity_signature(entity);
-			for (int i = 0; i < signature.size(); i++) {
-				if (signature[i] == true) {
-					show_component(entity, i);
-				}
+	ImGui::BeginTable("Components", 2, ImGuiTableFlags_Borders);
+	ImGui::TableNextRow();
+	ImGui::TableSetColumnIndex(0);
+	if (ImGui::TreeNodeEx(entity_name.c_str(), tree_flags)) {
+		Signature signature = ecs_manager.get_entity_signature(entity);
+		for (int i = 0; i < signature.size(); i++) {
+			if (signature[i] == true) {
+				show_component(entity, i);
 			}
-			ImGui::TreePop();
 		}
 		ImGui::TreePop();
 	}
+	ImGui::EndTable();
 }
 void Inspector::show_component(Entity entity, int signature_index) {
 	switch (signature_index) {
@@ -70,10 +71,24 @@ void Inspector::show_name(Entity entity) {
 void Inspector::show_transform(Entity entity) {
 	auto &transform = ecs_manager.get_component<Transform>(entity);
 	bool changed = false;
-	if (ImGui::TreeNode("Transform")) {
-		changed |= ImGui::DragFloat3("Position", &transform.position.x, 0.1f);
-		changed |= ImGui::DragFloat3("Rotation", &transform.euler_rot.x, 0.1f);
-		changed |= ImGui::DragFloat3("Scale", &transform.scale.x, 0.1f);
+	ImGui::TableNextRow();
+	ImGui::TableSetColumnIndex(0);
+	if (ImGui::TreeNodeEx("Transform", tree_flags)) {
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Position");
+		ImGui::TableSetColumnIndex(1);
+		changed |= ImGui::DragFloat3("##", &transform.position.x, 0.1f);
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Rotation");
+		ImGui::TableSetColumnIndex(1);
+		changed |= ImGui::DragFloat3("##", &transform.euler_rot.x, 0.1f);
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Scale");
+		ImGui::TableSetColumnIndex(1);
+		changed |= ImGui::DragFloat3("##", &transform.scale.x, 0.1f);
 
 		if (changed) {
 			transform.set_changed(true);
@@ -83,7 +98,7 @@ void Inspector::show_transform(Entity entity) {
 }
 void Inspector::show_rigidbody(Entity entity) {
 	auto &rigidbody = ecs_manager.get_component<RigidBody>(entity);
-	if (ImGui::TreeNode("RigidBody")) {
+	if (ImGui::TreeNodeEx("RigidBody", tree_flags)) {
 		ImGui::DragFloat3("Velocity", &rigidbody.velocity.x, 0.1f);
 		ImGui::DragFloat3("Acceleration", &rigidbody.acceleration.x, 0.1f);
 		ImGui::TreePop();
@@ -91,23 +106,23 @@ void Inspector::show_rigidbody(Entity entity) {
 }
 void Inspector::show_gravity(Entity entity) {
 	auto &gravity = ecs_manager.get_component<Gravity>(entity);
-	if (ImGui::TreeNode("Gravity")) {
+	if (ImGui::TreeNodeEx("Gravity", tree_flags)) {
 		ImGui::DragFloat3("Gravity", &gravity.force.x, 0.1f);
 		ImGui::TreePop();
 	}
 }
 void Inspector::show_parent(Entity entity) {
 	auto &parent = ecs_manager.get_component<Parent>(entity);
-	if (ImGui::TreeNode("Parent")) {
+	if (ImGui::TreeNodeEx("Parent", tree_flags)) {
 		ImGui::Text("Parent: %d", parent.parent);
 		ImGui::TreePop();
 	}
 }
 void Inspector::show_children(Entity entity) {
 	auto &children = ecs_manager.get_component<Children>(entity);
-	if (ImGui::TreeNode("Children")) {
+	if (ImGui::TreeNodeEx("Children", tree_flags)) {
 		ImGui::Text("Children: %d", children.children_count);
-		if (ImGui::TreeNode("Children list")) {
+		if (ImGui::TreeNodeEx("Children list", tree_flags)) {
 			for (int i = 0; i < children.children_count; i++) {
 				ImGui::Text("%d", children.children[i]);
 			}
@@ -119,19 +134,25 @@ void Inspector::show_children(Entity entity) {
 void Inspector::show_modelinstance(Entity entity) {
 	auto &modelinstance = ecs_manager.get_component<ModelInstance>(entity);
 	auto models = render_manager.get_models();
-	if (ImGui::TreeNode("ModelInstance")) {
+	ImGui::TableNextRow();
+	ImGui::TableSetColumnIndex(0);
+	if (ImGui::TreeNodeEx("ModelInstance", tree_flags)) {
 		std::string name = render_manager.get_model(modelinstance.model_handle).name;
 		std::size_t last_slash_pos = name.find_last_of("/\\");
 
 		if (last_slash_pos != std::string::npos) {
 			name = name.substr(last_slash_pos + 1);
-			std::size_t dot_pos = name.find_last_of(".");
+			std::size_t dot_pos = name.find_last_of('.');
 			if (dot_pos != std::string::npos) {
 				name = name.substr(0, dot_pos);
 			}
 		}
 
-		if (ImGui::BeginCombo("Model", name.c_str())) {
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Model");
+		ImGui::TableSetColumnIndex(1);
+		if (ImGui::BeginCombo("##Model", name.c_str())) {
 			for (const auto &model : models) {
 				bool is_selected = (modelinstance.model_handle.id == render_manager.get_model_handle(model.name).id);
 				std::string model_name = model.name;
@@ -154,7 +175,11 @@ void Inspector::show_modelinstance(Entity entity) {
 			}
 			ImGui::EndCombo();
 		}
-		if (ImGui::BeginCombo("Material", magic_enum::enum_name(modelinstance.material_type).data())) {
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Material");
+		ImGui::TableSetColumnIndex(1);
+		if (ImGui::BeginCombo("##Material", magic_enum::enum_name(modelinstance.material_type).data())) {
 			for (auto material : magic_enum::enum_values<MaterialType>()) {
 				bool is_selected = (modelinstance.material_type == material);
 				if (ImGui::Selectable(magic_enum::enum_name(material).data(), is_selected)) {
@@ -171,7 +196,7 @@ void Inspector::show_modelinstance(Entity entity) {
 }
 void Inspector::show_fmodlistener(Entity entity) {
 	auto &fmodlistener = ecs_manager.get_component<FmodListener>(entity);
-	if (ImGui::TreeNode("FmodListener")) {
+	if (ImGui::TreeNodeEx("FmodListener", tree_flags)) {
 		ImGui::Text("Listener: %d", fmodlistener.listener_id);
 		ImGui::TreePop();
 	}
@@ -180,7 +205,7 @@ void Inspector::show_collidertag(Entity entity) {
 }
 void Inspector::show_collidersphere(Entity entity) {
 	auto &collidersphere = ecs_manager.get_component<ColliderSphere>(entity);
-	if (ImGui::TreeNode("ColliderSphere")) {
+	if (ImGui::TreeNodeEx("ColliderSphere", tree_flags)) {
 		ImGui::DragFloat3("Center", &collidersphere.center.x, 0.1f);
 		ImGui::DragFloat("Radius", &collidersphere.radius, 0.1f);
 		ImGui::Checkbox("Is movable", &collidersphere.is_movable);
@@ -189,7 +214,7 @@ void Inspector::show_collidersphere(Entity entity) {
 }
 void Inspector::show_collideraabb(Entity entity) {
 	auto &collideraabb = ecs_manager.get_component<ColliderAABB>(entity);
-	if (ImGui::TreeNode("ColliderAABB")) {
+	if (ImGui::TreeNodeEx("ColliderAABB", tree_flags)) {
 		ImGui::DragFloat3("Center", &collideraabb.center.x, 0.1f);
 		ImGui::DragFloat3("Range", &collideraabb.range.x, 0.1f);
 		ImGui::Checkbox("Is movable", &collideraabb.is_movable);
@@ -198,7 +223,7 @@ void Inspector::show_collideraabb(Entity entity) {
 }
 void Inspector::show_colliderobb(Entity entity) {
 	auto &colliderobb = ecs_manager.get_component<ColliderOBB>(entity);
-	if (ImGui::TreeNode("ColliderOBB")) {
+	if (ImGui::TreeNodeEx("ColliderOBB", tree_flags)) {
 		ImGui::DragFloat3("Center", &colliderobb.center.x, 0.1f);
 		ImGui::DragFloat3("Orientation 1", &colliderobb.orientation[0].x, 0.1f);
 		ImGui::DragFloat3("Orientation 2", &colliderobb.orientation[1].x, 0.1f);

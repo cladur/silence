@@ -43,15 +43,8 @@ void Editor::imgui_inspector() {
 
 	ImGui::Begin("Inspector");
 
-	for (auto &entity : scenes[0].entities) {
-		if (ImGui::Selectable(fmt::format("Entity {}", entity).c_str())) {
-			entities_selected.push_back(entity);
-		}
-	}
-
-	if (!entities_selected.empty()) {
-		Entity active_entity = entities_selected.back();
-		auto &transform = ecs_manager.get_component<Transform>(active_entity);
+	if (last_entity_selected > 0) {
+		Entity active_entity = last_entity_selected;
 		inspector.show_components(active_entity);
 	} else {
 		ImGui::Text("No entity selected");

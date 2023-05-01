@@ -3,9 +3,12 @@
 
 #include "ecs/ecs_manager.h"
 #include "render/render_manager.h"
+#include <imgui.h>
 #include <cstdint>
 class Inspector {
 private:
+	ImGuiTreeNodeFlags tree_flags =
+			ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_SpanFullWidth;
 	ECSManager &ecs_manager = ECSManager::get();
 	RenderManager &render_manager = RenderManager::get();
 

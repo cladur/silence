@@ -2,6 +2,7 @@
 #include "ecs/ecs_manager.h"
 #include "input/input_manager.h"
 #include "render/render_manager.h"
+#include <imgui.h>
 
 void default_mappings() {
 	InputManager &input_manager = InputManager::get();
@@ -253,7 +254,7 @@ void Editor::update(float dt) {
 
 	// GUI
 	ImGuiIO &io = ImGui::GetIO();
-	io.ConfigFlags |= ImGuiTreeNodeFlags_SpanAvailWidth;
+	io.ConfigFlags |= ImGuiTreeNodeFlags_SpanFullWidth;
 	ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
 
 	imgui_menu_bar();
