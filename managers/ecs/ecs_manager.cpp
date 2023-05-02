@@ -162,6 +162,9 @@ void ECSManager::print_components() {
 void ECSManager::add_component(Entity entity, int component_id) {
 	add_component_map[component_id](entity);
 }
+void ECSManager::remove_component(Entity entity, int component_id) {
+	remove_component_map[component_id](entity);
+}
 bool ECSManager::has_component(Entity entity, int component_id) {
 	return has_component_map[component_id](entity);
 }

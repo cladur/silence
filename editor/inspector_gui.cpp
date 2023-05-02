@@ -1,4 +1,9 @@
 #include "inspector_gui.h"
+#include "components/collider_aabb.h"
+#include "components/collider_sphere.h"
+#include "components/collider_tag_component.h"
+#include "components/fmod_listener_component.h"
+#include "components/rigidbody_component.h"
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <imgui_stdlib.h>
@@ -29,8 +34,15 @@ void Inspector::show_components() {
 		return;
 	}
 
-	for (auto component : selected_entity_components) {
-		show_component(component);
+	for (auto component_id : selected_entity_components) {
+		current_component_id = component_id;
+		show_component(component_id);
+	}
+
+	for (int i = 0; i < remove_component_queue.size(); i++) {
+		auto [entity, component_to_remove] = remove_component_queue.front();
+		ecs_manager.remove_component(entity, component_to_remove);
+		remove_component_queue.pop();
 	}
 }
 void Inspector::show_component(int signature_index) {
@@ -54,6 +66,8 @@ void Inspector::show_transform() {
 				transform.scale = glm::vec3(1.0f);
 				transform.set_changed(true);
 			}
+			remove_component_menu_item<Transform>();
+
 			ImGui::EndPopup();
 		}
 		float available_width = ImGui::GetContentRegionAvail().x;
@@ -80,6 +94,7 @@ void Inspector::show_transform() {
 void Inspector::show_rigidbody() {
 	auto &rigidbody = ecs_manager.get_component<RigidBody>(selected_entity);
 	if (ImGui::CollapsingHeader("RigidBody", tree_flags)) {
+		remove_component_popup<RigidBody>();
 		float available_width = ImGui::GetContentRegionAvail().x;
 		ImGui::BeginTable("Transform", 2);
 		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
@@ -93,6 +108,7 @@ void Inspector::show_rigidbody() {
 void Inspector::show_gravity() {
 	auto &gravity = ecs_manager.get_component<Gravity>(selected_entity);
 	if (ImGui::CollapsingHeader("Gravity", tree_flags)) {
+		remove_component_popup<Gravity>();
 		float available_width = ImGui::GetContentRegionAvail().x;
 		ImGui::BeginTable("Transform", 2);
 		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
@@ -105,6 +121,7 @@ void Inspector::show_gravity() {
 void Inspector::show_parent() {
 	auto &parent = ecs_manager.get_component<Parent>(selected_entity);
 	if (ImGui::CollapsingHeader("Parent", tree_flags)) {
+		remove_component_popup<Parent>();
 		float available_width = ImGui::GetContentRegionAvail().x;
 		ImGui::BeginTable("Model Instance", 2);
 		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
@@ -118,6 +135,7 @@ void Inspector::show_parent() {
 void Inspector::show_children() {
 	auto &children = ecs_manager.get_component<Children>(selected_entity);
 	if (ImGui::CollapsingHeader("Children", tree_flags)) {
+		remove_component_popup<Children>();
 		float available_width = ImGui::GetContentRegionAvail().x;
 		ImGui::BeginTable("Model Instance", 2);
 		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
@@ -125,12 +143,21 @@ void Inspector::show_children() {
 
 		std::string text_value = has_children ? std::to_string(children.children_count) : "None";
 		show_text("Children:", text_value.c_str());
+		ImGui::EndTable();
+		ImGui::BeginTable("HeaderTable", 3);
+		ImGui::TableSetupColumn("##Col11", ImGuiTableColumnFlags_WidthFixed, available_width * 0.1f);
+		ImGui::TableSetupColumn("##Col12", ImGuiTableColumnFlags_WidthFixed, available_width * 0.8f);
+		ImGui::TableSetupColumn("##Col13", ImGuiTableColumnFlags_WidthFixed, available_width * 0.1f);
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(1);
 		if (has_children && ImGui::CollapsingHeader("Children list", tree_flags)) {
+			ImGui::EndTable();
+			ImGui::BeginTable("Model Instance2", 2);
+			ImGui::TableSetupColumn("##Col12", ImGuiTableColumnFlags_WidthFixed, available_width * 0.2f);
 			for (int i = 0; i < children.children_count; i++) {
 				show_text("Child: ", children.children[i]);
 			}
 		}
-
 		ImGui::EndTable();
 	}
 }
@@ -138,6 +165,7 @@ void Inspector::show_modelinstance() {
 	auto &modelinstance = ecs_manager.get_component<ModelInstance>(selected_entity);
 	auto models = render_manager.get_models();
 	if (ImGui::CollapsingHeader("Model Instance", tree_flags)) {
+		remove_component_popup<ModelInstance>();
 		std::string name = render_manager.get_model(modelinstance.model_handle).name;
 		std::size_t last_slash_pos = name.find_last_of("/\\");
 
@@ -203,6 +231,7 @@ void Inspector::show_modelinstance() {
 void Inspector::show_fmodlistener() {
 	auto &fmodlistener = ecs_manager.get_component<FmodListener>(selected_entity);
 	if (ImGui::CollapsingHeader("FmodListener", tree_flags)) {
+		remove_component_popup<FmodListener>();
 		float available_width = ImGui::GetContentRegionAvail().x;
 		ImGui::BeginTable("Transform", 2);
 		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
@@ -214,6 +243,7 @@ void Inspector::show_fmodlistener() {
 }
 void Inspector::show_collidertag() {
 	if (ImGui::CollapsingHeader("ColliderTag", tree_flags)) {
+		remove_component_popup<ColliderTag>();
 		float available_width = ImGui::GetContentRegionAvail().x;
 		ImGui::BeginTable("Transform", 2);
 		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
@@ -226,6 +256,7 @@ void Inspector::show_collidertag() {
 void Inspector::show_collidersphere() {
 	auto &collidersphere = ecs_manager.get_component<ColliderSphere>(selected_entity);
 	if (ImGui::CollapsingHeader("ColliderSphere", tree_flags)) {
+		remove_component_popup<ColliderSphere>();
 		float available_width = ImGui::GetContentRegionAvail().x;
 		ImGui::BeginTable("Transform", 2);
 		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
@@ -240,6 +271,7 @@ void Inspector::show_collidersphere() {
 void Inspector::show_collideraabb() {
 	auto &collideraabb = ecs_manager.get_component<ColliderAABB>(selected_entity);
 	if (ImGui::CollapsingHeader("ColliderAABB", tree_flags)) {
+		remove_component_popup<ColliderAABB>();
 		float available_width = ImGui::GetContentRegionAvail().x;
 		ImGui::BeginTable("Transform", 2);
 		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
@@ -254,6 +286,7 @@ void Inspector::show_collideraabb() {
 void Inspector::show_colliderobb() {
 	auto &colliderobb = ecs_manager.get_component<ColliderOBB>(selected_entity);
 	if (ImGui::CollapsingHeader("ColliderOBB", tree_flags)) {
+		remove_component_popup<ColliderOBB>();
 		float available_width = ImGui::GetContentRegionAvail().x;
 		ImGui::BeginTable("Transform", 2);
 		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
@@ -393,6 +426,7 @@ void Inspector::add_mapping(int signature_index, std::function<void()> func) {
 	Inspector &inspector = Inspector::get();
 	inspector.show_component_map[signature_index] = std::move(func);
 }
+
 void Inspector::refresh_entity() {
 	selected_entity_signature = ecs_manager.get_entity_signature(selected_entity);
 	int number_of_components = ecs_manager.get_registered_components();

@@ -11,12 +11,14 @@ private:
 	std::unique_ptr<EntityManager> entity_manager;
 	std::unique_ptr<SystemManager> system_manager;
 
-	// Maps with add/has component function calls that use id of component instead of object. Component has the same id
-	// as its index in the vector of component_names which are added when component is registered
+	// Maps with add/has/remove component function calls that use id of component instead of object. Component has the
+	// same id as its index in the vector of component_names which are added when component is registered
 	std::unordered_map<int, std::function<void(Entity entity)>> add_component_map;
+	std::unordered_map<int, std::function<void(Entity entity)>> remove_component_map;
 	std::unordered_map<int, std::function<bool(Entity entity)>> has_component_map;
 
 	std::vector<std::string> component_names;
+	std::unordered_map<std::string, int> component_ids;
 	int registered_components = 0;
 
 public:
@@ -43,8 +45,10 @@ public:
 		type_name = type_name.substr(pos + 1);
 		int type_id = component_names.size();
 		component_names.emplace_back(type_name);
+		component_ids[type_name] = type_id;
 
 		add_component_map[type_id] = [this](Entity entity) { add_component(entity, T{}); };
+		remove_component_map[type_id] = [this](Entity entity) { remove_component<T>(entity); };
 		has_component_map[type_id] = [this](Entity entity) { return has_component<T>(entity); };
 
 		registered_components++;
@@ -104,6 +108,10 @@ public:
 		system_manager->set_component_blacklist<T>(signature);
 	}
 
+	template <typename T> int get_component_id() {
+		return component_ids[typeid(T).name()];
+	}
+
 	// Specific parent system methods
 	bool add_child(Entity parent, Entity child, bool keep_transform = false);
 	bool remove_child(Entity parent, Entity child, bool keep_transform = false);
@@ -114,6 +122,7 @@ public:
 	void print_components();
 
 	void add_component(Entity entity, int component_id);
+	void remove_component(Entity entity, int component_id);
 	bool has_component(Entity entity, int component_id);
 
 	Signature get_entity_signature(Entity entity);

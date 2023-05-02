@@ -84,7 +84,26 @@ void Editor::imgui_scene(Scene &scene) {
 	cursor_pos.y += 4;
 	ImGui::SetCursorPos(cursor_pos);
 
-	ImGui::Button(ICON_MD_ADD, ImVec2(20, 20));
+	// ADD ENTITY BUTTON
+	if (ImGui::Button(ICON_MD_ADD, ImVec2(20, 20))) {
+		ImGui::OpenPopup("Add Entity");
+	}
+
+	if (ImGui::BeginPopup("Add Entity")) {
+		ImGui::SeparatorText("Basic");
+		if (ImGui::MenuItem("Empty")) {
+			Entity new_entity = ecs_manager.create_entity();
+			ecs_manager.add_component(new_entity, Transform{});
+			scene.entities.push_back(new_entity);
+			scene.last_entity_selected = new_entity;
+		}
+		ImGui::SeparatorText("Prefabs");
+
+		ImGui::EndPopup();
+	}
+
+	// --------------------
+
 	ImGui::SameLine();
 	float avail_x = ImGui::GetContentRegionAvail().x;
 	static ImGuiTextFilter filter;
