@@ -1,7 +1,7 @@
 #include "ui_slider.h"
 
-UISlider::UISlider(float value, float min, float max, bool is_stepped)
-	: value(value), min(min), max(max), is_stepped(is_stepped) {
+UISlider::UISlider(float value, float min, float max)
+	: value(value), min(min), max(max) {
 }
 
 UISlider::~UISlider() {
@@ -32,7 +32,7 @@ void UISlider::draw() {
 				break;
 		}
 
-		sprite_draw::draw_colored(new_position, new_size, color, is_screen_space, alignment);
+		sprite_draw::draw_colored(new_position + glm::vec3(0.0f, 0.0f, 0.01f), new_size, color, is_screen_space, alignment);
 		sprite_draw::draw_colored(position, size, glm::vec3(0.0f), is_screen_space, alignment);
 	} else {
 		sprite_draw::draw_slider_billboard(

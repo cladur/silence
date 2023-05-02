@@ -335,9 +335,6 @@ int main() {
 	auto opengl_system = ecs_manager.register_system<OpenglSystem>();
 	opengl_system->startup();
 
-	SpriteManager::get()->load_sprite_texture("ui_width", "ui_width.ktx2");
-	SpriteManager::get()->load_sprite_texture("ui_height", "ui_height.ktx2");
-	SpriteManager::get()->load_sprite_texture("kek", "kek.ktx2");
 	SpriteManager::get()->load_sprite_texture("pointer", "gun_sight.ktx2");
 	SpriteManager::get()->load_sprite_texture("skull", "skull_emoji.ktx2");
 	SpriteManager::get()->load_sprite_texture("anchor_debug", "anchor_debug.ktx2");
@@ -408,24 +405,45 @@ int main() {
 	UIAnchor anchor = UIAnchor(0.5f, 0.5f);
 
 //	// IMAGE
-//	UIImage image = UIImage(glm::vec3(-200.0f, 0.0f, 3.0f), glm::vec2(100.0f, 100.0f), "skull");
-//	image.is_screen_space = true;
-//	image.is_billboard = false;
-//	//anchor.add_child(image);
-//
-//	UIText text = UIText(glm::vec3(-200.0f, 0.0f, 1.0f), 0.5f, "Hello World!", "one");
-//	text.is_screen_space = true;
-//	anchor.add_child(text);
+	UIImage image = UIImage(glm::vec3(-5.0f, 0.0f, 0.0f), glm::vec2(3.0f, 3.0f), "skull");
+	image.is_screen_space = false;
+	image.is_billboard = true;
+
+	UIImage image_ss = UIImage(glm::vec3(0.0f, 150.0f, 0.0f), glm::vec2(100.0f, 100.0f), "pointer");
+	image_ss.is_screen_space = true;
+	image_ss.is_billboard = false;
+ 	anchor.add_child(image_ss);
+
+	UIText text_ss = UIText(glm::vec3(-600.0f, 300.0f, 1.0f), 0.5f, "everything is relative to the anchor in the middle", "two");
+	text_ss.is_screen_space = true;
+	anchor.add_child(text_ss);
+
+	UIText text = UIText(glm::vec3(5.0f, 0.0f, 1.0f), 1.5f, "Hello World!", "one");
+	text.is_screen_space = false;
+	text.is_billboard = true;
+	text.centered_x = true;
+	text.centered_y = true;
 
 	UIButton button = UIButton(
-			glm::vec3(200.0f, 0.0f, 2.0f),
+			glm::vec3(400.0f, 300.0f, 2.0f),
 			glm::vec2(300.0f, 300.0f),
 			"button",
 			"two",
 			"button_bg");
 	button.text_color = glm::vec4(0.87f, 0.9f, 0.92f, 1.0f);
-
 	anchor.add_child(button);
+
+	UISlider slider_ss = UISlider(0.0f, 0.0f, 1.0f);
+	slider_ss.is_screen_space = true;
+	slider_ss.position = glm::vec3(0.0f, -300.0f, 0.0f);
+	slider_ss.size = glm::vec2(400.0f, 30.0f);
+	anchor.add_child(slider_ss);
+
+	UISlider slider = UISlider(0.0f, 0.0f, 1.0f);
+	slider.is_screen_space = false;
+	slider.is_billboard = true;
+	slider.position = glm::vec3(0.0f, -3.0f, 0.0f);
+	slider.size = glm::vec2(7.0f, 1.0f);
 
 	bool should_run = true;
 	nlohmann::json scene;
@@ -552,40 +570,26 @@ int main() {
 		render_system->update(*RenderManager::get());
 #endif
 
-		ImGui::Begin("Text Demo");
+		ImGui::Begin("UI Demo");
 
 		static char buffer[128] = { 'H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd', '!' };
-		static float scale = 1.0f;
-		static float position[3] = { 0.0f, 0.0f, 0.0f };
-		static float rotation[3] = { 0.0f, 0.0f, 0.0f };
-		static glm::vec3 color = { 1.0f, 1.0f, 1.0f };
-		static bool screenspace = false;
-		static bool centered_x = false;
-		static bool centered_y = false;
 		ImGui::InputText("Text", buffer, 128);
-		ImGui::InputFloat("Scale", &scale);
-		ImGui::InputFloat3("Position", position);
-		ImGui::InputFloat3("Rotation", rotation);
-		ImGui::InputFloat3("Color", &color.x);
-		ImGui::Checkbox("Screenspace", &screenspace);
-		ImGui::Checkbox("Center X", &centered_x);
-		ImGui::Checkbox("Center Y", &centered_y);
+		static float value = 0.0f;
+		ImGui::SliderFloat("Float", &value, 0.0f, 1.0f);
 
 		ImGui::End();
 
+		text.text = std::string(buffer);
+		slider_ss.value = value;
+		slider.value = value;
+		// billboards
+		text.draw();
+		image.draw();
+		slider.draw();
 
-//		debug_draw::draw_line(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(10.0f, 0.0f, 0.0f));
-//		debug_draw::draw_line(glm::vec3(0.0f, 5.0f, 0.0f), glm::vec3(10.0f, 0.0f, 0.0f));
-//
-//		debug_draw::draw_line(glm::vec3(0.0f, 5.0f, 10.0f), glm::vec3(10.0f, 0.0f, 2.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-//
-//		debug_draw::draw_box(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-//		debug_draw::draw_box(glm::vec3(0.0f, 5.0f, 0.0f), glm::vec3(10.0f, 1.0f, 1.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-
-		//text.text = std::string(buffer);
-
-		//image.draw();
+		// all screenspace elements
 		anchor.draw();
+
 		if (button.clicked()) {
 			std::cout << "BUTTON CLICKED!" << std::endl;
 		}

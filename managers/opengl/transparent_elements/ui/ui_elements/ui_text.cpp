@@ -19,7 +19,8 @@ void UIText::draw() {
 			texture_name,
 			centered_x,
 			centered_y,
-			glm::vec3(0.0f));
+			glm::vec3(0.0f),
+			is_billboard);
 
 	for (auto& child : children) {
 		child->draw(position, size);
@@ -37,7 +38,8 @@ void UIText::draw(glm::vec3 parent_position, glm::vec2 parent_size) {
 			texture_name,
 			centered_x,
 			centered_y,
-			glm::vec3(0.0f));
+			glm::vec3(0.0f),
+			is_billboard);
 
 	for (auto& child : children) {
 		child->draw(position, size);

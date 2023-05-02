@@ -87,13 +87,12 @@ void draw_text_3d(const std::string &text, const glm::vec3 &position, const glm:
 }
 
 void draw_text(const std::string &text, bool is_screen_space, const glm::vec3 &position, const glm::vec3 &color,
-		float scale, std::string font_name, bool center_x, bool center_y, const glm::vec3 &rotation) {
+		float scale, std::string font_name, bool center_x, bool center_y, const glm::vec3 &rotation, bool billboard) {
 
 	auto font_manager = FontManager::get();
 
 	TransparentObject object = {};
 	object.transform = glm::mat4(1.0f);
-	object.position = position;
 	object.texture_name = "";
 
 	Font *font = &font_manager->fonts.begin()->second;
@@ -106,12 +105,6 @@ void draw_text(const std::string &text, bool is_screen_space, const glm::vec3 &p
 	}
 
 	OpenglManager *opengl_manager = OpenglManager::get();
-	//TextDraw &text_draw = opengl_manager->text_draw;
-
-	// We're scaling the text by arbitrary amount
-	// Correct way to do it would be to calculate it based on the font size which we loaded using FreeType
-	// But whatever
-	//scale *= 0.02f;
 
 	// We're scaling down the font even more if it's in screenspace coords, cause they are just [-1; 1]
 	float screen_space_scale = 1.0f;
@@ -126,6 +119,14 @@ void draw_text(const std::string &text, bool is_screen_space, const glm::vec3 &p
 	}
 
 	float x = position.x;
+	float y = position.y;
+	float z = position.z;
+	if (billboard) {
+		x = 0.0f;
+		y = 0.0f;
+		z = 0.0f;
+	}
+
 	if (center_x) {
 		float text_width = 0.0f;
 		for (char c : text) {
@@ -140,7 +141,7 @@ void draw_text(const std::string &text, bool is_screen_space, const glm::vec3 &p
 		x -= text_width / 2.0f;
 	}
 
-	float y = position.y;
+
 	if (center_y) {
 		float text_height = 0.0f;
 		for (char c : text) {
@@ -162,6 +163,9 @@ void draw_text(const std::string &text, bool is_screen_space, const glm::vec3 &p
 	rotation_matrix = glm::rotate(rotation_matrix, glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
 	rotation_matrix = glm::rotate(rotation_matrix, glm::radians(rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
 
+	glm::vec2 text_size = glm::vec2(0.0f);
+	text_size.x = x;
+	text_size.y = y;
 
 	for (char c : text) {
 		Character character = font->characters[c];
@@ -171,7 +175,7 @@ void draw_text(const std::string &text, bool is_screen_space, const glm::vec3 &p
 
 		float xpos = x + character.bearing.x * scale;
 		float ypos = y - (y_size - character.bearing.y) * scale;
-		float zpos = position.z;
+		float zpos = z;
 
 		float w = x_size * scale * aspect;
 		float h = y_size * scale;
@@ -212,6 +216,12 @@ void draw_text(const std::string &text, bool is_screen_space, const glm::vec3 &p
 		// now advance cursors for next glyph (note that advance is number of 1/64 pixels)
 		x += (character.advance >> 6) * scale * aspect; // bitshift by 6 to get value in pixels (2^6 = 64)
 	}
+	text_size.x = abs(x - text_size.x);
+
+	object.type = TransparentType::TEXT;
+	object.billboard = true;
+	object.size = text_size / 2.0f;
+	object.position = position;
 	opengl_manager->transparent_draw.objects.push_back(object);
 }
 

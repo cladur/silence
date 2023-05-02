@@ -211,8 +211,6 @@ void sprite_draw::draw_sprite_billboard(const glm::vec3 &position, const glm::ve
 
 	TransparentObject sprite = default_vertex_data(glm::vec3(0.0f), size, (float)t.width, (float)t.height, color, false, sprite_draw::Alignment::NONE);
 
-	auto view = OpenglManager::get()->view;
-
 	sprite.texture_name = texture_name;
 	sprite.billboard = true;
 	sprite.size = size / 2.0f;

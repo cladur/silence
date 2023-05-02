@@ -11,7 +11,7 @@ public:
 	bool is_stepped = false;
 	sprite_draw::SliderAlignment slider_alignment = sprite_draw::SliderAlignment::LEFT_TO_RIGHT;
 
-	UISlider(float value, float min, float max, bool is_stepped);
+	UISlider(float value, float min, float max);
 	~UISlider();
 
 	void draw() override;
