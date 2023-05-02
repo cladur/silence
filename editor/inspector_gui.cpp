@@ -1,5 +1,6 @@
 #include "inspector_gui.h"
 #include <imgui.h>
+#include <imgui_internal.h>
 #include <imgui_stdlib.h>
 #include <glm/gtc/quaternion.hpp>
 
@@ -254,17 +255,39 @@ void Inspector::show_add_component() {
 
 	if (open_popup) {
 		ImGui::OpenPopup("add_component_popup");
+		ImGui::SetNextWindowFocus();
 	}
 
-	if (ImGui::BeginPopup("add_component_popup")) {
-		ImGui::SeparatorText("Components");
-		for (auto component_id : not_selected_entity_components) {
-			if (ImGui::Selectable(component_names[component_id].c_str())) {
-				ecs_manager.add_component(selected_entity, component_id);
-				set_active_entity(selected_entity);
+	ImGui::SetNextWindowSize(ImVec2(200, 0));
+	if (ImGui::IsPopupOpen("add_component_popup")) {
+		ImGui::GetIO().WantTextInput = true;
+		if (ImGui::BeginPopup("add_component_popup")) {
+			//ImGui::SeparatorText("Components");
+			float components_filter_available_width = ImGui::GetContentRegionAvail().x;
+			static ImGuiTextFilter components_filter;
+			components_filter.Draw("##component_filter", components_filter_available_width - 5);
+
+			ImGui::Separator();
+			ImGui::SetWindowFontScale(1.15f);
+			ImGui::SameLine(ImGui::GetWindowWidth() / 2 - ImGui::CalcTextSize("Search").x / 2);
+			ImGui::Text("Search");
+			ImGui::SetWindowFontScale(1);
+			ImGui::Separator();
+
+			for (auto component_id : not_selected_entity_components) {
+				const char *component_name = component_names[component_id].c_str();
+
+				if (!components_filter.PassFilter(component_name)) {
+					continue;
+				}
+
+				if (ImGui::Selectable(component_name)) {
+					ecs_manager.add_component(selected_entity, component_id);
+					set_active_entity(selected_entity);
+				}
 			}
+			ImGui::EndPopup();
 		}
-		ImGui::EndPopup();
 	}
 }
 
