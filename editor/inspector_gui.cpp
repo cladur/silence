@@ -44,6 +44,18 @@ void Inspector::show_transform() {
 	auto &transform = ecs_manager.get_component<Transform>(selected_entity);
 	bool changed = false;
 	if (ImGui::CollapsingHeader("Transform", tree_flags)) {
+		if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+			ImGui::OpenPopup("TransformContextMenu");
+		}
+		if (ImGui::BeginPopup("TransformContextMenu")) {
+			if (ImGui::MenuItem("Reset Transform")) {
+				transform.position = glm::vec3(0.0f);
+				transform.orientation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+				transform.scale = glm::vec3(1.0f);
+				transform.set_changed(true);
+			}
+			ImGui::EndPopup();
+		}
 		float available_width = ImGui::GetContentRegionAvail().x;
 		ImGui::BeginTable("Transform", 2);
 		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
@@ -53,11 +65,13 @@ void Inspector::show_transform() {
 
 		changed |= show_vec3("Position", transform.position);
 		changed |= show_vec3("Rotation", euler_rot, 1.0f);
-		changed |= show_vec3("Scale", transform.scale);
+		changed |= show_vec3("Scale", transform.scale, 0.1f, 1.0f);
 
 		if (changed) {
-			glm::vec3 change = euler_rot - prev_euler_rot;
-			transform.add_euler_rot(glm::radians(change));
+			glm::vec3 change = glm::radians(euler_rot - prev_euler_rot);
+			transform.add_euler_rot(glm::vec3(change.x, 0.0f, 0.0f));
+			transform.add_euler_rot(glm::vec3(0.0f, change.y, 0.0f));
+			transform.add_euler_rot(glm::vec3(0.0f, 0.0f, change.z));
 			transform.set_changed(true);
 		}
 		ImGui::EndTable();
@@ -253,12 +267,16 @@ void Inspector::show_colliderobb() {
 		ImGui::EndTable();
 	}
 }
-bool Inspector::show_vec3(const char *label, glm::vec3 &vec3, float speed) {
+bool Inspector::show_vec3(const char *label, glm::vec3 &vec3, float speed, float reset_value) {
 	bool changed = false;
 
 	ImGui::TableNextRow();
 	ImGui::TableSetColumnIndex(0);
 	ImGui::Text("%s", label);
+	if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+		vec3 = glm::vec3(reset_value);
+		changed = true;
+	}
 	ImGui::TableSetColumnIndex(1);
 	ImGui::SetNextItemWidth(-FLT_MIN);
 	changed |= ImGui::DragFloat3(fmt::format("##{}", label).c_str(), &vec3.x, speed);
