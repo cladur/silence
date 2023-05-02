@@ -14,6 +14,8 @@ public:
 	std::vector<UIElement*> children;
 	sprite_draw::Alignment alignment = sprite_draw::Alignment::NONE;
 
+	glm::vec3 parent_position = glm::vec3(0.0f);
+
 	virtual void draw();
 	virtual void draw(glm::vec3 parent_position, glm::vec2 parent_size);
 	virtual void add_child(UIElement &child);

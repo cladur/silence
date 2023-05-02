@@ -5,6 +5,8 @@ UIAnchor::UIAnchor(float x, float y) : x(x), y(y) {
 	alignment = sprite_draw::Alignment::NONE;
 	size = glm::vec2(1.0f, 1.0f);
 	texture_name = "anchor_debug";
+	glm::vec2 d_size = DisplayManager::get()->get_framebuffer_size();
+	position = glm::vec3(d_size.x * x, d_size.y * y, -99.0f);
 }
 
 void UIAnchor::draw() {

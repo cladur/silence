@@ -61,10 +61,10 @@ TransparentObject default_vertex_data(const glm::vec3 &position, const glm::vec2
 
 // draws a single colored quad. If is screen spaced, the scale represents pixel scale.
 void draw_colored(const glm::vec3 &position, const glm::vec2 &size, const glm::vec3 &color, bool is_screen_space,
-		Alignment alignment = Alignment::CENTER);
+		Alignment alignment = Alignment::NONE);
 void draw_colored_billboard(const glm::vec3 &position, const glm::vec2 &size, const glm::vec3 &color);
 void draw_sprite(const glm::vec3 &position, const glm::vec2 &size, const glm::vec3 &color, const char *texture_name,
-		bool is_screen_space, Alignment alignment = Alignment::CENTER);
+		bool is_screen_space, Alignment alignment = Alignment::NONE);
 void draw_sprite_billboard(const glm::vec3 &position, const glm::vec2 &size, const glm::vec3 &color, const char *texture_name);
 
 void draw_slider_billboard(const glm::vec3 &position, float add_z, const glm::vec2 &size,

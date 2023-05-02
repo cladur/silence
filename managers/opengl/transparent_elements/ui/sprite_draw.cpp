@@ -156,18 +156,18 @@ TransparentObject sprite_draw::default_vertex_data(
 	float sprite_y_aspect = 1.0f;
 
 	if (sprite_x_size > sprite_y_size) {
-		sprite_y_aspect = sprite_x_size / sprite_y_size;
+		sprite_y_aspect = sprite_y_size / sprite_x_size;
 	}
 	else {
-		sprite_x_aspect = sprite_y_size / sprite_x_size;
+		sprite_x_aspect = sprite_x_size / sprite_y_size;
 	}
 
 	float x = aligned_position.x * aspect;
 	float y = aligned_position.y;
 	float z = position.z;
 
-	float w = size.x / 2.0f * aspect * sprite_y_aspect;
-	float h = size.y / 2.0f * sprite_x_aspect;
+	float w = size.x / 2.0f * aspect * sprite_x_aspect;
+	float h = size.y / 2.0f * sprite_y_aspect;
 
 	//update the vertices
 	sprite.vertices[0] = { { x - w, y + h, z }, color, { 0.0f, 0.0f }, is_screen_space }; // 0

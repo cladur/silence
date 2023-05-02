@@ -42,6 +42,7 @@
 #include "core/camera/camera.h"
 #include "opengl/transparent_elements/ui/sprite_manager.h"
 #include "opengl/transparent_elements/ui/ui_elements/ui_anchor.h"
+#include "opengl/transparent_elements/ui/ui_elements/ui_button.h"
 #include "opengl/transparent_elements/ui/ui_elements/ui_image.h"
 #include "opengl/transparent_elements/ui/ui_elements/ui_slider.h"
 #include "opengl/transparent_elements/ui/ui_elements/ui_text.h"
@@ -98,6 +99,9 @@ void default_mappings() {
 	input_manager.add_key_to_action("collider_up", InputKey::O);
 	input_manager.add_action("collider_down");
 	input_manager.add_key_to_action("collider_down", InputKey::U);
+
+	input_manager.add_action("mouse_left");
+	input_manager.add_key_to_action("mouse_left", InputKey::MOUSE_LEFT);
 }
 
 void default_ecs_manager_init() {
@@ -337,6 +341,7 @@ int main() {
 	SpriteManager::get()->load_sprite_texture("pointer", "gun_sight.ktx2");
 	SpriteManager::get()->load_sprite_texture("skull", "skull_emoji.ktx2");
 	SpriteManager::get()->load_sprite_texture("anchor_debug", "anchor_debug.ktx2");
+	SpriteManager::get()->load_sprite_texture("button_bg", "button_bg.ktx2");
 
 #else
 	auto render_system = ecs_manager.register_system<RenderSystem>();
@@ -402,27 +407,25 @@ int main() {
 	// UI ANCHOR
 	UIAnchor anchor = UIAnchor(0.5f, 0.5f);
 
-	// SLIDER
-	UISlider slider_test = UISlider(0.0f, 0.0f, 1.0f, false);
-	slider_test.position = glm::vec3(200.0f, 0.0f, 1.0f);
-	slider_test.size = glm::vec2(200.0f, 20.0f);
-	slider_test.slider_alignment = sprite_draw::SliderAlignment::LEFT_TO_RIGHT;
-	float slider_value = 0.0f;
-	anchor.add_child(slider_test);
+//	// IMAGE
+//	UIImage image = UIImage(glm::vec3(-200.0f, 0.0f, 3.0f), glm::vec2(100.0f, 100.0f), "skull");
+//	image.is_screen_space = true;
+//	image.is_billboard = false;
+//	//anchor.add_child(image);
+//
+//	UIText text = UIText(glm::vec3(-200.0f, 0.0f, 1.0f), 0.5f, "Hello World!", "one");
+//	text.is_screen_space = true;
+//	anchor.add_child(text);
 
-	// IMAGE
-	UIImage image = UIImage(glm::vec3(-200.0f, 0.0f, 0.0f), glm::vec2(150.0f, 150.0f), "skull");
-	image.is_screen_space = true;
-	image.is_billboard = false;
-	anchor.add_child(image);
+	UIButton button = UIButton(
+			glm::vec3(200.0f, 0.0f, 2.0f),
+			glm::vec2(300.0f, 300.0f),
+			"button",
+			"two",
+			"button_bg");
+	button.text_color = glm::vec4(0.87f, 0.9f, 0.92f, 1.0f);
 
-	UIText text = UIText(glm::vec3(-200.0f, 0.0f, 1.0f), 0.5f, "Hello World!", "one");
-	text.is_screen_space = true;
-	anchor.add_child(text);
-
-	UIText text2 = UIText(glm::vec3(-200.0f, 0.0f, 2.0f), 0.5f, "agdf4ejtg", "two");
-	text2.is_screen_space = true;
-	//anchor.add_child(text2);
+	anchor.add_child(button);
 
 	bool should_run = true;
 	nlohmann::json scene;
@@ -522,9 +525,7 @@ int main() {
 			audio_manager.play_one_shot_3d(test_pluck, sound_position);
 		}
 
-		ImGui::SliderFloat("Slider test", &slider_value, 0.0f, 1.0f);
 		// 3D SOUND DEMO
-
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
 				ImGui::GetIO().Framerate);
 
@@ -572,15 +573,6 @@ int main() {
 
 		ImGui::End();
 
-//		text_draw::draw_text(std::string(buffer),
-//				screenspace,
-//				glm::vec3(position[0], position[1], position[2]),
-//				color,
-//				scale,
-//				"one",
-//				centered_x,
-//				centered_y,
-//				glm::vec3(rotation[0], rotation[1], rotation[2]));
 
 //		debug_draw::draw_line(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(10.0f, 0.0f, 0.0f));
 //		debug_draw::draw_line(glm::vec3(0.0f, 5.0f, 0.0f), glm::vec3(10.0f, 0.0f, 0.0f));
@@ -590,12 +582,13 @@ int main() {
 //		debug_draw::draw_box(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 //		debug_draw::draw_box(glm::vec3(0.0f, 5.0f, 0.0f), glm::vec3(10.0f, 1.0f, 1.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 
-
-		slider_test.value = slider_value;
-		text.text = std::string(buffer);
+		//text.text = std::string(buffer);
 
 		//image.draw();
 		anchor.draw();
+		if (button.clicked()) {
+			std::cout << "BUTTON CLICKED!" << std::endl;
+		}
 
 		// TODO: remove this when collision demo will be removed
 		for (auto sphere : spheres) {

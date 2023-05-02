@@ -20,6 +20,10 @@ void UIText::draw() {
 			centered_x,
 			centered_y,
 			glm::vec3(0.0f));
+
+	for (auto& child : children) {
+		child->draw(position, size);
+	}
 }
 
 void UIText::draw(glm::vec3 parent_position, glm::vec2 parent_size) {
@@ -34,4 +38,8 @@ void UIText::draw(glm::vec3 parent_position, glm::vec2 parent_size) {
 			centered_x,
 			centered_y,
 			glm::vec3(0.0f));
+
+	for (auto& child : children) {
+		child->draw(position, size);
+	}
 }
