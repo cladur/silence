@@ -407,7 +407,7 @@ int main() {
 	slider_test.size = glm::vec2(200.0f, 20.0f);
 	slider_test.slider_alignment = sprite_draw::SliderAlignment::LEFT_TO_RIGHT;
 	float slider_value = 0.0f;
-	//anchor.add_child(slider_test);
+	anchor.add_child(slider_test);
 
 	// IMAGE
 	UIImage image = UIImage(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec2(1.0f, 1.0f), "skull");
@@ -571,6 +571,16 @@ int main() {
 				"one",
 				centered_x,
 				centered_y,
+				glm::vec3(rotation[0], rotation[1] + 1.0f, rotation[2]));
+
+		text_draw::draw_text(std::string(buffer),
+				screenspace,
+				glm::vec3(position[0], position[1] -1.0f, position[2]),
+				color,
+				scale,
+				"two",
+				centered_x,
+				centered_y,
 				glm::vec3(rotation[0], rotation[1], rotation[2]));
 
 //		debug_draw::draw_line(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(10.0f, 0.0f, 0.0f));
@@ -583,8 +593,8 @@ int main() {
 
 
 		slider_test.value = slider_value;
-		image.draw();
-		//anchor.draw();
+		//image.draw();
+		anchor.draw();
 
 		// TODO: remove this when collision demo will be removed
 		for (auto sphere : spheres) {

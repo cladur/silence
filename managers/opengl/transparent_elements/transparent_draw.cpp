@@ -45,7 +45,6 @@ void TransparentDraw::draw() {
 
 	// transparency sorting for world-space objects
 	std::sort(objects.begin(), objects.end(), [cam_pos](const TransparentObject &a, const TransparentObject &b) {
-		SPDLOG_INFO("{} cam distance {}, {} cam distance {}", a.texture_name ,glm::distance(cam_pos, a.position), b.texture_name, glm::distance(cam_pos, b.position));
 		return glm::distance(cam_pos, a.position) > glm::distance(cam_pos, b.position);
 	});
 
@@ -61,7 +60,6 @@ void TransparentDraw::draw() {
 		if (object.vertices[0].is_screen_space == 1) {
 			// skup drawing billboards now, we'll draw them after we're finished with all the world-space objects
 			screen_space_objects.push_back(object);
-			SPDLOG_INFO("screen space object pushed");
 			continue;
 		}
 
