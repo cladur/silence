@@ -45,7 +45,7 @@ struct ColliderOBB {
 		range.z = obj["range"]["z"];
 	}
 
-	void setup_range(const std::vector<glm::vec3> &vertices) {
+	void setup_collider(const std::vector<glm::vec3> &vertices) {
 		glm::vec3 min(std::numeric_limits<float>::max());
 		glm::vec3 max(-std::numeric_limits<float>::max());
 

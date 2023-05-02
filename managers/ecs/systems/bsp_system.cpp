@@ -32,18 +32,27 @@ void BSPSystem::resolve_collision(BSPNode *node, Entity entity, CollisionSystem 
 	}
 
 	Side side;
-	ColliderOBB *obb;
-	ColliderAABB *aabb;
-	ColliderSphere *sphere;
+	Transform &t = ecs_manager.get_component<Transform>(entity);
 	if (ecs_manager.has_component<ColliderOBB>(entity)) {
-		obb = &ecs_manager.get_component<ColliderOBB>(entity);
-		side = process_collider(node->plane, *obb);
+		ColliderOBB &obb = ecs_manager.get_component<ColliderOBB>(entity);
+		ColliderOBB c;
+		c.set_orientation(t.get_euler_rot());
+		glm::mat3 o = c.get_orientation_matrix();
+		c.range = obb.range * t.get_scale();
+		c.center = t.get_position() + o * (obb.center * c.range);
+		side = process_collider(node->plane, c);
 	} else if (ecs_manager.has_component<ColliderAABB>(entity)) {
-		aabb = &ecs_manager.get_component<ColliderAABB>(entity);
-		side = process_collider(node->plane, *aabb);
+		ColliderAABB &aabb = ecs_manager.get_component<ColliderAABB>(entity);
+		ColliderAABB c;
+		c.range = aabb.range * t.get_scale();
+		c.center = t.get_position() + aabb.center * c.range;
+		side = process_collider(node->plane, c);
 	} else if (ecs_manager.has_component<ColliderSphere>(entity)) {
-		sphere = &ecs_manager.get_component<ColliderSphere>(entity);
-		side = process_collider(node->plane, *sphere);
+		ColliderSphere &sphere = ecs_manager.get_component<ColliderSphere>(entity);
+		ColliderSphere c;
+		c.radius = sphere.radius * t.get_scale().x;
+		c.center = t.get_position() + sphere.center * c.radius;
+		side = process_collider(node->plane, c);
 	} else {
 		SPDLOG_WARN("Movable object has invalid collider");
 		return;
@@ -75,13 +84,13 @@ void BSPSystem::process_node(const std::set<Entity> &objects, BSPNode *node, int
 	node->plane = calculate_plane(objects);
 
 	for (const Entity entity : objects) {
-		ColliderOBB *obb;
-		ColliderAABB *aabb;
-		ColliderSphere *sphere;
-
+		Transform &t = ecs_manager.get_component<Transform>(entity);
 		if (ecs_manager.has_component<ColliderAABB>(entity)) {
-			aabb = &ecs_manager.get_component<ColliderAABB>(entity);
-			switch (process_collider(node->plane, *aabb)) {
+			ColliderAABB &aabb = ecs_manager.get_component<ColliderAABB>(entity);
+			ColliderAABB c;
+			c.range = aabb.range * t.get_scale();
+			c.center = t.get_position() + aabb.center * c.range;
+			switch (process_collider(node->plane, c)) {
 				case Side::FRONT:
 					front.insert(entity);
 					break;
@@ -93,8 +102,13 @@ void BSPSystem::process_node(const std::set<Entity> &objects, BSPNode *node, int
 					break;
 			}
 		} else if (ecs_manager.has_component<ColliderOBB>(entity)) {
-			obb = &ecs_manager.get_component<ColliderOBB>(entity);
-			switch (process_collider(node->plane, *obb)) {
+			ColliderOBB &obb = ecs_manager.get_component<ColliderOBB>(entity);
+			ColliderOBB c;
+			c.set_orientation(t.get_euler_rot());
+			glm::mat3 o = c.get_orientation_matrix();
+			c.range = obb.range * t.get_scale();
+			c.center = t.get_position() + o * (obb.center * c.range);
+			switch (process_collider(node->plane, c)) {
 				case Side::FRONT:
 					front.insert(entity);
 					break;
@@ -107,8 +121,11 @@ void BSPSystem::process_node(const std::set<Entity> &objects, BSPNode *node, int
 			}
 
 		} else if (ecs_manager.has_component<ColliderSphere>(entity)) {
-			sphere = &ecs_manager.get_component<ColliderSphere>(entity);
-			switch (process_collider(node->plane, *sphere)) {
+			ColliderSphere &sphere = ecs_manager.get_component<ColliderSphere>(entity);
+			ColliderSphere c;
+			c.radius = sphere.radius * t.get_scale().x;
+			c.center = t.get_position() + sphere.center * c.radius;
+			switch (process_collider(node->plane, c)) {
 				case Side::FRONT:
 					front.insert(entity);
 					break;
@@ -140,32 +157,44 @@ Plane BSPSystem::calculate_plane(const std::set<Entity> &colliders) {
 	}
 
 	for (const Entity collider : colliders) {
-		ColliderOBB *obb;
-		ColliderAABB *aabb;
-		ColliderSphere *sphere;
+		Transform &t = ecs_manager.get_component<Transform>(collider);
 
 		if (ecs_manager.has_component<ColliderAABB>(collider)) {
-			aabb = &ecs_manager.get_component<ColliderAABB>(collider);
-			plane.point += aabb->center;
+			ColliderAABB &aabb = ecs_manager.get_component<ColliderAABB>(collider);
+			ColliderAABB c;
+			c.range = aabb.range * t.get_scale();
+			c.center = t.get_position() + aabb.center * c.range;
+
+			plane.point += c.center;
 		} else if (ecs_manager.has_component<ColliderSphere>(collider)) {
-			sphere = &ecs_manager.get_component<ColliderSphere>(collider);
-			plane.point += sphere->center;
+			ColliderSphere &sphere = ecs_manager.get_component<ColliderSphere>(collider);
+			ColliderSphere c;
+			c.radius = sphere.radius * t.get_scale().x;
+			c.center = t.get_position() + sphere.center * c.radius;
+
+			plane.point += c.center;
 		} else if (ecs_manager.has_component<ColliderOBB>(collider)) {
-			obb = &ecs_manager.get_component<ColliderOBB>(collider);
-			plane.point += obb->center;
+			ColliderOBB &obb = ecs_manager.get_component<ColliderOBB>(collider);
+			ColliderOBB c;
+			c.set_orientation(t.get_euler_rot());
+			c.range = obb.range * t.get_scale();
+			c.center = t.get_position() + c.get_orientation_matrix() * (obb.center * c.range);
+
+			plane.point += c.center;
 		}
 	}
 	plane.point /= colliders.size();
 
 	for (const Entity collider : colliders) {
-		ColliderOBB *obb;
-		ColliderAABB *aabb;
-		ColliderSphere *sphere;
+		Transform &t = ecs_manager.get_component<Transform>(collider);
 
 		if (ecs_manager.has_component<ColliderAABB>(collider)) {
-			aabb = &ecs_manager.get_component<ColliderAABB>(collider);
+			ColliderAABB &aabb = ecs_manager.get_component<ColliderAABB>(collider);
+			ColliderAABB c;
+			c.range = aabb.range * t.get_scale();
+			c.center = t.get_position() + aabb.center * c.range;
 
-			const glm::vec3 direction = plane.point - aabb->center;
+			const glm::vec3 direction = plane.point - c.center;
 			if (direction != glm::vec3(0.0f)) {
 				const glm::vec3 direction_abs = glm::abs(direction);
 				glm::vec3 normal(0.0f);
@@ -188,18 +217,25 @@ Plane BSPSystem::calculate_plane(const std::set<Entity> &colliders) {
 			}
 
 		} else if (ecs_manager.has_component<ColliderSphere>(collider)) {
-			sphere = &ecs_manager.get_component<ColliderSphere>(collider);
-			glm::vec3 direction = plane.point - sphere->center;
+			ColliderSphere &sphere = ecs_manager.get_component<ColliderSphere>(collider);
+			ColliderSphere c;
+			c.radius = sphere.radius * t.get_scale().x;
+			c.center = t.get_position() + sphere.center * c.radius;
+
+			glm::vec3 direction = plane.point - c.center;
 			if (direction != glm::vec3(0.0f)) {
 				plane.normal += glm::normalize(direction);
 			}
 
 		} else if (ecs_manager.has_component<ColliderOBB>(collider)) {
-			obb = &ecs_manager.get_component<ColliderOBB>(collider);
+			ColliderOBB &obb = ecs_manager.get_component<ColliderOBB>(collider);
+			ColliderOBB c;
+			c.set_orientation(t.get_euler_rot());
+			glm::mat3 o = c.get_orientation_matrix();
+			c.range = obb.range * t.get_scale();
+			c.center = t.get_position() + o * (obb.center * c.range);
 
-			glm::mat3 o = obb->get_orientation_matrix();
-
-			glm::vec3 direction = glm::transpose(o) * (plane.point - obb->center);
+			glm::vec3 direction = glm::transpose(o) * (plane.point - c.center);
 			glm::vec3 normal(0.0f);
 
 			for (int i = 0; i < 3; ++i) {

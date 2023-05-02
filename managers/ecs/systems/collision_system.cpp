@@ -139,7 +139,7 @@ void CollisionSystem::resolve_collision(Entity movable_object, const std::set<En
 	}
 }
 
-bool CollisionSystem::is_overlap(ColliderSphere &a, ColliderSphere &b) {
+bool CollisionSystem::is_overlap(const ColliderSphere &a, const ColliderSphere &b) {
 	glm::vec3 distance = a.center - b.center;
 	float distance_squared = glm::dot(distance, distance);
 	float radius_sum = a.radius + b.radius;
@@ -155,18 +155,17 @@ void CollisionSystem::resolve_collision_sphere(Entity e1, Entity e2) {
 
 	ColliderSphere c1;
 	ColliderSphere c2;
-	c1.center = temp_c1.center + t1.get_position();
-	c2.center = temp_c2.center + t2.get_position();
 	c1.radius = temp_c1.radius * t1.get_scale().x;
+	c1.center = t1.get_position() + temp_c1.center * c1.radius;
 	c2.radius = temp_c2.radius * t2.get_scale().x;
+	c2.center = t2.get_position() + temp_c2.center * c2.radius;
 
 	bool is_movable1 = !ecs_manager.has_component<StaticTag>(e1);
 	bool is_movable2 = !ecs_manager.has_component<StaticTag>(e2);
 
-	if (!is_collision_candidate(c1.center, glm::vec3(c1.radius), c2.center, glm::vec3(c2.radius))) {
-		return;
-	}
-	if (!is_overlap(c1, c2)) {
+	if (!(is_movable1 || is_movable2) ||
+			!is_collision_candidate(c1.center, glm::vec3(c1.radius), c2.center, glm::vec3(c2.radius)) ||
+			!is_overlap(c1, c2)) {
 		return;
 	}
 
@@ -178,16 +177,16 @@ void CollisionSystem::resolve_collision_sphere(Entity e1, Entity e2) {
 		// Value defining how fast the body will move other body
 		// 1 means that the bodies has same speed while pushing
 		const float slide_speed = 0.5f;
-		t1.add_position(offset * slide_speed);
-		t2.add_position(-offset * (1.0f - slide_speed));
+		t1.add_position(-offset * slide_speed);
+		t2.add_position(offset * (1.0f - slide_speed));
 	} else if (is_movable1) {
-		t1.add_position(offset);
+		t1.add_position(-offset);
 	} else {
-		t2.add_position(-offset);
+		t2.add_position(offset);
 	}
 }
 
-bool CollisionSystem::is_overlap(ColliderAABB &a, ColliderAABB &b) {
+bool CollisionSystem::is_overlap(const ColliderAABB &a, const ColliderAABB &b) {
 	// Check X axis
 	if (abs(a.center.x - b.center.x) > (a.range.x + b.range.x)) {
 		return false;
@@ -205,34 +204,23 @@ bool CollisionSystem::is_overlap(ColliderAABB &a, ColliderAABB &b) {
 }
 
 void CollisionSystem::resolve_collision_aabb(Entity e1, Entity e2) {
-	ColliderAABB &c1 = ecs_manager.get_component<ColliderAABB>(e1);
-	ColliderAABB &c2 = ecs_manager.get_component<ColliderAABB>(e2);
-	Transform *t1;
-	Transform *t2;
+	ColliderAABB &temp_c1 = ecs_manager.get_component<ColliderAABB>(e1);
+	ColliderAABB &temp_c2 = ecs_manager.get_component<ColliderAABB>(e2);
+	Transform &t1 = ecs_manager.get_component<Transform>(e1);
+	Transform &t2 = ecs_manager.get_component<Transform>(e2);
+
+	ColliderAABB c1;
+	ColliderAABB c2;
+	c1.range = temp_c1.range * t1.get_scale();
+	c1.center = t1.get_position() + temp_c1.center * c1.range;
+	c2.range = temp_c2.range * t2.get_scale();
+	c2.center = t2.get_position() + temp_c2.center * c2.range;
 
 	bool is_movable1 = !ecs_manager.has_component<StaticTag>(e1);
 	bool is_movable2 = !ecs_manager.has_component<StaticTag>(e2);
-	if (!(is_movable1 || is_movable2)) {
-		return;
-	} else if (is_movable1 && is_movable2) {
-		t1 = &ecs_manager.get_component<Transform>(e1);
-		c1.center = t1->get_position();
 
-		t2 = &ecs_manager.get_component<Transform>(e2);
-		c2.center = t2->get_position();
-	} else if (is_movable1) {
-		t1 = &ecs_manager.get_component<Transform>(e1);
-		c1.center = t1->get_position();
-	} else {
-		t2 = &ecs_manager.get_component<Transform>(e2);
-		c2.center = t2->get_position();
-	}
-
-	if (!is_collision_candidate(c1.center, c1.range, c2.center, c2.range)) {
-		return;
-	}
-
-	if (!is_overlap(c1, c2)) {
+	if (!(is_movable1 || is_movable2) || !is_collision_candidate(c1.center, c1.range, c2.center, c2.range) ||
+			!is_overlap(c1, c2)) {
 		return;
 	}
 
@@ -263,16 +251,16 @@ void CollisionSystem::resolve_collision_aabb(Entity e1, Entity e2) {
 		// Value defining how fast the body will move other body
 		// 1 means that the bodies has same speed while pushing
 		const float slide_speed = 0.5f;
-		t1->add_position(offset * slide_speed);
-		t2->add_position(-offset * (1.0f - slide_speed));
+		t1.add_position(offset * slide_speed);
+		t2.add_position(-offset * (1.0f - slide_speed));
 	} else if (is_movable1) {
-		t1->add_position(offset);
+		t1.add_position(offset);
 	} else {
-		t2->add_position(-offset);
+		t2.add_position(-offset);
 	}
 }
 
-glm::vec3 CollisionSystem::is_overlap(ColliderAABB &a, ColliderSphere &b) {
+glm::vec3 CollisionSystem::is_overlap(const ColliderAABB &a, const ColliderSphere &b) {
 	const glm::vec3 min = a.min();
 	const glm::vec3 max = a.max();
 	// Calculate nearest point AABB and Sphere center
@@ -296,35 +284,27 @@ glm::vec3 CollisionSystem::is_overlap(ColliderAABB &a, ColliderSphere &b) {
 }
 
 void CollisionSystem::resolve_aabb_sphere(Entity aabb, Entity sphere) {
-	ColliderAABB &c1 = ecs_manager.get_component<ColliderAABB>(aabb);
-	ColliderSphere &c2 = ecs_manager.get_component<ColliderSphere>(sphere);
-	Transform *t1;
-	Transform *t2;
+	ColliderAABB &temp_c1 = ecs_manager.get_component<ColliderAABB>(aabb);
+	ColliderSphere &temp_c2 = ecs_manager.get_component<ColliderSphere>(sphere);
+	Transform &t1 = ecs_manager.get_component<Transform>(aabb);
+	Transform &t2 = ecs_manager.get_component<Transform>(sphere);
+
+	ColliderAABB c1;
+	ColliderSphere c2;
+	c1.range = temp_c1.range * t1.get_scale();
+	c1.center = t1.get_position() + temp_c1.center * c1.range;
+	c2.radius = temp_c2.radius * t2.get_scale().x;
+	c2.center = t2.get_position() + temp_c2.center * c2.radius;
 
 	bool is_movable1 = !ecs_manager.has_component<StaticTag>(aabb);
 	bool is_movable2 = !ecs_manager.has_component<StaticTag>(sphere);
-	if (!(is_movable1 || is_movable2)) {
-		return;
-	} else if (is_movable1 && is_movable2) {
-		t1 = &ecs_manager.get_component<Transform>(aabb);
-		c1.center = t1->get_position();
-
-		t2 = &ecs_manager.get_component<Transform>(sphere);
-		c2.center = t2->get_position();
-	} else if (is_movable1) {
-		t1 = &ecs_manager.get_component<Transform>(aabb);
-		c1.center = t1->get_position();
-	} else {
-		t2 = &ecs_manager.get_component<Transform>(sphere);
-		c2.center = t2->get_position();
-	}
-
-	if (!is_collision_candidate(c1.center, c1.range, c2.center, glm::vec3(c2.radius))) {
+	if (!(is_movable1 || is_movable2) ||
+			!is_collision_candidate(c1.center, c1.range, c2.center, glm::vec3(c2.radius))) {
 		return;
 	}
 
 	glm::vec3 offset = is_overlap(c1, c2);
-	if (offset == glm::vec3(0.0f)) {
+	if (glm::dot(offset, offset) < 0.001f) {
 		return;
 	}
 
@@ -332,16 +312,16 @@ void CollisionSystem::resolve_aabb_sphere(Entity aabb, Entity sphere) {
 		// Value defining how fast the body will move other body
 		// 1 means that the bodies has same speed while pushing
 		const float slide_speed = 0.5f;
-		t1->add_position(offset * slide_speed);
-		t2->add_position(-offset * (1.0f - slide_speed));
+		t1.add_position(offset * slide_speed);
+		t2.add_position(-offset * (1.0f - slide_speed));
 	} else if (is_movable1) {
-		t1->add_position(offset);
+		t1.add_position(offset);
 	} else {
-		t2->add_position(-offset);
+		t2.add_position(-offset);
 	}
 }
 
-glm::vec3 CollisionSystem::is_overlap(ColliderOBB &a, ColliderOBB &b) {
+glm::vec3 CollisionSystem::is_overlap(const ColliderOBB &a, const ColliderOBB &b) {
 	const glm::vec3 distance = a.center - b.center;
 	const glm::mat3 o1 = a.get_orientation_matrix();
 	const glm::mat3 o2 = b.get_orientation_matrix();
@@ -391,39 +371,30 @@ glm::vec3 CollisionSystem::is_overlap(ColliderOBB &a, ColliderOBB &b) {
 }
 
 void CollisionSystem::resolve_collision_obb(Entity e1, Entity e2) {
-	ColliderOBB &c1 = ecs_manager.get_component<ColliderOBB>(e1);
-	ColliderOBB &c2 = ecs_manager.get_component<ColliderOBB>(e2);
-	Transform *t1;
-	Transform *t2;
+	ColliderOBB &temp_c1 = ecs_manager.get_component<ColliderOBB>(e1);
+	ColliderOBB &temp_c2 = ecs_manager.get_component<ColliderOBB>(e2);
+	Transform &t1 = ecs_manager.get_component<Transform>(e1);
+	Transform &t2 = ecs_manager.get_component<Transform>(e2);
+
+	ColliderOBB c1{};
+	ColliderOBB c2{};
+	c1.set_orientation(t1.get_euler_rot());
+	c1.range = temp_c1.range * t1.get_scale();
+	c1.center = t1.get_position() + c1.get_orientation_matrix() * (temp_c1.center * c1.range);
+
+	c2.set_orientation(t2.get_euler_rot());
+	c2.range = temp_c2.range * t2.get_scale();
+	c2.center = t2.get_position() + c2.get_orientation_matrix() * (temp_c2.center * c2.range);
 
 	bool is_movable1 = !ecs_manager.has_component<StaticTag>(e1);
 	bool is_movable2 = !ecs_manager.has_component<StaticTag>(e2);
-	if (!(is_movable1 || is_movable2)) {
-		return;
-	} else if (is_movable1 && is_movable2) {
-		t1 = &ecs_manager.get_component<Transform>(e1);
-		c1.center = t1->get_position();
-		c1.set_orientation(t1->get_euler_rot());
 
-		t2 = &ecs_manager.get_component<Transform>(e2);
-		c2.center = t2->get_position();
-		c2.set_orientation(t2->get_euler_rot());
-	} else if (is_movable1) {
-		t1 = &ecs_manager.get_component<Transform>(e1);
-		c1.center = t1->get_position();
-		c1.set_orientation(t1->get_euler_rot());
-	} else {
-		t2 = &ecs_manager.get_component<Transform>(e2);
-		c2.center = t2->get_position();
-		c2.set_orientation(t2->get_euler_rot());
-	}
-
-	if (!is_collision_candidate(c1.center, c1.range, c2.center, c2.range)) {
+	if (!(is_movable1 || is_movable2) || !is_collision_candidate(c1.center, c1.range, c2.center, c2.range)) {
 		return;
 	}
 
 	glm::vec3 offset = is_overlap(c1, c2);
-	if (offset == glm::vec3(0.0f)) {
+	if (glm::dot(offset, offset) < 0.001f) {
 		return;
 	}
 
@@ -431,16 +402,16 @@ void CollisionSystem::resolve_collision_obb(Entity e1, Entity e2) {
 		// Value defining how fast the body will move other body
 		// 1 means that the bodies has same speed while pushing
 		const float slide_speed = 0.5f;
-		t1->add_position(offset * slide_speed);
-		t2->add_position(-offset * (1.0f - slide_speed));
+		t1.add_position(offset * slide_speed);
+		t2.add_position(-offset * (1.0f - slide_speed));
 	} else if (is_movable1) {
-		t1->add_position(offset);
+		t1.add_position(offset);
 	} else {
-		t2->add_position(-offset);
+		t2.add_position(-offset);
 	}
 }
 
-glm::vec3 CollisionSystem::is_overlap(ColliderOBB &a, ColliderSphere &b) {
+glm::vec3 CollisionSystem::is_overlap(const ColliderOBB &a, const ColliderSphere &b) {
 	const glm::mat3 orientation = a.get_orientation_matrix();
 	const glm::vec3 sphere_center_local = glm::transpose(orientation) * (b.center - a.center);
 
@@ -468,37 +439,30 @@ glm::vec3 CollisionSystem::is_overlap(ColliderOBB &a, ColliderSphere &b) {
 }
 
 void CollisionSystem::resolve_obb_sphere(Entity obb, Entity sphere) {
-	ColliderOBB &c1 = ecs_manager.get_component<ColliderOBB>(obb);
-	ColliderSphere &c2 = ecs_manager.get_component<ColliderSphere>(sphere);
-	Transform *t1;
-	Transform *t2;
+	ColliderOBB &temp_c1 = ecs_manager.get_component<ColliderOBB>(obb);
+	ColliderSphere &temp_c2 = ecs_manager.get_component<ColliderSphere>(sphere);
+	Transform &t1 = ecs_manager.get_component<Transform>(obb);
+	Transform &t2 = ecs_manager.get_component<Transform>(sphere);
+
+	ColliderOBB c1{};
+	ColliderSphere c2{};
+	c1.set_orientation(t1.get_euler_rot());
+	c1.range = temp_c1.range * t1.get_scale();
+	c1.center = t1.get_position() + c1.get_orientation_matrix() * (temp_c1.center * c1.range);
+
+	c2.radius = temp_c2.radius * t2.get_scale().x;
+	c2.center = t2.get_position() + temp_c2.center * c2.radius;
 
 	bool is_movable1 = !ecs_manager.has_component<StaticTag>(obb);
 	bool is_movable2 = !ecs_manager.has_component<StaticTag>(sphere);
-	if (!(is_movable1 || is_movable2)) {
-		return;
-	} else if (is_movable1 && is_movable2) {
-		t1 = &ecs_manager.get_component<Transform>(obb);
-		c1.center = t1->get_position();
-		c1.set_orientation(t1->get_euler_rot());
 
-		t2 = &ecs_manager.get_component<Transform>(sphere);
-		c2.center = t2->get_position();
-	} else if (is_movable1) {
-		t1 = &ecs_manager.get_component<Transform>(obb);
-		c1.center = t1->get_position();
-		c1.set_orientation(t1->get_euler_rot());
-	} else {
-		t2 = &ecs_manager.get_component<Transform>(sphere);
-		c2.center = t2->get_position();
-	}
-
-	if (!is_collision_candidate(c1.center, c1.range, c2.center, glm::vec3(c2.radius))) {
+	if (!(is_movable1 || is_movable2) ||
+			!is_collision_candidate(c1.center, c1.range, c2.center, glm::vec3(c2.radius))) {
 		return;
 	}
 
 	glm::vec3 offset = is_overlap(c1, c2);
-	if (offset == glm::vec3(0.0f)) {
+	if (glm::dot(offset, offset) < 0.001f) {
 		return;
 	}
 
@@ -506,16 +470,16 @@ void CollisionSystem::resolve_obb_sphere(Entity obb, Entity sphere) {
 		// Value defining how fast the body will move other body
 		// 1 means that the bodies has same speed while pushing
 		const float slide_speed = 0.5f;
-		t1->add_position(offset * slide_speed);
-		t2->add_position(-offset * (1.0f - slide_speed));
+		t1.add_position(offset * slide_speed);
+		t2.add_position(-offset * (1.0f - slide_speed));
 	} else if (is_movable1) {
-		t1->add_position(offset);
+		t1.add_position(offset);
 	} else {
-		t2->add_position(-offset);
+		t2.add_position(-offset);
 	}
 }
 
-glm::vec3 CollisionSystem::is_overlap(ColliderOBB &a, ColliderAABB &b) {
+glm::vec3 CollisionSystem::is_overlap(const ColliderOBB &a, const ColliderAABB &b) {
 	const glm::vec3 distance = a.center - b.center;
 	const glm::mat3 o1 = a.get_orientation_matrix();
 	const glm::mat3 o2 =
@@ -567,37 +531,28 @@ glm::vec3 CollisionSystem::is_overlap(ColliderOBB &a, ColliderAABB &b) {
 }
 
 void CollisionSystem::resolve_obb_aabb(Entity obb, Entity aabb) {
-	ColliderOBB &c1 = ecs_manager.get_component<ColliderOBB>(obb);
-	ColliderAABB &c2 = ecs_manager.get_component<ColliderAABB>(aabb);
-	Transform *t1;
-	Transform *t2;
+	ColliderOBB &temp_c1 = ecs_manager.get_component<ColliderOBB>(obb);
+	ColliderAABB &temp_c2 = ecs_manager.get_component<ColliderAABB>(aabb);
+	Transform &t1 = ecs_manager.get_component<Transform>(obb);
+	Transform &t2 = ecs_manager.get_component<Transform>(aabb);
 
+	ColliderOBB c1{};
+	ColliderAABB c2{};
+	c1.set_orientation(t1.get_euler_rot());
+	c1.range = temp_c1.range * t1.get_scale();
+	c1.center = t1.get_position() + c1.get_orientation_matrix() * (temp_c1.center * c1.range);
+
+	c2.range = temp_c2.range * t2.get_scale();
+	c2.center = t2.get_position() + temp_c2.center * c2.range;
 	bool is_movable1 = !ecs_manager.has_component<StaticTag>(obb);
 	bool is_movable2 = !ecs_manager.has_component<StaticTag>(aabb);
-	if (!(is_movable1 || is_movable2)) {
-		return;
-	} else if (is_movable1 && is_movable2) {
-		t1 = &ecs_manager.get_component<Transform>(obb);
-		c1.center = t1->get_position();
-		c1.set_orientation(t1->get_euler_rot());
 
-		t2 = &ecs_manager.get_component<Transform>(aabb);
-		c2.center = t2->get_position();
-	} else if (is_movable1) {
-		t1 = &ecs_manager.get_component<Transform>(obb);
-		c1.center = t1->get_position();
-		c1.set_orientation(t1->get_euler_rot());
-	} else {
-		t2 = &ecs_manager.get_component<Transform>(aabb);
-		c2.center = t2->get_position();
-	}
-
-	if (!is_collision_candidate(c1.center, c1.range, c2.center, c2.range)) {
+	if (!(is_movable1 || is_movable2) || !is_collision_candidate(c1.center, c1.range, c2.center, c2.range)) {
 		return;
 	}
 
 	glm::vec3 offset = is_overlap(c1, c2);
-	if (offset == glm::vec3(0.0f)) {
+	if (glm::dot(offset, offset) < 0.001f) {
 		return;
 	}
 
@@ -605,12 +560,12 @@ void CollisionSystem::resolve_obb_aabb(Entity obb, Entity aabb) {
 		// Value defining how fast the body will move other body
 		// 1 means that the bodies has same speed while pushing
 		const float slide_speed = 0.5f;
-		t1->add_position(offset * slide_speed);
-		t2->add_position(-offset * (1.0f - slide_speed));
+		t1.add_position(offset * slide_speed);
+		t2.add_position(-offset * (1.0f - slide_speed));
 	} else if (is_movable1) {
-		t1->add_position(offset);
+		t1.add_position(offset);
 	} else {
-		t2->add_position(-offset);
+		t2.add_position(-offset);
 	}
 }
 
