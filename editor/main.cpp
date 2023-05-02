@@ -5,8 +5,6 @@
 int main() {
 	Editor &editor = *Editor::get();
 
-	ECSManager &ecs_manager = ECSManager::get();
-
 	editor.startup();
 	editor.run();
 

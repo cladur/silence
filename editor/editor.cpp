@@ -310,7 +310,7 @@ void Editor::startup() {
 
 	ecs_manager.add_component<Name>(entity, Name("Wooden Box"));
 
-	// ecs_manager.add_child(parent, entity);
+	ecs_manager.add_child(parent, entity);
 
 	scenes[1].entities.push_back(entity);
 

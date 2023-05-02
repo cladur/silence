@@ -162,25 +162,24 @@ void Editor::imgui_scene(Scene &scene) {
 			if (ImGui::IsItemClicked()) {
 				if (input_manager.is_action_pressed("select_multiple")) {
 					if (is_selected) {
-						scene.entities_selected.erase(
-								std::remove(scene.entities_selected.begin(), scene.entities_selected.end(), entity),
-								scene.entities_selected.end());
+						scene.clear_selection();
 					} else {
-						scene.entities_selected.push_back(entity);
+						scene.add_to_selection(entity);
 					}
 				} else if (input_manager.is_action_pressed("select_rows") && scene.last_entity_selected != 0) {
 					// Select all entities between last_entity_selected and entity
-					scene.entities_selected.clear();
+					scene.clear_selection();
 					uint32_t min = std::min(scene.last_entity_selected, entity);
 					uint32_t max = std::max(scene.last_entity_selected, entity);
 					for (uint32_t i = min; i <= max; i++) {
-						scene.entities_selected.push_back(i);
+						scene.add_to_selection(i);
 					}
 				} else {
-					scene.entities_selected.clear();
-					scene.entities_selected.push_back(entity);
+					scene.clear_selection();
+					scene.add_to_selection(entity);
 				}
-				scene.last_entity_selected = entity;
+				scene.calculate_multi_select_parent();
+				scene.execute_reparent_queue();
 			}
 
 			ImGui::TableNextColumn();
@@ -265,26 +264,6 @@ void Editor::imgui_viewport(Scene &scene, uint32_t scene_index) {
 	glm::mat4 *projection = &scene.get_render_scene().projection;
 
 	if (!scene.entities_selected.empty()) {
-		// If we have entities selected, we want to take their average position and use that as the pivot point
-		// for the gizmo
-
-		glm::mat4 temp_matrix = glm::mat4(1.0f);
-
-		// if (scene.entities_selected.size() > 1) {
-		// 	auto average_position = glm::vec3(0.0f);
-		// 	for (auto &entity : scene.entities_selected) {
-		// 		if (ecs_manager.has_component<Transform>(entity)) {
-		// 			auto &transform = ecs_manager.get_component<Transform>(entity);
-		// 			average_position += transform.get_position();
-		// 		}
-		// 	}
-
-		// 	temp_matrix = glm::translate(glm::mat4(1.0f), average_position / (float)scene.entities_selected.size());
-		// } else {
-		auto &transform = ecs_manager.get_component<Transform>(scene.entities_selected[0]);
-		temp_matrix = transform.get_global_model_matrix();
-		// }
-
 		float *snap = nullptr;
 		static float snap_values[3] = { 0.0f, 0.0f, 0.0f };
 
@@ -299,24 +278,39 @@ void Editor::imgui_viewport(Scene &scene, uint32_t scene_index) {
 			snap = snap_values;
 		}
 
+		auto &multi_transform = ecs_manager.get_component<Transform>(scene.multi_select_parent);
+		auto &transform = ecs_manager.get_component<Transform>(scene.entities_selected[0]);
+		glm::mat4 temp_matrix = glm::mat4(1.0f);
+
+		if (scene.entities_selected.size() == 1) {
+			temp_matrix = transform.get_global_model_matrix();
+		} else {
+			temp_matrix = multi_transform.get_global_model_matrix();
+		}
+
 		if (ImGuizmo::Manipulate(glm::value_ptr(*view), glm::value_ptr(*projection), current_gizmo_operation,
 					current_gizmo_mode, glm::value_ptr(temp_matrix), nullptr, snap)) {
 			glm::vec3 skew;
 			glm::vec4 perspective;
-			if (ecs_manager.has_component<Parent>(scene.entities_selected[0])) {
-				// Gizmo handles our final world transform, but we need to update our local transform (pos, orient,
-				// scale) In order to do that, we extract the local transform from the world transform, by
-				// multiplying by the inverse of the parent's world transform From there, we can decompose the local
-				// transform into its components (pos, orient, scale)
-				auto &parent = ecs_manager.get_component<Parent>(scene.entities_selected[0]).parent;
-				auto parent_matrix = ecs_manager.get_component<Transform>(parent).get_global_model_matrix();
-				glm::decompose(glm::inverse(parent_matrix) * temp_matrix, transform.scale, transform.orientation,
-						transform.position, skew, perspective);
+
+			if (scene.entities_selected.size() == 1) {
+				glm::mat4 parent_matrix = glm::mat4(1.0f);
+				if (ecs_manager.has_component<Parent>(scene.entities_selected[0])) {
+					auto &parent = ecs_manager.get_component<Parent>(scene.entities_selected[0]);
+					auto &parent_transform = ecs_manager.get_component<Transform>(parent.parent);
+					parent_matrix = glm::inverse(parent_transform.get_global_model_matrix());
+				}
+				glm::decompose(parent_matrix * temp_matrix, transform.scale, transform.orientation, transform.position,
+						skew, perspective);
+				transform.set_changed(true);
 			} else {
-				glm::decompose(
-						temp_matrix, transform.scale, transform.orientation, transform.position, skew, perspective);
+				glm::decompose(temp_matrix, multi_transform.scale, multi_transform.orientation,
+						multi_transform.position, skew, perspective);
+				multi_transform.set_changed(true);
 			}
-			transform.set_changed(true);
+			// glm::decompose(temp_matrix, multi_transform.scale, multi_transform.orientation, multi_transform.position,
+			// 		skew, perspective);
+			// multi_transform.set_changed(true);
 		}
 	}
 

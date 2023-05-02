@@ -105,10 +105,10 @@ public:
 	}
 
 	// Specific parent system methods
-	bool add_child(Entity parent, Entity child);
-	bool remove_child(Entity parent, Entity child);
+	bool add_child(Entity parent, Entity child, bool keep_transform = false);
+	bool remove_child(Entity parent, Entity child, bool keep_transform = false);
 	bool has_child(Entity parent, Entity child);
-	bool reparent(Entity new_parent, Entity child);
+	bool reparent(Entity new_parent, Entity child, bool keep_transform = false);
 	void serialize_entity_json(nlohmann::json &json, Entity entity);
 	void deserialize_entities_json(nlohmann::json &json, std::vector<Entity> &entities);
 	void print_components();

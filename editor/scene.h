@@ -17,6 +17,11 @@ struct Scene {
 	// Selection
 	std::vector<Entity> entities_selected;
 	Entity last_entity_selected = 0;
+	Entity multi_select_parent = 0;
+	// Used for multi-select
+	std::unordered_map<Entity, Entity> child_to_parent;
+	std::vector<std::pair<Entity, Entity>> reparent_queue;
+	std::vector<std::pair<Entity, Entity>> add_child_queue;
 
 	Camera camera;
 	bool is_prefab;
@@ -28,6 +33,13 @@ struct Scene {
 	Scene();
 	void update(float dt);
 	RenderScene &get_render_scene();
+
+	// Selection
+	void add_to_selection(Entity entity);
+	void remove_from_selection(Entity entity);
+	void clear_selection();
+	void calculate_multi_select_parent();
+	void execute_reparent_queue();
 };
 
 #endif //SILENCE_SCENE_H

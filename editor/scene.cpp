@@ -5,6 +5,7 @@
 #include "input/input_manager.h"
 #include "render/ecs/model_instance.h"
 #include "render/render_manager.h"
+#include <unordered_map>
 
 void handle_camera(Camera &cam, float dt) {
 	InputManager &input_manager = InputManager::get();
@@ -29,6 +30,10 @@ Scene::Scene() {
 	camera.yaw = 45.0f;
 	camera.pitch = -20.0f;
 	camera.update_camera_vectors();
+
+	ECSManager &ecs_manager = ECSManager::get();
+	multi_select_parent = ecs_manager.create_entity();
+	ecs_manager.add_component<Transform>(multi_select_parent, Transform());
 }
 
 void Scene::update(float dt) {
@@ -40,15 +45,10 @@ void Scene::update(float dt) {
 
 	get_render_scene().camera = camera;
 
-	get_render_scene().debug_draw.draw_line(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(10.0f, 0.0f, 0.0f));
-	get_render_scene().debug_draw.draw_line(glm::vec3(0.0f, 5.0f, 0.0f), glm::vec3(10.0f, 0.0f, 0.0f));
+	auto &trans = ecs_manager.get_component<Transform>(multi_select_parent);
 
-	get_render_scene().debug_draw.draw_line(
-			glm::vec3(0.0f, 5.0f, 10.0f), glm::vec3(10.0f, 0.0f, 2.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-
-	get_render_scene().debug_draw.draw_box(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 	get_render_scene().debug_draw.draw_box(
-			glm::vec3(0.0f, 5.0f, 0.0f), glm::vec3(10.0f, 1.0f, 1.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+			trans.get_global_position(), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 
 	// Handle camera movement
 	if ((viewport_hovered && input_manager.is_action_pressed("control_camera") || controlling_camera)) {
@@ -64,6 +64,16 @@ void Scene::update(float dt) {
 		display_manager.capture_mouse(false);
 	}
 
+	ImGui::Begin("Debug");
+
+	auto transform = ecs_manager.get_component<Transform>(multi_select_parent);
+
+	for (auto &e : entities_selected) {
+		ImGui::Text("Entity: %d", e);
+	}
+
+	ImGui::End();
+
 	for (auto &entity : entities) {
 		if (ecs_manager.has_component<Transform>(entity) && ecs_manager.has_component<ModelInstance>(entity)) {
 			auto &transform = ecs_manager.get_component<Transform>(entity);
@@ -76,4 +86,94 @@ void Scene::update(float dt) {
 RenderScene &Scene::get_render_scene() {
 	RenderManager &render_manager = RenderManager::get();
 	return render_manager.render_scenes[render_scene_idx];
+}
+
+void Scene::add_to_selection(Entity entity) {
+	ECSManager &ecs_manager = ECSManager::get();
+	if (ecs_manager.has_component<Parent>(entity)) {
+		Entity old_parent = ecs_manager.get_component<Parent>(entity).parent;
+		child_to_parent[entity] = old_parent;
+		// ecs_manager.reparent(multi_select_parent, entity);
+		reparent_queue.emplace_back(multi_select_parent, entity);
+	} else {
+		child_to_parent[entity] = 0;
+		// ecs_manager.add_child(multi_select_parent, entity);
+		add_child_queue.emplace_back(multi_select_parent, entity);
+	}
+	entities_selected.push_back(entity);
+	last_entity_selected = entity;
+}
+
+void Scene::remove_from_selection(Entity entity) {
+	ECSManager &ecs_manager = ECSManager::get();
+	if (child_to_parent.find(entity) != child_to_parent.end()) {
+		Entity old_parent = child_to_parent[entity];
+		if (old_parent == 0) {
+			if (ecs_manager.has_component<Parent>(entity)) {
+				ecs_manager.remove_child(multi_select_parent, entity, true);
+			}
+		} else {
+			// ecs_manager.reparent(old_parent, entity);
+			reparent_queue.emplace_back(old_parent, entity);
+		}
+		child_to_parent.erase(entity);
+	}
+	entities_selected.erase(
+			std::remove(entities_selected.begin(), entities_selected.end(), entity), entities_selected.end());
+}
+
+void Scene::clear_selection() {
+	while (!entities_selected.empty()) {
+		remove_from_selection(entities_selected[0]);
+	}
+}
+
+void Scene::calculate_multi_select_parent() {
+	auto &transform = ECSManager::get().get_component<Transform>(multi_select_parent);
+	if (entities_selected.size() <= 1) {
+		transform.set_position(glm::vec3(0.0f));
+		transform.set_euler_rot(glm::vec3(0.0f));
+		transform.set_scale(glm::vec3(1.0f));
+		transform.update_global_model_matrix();
+		return;
+	}
+	auto average_pos = glm::vec3(0.0f);
+	for (auto &entity : entities_selected) {
+		if (ECSManager::get().has_component<Transform>(entity)) {
+			auto &transform = ECSManager::get().get_component<Transform>(entity);
+			average_pos += transform.get_global_position();
+		}
+	}
+	average_pos /= entities_selected.size();
+
+	transform.set_position(average_pos);
+	if (entities_selected.size() == 1) {
+		auto &t = ECSManager::get().get_component<Transform>(entities_selected[0]);
+		transform.set_euler_rot(t.get_global_euler_rot());
+		transform.set_scale(t.get_scale());
+	} else {
+		transform.set_euler_rot(glm::vec3(0.0f));
+		transform.set_scale(glm::vec3(1.0f));
+	}
+
+	transform.update_global_model_matrix();
+
+	for (auto &entity : entities_selected) {
+		if (ECSManager::get().has_component<Transform>(entity)) {
+			auto &t = ECSManager::get().get_component<Transform>(entity);
+			t.reparent_to(transform);
+		}
+	}
+}
+
+void Scene::execute_reparent_queue() {
+	ECSManager &ecs_manager = ECSManager::get();
+	for (auto &pair : reparent_queue) {
+		ecs_manager.reparent(pair.first, pair.second, true);
+	}
+	reparent_queue.clear();
+	for (auto &pair : add_child_queue) {
+		ecs_manager.add_child(pair.first, pair.second, true);
+	}
+	add_child_queue.clear();
 }

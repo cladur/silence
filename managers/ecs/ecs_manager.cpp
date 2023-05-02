@@ -34,7 +34,7 @@ void ECSManager::destroy_entity(Entity entity) {
 	system_manager->entity_destroyed(entity);
 }
 
-bool ECSManager::add_child(Entity parent, Entity child) {
+bool ECSManager::add_child(Entity parent, Entity child, bool keep_transform) {
 	if (child == parent) {
 		SPDLOG_WARN("Parent and children are the same entity");
 		return false;
@@ -56,13 +56,27 @@ bool ECSManager::add_child(Entity parent, Entity child) {
 	}
 
 	SPDLOG_INFO("Added child {} to parent {}", child, parent);
+
+	if (keep_transform && has_component<Transform>(parent) && has_component<Transform>(child)) {
+		auto &child_transform = get_component<Transform>(child);
+		auto &parent_transform = get_component<Transform>(parent);
+		child_transform.reparent_to(parent_transform);
+	}
+
 	return get_component<Children>(parent).add_child(child);
 }
 
-bool ECSManager::remove_child(Entity parent, Entity child) {
+bool ECSManager::remove_child(Entity parent, Entity child, bool keep_transform) {
 	if (!has_component<Children>(parent)) {
 		SPDLOG_WARN("No children component found on parent");
 		return false;
+	}
+
+	if (keep_transform && has_component<Transform>(parent) && has_component<Transform>(child)) {
+		auto &child_transform = get_component<Transform>(child);
+		auto &parent_transform = get_component<Transform>(parent);
+		Transform zero = Transform();
+		child_transform.reparent_to(zero);
 	}
 
 	bool found_child = get_component<Children>(parent).remove_child(child);
@@ -93,8 +107,8 @@ bool ECSManager::has_child(Entity parent, Entity child) {
 	return false;
 }
 
-bool ECSManager::reparent(Entity new_parent, Entity child) {
-	remove_child(get_component<Parent>(child).parent, child);
+bool ECSManager::reparent(Entity new_parent, Entity child, bool keep_transform) {
+	remove_child(get_component<Parent>(child).parent, child, keep_transform);
 
 	if (has_component<Transform>(new_parent) && has_component<Transform>(child)) {
 		auto &child_transform = get_component<Transform>(child);

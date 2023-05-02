@@ -5,6 +5,7 @@
 #include <spdlog/spdlog.h>
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/matrix_decompose.hpp>
 struct Transform {
 private:
 	bool changed;
@@ -88,6 +89,16 @@ public:
 		return changed;
 	}
 
+	[[nodiscard]] glm::vec3 get_global_position() const {
+		return glm::vec3(global_model_matrix[3]);
+	}
+	[[nodiscard]] glm::vec3 get_global_euler_rot() const {
+		return glm::eulerAngles(glm::quat_cast(global_model_matrix));
+	}
+	[[nodiscard]] glm::quat get_global_orientation() const {
+		return glm::quat_cast(global_model_matrix);
+	}
+
 	[[nodiscard]] bool is_changed_this_frame() {
 		//		if (changed_this_frame) {
 		//			changed_this_frame = false;
@@ -116,6 +127,14 @@ public:
 	}
 	void add_euler_rot(glm::vec3 add_euler_rot) {
 		this->orientation *= glm::quat(add_euler_rot);
+		this->changed = true;
+	}
+	void set_orientation(glm::quat new_orientation) {
+		this->orientation = new_orientation;
+		this->changed = true;
+	}
+	void add_orientation(glm::quat add_orientation) {
+		this->orientation *= add_orientation;
 		this->changed = true;
 	}
 	void set_scale(glm::vec3 new_scale) {
@@ -159,10 +178,9 @@ public:
 
 	void reparent_to(Transform &new_parent) {
 		auto relative_affine = glm::inverse(new_parent.get_global_model_matrix()) * get_global_model_matrix();
-		position = glm::vec3(relative_affine[3]);
-		orientation = glm::quat(relative_affine);
-		scale = glm::vec3(
-				glm::length(relative_affine[0]), glm::length(relative_affine[1]), glm::length(relative_affine[2]));
+		glm::vec3 skew;
+		glm::vec4 perspective;
+		glm::decompose(relative_affine, scale, orientation, position, skew, perspective);
 		changed = true;
 	}
 };
