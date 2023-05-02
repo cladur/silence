@@ -3,8 +3,6 @@
 #include <imgui_internal.h>
 #include <imgui_stdlib.h>
 
-#include <utility>
-
 Inspector::Inspector() {
 	type_to_show_functions_map[typeid(Name)] = [this]() { show_name(); };
 	type_to_show_functions_map[typeid(Transform)] = [this]() { show_transform(); };
@@ -333,17 +331,17 @@ void Inspector::show_add_component() {
 	if (ImGui::IsPopupOpen("add_component_popup")) {
 		ImGui::GetIO().WantTextInput = true;
 		if (ImGui::BeginPopup("add_component_popup")) {
-			//ImGui::SeparatorText("Components");
+			// We only want to set the focus once, at the beginning
+			if (open_popup) {
+				ImGui::SetKeyboardFocusHere();
+			}
 			float components_filter_available_width = ImGui::GetContentRegionAvail().x;
 			static ImGuiTextFilter components_filter;
 			components_filter.Draw("##component_filter", components_filter_available_width - 5);
 
+			ImGui::Spacing();
 			ImGui::Separator();
-			ImGui::SetWindowFontScale(1.15f);
-			ImGui::SameLine(ImGui::GetWindowWidth() / 2 - ImGui::CalcTextSize("Search").x / 2);
-			ImGui::Text("Search");
-			ImGui::SetWindowFontScale(1);
-			ImGui::Separator();
+			ImGui::Spacing();
 
 			for (auto component_id : not_selected_entity_components) {
 				const char *component_name = component_names[component_id].c_str();

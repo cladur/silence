@@ -33,6 +33,12 @@ public:
 		component_manager->register_component<T>();
 
 		std::string type_name = typeid(T).name();
+		// Remove number prefix from type name
+		while (type_name[0] >= '0' && type_name[0] <= '9') {
+			type_name.erase(0, 1);
+		}
+		SPDLOG_INFO("Registering component {}", type_name);
+		// Remove whitespace from type name
 		size_t pos = type_name.find(" ");
 		type_name = type_name.substr(pos + 1);
 		int type_id = component_names.size();
