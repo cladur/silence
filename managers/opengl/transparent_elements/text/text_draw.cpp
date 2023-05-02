@@ -64,7 +64,7 @@ void TextDraw::draw() {
 	shader.set_mat4("view", opengl_manager->view);
 	shader.set_int("font_atlas_map", 0);
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, FontManager::get()->fonts.begin()->second.texture);
+	glBindTexture(GL_TEXTURE_2D, FontManager::get()->fonts.begin()->second.texture.id);
 
 	glBindVertexArray(vao);
 	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
@@ -93,6 +93,7 @@ void draw_text(const std::string &text, bool is_screen_space, const glm::vec3 &p
 
 	TransparentObject object = {};
 	object.transform = glm::mat4(1.0f);
+	object.position = position;
 	object.texture_name = "";
 
 	Font *font = &font_manager->fonts.begin()->second;
@@ -105,15 +106,24 @@ void draw_text(const std::string &text, bool is_screen_space, const glm::vec3 &p
 	}
 
 	OpenglManager *opengl_manager = OpenglManager::get();
-	TextDraw &text_draw = opengl_manager->text_draw;
+	//TextDraw &text_draw = opengl_manager->text_draw;
 
 	// We're scaling the text by arbitrary amount
 	// Correct way to do it would be to calculate it based on the font size which we loaded using FreeType
 	// But whatever
-	scale *= 0.02f;
+	//scale *= 0.02f;
 
 	// We're scaling down the font even more if it's in screenspace coords, cause they are just [-1; 1]
 	float screen_space_scale = 1.0f;
+
+	float aspect = 1.0;
+
+	if (!is_screen_space) {
+		glm::vec2 window_size = DisplayManager::get()->get_framebuffer_size();
+		aspect = 1.0f;//window_size.y / window_size.x;
+		// We're scaling down the font even more if it's in screenspace coords, cause they are just [-1; 1]
+		scale *= 0.02f;
+	}
 
 	float x = position.x;
 	if (center_x) {
@@ -151,17 +161,6 @@ void draw_text(const std::string &text, bool is_screen_space, const glm::vec3 &p
 	rotation_matrix = glm::rotate(rotation_matrix, glm::radians(rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
 	rotation_matrix = glm::rotate(rotation_matrix, glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
 	rotation_matrix = glm::rotate(rotation_matrix, glm::radians(rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
-
-	float aspect = 1.0;
-
-//	if (is_screen_space) {
-//		glm::vec2 window_size = DisplayManager::get()->get_framebuffer_size();
-//		aspect = 1.0f;//window_size.y / window_size.x;
-//		// We're scaling down the font even more if it's in screenspace coords, cause they are just [-1; 1]
-//		//scale *= screen_space_scale;
-//	}
-
-
 
 	for (char c : text) {
 		Character character = font->characters[c];
@@ -201,17 +200,18 @@ void draw_text(const std::string &text, bool is_screen_space, const glm::vec3 &p
 		object.vertices.push_back({ { v4.x, v4.y, v4.z }, color, { uv_x_max, uv_y_max }, ss }); // 3
 
 		//update the indices
-		uint32_t index = 0;
-		object.indices[index++] = 0;
-		object.indices[index++] = 1;
-		object.indices[index++] = 2;
-		object.indices[index++] = 0;
-		object.indices[index++] = 2;
-		object.indices[index++] = 3;
+		int index = object.vertices.size() - 4;
+		object.indices.push_back(0 + index);
+		object.indices.push_back(1 + index);
+		object.indices.push_back(2 + index);
+		object.indices.push_back(0 + index);
+		object.indices.push_back(2 + index);
+		object.indices.push_back(3 + index);
 
 		// now advance cursors for next glyph (note that advance is number of 1/64 pixels)
 		x += (character.advance >> 6) * scale * aspect; // bitshift by 6 to get value in pixels (2^6 = 64)
 	}
+	opengl_manager->transparent_draw.objects.push_back(object);
 }
 
 } //namespace text_draw

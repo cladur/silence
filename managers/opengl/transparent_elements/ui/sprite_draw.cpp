@@ -103,6 +103,7 @@ TransparentObject sprite_draw::default_vertex_data(
 		bool is_screen_space,
 		Alignment alignment) {
 	TransparentObject sprite = {};
+	sprite.position = position;
 	sprite.vertices.resize(4);
 	sprite.indices.resize(6);
 	sprite.transform = glm::mat4(1.0f);
@@ -236,6 +237,7 @@ void sprite_draw::draw_slider_billboard(const glm::vec3 &position, float add_z, 
 	sprite.indices.resize(6);
 	sprite.transform = glm::mat4(1.0f);
 	sprite.texture_name = "";
+	sprite.position = position;
 
 	float x = 0.0f;
 	float y = 0.0f;

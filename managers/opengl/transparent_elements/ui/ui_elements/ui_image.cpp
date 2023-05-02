@@ -1,7 +1,7 @@
 #include "ui_image.h"
 
-UIImage::UIImage(glm::vec2 position, glm::vec2 size, const std::string& texture_name) {
-	this->position = glm::vec3(position, 0.0f);
+UIImage::UIImage(glm::vec3 position, glm::vec2 size, const std::string& texture_name) {
+	this->position = position;
 	this->size = size;
 	this->texture_name = texture_name;
 }

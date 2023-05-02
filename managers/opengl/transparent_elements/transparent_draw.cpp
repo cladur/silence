@@ -41,10 +41,12 @@ void TransparentDraw::draw() {
 	auto manager = OpenglManager::get();
 	auto d_manager = DisplayManager::get();
 	static std::vector<TransparentObject> screen_space_objects;
+	glm::vec3 cam_pos = manager->camera_pos;
 
 	// transparency sorting for world-space objects
-	std::sort(objects.begin(), objects.end(), [](const TransparentObject &a, const TransparentObject &b) {
-		return a.vertices[0].position.z < b.vertices[0].position.z;
+	std::sort(objects.begin(), objects.end(), [cam_pos](const TransparentObject &a, const TransparentObject &b) {
+		SPDLOG_INFO("{} cam distance {}, {} cam distance {}", a.texture_name ,glm::distance(cam_pos, a.position), b.texture_name, glm::distance(cam_pos, b.position));
+		return glm::distance(cam_pos, a.position) > glm::distance(cam_pos, b.position);
 	});
 
 	static glm::mat4 view = manager->view;
@@ -62,6 +64,7 @@ void TransparentDraw::draw() {
 			SPDLOG_INFO("screen space object pushed");
 			continue;
 		}
+
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
 		glBufferSubData(GL_ARRAY_BUFFER, 0, object.vertices.size() * sizeof(TransparentVertex), &object.vertices[0]);
 
@@ -71,7 +74,7 @@ void TransparentDraw::draw() {
 		if (object.type == TransparentType::TEXT) {
 
 			// TODO text
-			//t = FontManager::get()->fonts[object.texture_name].texture;
+			t = FontManager::get()->fonts[object.texture_name].texture;
 			shader.set_int("is_sprite", 0);
 
 		} else if (object.type == TransparentType::SPRITE) {
@@ -127,7 +130,7 @@ void TransparentDraw::draw() {
 		if (object.type == TransparentType::TEXT) {
 
 			// TODO text
-			//t = FontManager::get()->fonts[object.texture_name].texture;
+			t = FontManager::get()->fonts[object.texture_name].texture;
 			shader.set_int("is_sprite", 0);
 
 		} else if (object.type == TransparentType::SPRITE) {

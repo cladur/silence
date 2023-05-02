@@ -8,6 +8,7 @@
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
+#include "opengl/texture.h"
 
 struct Character {
 	int x_min, y_min, x_max, y_max; // Coords of glyph in the texture atlas
@@ -18,7 +19,8 @@ struct Character {
 struct Font {
 	glm::vec2 texture_size;
 #ifdef USE_OPENGL
-	uint32_t texture;
+	//uint32_t texture;
+	Texture texture;
 #else
 	AllocatedImage character_atlas;
 	vk::Sampler sampler;

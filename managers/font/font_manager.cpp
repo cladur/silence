@@ -83,15 +83,20 @@ void FontManager::load_font(const char *path, int size, std::string name) {
 		// add 1 pixel of padding between glyphs
 		pen_x += bmp->width + 1;
 	}
-
+	Texture t = {};
 #ifdef USE_OPENGL
-	glGenTextures(1, &font.texture);
-	glBindTexture(GL_TEXTURE_2D, font.texture);
+	glGenTextures(1, &t.id);
+	glBindTexture(GL_TEXTURE_2D, t.id);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, tex_width, tex_height, 0, GL_RED, GL_UNSIGNED_BYTE, pixels);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	t.width = tex_width;
+	t.height = tex_height;
+	t.channels = 1;
+	font.texture = t;
 #else
 	RenderManager *manager = RenderManager::get();
 
