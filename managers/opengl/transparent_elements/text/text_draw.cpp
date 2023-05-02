@@ -39,6 +39,7 @@ void TextDraw::startup() {
 }
 
 void TextDraw::draw() {
+	ZoneScoped;
 	if (vertices.empty() || indices.empty()) {
 		return;
 	}
@@ -75,18 +76,32 @@ void TextDraw::draw() {
 
 namespace text_draw {
 
-void draw_text_2d(const std::string &text, const glm::vec2 &position, const glm::vec3 &color, float scale, Font *font) {
-	draw_text(text, true, glm::vec3(position, 0.0f), color, scale, font);
+void draw_text_2d(const std::string &text, const glm::vec2 &position, const glm::vec3 &color, float scale,  std::string font_name,
+		bool center_x, bool center_y) {
+	draw_text(text, true, glm::vec3(position, 0.0f), color, scale, font_name);
 }
 
-void draw_text_3d(const std::string &text, const glm::vec3 &position, const glm::vec3 &color, float scale, Font *font) {
-	draw_text(text, false, position, color, scale, font);
+void draw_text_3d(const std::string &text, const glm::vec3 &position, const glm::vec3 &color, float scale,  std::string font_name,
+		bool center_x, bool center_y) {
+	draw_text(text, false, position, color, scale, font_name, center_x, center_y);
 }
 
 void draw_text(const std::string &text, bool is_screen_space, const glm::vec3 &position, const glm::vec3 &color,
-		float scale, Font *font) {
-	if (font == nullptr) {
-		font = &FontManager::get()->fonts.begin()->second;
+		float scale, std::string font_name, bool center_x, bool center_y, const glm::vec3 &rotation) {
+
+	auto font_manager = FontManager::get();
+
+	TransparentObject object = {};
+	object.transform = glm::mat4(1.0f);
+	object.texture_name = "";
+
+	Font *font = &font_manager->fonts.begin()->second;
+	if (font_name.empty()) {
+		font = &font_manager->fonts.begin()->second;
+		object.texture_name = font_manager->fonts.begin()->first;
+	} else {
+		font = &font_manager->fonts[font_name];
+		object.texture_name = font_name;
 	}
 
 	OpenglManager *opengl_manager = OpenglManager::get();
@@ -97,16 +112,56 @@ void draw_text(const std::string &text, bool is_screen_space, const glm::vec3 &p
 	// But whatever
 	scale *= 0.02f;
 
+	// We're scaling down the font even more if it's in screenspace coords, cause they are just [-1; 1]
+	float screen_space_scale = 1.0f;
+
 	float x = position.x;
+	if (center_x) {
+		float text_width = 0.0f;
+		for (char c : text) {
+			Character character = font->characters[c];
+			if (is_screen_space) {
+				//text_width += (character.advance >> 6) * scale * screen_space_scale / 2;
+				text_width += (character.advance >> 6) * scale;
+			} else {
+				text_width += (character.advance >> 6) * scale;
+			}
+		}
+		x -= text_width / 2.0f;
+	}
+
+	float y = position.y;
+	if (center_y) {
+		float text_height = 0.0f;
+		for (char c : text) {
+			Character character = font->characters[c];
+			if (text_height < (character.y_max - character.y_min) * scale) {
+				if (is_screen_space) {
+					text_height = (character.y_max - character.y_min) * scale;
+				} else {
+					text_height = (character.y_max - character.y_min) * scale;
+				}
+			}
+		}
+		y -= text_height / 2.0f;
+	}
+
+	//creating rotation matrix
+	glm::mat4 rotation_matrix = glm::mat4(1.0f);
+	rotation_matrix = glm::rotate(rotation_matrix, glm::radians(rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+	rotation_matrix = glm::rotate(rotation_matrix, glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+	rotation_matrix = glm::rotate(rotation_matrix, glm::radians(rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
 
 	float aspect = 1.0;
 
-	if (is_screen_space) {
-		glm::vec2 window_size = DisplayManager::get()->get_framebuffer_size();
-		aspect = window_size.y / window_size.x;
-		// We're scaling down the font even more if it's in screenspace coords, cause they are just [-1; 1]
-		scale *= 0.1f;
-	}
+//	if (is_screen_space) {
+//		glm::vec2 window_size = DisplayManager::get()->get_framebuffer_size();
+//		aspect = 1.0f;//window_size.y / window_size.x;
+//		// We're scaling down the font even more if it's in screenspace coords, cause they are just [-1; 1]
+//		//scale *= screen_space_scale;
+//	}
+
+
 
 	for (char c : text) {
 		Character character = font->characters[c];
@@ -115,7 +170,7 @@ void draw_text(const std::string &text, bool is_screen_space, const glm::vec3 &p
 		float y_size = character.y_max - character.y_min;
 
 		float xpos = x + character.bearing.x * scale * aspect;
-		float ypos = position.y - (y_size - character.bearing.y) * scale;
+		float ypos = y - (y_size - character.bearing.y) * scale;
 		float zpos = position.z;
 
 		float w = x_size * scale * aspect;
@@ -128,20 +183,31 @@ void draw_text(const std::string &text, bool is_screen_space, const glm::vec3 &p
 
 		int ss = is_screen_space ? 1 : 0;
 
+		glm::vec4 v1 = { xpos, ypos + h, zpos, 0.0f };
+		glm::vec4 v2 = { xpos, ypos, zpos, 0.0f };
+		glm::vec4 v3 = { xpos + w, ypos, zpos, 0.0f };
+		glm::vec4 v4 = { xpos + w, ypos + h, zpos, 0.0f };
+
+		//rotate vertices
+		v1 = rotation_matrix * v1;
+		v2 = rotation_matrix * v2;
+		v3 = rotation_matrix * v3;
+		v4 = rotation_matrix * v4;
+
 		//update the vertices
-		text_draw.vertices.push_back({ { xpos, ypos + h, zpos }, color, { uv_x_min, uv_y_max }, ss }); // 0
-		text_draw.vertices.push_back({ { xpos, ypos, zpos }, color, { uv_x_min, uv_y_min }, ss }); // 1
-		text_draw.vertices.push_back({ { xpos + w, ypos, zpos }, color, { uv_x_max, uv_y_min }, ss }); // 2
-		text_draw.vertices.push_back({ { xpos + w, ypos + h, zpos }, color, { uv_x_max, uv_y_max }, ss }); // 3
+		object.vertices.push_back({ { v1.x, v1.y, v1.z }, color, { uv_x_min, uv_y_max }, ss }); // 0
+		object.vertices.push_back({ { v2.x, v2.y, v2.z }, color, { uv_x_min, uv_y_min }, ss }); // 1
+		object.vertices.push_back({ { v3.x, v3.y, v3.z }, color, { uv_x_max, uv_y_min }, ss }); // 2
+		object.vertices.push_back({ { v4.x, v4.y, v4.z }, color, { uv_x_max, uv_y_max }, ss }); // 3
 
 		//update the indices
-		uint32_t index = text_draw.vertices.size() - 4;
-		text_draw.indices.push_back(index + 0);
-		text_draw.indices.push_back(index + 1);
-		text_draw.indices.push_back(index + 2);
-		text_draw.indices.push_back(index + 0);
-		text_draw.indices.push_back(index + 2);
-		text_draw.indices.push_back(index + 3);
+		uint32_t index = 0;
+		object.indices[index++] = 0;
+		object.indices[index++] = 1;
+		object.indices[index++] = 2;
+		object.indices[index++] = 0;
+		object.indices[index++] = 2;
+		object.indices[index++] = 3;
 
 		// now advance cursors for next glyph (note that advance is number of 1/64 pixels)
 		x += (character.advance >> 6) * scale * aspect; // bitshift by 6 to get value in pixels (2^6 = 64)

@@ -37,7 +37,7 @@ public:
 	void startup();
 	void shutdown();
 
-	void load_font(const char *path, int size);
+	void load_font(const char *path, int size, std::string name);
 };
 
 #endif // SILENCE_FONT_MANAGER_H

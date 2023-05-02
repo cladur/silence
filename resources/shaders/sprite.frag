@@ -11,9 +11,6 @@ uniform int textured;
 void main()
 {
     vec4 sampled = texture(sprite_texture, TexCoords);
-//    if (sampled.a == 0) {
-//        discard;
-//    }
     // for flat-colored sprites
     if (textured == 0) {
         sampled = vec4(1.0, 1.0, 1.0, 1.0);

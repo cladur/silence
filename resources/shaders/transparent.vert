@@ -23,11 +23,11 @@ void main() {
     if (is_screen_space == 1) {
         gl_Position = projection * vec4(aPos, 1.0);
     } else {
+        mat4 vp = projection * view;
         if (is_billboard == 1) {
-            mat4 vp = projection * view;
             gl_Position = vp * vec4(billboard_center + camera_right * aPos.x + camera_up * aPos.y + camera_look * aPos.z, 1.0);
         } else {
-            gl_Position = projection * view * vec4(aPos, 1.0);
+            gl_Position = vp * vec4(aPos, 1.0);
         }
     }
 

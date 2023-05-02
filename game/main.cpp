@@ -40,10 +40,10 @@
 #include <fstream>
 
 #include "core/camera/camera.h"
-#include "opengl/ui/sprite_manager.h"
-#include "opengl/ui/ui_elements/ui_anchor.h"
-#include "opengl/ui/ui_elements/ui_image.h"
-#include "opengl/ui/ui_elements/ui_slider.h"
+#include "opengl/transparent_elements/ui/sprite_manager.h"
+#include "opengl/transparent_elements/ui/ui_elements/ui_anchor.h"
+#include "opengl/transparent_elements/ui/ui_elements/ui_image.h"
+#include "opengl/transparent_elements/ui/ui_elements/ui_slider.h"
 // #include "render/debug/debug_draw.h"
 // #include "render/text/text_draw.h"
 
@@ -52,6 +52,13 @@ AudioManager audio_manager;
 InputManager input_manager;
 
 Camera camera(glm::vec3(0.0f, 0.0f, -25.0f));
+
+#ifdef USE_OPENGL
+extern "C" {
+__declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
+__declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
+}
+#endif
 
 bool in_debug_menu = true;
 
@@ -325,7 +332,6 @@ int main() {
 
 	SpriteManager::get()->load_sprite_texture("ui_width", "ui_width.ktx2");
 	SpriteManager::get()->load_sprite_texture("ui_height", "ui_height.ktx2");
-	SpriteManager::get()->load_sprite_texture("ui_test", "ui_test.ktx2");
 	SpriteManager::get()->load_sprite_texture("kek", "kek.ktx2");
 	SpriteManager::get()->load_sprite_texture("pointer", "gun_sight.ktx2");
 	SpriteManager::get()->load_sprite_texture("skull", "skull_emoji.ktx2");
@@ -360,7 +366,8 @@ int main() {
 	audio_manager.load_bank("Ambience");
 	audio_manager.load_sample_data();
 
-	FontManager::get()->load_font("resources/fonts/PoltawskiNowy.ttf", 48);
+	FontManager::get()->load_font("resources/fonts/PoltawskiNowy.ttf", 48, "one");
+	FontManager::get()->load_font("resources/fonts/FROSTBITE-Narrow.ttf", 48, "two");
 
 	//Map inputs
 	default_mappings();
@@ -403,18 +410,10 @@ int main() {
 	anchor.add_child(slider_test);
 
 	// IMAGE
-	UIImage image = UIImage(glm::vec3(-2.0f, 0.0f, 0.0f), glm::vec2(3.0f, 3.0f), "skull");
-	image.is_screen_space = false;
-	image.is_billboard = true;
-	//anchor.add_child(image);
-
-	UISlider billboard_test = UISlider(0.0f, 0.0f, 1.0f, false);
-	billboard_test.position = glm::vec3(0.0f, 0.0f, 0.0f);
-	billboard_test.size = glm::vec2(0.5f, 4.0f);
-	billboard_test.slider_alignment = sprite_draw::SliderAlignment::BOTTOM_TO_TOP;
-	billboard_test.is_screen_space = false;
-	billboard_test.is_billboard = true;
-	billboard_test.color = glm::vec3(0.142f, 0.531f, 0.8534f);
+	UIImage image = UIImage(glm::vec3(-200.0f, 0.0f, 0.0f), glm::vec2(150.0f, 150.0f), "skull");
+	image.is_screen_space = true;
+	image.is_billboard = false;
+	anchor.add_child(image);
 
 	bool should_run = true;
 	nlohmann::json scene;
@@ -548,19 +547,32 @@ int main() {
 		static char buffer[128] = { 'H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd', '!' };
 		static float scale = 1.0f;
 		static float position[3] = { 0.0f, 0.0f, 0.0f };
+		static float rotation[3] = { 0.0f, 0.0f, 0.0f };
 		static glm::vec3 color = { 1.0f, 1.0f, 1.0f };
 		static bool screenspace = false;
+		static bool centered_x = false;
+		static bool centered_y = false;
 		ImGui::InputText("Text", buffer, 128);
 		ImGui::InputFloat("Scale", &scale);
 		ImGui::InputFloat3("Position", position);
+		ImGui::InputFloat3("Rotation", rotation);
 		ImGui::InputFloat3("Color", &color.x);
 		ImGui::Checkbox("Screenspace", &screenspace);
+		ImGui::Checkbox("Center X", &centered_x);
+		ImGui::Checkbox("Center Y", &centered_y);
 
 		ImGui::End();
 
-//		text_draw::draw_text(
-//				std::string(buffer), screenspace, glm::vec3(position[0], position[1], position[2]), color, scale);
-//
+//		text_draw::draw_text(std::string(buffer),
+//				screenspace,
+//				glm::vec3(position[0], position[1], position[2]),
+//				color,
+//				scale,
+//				"one",
+//				centered_x,
+//				centered_y,
+//				glm::vec3(rotation[0], rotation[1], rotation[2]));
+
 //		debug_draw::draw_line(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(10.0f, 0.0f, 0.0f));
 //		debug_draw::draw_line(glm::vec3(0.0f, 5.0f, 0.0f), glm::vec3(10.0f, 0.0f, 0.0f));
 //
@@ -569,101 +581,9 @@ int main() {
 //		debug_draw::draw_box(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 //		debug_draw::draw_box(glm::vec3(0.0f, 5.0f, 0.0f), glm::vec3(10.0f, 1.0f, 1.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 
-//		sprite_draw::draw_colored(glm::vec3(0.0f, 3.0f, 0.0f), glm::vec2(2.0f, 2.0f), glm::vec3(0.4531f, 0.643f, 0.8134f), false);
-//		sprite_draw::draw_sprite(
-//				glm::vec3(0.0f, 0.0f, 0.0f),
-//				glm::vec2(100.0f, 100.0f),
-//				glm::vec3(0.543f, 0.413, 0.8134f),
-//				"pointer",
-//				true,
-//				sprite_draw::Alignment::CENTER);
-//		sprite_draw::draw_sprite(
-//				glm::vec3(0.0f, -70.0f, 0.0f),
-//				glm::vec2(140.0f, 140.0f),
-//				glm::vec3(1.0f),
-//				"ui_width",
-//				true,
-//				sprite_draw::Alignment::TOP);
-//		sprite_draw::draw_sprite(
-//				glm::vec3(50.0f, 0.0f, 0.0f),
-//				glm::vec2(100.0f, 100.0f),
-//				glm::vec3(1.0f),
-//				"ui_height",
-//				true,
-//				sprite_draw::Alignment::LEFT);
-//		sprite_draw::draw_sprite(
-//				glm::vec3(-100.0f, 0.0f, 0.0f),
-//				glm::vec2(200.0f, 200.0f),
-//				glm::vec3(1.0f),
-//				"kek",
-//				true,
-//				sprite_draw::Alignment::RIGHT);
-//		sprite_draw::draw_sprite(
-//				glm::vec3(0.0f, 100.0f, 0.0f),
-//				glm::vec2(200.0f, 200.0f),
-//				glm::vec3(1.0f),
-//				"missing_asf",
-//				true,
-//				sprite_draw::Alignment::BOTTOM);
-//
-//		sprite_draw::draw_sprite(
-//				glm::vec3(50.0f, -50.0f, 0.0f),
-//				glm::vec2(100.0f, 100.0f),
-//				glm::vec3(0.345f, 0.531, 0.9345f),
-//				"skull",
-//				true,
-//				sprite_draw::Alignment::TOP_LEFT);
-//		sprite_draw::draw_sprite(
-//				glm::vec3(-50.0f, -50.0f, 0.0f),
-//				glm::vec2(100.0f, 100.0f),
-//				glm::vec3(0.545f, 0.231, 0.725f),
-//				"skull",
-//				true,
-//				sprite_draw::Alignment::TOP_RIGHT);
-//		sprite_draw::draw_sprite(
-//				glm::vec3(50.0f, 50.0f, 0.0f),
-//				glm::vec2(100.0f, 100.0f),
-//				glm::vec3(1.0f),
-//				"skull",
-//				true,
-//				sprite_draw::Alignment::BOTTOM_LEFT);
-//		sprite_draw::draw_sprite(
-//				glm::vec3(-50.0f, 50.0f, 0.0f),
-//				glm::vec2(100.0f, 100.0f),
-//				glm::vec3(0.123f, 0.52, 0.347f),
-//				"skull",
-//				true,
-//				sprite_draw::Alignment::BOTTOM_RIGHT);
 
-		//slider_test.value = slider_value;
-		//slider_test.draw();
-		//anchor.draw();
-		image.draw();
-		billboard_test.value = slider_value;
-
-		billboard_test.position = glm::vec3(0.0f, 0.0f, 0.0f);
-		billboard_test.size = glm::vec2(0.5f, 4.0f);
-		billboard_test.slider_alignment = sprite_draw::SliderAlignment::BOTTOM_TO_TOP;
-		billboard_test.color = glm::vec3(0.0f, 1.0f, 1.0f);
-		billboard_test.draw();
-
-		billboard_test.position = glm::vec3(0.0f, -5.0f, 0.0f);
-		billboard_test.size = glm::vec2(0.5f, 4.0f);
-		billboard_test.slider_alignment = sprite_draw::SliderAlignment::TOP_TO_BOTTOM;
-		billboard_test.color = glm::vec3(1.0f, 1.0f, 1.0f);
-		billboard_test.draw();
-
-		billboard_test.position = glm::vec3(10.0f, 2.0f, 0.0f);
-		billboard_test.size = glm::vec2(4.0f, 0.5f);
-		billboard_test.slider_alignment = sprite_draw::SliderAlignment::LEFT_TO_RIGHT;
-		billboard_test.color = glm::vec3(1.0f, 1.0f, 0.0f);
-		billboard_test.draw();
-
-		billboard_test.position = glm::vec3(10.0f, -2.0f, 0.0f);
-		billboard_test.size = glm::vec2(4.0f, 0.5f);
-		billboard_test.color = glm::vec3(1.0f, 0.0f, 1.0f);
-		billboard_test.slider_alignment = sprite_draw::SliderAlignment::RIGHT_TO_LEFT;
-		billboard_test.draw();
+		slider_test.value = slider_value;
+		anchor.draw();
 
 		// TODO: remove this when collision demo will be removed
 		for (auto sphere : spheres) {

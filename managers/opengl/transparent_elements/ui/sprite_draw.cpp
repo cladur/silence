@@ -81,8 +81,7 @@ void SpriteDraw::draw() {
 			shader.set_vec2("size", sprite.size);
 			shader.set_vec3("billboard_center", sprite.position);
 			shader.set_int("is_billboard", 1);
-		} else
-		{
+		} else {
 			shader.set_int("is_billboard", 0);
 		}
 		glActiveTexture(GL_TEXTURE0);
@@ -95,7 +94,7 @@ void SpriteDraw::draw() {
 	sprites.clear();
 }
 
-Sprite sprite_draw::default_vertex_data(
+TransparentObject sprite_draw::default_vertex_data(
 		const glm::vec3 &position,
 		const glm::vec2 &size,
 		float sprite_x_size,
@@ -103,11 +102,12 @@ Sprite sprite_draw::default_vertex_data(
 		const glm::vec3 &color,
 		bool is_screen_space,
 		Alignment alignment) {
-	Sprite sprite = {};
+	TransparentObject sprite = {};
 	sprite.vertices.resize(4);
 	sprite.indices.resize(6);
 	sprite.transform = glm::mat4(1.0f);
 	sprite.texture_name = "";
+	sprite.type = TransparentType::SPRITE;
 
 	float aspect = 1.0f;
 
@@ -189,9 +189,9 @@ Sprite sprite_draw::default_vertex_data(
 void sprite_draw::draw_colored(const glm::vec3 &position, const glm::vec2 &size, const glm::vec3 &color,
 		bool is_screen_space, Alignment alignment) {
 
-	Sprite sprite = default_vertex_data(position, size, 1.0f, 1.0f, color, is_screen_space, alignment);
+	TransparentObject sprite = default_vertex_data(position, size, 1.0f, 1.0f, color, is_screen_space, alignment);
 	auto manager = OpenglManager::get();
-	manager->sprite_draw.sprites.push_back(sprite);
+	manager->transparent_draw.objects.push_back(sprite);
 }
 
 void sprite_draw::draw_sprite(const glm::vec3 &position, const glm::vec2 &size, const glm::vec3 &color,
@@ -199,16 +199,16 @@ void sprite_draw::draw_sprite(const glm::vec3 &position, const glm::vec2 &size, 
 
 	Texture t = SpriteManager::get()->get_sprite_texture(texture_name);
 
-	Sprite sprite = default_vertex_data(position, size, (float)t.width, (float)t.height, color, is_screen_space, alignment);
+	TransparentObject sprite = default_vertex_data(position, size, (float)t.width, (float)t.height, color, is_screen_space, alignment);
 	sprite.texture_name = texture_name;
 	auto manager = OpenglManager::get();
-	manager->sprite_draw.sprites.push_back(sprite);
+	manager->transparent_draw.objects.push_back(sprite);
 }
 
 void sprite_draw::draw_sprite_billboard(const glm::vec3 &position, const glm::vec2 &size, const glm::vec3 &color, const char *texture_name) {
 	Texture t = SpriteManager::get()->get_sprite_texture(texture_name);
 
-	Sprite sprite = default_vertex_data(glm::vec3(0.0f), size, (float)t.width, (float)t.height, color, false, sprite_draw::Alignment::NONE);
+	TransparentObject sprite = default_vertex_data(glm::vec3(0.0f), size, (float)t.width, (float)t.height, color, false, sprite_draw::Alignment::NONE);
 
 	auto view = OpenglManager::get()->view;
 
@@ -217,21 +217,21 @@ void sprite_draw::draw_sprite_billboard(const glm::vec3 &position, const glm::ve
 	sprite.size = size / 2.0f;
 	sprite.position = position;
 	auto manager = OpenglManager::get();
-	manager->sprite_draw.sprites.push_back(sprite);
+	manager->transparent_draw.objects.push_back(sprite);
 }
 
 void sprite_draw::draw_colored_billboard(const glm::vec3 &position, const glm::vec2 &size, const glm::vec3 &color) {
-	Sprite sprite = default_vertex_data(glm::vec3(0.0f), size, 1.0f, 1.0f, color, false, sprite_draw::Alignment::NONE);
+	TransparentObject sprite = default_vertex_data(glm::vec3(0.0f), size, 1.0f, 1.0f, color, false, sprite_draw::Alignment::NONE);
 
 	sprite.billboard = true;
 	sprite.size = size / 2.0f;
 	sprite.position = position;
 	auto manager = OpenglManager::get();
-	manager->sprite_draw.sprites.push_back(sprite);
+	manager->transparent_draw.objects.push_back(sprite);
 }
 
 void sprite_draw::draw_slider_billboard(const glm::vec3 &position, float add_z, const glm::vec2 &size, const glm::vec3 &color, float value, SliderAlignment slider_alignment) {
-	Sprite sprite = {};
+	TransparentObject sprite = {};
 	sprite.vertices.resize(4);
 	sprite.indices.resize(6);
 	sprite.transform = glm::mat4(1.0f);
@@ -287,9 +287,10 @@ void sprite_draw::draw_slider_billboard(const glm::vec3 &position, float add_z, 
 	sprite.indices[index++] = 2;
 	sprite.indices[index++] = 3;
 
+	sprite.type = sprite.type = TransparentType::SPRITE;
 	sprite.billboard = true;
 	sprite.size = size / 2.0f;
 	sprite.position = position;
 	auto manager = OpenglManager::get();
-	manager->sprite_draw.sprites.push_back(sprite);
+	manager->transparent_draw.objects.push_back(sprite);
 }

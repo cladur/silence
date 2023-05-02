@@ -1,9 +1,12 @@
 #include "font_manager.h"
 #include <freetype/freetype.h>
 
+#ifndef USE_OPENGL
 #include "render/vk_debug.h"
 #include "render/vk_initializers.h"
 #include "render/vk_textures.h"
+#endif
+#include "glad/glad.h"
 
 FontManager *FontManager::get() {
 	static FontManager instance;
@@ -20,7 +23,7 @@ void FontManager::shutdown() {
 	FT_Done_FreeType(ft);
 }
 
-void FontManager::load_font(const char *path, int size) {
+void FontManager::load_font(const char *path, int size, std::string name) {
 	FT_Face face;
 	if (FT_New_Face(ft, path, 0, &face)) {
 		SPDLOG_ERROR("FREETYPE: Failed to load font");
@@ -120,5 +123,5 @@ void FontManager::load_font(const char *path, int size) {
 	free(pixels);
 	FT_Done_Face(face);
 
-	fonts.insert(std::pair<std::string, Font>(path, font));
+	fonts.insert(std::pair<std::string, Font>(name, font));
 }

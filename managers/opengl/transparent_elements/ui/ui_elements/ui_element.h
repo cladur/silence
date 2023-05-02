@@ -1,7 +1,7 @@
 #ifndef SILENCE_UI_ELEMENT_H
 #define SILENCE_UI_ELEMENT_H
 
-#include "opengl/ui/sprite_draw.h"
+#include "managers/opengl/transparent_elements/ui/sprite_draw.h"
 
 class UIElement {
 public:

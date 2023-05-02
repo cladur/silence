@@ -2,6 +2,7 @@
 #define SILENCE_SPRITE_DRAW_H
 
 #include <opengl/shader.h>
+#include "opengl/transparent_elements/transparent_draw.h"
 
 struct SpriteVertex {
 	glm::vec3 position;
@@ -55,7 +56,7 @@ enum class SliderAlignment {
 	BOTTOM_TO_TOP
 };
 
-Sprite default_vertex_data(const glm::vec3 &position, const glm::vec2 &size, float sprite_x_size, float sprite_y_size,
+TransparentObject default_vertex_data(const glm::vec3 &position, const glm::vec2 &size, float sprite_x_size, float sprite_y_size,
 		const glm::vec3 &color, bool is_screen_space, Alignment alignment = Alignment::CENTER);
 
 // draws a single colored quad. If is screen spaced, the scale represents pixel scale.
