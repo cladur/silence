@@ -33,7 +33,10 @@ private:
 	void show_collidersphere();
 	void show_collideraabb();
 	void show_colliderobb();
-	bool show_vec3(const char *label, glm::vec3 &vec3, float speed = 0.1f);
+	static bool show_vec3(const char *label, glm::vec3 &vec3, float speed = 0.1f);
+	static bool show_float(const char *label, float &value, float speed = 0.1f);
+	static void show_checkbox(const char *label, bool &value);
+	static void show_text(const char *label, const char *value);
 
 public:
 	Inspector();
@@ -53,6 +56,7 @@ public:
 			SPDLOG_ERROR("No show function for component {}", typeid(T).name());
 		}
 	};
+	static void show_text(const char *label, int value);
 };
 
 #endif //SILENCE_INSPECTOR_GUI_H

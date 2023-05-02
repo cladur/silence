@@ -67,37 +67,59 @@ void Inspector::show_transform() {
 }
 void Inspector::show_rigidbody() {
 	auto &rigidbody = ecs_manager.get_component<RigidBody>(selected_entity);
-	if (ImGui::TreeNodeEx("RigidBody", tree_flags)) {
-		ImGui::DragFloat3("Velocity", &rigidbody.velocity.x, 0.1f);
-		ImGui::DragFloat3("Acceleration", &rigidbody.acceleration.x, 0.1f);
-		ImGui::TreePop();
+	if (ImGui::CollapsingHeader("RigidBody", tree_flags)) {
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("Transform", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+
+		show_vec3("Velocity", rigidbody.velocity);
+		show_vec3("Acceleration", rigidbody.acceleration);
+
+		ImGui::EndTable();
 	}
 }
 void Inspector::show_gravity() {
 	auto &gravity = ecs_manager.get_component<Gravity>(selected_entity);
-	if (ImGui::TreeNodeEx("Gravity", tree_flags)) {
-		ImGui::DragFloat3("Gravity", &gravity.force.x, 0.1f);
-		ImGui::TreePop();
+	if (ImGui::CollapsingHeader("Gravity", tree_flags)) {
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("Transform", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+
+		show_vec3("Gravity", gravity.force);
+
+		ImGui::EndTable();
 	}
 }
 void Inspector::show_parent() {
 	auto &parent = ecs_manager.get_component<Parent>(selected_entity);
-	if (ImGui::TreeNodeEx("Parent", tree_flags)) {
-		ImGui::Text("Parent: %d", parent.parent);
-		ImGui::TreePop();
+	if (ImGui::CollapsingHeader("Parent", tree_flags)) {
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("Model Instance", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+
+		std::string text_value = parent.parent != 0 ? std::to_string(parent.parent) : "None";
+		show_text("Parent:", text_value.c_str());
+
+		ImGui::EndTable();
 	}
 }
 void Inspector::show_children() {
 	auto &children = ecs_manager.get_component<Children>(selected_entity);
-	if (ImGui::TreeNodeEx("Children", tree_flags)) {
-		ImGui::Text("Children: %d", children.children_count);
-		if (ImGui::TreeNodeEx("Children list", tree_flags)) {
+	if (ImGui::CollapsingHeader("Children", tree_flags)) {
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("Model Instance", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+		bool has_children = children.children_count != 0;
+
+		std::string text_value = has_children ? std::to_string(children.children_count) : "None";
+		show_text("Children:", text_value.c_str());
+		if (has_children && ImGui::CollapsingHeader("Children list", tree_flags)) {
 			for (int i = 0; i < children.children_count; i++) {
-				ImGui::Text("%d", children.children[i]);
+				show_text("Child: ", children.children[i]);
 			}
-			ImGui::TreePop();
 		}
-		ImGui::TreePop();
+
+		ImGui::EndTable();
 	}
 }
 void Inspector::show_modelinstance() {
@@ -168,44 +190,74 @@ void Inspector::show_modelinstance() {
 }
 void Inspector::show_fmodlistener() {
 	auto &fmodlistener = ecs_manager.get_component<FmodListener>(selected_entity);
-	if (ImGui::TreeNodeEx("FmodListener", tree_flags)) {
-		ImGui::Text("Listener: %d", fmodlistener.listener_id);
-		ImGui::TreePop();
+	if (ImGui::CollapsingHeader("FmodListener", tree_flags)) {
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("Transform", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+
+		show_text("Listener: ", fmodlistener.listener_id);
+
+		ImGui::EndTable();
 	}
 }
 void Inspector::show_collidertag() {
+	if (ImGui::CollapsingHeader("ColliderTag", tree_flags)) {
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("Transform", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+
+		show_text("Collider Tag", "Yes");
+
+		ImGui::EndTable();
+	}
 }
 void Inspector::show_collidersphere() {
 	auto &collidersphere = ecs_manager.get_component<ColliderSphere>(selected_entity);
-	if (ImGui::TreeNodeEx("ColliderSphere", tree_flags)) {
-		ImGui::DragFloat3("Center", &collidersphere.center.x, 0.1f);
-		ImGui::DragFloat("Radius", &collidersphere.radius, 0.1f);
-		ImGui::Checkbox("Is movable", &collidersphere.is_movable);
-		ImGui::TreePop();
+	if (ImGui::CollapsingHeader("ColliderSphere", tree_flags)) {
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("Transform", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+
+		show_vec3("Center", collidersphere.center);
+		show_float("Radius", collidersphere.radius);
+		show_checkbox("Is movable", collidersphere.is_movable);
+
+		ImGui::EndTable();
 	}
 }
 void Inspector::show_collideraabb() {
 	auto &collideraabb = ecs_manager.get_component<ColliderAABB>(selected_entity);
-	if (ImGui::TreeNodeEx("ColliderAABB", tree_flags)) {
-		ImGui::DragFloat3("Center", &collideraabb.center.x, 0.1f);
-		ImGui::DragFloat3("Range", &collideraabb.range.x, 0.1f);
-		ImGui::Checkbox("Is movable", &collideraabb.is_movable);
-		ImGui::TreePop();
+	if (ImGui::CollapsingHeader("ColliderAABB", tree_flags)) {
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("Transform", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+
+		show_vec3("Center", collideraabb.center);
+		show_vec3("Range", collideraabb.range);
+		show_checkbox("Is movable", collideraabb.is_movable);
+
+		ImGui::EndTable();
 	}
 }
 void Inspector::show_colliderobb() {
 	auto &colliderobb = ecs_manager.get_component<ColliderOBB>(selected_entity);
-	if (ImGui::TreeNodeEx("ColliderOBB", tree_flags)) {
-		ImGui::DragFloat3("Center", &colliderobb.center.x, 0.1f);
-		ImGui::DragFloat3("Orientation 1", &colliderobb.orientation[0].x, 0.1f);
-		ImGui::DragFloat3("Orientation 2", &colliderobb.orientation[1].x, 0.1f);
-		ImGui::DragFloat3("Range", &colliderobb.range.x, 0.1f);
-		ImGui::Checkbox("Is movable", &colliderobb.is_movable);
-		ImGui::TreePop();
+	if (ImGui::CollapsingHeader("ColliderOBB", tree_flags)) {
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("Transform", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+
+		show_vec3("Center", colliderobb.center);
+		show_vec3("Orientation 1", colliderobb.orientation[0]);
+		show_vec3("Orientation 2", colliderobb.orientation[1]);
+		show_vec3("Range", colliderobb.range);
+		show_checkbox("Is movable", colliderobb.is_movable);
+
+		ImGui::EndTable();
 	}
 }
 bool Inspector::show_vec3(const char *label, glm::vec3 &vec3, float speed) {
 	bool changed = false;
+
 	ImGui::TableNextRow();
 	ImGui::TableSetColumnIndex(0);
 	ImGui::Text("%s", label);
@@ -214,6 +266,43 @@ bool Inspector::show_vec3(const char *label, glm::vec3 &vec3, float speed) {
 	changed |= ImGui::DragFloat3(fmt::format("##{}", label).c_str(), &vec3.x, speed);
 	return changed;
 }
+
+bool Inspector::show_float(const char *label, float &value, float speed) {
+	bool changed = false;
+
+	ImGui::TableNextRow();
+	ImGui::TableSetColumnIndex(0);
+	ImGui::Text("%s", label);
+	ImGui::TableSetColumnIndex(1);
+	ImGui::SetNextItemWidth(-FLT_MIN);
+	changed |= ImGui::DragFloat(fmt::format("##{}", label).c_str(), &value, speed);
+	return changed;
+}
+
+void Inspector::show_checkbox(const char *label, bool &value) {
+	ImGui::TableNextRow();
+	ImGui::TableSetColumnIndex(0);
+	ImGui::Text("%s", label);
+	ImGui::TableSetColumnIndex(1);
+	ImGui::SetNextItemWidth(-FLT_MIN);
+	ImGui::Checkbox(fmt::format("##{}", label).c_str(), &value);
+}
+
+void Inspector::show_text(const char *label, const char *value) {
+	ImGui::TableNextRow();
+	ImGui::TableSetColumnIndex(0);
+	ImGui::Text("%s", label);
+	ImGui::TableSetColumnIndex(1);
+	ImGui::SetNextItemWidth(-FLT_MIN);
+	ImGui::Text("%s", value);
+}
+
+void Inspector::show_text(const char *label, int value) {
+	std::string value_str = std::to_string(value);
+
+	Inspector::show_text(label, value_str.c_str());
+}
+
 void Inspector::show_add_component() {
 	std::vector<std::string> component_names = ecs_manager.get_component_names();
 	float available_width = ImGui::GetContentRegionAvail().x;
