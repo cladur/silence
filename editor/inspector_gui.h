@@ -5,6 +5,7 @@
 #include "render/render_manager.h"
 #include <imgui.h>
 #include <cstdint>
+#include <typeindex>
 class Inspector {
 private:
 	Entity selected_entity = 0;
@@ -16,8 +17,10 @@ private:
 	ECSManager &ecs_manager = ECSManager::get();
 	RenderManager &render_manager = RenderManager::get();
 
-	void (*show_component_functions[12])(Entity entity);
-	void show_component(int signature_index);
+	std::unordered_map<int, std::function<void()>> show_component_map;
+	std::unordered_map<std::type_index, std::function<void()>> type_to_show_functions_map;
+
+	static void show_component(int signature_index);
 	void show_name();
 	void show_transform();
 	void show_rigidbody();
@@ -33,9 +36,23 @@ private:
 	bool show_vec3(const char *label, glm::vec3 &vec3, float speed = 0.1f);
 
 public:
+	Inspector();
+	static Inspector &get();
 	void show_components();
 	void show_add_component();
+	void refresh_entity();
 	void set_active_entity(Entity entity);
+	static void add_mapping(int signature_index, std::function<void()> func);
+	template <typename T> static void show_component() {
+		Inspector &inspector = Inspector::get();
+		auto map = inspector.type_to_show_functions_map;
+		auto it = map.find(typeid(T));
+		if (it != map.end()) {
+			it->second();
+		} else {
+			SPDLOG_ERROR("No show function for component {}", typeid(T).name());
+		}
+	};
 };
 
 #endif //SILENCE_INSPECTOR_GUI_H

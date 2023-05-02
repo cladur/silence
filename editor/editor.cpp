@@ -6,7 +6,14 @@
 #include <imgui_internal.h>
 
 #include "IconsMaterialDesign.h"
+#include "inspector_gui.h"
 // #include "IconsFontAwesome5.h"
+template <typename T> void register_component() {
+	ECSManager &ecs_manager = ECSManager::get();
+	int type_id = ecs_manager.get_registered_components();
+	ecs_manager.register_component<T>();
+	Inspector::add_mapping(type_id, []() { Inspector::show_component<T>(); });
+}
 
 void default_mappings() {
 	InputManager &input_manager = InputManager::get();
@@ -230,18 +237,18 @@ void Editor::startup() {
 	RenderManager &render_manager = RenderManager::get();
 
 	// Components
-	ecs_manager.register_component<Name>();
-	ecs_manager.register_component<Transform>();
-	ecs_manager.register_component<RigidBody>();
-	ecs_manager.register_component<Gravity>();
-	ecs_manager.register_component<Parent>();
-	ecs_manager.register_component<Children>();
-	ecs_manager.register_component<ModelInstance>();
-	ecs_manager.register_component<FmodListener>();
-	ecs_manager.register_component<ColliderTag>();
-	ecs_manager.register_component<ColliderSphere>();
-	ecs_manager.register_component<ColliderAABB>();
-	ecs_manager.register_component<ColliderOBB>();
+	register_component<Name>();
+	register_component<Transform>();
+	register_component<RigidBody>();
+	register_component<Gravity>();
+	register_component<Parent>();
+	register_component<Children>();
+	register_component<ModelInstance>();
+	register_component<FmodListener>();
+	register_component<ColliderTag>();
+	register_component<ColliderSphere>();
+	register_component<ColliderAABB>();
+	register_component<ColliderOBB>();
 
 	// Systems
 	physics_system = ecs_manager.register_system<PhysicsSystem>();

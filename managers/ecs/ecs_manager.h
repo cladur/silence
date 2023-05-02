@@ -5,7 +5,6 @@
 #include "entity_manager.h"
 #include "serialization.h"
 #include "system_manager.h"
-
 class ECSManager {
 private:
 	std::unique_ptr<ComponentManager> component_manager;

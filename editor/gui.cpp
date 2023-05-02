@@ -46,7 +46,7 @@ void Editor::imgui_menu_bar() {
 void Editor::imgui_inspector(Scene &scene) {
 	ECSManager &ecs_manager = ECSManager::get();
 	RenderManager &render_manager = RenderManager::get();
-	Inspector inspector = Inspector();
+	Inspector &inspector = Inspector::get();
 
 	ImGui::Begin("Inspector");
 

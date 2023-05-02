@@ -2,7 +2,28 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <imgui_stdlib.h>
-#include <glm/gtc/quaternion.hpp>
+
+#include <utility>
+
+Inspector::Inspector() {
+	type_to_show_functions_map[typeid(Name)] = [this]() { show_name(); };
+	type_to_show_functions_map[typeid(Transform)] = [this]() { show_transform(); };
+	type_to_show_functions_map[typeid(RigidBody)] = [this]() { show_rigidbody(); };
+	type_to_show_functions_map[typeid(Gravity)] = [this]() { show_gravity(); };
+	type_to_show_functions_map[typeid(Parent)] = [this]() { show_parent(); };
+	type_to_show_functions_map[typeid(Children)] = [this]() { show_children(); };
+	type_to_show_functions_map[typeid(ModelInstance)] = [this]() { show_modelinstance(); };
+	type_to_show_functions_map[typeid(FmodListener)] = [this]() { show_fmodlistener(); };
+	type_to_show_functions_map[typeid(ColliderTag)] = [this]() { show_collidertag(); };
+	type_to_show_functions_map[typeid(ColliderSphere)] = [this]() { show_collidersphere(); };
+	type_to_show_functions_map[typeid(ColliderAABB)] = [this]() { show_collideraabb(); };
+	type_to_show_functions_map[typeid(ColliderOBB)] = [this]() { show_colliderobb(); };
+}
+
+Inspector &Inspector::get() {
+	static Inspector instance;
+	return instance;
+}
 
 void Inspector::show_components() {
 	if (selected_entity <= 0) {
@@ -15,47 +36,8 @@ void Inspector::show_components() {
 	}
 }
 void Inspector::show_component(int signature_index) {
-	switch (signature_index) {
-		case 0:
-			show_name();
-			break;
-		case 1:
-			show_transform();
-			break;
-		case 2:
-			show_rigidbody();
-			break;
-		case 3:
-			show_gravity();
-			break;
-		case 4:
-			show_parent();
-			break;
-		case 5:
-			show_children();
-			break;
-		case 6:
-			show_modelinstance();
-			break;
-		case 7:
-			show_fmodlistener();
-			break;
-		case 8:
-			show_collidertag();
-			break;
-		case 9:
-			show_collidersphere();
-			break;
-		case 10:
-			show_collideraabb();
-			break;
-		case 11:
-			show_colliderobb();
-			break;
-		default:
-			SPDLOG_WARN("Invalid signature index {}", signature_index);
-			break;
-	}
+	Inspector &inspector = Inspector::get();
+	inspector.show_component_map[signature_index]();
 }
 void Inspector::show_name() {
 }
@@ -284,6 +266,7 @@ void Inspector::show_add_component() {
 				if (ImGui::Selectable(component_name)) {
 					ecs_manager.add_component(selected_entity, component_id);
 					set_active_entity(selected_entity);
+					break;
 				}
 			}
 			ImGui::EndPopup();
@@ -293,14 +276,24 @@ void Inspector::show_add_component() {
 
 void Inspector::set_active_entity(Entity entity) {
 	if (entity == selected_entity) {
+		refresh_entity();
 		return;
 	}
 
 	selected_entity = entity;
-	selected_entity_signature = ecs_manager.get_entity_signature(entity);
+	refresh_entity();
+}
+
+void Inspector::add_mapping(int signature_index, std::function<void()> func) {
+	Inspector &inspector = Inspector::get();
+	inspector.show_component_map[signature_index] = std::move(func);
+}
+void Inspector::refresh_entity() {
+	selected_entity_signature = ecs_manager.get_entity_signature(selected_entity);
 	int number_of_components = ecs_manager.get_registered_components();
 
 	selected_entity_components.clear();
+	not_selected_entity_components.clear();
 	for (int i = 0; i < number_of_components; i++) {
 		if (selected_entity_signature[i] == true) {
 			selected_entity_components.push_back(i);
