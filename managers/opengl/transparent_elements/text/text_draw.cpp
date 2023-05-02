@@ -162,13 +162,14 @@ void draw_text(const std::string &text, bool is_screen_space, const glm::vec3 &p
 	rotation_matrix = glm::rotate(rotation_matrix, glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
 	rotation_matrix = glm::rotate(rotation_matrix, glm::radians(rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
 
+
 	for (char c : text) {
 		Character character = font->characters[c];
 
 		float x_size = character.x_max - character.x_min;
 		float y_size = character.y_max - character.y_min;
 
-		float xpos = x + character.bearing.x * scale * aspect;
+		float xpos = x + character.bearing.x * scale;
 		float ypos = y - (y_size - character.bearing.y) * scale;
 		float zpos = position.z;
 
@@ -194,10 +195,10 @@ void draw_text(const std::string &text, bool is_screen_space, const glm::vec3 &p
 		v4 = rotation_matrix * v4;
 
 		//update the vertices
-		object.vertices.push_back({ { v1.x, v1.y, v1.z }, color, { uv_x_min, uv_y_max }, ss }); // 0
-		object.vertices.push_back({ { v2.x, v2.y, v2.z }, color, { uv_x_min, uv_y_min }, ss }); // 1
-		object.vertices.push_back({ { v3.x, v3.y, v3.z }, color, { uv_x_max, uv_y_min }, ss }); // 2
-		object.vertices.push_back({ { v4.x, v4.y, v4.z }, color, { uv_x_max, uv_y_max }, ss }); // 3
+		object.vertices.push_back({ { v1.x, v1.y, v1.z }, color, { uv_x_min, uv_y_max }, ss });
+		object.vertices.push_back({ { v2.x, v2.y, v2.z }, color, { uv_x_min, uv_y_min }, ss });
+		object.vertices.push_back({ { v3.x, v3.y, v3.z }, color, { uv_x_max, uv_y_min }, ss });
+		object.vertices.push_back({ { v4.x, v4.y, v4.z }, color, { uv_x_max, uv_y_max }, ss });
 
 		//update the indices
 		int index = object.vertices.size() - 4;

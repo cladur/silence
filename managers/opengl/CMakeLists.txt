@@ -13,7 +13,7 @@ add_library(${OPENGL_MANAGER_NAME} STATIC
         transparent_elements/text/text_draw.cpp transparent_elements/text/text_draw.h
         transparent_elements/ui/sprite_manager.cpp transparent_elements/ui/sprite_manager.h transparent_elements/ui/sprite_draw.cpp transparent_elements/ui/sprite_draw.h
         debug/debug_draw.cpp debug/debug_draw.h
-        transparent_elements/ui/ui_elements/ui_slider.cpp transparent_elements/ui/ui_elements/ui_slider.h transparent_elements/ui/ui_elements/ui_element.cpp transparent_elements/ui/ui_elements/ui_element.h transparent_elements/ui/ui_elements/ui_anchor.cpp transparent_elements/ui/ui_elements/ui_anchor.h transparent_elements/ui/ui_elements/ui_image.cpp transparent_elements/ui/ui_elements/ui_image.h transparent_elements/transparent_draw.cpp transparent_elements/transparent_draw.h)
+        transparent_elements/ui/ui_elements/ui_slider.cpp transparent_elements/ui/ui_elements/ui_slider.h transparent_elements/ui/ui_elements/ui_element.cpp transparent_elements/ui/ui_elements/ui_element.h transparent_elements/ui/ui_elements/ui_anchor.cpp transparent_elements/ui/ui_elements/ui_anchor.h transparent_elements/ui/ui_elements/ui_image.cpp transparent_elements/ui/ui_elements/ui_image.h transparent_elements/transparent_draw.cpp transparent_elements/transparent_draw.h transparent_elements/ui/ui_elements/ui_text.cpp transparent_elements/ui/ui_elements/ui_text.h)
 
 # Include directories
 target_include_directories(${OPENGL_MANAGER_NAME} PUBLIC ${MANAGER_DIR})

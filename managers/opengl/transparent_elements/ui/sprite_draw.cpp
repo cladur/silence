@@ -170,7 +170,7 @@ TransparentObject sprite_draw::default_vertex_data(
 	float h = size.y / 2.0f * sprite_x_aspect;
 
 	//update the vertices
-	sprite.vertices[0] = { { x - w, y + h, z}, color, { 0.0f, 0.0f }, is_screen_space }; // 0
+	sprite.vertices[0] = { { x - w, y + h, z }, color, { 0.0f, 0.0f }, is_screen_space }; // 0
 	sprite.vertices[1] = { { x - w, y - h, z }, color, { 0.0f, 1.0f }, is_screen_space }; // 1
 	sprite.vertices[2] = { { x + w, y - h, z }, color, { 1.0f, 1.0f }, is_screen_space }; // 2
 	sprite.vertices[3] = { { x + w, y + h, z }, color, { 1.0f, 0.0f }, is_screen_space }; // 3

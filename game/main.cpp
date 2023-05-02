@@ -44,6 +44,7 @@
 #include "opengl/transparent_elements/ui/ui_elements/ui_anchor.h"
 #include "opengl/transparent_elements/ui/ui_elements/ui_image.h"
 #include "opengl/transparent_elements/ui/ui_elements/ui_slider.h"
+#include "opengl/transparent_elements/ui/ui_elements/ui_text.h"
 // #include "render/debug/debug_draw.h"
 // #include "render/text/text_draw.h"
 
@@ -403,17 +404,25 @@ int main() {
 
 	// SLIDER
 	UISlider slider_test = UISlider(0.0f, 0.0f, 1.0f, false);
-	slider_test.position = glm::vec3(200.0f, 0.0f, 0.0f);
+	slider_test.position = glm::vec3(200.0f, 0.0f, 1.0f);
 	slider_test.size = glm::vec2(200.0f, 20.0f);
 	slider_test.slider_alignment = sprite_draw::SliderAlignment::LEFT_TO_RIGHT;
 	float slider_value = 0.0f;
 	anchor.add_child(slider_test);
 
 	// IMAGE
-	UIImage image = UIImage(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec2(1.0f, 1.0f), "skull");
-	image.is_screen_space = false;
+	UIImage image = UIImage(glm::vec3(-200.0f, 0.0f, 0.0f), glm::vec2(150.0f, 150.0f), "skull");
+	image.is_screen_space = true;
 	image.is_billboard = false;
-	//anchor.add_child(image);
+	anchor.add_child(image);
+
+	UIText text = UIText(glm::vec3(-200.0f, 0.0f, 1.0f), 0.5f, "Hello World!", "one");
+	text.is_screen_space = true;
+	anchor.add_child(text);
+
+	UIText text2 = UIText(glm::vec3(-200.0f, 0.0f, 2.0f), 0.5f, "agdf4ejtg", "two");
+	text2.is_screen_space = true;
+	//anchor.add_child(text2);
 
 	bool should_run = true;
 	nlohmann::json scene;
@@ -563,25 +572,15 @@ int main() {
 
 		ImGui::End();
 
-		text_draw::draw_text(std::string(buffer),
-				screenspace,
-				glm::vec3(position[0], position[1], position[2]),
-				color,
-				scale,
-				"one",
-				centered_x,
-				centered_y,
-				glm::vec3(rotation[0], rotation[1] + 1.0f, rotation[2]));
-
-		text_draw::draw_text(std::string(buffer),
-				screenspace,
-				glm::vec3(position[0], position[1] -1.0f, position[2]),
-				color,
-				scale,
-				"two",
-				centered_x,
-				centered_y,
-				glm::vec3(rotation[0], rotation[1], rotation[2]));
+//		text_draw::draw_text(std::string(buffer),
+//				screenspace,
+//				glm::vec3(position[0], position[1], position[2]),
+//				color,
+//				scale,
+//				"one",
+//				centered_x,
+//				centered_y,
+//				glm::vec3(rotation[0], rotation[1], rotation[2]));
 
 //		debug_draw::draw_line(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(10.0f, 0.0f, 0.0f));
 //		debug_draw::draw_line(glm::vec3(0.0f, 5.0f, 0.0f), glm::vec3(10.0f, 0.0f, 0.0f));
@@ -593,6 +592,8 @@ int main() {
 
 
 		slider_test.value = slider_value;
+		text.text = std::string(buffer);
+
 		//image.draw();
 		anchor.draw();
 

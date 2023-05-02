@@ -126,20 +126,17 @@ void TransparentDraw::draw() {
 		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, object.indices.size() * sizeof(uint32_t), &object.indices[0]);
 
 		if (object.type == TransparentType::TEXT) {
-
-			// TODO text
 			t = FontManager::get()->fonts[object.texture_name].texture;
 			shader.set_int("is_sprite", 0);
 
 		} else if (object.type == TransparentType::SPRITE) {
-
 			t = SpriteManager::get()->get_sprite_texture(object.texture_name);
 			shader.set_int("is_sprite", 1);
 		}
 		textured = !object.texture_name.empty();
 
 		view = manager->view;
-		proj = glm::ortho(0.0f, window_size.x, 0.0f, window_size.y);
+		proj = glm::ortho(0.0f, window_size.x, 0.0f, window_size.y, 0.1f, 100.0f);
 
 		shader.set_mat4("projection", proj);
 		shader.set_mat4("view", view);
