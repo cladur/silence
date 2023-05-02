@@ -55,13 +55,15 @@ void Editor::imgui_inspector(Scene &scene) {
 		if (ecs_manager.has_component<Name>(active_entity)) {
 			auto &name = ecs_manager.get_component<Name>(active_entity);
 			ImGui::SetNextItemWidth(-FLT_MIN);
-			ImGui::InputText("##", &name.name);
+			ImGui::InputText("##Name", &name.name);
 		} else {
 			ImGui::Text("<Unnamed Entity %d>", active_entity);
 		}
 		ImGui::Spacing();
 		ImGui::Spacing();
-		inspector.show_components(active_entity);
+		inspector.set_active_entity(active_entity);
+		inspector.show_components();
+		inspector.show_add_component();
 	} else {
 		ImGui::Text("No entity selected");
 	}

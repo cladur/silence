@@ -151,3 +151,9 @@ void ECSManager::add_component(Entity entity, int component_id) {
 bool ECSManager::has_component(Entity entity, int component_id) {
 	return has_component_map[component_id](entity);
 }
+std::vector<std::string> &ECSManager::get_component_names() {
+	return component_names;
+}
+int ECSManager::get_registered_components() {
+	return registered_components;
+}

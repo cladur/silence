@@ -18,6 +18,7 @@ private:
 	std::unordered_map<int, std::function<bool(Entity entity)>> has_component_map;
 
 	std::vector<std::string> component_names;
+	int registered_components = 0;
 
 public:
 	static ECSManager &get();
@@ -40,6 +41,8 @@ public:
 
 		add_component_map[type_id] = [this](Entity entity) { add_component(entity, T{}); };
 		has_component_map[type_id] = [this](Entity entity) { return has_component<T>(entity); };
+
+		registered_components++;
 	}
 
 	template <typename T> void add_component(Entity entity, T component) {
@@ -109,6 +112,8 @@ public:
 	bool has_component(Entity entity, int component_id);
 
 	Signature get_entity_signature(Entity entity);
+	std::vector<std::string> &get_component_names();
+	int get_registered_components();
 };
 
 #endif //SILENCE_ECSMANAGER_H
