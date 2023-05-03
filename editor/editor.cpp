@@ -5,6 +5,9 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
+
 #include "IconsMaterialDesign.h"
 #include "inspector_gui.h"
 // #include "IconsFontAwesome5.h"
@@ -327,6 +330,32 @@ void Editor::startup() {
 	}
 
 	bootleg_unity_theme();
+
+	// load file image
+	int tex_width, tex_height, tex_channels;
+	stbi_uc *pixels = stbi_load("resources/icons/file.png", &tex_width, &tex_height, &tex_channels, STBI_rgb_alpha);
+
+	glGenTextures(1, &file_texture);
+	glBindTexture(GL_TEXTURE_2D, file_texture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tex_width, tex_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	stbi_image_free(pixels);
+
+	// load folder image
+	pixels = stbi_load("resources/icons/folder.png", &tex_width, &tex_height, &tex_channels, STBI_rgb_alpha);
+
+	glGenTextures(1, &folder_texture);
+	glBindTexture(GL_TEXTURE_2D, folder_texture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tex_width, tex_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+	stbi_image_free(pixels);
 }
 
 void Editor::shutdown() {
@@ -418,7 +447,7 @@ void Editor::update(float dt) {
 	ImGui::DockSpaceOverViewport(ImGui::GetMainViewport(), ImGuiDockNodeFlags_NoWindowMenuButton);
 
 	imgui_menu_bar();
-	imgui_resources();
+	imgui_content_browser();
 	imgui_settings();
 	imgui_inspector(scenes[active_scene]);
 	imgui_scene(scenes[active_scene]);

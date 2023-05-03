@@ -5,7 +5,7 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <imgui_stdlib.h>
-#include <glm/gtc/type_ptr.hpp>
+#include <filesystem>
 #include <glm/gtx/matrix_decompose.hpp>
 
 #include "IconsMaterialDesign.h"
@@ -304,20 +304,12 @@ void Editor::imgui_viewport(Scene &scene, uint32_t scene_index) {
 
 		if (scene.entities_selected.size() == 1) {
 			temp_matrix = transform.get_global_model_matrix();
-		} else if (current_gizmo_operation == ImGuizmo::ROTATE && use_individual_origins) {
-			temp_matrix = scene.dummy_transform.get_global_model_matrix();
 		} else {
 			temp_matrix = multi_transform.get_global_model_matrix();
 		}
 
-		static auto prev_scale = glm::vec3(1.0f);
-		if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
-			prev_scale = glm::vec3(1.0f);
-		}
-
-		glm::mat4 delta_matrix = glm::mat4(1.0f);
 		if (ImGuizmo::Manipulate(glm::value_ptr(*view), glm::value_ptr(*projection), current_gizmo_operation,
-					current_gizmo_mode, glm::value_ptr(temp_matrix), glm::value_ptr(delta_matrix), snap)) {
+					current_gizmo_mode, glm::value_ptr(temp_matrix), nullptr, snap)) {
 			glm::vec3 skew;
 			glm::vec4 perspective;
 
@@ -331,40 +323,14 @@ void Editor::imgui_viewport(Scene &scene, uint32_t scene_index) {
 				glm::decompose(parent_matrix * temp_matrix, transform.scale, transform.orientation, transform.position,
 						skew, perspective);
 				transform.set_changed(true);
-			} else if (use_individual_origins) {
-				glm::vec3 scale;
-				glm::quat orientation;
-				glm::vec3 position;
-
-				glm::decompose(delta_matrix, scale, orientation, position, skew, perspective);
-				glm::vec3 delta_scale = scale / prev_scale;
-				prev_scale = scale;
-
-				for (auto &entity : scene.entities_selected) {
-					auto &t = ecs_manager.get_component<Transform>(entity);
-					glm::vec3 prev_pos = t.position;
-					t.update_global_model_matrix();
-
-					t.add_orientation(orientation);
-
-					if (current_gizmo_operation == ImGuizmo::SCALE) {
-						t.scale *= delta_scale;
-					}
-					t.set_changed(true);
-				}
-
-				glm::decompose(temp_matrix, scale, orientation, multi_transform.position, skew, perspective);
-				multi_transform.set_changed(true);
-
-				glm::decompose(temp_matrix, scene.dummy_transform.scale, scene.dummy_transform.orientation,
-						scene.dummy_transform.position, skew, perspective);
-				scene.dummy_transform.set_changed(true);
-				scene.dummy_transform.update_global_model_matrix();
 			} else {
 				glm::decompose(temp_matrix, multi_transform.scale, multi_transform.orientation,
 						multi_transform.position, skew, perspective);
 				multi_transform.set_changed(true);
 			}
+			// glm::decompose(temp_matrix, multi_transform.scale, multi_transform.orientation, multi_transform.position,
+			// 		skew, perspective);
+			// multi_transform.set_changed(true);
 		}
 	}
 
@@ -443,17 +409,6 @@ void Editor::imgui_viewport(Scene &scene, uint32_t scene_index) {
 	if (ImGui::Button(ICON_MD_TUNE)) {
 		ImGui::OpenPopup("Gizmo Settings");
 	}
-	ImGui::SameLine();
-	// INDIVIDUAL ORIGINS
-	if (use_individual_origins) {
-		ImGui::PushStyleColor(ImGuiCol_Button, active_color);
-		push_count++;
-	}
-	if (ImGui::Button(ICON_MD_TRIP_ORIGIN)) {
-		use_individual_origins = !use_individual_origins;
-	}
-	ImGui::PopStyleColor(push_count);
-	push_count = 0;
 
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 8));
 	if (ImGui::BeginPopup("Gizmo Settings")) {
@@ -470,10 +425,150 @@ void Editor::imgui_viewport(Scene &scene, uint32_t scene_index) {
 	ImGui::PopStyleVar();
 }
 
-void Editor::imgui_resources() {
-	ImGui::Begin("Resources");
+void Editor::display_folder(const std::string &path) {
+	for (auto &entry : std::filesystem::directory_iterator(path)) {
+		if (!entry.is_directory()) {
+			continue;
+		}
 
-	ImGui::Text("TODO: List resources");
+		static ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick |
+				ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_SpanFullWidth;
+
+		ImGuiTreeNodeFlags node_flags = base_flags;
+
+		// Check if entry has folders inside it
+		bool is_empty = true;
+		for (auto &child : std::filesystem::directory_iterator(entry.path())) {
+			if (child.is_directory()) {
+				is_empty = false;
+				break;
+			}
+		}
+		if (is_empty) {
+			node_flags |= ImGuiTreeNodeFlags_Leaf;
+		} else {
+			node_flags |= ImGuiTreeNodeFlags_OpenOnArrow;
+		}
+
+		if (content_browser_current_path == entry.path().string()) {
+			node_flags |= ImGuiTreeNodeFlags_Selected;
+		}
+
+		bool node_open = ImGui::TreeNodeEx(entry.path().filename().string().c_str(), node_flags);
+
+		if (ImGui::IsItemClicked()) {
+			content_browser_current_path = entry.path().string();
+		}
+
+		if (node_open) {
+			display_folder(entry.path().string());
+
+			ImGui::TreePop();
+		}
+	}
+}
+
+void Editor::imgui_content_browser() {
+	ImGui::Begin("Content Browser", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+
+	ImGui::BeginTable("Content Browser", 2, ImGuiTableFlags_Resizable);
+
+	ImGui::TableSetupColumn("Folders", ImGuiTableColumnFlags_WidthFixed, 120.0f);
+
+	ImGui::TableNextRow(ImGuiTableRowFlags_None, ImGui::GetContentRegionAvail().y);
+	ImGui::TableSetColumnIndex(0);
+
+	display_folder("resources");
+
+	ImGui::TableNextColumn();
+
+	float padding = 16.0f;
+	float thumbnail_size = 48.0f;
+	float cell_size = thumbnail_size + padding;
+
+	float panel_width = ImGui::GetContentRegionAvail().x;
+	int column_count = (int)(panel_width / cell_size);
+	if (column_count < 1) {
+		column_count = 1;
+	}
+
+	ImGui::BeginChild("##ScrollingRegion", ImVec2(0, 0), false);
+
+	if (ImGui::Button(ICON_MD_ARROW_UPWARD)) {
+		if (content_browser_current_path != "resources") {
+			content_browser_current_path = std::filesystem::path(content_browser_current_path).parent_path().string();
+		}
+	}
+	ImGui::SameLine();
+	ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
+	ImGui::SameLine();
+	ImGui::Text("%s", content_browser_current_path.c_str());
+
+	ImGui::Spacing();
+
+	ImGui::BeginTable("##Content Browser", column_count, ImGuiTableFlags_NoBordersInBody);
+
+	ImGui::TableNextColumn();
+
+	for (auto &entry : std::filesystem::directory_iterator(content_browser_current_path)) {
+		ImGui::BeginGroup();
+
+		std::string label = entry.path().filename().string();
+		std::string extension = entry.path().extension().string();
+
+		ImVec2 label_size = ImGui::CalcTextSize(label.c_str());
+
+		ImVec2 thumbnail_size_vec2 = ImVec2(thumbnail_size, thumbnail_size);
+		ImVec2 thumbnail_uv0 = ImVec2(0.0f, 0.0f);
+		ImVec2 thumbnail_uv1 = ImVec2(1.0f, 1.0f);
+
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+		ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+		ImGui::PushStyleColor(ImGuiCol_BorderShadow, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+
+		uint32_t entry_texture = file_texture;
+		if (entry.is_directory()) {
+			entry_texture = folder_texture;
+		}
+		ImGui::ImageButton((ImTextureID)entry_texture, thumbnail_size_vec2, thumbnail_uv0, thumbnail_uv1);
+
+		ImGui::PopStyleColor(3);
+
+		float text_scale = 0.75f;
+		ImGui::SetWindowFontScale(text_scale);
+		ImGuiStyle &style = ImGui::GetStyle();
+
+		float size = ImGui::CalcTextSize(label.c_str()).x * text_scale + style.FramePadding.x * 2.0f;
+		float avail = thumbnail_size;
+
+		float off = (avail - size) * 0.5f;
+		if (off > 0.0f) {
+			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + off);
+		}
+
+		ImGui::Text("%s", label.c_str());
+		ImGui::SetWindowFontScale(1.0f);
+
+		ImGui::Spacing();
+
+		ImGui::EndGroup();
+
+		if (ImGui::IsItemClicked()) {
+			if (entry.is_directory()) {
+				content_browser_current_path = entry.path().string();
+			} else {
+				SPDLOG_INFO("Clicked on file {}", entry.path().string());
+			}
+		}
+
+		ImGui::TableNextColumn();
+	}
+
+	ImGui::EndTable();
+
+	ImGui::EndChild();
+
+	ImGui::EndTable();
 
 	ImGui::End();
 }

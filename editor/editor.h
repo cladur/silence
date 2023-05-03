@@ -77,6 +77,11 @@ public:
 	std::vector<Scene> scenes;
 	uint32_t active_scene = 0;
 
+	// Content Browser
+	std::string content_browser_current_path = "resources";
+	uint32_t file_texture;
+	uint32_t folder_texture;
+
 	static Editor *get();
 	void startup();
 	void shutdown();
@@ -88,7 +93,8 @@ public:
 	void imgui_inspector(Scene &scene);
 	void imgui_scene(Scene &scene);
 	void imgui_viewport(Scene &scene, uint32_t scene_index);
-	void imgui_resources();
+	void display_folder(const std::string &path);
+	void imgui_content_browser();
 	void imgui_settings();
 
 	void create_scene(const std::string &name);
