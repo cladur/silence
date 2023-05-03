@@ -3,8 +3,8 @@
 #include "core/components/transform_component.h"
 #include "ecs/ecs_manager.h"
 
+#include "managers/render/render_manager.h"
 #include "opengl/render_handle.h"
-#include "render_manager.h"
 
 extern ECSManager ecs_manager;
 

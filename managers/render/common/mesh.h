@@ -25,7 +25,7 @@ public:
 	void draw();
 	void setup_mesh();
 	void load_from_asset(const char *path);
-	
+
 	std::vector<glm::vec3> get_position_vertices() const;
 
 	//  render data

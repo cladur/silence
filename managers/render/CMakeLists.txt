@@ -3,13 +3,13 @@ set(OPENGL_MANAGER_NAME "silence_opengl_manager")
 # Libraries
 add_library(${OPENGL_MANAGER_NAME} STATIC
         render_manager.cpp render_manager.h
-        render_system.cpp render_system.h
-        mesh.cpp mesh.h
-        shader.cpp shader.h
-        model.cpp model.h
-        texture.cpp texture.h
-        material.cpp material.h
-        render_pass.cpp render_pass.h
+        ecs/render_system.cpp ecs/render_system.h
+        common/mesh.cpp common/mesh.h
+        common/shader.cpp common/shader.h
+        common/model.cpp common/model.h
+        common/texture.cpp common/texture.h
+        common/material.cpp common/material.h
+        common/render_pass.cpp common/render_pass.h
         debug/debug_draw.cpp debug/debug_draw.h
         transparent_elements/transparent_draw.cpp transparent_elements/transparent_draw.h
         transparent_elements/text/text_draw.cpp transparent_elements/text/text_draw.h
@@ -21,8 +21,8 @@ add_library(${OPENGL_MANAGER_NAME} STATIC
         transparent_elements/ui/ui_elements/ui_image.cpp transparent_elements/ui/ui_elements/ui_image.h
         transparent_elements/ui/ui_elements/ui_text.cpp transparent_elements/ui/ui_elements/ui_text.h
         transparent_elements/ui/ui_elements/ui_button.cpp transparent_elements/ui/ui_elements/ui_button.h
-        skybox.cpp skybox.h
-        utils.cpp utils.h)
+        common/skybox.cpp common/skybox.h
+        common/utils.cpp common/utils.h)
 
 # Include directories
 target_include_directories(${OPENGL_MANAGER_NAME} PUBLIC ${MANAGER_DIR})

@@ -1,12 +1,12 @@
 #ifndef SILENCE_RENDER_MANAGER_H
 #define SILENCE_RENDER_MANAGER_H
 
-#include "material.h"
-#include "mesh.h"
-#include "model.h"
-#include "render_pass.h"
-#include "shader.h"
-#include "texture.h"
+#include "managers/render/common/material.h"
+#include "managers/render/common/mesh.h"
+#include "managers/render/common/model.h"
+#include "managers/render/common/render_pass.h"
+#include "managers/render/common/shader.h"
+#include "managers/render/common/texture.h"
 
 #include "debug/debug_draw.h"
 #include "transparent_elements/text/text_draw.h"
