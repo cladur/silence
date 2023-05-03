@@ -12,7 +12,9 @@ public:
 	bool centered_x = true;
 	bool centered_y = true;
 	bool active = true;
+	std::string hover_texture_name;
 
+	UIButton() = default;
 	UIButton(glm::vec3 position, glm::vec2 size, const std::string& text, const std::string& font_name,  const std::string &texture_name);
 
 	void draw() override;

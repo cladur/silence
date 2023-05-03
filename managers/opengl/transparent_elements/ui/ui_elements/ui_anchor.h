@@ -7,7 +7,9 @@ class UIAnchor : public UIElement {
 public:
 	float x = 0.0f;
 	float y = 0.0f;
+	bool draw_anchor = false;
 
+	UIAnchor() = default;
 	UIAnchor(float x, float y);
 
 	void draw() override;

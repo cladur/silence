@@ -5,6 +5,7 @@
 
 class UIImage : public UIElement {
 public:
+	UIImage() = default;
 	UIImage(glm::vec3 position, glm::vec2 size, const std::string& texture_name);
 
 	void draw() override;

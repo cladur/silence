@@ -17,17 +17,18 @@ UIButton::UIButton(glm::vec3 position, glm::vec2 size, const std::string &text, 
 }
 
 void UIButton::draw() {
-	glm::vec3 col = this->color;
-	if (hovered()) {
-		col *= glm::vec3(1.5f, 1.5f, 1.5f);
+
+	std::string tex = texture_name;
+	if (hovered() && hover_texture_name.empty()) {
+		tex = hover_texture_name;
 	} else {
-		col = color;
+		tex = texture_name;
 	}
 
 	if (texture_name.empty()) {
-		sprite_draw::draw_colored(position, size, col, is_screen_space);
+		sprite_draw::draw_colored(position, size, color, is_screen_space);
 	} else {
-		sprite_draw::draw_sprite(position, size, col, texture_name.c_str(), is_screen_space);
+		sprite_draw::draw_sprite(position, size, color, tex.c_str(), is_screen_space);
 	}
 
 	if (text.empty()) { return; }
@@ -47,18 +48,17 @@ void UIButton::draw(glm::vec3 parent_position, glm::vec2 parent_size) {
 	glm::vec3 new_pos = position + parent_position + glm::vec3(0.0f, 0.0f, 0.01f);
 	new_pos.z += 0.01f;
 
-	glm::vec3 col = this->color;
-
-	if (hovered()) {
-		col *= glm::vec3(1.5f, 1.5f, 1.5f);
+	std::string tex = texture_name;
+	if (hovered() && !hover_texture_name.empty()) {
+		tex = hover_texture_name;
 	} else {
-		col = color;
+		tex = texture_name;
 	}
 
 	if (texture_name.empty()) {
-		sprite_draw::draw_colored(new_pos, size, col, is_screen_space);
+		sprite_draw::draw_colored(new_pos, size, color, is_screen_space);
 	} else {
-		sprite_draw::draw_sprite(new_pos, size, col, texture_name.c_str(), is_screen_space);
+		sprite_draw::draw_sprite(new_pos, size, color, tex.c_str(), is_screen_space);
 	}
 
 	if (text.empty()) { return; }
