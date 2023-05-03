@@ -9,6 +9,7 @@ UIText::UIText(glm::vec3 position,  float scale, const std::string &text, const 
 }
 
 void UIText::draw() {
+	if (!display) { return; }
 	if (text.empty()) { return; }
 	text_draw::draw_text(
 			text,
@@ -28,6 +29,7 @@ void UIText::draw() {
 }
 
 void UIText::draw(glm::vec3 parent_position, glm::vec2 parent_size) {
+	if (!display) { return; }
 	if (text.empty()) { return; }
 	text_draw::draw_text(
 			text,

@@ -8,6 +8,7 @@ UISlider::~UISlider() {
 }
 
 void UISlider::draw() {
+	if (!display) { return; }
 	value = std::clamp(value, min, max);
 	if (!is_billboard) {
 		glm::vec2 new_size = size;
@@ -57,6 +58,7 @@ void UISlider::draw() {
 }
 
 void UISlider::draw(glm::vec3 parent_position, glm::vec2 parent_size) {
+	if (!display) { return; }
 	value = std::clamp(value, min, max);
 	glm::vec2 new_size = size;
 

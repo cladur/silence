@@ -13,6 +13,7 @@ public:
 	bool is_billboard = false;
 	std::vector<UIElement*> children;
 	sprite_draw::Alignment alignment = sprite_draw::Alignment::NONE;
+	bool display = true;
 
 	glm::vec3 parent_position = glm::vec3(0.0f);
 

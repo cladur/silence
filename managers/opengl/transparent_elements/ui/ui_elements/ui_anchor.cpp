@@ -10,6 +10,7 @@ UIAnchor::UIAnchor(float x, float y) : x(x), y(y) {
 }
 
 void UIAnchor::draw() {
+	if (!display) { return; }
 	glm::vec2 d_size = DisplayManager::get()->get_framebuffer_size();
 	position = glm::vec3(d_size.x * x, d_size.y * y, -1.0f);
 
@@ -23,6 +24,7 @@ void UIAnchor::draw() {
 }
 
 void UIAnchor::draw(glm::vec3 parent_position, glm::vec2 parent_size) {
+	if (!display) { return; }
 	glm::vec2 d_size = parent_size;
 
 	glm::vec3 new_pos = parent_position - glm::vec3(parent_size / 2.0f, 0.0f) + glm::vec3(d_size.x * x, d_size.y * y, 0.01f);

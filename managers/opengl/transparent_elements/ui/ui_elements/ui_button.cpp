@@ -37,11 +37,19 @@ UIButton::UIButton(
 
 void UIButton::draw() {
 
+	if (!display) { return; }
 	std::string tex = texture_name;
-	if (hovered() && hover_texture_name.empty()) {
-		tex = hover_texture_name;
-	} else {
-		tex = texture_name;
+	bool h = hovered();
+
+	if (h) {
+		if (!hover_texture_name.empty()) {
+			tex = hover_texture_name;
+		}
+
+		if (!hover_event.path.empty() && !is_hovered) {
+			audio_manager.play_one_shot_2d(hover_event);
+			is_hovered = true;
+		}
 	}
 
 	if (texture_name.empty()) {
@@ -64,6 +72,7 @@ void UIButton::draw() {
 }
 
 void UIButton::draw(glm::vec3 parent_position, glm::vec2 parent_size) {
+	if (!display) { return; }
 	glm::vec3 new_pos = position + parent_position + glm::vec3(0.0f, 0.0f, 0.01f);
 	new_pos.z += 0.01f;
 
@@ -110,6 +119,9 @@ bool UIButton::clicked() {
 	if (!active) {
 		return false;
 	}
+	if (!display) {
+		return false;
+	}
 
 	auto mouse_pos = input_manager.get_mouse_position();
 	mouse_pos.y = DisplayManager::get()->get_framebuffer_size().y - mouse_pos.y;
@@ -154,6 +166,9 @@ bool UIButton::clicked() {
 
 bool UIButton::hovered() {
 	if (!active) {
+		return false;
+	}
+	if (!display) {
 		return false;
 	}
 
