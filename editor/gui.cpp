@@ -5,6 +5,7 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <imgui_stdlib.h>
+#include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
 
 #include "IconsMaterialDesign.h"
@@ -303,12 +304,20 @@ void Editor::imgui_viewport(Scene &scene, uint32_t scene_index) {
 
 		if (scene.entities_selected.size() == 1) {
 			temp_matrix = transform.get_global_model_matrix();
+		} else if (current_gizmo_operation == ImGuizmo::ROTATE && use_individual_origins) {
+			temp_matrix = scene.dummy_transform.get_global_model_matrix();
 		} else {
 			temp_matrix = multi_transform.get_global_model_matrix();
 		}
 
+		static auto prev_scale = glm::vec3(1.0f);
+		if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
+			prev_scale = glm::vec3(1.0f);
+		}
+
+		glm::mat4 delta_matrix = glm::mat4(1.0f);
 		if (ImGuizmo::Manipulate(glm::value_ptr(*view), glm::value_ptr(*projection), current_gizmo_operation,
-					current_gizmo_mode, glm::value_ptr(temp_matrix), nullptr, snap)) {
+					current_gizmo_mode, glm::value_ptr(temp_matrix), glm::value_ptr(delta_matrix), snap)) {
 			glm::vec3 skew;
 			glm::vec4 perspective;
 
@@ -322,14 +331,40 @@ void Editor::imgui_viewport(Scene &scene, uint32_t scene_index) {
 				glm::decompose(parent_matrix * temp_matrix, transform.scale, transform.orientation, transform.position,
 						skew, perspective);
 				transform.set_changed(true);
+			} else if (use_individual_origins) {
+				glm::vec3 scale;
+				glm::quat orientation;
+				glm::vec3 position;
+
+				glm::decompose(delta_matrix, scale, orientation, position, skew, perspective);
+				glm::vec3 delta_scale = scale / prev_scale;
+				prev_scale = scale;
+
+				for (auto &entity : scene.entities_selected) {
+					auto &t = ecs_manager.get_component<Transform>(entity);
+					glm::vec3 prev_pos = t.position;
+					t.update_global_model_matrix();
+
+					t.add_orientation(orientation);
+
+					if (current_gizmo_operation == ImGuizmo::SCALE) {
+						t.scale *= delta_scale;
+					}
+					t.set_changed(true);
+				}
+
+				glm::decompose(temp_matrix, scale, orientation, multi_transform.position, skew, perspective);
+				multi_transform.set_changed(true);
+
+				glm::decompose(temp_matrix, scene.dummy_transform.scale, scene.dummy_transform.orientation,
+						scene.dummy_transform.position, skew, perspective);
+				scene.dummy_transform.set_changed(true);
+				scene.dummy_transform.update_global_model_matrix();
 			} else {
 				glm::decompose(temp_matrix, multi_transform.scale, multi_transform.orientation,
 						multi_transform.position, skew, perspective);
 				multi_transform.set_changed(true);
 			}
-			// glm::decompose(temp_matrix, multi_transform.scale, multi_transform.orientation, multi_transform.position,
-			// 		skew, perspective);
-			// multi_transform.set_changed(true);
 		}
 	}
 
@@ -408,6 +443,17 @@ void Editor::imgui_viewport(Scene &scene, uint32_t scene_index) {
 	if (ImGui::Button(ICON_MD_TUNE)) {
 		ImGui::OpenPopup("Gizmo Settings");
 	}
+	ImGui::SameLine();
+	// INDIVIDUAL ORIGINS
+	if (use_individual_origins) {
+		ImGui::PushStyleColor(ImGuiCol_Button, active_color);
+		push_count++;
+	}
+	if (ImGui::Button(ICON_MD_TRIP_ORIGIN)) {
+		use_individual_origins = !use_individual_origins;
+	}
+	ImGui::PopStyleColor(push_count);
+	push_count = 0;
 
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 8));
 	if (ImGui::BeginPopup("Gizmo Settings")) {

@@ -58,6 +58,8 @@ void default_mappings() {
 	input_manager.add_key_to_action("toggle_gizmo_mode", InputKey::T);
 	input_manager.add_action("toggle_snapping");
 	input_manager.add_key_to_action("toggle_snapping", InputKey::Y);
+	input_manager.add_action("toggle_individual_origins");
+	input_manager.add_key_to_action("toggle_individual_origins", InputKey::U);
 
 	input_manager.add_action("delete");
 	input_manager.add_key_to_action("delete", InputKey::BACKSPACE);
@@ -389,6 +391,10 @@ void Editor::update(float dt) {
 
 		if (input_manager.is_action_just_pressed("toggle_snapping")) {
 			use_snapping = !use_snapping;
+		}
+
+		if (input_manager.is_action_just_pressed("toggle_individual_origins")) {
+			use_individual_origins = !use_individual_origins;
 		}
 	}
 

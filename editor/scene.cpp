@@ -128,6 +128,24 @@ void Scene::clear_selection() {
 	}
 }
 
+void Scene::unparent_selected() {
+	for (auto &entity : entities_selected) {
+		if (child_to_parent.find(entity) != child_to_parent.end()) {
+			Entity parent = child_to_parent[entity];
+			reparent_queue.emplace_back(parent, entity);
+		}
+	}
+}
+
+void Scene::reparent_selected() {
+	for (auto &entity : entities_selected) {
+		if (child_to_parent.find(entity) != child_to_parent.end()) {
+			Entity parent = child_to_parent[entity];
+			reparent_queue.emplace_back(multi_select_parent, entity);
+		}
+	}
+}
+
 void Scene::calculate_multi_select_parent() {
 	auto &transform = ECSManager::get().get_component<Transform>(multi_select_parent);
 	if (entities_selected.size() <= 1) {
@@ -164,6 +182,8 @@ void Scene::calculate_multi_select_parent() {
 			t.reparent_to(transform);
 		}
 	}
+
+	dummy_transform = transform;
 }
 
 void Scene::execute_reparent_queue() {

@@ -18,6 +18,7 @@ struct Scene {
 	std::vector<Entity> entities_selected;
 	Entity last_entity_selected = 0;
 	Entity multi_select_parent = 0;
+	Transform dummy_transform;
 	// Used for multi-select
 	std::unordered_map<Entity, Entity> child_to_parent;
 	std::vector<std::pair<Entity, Entity>> reparent_queue;
@@ -38,6 +39,8 @@ struct Scene {
 	void add_to_selection(Entity entity);
 	void remove_from_selection(Entity entity);
 	void clear_selection();
+	void unparent_selected();
+	void reparent_selected();
 	void calculate_multi_select_parent();
 	void execute_reparent_queue();
 };
