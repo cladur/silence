@@ -4,6 +4,7 @@
 #include "opengl/transparent_elements/ui/ui_elements/ui_anchor.h"
 #include "opengl/transparent_elements/ui/ui_elements/ui_button.h"
 #include "opengl/transparent_elements/ui/ui_elements/ui_element.h"
+
 class MenuDemo {
 	UIAnchor root;
 	UIButton play_button;

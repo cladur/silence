@@ -389,12 +389,12 @@ int main() {
 	float target_frame_time = 1.0f / (float)DisplayManager::get()->get_refresh_rate();
 	float dt = target_frame_time;
 
-	MenuDemo menu_demo = MenuDemo();
-
 	// TEST FOR 3D AUDIO
 	glm::vec3 sound_position = glm::vec3(0.0f, 0.0f, 0.0f);
 	EventReference test_pluck = EventReference("test_pluck");
 	// #################
+
+	MenuDemo menu_demo = MenuDemo();
 
 	bool should_run = true;
 	nlohmann::json scene;

@@ -1,12 +1,21 @@
 #include "ui_button.h"
+#include <audio/audio_manager.h>
 #include <display/display_manager.h>
 #include <input/input_manager.h>
 #include <opengl/transparent_elements/text/text_draw.h>
 #include <opengl/transparent_elements/ui/sprite_manager.h>
 
 extern InputManager input_manager;
+extern AudioManager audio_manager;
 
-UIButton::UIButton(glm::vec3 position, glm::vec2 size, const std::string &text, const std::string &font_name, const std::string &texture_name) {
+UIButton::UIButton(
+		glm::vec3 position,
+		glm::vec2 size,
+		const std::string& text,
+		const std::string& font_name,
+		const std::string &texture_name,
+		const std::string &hover_sound_name,
+		const std::string &click_sound_name) {
 	this->position = position;
 	this->size = size;
 	this->text = text;
@@ -14,6 +23,16 @@ UIButton::UIButton(glm::vec3 position, glm::vec2 size, const std::string &text, 
 	this->texture_name = texture_name;
 	this->is_screen_space = true;
 	color = glm::vec4(1.0f);
+
+	// TODO: in the future remove magic text and put the passed values in here
+	hover_event = EventReference("SFX/UI/button_hover");
+	click_event = EventReference("SFX/UI/button_click");
+//	if (!hover_sound_name.empty()) {
+//
+//	}
+//	if (!click_sound_name.empty()) {
+//
+//	}
 }
 
 void UIButton::draw() {
@@ -49,10 +68,23 @@ void UIButton::draw(glm::vec3 parent_position, glm::vec2 parent_size) {
 	new_pos.z += 0.01f;
 
 	std::string tex = texture_name;
-	if (hovered() && !hover_texture_name.empty()) {
-		tex = hover_texture_name;
-	} else {
-		tex = texture_name;
+	bool h = hovered();
+
+	if (h) {
+		if (!hover_texture_name.empty()) {
+			tex = hover_texture_name;
+		}
+
+		if (!hover_event.path.empty() && !is_hovered) {
+			audio_manager.play_one_shot_2d(hover_event);
+			is_hovered = true;
+		}
+	}
+
+	if (clicked()) {
+		if (!click_event.path.empty()) {
+			audio_manager.play_one_shot_2d(click_event);
+		}
 	}
 
 	if (texture_name.empty()) {
@@ -159,5 +191,6 @@ bool UIButton::hovered() {
 			mouse_pos.y > y_bounds.x && mouse_pos.y < y_bounds.y) {
 		return true;
 	}
+	is_hovered = false;
 	return false;
 }

@@ -14,6 +14,7 @@ MenuDemo::MenuDemo() {
 			"button");
 	play_button.hover_texture_name = "button_hover";
 	root.add_child(play_button);
+
 	options_button = UIButton(
 			glm::vec3(0.0f, 0.0f, 0.0f),
 			glm::vec2(300.0f, 300.0f),
@@ -21,7 +22,9 @@ MenuDemo::MenuDemo() {
 			"two",
 			"button");
 	options_button.hover_texture_name = "button_hover";
+
 	root.add_child(options_button);
+
 	credits_button = UIButton(
 			glm::vec3(0.0f, -200.0f, 0.0f),
 			glm::vec2(300.0f, 300.0f),

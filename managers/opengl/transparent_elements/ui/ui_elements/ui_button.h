@@ -3,7 +3,11 @@
 
 #include "ui_element.h"
 
+#include "audio/event_reference.h"
+
 class UIButton : public UIElement {
+private:
+	bool is_hovered = false;
 public:
 	std::string text;
 	std::string font_name;
@@ -14,8 +18,18 @@ public:
 	bool active = true;
 	std::string hover_texture_name;
 
+	EventReference hover_event;
+	EventReference click_event;
+
 	UIButton() = default;
-	UIButton(glm::vec3 position, glm::vec2 size, const std::string& text, const std::string& font_name,  const std::string &texture_name);
+	UIButton(
+			glm::vec3 position,
+			glm::vec2 size,
+			const std::string& text,
+			const std::string& font_name,
+			const std::string &texture_name,
+			const std::string &hover_sound_name = "",
+			const std::string &click_sound_name = "");
 
 	void draw() override;
 	void draw(glm::vec3 parent_position, glm::vec2 parent_size) override;

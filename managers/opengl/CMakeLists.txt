@@ -21,7 +21,10 @@ target_include_directories(${OPENGL_MANAGER_NAME} PUBLIC ${MANAGER_DIR})
 # Link libraries
 find_package(glad CONFIG REQUIRED)
 
-target_link_libraries(${OPENGL_MANAGER_NAME} PRIVATE
+target_link_libraries(${OPENGL_MANAGER_NAME}
+        PUBLIC
+        fmod
+        PRIVATE
         silence_common
         silence_core
         silence_assets
