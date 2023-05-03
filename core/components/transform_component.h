@@ -26,9 +26,9 @@ public:
 	glm::quat orientation{};
 	glm::vec3 scale{};
 	void serialize_json(nlohmann::json &j) {
-		nlohmann::json obj;
+		nlohmann::json::object_t obj;
 		obj["position"] = nlohmann::json::object();
-		obj["euler_rot"] = nlohmann::json::object();
+		obj["orientation"] = nlohmann::json::object();
 		obj["scale"] = nlohmann::json::object();
 		obj["position"]["x"] = position.x;
 		obj["position"]["y"] = position.y;
@@ -46,7 +46,7 @@ public:
 
 	void deserialize_json(nlohmann::json &j) {
 		nlohmann::json obj = Serializer::get_data("transform", j);
-
+		SPDLOG_WARN(obj.dump());
 		position.x = obj["position"]["x"];
 		position.y = obj["position"]["y"];
 		position.z = obj["position"]["z"];

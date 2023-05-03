@@ -8,8 +8,10 @@ public:
 	std::string name;
 
 	void serialize_json(nlohmann::json &j) {
-		nlohmann::json obj;
+		nlohmann::json::object_t obj;
 		obj["name"] = name;
+		j.push_back(nlohmann::json::object());
+		j.back()["name"] = obj;
 	}
 
 	void deserialize_json(nlohmann::json &j) {
