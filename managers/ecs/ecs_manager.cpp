@@ -42,7 +42,7 @@ bool ECSManager::add_child(Entity parent, Entity child, bool keep_transform) {
 
 	if (!has_component<Children>(parent)) {
 		add_component<Children>(parent, Children{});
-		SPDLOG_INFO("Added children component to {}", parent);
+		// SPDLOG_INFO("Added children component to {}", parent);
 	} else {
 		if (has_child(parent, child)) {
 			SPDLOG_WARN("Child {} already exists on parent {}", child, parent);
@@ -52,10 +52,10 @@ bool ECSManager::add_child(Entity parent, Entity child, bool keep_transform) {
 
 	if (!has_component<Parent>(child)) {
 		add_component(child, Parent{ parent });
-		SPDLOG_INFO("Added parent component to {}", child);
+		// SPDLOG_INFO("Added parent component to {}", child);
 	}
 
-	SPDLOG_INFO("Added child {} to parent {}", child, parent);
+	// SPDLOG_INFO("Added child {} to parent {}", child, parent);
 
 	if (keep_transform && has_component<Transform>(parent) && has_component<Transform>(child)) {
 		auto &child_transform = get_component<Transform>(child);
@@ -84,15 +84,15 @@ bool ECSManager::remove_child(Entity parent, Entity child, bool keep_transform) 
 		SPDLOG_WARN("Children {} not found on parent", child);
 		return false;
 	} else {
-		SPDLOG_INFO("Removed child {} from parent {}", child, parent);
+		// SPDLOG_INFO("Removed child {} from parent {}", child, parent);
 	}
 
 	remove_component<Parent>(child);
-	SPDLOG_INFO("Removed parent component from child {}", child);
+	// SPDLOG_INFO("Removed parent component from child {}", child);
 
 	if (get_component<Children>(parent).children_count == 0) {
 		remove_component<Children>(parent);
-		SPDLOG_INFO("Removed children component from {}", parent);
+		// SPDLOG_INFO("Removed children component from {}", parent);
 	}
 
 	return true;
