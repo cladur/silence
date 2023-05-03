@@ -83,6 +83,7 @@ void default_ecs_manager_init() {
 	ecs_manager.register_component<Children>();
 	ecs_manager.register_component<RenderHandle>();
 	ecs_manager.register_component<FmodListener>();
+	ecs_manager.register_component<StaticTag>();
 	ecs_manager.register_component<ColliderTag>();
 	ecs_manager.register_component<ColliderSphere>();
 	ecs_manager.register_component<ColliderAABB>();
@@ -113,7 +114,7 @@ void demo_entities_init(std::vector<Entity> &entities) {
 		ecs_manager.add_component(entity, transform);
 
 		ColliderComponentsFactory::add_collider_component(
-				entity, ColliderAABB{ transform.get_position(), transform.get_scale(), true });
+				entity, ColliderAABB{ transform.get_position(), transform.get_scale() }, true);
 
 		Handle<ModelInstance> hndl = OpenglManager::get()->add_instance("woodenBox/woodenBox.pfb");
 		//		Handle<ModelInstance> hndl = OpenglManager::get()->add_instance("electricBox/electricBox.pfb");
@@ -135,7 +136,7 @@ void demo_entities_init(std::vector<Entity> &entities) {
 	ecs_manager.add_component(floor, transform);
 
 	ColliderComponentsFactory::add_collider_component(
-			floor, ColliderAABB{ transform.get_position(), transform.get_scale(), false });
+			floor, ColliderAABB{ transform.get_position(), transform.get_scale() }, false);
 
 	entities.push_back(floor);
 }
@@ -150,8 +151,7 @@ void demo_collision_init(Entity &entity) {
 	c.center = transform.get_position();
 	c.range = transform.get_scale();
 	c.set_orientation(transform.get_euler_rot());
-	c.is_movable = true;
-	ColliderComponentsFactory::add_collider_component(entity, c);
+	ColliderComponentsFactory::add_collider_component(entity, c, true);
 
 	// ecs_manager.add_component<MeshInstance>(
 	// 		entity, { render_manager.get_mesh("box"), render_manager.get_material("default_mesh") });
@@ -171,7 +171,7 @@ void demo_collision_sphere(std::vector<Entity> &entities) {
 		ecs_manager.add_component(entity, transform);
 
 		ColliderComponentsFactory::add_collider_component(
-				entity, ColliderSphere{ transform.get_position(), transform.get_scale().x, true });
+				entity, ColliderSphere{ transform.get_position(), transform.get_scale().x }, true);
 
 		ecs_manager.add_component<Gravity>(entity, { glm::vec3(0.0f, rand_gravity(random_generator), 0.0f) });
 
@@ -198,9 +198,8 @@ void demo_collision_obb(std::vector<Entity> &entities) {
 		c.center = transform.get_position();
 		c.range = transform.get_scale();
 		c.set_orientation(transform.get_euler_rot());
-		c.is_movable = true;
 
-		ColliderComponentsFactory::add_collider_component(entity, c);
+		ColliderComponentsFactory::add_collider_component(entity, c, true);
 
 		ecs_manager.add_component<Gravity>(entity, { glm::vec3(0.0f, rand_gravity(random_generator), 0.0f) });
 
@@ -288,7 +287,7 @@ int main() {
 	audio_manager.load_bank("Ambience");
 	audio_manager.load_sample_data();
 
-	FontManager::get()->load_font("resources/fonts/PoltawskiNowy.ttf", 48);
+	FontManager::get()->load_font("resources/fonts/PoltawskiNowy.ttf", 48, "PoltawskiNowy");
 
 	//Map inputs
 	default_mappings();

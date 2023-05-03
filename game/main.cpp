@@ -41,6 +41,13 @@
 #include <fstream>
 
 #include "core/camera/camera.h"
+#include "menu_demo.h"
+#include "opengl/transparent_elements/ui/sprite_manager.h"
+#include "opengl/transparent_elements/ui/ui_elements/ui_anchor.h"
+#include "opengl/transparent_elements/ui/ui_elements/ui_button.h"
+#include "opengl/transparent_elements/ui/ui_elements/ui_image.h"
+#include "opengl/transparent_elements/ui/ui_elements/ui_slider.h"
+#include "opengl/transparent_elements/ui/ui_elements/ui_text.h"
 // #include "render/debug/debug_draw.h"
 // #include "render/text/text_draw.h"
 
@@ -50,10 +57,12 @@ InputManager input_manager;
 
 Camera camera(glm::vec3(0.0f, 0.0f, -25.0f));
 
+#ifdef WIN32
 extern "C" {
 __declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
 __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
 }
+#endif
 
 bool in_debug_menu = true;
 
@@ -92,6 +101,9 @@ void default_mappings() {
 	input_manager.add_key_to_action("collider_up", InputKey::O);
 	input_manager.add_action("collider_down");
 	input_manager.add_key_to_action("collider_down", InputKey::U);
+
+	input_manager.add_action("mouse_left");
+	input_manager.add_key_to_action("mouse_left", InputKey::MOUSE_LEFT);
 }
 
 void default_ecs_manager_init() {
@@ -332,6 +344,7 @@ int main() {
 	input_manager.startup();
 #ifdef USE_OPENGL
 	OpenglManager::get()->startup();
+	SpriteManager::get()->startup();
 #else
 	RenderManager::get()->startup();
 #endif
@@ -351,6 +364,7 @@ int main() {
 #ifdef USE_OPENGL
 	auto opengl_system = ecs_manager.register_system<OpenglSystem>();
 	opengl_system->startup();
+
 #else
 	auto render_system = ecs_manager.register_system<RenderSystem>();
 	render_system->startup();
@@ -380,7 +394,8 @@ int main() {
 	audio_manager.load_bank("Ambience");
 	audio_manager.load_sample_data();
 
-	FontManager::get()->load_font("resources/fonts/PoltawskiNowy.ttf", 48);
+	FontManager::get()->load_font("resources/fonts/PoltawskiNowy.ttf", 48, "one");
+	FontManager::get()->load_font("resources/fonts/FROSTBITE-Narrow.ttf", 48, "two");
 
 	//Map inputs
 	default_mappings();
@@ -407,6 +422,8 @@ int main() {
 	glm::vec3 sound_position = glm::vec3(0.0f, 0.0f, 0.0f);
 	EventReference test_pluck = EventReference("test_pluck");
 	// #################
+
+	MenuDemo menu_demo = MenuDemo();
 
 	bool should_run = true;
 	nlohmann::json scene;
@@ -507,8 +524,8 @@ int main() {
 		if (ImGui::Button("Play pluck")) {
 			audio_manager.play_one_shot_3d(test_pluck, sound_position);
 		}
-		// 3D SOUND DEMO
 
+		// 3D SOUND DEMO
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
 				ImGui::GetIO().Framerate);
 
@@ -536,35 +553,16 @@ int main() {
 		render_system->update(*RenderManager::get());
 #endif
 
-		ImGui::Begin("Text Demo");
+		//		ImGui::Begin("UI Demo");
+		//
+		//		static char buffer[128] = { 'H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd', '!' };
+		//		ImGui::InputText("Text", buffer, 128);
+		//		static float value = 0.0f;
+		//		ImGui::SliderFloat("Float", &value, 0.0f, 1.0f);
+		//
+		//		ImGui::End();
 
-		static char buffer[128] = { 'H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd', '!' };
-		static float scale = 1.0f;
-		static float position[3] = { 0.0f, 0.0f, 0.0f };
-		static glm::vec3 color = { 1.0f, 1.0f, 1.0f };
-		static bool screenspace = false;
-		static bool centered_x = false;
-		static bool centered_y = false;
-		ImGui::InputText("Text", buffer, 128);
-		ImGui::InputFloat("Scale", &scale);
-		ImGui::InputFloat3("Position", position);
-		ImGui::InputFloat3("Color", &color.x);
-		ImGui::Checkbox("Screenspace", &screenspace);
-		ImGui::Checkbox("Center X", &centered_x);
-		ImGui::Checkbox("Center Y", &centered_y);
-
-		ImGui::End();
-
-		text_draw::draw_text(std::string(buffer), screenspace, glm::vec3(position[0], position[1], position[2]), color,
-				scale, nullptr, centered_x, centered_y);
-
-		debug_draw::draw_line(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(10.0f, 0.0f, 0.0f));
-		debug_draw::draw_line(glm::vec3(0.0f, 5.0f, 0.0f), glm::vec3(10.0f, 0.0f, 0.0f));
-
-		debug_draw::draw_line(glm::vec3(0.0f, 5.0f, 10.0f), glm::vec3(10.0f, 0.0f, 2.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-
-		debug_draw::draw_box(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-		debug_draw::draw_box(glm::vec3(0.0f, 5.0f, 0.0f), glm::vec3(10.0f, 1.0f, 1.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		menu_demo.draw();
 
 		// TODO: remove this when collision demo will be removed
 		for (auto sphere : spheres) {
@@ -601,6 +599,7 @@ int main() {
 	input_manager.shutdown();
 	audio_manager.shutdown();
 #ifdef USE_OPENGL
+	SpriteManager::get()->shutdown();
 	OpenglManager::get()->shutdown();
 #else
 	RenderManager::get()->shutdown();

@@ -29,6 +29,8 @@ public:
 	void shutdown();
 	void update();
 
+	FMOD::Studio::System *get_system();
+
 	void load_startup_banks();
 	void load_bank(const std::string &name);
 
@@ -55,6 +57,8 @@ public:
 	 */
 	FMOD::Studio::EventInstance *create_event_instance(const EventReference &event_ref);
 
+	FMOD::Studio::EventInstance *create_event_instance(const std::string event_name);
+
 	void play_one_shot_2d(const EventReference &event_ref);
 
 	void play_one_shot_3d(const EventReference &event_ref, glm::vec3 position, RigidBody *rigid_body = nullptr);
@@ -63,5 +67,6 @@ public:
 
 	FMOD_GUID path_to_guid(const std::string &path);
 };
+
 
 #endif //SILENCE_AUDIO_MANAGER_H

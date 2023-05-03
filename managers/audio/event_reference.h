@@ -7,9 +7,10 @@
 class EventReference {
 public:
 	std::string path;
-	FMOD_GUID guid;
+	FMOD_GUID guid = {};
 
-	EventReference(const std::string &path);
+	EventReference() = default;
+	explicit EventReference(const std::string &path);
 
 	const std::string &get_path() const;
 

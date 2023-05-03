@@ -11,6 +11,10 @@ if (USE_OPENGL)
     add_compile_definitions(USE_OPENGL)
 endif ()
 
+if(WIN32)
+    add_compile_definitions(WIN32)
+endif()
+
 find_package(glad CONFIG REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 

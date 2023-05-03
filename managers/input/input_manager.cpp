@@ -112,6 +112,7 @@ void InputManager::startup() {
 		input->key_state[input_key] = action == GLFW_PRESS ? 1.f : 0.f;
 	});
 
+	// TODO: Change the y to match OpenGL now that we're not using Vulkan
 	glfwSetCursorPosCallback(window, [](GLFWwindow *w_window, double xpos, double ypos) {
 		auto *input = static_cast<InputManager *>(glfwGetWindowUserPointer(w_window));
 		input->mouse_position = glm::vec2(xpos, ypos);

@@ -18,6 +18,8 @@ void Texture::load_from_asset(const std::string &path, bool pregenerated_mipmaps
 	GLenum format = GL_RGBA;
 
 	result = ktxTexture2_TranscodeBasis(ktx_texture, tf, 0);
+    width = ktx_texture->baseWidth;
+	height = ktx_texture->baseHeight;
 
 	GLenum target;
 	if (ktx_texture->isCubemap) {

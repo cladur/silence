@@ -9,9 +9,11 @@
 #include "texture.h"
 
 #include "debug/debug_draw.h"
-#include "text/text_draw.h"
+#include "transparent_elements/text/text_draw.h"
 
 #include "camera/camera.h"
+#include "opengl/transparent_elements/transparent_draw.h"
+#include "transparent_elements/ui/sprite_draw.h"
 
 class OpenglManager {
 private:
@@ -28,6 +30,8 @@ public:
 
 	TextDraw text_draw;
 	DebugDraw debug_draw;
+	SpriteDraw sprite_draw;
+	TransparentDraw transparent_draw;
 
 	// Render passes
 	UnlitPass unlit_pass;

@@ -60,6 +60,8 @@ void OpenglManager::startup() {
 
 	text_draw.startup();
 	debug_draw.startup();
+	sprite_draw.startup();
+	transparent_draw.startup();
 
 	unlit_pass.startup();
 	pbr_pass.startup();
@@ -95,12 +97,18 @@ void OpenglManager::draw() {
 	skybox_pass.draw();
 	glDepthFunc(GL_LESS);
 
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	text_draw.draw();
-	glDisable(GL_BLEND);
-
 	debug_draw.draw();
+
+	glEnable(GL_BLEND);
+//	glEnable(GL_ALPHA_TEST);
+//	glAlphaFunc(GL_LESS, 0.1);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//text_draw.draw();
+
+	// ui needs to go last, later to be a different render target
+	//sprite_draw.draw();
+	transparent_draw.draw();
+	glDisable(GL_BLEND);
 
 	// IMGUI
 	ImGui::Render();
