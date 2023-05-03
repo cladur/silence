@@ -277,58 +277,6 @@ void Editor::startup() {
 	// Native file dialog
 	NFD_Init();
 
-	// Default scene
-	create_scene("Default");
-
-	Entity entity = ecs_manager.create_entity();
-
-	ecs_manager.add_component<Transform>(
-			entity, Transform{ glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f) });
-
-	ecs_manager.add_component<ModelInstance>(entity, ModelInstance("woodenBox/woodenBox.mdl", MaterialType::PBR));
-
-	ecs_manager.add_component<Name>(entity, Name("Wooden Box"));
-
-	render_manager.load_model("cardboardBox/console.mdl");
-	render_manager.load_model("electricBox2/electricBox2.mdl");
-
-	scenes[0].entities.push_back(entity);
-
-	create_scene("Another Scene");
-
-	entity = ecs_manager.create_entity();
-
-	ecs_manager.add_component<Transform>(
-			entity, Transform{ glm::vec3(3.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f) });
-
-	ecs_manager.add_component<ModelInstance>(entity, ModelInstance("electricBox/electricBox.mdl", MaterialType::PBR));
-
-	ecs_manager.add_component<Name>(entity, Name("Electric Box"));
-
-	scenes[1].entities.push_back(entity);
-
-	Entity parent = entity;
-
-	entity = ecs_manager.create_entity();
-
-	ecs_manager.add_component<Transform>(
-			entity, Transform{ glm::vec3(0.0f, 3.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f) });
-
-	ecs_manager.add_component<ModelInstance>(entity, ModelInstance("woodenBox/woodenBox.mdl", MaterialType::PBR));
-
-	ecs_manager.add_component<Name>(entity, Name("Wooden Box"));
-
-	ecs_manager.add_child(parent, entity);
-
-	scenes[1].entities.push_back(entity);
-
-	for (int i = 0; i < 10; i++) {
-		entity = ecs_manager.create_entity();
-		ecs_manager.add_component<Transform>(
-				entity, Transform{ glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f) });
-		scenes[1].entities.push_back(entity);
-	}
-
 	bootleg_unity_theme();
 
 	// load file image
@@ -449,8 +397,15 @@ void Editor::update(float dt) {
 	imgui_menu_bar();
 	imgui_content_browser();
 	imgui_settings();
-	imgui_inspector(scenes[active_scene]);
-	imgui_scene(scenes[active_scene]);
+	if (!scenes.empty()) {
+		imgui_inspector(scenes[active_scene]);
+		imgui_scene(scenes[active_scene]);
+	} else {
+		ImGui::Begin("Scene");
+		ImGui::End();
+		ImGui::Begin("Inspector");
+		ImGui::End();
+	}
 
 	viewport_hovered = false;
 	for (int i = 0; i < scenes.size(); i++) {
@@ -459,6 +414,14 @@ void Editor::update(float dt) {
 			scene.update(dt);
 		}
 		imgui_viewport(scene, i);
+	}
+
+	if (scene_deletion_queued) {
+		scenes.erase(scenes.begin() + scene_to_delete);
+		if (active_scene == scene_to_delete) {
+			active_scene = 0;
+		}
+		scene_deletion_queued = false;
 	}
 
 	parent_system->update();

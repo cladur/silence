@@ -8,8 +8,10 @@
 
 struct Scene {
 	std::string name;
-	bool is_visible = false;
+	std::string path;
+	bool is_prefab;
 
+	bool is_visible = false;
 	bool viewport_hovered = false;
 	bool controlling_camera = false;
 	ImVec2 last_viewport_size = ImVec2(0, 0);
@@ -25,7 +27,6 @@ struct Scene {
 	std::vector<std::pair<Entity, Entity>> add_child_queue;
 
 	Camera camera;
-	bool is_prefab;
 
 	std::vector<Entity> entities;
 
@@ -34,6 +35,10 @@ struct Scene {
 	Scene();
 	void update(float dt);
 	RenderScene &get_render_scene();
+
+	// Serialization
+	void save_to_file(const std::string &path = "");
+	void load_from_file(const std::string &path);
 
 	// Selection
 	void add_to_selection(Entity entity);

@@ -22,6 +22,11 @@ nlohmann::json SceneManager::save_scene(const std::vector<Entity> &entities) {
 	return scene_json;
 }
 void SceneManager::save_json_to_file(const std::string &file_name, const nlohmann::json &json) {
+	// check if file exists
+	std::filesystem::path path(file_name);
+	if (std::filesystem::exists(path)) {
+		std::filesystem::remove(path);
+	}
 	std::ofstream file(file_name);
 	file << json.dump();
 	file.close();

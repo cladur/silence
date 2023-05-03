@@ -70,9 +70,41 @@ void Scene::update(float dt) {
 		}
 	}
 }
+
 RenderScene &Scene::get_render_scene() {
 	RenderManager &render_manager = RenderManager::get();
 	return render_manager.render_scenes[render_scene_idx];
+}
+
+void Scene::save_to_file(const std::string &path) {
+	if (!path.empty()) {
+		this->path = path;
+	}
+	if (this->path.empty()) {
+		return;
+	}
+	clear_selection();
+	auto json = SceneManager::save_scene(entities);
+	SceneManager::save_json_to_file(this->path, json);
+}
+
+void Scene::load_from_file(const std::string &path) {
+	if (path.empty()) {
+		SPDLOG_ERROR("Wrong path: ", path, " should not be empty");
+		assert(false);
+	}
+	this->path = path;
+	if (this->path.empty()) {
+		return;
+	}
+	std::ifstream file(this->path);
+	if (!file.is_open()) {
+		SPDLOG_WARN("Failed to open file: ", this->path);
+		return;
+	}
+	nlohmann::json scene_json = nlohmann::json::parse(file);
+	file.close();
+	SceneManager::load_scene_from_json_file(scene_json, "", entities);
 }
 
 void Scene::add_to_selection(Entity entity) {

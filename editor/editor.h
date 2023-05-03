@@ -76,6 +76,8 @@ public:
 	// Scenes
 	std::vector<Scene> scenes;
 	uint32_t active_scene = 0;
+	uint32_t scene_to_delete = 0;
+	bool scene_deletion_queued = false;
 
 	// Content Browser
 	std::string content_browser_current_path = "resources";

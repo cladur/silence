@@ -9,25 +9,62 @@
 #include <glm/gtx/matrix_decompose.hpp>
 
 #include "IconsMaterialDesign.h"
+#include "nfd.h"
 
 void Editor::imgui_menu_bar() {
 	ImGui::BeginMainMenuBar();
 
 	if (ImGui::BeginMenu("File")) {
+		if (ImGui::MenuItem(ICON_MD_NEW_LABEL " New")) {
+			SPDLOG_INFO("Create scene...");
+			std::string name = fmt::format("New Scene {}", scenes.size());
+			create_scene(name);
+		}
 		if (ImGui::MenuItem(ICON_MD_SAVE " Save")) {
 			SPDLOG_INFO("Saving scene...");
+			if (scenes[active_scene].path.empty()) {
+				nfdchar_t *out_path;
+				nfdfilteritem_t filter_item[1] = { { "Scene", "scn" } };
+				nfdresult_t result = NFD_SaveDialog(&out_path, filter_item, 1, nullptr, nullptr);
+				if (result == NFD_OKAY) {
+					auto filename = std::filesystem::path(out_path).filename().string();
+					scenes[active_scene].name = filename;
+					scenes[active_scene].save_to_file(out_path);
+					NFD_FreePath(out_path);
+				} else if (result == NFD_CANCEL) {
+					puts("User pressed cancel.");
+				} else {
+					printf("Error: %s\n", NFD_GetError());
+				}
+			} else {
+				scenes[active_scene].save_to_file();
+			}
 		}
 		if (ImGui::MenuItem(ICON_MD_SAVE " Save as...")) {
 			SPDLOG_INFO("Saving scene as...");
+			nfdchar_t *out_path;
+			nfdfilteritem_t filter_item[1] = { { "Scene", "scn" } };
+			nfdresult_t result = NFD_SaveDialog(&out_path, filter_item, 1, nullptr, nullptr);
+			if (result == NFD_OKAY) {
+				auto filename = std::filesystem::path(out_path).filename().string();
+				scenes[active_scene].name = filename;
+				scenes[active_scene].save_to_file(out_path);
+				NFD_FreePath(out_path);
+			} else if (result == NFD_CANCEL) {
+				puts("User pressed cancel.");
+			} else {
+				printf("Error: %s\n", NFD_GetError());
+			}
 		}
 		if (ImGui::MenuItem(ICON_MD_FOLDER_OPEN " Load")) {
 			SPDLOG_INFO(ICON_MD_CLOSE "Loading scene...");
 			nfdchar_t *out_path;
-			nfdfilteritem_t filter_item[2] = { { "Source code", "c,cpp,cc" }, { "Headers", "h,hpp" } };
-			nfdresult_t result = NFD_OpenDialog(&out_path, filter_item, 2, nullptr);
+			nfdfilteritem_t filter_item[1] = { { "Scene", "scn" } };
+			nfdresult_t result = NFD_OpenDialog(&out_path, filter_item, 1, nullptr);
 			if (result == NFD_OKAY) {
-				puts("Success!");
-				puts(out_path);
+				auto filename = std::filesystem::path(out_path).filename().string();
+				create_scene(filename);
+				scenes[scenes.size() - 1].load_from_file(out_path);
 				NFD_FreePath(out_path);
 			} else if (result == NFD_CANCEL) {
 				puts("User pressed cancel.");
@@ -244,7 +281,8 @@ void Editor::imgui_viewport(Scene &scene, uint32_t scene_index) {
 
 	ImVec2 viewport_start = ImGui::GetCursorPos();
 
-	ImGui::Begin(scene.name.c_str());
+	bool open = true;
+	ImGui::Begin(scene.name.c_str(), &open);
 	ImGuizmo::SetDrawlist();
 	// We need to set unique ID to each viewport, otherwise modifying the transform of one viewport will affect all
 	ImGuizmo::SetID((int)scene_index);
@@ -328,9 +366,8 @@ void Editor::imgui_viewport(Scene &scene, uint32_t scene_index) {
 						multi_transform.position, skew, perspective);
 				multi_transform.set_changed(true);
 			}
-			// glm::decompose(temp_matrix, multi_transform.scale, multi_transform.orientation, multi_transform.position,
-			// 		skew, perspective);
-			// multi_transform.set_changed(true);
+			// glm::decompose(temp_matrix, multi_transform.scale, multi_transform.orientation,
+			// multi_transform.position, 		skew, perspective); multi_transform.set_changed(true);
 		}
 	}
 
@@ -423,6 +460,11 @@ void Editor::imgui_viewport(Scene &scene, uint32_t scene_index) {
 
 	ImGui::PopStyleVar();
 	ImGui::PopStyleVar();
+
+	if (!open) {
+		scene_to_delete = scene_index;
+		scene_deletion_queued = true;
+	}
 }
 
 void Editor::display_folder(const std::string &path) {
@@ -530,7 +572,7 @@ void Editor::imgui_content_browser() {
 		if (entry.is_directory()) {
 			entry_texture = folder_texture;
 		}
-		ImGui::ImageButton((ImTextureID)entry_texture, thumbnail_size_vec2, thumbnail_uv0, thumbnail_uv1);
+		ImGui::ImageButton((ImTextureID)(uint64_t)entry_texture, thumbnail_size_vec2, thumbnail_uv0, thumbnail_uv1);
 
 		ImGui::PopStyleColor(3);
 
