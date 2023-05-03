@@ -4,11 +4,7 @@
 #include "material.h"
 #include "model.h"
 #include "model_instance.h"
-
-struct InstanceInfo {
-	bool in_forward_pass;
-	bool in_shadow_pass;
-};
+#include "skybox.h"
 
 class RenderPass {
 public:
@@ -24,6 +20,22 @@ public:
 class UnlitPass : public RenderPass {
 public:
 	MaterialUnlit material;
+	void startup() override;
+	void draw() override;
+};
+
+class PBRPass : public RenderPass {
+public:
+	MaterialPBR material;
+	void startup() override;
+	void draw() override;
+};
+
+class SkyboxPass : public RenderPass {
+public:
+	MaterialSkybox material;
+	Skybox skybox;
+
 	void startup() override;
 	void draw() override;
 };

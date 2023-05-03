@@ -24,13 +24,15 @@ void TransparentDraw::startup() {
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(TransparentVertex), (void *)nullptr);
 	// vertex color
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(TransparentVertex), (void *)offsetof(TransparentVertex, color));
+	glVertexAttribPointer(
+			1, 3, GL_FLOAT, GL_FALSE, sizeof(TransparentVertex), (void *)offsetof(TransparentVertex, color));
 	// vertex uv
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(TransparentVertex), (void *)offsetof(TransparentVertex, uv));
 	// is screen space
 	glEnableVertexAttribArray(3);
-	glVertexAttribIPointer(3, 1, GL_INT, sizeof(TransparentVertex), (void *)offsetof(TransparentVertex, is_screen_space));
+	glVertexAttribIPointer(
+			3, 1, GL_INT, sizeof(TransparentVertex), (void *)offsetof(TransparentVertex, is_screen_space));
 
 	glBindVertexArray(0);
 
@@ -50,7 +52,7 @@ void TransparentDraw::draw() {
 
 	static glm::mat4 view = manager->view;
 	static glm::mat4 proj = manager->projection;
-	static glm::vec2 window_size = d_manager->get_framebuffer_size();
+	static glm::vec2 window_size = d_manager->get_window_size();
 	static Texture t;
 	static int textured = 0;
 
@@ -70,13 +72,11 @@ void TransparentDraw::draw() {
 		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, object.indices.size() * sizeof(uint32_t), &object.indices[0]);
 
 		if (object.type == TransparentType::TEXT) {
-
 			// TODO text
 			t = FontManager::get()->fonts[object.texture_name].texture;
 			shader.set_int("is_sprite", 0);
 
 		} else if (object.type == TransparentType::SPRITE) {
-
 			t = SpriteManager::get()->get_sprite_texture(object.texture_name);
 			shader.set_int("is_sprite", 1);
 		}
@@ -112,11 +112,13 @@ void TransparentDraw::draw() {
 		glBindVertexArray(0);
 	}
 
-	// we need to sort screen-space object separately cos their z values are in screen space and don't change depending on player movement
+	// we need to sort screen-space object separately cos their z values are in screen space and don't change depending
+	// on player movement
 
-	std::sort(screen_space_objects.begin(), screen_space_objects.end(), [](const TransparentObject &a, const TransparentObject &b) {
-		return a.vertices[0].position.z < b.vertices[0].position.z;
-	});
+	std::sort(screen_space_objects.begin(), screen_space_objects.end(),
+			[](const TransparentObject &a, const TransparentObject &b) {
+				return a.vertices[0].position.z < b.vertices[0].position.z;
+			});
 
 	for (auto &object : screen_space_objects) {
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);

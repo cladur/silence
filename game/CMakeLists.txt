@@ -17,9 +17,8 @@ target_link_libraries(${GAME_NAME} PRIVATE
         silence_font_manager
         )
 
-
-if(USE_OPENGL)
-        target_link_libraries(${GAME_NAME} PRIVATE silence_opengl_manager)
-else()
-        target_link_libraries(${GAME_NAME} PRIVATE silence_render_manager)
-endif()
+if (USE_OPENGL)
+    target_link_libraries(${GAME_NAME} PRIVATE silence_opengl_manager)
+else ()
+    target_link_libraries(${GAME_NAME} PRIVATE silence_render_manager)
+endif ()

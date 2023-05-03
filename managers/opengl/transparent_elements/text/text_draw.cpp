@@ -76,19 +76,18 @@ void TextDraw::draw() {
 
 namespace text_draw {
 
-void draw_text_2d(const std::string &text, const glm::vec2 &position, const glm::vec3 &color, float scale,  std::string font_name,
-		bool center_x, bool center_y) {
+void draw_text_2d(const std::string &text, const glm::vec2 &position, const glm::vec3 &color, float scale,
+		std::string font_name, bool center_x, bool center_y) {
 	draw_text(text, true, glm::vec3(position, 0.0f), color, scale, font_name);
 }
 
-void draw_text_3d(const std::string &text, const glm::vec3 &position, const glm::vec3 &color, float scale,  std::string font_name,
-		bool center_x, bool center_y) {
+void draw_text_3d(const std::string &text, const glm::vec3 &position, const glm::vec3 &color, float scale,
+		std::string font_name, bool center_x, bool center_y) {
 	draw_text(text, false, position, color, scale, font_name, center_x, center_y);
 }
 
 void draw_text(const std::string &text, bool is_screen_space, const glm::vec3 &position, const glm::vec3 &color,
 		float scale, std::string font_name, bool center_x, bool center_y, const glm::vec3 &rotation, bool billboard) {
-
 	auto font_manager = FontManager::get();
 
 	TransparentObject object = {};
@@ -113,7 +112,7 @@ void draw_text(const std::string &text, bool is_screen_space, const glm::vec3 &p
 
 	if (!is_screen_space) {
 		glm::vec2 window_size = DisplayManager::get()->get_framebuffer_size();
-		aspect = 1.0f;//window_size.y / window_size.x;
+		aspect = 1.0f; //window_size.y / window_size.x;
 		// We're scaling down the font even more if it's in screenspace coords, cause they are just [-1; 1]
 		scale *= 0.02f;
 	}
@@ -140,7 +139,6 @@ void draw_text(const std::string &text, bool is_screen_space, const glm::vec3 &p
 		}
 		x -= text_width / 2.0f;
 	}
-
 
 	if (center_y) {
 		float text_height = 0.0f;

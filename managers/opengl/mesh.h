@@ -1,7 +1,6 @@
 #ifndef SILENCE_MESH_H
 #define SILENCE_MESH_H
 
-#include "material.h"
 #include "texture.h"
 
 struct Shader;
@@ -17,16 +16,17 @@ public:
 	// mesh data
 	std::vector<MeshVertex> vertices;
 	std::vector<uint32_t> indices;
-	// PBR: [0] = albedo, [1] = ao, [2] = normal, [3] = metallic | roughness, [4] = emissive
-	std::array<Texture, 5> textures;
-	std::array<bool, 5> textures_present;
+	// PBR: [0] = albedo, [1] = normal, [2] = ao | metallic | roughness, [3] = emissive
+	std::array<Texture, 4> textures;
+	std::array<bool, 4> textures_present;
 
-	void draw(MaterialType material_type);
+	bool has_ao_map = false;
+
+	void draw();
 	void setup_mesh();
 	void load_from_asset(const char *path);
-
-	void bind_textures_pbr();
-	void bind_textures_unlit();
+	
+	std::vector<glm::vec3> get_position_vertices() const;
 
 	//  render data
 	unsigned int vao, vbo, ebo;

@@ -31,9 +31,14 @@ add_library(${CORE_LIB_NAME} STATIC
         serialization.h
         camera/camera.cpp camera/camera.h
         components/collider_tag_component.h
+        components/static_tag_component.h
         components/collider_aabb.h
-        components/collider_sphere.h components/collider_obb.h
-        cvars/cvars.cpp cvars/cvars.h
+        components/collider_sphere.h
+        components/collider_obb.h
+        components/collider_sphere.h
+        components/collider_obb.h
+        cvars/cvars.cpp
+        cvars/cvars.h
         )
 
 target_include_directories(${CORE_LIB_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})

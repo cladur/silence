@@ -26,9 +26,11 @@ public:
 
 	GLFWwindow *window;
 
+	bool is_window_resizable;
+
 	static DisplayManager *get();
 
-	Status startup();
+	Status startup(bool resizable = false);
 	void shutdown();
 
 	void capture_mouse(bool capture) const;
@@ -40,6 +42,7 @@ public:
 #endif
 
 	[[nodiscard]] glm::vec2 get_framebuffer_size() const;
+	[[nodiscard]] glm::vec2 get_window_size() const;
 	void poll_events();
 	[[nodiscard]] bool window_should_close() const;
 };

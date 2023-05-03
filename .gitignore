@@ -24,3 +24,4 @@ thirdparty/fmod/plugins
 *.tx
 *.mesh
 resources/assets_export
+resources/assets_tmp
