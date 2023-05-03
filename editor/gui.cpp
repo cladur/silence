@@ -272,15 +272,13 @@ void Editor::imgui_scene(Scene &scene) {
 }
 void Editor::imgui_viewport(Scene &scene, uint32_t scene_index) {
 	RenderManager &render_manager = RenderManager::get();
-	World &world = scene.world;
 
 	ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0);
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
 
 	ImVec2 viewport_start = ImGui::GetCursorPos();
 
-	bool open = true;
-	ImGui::Begin(scene.name.c_str(), &open);
+	ImGui::Begin(scene.name.c_str());
 	ImGuizmo::SetDrawlist();
 	// We need to set unique ID to each viewport, otherwise modifying the transform of one viewport will affect all
 	ImGuizmo::SetID((int)scene_index);
@@ -334,38 +332,71 @@ void Editor::imgui_viewport(Scene &scene, uint32_t scene_index) {
 			snap = snap_values;
 		}
 
-		auto &multi_transform = world.get_component<Transform>(scene.multi_select_parent);
-		auto &transform = world.get_component<Transform>(scene.entities_selected[0]);
+		auto &multi_transform = scene.world.get_component<Transform>(scene.multi_select_parent);
+		auto &transform = scene.world.get_component<Transform>(scene.entities_selected[0]);
 		glm::mat4 temp_matrix = glm::mat4(1.0f);
 
 		if (scene.entities_selected.size() == 1) {
 			temp_matrix = transform.get_global_model_matrix();
+		} else if (current_gizmo_operation == ImGuizmo::ROTATE && use_individual_origins) {
+			temp_matrix = scene.dummy_transform.get_global_model_matrix();
 		} else {
 			temp_matrix = multi_transform.get_global_model_matrix();
 		}
 
+		static auto prev_scale = glm::vec3(1.0f);
+		if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
+			prev_scale = glm::vec3(1.0f);
+		}
+
+		glm::mat4 delta_matrix = glm::mat4(1.0f);
 		if (ImGuizmo::Manipulate(glm::value_ptr(*view), glm::value_ptr(*projection), current_gizmo_operation,
-					current_gizmo_mode, glm::value_ptr(temp_matrix), nullptr, snap)) {
+					current_gizmo_mode, glm::value_ptr(temp_matrix), glm::value_ptr(delta_matrix), snap)) {
 			glm::vec3 skew;
 			glm::vec4 perspective;
 
 			if (scene.entities_selected.size() == 1) {
 				glm::mat4 parent_matrix = glm::mat4(1.0f);
-				if (world.has_component<Parent>(scene.entities_selected[0])) {
-					auto &parent = world.get_component<Parent>(scene.entities_selected[0]);
-					auto &parent_transform = world.get_component<Transform>(parent.parent);
+				if (scene.world.has_component<Parent>(scene.entities_selected[0])) {
+					auto &parent = scene.world.get_component<Parent>(scene.entities_selected[0]);
+					auto &parent_transform = scene.world.get_component<Transform>(parent.parent);
 					parent_matrix = glm::inverse(parent_transform.get_global_model_matrix());
 				}
 				glm::decompose(parent_matrix * temp_matrix, transform.scale, transform.orientation, transform.position,
 						skew, perspective);
 				transform.set_changed(true);
+			} else if (use_individual_origins) {
+				glm::vec3 scale;
+				glm::quat orientation;
+				glm::vec3 position;
+
+				glm::decompose(delta_matrix, scale, orientation, position, skew, perspective);
+				glm::vec3 delta_scale = scale / prev_scale;
+				prev_scale = scale;
+
+				for (auto &entity : scene.entities_selected) {
+					auto &t = scene.world.get_component<Transform>(entity);
+
+					t.add_orientation(orientation);
+
+					if (current_gizmo_operation == ImGuizmo::SCALE) {
+						t.scale *= delta_scale;
+					}
+					t.set_changed(true);
+				}
+
+				glm::decompose(temp_matrix, scale, orientation, multi_transform.position, skew, perspective);
+				multi_transform.set_changed(true);
+
+				glm::decompose(temp_matrix, scene.dummy_transform.scale, scene.dummy_transform.orientation,
+						scene.dummy_transform.position, skew, perspective);
+				scene.dummy_transform.set_changed(true);
+				scene.dummy_transform.update_global_model_matrix();
 			} else {
 				glm::decompose(temp_matrix, multi_transform.scale, multi_transform.orientation,
 						multi_transform.position, skew, perspective);
 				multi_transform.set_changed(true);
 			}
-			// glm::decompose(temp_matrix, multi_transform.scale, multi_transform.orientation,
-			// multi_transform.position, 		skew, perspective); multi_transform.set_changed(true);
 		}
 	}
 
@@ -444,6 +475,17 @@ void Editor::imgui_viewport(Scene &scene, uint32_t scene_index) {
 	if (ImGui::Button(ICON_MD_TUNE)) {
 		ImGui::OpenPopup("Gizmo Settings");
 	}
+	ImGui::SameLine();
+	// INDIVIDUAL ORIGINS
+	if (use_individual_origins) {
+		ImGui::PushStyleColor(ImGuiCol_Button, active_color);
+		push_count++;
+	}
+	if (ImGui::Button(ICON_MD_TRIP_ORIGIN)) {
+		use_individual_origins = !use_individual_origins;
+	}
+	ImGui::PopStyleColor(push_count);
+	push_count = 0;
 
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 8));
 	if (ImGui::BeginPopup("Gizmo Settings")) {
@@ -458,11 +500,6 @@ void Editor::imgui_viewport(Scene &scene, uint32_t scene_index) {
 
 	ImGui::PopStyleVar();
 	ImGui::PopStyleVar();
-
-	if (!open) {
-		scene_to_delete = scene_index;
-		scene_deletion_queued = true;
-	}
 }
 
 void Editor::display_folder(const std::string &path) {
