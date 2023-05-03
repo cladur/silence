@@ -1,47 +1,65 @@
 #include "debug_draw.h"
-#include "render/vk_debug.h"
-#include <render/render_manager.h>
-#include <render/vk_initializers.h>
-#include <vulkan/vulkan_handles.hpp>
 
-VertexInputDescription DebugVertex::get_vertex_description() {
-	VertexInputDescription description;
+#include "opengl/opengl_manager.h"
 
-	//we will have just 1 vertex buffer binding, with a per-vertex rate
-	vk::VertexInputBindingDescription main_binding = {};
-	main_binding.binding = 0;
-	main_binding.stride = sizeof(DebugVertex);
-	main_binding.inputRate = vk::VertexInputRate::eVertex;
+const uint32_t MAX_VERTEX_COUNT = 10000;
 
-	description.bindings.push_back(main_binding);
+void DebugDraw::startup() {
+	glGenVertexArrays(1, &vao);
+	glGenBuffers(1, &vbo);
 
-	//Position will be stored at Location 0
-	vk::VertexInputAttributeDescription position_attribute = {};
-	position_attribute.binding = 0;
-	position_attribute.location = 0;
-	position_attribute.format = vk::Format::eR32G32B32Sfloat;
-	position_attribute.offset = offsetof(DebugVertex, position);
+	glBindVertexArray(vao);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-	//Color will be stored at Location 1
-	vk::VertexInputAttributeDescription color_attribute = {};
-	color_attribute.binding = 0;
-	color_attribute.location = 1;
-	color_attribute.format = vk::Format::eR32G32B32Sfloat;
-	color_attribute.offset = offsetof(DebugVertex, color);
+	glBufferData(GL_ARRAY_BUFFER, MAX_VERTEX_COUNT * sizeof(DebugVertex), nullptr, GL_DYNAMIC_DRAW);
 
-	description.attributes.push_back(position_attribute);
-	description.attributes.push_back(color_attribute);
+	// vertex positions
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(DebugVertex), (void *)nullptr);
+	// vertex color
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(DebugVertex), (void *)offsetof(DebugVertex, color));
 
-	return description;
+	glBindVertexArray(0);
+
+	shader.load_from_files(shader_path("debug.vert"), shader_path("debug.frag"));
+}
+
+void DebugDraw::draw() {
+	if (vertices.empty()) {
+		return;
+	}
+
+	// TODO: Dynamically resize buffers?
+	if (vertices.size() > MAX_VERTEX_COUNT) {
+		SPDLOG_ERROR("Too many debug vertices to draw!!!");
+		return;
+	}
+
+	shader.use();
+
+	// update buffers
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(DebugVertex), &vertices[0]);
+
+	OpenglManager *opengl_manager = OpenglManager::get();
+	shader.set_mat4("projection", opengl_manager->projection);
+	shader.set_mat4("view", opengl_manager->view);
+
+	glBindVertexArray(vao);
+	glDrawArrays(GL_LINES, 0, vertices.size());
+	glBindVertexArray(0);
+
+	vertices.clear();
 }
 
 namespace debug_draw {
 
 void draw_line(const glm::vec3 &from, const glm::vec3 &to, const glm::vec3 &color) {
-	auto render_manager = RenderManager::get();
+	OpenglManager *opengl_manager = OpenglManager::get();
 
-	render_manager->debug_vertices.push_back({ from, color });
-	render_manager->debug_vertices.push_back({ to, color });
+	opengl_manager->debug_draw.vertices.push_back({ from, color });
+	opengl_manager->debug_draw.vertices.push_back({ to, color });
 }
 
 // Draw a box with center at "center" and scale "scale".
@@ -83,11 +101,11 @@ void draw_sphere(const glm::vec3 &center, float radius, const glm::vec3 &color) 
 	// generate vertices
 	float vertices[num_rings + 1][num_segments + 1][3];
 	for (int i = 0; i <= num_rings; i++) {
-		float radius = sin(i * delta_ring);
+		float r = radius * sin(i * delta_ring);
 		for (int j = 0; j <= num_segments; j++) {
-			vertices[i][j][0] = radius * cos(j * delta_segment) + center.x;
-			vertices[i][j][1] = cos(i * delta_ring) + center.y;
-			vertices[i][j][2] = radius * sin(j * delta_segment) + center.z;
+			vertices[i][j][0] = r * cos(j * delta_segment) + center.x;
+			vertices[i][j][1] = radius * cos(i * delta_ring) + center.y;
+			vertices[i][j][2] = r * sin(j * delta_segment) + center.z;
 		}
 	}
 

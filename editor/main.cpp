@@ -117,8 +117,8 @@ void demo_entities_init(std::vector<Entity> &entities) {
 				entity, ColliderAABB{ transform.get_position(), transform.get_scale() }, true);
 
 		Handle<ModelInstance> hndl = OpenglManager::get()->add_instance("woodenBox/woodenBox.pfb");
-		//		Handle<ModelInstance> hndl = OpenglManager::get()->add_instance("electricBox/electricBox.pfb");
-		//		Handle<ModelInstance> hndl = OpenglManager::get()->add_instance("Agent/agent_idle.pfb");
+		//		Handle<ModelInstance> hndl = RenderManager::get()->add_instance("electricBox/electricBox.pfb");
+		//		Handle<ModelInstance> hndl = RenderManager::get()->add_instance("Agent/agent_idle.pfb");
 		ecs_manager.add_component<RenderHandle>(entity, RenderHandle{ .handle = hndl });
 	}
 

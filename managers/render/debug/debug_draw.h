@@ -1,16 +1,26 @@
 #ifndef SILENCE_DEBUG_DRAW_H
 #define SILENCE_DEBUG_DRAW_H
 
-#include "render/material_system.h"
-#include <vulkan/vulkan_handles.hpp>
+#include "opengl/shader.h"
 
 class RenderManager;
 
 struct DebugVertex {
 	glm::vec3 position;
 	glm::vec3 color;
+};
 
-	static VertexInputDescription get_vertex_description();
+class DebugDraw {
+private:
+	//  render data
+	unsigned int vao, vbo, ebo;
+	Shader shader;
+
+public:
+	std::vector<DebugVertex> vertices;
+
+	void startup();
+	void draw();
 };
 
 namespace debug_draw {

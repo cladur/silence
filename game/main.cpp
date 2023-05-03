@@ -155,8 +155,8 @@ void demo_entities_init(std::vector<Entity> &entities) {
 		collider.center = glm::vec3(0.0f, 1.0f, 0.0f);
 		collider.setup_collider(OpenglManager::get()->get_model(hndl_model).meshes[0].get_position_vertices());
 		ColliderComponentsFactory::add_collider_component(entity, collider);
-		//		Handle<ModelInstance> hndl = OpenglManager::get()->add_instance("electricBox/electricBox.pfb");
-		//		Handle<ModelInstance> hndl = OpenglManager::get()->add_instance("Agent/agent_idle.pfb");
+		//		Handle<ModelInstance> hndl = RenderManager::get()->add_instance("electricBox/electricBox.pfb");
+		//		Handle<ModelInstance> hndl = RenderManager::get()->add_instance("Agent/agent_idle.pfb");
 		ecs_manager.add_component<RenderHandle>(entity, RenderHandle{ .handle = hndl });
 	}
 
@@ -200,7 +200,7 @@ void demo_collision_init(Entity &entity) {
 	collider.setup_collider(OpenglManager::get()->get_model(hndl_model).meshes[0].get_position_vertices());
 	//	ColliderAABB collider{};
 	//	collider.center = glm::vec3(0.0f, 1.0f, 0.0f);
-	//	collider.setup_collider(OpenglManager::get()->get_model(hndl_model).meshes[0].get_position_vertices());
+	//	collider.setup_collider(RenderManager::get()->get_model(hndl_model).meshes[0].get_position_vertices());
 
 	ColliderComponentsFactory::add_collider_component(entity, collider, true);
 

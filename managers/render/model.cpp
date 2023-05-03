@@ -3,10 +3,10 @@
 #include "assets/material_asset.h"
 #include "assets/prefab_asset.h"
 
-#include "opengl_manager.h"
+#include "render_manager.h"
 
 void Model::load_from_asset(const char *path) {
-	OpenglManager *opengl_manager = OpenglManager::get();
+	RenderManager *opengl_manager = RenderManager::get();
 
 	assets::AssetFile file;
 	bool loaded = assets::load_binary_file(path, file);

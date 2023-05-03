@@ -6,14 +6,14 @@
 
 #include "render_pass.h"
 
-#include "opengl_manager.h"
+#include "render_manager.h"
 
 void MaterialUnlit::startup() {
 	shader.load_from_files(shader_path("unlit.vert"), shader_path("unlit.frag"));
 }
 
 void MaterialUnlit::bind_resources() {
-	OpenglManager *opengl_manager = OpenglManager::get();
+	RenderManager *opengl_manager = RenderManager::get();
 	shader.use();
 	shader.set_mat4("view", opengl_manager->view);
 	shader.set_mat4("projection", opengl_manager->projection);
@@ -37,7 +37,7 @@ void MaterialPBR::startup() {
 }
 
 void MaterialPBR::bind_resources() {
-	OpenglManager *opengl_manager = OpenglManager::get();
+	RenderManager *opengl_manager = RenderManager::get();
 	shader.use();
 	shader.set_mat4("view", opengl_manager->view);
 	shader.set_mat4("projection", opengl_manager->projection);
@@ -114,7 +114,7 @@ void MaterialSkybox::startup() {
 }
 
 void MaterialSkybox::bind_resources() {
-	OpenglManager *opengl_manager = OpenglManager::get();
+	RenderManager *opengl_manager = RenderManager::get();
 	shader.use();
 	shader.set_int("environment_map", 0);
 	shader.set_mat4("view", opengl_manager->view);
