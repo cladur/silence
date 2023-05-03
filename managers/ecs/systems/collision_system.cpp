@@ -3,27 +3,26 @@
 #include "components/collider_aabb.h"
 #include "components/collider_sphere.h"
 #include "components/collider_tag_component.h"
-#include "ecs/ecs_manager.h"
+#include "ecs/world.h"
 
-void CollisionSystem::startup() {
-	ECSManager &ecs_manager = ECSManager::get();
+void CollisionSystem::startup(World &world) {
 	Signature signature;
-	signature.set(ecs_manager.get_component_type<ColliderTag>());
-	ecs_manager.set_system_component_whitelist<CollisionSystem>(signature);
+	signature.set(world.get_component_type<ColliderTag>());
+	world.set_system_component_whitelist<CollisionSystem>(signature);
 }
 
-void CollisionSystem::update() { //TODO: Optimize update because now it's O(n^2) :(
+void CollisionSystem::update(World &world, float dt) {
+	//TODO: Optimize update because now it's O(n^2) :(
 	ZoneScopedN("CollisionSystem::update");
-	ECSManager &ecs_manager = ECSManager::get();
 
 	CollisionFlag first, second;
 	for (auto it1 = entities.begin(); it1 != entities.end(); ++it1) {
 		Entity e1 = std::ref(*it1);
-		if (ecs_manager.has_component<ColliderOBB>(e1)) {
+		if (world.has_component<ColliderOBB>(e1)) {
 			first = CollisionFlag::FIRST_OBB;
-		} else if (ecs_manager.has_component<ColliderAABB>(e1)) {
+		} else if (world.has_component<ColliderAABB>(e1)) {
 			first = CollisionFlag::FIRST_AABB;
-		} else if (ecs_manager.has_component<ColliderSphere>(e1)) {
+		} else if (world.has_component<ColliderSphere>(e1)) {
 			first = CollisionFlag::FIRST_SPHERE;
 		} else {
 			continue;
@@ -31,11 +30,11 @@ void CollisionSystem::update() { //TODO: Optimize update because now it's O(n^2)
 		for (auto it2 = std::next(it1); it2 != entities.end(); ++it2) {
 			Entity e2 = std::ref(*it2);
 
-			if (ecs_manager.has_component<ColliderOBB>(e2)) {
+			if (world.has_component<ColliderOBB>(e2)) {
 				second = CollisionFlag::SECOND_OBB;
-			} else if (ecs_manager.has_component<ColliderAABB>(e2)) {
+			} else if (world.has_component<ColliderAABB>(e2)) {
 				second = CollisionFlag::SECOND_AABB;
-			} else if (ecs_manager.has_component<ColliderSphere>(e2)) {
+			} else if (world.has_component<ColliderSphere>(e2)) {
 				second = CollisionFlag::SECOND_SPHERE;
 			} else {
 				continue;
@@ -43,31 +42,31 @@ void CollisionSystem::update() { //TODO: Optimize update because now it's O(n^2)
 
 			switch (first | second) {
 				case CollisionFlag::SPHERE_SPHERE:
-					resolve_collision_sphere(e1, e2);
+					resolve_collision_sphere(world, e1, e2);
 					break;
 				case CollisionFlag::AABB_AABB:
-					resolve_collision_aabb(e1, e2);
+					resolve_collision_aabb(world, e1, e2);
 					break;
 				case CollisionFlag::SPHERE_AABB:
-					resolve_aabb_sphere(e2, e1);
+					resolve_aabb_sphere(world, e2, e1);
 					break;
 				case CollisionFlag::AABB_SPHERE:
-					resolve_aabb_sphere(e1, e2);
+					resolve_aabb_sphere(world, e1, e2);
 					break;
 				case CollisionFlag::OBB_OBB:
-					resolve_collision_obb(e1, e2);
+					resolve_collision_obb(world, e1, e2);
 					break;
 				case CollisionFlag::SPHERE_OBB:
-					resolve_obb_sphere(e2, e1);
+					resolve_obb_sphere(world, e2, e1);
 					break;
 				case CollisionFlag::OBB_SPHERE:
-					resolve_obb_sphere(e1, e2);
+					resolve_obb_sphere(world, e1, e2);
 					break;
 				case CollisionFlag::AABB_OBB:
-					resolve_obb_aabb(e2, e1);
+					resolve_obb_aabb(world, e2, e1);
 					break;
 				case CollisionFlag::OBB_AABB:
-					resolve_obb_aabb(e1, e2);
+					resolve_obb_aabb(world, e1, e2);
 					break;
 				default:
 					break;
@@ -84,26 +83,25 @@ bool CollisionSystem::is_overlap(ColliderSphere &a, ColliderSphere &b) {
 	return distance_squared <= (radius_sum * radius_sum);
 }
 
-void CollisionSystem::resolve_collision_sphere(Entity e1, Entity e2) {
-	ECSManager &ecs_manager = ECSManager::get();
-	ColliderSphere &c1 = ecs_manager.get_component<ColliderSphere>(e1);
-	ColliderSphere &c2 = ecs_manager.get_component<ColliderSphere>(e2);
+void CollisionSystem::resolve_collision_sphere(World &world, Entity e1, Entity e2) {
+	ColliderSphere &c1 = world.get_component<ColliderSphere>(e1);
+	ColliderSphere &c2 = world.get_component<ColliderSphere>(e2);
 	Transform *t1;
 	Transform *t2;
 
 	if (!(c1.is_movable || c2.is_movable)) {
 		return;
 	} else if (c1.is_movable && c2.is_movable) {
-		t1 = &ecs_manager.get_component<Transform>(e1);
+		t1 = &world.get_component<Transform>(e1);
 		c1.center = t1->get_position();
 
-		t2 = &ecs_manager.get_component<Transform>(e2);
+		t2 = &world.get_component<Transform>(e2);
 		c2.center = t2->get_position();
 	} else if (c1.is_movable) {
-		t1 = &ecs_manager.get_component<Transform>(e1);
+		t1 = &world.get_component<Transform>(e1);
 		c1.center = t1->get_position();
 	} else {
-		t2 = &ecs_manager.get_component<Transform>(e2);
+		t2 = &world.get_component<Transform>(e2);
 		c2.center = t2->get_position();
 	}
 
@@ -145,26 +143,25 @@ bool CollisionSystem::is_overlap(ColliderAABB &a, ColliderAABB &b) {
 	return true;
 }
 
-void CollisionSystem::resolve_collision_aabb(Entity e1, Entity e2) {
-	ECSManager &ecs_manager = ECSManager::get();
-	ColliderAABB &c1 = ecs_manager.get_component<ColliderAABB>(e1);
-	ColliderAABB &c2 = ecs_manager.get_component<ColliderAABB>(e2);
+void CollisionSystem::resolve_collision_aabb(World &world, Entity e1, Entity e2) {
+	ColliderAABB &c1 = world.get_component<ColliderAABB>(e1);
+	ColliderAABB &c2 = world.get_component<ColliderAABB>(e2);
 	Transform *t1;
 	Transform *t2;
 
 	if (!(c1.is_movable || c2.is_movable)) {
 		return;
 	} else if (c1.is_movable && c2.is_movable) {
-		t1 = &ecs_manager.get_component<Transform>(e1);
+		t1 = &world.get_component<Transform>(e1);
 		c1.center = t1->get_position();
 
-		t2 = &ecs_manager.get_component<Transform>(e2);
+		t2 = &world.get_component<Transform>(e2);
 		c2.center = t2->get_position();
 	} else if (c1.is_movable) {
-		t1 = &ecs_manager.get_component<Transform>(e1);
+		t1 = &world.get_component<Transform>(e1);
 		c1.center = t1->get_position();
 	} else {
-		t2 = &ecs_manager.get_component<Transform>(e2);
+		t2 = &world.get_component<Transform>(e2);
 		c2.center = t2->get_position();
 	}
 
@@ -233,26 +230,25 @@ glm::vec3 CollisionSystem::is_overlap(ColliderAABB &aabb, ColliderSphere &sphere
 	return glm::vec3(0.0f);
 }
 
-void CollisionSystem::resolve_aabb_sphere(Entity aabb, Entity sphere) {
-	ECSManager &ecs_manager = ECSManager::get();
-	ColliderAABB &c1 = ecs_manager.get_component<ColliderAABB>(aabb);
-	ColliderSphere &c2 = ecs_manager.get_component<ColliderSphere>(sphere);
+void CollisionSystem::resolve_aabb_sphere(World &world, Entity aabb, Entity sphere) {
+	ColliderAABB &c1 = world.get_component<ColliderAABB>(aabb);
+	ColliderSphere &c2 = world.get_component<ColliderSphere>(sphere);
 	Transform *t1;
 	Transform *t2;
 
 	if (!(c1.is_movable || c2.is_movable)) {
 		return;
 	} else if (c1.is_movable && c2.is_movable) {
-		t1 = &ecs_manager.get_component<Transform>(aabb);
+		t1 = &world.get_component<Transform>(aabb);
 		c1.center = t1->get_position();
 
-		t2 = &ecs_manager.get_component<Transform>(sphere);
+		t2 = &world.get_component<Transform>(sphere);
 		c2.center = t2->get_position();
 	} else if (c1.is_movable) {
-		t1 = &ecs_manager.get_component<Transform>(aabb);
+		t1 = &world.get_component<Transform>(aabb);
 		c1.center = t1->get_position();
 	} else {
-		t2 = &ecs_manager.get_component<Transform>(sphere);
+		t2 = &world.get_component<Transform>(sphere);
 		c2.center = t2->get_position();
 	}
 
@@ -324,29 +320,28 @@ glm::vec3 CollisionSystem::is_overlap(ColliderOBB &a, ColliderOBB &b) {
 	return separation * max_overlap;
 }
 
-void CollisionSystem::resolve_collision_obb(Entity e1, Entity e2) {
-	ECSManager &ecs_manager = ECSManager::get();
-	ColliderOBB &c1 = ecs_manager.get_component<ColliderOBB>(e1);
-	ColliderOBB &c2 = ecs_manager.get_component<ColliderOBB>(e2);
+void CollisionSystem::resolve_collision_obb(World &world, Entity e1, Entity e2) {
+	ColliderOBB &c1 = world.get_component<ColliderOBB>(e1);
+	ColliderOBB &c2 = world.get_component<ColliderOBB>(e2);
 	Transform *t1;
 	Transform *t2;
 
 	if (!(c1.is_movable || c2.is_movable)) {
 		return;
 	} else if (c1.is_movable && c2.is_movable) {
-		t1 = &ecs_manager.get_component<Transform>(e1);
+		t1 = &world.get_component<Transform>(e1);
 		c1.center = t1->get_position();
 		c1.set_orientation(t1->get_euler_rot());
 
-		t2 = &ecs_manager.get_component<Transform>(e2);
+		t2 = &world.get_component<Transform>(e2);
 		c2.center = t2->get_position();
 		c2.set_orientation(t2->get_euler_rot());
 	} else if (c1.is_movable) {
-		t1 = &ecs_manager.get_component<Transform>(e1);
+		t1 = &world.get_component<Transform>(e1);
 		c1.center = t1->get_position();
 		c1.set_orientation(t1->get_euler_rot());
 	} else {
-		t2 = &ecs_manager.get_component<Transform>(e2);
+		t2 = &world.get_component<Transform>(e2);
 		c2.center = t2->get_position();
 		c2.set_orientation(t2->get_euler_rot());
 	}
@@ -396,28 +391,27 @@ glm::vec3 CollisionSystem::is_overlap(ColliderOBB &a, ColliderSphere &b) {
 	return glm::vec3(0.0f);
 }
 
-void CollisionSystem::resolve_obb_sphere(Entity obb, Entity sphere) {
-	ECSManager &ecs_manager = ECSManager::get();
-	ColliderOBB &c1 = ecs_manager.get_component<ColliderOBB>(obb);
-	ColliderSphere &c2 = ecs_manager.get_component<ColliderSphere>(sphere);
+void CollisionSystem::resolve_obb_sphere(World &world, Entity obb, Entity sphere) {
+	ColliderOBB &c1 = world.get_component<ColliderOBB>(obb);
+	ColliderSphere &c2 = world.get_component<ColliderSphere>(sphere);
 	Transform *t1;
 	Transform *t2;
 
 	if (!(c1.is_movable || c2.is_movable)) {
 		return;
 	} else if (c1.is_movable && c2.is_movable) {
-		t1 = &ecs_manager.get_component<Transform>(obb);
+		t1 = &world.get_component<Transform>(obb);
 		c1.center = t1->get_position();
 		c1.set_orientation(t1->get_euler_rot());
 
-		t2 = &ecs_manager.get_component<Transform>(sphere);
+		t2 = &world.get_component<Transform>(sphere);
 		c2.center = t2->get_position();
 	} else if (c1.is_movable) {
-		t1 = &ecs_manager.get_component<Transform>(obb);
+		t1 = &world.get_component<Transform>(obb);
 		c1.center = t1->get_position();
 		c1.set_orientation(t1->get_euler_rot());
 	} else {
-		t2 = &ecs_manager.get_component<Transform>(sphere);
+		t2 = &world.get_component<Transform>(sphere);
 		c2.center = t2->get_position();
 	}
 
@@ -490,28 +484,27 @@ glm::vec3 CollisionSystem::is_overlap(ColliderOBB &a, ColliderAABB &b) {
 	return separation * max_overlap;
 }
 
-void CollisionSystem::resolve_obb_aabb(Entity obb, Entity aabb) {
-	ECSManager &ecs_manager = ECSManager::get();
-	ColliderOBB &c1 = ecs_manager.get_component<ColliderOBB>(obb);
-	ColliderAABB &c2 = ecs_manager.get_component<ColliderAABB>(aabb);
+void CollisionSystem::resolve_obb_aabb(World &world, Entity obb, Entity aabb) {
+	ColliderOBB &c1 = world.get_component<ColliderOBB>(obb);
+	ColliderAABB &c2 = world.get_component<ColliderAABB>(aabb);
 	Transform *t1;
 	Transform *t2;
 
 	if (!(c1.is_movable || c2.is_movable)) {
 		return;
 	} else if (c1.is_movable && c2.is_movable) {
-		t1 = &ecs_manager.get_component<Transform>(obb);
+		t1 = &world.get_component<Transform>(obb);
 		c1.center = t1->get_position();
 		c1.set_orientation(t1->get_euler_rot());
 
-		t2 = &ecs_manager.get_component<Transform>(aabb);
+		t2 = &world.get_component<Transform>(aabb);
 		c2.center = t2->get_position();
 	} else if (c1.is_movable) {
-		t1 = &ecs_manager.get_component<Transform>(obb);
+		t1 = &world.get_component<Transform>(obb);
 		c1.center = t1->get_position();
 		c1.set_orientation(t1->get_euler_rot());
 	} else {
-		t2 = &ecs_manager.get_component<Transform>(aabb);
+		t2 = &world.get_component<Transform>(aabb);
 		c2.center = t2->get_position();
 	}
 

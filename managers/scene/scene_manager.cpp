@@ -1,22 +1,20 @@
 #include "scene_manager.h"
-#include "ecs/ecs_manager.h"
+#include "ecs/world.h"
 #include "serialization.h"
 #include <fstream>
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
 
 void SceneManager::load_scene_from_json_file(
-		nlohmann::json &scene_json, const std::string &scene_name, std::vector<Entity> &entities) {
-	ECSManager &ecs_manager = ECSManager::get();
+		World &world, nlohmann::json &scene_json, const std::string &scene_name, std::vector<Entity> &entities) {
 	entities.clear();
-	ecs_manager.deserialize_entities_json(scene_json, entities);
+	world.deserialize_entities_json(scene_json, entities);
 }
-nlohmann::json SceneManager::save_scene(const std::vector<Entity> &entities) {
+nlohmann::json SceneManager::save_scene(World &world, const std::vector<Entity> &entities) {
 	nlohmann::json scene_json = nlohmann::json::array();
-	ECSManager &ecs_manager = ECSManager::get();
 	for (auto const &entity : entities) {
 		scene_json.push_back(nlohmann::json::object());
-		ecs_manager.serialize_entity_json(scene_json.back(), entity);
+		world.serialize_entity_json(scene_json.back(), entity);
 	}
 	SPDLOG_INFO("Saved scene with {} entities", entities.size());
 	return scene_json;

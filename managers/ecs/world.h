@@ -1,11 +1,14 @@
-#ifndef SILENCE_ECSMANAGER_H
-#define SILENCE_ECSMANAGER_H
+#ifndef SILENCE_WORLD_H
+#define SILENCE_WORLD_H
 
 #include "component_manager.h"
+#include "ecs/systems/base_system.h"
 #include "entity_manager.h"
 #include "serialization.h"
 #include "system_manager.h"
-class ECSManager {
+#include <memory>
+
+class World {
 private:
 	std::unique_ptr<ComponentManager> component_manager;
 	std::unique_ptr<EntityManager> entity_manager;
@@ -20,9 +23,9 @@ private:
 	std::vector<std::string> component_names;
 	std::unordered_map<std::string, int> component_ids;
 	int registered_components = 0;
+	std::vector<std::shared_ptr<BaseSystem>> systems;
 
 public:
-	static ECSManager &get();
 	void startup();
 
 	// Entity methods
@@ -96,8 +99,16 @@ public:
 	}
 
 	// System methods
-	template <typename T> std::shared_ptr<T> register_system() {
-		return system_manager->register_system<T>();
+	template <typename T> void register_system() {
+		auto system = system_manager->register_system<T>();
+		system->startup(*this);
+		systems.emplace_back(std::move(system));
+	}
+
+	void update(float dt) {
+		for (auto &system : systems) {
+			system->update(*this, dt);
+		}
 	}
 
 	template <typename T> void set_system_component_whitelist(Signature signature) {
@@ -130,4 +141,4 @@ public:
 	int get_registered_components();
 };
 
-#endif //SILENCE_ECSMANAGER_H
+#endif //SILENCE_WORLD_H

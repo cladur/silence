@@ -1,24 +1,22 @@
 #include "render_system.h"
 
 #include "core/components/transform_component.h"
-#include "ecs/ecs_manager.h"
+#include "ecs/world.h"
 #include "managers/render/render_manager.h"
 
-void RenderSystem::startup() {
-	ECSManager &ecs_manager = ECSManager::get();
+void RenderSystem::startup(World &world) {
 	Signature signature;
-	signature.set(ecs_manager.get_component_type<Transform>());
-	signature.set(ecs_manager.get_component_type<ModelInstance>());
-	ecs_manager.set_system_component_whitelist<RenderSystem>(signature);
+	signature.set(world.get_component_type<Transform>());
+	signature.set(world.get_component_type<ModelInstance>());
+	world.set_system_component_whitelist<RenderSystem>(signature);
 }
 
-void RenderSystem::update() {
-	ECSManager &ecs_manager = ECSManager::get();
+void RenderSystem::update(World &world, float dt) {
 	RenderManager &render_manager = RenderManager::get();
 
 	// for (auto const &entity : entities) {
-	// 	auto &transform = ecs_manager.get_component<Transform>(entity);
-	// 	auto &model_instance = ecs_manager.get_component<ModelInstance>(entity);
+	// 	auto &transform = world.get_component<Transform>(entity);
+	// 	auto &model_instance = world.get_component<ModelInstance>(entity);
 
 	// 	render_manager.queue_draw(&model_instance, &transform);
 	// }

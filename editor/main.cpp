@@ -1,5 +1,5 @@
 #include "components/rigidbody_component.h"
-#include "ecs/ecs_manager.h"
+#include "ecs/world.h"
 #include "editor.h"
 
 int main() {

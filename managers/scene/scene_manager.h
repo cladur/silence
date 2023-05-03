@@ -3,6 +3,8 @@
 
 #include "core/serialization.h"
 
+class World;
+
 class SceneManager {
 private:
 	static SceneManager *instance;
@@ -14,8 +16,8 @@ public:
 
 	// Serialization
 	static void load_scene_from_json_file(
-			nlohmann::json &scene_json, const std::string &scene_name, std::vector<Entity> &entities);
-	static nlohmann::json save_scene(const std::vector<Entity> &entities);
+			World &world, nlohmann::json &scene_json, const std::string &scene_name, std::vector<Entity> &entities);
+	static nlohmann::json save_scene(World &world, const std::vector<Entity> &entities);
 	static void save_json_to_file(const std::string &file_name, const nlohmann::json &json);
 	static serialization::IdToClassConstructor &get_class_map();
 

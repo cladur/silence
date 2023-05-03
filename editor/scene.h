@@ -2,7 +2,7 @@
 #define SILENCE_SCENE_H
 
 #include "camera/camera.h"
-#include "ecs/ecs_manager.h"
+#include "ecs/world.h"
 #include "imgui.h"
 #include "render/render_scene.h"
 
@@ -10,6 +10,8 @@ struct Scene {
 	std::string name;
 	std::string path;
 	bool is_prefab;
+
+	World world;
 
 	bool is_visible = false;
 	bool viewport_hovered = false;

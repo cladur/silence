@@ -3,6 +3,7 @@
 
 #include "audio/audio_manager.h"
 #include "display/display_manager.h"
+#include "editor/inspector_gui.h"
 #include "font/font_manager.h"
 #include "input/input_manager.h"
 #include "managers/render/common/material.h"
@@ -22,11 +23,11 @@
 #include "components/rigidbody_component.h"
 #include "components/transform_component.h"
 
-#include "ecs/ecs_manager.h"
 #include "ecs/systems/collider_components_factory.h"
 #include "ecs/systems/collision_system.h"
 #include "ecs/systems/parent_system.h"
 #include "ecs/systems/physics_system.h"
+#include "ecs/world.h"
 
 #include "audio/fmod_listener_system.h"
 #include "components/fmod_listener_component.h"
@@ -48,11 +49,7 @@
 
 class Editor {
 public:
-	// Systems
-	std::shared_ptr<PhysicsSystem> physics_system;
-	std::shared_ptr<CollisionSystem> collision_system;
-	std::shared_ptr<ParentSystem> parent_system;
-	std::shared_ptr<RenderSystem> render_system;
+	Inspector inspector;
 
 	// Viewport
 	bool controlling_camera = false;

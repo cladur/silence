@@ -2,24 +2,22 @@
 #include "audio_manager.h"
 #include "components/fmod_listener_component.h"
 #include "components/transform_component.h"
-#include "ecs/ecs_manager.h"
+#include "ecs/world.h"
 
 extern AudioManager audio_manager;
 
-void FmodListenerSystem::startup() {
-	ECSManager &ecs_manager = ECSManager::get();
+void FmodListenerSystem::startup(World &world) {
 	Signature signature;
-	signature.set(ecs_manager.get_component_type<FmodListener>());
-	signature.set(ecs_manager.get_component_type<Transform>());
-	ecs_manager.set_system_component_whitelist<FmodListenerSystem>(signature);
+	signature.set(world.get_component_type<FmodListener>());
+	signature.set(world.get_component_type<Transform>());
+	world.set_system_component_whitelist<FmodListenerSystem>(signature);
 }
 
-void FmodListenerSystem::update(float dt) {
+void FmodListenerSystem::update(World &world, float dt) {
 	ZoneScopedNC("FmodListenerSystem::update", 0xcacaca);
-	ECSManager &ecs_manager = ECSManager::get();
 	for (auto const &entity : entities) {
-		auto &transform = ecs_manager.get_component<Transform>(entity);
-		auto &listener = ecs_manager.get_component<FmodListener>(entity);
+		auto &transform = world.get_component<Transform>(entity);
+		auto &listener = world.get_component<FmodListener>(entity);
 
 		glm::vec3 p = transform.get_position();
 		glm::vec3 v = p - listener.prev_frame_position;

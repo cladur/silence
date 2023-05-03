@@ -1,5 +1,5 @@
 #include "ImGuizmo.h"
-#include "ecs/ecs_manager.h"
+#include "ecs/world.h"
 #include "editor.h"
 #include "inspector_gui.h"
 #include <imgui.h>
@@ -82,16 +82,14 @@ void Editor::imgui_menu_bar() {
 }
 
 void Editor::imgui_inspector(Scene &scene) {
-	ECSManager &ecs_manager = ECSManager::get();
+	World &world = scene.world;
 	RenderManager &render_manager = RenderManager::get();
-	Inspector &inspector = Inspector::get();
-
 	ImGui::Begin("Inspector");
 
 	if (scene.last_entity_selected > 0) {
 		Entity active_entity = scene.last_entity_selected;
-		if (ecs_manager.has_component<Name>(active_entity)) {
-			auto &name = ecs_manager.get_component<Name>(active_entity);
+		if (world.has_component<Name>(active_entity)) {
+			auto &name = world.get_component<Name>(active_entity);
 			ImGui::SetNextItemWidth(-FLT_MIN);
 			ImGui::InputText("##Name", &name.name);
 		} else {
@@ -114,7 +112,7 @@ void Editor::imgui_scene(Scene &scene) {
 	ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(0, 0));
 
 	ImGui::Begin("Scene");
-	ECSManager &ecs_manager = ECSManager::get();
+	World &world = scene.world;
 	InputManager &input_manager = InputManager::get();
 
 	ImVec2 cursor_pos = ImGui::GetCursorPos();
@@ -130,8 +128,8 @@ void Editor::imgui_scene(Scene &scene) {
 	if (ImGui::BeginPopup("Add Entity")) {
 		ImGui::SeparatorText("Basic");
 		if (ImGui::MenuItem("Empty")) {
-			Entity new_entity = ecs_manager.create_entity();
-			ecs_manager.add_component(new_entity, Transform{});
+			Entity new_entity = world.create_entity();
+			world.add_component(new_entity, Transform{});
 			scene.entities.push_back(new_entity);
 			scene.last_entity_selected = new_entity;
 		}
@@ -158,8 +156,8 @@ void Editor::imgui_scene(Scene &scene) {
 
 		for (auto &entity : scene.entities) {
 			std::string name = std::to_string(entity);
-			if (ecs_manager.has_component<Name>(entity)) {
-				name = ecs_manager.get_component<Name>(entity).name;
+			if (world.has_component<Name>(entity)) {
+				name = world.get_component<Name>(entity).name;
 			}
 
 			if (!filter.PassFilter(name.c_str())) {
@@ -274,7 +272,7 @@ void Editor::imgui_scene(Scene &scene) {
 }
 void Editor::imgui_viewport(Scene &scene, uint32_t scene_index) {
 	RenderManager &render_manager = RenderManager::get();
-	ECSManager &ecs_manager = ECSManager::get();
+	World &world = scene.world;
 
 	ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0);
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
@@ -336,8 +334,8 @@ void Editor::imgui_viewport(Scene &scene, uint32_t scene_index) {
 			snap = snap_values;
 		}
 
-		auto &multi_transform = ecs_manager.get_component<Transform>(scene.multi_select_parent);
-		auto &transform = ecs_manager.get_component<Transform>(scene.entities_selected[0]);
+		auto &multi_transform = world.get_component<Transform>(scene.multi_select_parent);
+		auto &transform = world.get_component<Transform>(scene.entities_selected[0]);
 		glm::mat4 temp_matrix = glm::mat4(1.0f);
 
 		if (scene.entities_selected.size() == 1) {
@@ -353,9 +351,9 @@ void Editor::imgui_viewport(Scene &scene, uint32_t scene_index) {
 
 			if (scene.entities_selected.size() == 1) {
 				glm::mat4 parent_matrix = glm::mat4(1.0f);
-				if (ecs_manager.has_component<Parent>(scene.entities_selected[0])) {
-					auto &parent = ecs_manager.get_component<Parent>(scene.entities_selected[0]);
-					auto &parent_transform = ecs_manager.get_component<Transform>(parent.parent);
+				if (world.has_component<Parent>(scene.entities_selected[0])) {
+					auto &parent = world.get_component<Parent>(scene.entities_selected[0]);
+					auto &parent_transform = world.get_component<Transform>(parent.parent);
 					parent_matrix = glm::inverse(parent_transform.get_global_model_matrix());
 				}
 				glm::decompose(parent_matrix * temp_matrix, transform.scale, transform.orientation, transform.position,

@@ -1,16 +1,11 @@
-#include "ecs_manager.h"
+#include "world.h"
 
 #include "component_visitor.h"
 #include "components/children_component.h"
 #include "components/parent_component.h"
 #include "serialization.h"
 
-ECSManager &ECSManager::get() {
-	static ECSManager instance;
-	return instance;
-}
-
-void ECSManager::startup() {
+void World::startup() {
 	// Create pointers to each manager
 	component_manager = std::make_unique<ComponentManager>();
 	entity_manager = std::make_unique<EntityManager>();
@@ -18,15 +13,15 @@ void ECSManager::startup() {
 	system_manager = std::make_unique<SystemManager>();
 }
 
-Entity ECSManager::create_entity() {
+Entity World::create_entity() {
 	return entity_manager->create_entity();
 }
 
-Entity ECSManager::create_entity(Entity entity) {
+Entity World::create_entity(Entity entity) {
 	return entity_manager->create_entity(entity);
 }
 
-void ECSManager::destroy_entity(Entity entity) {
+void World::destroy_entity(Entity entity) {
 	entity_manager->destroy_entity(entity);
 
 	component_manager->entity_destroyed(entity);
@@ -34,7 +29,7 @@ void ECSManager::destroy_entity(Entity entity) {
 	system_manager->entity_destroyed(entity);
 }
 
-bool ECSManager::add_child(Entity parent, Entity child, bool keep_transform) {
+bool World::add_child(Entity parent, Entity child, bool keep_transform) {
 	if (child == parent) {
 		SPDLOG_WARN("Parent and children are the same entity");
 		return false;
@@ -66,7 +61,7 @@ bool ECSManager::add_child(Entity parent, Entity child, bool keep_transform) {
 	return get_component<Children>(parent).add_child(child);
 }
 
-bool ECSManager::remove_child(Entity parent, Entity child, bool keep_transform) {
+bool World::remove_child(Entity parent, Entity child, bool keep_transform) {
 	if (!has_component<Children>(parent)) {
 		SPDLOG_WARN("No children component found on parent");
 		return false;
@@ -98,7 +93,7 @@ bool ECSManager::remove_child(Entity parent, Entity child, bool keep_transform) 
 	return true;
 }
 
-bool ECSManager::has_child(Entity parent, Entity child) {
+bool World::has_child(Entity parent, Entity child) {
 	for (auto &c : get_component<Children>(parent).children) {
 		if (c == child) {
 			return true;
@@ -107,7 +102,7 @@ bool ECSManager::has_child(Entity parent, Entity child) {
 	return false;
 }
 
-bool ECSManager::reparent(Entity new_parent, Entity child, bool keep_transform) {
+bool World::reparent(Entity new_parent, Entity child, bool keep_transform) {
 	remove_child(get_component<Parent>(child).parent, child, keep_transform);
 
 	if (has_component<Transform>(new_parent) && has_component<Transform>(child)) {
@@ -119,14 +114,14 @@ bool ECSManager::reparent(Entity new_parent, Entity child, bool keep_transform) 
 	return add_child(new_parent, child);
 }
 
-void ECSManager::serialize_entity_json(nlohmann::json &json, Entity entity) {
+void World::serialize_entity_json(nlohmann::json &json, Entity entity) {
 	json["entity"] = entity;
 	json["signature"] = entity_manager->get_signature(entity).to_string();
 	json["components"] = nlohmann::json::array();
 	component_manager->serialize_entity(json["components"], entity);
 }
 
-void ECSManager::deserialize_entities_json(nlohmann::json &json, std::vector<Entity> &entities) {
+void World::deserialize_entities_json(nlohmann::json &json, std::vector<Entity> &entities) {
 	serialization::IdToClassConstructor map = SceneManager::get_class_map();
 	Entity entity{};
 	Signature signature{};
@@ -145,32 +140,32 @@ void ECSManager::deserialize_entities_json(nlohmann::json &json, std::vector<Ent
 			if (component_active) {
 				auto component = map[i](array_entity["components"]);
 
-				ComponentVisitor::visit(entity, component);
+				ComponentVisitor::visit(*this, entity, component);
 			}
 		}
 	}
 }
-Signature ECSManager::get_entity_signature(Entity entity) {
+Signature World::get_entity_signature(Entity entity) {
 	return entity_manager->get_signature(entity);
 }
-void ECSManager::print_components() {
+void World::print_components() {
 	int i = 0;
 	for (auto name : component_names) {
 		SPDLOG_INFO("ID: {}  Name: {}", i++, name);
 	}
 }
-void ECSManager::add_component(Entity entity, int component_id) {
+void World::add_component(Entity entity, int component_id) {
 	add_component_map[component_id](entity);
 }
-void ECSManager::remove_component(Entity entity, int component_id) {
+void World::remove_component(Entity entity, int component_id) {
 	remove_component_map[component_id](entity);
 }
-bool ECSManager::has_component(Entity entity, int component_id) {
+bool World::has_component(Entity entity, int component_id) {
 	return has_component_map[component_id](entity);
 }
-std::vector<std::string> &ECSManager::get_component_names() {
+std::vector<std::string> &World::get_component_names() {
 	return component_names;
 }
-int ECSManager::get_registered_components() {
+int World::get_registered_components() {
 	return registered_components;
 }

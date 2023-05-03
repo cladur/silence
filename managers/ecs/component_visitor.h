@@ -1,20 +1,19 @@
 #ifndef SILENCE_COMPONENT_VISITOR_H
 #define SILENCE_COMPONENT_VISITOR_H
 
-#include "ecs_manager.h"
 #include "types.h"
+#include "world.h"
 
 class ComponentVisitor {
 public:
-	static void visit(Entity entity, serialization::variant_type &variant) {
-		ECSManager &ecs_manager = ECSManager::get();
+	static void visit(World &world, Entity entity, serialization::variant_type &variant) {
 		// std::visit pass type to component in lambda from variant
 		std::visit(
 				[&](auto &component) {
-					if (!ecs_manager.has_component(entity, component)) {
-						ecs_manager.add_component(entity, component);
+					if (!world.has_component(entity, component)) {
+						world.add_component(entity, component);
 					}
-					ecs_manager.update_component(entity, component);
+					world.update_component(entity, component);
 				},
 				variant);
 	}

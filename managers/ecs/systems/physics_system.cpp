@@ -2,26 +2,24 @@
 #include "components/gravity_component.h"
 #include "components/rigidbody_component.h"
 #include "components/transform_component.h"
-#include "ecs/ecs_manager.h"
+#include "ecs/world.h"
 
-void PhysicsSystem::startup() {
-	ECSManager &ecs_manager = ECSManager::get();
+void PhysicsSystem::startup(World &world) {
 	Signature signature;
-	signature.set(ecs_manager.get_component_type<Gravity>());
-	signature.set(ecs_manager.get_component_type<RigidBody>());
-	signature.set(ecs_manager.get_component_type<Transform>());
-	ecs_manager.set_system_component_whitelist<PhysicsSystem>(signature);
+	signature.set(world.get_component_type<Gravity>());
+	signature.set(world.get_component_type<RigidBody>());
+	signature.set(world.get_component_type<Transform>());
+	world.set_system_component_whitelist<PhysicsSystem>(signature);
 }
 
-void PhysicsSystem::update(float dt) {
+void PhysicsSystem::update(World &world, float dt) {
 	ZoneScopedN("PhysicsSystem::update");
-	ECSManager &ecs_manager = ECSManager::get();
 	for (auto const &entity : entities) {
-		auto &rigid_body = ecs_manager.get_component<RigidBody>(entity);
-		auto &transform = ecs_manager.get_component<Transform>(entity);
+		auto &rigid_body = world.get_component<RigidBody>(entity);
+		auto &transform = world.get_component<Transform>(entity);
 
 		// Forces
-		auto const &gravity = ecs_manager.get_component<Gravity>(entity);
+		auto const &gravity = world.get_component<Gravity>(entity);
 
 		rigid_body.velocity += gravity.force * dt;
 

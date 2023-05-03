@@ -4,29 +4,22 @@
 #include "components/collider_tag_component.h"
 #include "components/fmod_listener_component.h"
 #include "components/rigidbody_component.h"
+#include "render/ecs/model_instance.h"
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <imgui_stdlib.h>
 
-Inspector::Inspector() {
-	type_to_show_functions_map[typeid(Name)] = [this]() { show_name(); };
-	type_to_show_functions_map[typeid(Transform)] = [this]() { show_transform(); };
-	type_to_show_functions_map[typeid(RigidBody)] = [this]() { show_rigidbody(); };
-	type_to_show_functions_map[typeid(Gravity)] = [this]() { show_gravity(); };
-	type_to_show_functions_map[typeid(Parent)] = [this]() { show_parent(); };
-	type_to_show_functions_map[typeid(Children)] = [this]() { show_children(); };
-	type_to_show_functions_map[typeid(ModelInstance)] = [this]() { show_modelinstance(); };
-	type_to_show_functions_map[typeid(FmodListener)] = [this]() { show_fmodlistener(); };
-	type_to_show_functions_map[typeid(ColliderTag)] = [this]() { show_collidertag(); };
-	type_to_show_functions_map[typeid(ColliderSphere)] = [this]() { show_collidersphere(); };
-	type_to_show_functions_map[typeid(ColliderAABB)] = [this]() { show_collideraabb(); };
-	type_to_show_functions_map[typeid(ColliderOBB)] = [this]() { show_colliderobb(); };
-}
+#define SHOW_COMPONENT(type, func)                                                                                     \
+	if (world->has_component<type>(selected_entity)) {                                                                 \
+		func();                                                                                                        \
+	}
 
-Inspector &Inspector::get() {
-	static Inspector instance;
-	return instance;
-}
+#define SHOW_ADD_COMPONENT(type)                                                                                       \
+	if (!world->has_component<type>(selected_entity)) {                                                                \
+		if (ImGui::Selectable(#type)) {                                                                                \
+			world->add_component<type>(selected_entity, type{});                                                       \
+		}                                                                                                              \
+	}
 
 void Inspector::show_components() {
 	if (selected_entity <= 0) {
@@ -34,26 +27,31 @@ void Inspector::show_components() {
 		return;
 	}
 
-	for (auto component_id : selected_entity_components) {
-		current_component_id = component_id;
-		show_component(component_id);
-	}
+	SHOW_COMPONENT(Name, show_name);
+	SHOW_COMPONENT(Transform, show_transform);
+	SHOW_COMPONENT(RigidBody, show_rigidbody);
+	SHOW_COMPONENT(Gravity, show_gravity);
+	SHOW_COMPONENT(Parent, show_parent);
+	SHOW_COMPONENT(Children, show_children);
+	SHOW_COMPONENT(ModelInstance, show_modelinstance);
+	SHOW_COMPONENT(FmodListener, show_fmodlistener);
+	SHOW_COMPONENT(ColliderTag, show_collidertag);
+	SHOW_COMPONENT(ColliderSphere, show_collidersphere);
+	SHOW_COMPONENT(ColliderAABB, show_collideraabb);
+	SHOW_COMPONENT(ColliderOBB, show_colliderobb);
 
 	for (int i = 0; i < remove_component_queue.size(); i++) {
 		auto [entity, component_to_remove] = remove_component_queue.front();
-		ecs_manager.remove_component(entity, component_to_remove);
+		world->remove_component(entity, component_to_remove);
 		remove_component_queue.pop();
 	}
 }
-void Inspector::show_component(int signature_index) {
-	Inspector &inspector = Inspector::get();
-	inspector.show_component_map[signature_index]();
-}
+
 void Inspector::show_name() {
 }
 
 void Inspector::show_transform() {
-	auto &transform = ecs_manager.get_component<Transform>(selected_entity);
+	auto &transform = world->get_component<Transform>(selected_entity);
 	bool changed = false;
 	if (ImGui::CollapsingHeader("Transform", tree_flags)) {
 		if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
@@ -92,7 +90,7 @@ void Inspector::show_transform() {
 	}
 }
 void Inspector::show_rigidbody() {
-	auto &rigidbody = ecs_manager.get_component<RigidBody>(selected_entity);
+	auto &rigidbody = world->get_component<RigidBody>(selected_entity);
 	if (ImGui::CollapsingHeader("RigidBody", tree_flags)) {
 		remove_component_popup<RigidBody>();
 		float available_width = ImGui::GetContentRegionAvail().x;
@@ -106,7 +104,7 @@ void Inspector::show_rigidbody() {
 	}
 }
 void Inspector::show_gravity() {
-	auto &gravity = ecs_manager.get_component<Gravity>(selected_entity);
+	auto &gravity = world->get_component<Gravity>(selected_entity);
 	if (ImGui::CollapsingHeader("Gravity", tree_flags)) {
 		remove_component_popup<Gravity>();
 		float available_width = ImGui::GetContentRegionAvail().x;
@@ -119,7 +117,7 @@ void Inspector::show_gravity() {
 	}
 }
 void Inspector::show_parent() {
-	auto &parent = ecs_manager.get_component<Parent>(selected_entity);
+	auto &parent = world->get_component<Parent>(selected_entity);
 	if (ImGui::CollapsingHeader("Parent", tree_flags)) {
 		remove_component_popup<Parent>();
 		float available_width = ImGui::GetContentRegionAvail().x;
@@ -133,7 +131,7 @@ void Inspector::show_parent() {
 	}
 }
 void Inspector::show_children() {
-	auto &children = ecs_manager.get_component<Children>(selected_entity);
+	auto &children = world->get_component<Children>(selected_entity);
 	if (ImGui::CollapsingHeader("Children", tree_flags)) {
 		remove_component_popup<Children>();
 		float available_width = ImGui::GetContentRegionAvail().x;
@@ -162,7 +160,7 @@ void Inspector::show_children() {
 	}
 }
 void Inspector::show_modelinstance() {
-	auto &modelinstance = ecs_manager.get_component<ModelInstance>(selected_entity);
+	auto &modelinstance = world->get_component<ModelInstance>(selected_entity);
 	auto models = render_manager.get_models();
 	if (ImGui::CollapsingHeader("Model Instance", tree_flags)) {
 		remove_component_popup<ModelInstance>();
@@ -229,7 +227,7 @@ void Inspector::show_modelinstance() {
 	}
 }
 void Inspector::show_fmodlistener() {
-	auto &fmodlistener = ecs_manager.get_component<FmodListener>(selected_entity);
+	auto &fmodlistener = world->get_component<FmodListener>(selected_entity);
 	if (ImGui::CollapsingHeader("FmodListener", tree_flags)) {
 		remove_component_popup<FmodListener>();
 		float available_width = ImGui::GetContentRegionAvail().x;
@@ -254,7 +252,7 @@ void Inspector::show_collidertag() {
 	}
 }
 void Inspector::show_collidersphere() {
-	auto &collidersphere = ecs_manager.get_component<ColliderSphere>(selected_entity);
+	auto &collidersphere = world->get_component<ColliderSphere>(selected_entity);
 	if (ImGui::CollapsingHeader("ColliderSphere", tree_flags)) {
 		remove_component_popup<ColliderSphere>();
 		float available_width = ImGui::GetContentRegionAvail().x;
@@ -269,7 +267,7 @@ void Inspector::show_collidersphere() {
 	}
 }
 void Inspector::show_collideraabb() {
-	auto &collideraabb = ecs_manager.get_component<ColliderAABB>(selected_entity);
+	auto &collideraabb = world->get_component<ColliderAABB>(selected_entity);
 	if (ImGui::CollapsingHeader("ColliderAABB", tree_flags)) {
 		remove_component_popup<ColliderAABB>();
 		float available_width = ImGui::GetContentRegionAvail().x;
@@ -284,7 +282,7 @@ void Inspector::show_collideraabb() {
 	}
 }
 void Inspector::show_colliderobb() {
-	auto &colliderobb = ecs_manager.get_component<ColliderOBB>(selected_entity);
+	auto &colliderobb = world->get_component<ColliderOBB>(selected_entity);
 	if (ImGui::CollapsingHeader("ColliderOBB", tree_flags)) {
 		remove_component_popup<ColliderOBB>();
 		float available_width = ImGui::GetContentRegionAvail().x;
@@ -353,7 +351,7 @@ void Inspector::show_text(const char *label, int value) {
 }
 
 void Inspector::show_add_component() {
-	std::vector<std::string> component_names = ecs_manager.get_component_names();
+	std::vector<std::string> component_names = world->get_component_names();
 	float available_width = ImGui::GetContentRegionAvail().x;
 	bool open_popup = false;
 
@@ -394,50 +392,24 @@ void Inspector::show_add_component() {
 			ImGui::Separator();
 			ImGui::Spacing();
 
-			for (auto component_id : not_selected_entity_components) {
-				const char *component_name = component_names[component_id].c_str();
+			SHOW_ADD_COMPONENT(Name);
+			SHOW_ADD_COMPONENT(Transform);
+			SHOW_ADD_COMPONENT(RigidBody);
+			SHOW_ADD_COMPONENT(Gravity);
+			SHOW_ADD_COMPONENT(Parent);
+			SHOW_ADD_COMPONENT(Children);
+			SHOW_ADD_COMPONENT(ModelInstance);
+			SHOW_ADD_COMPONENT(FmodListener);
+			SHOW_ADD_COMPONENT(ColliderTag);
+			SHOW_ADD_COMPONENT(ColliderSphere);
+			SHOW_ADD_COMPONENT(ColliderAABB);
+			SHOW_ADD_COMPONENT(ColliderOBB);
 
-				if (!components_filter.PassFilter(component_name)) {
-					continue;
-				}
-
-				if (ImGui::Selectable(component_name)) {
-					ecs_manager.add_component(selected_entity, component_id);
-					set_active_entity(selected_entity);
-					break;
-				}
-			}
 			ImGui::EndPopup();
 		}
 	}
 }
 
 void Inspector::set_active_entity(Entity entity) {
-	if (entity == selected_entity) {
-		refresh_entity();
-		return;
-	}
-
 	selected_entity = entity;
-	refresh_entity();
-}
-
-void Inspector::add_mapping(int signature_index, std::function<void()> func) {
-	Inspector &inspector = Inspector::get();
-	inspector.show_component_map[signature_index] = std::move(func);
-}
-
-void Inspector::refresh_entity() {
-	selected_entity_signature = ecs_manager.get_entity_signature(selected_entity);
-	int number_of_components = ecs_manager.get_registered_components();
-
-	selected_entity_components.clear();
-	not_selected_entity_components.clear();
-	for (int i = 0; i < number_of_components; i++) {
-		if (selected_entity_signature[i] == true) {
-			selected_entity_components.push_back(i);
-		} else {
-			not_selected_entity_components.push_back(i);
-		}
-	}
 }

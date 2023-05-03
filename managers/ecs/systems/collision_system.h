@@ -32,27 +32,27 @@ static CollisionFlag operator|(const CollisionFlag first, const CollisionFlag se
 
 class CollisionSystem : public BaseSystem {
 public:
-	void startup();
-	void update();
+	void startup(World &world) override;
+	void update(World &world, float dt) override;
 
 private:
 	bool is_overlap(ColliderSphere &a, ColliderSphere &b);
-	void resolve_collision_sphere(Entity e1, Entity e2);
+	void resolve_collision_sphere(World &world, Entity e1, Entity e2);
 
 	bool is_overlap(ColliderAABB &a, ColliderAABB &b);
-	void resolve_collision_aabb(Entity e1, Entity e2);
+	void resolve_collision_aabb(World &world, Entity e1, Entity e2);
 
 	glm::vec3 is_overlap(ColliderAABB &aabb, ColliderSphere &sphere);
-	void resolve_aabb_sphere(Entity aabb, Entity sphere);
+	void resolve_aabb_sphere(World &world, Entity aabb, Entity sphere);
 
 	glm::vec3 is_overlap(ColliderOBB &a, ColliderOBB &b);
-	void resolve_collision_obb(Entity e1, Entity e2);
+	void resolve_collision_obb(World &world, Entity e1, Entity e2);
 
 	glm::vec3 is_overlap(ColliderOBB &a, ColliderSphere &b);
-	void resolve_obb_sphere(Entity obb, Entity sphere);
+	void resolve_obb_sphere(World &world, Entity obb, Entity sphere);
 
 	glm::vec3 is_overlap(ColliderOBB &a, ColliderAABB &b);
-	void resolve_obb_aabb(Entity obb, Entity aabb);
+	void resolve_obb_aabb(World &world, Entity obb, Entity aabb);
 };
 
 #endif //SILENCE_COLLISION_SYSTEM_H
