@@ -30,15 +30,20 @@ void RenderScene::draw() {
 
 	// Draw grid
 	for (int i = -10; i <= 10; i++) {
-		debug_draw.draw_line(glm::vec3(i, 0, -10), glm::vec3(i, 0, 10), glm::vec4(0.5, 0.5, 0.5, 1));
-		debug_draw.draw_line(glm::vec3(-10, 0, i), glm::vec3(10, 0, i), glm::vec4(0.5, 0.5, 0.5, 1));
+		glm::vec4 color = glm::vec4(0.5, 0.5, 0.5, 1);
+		if (i == 0) {
+			color = glm::vec4(0.75, 0.75, 0.75, 1);
+		}
+		debug_draw.draw_line(glm::vec3(i, 0, -10), glm::vec3(i, 0, 10), color);
+		debug_draw.draw_line(glm::vec3(-10, 0, i), glm::vec3(10, 0, i), color);
 	}
 
 	// Clear the screen
 	glad_glClearColor(0.275f, 0.275f, 0.275f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	projection = glm::perspective(glm::radians(cvar_fov.get()), render_extent.x / render_extent.y, 0.1f, cvar_draw_distance.get());
+	projection = glm::perspective(
+			glm::radians(cvar_fov.get()), render_extent.x / render_extent.y, 0.1f, cvar_draw_distance.get());
 	view = camera.get_view_matrix();
 	camera_pos = camera.get_position();
 

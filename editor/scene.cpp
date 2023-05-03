@@ -47,8 +47,13 @@ void Scene::update(float dt) {
 
 	auto &trans = ecs_manager.get_component<Transform>(multi_select_parent);
 
-	get_render_scene().debug_draw.draw_box(
-			trans.get_global_position(), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	ImGui::Begin("Debug");
+
+	for (auto &pair : child_to_parent) {
+		ImGui::Text("Parent: %d, Child: %d", pair.second, pair.first);
+	}
+
+	ImGui::End();
 
 	// Handle camera movement
 	if ((viewport_hovered && input_manager.is_action_pressed("control_camera") || controlling_camera)) {
@@ -63,16 +68,6 @@ void Scene::update(float dt) {
 		Editor::get()->controlling_camera = false;
 		display_manager.capture_mouse(false);
 	}
-
-	ImGui::Begin("Debug");
-
-	auto transform = ecs_manager.get_component<Transform>(multi_select_parent);
-
-	for (auto &e : entities_selected) {
-		ImGui::Text("Entity: %d", e);
-	}
-
-	ImGui::End();
 
 	for (auto &entity : entities) {
 		if (ecs_manager.has_component<Transform>(entity) && ecs_manager.has_component<ModelInstance>(entity)) {
@@ -93,11 +88,9 @@ void Scene::add_to_selection(Entity entity) {
 	if (ecs_manager.has_component<Parent>(entity)) {
 		Entity old_parent = ecs_manager.get_component<Parent>(entity).parent;
 		child_to_parent[entity] = old_parent;
-		// ecs_manager.reparent(multi_select_parent, entity);
 		reparent_queue.emplace_back(multi_select_parent, entity);
 	} else {
 		child_to_parent[entity] = 0;
-		// ecs_manager.add_child(multi_select_parent, entity);
 		add_child_queue.emplace_back(multi_select_parent, entity);
 	}
 	entities_selected.push_back(entity);
@@ -126,24 +119,7 @@ void Scene::clear_selection() {
 	while (!entities_selected.empty()) {
 		remove_from_selection(entities_selected[0]);
 	}
-}
-
-void Scene::unparent_selected() {
-	for (auto &entity : entities_selected) {
-		if (child_to_parent.find(entity) != child_to_parent.end()) {
-			Entity parent = child_to_parent[entity];
-			reparent_queue.emplace_back(parent, entity);
-		}
-	}
-}
-
-void Scene::reparent_selected() {
-	for (auto &entity : entities_selected) {
-		if (child_to_parent.find(entity) != child_to_parent.end()) {
-			Entity parent = child_to_parent[entity];
-			reparent_queue.emplace_back(multi_select_parent, entity);
-		}
-	}
+	execute_reparent_queue();
 }
 
 void Scene::calculate_multi_select_parent() {

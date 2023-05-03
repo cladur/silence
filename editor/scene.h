@@ -39,8 +39,6 @@ struct Scene {
 	void add_to_selection(Entity entity);
 	void remove_from_selection(Entity entity);
 	void clear_selection();
-	void unparent_selected();
-	void reparent_selected();
 	void calculate_multi_select_parent();
 	void execute_reparent_queue();
 };
