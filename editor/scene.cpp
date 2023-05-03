@@ -47,14 +47,6 @@ void Scene::update(float dt) {
 
 	auto &trans = ecs_manager.get_component<Transform>(multi_select_parent);
 
-	ImGui::Begin("Debug");
-
-	for (auto &pair : child_to_parent) {
-		ImGui::Text("Parent: %d, Child: %d", pair.second, pair.first);
-	}
-
-	ImGui::End();
-
 	// Handle camera movement
 	if ((viewport_hovered && input_manager.is_action_pressed("control_camera") || controlling_camera)) {
 		controlling_camera = true;
