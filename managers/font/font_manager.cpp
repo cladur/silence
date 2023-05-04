@@ -1,16 +1,11 @@
 #include "font_manager.h"
 #include <freetype/freetype.h>
 
-#ifndef USE_OPENGL
-#include "render/vk_debug.h"
-#include "render/vk_initializers.h"
-#include "render/vk_textures.h"
-#endif
 #include "glad/glad.h"
 
-FontManager *FontManager::get() {
+FontManager &FontManager::get() {
 	static FontManager instance;
-	return &instance;
+	return instance;
 }
 
 void FontManager::startup() {
@@ -83,47 +78,14 @@ void FontManager::load_font(const char *path, int size, std::string name) {
 		// add 1 pixel of padding between glyphs
 		pen_x += bmp->width + 1;
 	}
-	Texture t = {};
-#ifdef USE_OPENGL
-	glGenTextures(1, &t.id);
-	glBindTexture(GL_TEXTURE_2D, t.id);
+
+	glGenTextures(1, &font.texture.id);
+	glBindTexture(GL_TEXTURE_2D, font.texture.id);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, tex_width, tex_height, 0, GL_RED, GL_UNSIGNED_BYTE, pixels);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	t.width = tex_width;
-	t.height = tex_height;
-	t.channels = 1;
-	font.texture = t;
-#else
-	RenderManager *manager = RenderManager::get();
-
-	//allocate temporary buffer for holding texture data to upload
-	AllocatedBufferUntyped staging_buffer = manager->create_buffer(
-			"Staging buffer", texture_size, vk::BufferUsageFlagBits::eTransferSrc, vma::MemoryUsage::eCpuOnly);
-
-	//copy data to buffer
-	void *data;
-	VK_CHECK(manager->allocator.mapMemory(staging_buffer.allocation, &data));
-	memcpy(data, pixels, static_cast<size_t>(texture_size));
-	manager->allocator.unmapMemory(staging_buffer.allocation);
-
-	font.character_atlas = vk_util::upload_image(*manager, tex_width, tex_height, vk::Format::eR8Unorm, staging_buffer);
-
-	VkDebug::set_name(font.character_atlas.image, fmt::format("Font atlas - {}", path).c_str());
-
-	vk::SamplerCreateInfo sampler_info = vk_init::sampler_create_info(vk::Filter::eLinear);
-	sampler_info.mipmapMode = vk::SamplerMipmapMode::eLinear;
-
-	VK_CHECK(manager->device.createSampler(&sampler_info, nullptr, &font.sampler));
-	VkDebug::set_name(font.sampler, "Font Atlas Sampler");
-
-	manager->main_deletion_queue.push_function([=]() { manager->device.destroySampler(font.sampler); });
-
-	manager->allocator.destroyBuffer(staging_buffer.buffer, staging_buffer.allocation);
-#endif
 
 	free(pixels);
 	FT_Done_Face(face);

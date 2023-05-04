@@ -3,13 +3,7 @@
 
 #include <glad/glad.h>
 
-#ifdef USE_OPENGL
 #define GLFW_INCLUDE_NONE
-#else
-#define GLFW_INCLUDE_VULKAN
-#include <vulkan/vulkan.h>
-#endif
-
 #include <GLFW/glfw3.h>
 
 #include "managers/input/input_key.h"
@@ -28,18 +22,16 @@ public:
 
 	bool is_window_resizable;
 
-	static DisplayManager *get();
+	static DisplayManager &get();
 
-	Status startup(bool resizable = false);
+	Status startup(const std::string &window_name, bool resizable = false);
 	void shutdown();
 
 	void capture_mouse(bool capture) const;
 
 	[[nodiscard]] int get_refresh_rate() const;
 
-#ifndef USE_OPENGL
-	VkSurfaceKHR create_surface(VkInstance &instance) const;
-#endif
+	[[nodiscard]] bool was_window_resized() const;
 
 	[[nodiscard]] glm::vec2 get_framebuffer_size() const;
 	[[nodiscard]] glm::vec2 get_window_size() const;

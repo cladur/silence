@@ -9,11 +9,11 @@
 // children matrices using previously calculated matrix going down to all children recursively
 class RootParentSystem : public BaseSystem {
 public:
-	void startup();
-	void update();
+	void startup(World &world) override;
+	void update(World &world, float dt) override;
 
 private:
-	void update_children(Entity parent, glm::mat4 parent_model);
+	void update_children(World &world, Entity parent, glm::mat4 parent_model);
 };
 
 #endif //SILENCE_ROOT_PARENT_SYSTEM_H

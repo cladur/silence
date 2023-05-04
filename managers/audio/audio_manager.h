@@ -25,6 +25,8 @@ class AudioManager {
 	FMOD::Studio::EventInstance *test_event_instance = nullptr;
 
 public:
+	static AudioManager &get();
+
 	void startup();
 	void shutdown();
 	void update();
@@ -67,6 +69,5 @@ public:
 
 	FMOD_GUID path_to_guid(const std::string &path);
 };
-
 
 #endif //SILENCE_AUDIO_MANAGER_H

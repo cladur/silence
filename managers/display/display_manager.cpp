@@ -3,34 +3,26 @@
 
 extern InputManager *input_manager;
 
-DisplayManager *DisplayManager::get() {
+DisplayManager &DisplayManager::get() {
 	static DisplayManager display_manager;
-	return &display_manager;
+	return display_manager;
 }
 
-DisplayManager::Status DisplayManager::startup(bool resizable) {
+DisplayManager::Status DisplayManager::startup(const std::string &window_name, bool resizable) {
 	if (!glfwInit()) {
 		return Status::FailedToInitializeGlfw;
 	}
 
-	// No need to create context since we're using Vulkan, not OpenGL(ES).
-
-#ifdef USE_OPENGL
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // 3.2+ only
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // Required on Mac
-#else
-	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-#endif
 
 	is_window_resizable = resizable;
 	glfwWindowHint(GLFW_RESIZABLE, resizable);
-	window = glfwCreateWindow(1280, 720, "Silence Game", nullptr, nullptr);
+	window = glfwCreateWindow(1280, 720, window_name.c_str(), nullptr, nullptr);
 
-#ifdef USE_OPENGL
 	glfwMakeContextCurrent(window);
-#endif
 
 	if (!window) {
 		glfwTerminate();
@@ -57,16 +49,15 @@ int DisplayManager::get_refresh_rate() const {
 	return mode->refreshRate;
 }
 
-#ifndef USE_OPENGL
-VkSurfaceKHR DisplayManager::create_surface(VkInstance &instance) const {
-	VkSurfaceKHR surface;
-	VkResult err = glfwCreateWindowSurface(instance, window, nullptr, &surface);
-	if (err) {
-		assert(false);
+[[nodiscard]] bool DisplayManager::was_window_resized() const {
+	static glm::vec2 last_framebuffer_size = get_framebuffer_size();
+	glm::vec2 framebuffer_size = get_framebuffer_size();
+	if (framebuffer_size != last_framebuffer_size) {
+		last_framebuffer_size = framebuffer_size;
+		return true;
 	}
-	return surface;
+	return false;
 }
-#endif
 
 void DisplayManager::poll_events() {
 	ZoneScopedN("DisplayManager::poll_events");

@@ -6,8 +6,8 @@
 
 class FmodListenerSystem : public BaseSystem {
 public:
-	void startup();
-	void update(float dt);
+	void startup(World &world) override;
+	void update(World &world, float dt) override;
 };
 
 #endif //SILENCE_FMOD_LISTENER_SYSTEM_H

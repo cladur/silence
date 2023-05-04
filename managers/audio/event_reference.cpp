@@ -1,11 +1,9 @@
 #include "event_reference.h"
 #include "audio_manager.h"
 
-extern AudioManager audio_manager;
-
 EventReference::EventReference(const std::string &path) {
 	this->path = path;
-	guid = audio_manager.path_to_guid(path);
+	guid = AudioManager::get().path_to_guid(path);
 }
 
 const std::string &EventReference::get_path() const {

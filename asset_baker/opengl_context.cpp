@@ -2,8 +2,8 @@
 
 #include <stb_image_write.h>
 
-#include "opengl/texture.h"
-#include "opengl/utils.h"
+#include "managers/render/common/texture.h"
+#include "managers/render/common/utils.h"
 
 #include "core/camera/camera.h"
 Camera camera;

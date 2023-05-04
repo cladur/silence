@@ -7,13 +7,9 @@
 
 // ParentSystem updates transform's model matrices of all entities using 2 other systems
 class ParentSystem : public BaseSystem {
-private:
-	std::shared_ptr<IsolatedEntitiesSystem> isolated_entities_system;
-	std::shared_ptr<RootParentSystem> root_parent_system;
-
 public:
-	void startup();
-	void update();
+	void startup(World &world) override;
+	void update(World &world, float dt) override;
 };
 
 #endif //SILENCE_PARENT_SYSTEM_H

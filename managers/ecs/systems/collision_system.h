@@ -32,30 +32,30 @@ static CollisionFlag operator|(const CollisionFlag first, const CollisionFlag se
 
 class CollisionSystem : public BaseSystem {
 public:
-	void startup();
-	void update();
+	void startup(World &world) override;
+	void update(World &world, float dt) override;
 
-	void resolve_collision(Entity movable_object, const std::set<Entity> &static_entities);
+	void resolve_collision(World &world, Entity movable_object, const std::set<Entity> &static_entities);
 
 private:
 	friend class BSPSystem;
 	bool is_overlap(const ColliderSphere &a, const ColliderSphere &b);
-	void resolve_collision_sphere(Entity e1, Entity e2);
+	void resolve_collision_sphere(World &world, Entity e1, Entity e2);
 
 	bool is_overlap(const ColliderAABB &a, const ColliderAABB &b);
-	void resolve_collision_aabb(Entity e1, Entity e2);
+	void resolve_collision_aabb(World &world, Entity e1, Entity e2);
 
 	glm::vec3 is_overlap(const ColliderAABB &a, const ColliderSphere &b);
-	void resolve_aabb_sphere(Entity aabb, Entity sphere);
+	void resolve_aabb_sphere(World &world, Entity aabb, Entity sphere);
 
 	glm::vec3 is_overlap(const ColliderOBB &a, const ColliderOBB &b);
-	void resolve_collision_obb(Entity e1, Entity e2);
+	void resolve_collision_obb(World &world, Entity e1, Entity e2);
 
 	glm::vec3 is_overlap(const ColliderOBB &a, const ColliderSphere &b);
-	void resolve_obb_sphere(Entity obb, Entity sphere);
+	void resolve_obb_sphere(World &world, Entity obb, Entity sphere);
 
 	glm::vec3 is_overlap(const ColliderOBB &a, const ColliderAABB &b);
-	void resolve_obb_aabb(Entity obb, Entity aabb);
+	void resolve_obb_aabb(World &world, Entity obb, Entity aabb);
 
 	bool is_collision_candidate(const glm::vec3 &p1, const glm::vec3 &r1, const glm::vec3 &p2, const glm::vec3 &r2);
 };

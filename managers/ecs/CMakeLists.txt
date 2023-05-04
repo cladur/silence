@@ -5,7 +5,7 @@ add_library(${ECS_MANAGER_NAME} STATIC
         component_array.h component_array_interface.h
         component_manager.h
         system_manager.h
-        ecs_manager.cpp ecs_manager.h
+        world.cpp world.h
         systems/base_system.h
         systems/physics_system.cpp systems/physics_system.h
         systems/collider_components_factory.h

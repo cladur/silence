@@ -1,44 +1,45 @@
-set(RENDER_MANAGER_NAME "silence_render_manager")
+set(OPENGL_MANAGER_NAME "silence_render_manager")
 
 # Libraries
-add_library(${RENDER_MANAGER_NAME} STATIC
+add_library(${OPENGL_MANAGER_NAME} STATIC
         render_manager.cpp render_manager.h
-        vk_initializers.cpp vk_initializers.h
-        material_system.cpp material_system.h
-        vk_types.h
-        vk_mesh.cpp vk_mesh.h
-        vk_textures.cpp vk_textures.h
-        render_system.cpp render_system.h
-        vk_descriptors.cpp vk_descriptors.h
-        vk_shaders.cpp vk_shaders.h
-        vk_scene.cpp vk_scene.h
-        vk_push_buffer.cpp vk_push_buffer.h
-        vk_scene_render.cpp vk_debug.cpp vk_debug.h
+        render_scene.cpp render_scene.h
+        common/mesh.cpp common/mesh.h
+        common/shader.cpp common/shader.h
+        common/model.cpp common/model.h
+        common/texture.cpp common/texture.h
+        common/material.cpp common/material.h
+        common/render_pass.cpp common/render_pass.h
+        common/skybox.cpp common/skybox.h
+        common/utils.cpp common/utils.h
+        common/framebuffer.cpp common/framebuffer.h
+        ecs/render_system.cpp ecs/render_system.h
+        ecs/model_instance.cpp ecs/model_instance.h
         debug/debug_draw.cpp debug/debug_draw.h
-        text/text_draw.cpp text/text_draw.h
-        ../animation/skinned_mesh.cpp ../animation/skinned_mesh.h
-        ../animation/skinned_model.cpp ../animation/skinned_model.h
-        ../animation/animation.cpp ../animation/animation.h
-        ../animation/joint.h
-        ../animation/bone.cpp ../animation/bone.h
-        ../animation/animator.cpp ../animation/animator.h
-        )
+        transparent_elements/transparent_draw.cpp transparent_elements/transparent_draw.h
+        transparent_elements/text/text_draw.cpp transparent_elements/text/text_draw.h
+        transparent_elements/ui/sprite_manager.cpp transparent_elements/ui/sprite_manager.h
+        transparent_elements/ui/sprite_draw.cpp transparent_elements/ui/sprite_draw.h
+        transparent_elements/ui/ui_elements/ui_slider.cpp transparent_elements/ui/ui_elements/ui_slider.h
+        transparent_elements/ui/ui_elements/ui_element.cpp transparent_elements/ui/ui_elements/ui_element.h
+        transparent_elements/ui/ui_elements/ui_anchor.cpp transparent_elements/ui/ui_elements/ui_anchor.h
+        transparent_elements/ui/ui_elements/ui_image.cpp transparent_elements/ui/ui_elements/ui_image.h
+        transparent_elements/ui/ui_elements/ui_text.cpp transparent_elements/ui/ui_elements/ui_text.h
+        transparent_elements/ui/ui_elements/ui_button.cpp transparent_elements/ui/ui_elements/ui_button.h)
 
 # Include directories
-target_include_directories(${RENDER_MANAGER_NAME} PUBLIC ${MANAGER_DIR})
-
-find_package(unofficial-spirv-reflect CONFIG REQUIRED)
+target_include_directories(${OPENGL_MANAGER_NAME} PUBLIC ${MANAGER_DIR})
 
 # Link libraries
+find_package(glad CONFIG REQUIRED)
 
-target_link_libraries(${RENDER_MANAGER_NAME} PRIVATE
+target_link_libraries(${OPENGL_MANAGER_NAME}
+        PUBLIC
+        fmod
+        PRIVATE
         silence_common
         silence_core
         silence_assets
-        Vulkan::Vulkan
-        unofficial::vulkan-memory-allocator::vulkan-memory-allocator
-        unofficial::VulkanMemoryAllocator-Hpp::VulkanMemoryAllocator-Hpp
-        vk-bootstrap::vk-bootstrap
-        unofficial::spirv-reflect::spirv-reflect
+        glad::glad
         ${ECS_MANAGER_NAME}
         )

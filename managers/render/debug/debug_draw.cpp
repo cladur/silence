@@ -1,51 +1,64 @@
 #include "debug_draw.h"
-#include "render/vk_debug.h"
-#include <render/render_manager.h>
-#include <render/vk_initializers.h>
-#include <vulkan/vulkan_handles.hpp>
 
-VertexInputDescription DebugVertex::get_vertex_description() {
-	VertexInputDescription description;
+#include "render/render_manager.h"
 
-	//we will have just 1 vertex buffer binding, with a per-vertex rate
-	vk::VertexInputBindingDescription main_binding = {};
-	main_binding.binding = 0;
-	main_binding.stride = sizeof(DebugVertex);
-	main_binding.inputRate = vk::VertexInputRate::eVertex;
+const uint32_t MAX_VERTEX_COUNT = 10000;
 
-	description.bindings.push_back(main_binding);
+void DebugDraw::startup() {
+	glGenVertexArrays(1, &vao);
+	glGenBuffers(1, &vbo);
 
-	//Position will be stored at Location 0
-	vk::VertexInputAttributeDescription position_attribute = {};
-	position_attribute.binding = 0;
-	position_attribute.location = 0;
-	position_attribute.format = vk::Format::eR32G32B32Sfloat;
-	position_attribute.offset = offsetof(DebugVertex, position);
+	glBindVertexArray(vao);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-	//Color will be stored at Location 1
-	vk::VertexInputAttributeDescription color_attribute = {};
-	color_attribute.binding = 0;
-	color_attribute.location = 1;
-	color_attribute.format = vk::Format::eR32G32B32Sfloat;
-	color_attribute.offset = offsetof(DebugVertex, color);
+	glBufferData(GL_ARRAY_BUFFER, MAX_VERTEX_COUNT * sizeof(DebugVertex), nullptr, GL_DYNAMIC_DRAW);
 
-	description.attributes.push_back(position_attribute);
-	description.attributes.push_back(color_attribute);
+	// vertex positions
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(DebugVertex), (void *)nullptr);
+	// vertex color
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(DebugVertex), (void *)offsetof(DebugVertex, color));
 
-	return description;
+	glBindVertexArray(0);
+
+	shader.load_from_files(shader_path("debug.vert"), shader_path("debug.frag"));
 }
 
-namespace debug_draw {
+void DebugDraw::draw() {
+	if (vertices.empty()) {
+		return;
+	}
 
-void draw_line(const glm::vec3 &from, const glm::vec3 &to, const glm::vec3 &color) {
-	auto render_manager = RenderManager::get();
+	// TODO: Dynamically resize buffers?
+	if (vertices.size() > MAX_VERTEX_COUNT) {
+		SPDLOG_ERROR("Too many debug vertices to draw!!!");
+		return;
+	}
 
-	render_manager->debug_vertices.push_back({ from, color });
-	render_manager->debug_vertices.push_back({ to, color });
+	shader.use();
+
+	// update buffers
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(DebugVertex), &vertices[0]);
+
+	shader.set_mat4("projection", projection);
+	shader.set_mat4("view", view);
+
+	glBindVertexArray(vao);
+	glDrawArrays(GL_LINES, 0, vertices.size());
+	glBindVertexArray(0);
+
+	vertices.clear();
+}
+
+void DebugDraw::draw_line(const glm::vec3 &from, const glm::vec3 &to, const glm::vec3 &color) {
+	vertices.push_back({ from, color });
+	vertices.push_back({ to, color });
 }
 
 // Draw a box with center at "center" and scale "scale".
-void draw_box(const glm::vec3 &center, const glm::vec3 &scale, const glm::vec3 &color) {
+void DebugDraw::draw_box(const glm::vec3 &center, const glm::vec3 &scale, const glm::vec3 &color) {
 	// Generate a box mesh, using draw_line to draw the lines
 	glm::vec3 vertices[8] = { glm::vec3(
 									  center.x - scale.x / 2.0f, center.y - scale.y / 2.0f, center.z - scale.z / 2.0f),
@@ -72,7 +85,7 @@ void draw_box(const glm::vec3 &center, const glm::vec3 &scale, const glm::vec3 &
 }
 
 // Draw a sphere with center at "center" and radius "radius".
-void draw_sphere(const glm::vec3 &center, float radius, const glm::vec3 &color) {
+void DebugDraw::draw_sphere(const glm::vec3 &center, float radius, const glm::vec3 &color) {
 	// Generate a sphere mesh, using draw_line to draw the lines
 	const int num_segments = 8; // number of horizontal segments
 	const int num_rings = 4; // number of vertical rings
@@ -83,11 +96,11 @@ void draw_sphere(const glm::vec3 &center, float radius, const glm::vec3 &color) 
 	// generate vertices
 	float vertices[num_rings + 1][num_segments + 1][3];
 	for (int i = 0; i <= num_rings; i++) {
-		float radius = sin(i * delta_ring);
+		float r = radius * sin(i * delta_ring);
 		for (int j = 0; j <= num_segments; j++) {
-			vertices[i][j][0] = radius * cos(j * delta_segment) + center.x;
-			vertices[i][j][1] = cos(i * delta_ring) + center.y;
-			vertices[i][j][2] = radius * sin(j * delta_segment) + center.z;
+			vertices[i][j][0] = r * cos(j * delta_segment) + center.x;
+			vertices[i][j][1] = radius * cos(i * delta_ring) + center.y;
+			vertices[i][j][2] = r * sin(j * delta_segment) + center.z;
 		}
 	}
 
@@ -105,5 +118,3 @@ void draw_sphere(const glm::vec3 &center, float radius, const glm::vec3 &color) 
 		}
 	}
 }
-
-}; //namespace debug_draw

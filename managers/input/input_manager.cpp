@@ -1,6 +1,12 @@
 #include "input_manager.h"
 
 #include "display/display_manager.h"
+#include <GLFW/glfw3.h>
+
+InputManager &InputManager::get() {
+	static InputManager instance;
+	return instance;
+}
 
 bool InputManager::is_action_valid(const std::string &action_name) {
 	if (!actions.contains(action_name)) {
@@ -61,26 +67,26 @@ void InputManager::poll_gamepads() {
 }
 
 void InputManager::startup() {
-	GLFWwindow *window = DisplayManager::get()->window;
+	GLFWwindow *window = DisplayManager::get().window;
 
 	glfwSetWindowUserPointer(window, this);
 	for (int i = GLFW_JOYSTICK_1; i < GLFW_JOYSTICK_16; i++) {
 		glfwSetJoystickUserPointer(i, this);
 	}
 
-	glfwSetJoystickCallback([](int joystickId, int event) {
-		auto *input = static_cast<InputManager *>(glfwGetJoystickUserPointer(joystickId));
+	glfwSetJoystickCallback([](int joystick_id, int event) {
+		auto *input = static_cast<InputManager *>(glfwGetJoystickUserPointer(joystick_id));
 		if (input == nullptr) {
 			return;
 		}
 		switch (event) {
 			case GLFW_CONNECTED: {
-				const char *name = glfwGetJoystickName(joystickId);
-				SPDLOG_INFO("Gamepad ({}) {} connected", joystickId, name);
+				const char *name = glfwGetJoystickName(joystick_id);
+				SPDLOG_INFO("Gamepad ({}) {} connected", joystick_id, name);
 				break;
 			}
 			case GLFW_DISCONNECTED: {
-				SPDLOG_INFO("Gamepad ({}) disconnected", joystickId);
+				SPDLOG_INFO("Gamepad ({}) disconnected", joystick_id);
 				break;
 			}
 			default:
@@ -91,6 +97,13 @@ void InputManager::startup() {
 	glfwSetKeyCallback(window, [](GLFWwindow *w_window, int key, int scancode, int action, int mods) {
 		auto *input = static_cast<InputManager *>(glfwGetWindowUserPointer(w_window));
 		InputKey input_key = glfw_key_to_input_key(key);
+
+		if (mods & GLFW_MOD_CONTROL) {
+			input->key_state[InputKey::LEFT_CONTROL] = 1.f;
+		} else {
+			input->key_state[InputKey::LEFT_CONTROL] = 0.f;
+		}
+
 		float value = 0.f;
 		switch (action) {
 			case GLFW_PRESS:

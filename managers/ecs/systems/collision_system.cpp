@@ -4,30 +4,28 @@
 #include "components/collider_sphere.h"
 #include "components/collider_tag_component.h"
 #include "components/static_tag_component.h"
-#include "ecs/ecs_manager.h"
+#include "ecs/world.h"
 
-extern ECSManager ecs_manager;
-
-void CollisionSystem::startup() {
+void CollisionSystem::startup(World &world) {
 	Signature white_signature, black_signature;
-	white_signature.set(ecs_manager.get_component_type<ColliderTag>());
-	ecs_manager.set_system_component_whitelist<CollisionSystem>(white_signature);
+	white_signature.set(world.get_component_type<ColliderTag>());
+	world.set_system_component_whitelist<CollisionSystem>(white_signature);
 
-	black_signature.set(ecs_manager.get_component_type<StaticTag>());
-	ecs_manager.set_system_component_blacklist<CollisionSystem>(black_signature);
+	black_signature.set(world.get_component_type<StaticTag>());
+	world.set_system_component_blacklist<CollisionSystem>(black_signature);
 }
 
-void CollisionSystem::update() {
+void CollisionSystem::update(World &world, float dt) {
 	ZoneScopedN("CollisionSystem::update");
 
 	CollisionFlag first, second;
 	for (auto it1 = entities.begin(); it1 != entities.end(); ++it1) {
 		Entity e1 = std::ref(*it1);
-		if (ecs_manager.has_component<ColliderOBB>(e1)) {
+		if (world.has_component<ColliderOBB>(e1)) {
 			first = CollisionFlag::FIRST_OBB;
-		} else if (ecs_manager.has_component<ColliderAABB>(e1)) {
+		} else if (world.has_component<ColliderAABB>(e1)) {
 			first = CollisionFlag::FIRST_AABB;
-		} else if (ecs_manager.has_component<ColliderSphere>(e1)) {
+		} else if (world.has_component<ColliderSphere>(e1)) {
 			first = CollisionFlag::FIRST_SPHERE;
 		} else {
 			continue;
@@ -35,11 +33,11 @@ void CollisionSystem::update() {
 		for (auto it2 = std::next(it1); it2 != entities.end(); ++it2) {
 			Entity e2 = std::ref(*it2);
 
-			if (ecs_manager.has_component<ColliderOBB>(e2)) {
+			if (world.has_component<ColliderOBB>(e2)) {
 				second = CollisionFlag::SECOND_OBB;
-			} else if (ecs_manager.has_component<ColliderAABB>(e2)) {
+			} else if (world.has_component<ColliderAABB>(e2)) {
 				second = CollisionFlag::SECOND_AABB;
-			} else if (ecs_manager.has_component<ColliderSphere>(e2)) {
+			} else if (world.has_component<ColliderSphere>(e2)) {
 				second = CollisionFlag::SECOND_SPHERE;
 			} else {
 				continue;
@@ -47,31 +45,31 @@ void CollisionSystem::update() {
 
 			switch (first | second) {
 				case CollisionFlag::SPHERE_SPHERE:
-					resolve_collision_sphere(e1, e2);
+					resolve_collision_sphere(world, e1, e2);
 					break;
 				case CollisionFlag::AABB_AABB:
-					resolve_collision_aabb(e1, e2);
+					resolve_collision_aabb(world, e1, e2);
 					break;
 				case CollisionFlag::SPHERE_AABB:
-					resolve_aabb_sphere(e2, e1);
+					resolve_aabb_sphere(world, e2, e1);
 					break;
 				case CollisionFlag::AABB_SPHERE:
-					resolve_aabb_sphere(e1, e2);
+					resolve_aabb_sphere(world, e1, e2);
 					break;
 				case CollisionFlag::OBB_OBB:
-					resolve_collision_obb(e1, e2);
+					resolve_collision_obb(world, e1, e2);
 					break;
 				case CollisionFlag::SPHERE_OBB:
-					resolve_obb_sphere(e2, e1);
+					resolve_obb_sphere(world, e2, e1);
 					break;
 				case CollisionFlag::OBB_SPHERE:
-					resolve_obb_sphere(e1, e2);
+					resolve_obb_sphere(world, e1, e2);
 					break;
 				case CollisionFlag::AABB_OBB:
-					resolve_obb_aabb(e2, e1);
+					resolve_obb_aabb(world, e2, e1);
 					break;
 				case CollisionFlag::OBB_AABB:
-					resolve_obb_aabb(e1, e2);
+					resolve_obb_aabb(world, e1, e2);
 					break;
 				default:
 					break;
@@ -80,14 +78,14 @@ void CollisionSystem::update() {
 	}
 }
 
-void CollisionSystem::resolve_collision(Entity movable_object, const std::set<Entity> &static_entities) {
+void CollisionSystem::resolve_collision(World &world, Entity movable_object, const std::set<Entity> &static_entities) {
 	CollisionFlag first, second;
 	Entity e1 = movable_object;
-	if (ecs_manager.has_component<ColliderOBB>(e1)) {
+	if (world.has_component<ColliderOBB>(e1)) {
 		first = CollisionFlag::FIRST_OBB;
-	} else if (ecs_manager.has_component<ColliderAABB>(e1)) {
+	} else if (world.has_component<ColliderAABB>(e1)) {
 		first = CollisionFlag::FIRST_AABB;
-	} else if (ecs_manager.has_component<ColliderSphere>(e1)) {
+	} else if (world.has_component<ColliderSphere>(e1)) {
 		first = CollisionFlag::FIRST_SPHERE;
 	} else {
 		SPDLOG_WARN("Movable object has invalid collider");
@@ -95,11 +93,11 @@ void CollisionSystem::resolve_collision(Entity movable_object, const std::set<En
 	}
 
 	for (const Entity e2 : static_entities) {
-		if (ecs_manager.has_component<ColliderOBB>(e2)) {
+		if (world.has_component<ColliderOBB>(e2)) {
 			second = CollisionFlag::SECOND_OBB;
-		} else if (ecs_manager.has_component<ColliderAABB>(e2)) {
+		} else if (world.has_component<ColliderAABB>(e2)) {
 			second = CollisionFlag::SECOND_AABB;
-		} else if (ecs_manager.has_component<ColliderSphere>(e2)) {
+		} else if (world.has_component<ColliderSphere>(e2)) {
 			second = CollisionFlag::SECOND_SPHERE;
 		} else {
 			continue;
@@ -107,31 +105,31 @@ void CollisionSystem::resolve_collision(Entity movable_object, const std::set<En
 
 		switch (first | second) {
 			case CollisionFlag::SPHERE_SPHERE:
-				resolve_collision_sphere(e1, e2);
+				resolve_collision_sphere(world, e1, e2);
 				break;
 			case CollisionFlag::AABB_AABB:
-				resolve_collision_aabb(e1, e2);
+				resolve_collision_aabb(world, e1, e2);
 				break;
 			case CollisionFlag::SPHERE_AABB:
-				resolve_aabb_sphere(e2, e1);
+				resolve_aabb_sphere(world, e2, e1);
 				break;
 			case CollisionFlag::AABB_SPHERE:
-				resolve_aabb_sphere(e1, e2);
+				resolve_aabb_sphere(world, e1, e2);
 				break;
 			case CollisionFlag::OBB_OBB:
-				resolve_collision_obb(e1, e2);
+				resolve_collision_obb(world, e1, e2);
 				break;
 			case CollisionFlag::SPHERE_OBB:
-				resolve_obb_sphere(e2, e1);
+				resolve_obb_sphere(world, e2, e1);
 				break;
 			case CollisionFlag::OBB_SPHERE:
-				resolve_obb_sphere(e1, e2);
+				resolve_obb_sphere(world, e1, e2);
 				break;
 			case CollisionFlag::AABB_OBB:
-				resolve_obb_aabb(e2, e1);
+				resolve_obb_aabb(world, e2, e1);
 				break;
 			case CollisionFlag::OBB_AABB:
-				resolve_obb_aabb(e1, e2);
+				resolve_obb_aabb(world, e1, e2);
 				break;
 			default:
 				break;
@@ -147,11 +145,11 @@ bool CollisionSystem::is_overlap(const ColliderSphere &a, const ColliderSphere &
 	return distance_squared <= (radius_sum * radius_sum);
 }
 
-void CollisionSystem::resolve_collision_sphere(Entity e1, Entity e2) {
-	ColliderSphere &temp_c1 = ecs_manager.get_component<ColliderSphere>(e1);
-	ColliderSphere &temp_c2 = ecs_manager.get_component<ColliderSphere>(e2);
-	Transform &t1 = ecs_manager.get_component<Transform>(e1);
-	Transform &t2 = ecs_manager.get_component<Transform>(e2);
+void CollisionSystem::resolve_collision_sphere(World &world, Entity e1, Entity e2) {
+	ColliderSphere &temp_c1 = world.get_component<ColliderSphere>(e1);
+	ColliderSphere &temp_c2 = world.get_component<ColliderSphere>(e2);
+	Transform &t1 = world.get_component<Transform>(e1);
+	Transform &t2 = world.get_component<Transform>(e2);
 
 	ColliderSphere c1;
 	ColliderSphere c2;
@@ -160,8 +158,8 @@ void CollisionSystem::resolve_collision_sphere(Entity e1, Entity e2) {
 	c2.radius = temp_c2.radius * t2.get_scale().x;
 	c2.center = t2.get_position() + temp_c2.center * c2.radius;
 
-	bool is_movable1 = !ecs_manager.has_component<StaticTag>(e1);
-	bool is_movable2 = !ecs_manager.has_component<StaticTag>(e2);
+	bool is_movable1 = !world.has_component<StaticTag>(e1);
+	bool is_movable2 = !world.has_component<StaticTag>(e2);
 
 	if (!(is_movable1 || is_movable2) ||
 			!is_collision_candidate(c1.center, glm::vec3(c1.radius), c2.center, glm::vec3(c2.radius)) ||
@@ -203,11 +201,11 @@ bool CollisionSystem::is_overlap(const ColliderAABB &a, const ColliderAABB &b) {
 	return true;
 }
 
-void CollisionSystem::resolve_collision_aabb(Entity e1, Entity e2) {
-	ColliderAABB &temp_c1 = ecs_manager.get_component<ColliderAABB>(e1);
-	ColliderAABB &temp_c2 = ecs_manager.get_component<ColliderAABB>(e2);
-	Transform &t1 = ecs_manager.get_component<Transform>(e1);
-	Transform &t2 = ecs_manager.get_component<Transform>(e2);
+void CollisionSystem::resolve_collision_aabb(World &world, Entity e1, Entity e2) {
+	ColliderAABB &temp_c1 = world.get_component<ColliderAABB>(e1);
+	ColliderAABB &temp_c2 = world.get_component<ColliderAABB>(e2);
+	Transform &t1 = world.get_component<Transform>(e1);
+	Transform &t2 = world.get_component<Transform>(e2);
 
 	ColliderAABB c1;
 	ColliderAABB c2;
@@ -216,8 +214,8 @@ void CollisionSystem::resolve_collision_aabb(Entity e1, Entity e2) {
 	c2.range = temp_c2.range * t2.get_scale();
 	c2.center = t2.get_position() + temp_c2.center * c2.range;
 
-	bool is_movable1 = !ecs_manager.has_component<StaticTag>(e1);
-	bool is_movable2 = !ecs_manager.has_component<StaticTag>(e2);
+	bool is_movable1 = !world.has_component<StaticTag>(e1);
+	bool is_movable2 = !world.has_component<StaticTag>(e2);
 
 	if (!(is_movable1 || is_movable2) || !is_collision_candidate(c1.center, c1.range, c2.center, c2.range) ||
 			!is_overlap(c1, c2)) {
@@ -283,11 +281,11 @@ glm::vec3 CollisionSystem::is_overlap(const ColliderAABB &a, const ColliderSpher
 	return glm::vec3(0.0f);
 }
 
-void CollisionSystem::resolve_aabb_sphere(Entity aabb, Entity sphere) {
-	ColliderAABB &temp_c1 = ecs_manager.get_component<ColliderAABB>(aabb);
-	ColliderSphere &temp_c2 = ecs_manager.get_component<ColliderSphere>(sphere);
-	Transform &t1 = ecs_manager.get_component<Transform>(aabb);
-	Transform &t2 = ecs_manager.get_component<Transform>(sphere);
+void CollisionSystem::resolve_aabb_sphere(World &world, Entity aabb, Entity sphere) {
+	ColliderAABB &temp_c1 = world.get_component<ColliderAABB>(aabb);
+	ColliderSphere &temp_c2 = world.get_component<ColliderSphere>(sphere);
+	Transform &t1 = world.get_component<Transform>(aabb);
+	Transform &t2 = world.get_component<Transform>(sphere);
 
 	ColliderAABB c1;
 	ColliderSphere c2;
@@ -296,8 +294,8 @@ void CollisionSystem::resolve_aabb_sphere(Entity aabb, Entity sphere) {
 	c2.radius = temp_c2.radius * t2.get_scale().x;
 	c2.center = t2.get_position() + temp_c2.center * c2.radius;
 
-	bool is_movable1 = !ecs_manager.has_component<StaticTag>(aabb);
-	bool is_movable2 = !ecs_manager.has_component<StaticTag>(sphere);
+	bool is_movable1 = !world.has_component<StaticTag>(aabb);
+	bool is_movable2 = !world.has_component<StaticTag>(sphere);
 	if (!(is_movable1 || is_movable2) ||
 			!is_collision_candidate(c1.center, c1.range, c2.center, glm::vec3(c2.radius))) {
 		return;
@@ -370,11 +368,11 @@ glm::vec3 CollisionSystem::is_overlap(const ColliderOBB &a, const ColliderOBB &b
 	return glm::normalize(separation) * max_overlap;
 }
 
-void CollisionSystem::resolve_collision_obb(Entity e1, Entity e2) {
-	ColliderOBB &temp_c1 = ecs_manager.get_component<ColliderOBB>(e1);
-	ColliderOBB &temp_c2 = ecs_manager.get_component<ColliderOBB>(e2);
-	Transform &t1 = ecs_manager.get_component<Transform>(e1);
-	Transform &t2 = ecs_manager.get_component<Transform>(e2);
+void CollisionSystem::resolve_collision_obb(World &world, Entity e1, Entity e2) {
+	ColliderOBB &temp_c1 = world.get_component<ColliderOBB>(e1);
+	ColliderOBB &temp_c2 = world.get_component<ColliderOBB>(e2);
+	Transform &t1 = world.get_component<Transform>(e1);
+	Transform &t2 = world.get_component<Transform>(e2);
 
 	ColliderOBB c1{};
 	ColliderOBB c2{};
@@ -386,8 +384,8 @@ void CollisionSystem::resolve_collision_obb(Entity e1, Entity e2) {
 	c2.range = temp_c2.range * t2.get_scale();
 	c2.center = t2.get_position() + c2.get_orientation_matrix() * (temp_c2.center * c2.range);
 
-	bool is_movable1 = !ecs_manager.has_component<StaticTag>(e1);
-	bool is_movable2 = !ecs_manager.has_component<StaticTag>(e2);
+	bool is_movable1 = !world.has_component<StaticTag>(e1);
+	bool is_movable2 = !world.has_component<StaticTag>(e2);
 
 	if (!(is_movable1 || is_movable2) || !is_collision_candidate(c1.center, c1.range, c2.center, c2.range)) {
 		return;
@@ -438,11 +436,11 @@ glm::vec3 CollisionSystem::is_overlap(const ColliderOBB &a, const ColliderSphere
 	return glm::vec3(0.0f);
 }
 
-void CollisionSystem::resolve_obb_sphere(Entity obb, Entity sphere) {
-	ColliderOBB &temp_c1 = ecs_manager.get_component<ColliderOBB>(obb);
-	ColliderSphere &temp_c2 = ecs_manager.get_component<ColliderSphere>(sphere);
-	Transform &t1 = ecs_manager.get_component<Transform>(obb);
-	Transform &t2 = ecs_manager.get_component<Transform>(sphere);
+void CollisionSystem::resolve_obb_sphere(World &world, Entity obb, Entity sphere) {
+	ColliderOBB &temp_c1 = world.get_component<ColliderOBB>(obb);
+	ColliderSphere &temp_c2 = world.get_component<ColliderSphere>(sphere);
+	Transform &t1 = world.get_component<Transform>(obb);
+	Transform &t2 = world.get_component<Transform>(sphere);
 
 	ColliderOBB c1{};
 	ColliderSphere c2{};
@@ -453,8 +451,8 @@ void CollisionSystem::resolve_obb_sphere(Entity obb, Entity sphere) {
 	c2.radius = temp_c2.radius * t2.get_scale().x;
 	c2.center = t2.get_position() + temp_c2.center * c2.radius;
 
-	bool is_movable1 = !ecs_manager.has_component<StaticTag>(obb);
-	bool is_movable2 = !ecs_manager.has_component<StaticTag>(sphere);
+	bool is_movable1 = !world.has_component<StaticTag>(obb);
+	bool is_movable2 = !world.has_component<StaticTag>(sphere);
 
 	if (!(is_movable1 || is_movable2) ||
 			!is_collision_candidate(c1.center, c1.range, c2.center, glm::vec3(c2.radius))) {
@@ -530,11 +528,11 @@ glm::vec3 CollisionSystem::is_overlap(const ColliderOBB &a, const ColliderAABB &
 	return glm::normalize(separation) * max_overlap;
 }
 
-void CollisionSystem::resolve_obb_aabb(Entity obb, Entity aabb) {
-	ColliderOBB &temp_c1 = ecs_manager.get_component<ColliderOBB>(obb);
-	ColliderAABB &temp_c2 = ecs_manager.get_component<ColliderAABB>(aabb);
-	Transform &t1 = ecs_manager.get_component<Transform>(obb);
-	Transform &t2 = ecs_manager.get_component<Transform>(aabb);
+void CollisionSystem::resolve_obb_aabb(World &world, Entity obb, Entity aabb) {
+	ColliderOBB &temp_c1 = world.get_component<ColliderOBB>(obb);
+	ColliderAABB &temp_c2 = world.get_component<ColliderAABB>(aabb);
+	Transform &t1 = world.get_component<Transform>(obb);
+	Transform &t2 = world.get_component<Transform>(aabb);
 
 	ColliderOBB c1{};
 	ColliderAABB c2{};
@@ -544,8 +542,8 @@ void CollisionSystem::resolve_obb_aabb(Entity obb, Entity aabb) {
 
 	c2.range = temp_c2.range * t2.get_scale();
 	c2.center = t2.get_position() + temp_c2.center * c2.range;
-	bool is_movable1 = !ecs_manager.has_component<StaticTag>(obb);
-	bool is_movable2 = !ecs_manager.has_component<StaticTag>(aabb);
+	bool is_movable1 = !world.has_component<StaticTag>(obb);
+	bool is_movable2 = !world.has_component<StaticTag>(aabb);
 
 	if (!(is_movable1 || is_movable2) || !is_collision_candidate(c1.center, c1.range, c2.center, c2.range)) {
 		return;

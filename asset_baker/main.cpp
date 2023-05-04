@@ -1,10 +1,9 @@
 #include "asset_loader.h"
 #include "material_asset.h"
 #include "mesh_asset.h"
-#include "prefab_asset.h"
+#include "model_asset.h"
 #include "texture_asset.h"
 #include <ktx.h>
-#include <vulkan/vulkan_core.h>
 #include <filesystem>
 #include <fstream>
 #include <future>
@@ -395,7 +394,7 @@ void extract_gltf_materials(tinygltf::Model &model, const fs::path &input, const
 
 void extract_gltf_nodes(tinygltf::Model &model, const fs::path &input, const fs::path &output_folder,
 		const ConverterState &conv_state) {
-	assets::PrefabInfo prefab;
+	assets::ModelInfo model_info;
 
 	std::vector<uint64_t> mesh_nodes;
 	for (int i = 0; i < model.nodes.size(); i++) {
@@ -403,7 +402,7 @@ void extract_gltf_nodes(tinygltf::Model &model, const fs::path &input, const fs:
 
 		std::string nodename = node.name;
 
-		prefab.node_names[i] = nodename;
+		model_info.node_names[i] = nodename;
 
 		std::array<float, 16> matrix{};
 
@@ -452,8 +451,8 @@ void extract_gltf_nodes(tinygltf::Model &model, const fs::path &input, const fs:
 			memcpy(matrix.data(), &transform_matrix, sizeof(glm::mat4));
 		}
 
-		prefab.node_matrices[i] = (int)prefab.matrices.size();
-		prefab.matrices.push_back(matrix);
+		model_info.node_matrices[i] = (int)model_info.matrices.size();
+		model_info.matrices.push_back(matrix);
 
 		if (node.mesh >= 0) {
 			auto mesh = model.meshes[node.mesh];
@@ -472,11 +471,11 @@ void extract_gltf_nodes(tinygltf::Model &model, const fs::path &input, const fs:
 
 				fs::path materialpath = output_folder / (matname + ".mat");
 
-				assets::PrefabInfo::NodeMesh nmesh;
+				assets::ModelInfo::NodeMesh nmesh;
 				nmesh.mesh_path = conv_state.convert_to_export_relative(meshpath).string();
 				nmesh.material_path = conv_state.convert_to_export_relative(materialpath).string();
 
-				prefab.node_meshes[i] = nmesh;
+				model_info.node_meshes[i] = nmesh;
 			}
 		}
 	}
@@ -485,7 +484,7 @@ void extract_gltf_nodes(tinygltf::Model &model, const fs::path &input, const fs:
 	//gltf stores children, but we want parent
 	for (int i = 0; i < model.nodes.size(); i++) {
 		for (auto c : model.nodes[i].children) {
-			prefab.node_parents[c] = i;
+			model_info.node_parents[c] = i;
 		}
 	}
 
@@ -500,9 +499,9 @@ void extract_gltf_nodes(tinygltf::Model &model, const fs::path &input, const fs:
 
 	//flip[2][2] = -1;
 	for (int i = 0; i < model.nodes.size(); i++) {
-		auto it = prefab.node_parents.find(i);
-		if (it == prefab.node_parents.end()) {
-			auto matrix = prefab.matrices[prefab.node_matrices[i]];
+		auto it = model_info.node_parents.find(i);
+		if (it == model_info.node_parents.end()) {
+			auto matrix = model_info.matrices[model_info.node_matrices[i]];
 			//no parent, root node
 			glm::mat4 mat;
 
@@ -512,7 +511,7 @@ void extract_gltf_nodes(tinygltf::Model &model, const fs::path &input, const fs:
 
 			memcpy(&matrix, &mat, sizeof(glm::mat4));
 
-			prefab.matrices[prefab.node_matrices[i]] = matrix;
+			model_info.matrices[model_info.node_matrices[i]] = matrix;
 		}
 	}
 
@@ -533,7 +532,7 @@ void extract_gltf_nodes(tinygltf::Model &model, const fs::path &input, const fs:
 
 			auto prim_index_string = std::to_string(prim_index);
 
-			prefab.node_names[newnode] = prefab.node_names[i] + "_PRIM_" + prim_index_string;
+			model_info.node_names[newnode] = model_info.node_names[i] + "_PRIM_" + prim_index_string;
 
 			int material = primitive.material;
 			auto mat = model.materials[material];
@@ -543,19 +542,19 @@ void extract_gltf_nodes(tinygltf::Model &model, const fs::path &input, const fs:
 			fs::path materialpath = output_folder / (matname + ".mat");
 			fs::path meshpath = output_folder / (meshname + ".mesh");
 
-			assets::PrefabInfo::NodeMesh nmesh;
+			assets::ModelInfo::NodeMesh nmesh;
 			nmesh.mesh_path = conv_state.convert_to_export_relative(meshpath).string();
 			nmesh.material_path = conv_state.convert_to_export_relative(materialpath).string();
 
-			prefab.node_meshes[newnode] = nmesh;
+			model_info.node_meshes[newnode] = nmesh;
 		}
 	}
 
-	assets::AssetFile new_file = assets::pack_prefab(prefab);
+	assets::AssetFile new_file = assets::pack_model(model_info);
 
 	fs::path scenefilepath = (output_folder.parent_path()) / input.stem();
 
-	scenefilepath.replace_extension(".pfb");
+	scenefilepath.replace_extension(".mdl");
 
 	//save to disk
 	save_binary_file(scenefilepath.string().c_str(), new_file);
