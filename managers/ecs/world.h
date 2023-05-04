@@ -161,7 +161,6 @@ public:
 	void update(float dt) {
 		for (auto &system : systems) {
 			system->update(*this, dt);
-			systems.print_values();
 		}
 	}
 
