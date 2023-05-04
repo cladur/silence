@@ -20,7 +20,9 @@ public:
 	uint32_t active_scene = 0;
 
 	virtual void create_scene(const std::string &name);
+	Scene &get_active_scene();
 	uint32_t get_scene_index(const std::string &name);
+	void set_active_scene(const std::string &name);
 };
 
 #endif // SILENCE_ENGINE_H

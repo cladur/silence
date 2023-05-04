@@ -73,7 +73,7 @@ void Engine::update(float dt) {
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
 
-	if (true) {
+	if (show_cvar_editor) {
 		CVarSystem::get()->draw_imgui_editor();
 	}
 
@@ -120,4 +120,13 @@ uint32_t Engine::get_scene_index(const std::string &name) {
 		}
 	}
 	return 0;
+}
+
+void Engine::set_active_scene(const std::string &name) {
+	active_scene = get_scene_index(name);
+	RenderManager::get().displayed_scene = scenes[active_scene]->render_scene_idx;
+}
+
+Scene &Engine::get_active_scene() {
+	return *scenes[active_scene];
 }

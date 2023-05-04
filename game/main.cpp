@@ -6,6 +6,7 @@ int main() {
 
 	game.create_scene("Main");
 	game.scenes[0]->load_from_file("resources/scenes/Skrzyneczka.scn");
+	game.set_active_scene("Main");
 
 	game.run();
 	return 0;

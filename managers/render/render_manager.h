@@ -26,6 +26,7 @@ private:
 public:
 	// Render scenes
 	std::vector<RenderScene> render_scenes;
+	int displayed_scene = -1;
 
 	static RenderManager &get();
 

@@ -98,6 +98,14 @@ void RenderManager::draw() {
 	glad_glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	// blit scene's framebuffer to the default framebuffer
+	if (displayed_scene != -1) {
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, render_scenes[displayed_scene].render_framebuffer.framebuffer_id);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+		glBlitFramebuffer(0, 0, window_extent.x, window_extent.y, 0, 0, window_extent.x, window_extent.y,
+				GL_COLOR_BUFFER_BIT, GL_NEAREST);
+	}
+
 	// IMGUI
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
