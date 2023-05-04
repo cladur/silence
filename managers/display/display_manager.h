@@ -34,6 +34,7 @@ public:
 	[[nodiscard]] bool was_window_resized() const;
 
 	[[nodiscard]] glm::vec2 get_framebuffer_size() const;
+	[[nodiscard]] glm::vec2 get_window_size() const;
 	void poll_events();
 	[[nodiscard]] bool window_should_close() const;
 };

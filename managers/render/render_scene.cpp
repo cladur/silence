@@ -18,6 +18,8 @@ void RenderScene::startup() {
 
 	text_draw.startup();
 	debug_draw.startup();
+	sprite_draw.startup();
+	transparent_draw.startup();
 }
 
 void RenderScene::draw() {
@@ -65,6 +67,10 @@ void RenderScene::draw() {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	text_draw.draw();
 	glDisable(GL_BLEND);
+
+	// ui needs to go last, later to be a different render target
+	//sprite_draw.draw();
+	transparent_draw.draw(*this);
 }
 
 void RenderScene::resize_framebuffer(uint32_t width, uint32_t height) {

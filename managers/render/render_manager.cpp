@@ -1,11 +1,11 @@
 #include "render_manager.h"
 
+#include "common/material.h"
 #include "components/transform_component.h"
 #include "display/display_manager.h"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
-#include "managers/render/common/material.h"
 #include "render/render_scene.h"
 #include <glad/glad.h>
 #define IMGUI_DEFINE_MATH_OPERATORS

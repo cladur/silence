@@ -43,6 +43,7 @@ Scene::Scene() {
 	world.register_component<Children>();
 	world.register_component<ModelInstance>();
 	world.register_component<FmodListener>();
+	world.register_component<StaticTag>();
 	world.register_component<ColliderTag>();
 	world.register_component<ColliderSphere>();
 	world.register_component<ColliderAABB>();

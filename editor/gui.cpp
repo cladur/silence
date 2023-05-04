@@ -278,7 +278,8 @@ void Editor::imgui_viewport(Scene &scene, uint32_t scene_index) {
 
 	ImVec2 viewport_start = ImGui::GetCursorPos();
 
-	ImGui::Begin(scene.name.c_str());
+	bool window_opened = true;
+	ImGui::Begin(scene.name.c_str(), &window_opened);
 	ImGuizmo::SetDrawlist();
 	// We need to set unique ID to each viewport, otherwise modifying the transform of one viewport will affect all
 	ImGuizmo::SetID((int)scene_index);
@@ -500,6 +501,11 @@ void Editor::imgui_viewport(Scene &scene, uint32_t scene_index) {
 
 	ImGui::PopStyleVar();
 	ImGui::PopStyleVar();
+
+	if (!window_opened) {
+		scene_to_delete = scene_index;
+		scene_deletion_queued = true;
+	}
 }
 
 void Editor::display_folder(const std::string &path) {

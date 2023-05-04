@@ -74,3 +74,10 @@ glm::vec2 DisplayManager::get_framebuffer_size() const {
 	glfwGetFramebufferSize(window, &width, &height);
 	return { width, height };
 }
+
+[[nodiscard]] glm::vec2 DisplayManager::get_window_size() const {
+	int width, height;
+	glfwGetWindowSize(window, &width, &height);
+	SPDLOG_INFO("Window size: {}x{}", width, height);
+	return { width, height };
+}

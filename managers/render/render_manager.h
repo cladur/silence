@@ -13,7 +13,7 @@
 
 #include "components/transform_component.h"
 #include "debug/debug_draw.h"
-#include "text/text_draw.h"
+#include "transparent_elements/text/text_draw.h"
 
 #include "camera/camera.h"
 

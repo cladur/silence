@@ -261,7 +261,6 @@ void Inspector::show_collidersphere() {
 
 		show_vec3("Center", collidersphere.center);
 		show_float("Radius", collidersphere.radius);
-		show_checkbox("Is movable", collidersphere.is_movable);
 
 		ImGui::EndTable();
 	}
@@ -276,7 +275,6 @@ void Inspector::show_collideraabb() {
 
 		show_vec3("Center", collideraabb.center);
 		show_vec3("Range", collideraabb.range);
-		show_checkbox("Is movable", collideraabb.is_movable);
 
 		ImGui::EndTable();
 	}
@@ -293,7 +291,6 @@ void Inspector::show_colliderobb() {
 		show_vec3("Orientation 1", colliderobb.orientation[0]);
 		show_vec3("Orientation 2", colliderobb.orientation[1]);
 		show_vec3("Range", colliderobb.range);
-		show_checkbox("Is movable", colliderobb.is_movable);
 
 		ImGui::EndTable();
 	}

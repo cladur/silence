@@ -17,11 +17,12 @@
 #include "components/rigidbody_component.h"
 #include "components/transform_component.h"
 
-#include "ecs/ecs_manager.h"
+#include "ecs/systems/bsp_system.h"
 #include "ecs/systems/collider_components_factory.h"
 #include "ecs/systems/collision_system.h"
 #include "ecs/systems/parent_system.h"
 #include "ecs/systems/physics_system.h"
+#include "ecs/world.h"
 
 #include "audio/fmod_listener_system.h"
 #include "components/fmod_listener_component.h"
@@ -34,14 +35,27 @@
 #include <fstream>
 
 #include "core/camera/camera.h"
+#include "menu_demo.h"
+#include "render/transparent_elements/ui/sprite_manager.h"
+#include "render/transparent_elements/ui/ui_elements/ui_anchor.h"
+#include "render/transparent_elements/ui/ui_elements/ui_button.h"
+#include "render/transparent_elements/ui/ui_elements/ui_image.h"
+#include "render/transparent_elements/ui/ui_elements/ui_slider.h"
+#include "render/transparent_elements/ui/ui_elements/ui_text.h"
 // #include "render/debug/debug_draw.h"
 // #include "render/text/text_draw.h"
 
-ECSManager ecs_manager;
 AudioManager audio_manager;
 InputManager input_manager;
 
 Camera camera(glm::vec3(0.0f, 0.0f, -25.0f));
+
+#ifdef WIN32
+extern "C" {
+__declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
+__declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
+}
+#endif
 
 bool in_debug_menu = true;
 
@@ -80,25 +94,29 @@ void default_mappings() {
 	input_manager.add_key_to_action("collider_up", InputKey::O);
 	input_manager.add_action("collider_down");
 	input_manager.add_key_to_action("collider_down", InputKey::U);
+
+	input_manager.add_action("mouse_left");
+	input_manager.add_key_to_action("mouse_left", InputKey::MOUSE_LEFT);
 }
 
-void default_ecs_manager_init() {
-	ecs_manager.startup();
+void default_ecs_world_init(World &world) {
+	world.startup();
 
-	ecs_manager.register_component<Transform>();
-	ecs_manager.register_component<RigidBody>();
-	ecs_manager.register_component<Gravity>();
-	ecs_manager.register_component<Parent>();
-	ecs_manager.register_component<Children>();
-	ecs_manager.register_component<ModelInstance>();
-	ecs_manager.register_component<FmodListener>();
-	ecs_manager.register_component<ColliderTag>();
-	ecs_manager.register_component<ColliderSphere>();
-	ecs_manager.register_component<ColliderAABB>();
-	ecs_manager.register_component<ColliderOBB>();
+	world.register_component<Transform>();
+	world.register_component<RigidBody>();
+	world.register_component<Gravity>();
+	world.register_component<Parent>();
+	world.register_component<Children>();
+	world.register_component<ModelInstance>();
+	world.register_component<FmodListener>();
+	world.register_component<ColliderTag>();
+	world.register_component<StaticTag>();
+	world.register_component<ColliderSphere>();
+	world.register_component<ColliderAABB>();
+	world.register_component<ColliderOBB>();
 }
 
-void demo_entities_init(std::vector<Entity> &entities) {
+void demo_entities_init(World &world, std::vector<Entity> &entities) {
 	std::default_random_engine random_generator; // NOLINT(cert-msc51-cpp)
 	std::uniform_real_distribution<float> rand_position(-40.0f, 40.0f);
 	std::uniform_real_distribution<float> rand_rotation(0.0f, 0.0f);
@@ -110,61 +128,77 @@ void demo_entities_init(std::vector<Entity> &entities) {
 	float scale = rand_scale(random_generator);
 
 	for (unsigned int &entity : entities) {
-		entity = ecs_manager.create_entity();
+		entity = world.create_entity();
 
-		ecs_manager.add_component<Gravity>(entity, { glm::vec3(0.0f, rand_gravity(random_generator), 0.0f) });
+		world.add_component<Gravity>(entity, { glm::vec3(0.0f, rand_gravity(random_generator), 0.0f) });
 
-		ecs_manager.add_component(entity,
+		world.add_component(entity,
 				RigidBody{ .velocity = glm::vec3(0.0f, 0.0f, 0.0f), .acceleration = glm::vec3(0.0f, 0.0f, 0.0f) });
 
-		Transform transform = Transform{ glm::vec3(rand_position(random_generator),
-												 rand_position(random_generator) + 40.0f,
-												 rand_position(random_generator)),
-			glm::vec3(rand_rotation(random_generator), -50.0f, rand_rotation(random_generator)), glm::vec3(4.0f) };
-		ecs_manager.add_component(entity, transform);
+		Transform transform =
+				Transform{ glm::vec3(rand_position(random_generator), rand_position(random_generator) + 40.0f,
+								   rand_position(random_generator)),
+					glm::vec3(0.0f), glm::vec3(4.0f) };
+		world.add_component(entity, transform);
 
-		ColliderComponentsFactory::add_collider_component(
-				entity, ColliderAABB{ transform.get_position(), transform.get_scale(), true });
+		Handle<ModelInstance> hndl = RenderManager::get()->add_instance("woodenBox/woodenBox.pfb");
+		Handle<Model> hndl_model = RenderManager::get()->get_model_instance(hndl).model_handle;
 
-		// Handle<ModelInstance> hndl = RenderManager::get()->add_instance("woodenBox/woodenBox.mdl");
-		//		Handle<ModelInstance> hndl = RenderManager::get()->add_instance("electricBox/electricBox.mdl");
-		// Handle<ModelInstance> hndl = RenderManager::get()->add_instance("Agent/agent_idle.mdl");
-		ecs_manager.add_component<ModelInstance>(entity, ModelInstance("woodenBox/woodenBox.mdl"));
+		ColliderAABB collider = { glm::vec3(0.0f), glm::vec3(0.0f) };
+		collider.center = glm::vec3(0.0f, 1.0f, 0.0f);
+		collider.setup_collider(RenderManager::get()->get_model(hndl_model).meshes[0].get_position_vertices());
+		ColliderComponentsFactory::add_collider_component(entity, collider);
+		//		Handle<ModelInstance> hndl = RenderManager::get()->add_instance("electricBox/electricBox.pfb");
+		//		Handle<ModelInstance> hndl = RenderManager::get()->add_instance("Agent/agent_idle.pfb");
+		world.add_component<RenderHandle>(entity, RenderHandle{ .handle = hndl });
 	}
 
-	auto listener = ecs_manager.create_entity();
-	ecs_manager.add_component(listener, Transform{ glm::vec3(0.0f, 0.0f, -25.0f), glm::vec3(0.0f), glm::vec3(1.0f) });
+	auto listener = world.create_entity();
+	world.add_component(listener, Transform{ glm::vec3(0.0f, 0.0f, -25.0f), glm::vec3(0.0f), glm::vec3(1.0f) });
 	// Later on attach FmodListener component to camera
-	ecs_manager.add_component<FmodListener>(listener,
+	world.add_component<FmodListener>(listener,
 			FmodListener{ .listener_id = SILENCE_FMOD_LISTENER_DEBUG_CAMERA,
 					.prev_frame_position = glm::vec3(0.0f, 0.0f, -25.0f) });
 	entities.push_back(listener);
 
-	Entity floor = ecs_manager.create_entity();
+	Entity floor = world.create_entity();
 
-	Transform transform = Transform{ glm::vec3(0.0f, -20.0f, 0.0f), glm::vec3(0.0f), glm::vec3(20.0f, 1.0f, 20.0f) };
-	ecs_manager.add_component(floor, transform);
+	Transform transform = Transform{ glm::vec3(0.0f, -20.0f, 0.0f), glm::vec3(0.0f), glm::vec3(80.0f, 4.0f, 80.0f) };
+	world.add_component(floor, transform);
 
-	ColliderComponentsFactory::add_collider_component(
-			floor, ColliderAABB{ transform.get_position(), transform.get_scale(), false });
+	Handle<ModelInstance> hndl = RenderManager::get()->add_instance("woodenBox/woodenBox.pfb");
+	Handle<Model> hndl_model = RenderManager::get()->get_model_instance(hndl).model_handle;
 
+	ColliderAABB collider = { glm::vec3(0.0f), glm::vec3(0.0f) };
+	collider.center = glm::vec3(0.0f, 1.0f, 0.0f);
+	collider.setup_collider(RenderManager::get()->get_model(hndl_model).meshes[0].get_position_vertices());
+	ColliderComponentsFactory::add_collider_component(floor, collider);
+
+	world.add_component<RenderHandle>(floor, RenderHandle{ .handle = hndl });
 	entities.push_back(floor);
 }
 
 void demo_collision_init(Entity &entity) {
-	entity = ecs_manager.create_entity();
+	entity = world.create_entity();
 
-	Transform transform = Transform{ glm::vec3(0.0f), glm::vec3(45.0f), glm::vec3(1.0f) };
-	ecs_manager.add_component(entity, transform);
+	Transform transform = Transform{ glm::vec3(0.0f, 0.0f, -20.0f), glm::vec3(0.0f), glm::vec3(4.0f) };
+	world.add_component(entity, transform);
 
-	ColliderOBB c{};
-	c.center = transform.get_position();
-	c.range = transform.get_scale();
-	c.set_orientation(transform.get_euler_rot());
-	c.is_movable = true;
-	ColliderComponentsFactory::add_collider_component(entity, c);
+	Handle<ModelInstance> hndl = RenderManager::get()->add_instance("woodenBox/woodenBox.pfb");
+	Handle<Model> hndl_model = RenderManager::get()->get_model_instance(hndl).model_handle;
 
-	// ecs_manager.add_component<MeshInstance>(
+	ColliderOBB collider{};
+	collider.center = glm::vec3(0.0f, 1.0f, 0.0f);
+	collider.set_orientation(transform.get_euler_rot());
+	collider.setup_collider(RenderManager::get()->get_model(hndl_model).meshes[0].get_position_vertices());
+	//	ColliderAABB collider{};
+	//	collider.center = glm::vec3(0.0f, 1.0f, 0.0f);
+	//	collider.setup_collider(RenderManager::get()->get_model(hndl_model).meshes[0].get_position_vertices());
+
+	ColliderComponentsFactory::add_collider_component(entity, collider, true);
+
+	world.add_component<RenderHandle>(entity, RenderHandle{ .handle = hndl });
+	// world.add_component<MeshInstance>(
 	// 		entity, { render_manager.get_mesh("box"), render_manager.get_material("default_mesh") });
 }
 
@@ -174,48 +208,50 @@ void demo_collision_sphere(std::vector<Entity> &entities) {
 	std::uniform_real_distribution<float> rand_gravity(-40.0f, -20.0f);
 
 	for (Entity &entity : entities) {
-		entity = ecs_manager.create_entity();
+		entity = world.create_entity();
 
 		Transform transform = Transform{ glm::vec3(rand_position(random_generator), rand_position(random_generator),
 												 rand_position(random_generator)),
-			glm::vec3(0.0f), glm::vec3(1.0f) };
-		ecs_manager.add_component(entity, transform);
+			glm::vec3(0.0f), glm::vec3(4.0f) };
+		world.add_component(entity, transform);
 
-		ColliderComponentsFactory::add_collider_component(
-				entity, ColliderSphere{ transform.get_position(), transform.get_scale().x, true });
+		ColliderComponentsFactory::add_collider_component(entity, ColliderSphere{ glm::vec3(0.0f), 1.0f });
 
-		ecs_manager.add_component<Gravity>(entity, { glm::vec3(0.0f, rand_gravity(random_generator), 0.0f) });
+		world.add_component<Gravity>(entity, { glm::vec3(0.0f, rand_gravity(random_generator), 0.0f) });
 
-		ecs_manager.add_component(entity,
+		world.add_component(entity,
 				RigidBody{ .velocity = glm::vec3(0.0f, 0.0f, 0.0f), .acceleration = glm::vec3(0.0f, 0.0f, 0.0f) });
 	}
 }
 
 void demo_collision_obb(std::vector<Entity> &entities) {
 	std::default_random_engine random_generator; // NOLINT(cert-msc51-cpp)
-	std::uniform_real_distribution<float> rand_position(-10.0f, 10.0f);
+	std::uniform_real_distribution<float> rand_position(-40.0f, 40.0f);
 	std::uniform_real_distribution<float> rand_rotation(-90.0f, 90.0f);
 	std::uniform_real_distribution<float> rand_gravity(-40.0f, -20.0f);
 
 	for (Entity &entity : entities) {
-		entity = ecs_manager.create_entity();
+		entity = world.create_entity();
 
 		Transform transform = Transform{ glm::vec3(rand_position(random_generator), rand_position(random_generator),
 												 rand_position(random_generator)),
-			glm::vec3(rand_rotation(random_generator)), glm::vec3(1.0f) };
-		ecs_manager.add_component(entity, transform);
+			glm::vec3(rand_rotation(random_generator)), glm::vec3(4.0f) };
+		world.add_component(entity, transform);
 
+		Handle<ModelInstance> hndl = RenderManager::get()->add_instance("woodenBox/woodenBox.pfb");
+		world.add_component<RenderHandle>(entity, RenderHandle{ .handle = hndl });
+
+		Handle<Model> hndl_model = RenderManager::get()->get_model_instance(hndl).model_handle;
 		ColliderOBB c{};
-		c.center = transform.get_position();
-		c.range = transform.get_scale();
 		c.set_orientation(transform.get_euler_rot());
-		c.is_movable = true;
+		c.setup_collider(RenderManager::get()->get_model(hndl_model).meshes[0].get_position_vertices());
+		c.center = glm::vec3(0.0f, 1.0f, 0.0f);
 
 		ColliderComponentsFactory::add_collider_component(entity, c);
 
-		ecs_manager.add_component<Gravity>(entity, { glm::vec3(0.0f, rand_gravity(random_generator), 0.0f) });
+		world.add_component<Gravity>(entity, { glm::vec3(0.0f, rand_gravity(random_generator), 0.0f) });
 
-		ecs_manager.add_component(entity,
+		world.add_component(entity,
 				RigidBody{ .velocity = glm::vec3(0.0f, 0.0f, 0.0f), .acceleration = glm::vec3(0.0f, 0.0f, 0.0f) });
 	}
 }
@@ -258,7 +294,7 @@ void setup_imgui_style() {
 
 void destroy_all_entities(const std::vector<Entity> &entities) {
 	for (unsigned int entity : entities) {
-		ecs_manager.destroy_entity(entity);
+		world.destroy_entity(entity);
 	}
 }
 
@@ -274,14 +310,23 @@ void handle_camera(Camera &cam, float dt) {
 	cam.rotate(mouse_delta.x * dt, mouse_delta.y * dt);
 }
 
+AutoCVarFloat cvar_tester_rot_x("rot.x", "Rotation X", 0.0f, CVarFlags::EditFloatDrag);
+AutoCVarFloat cvar_tester_rot_y("rot.y", "Rotation Y", 0.0f, CVarFlags::EditFloatDrag);
+AutoCVarFloat cvar_tester_rot_z("rot.z", "Rotation Z", 0.0f, CVarFlags::EditFloatDrag);
+AutoCVarFloat cvar_tester_center_x("pos.x", "Offset X", 0.0f, CVarFlags::EditFloatDrag);
+AutoCVarFloat cvar_tester_center_y("pos.y", "Offset Y", 1.0f, CVarFlags::EditFloatDrag);
+AutoCVarFloat cvar_tester_center_z("pos.z", "Offset Z", 0.0f, CVarFlags::EditFloatDrag);
+
 void handle_collider_movement(Entity entity, float dt) {
 	float forward = -input_manager.get_axis("collider_backward", "collider_forward");
 	float right = -input_manager.get_axis("collider_left", "collider_right");
 	float up = -input_manager.get_axis("collider_down", "collider_up");
 
-	auto &t = ecs_manager.get_component<Transform>(entity);
-
-	const float speed = 5.0f;
+	auto &t = world.get_component<Transform>(entity);
+	auto &c = world.get_component<ColliderOBB>(entity);
+	t.set_euler_rot({ cvar_tester_rot_x.get(), cvar_tester_rot_y.get(), cvar_tester_rot_z.get() });
+	c.center = { cvar_tester_center_x.get(), cvar_tester_center_y.get(), cvar_tester_center_z.get() };
+	const float speed = 10.0f;
 	t.add_position(glm::vec3(forward, up, right) * speed * dt);
 }
 
@@ -290,6 +335,10 @@ int main() {
 
 	display_manager_init();
 	input_manager.startup();
+#ifdef USE_OPENGL
+	RenderManager::get()->startup();
+	SpriteManager::get()->startup();
+#else
 	RenderManager::get()->startup();
 
 	// nie dla psa 😔
@@ -298,12 +347,18 @@ int main() {
 	// ECS ----------------------------------------
 
 	default_ecs_manager_init();
-	auto physics_system = ecs_manager.register_system<PhysicsSystem>();
-	auto collision_system = ecs_manager.register_system<CollisionSystem>();
-	auto parent_system = ecs_manager.register_system<ParentSystem>();
-	auto fmod_listener_system = ecs_manager.register_system<FmodListenerSystem>();
+	auto physics_system = world.register_system<PhysicsSystem>();
+	auto collision_system = world.register_system<CollisionSystem>();
+	auto bsp_system = world.register_system<BSPSystem>();
+	auto parent_system = world.register_system<ParentSystem>();
+	auto fmod_listener_system = world.register_system<FmodListenerSystem>();
 
-	auto render_system = ecs_manager.register_system<RenderSystem>();
+#ifdef USE_OPENGL
+	auto opengl_system = world.register_system<OpenglSystem>();
+	opengl_system->startup();
+
+#else
+	auto render_system = world.register_system<RenderSystem>();
 	render_system->startup();
 
 	physics_system->startup();
@@ -315,10 +370,10 @@ int main() {
 	std::vector<Entity> entities(50);
 	demo_entities_init(entities);
 
-	std::vector<Entity> spheres(10);
+	std::vector<Entity> spheres(50);
 	demo_collision_sphere(spheres);
 
-	std::vector<Entity> obbs(10);
+	std::vector<Entity> obbs(50);
 	demo_collision_obb(obbs);
 
 	Entity collision_tester;
@@ -330,7 +385,8 @@ int main() {
 	audio_manager.load_bank("Ambience");
 	audio_manager.load_sample_data();
 
-	FontManager::get()->load_font("resources/fonts/PoltawskiNowy.ttf", 48);
+	FontManager::get()->load_font("resources/fonts/PoltawskiNowy.ttf", 48, "one");
+	FontManager::get()->load_font("resources/fonts/FROSTBITE-Narrow.ttf", 48, "two");
 
 	//Map inputs
 	default_mappings();
@@ -358,8 +414,12 @@ int main() {
 	EventReference test_pluck = EventReference("test_pluck");
 	// #################
 
+	MenuDemo menu_demo = MenuDemo();
+
 	bool should_run = true;
 	nlohmann::json scene;
+
+	bsp_system->build_tree(10);
 	while (should_run) {
 		// GAME LOGIC
 		auto start_time = std::chrono::high_resolution_clock::now();
@@ -401,11 +461,11 @@ int main() {
 		ImGui::DragInt("Children Id", &imgui_children_id, 1, 1, max_imgui_entities);
 
 		if (ImGui::Button("Add child")) {
-			ecs_manager.add_child(imgui_entity_id, imgui_children_id);
+			world.add_child(imgui_entity_id, imgui_children_id);
 		}
 
 		if (ImGui::Button("Remove child")) {
-			ecs_manager.remove_child(imgui_entity_id, imgui_children_id);
+			world.remove_child(imgui_entity_id, imgui_children_id);
 		}
 
 		if (ImGui::Button("Destroy all entities")) {
@@ -451,8 +511,8 @@ int main() {
 		if (ImGui::Button("Play pluck")) {
 			audio_manager.play_one_shot_3d(test_pluck, sound_position);
 		}
-		// 3D SOUND DEMO
 
+		// 3D SOUND DEMO
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
 				ImGui::GetIO().Framerate);
 
@@ -471,40 +531,26 @@ int main() {
 		}
 
 		collision_system->update();
+		bsp_system->update(*collision_system);
 
 		parent_system->update();
 		render_system->update();
 
-		ImGui::Begin("Text Demo");
+		//		ImGui::Begin("UI Demo");
+		//
+		//		static char buffer[128] = { 'H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd', '!' };
+		//		ImGui::InputText("Text", buffer, 128);
+		//		static float value = 0.0f;
+		//		ImGui::SliderFloat("Float", &value, 0.0f, 1.0f);
+		//
+		//		ImGui::End();
 
-		static char buffer[128] = { 'H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd', '!' };
-		static float scale = 1.0f;
-		static float position[3] = { 0.0f, 0.0f, 0.0f };
-		static glm::vec3 color = { 1.0f, 1.0f, 1.0f };
-		static bool screenspace = false;
-		ImGui::InputText("Text", buffer, 128);
-		ImGui::InputFloat("Scale", &scale);
-		ImGui::InputFloat3("Position", position);
-		ImGui::InputFloat3("Color", &color.x);
-		ImGui::Checkbox("Screenspace", &screenspace);
-
-		ImGui::End();
-
-		text_draw::draw_text(
-				std::string(buffer), screenspace, glm::vec3(position[0], position[1], position[2]), color, scale);
-
-		debug_draw::draw_line(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(10.0f, 0.0f, 0.0f));
-		debug_draw::draw_line(glm::vec3(0.0f, 5.0f, 0.0f), glm::vec3(10.0f, 0.0f, 0.0f));
-
-		debug_draw::draw_line(glm::vec3(0.0f, 5.0f, 10.0f), glm::vec3(10.0f, 0.0f, 2.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-
-		debug_draw::draw_box(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-		debug_draw::draw_box(glm::vec3(0.0f, 5.0f, 0.0f), glm::vec3(10.0f, 1.0f, 1.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		menu_demo.draw();
 
 		// TODO: remove this when collision demo will be removed
 		for (auto sphere : spheres) {
-			auto &c = ecs_manager.get_component<ColliderSphere>(sphere);
-			debug_draw::draw_sphere(c.center, c.radius);
+			auto &t = world.get_component<Transform>(sphere);
+			debug_draw::draw_sphere(t.get_position(), t.get_scale().x);
 		}
 
 		input_manager.process_input();
@@ -531,6 +577,10 @@ int main() {
 	SPDLOG_INFO("Shutting down engine subsystems...");
 	input_manager.shutdown();
 	audio_manager.shutdown();
+#ifdef USE_OPENGL
+	SpriteManager::get()->shutdown();
+	RenderManager::get()->shutdown();
+#else
 	RenderManager::get()->shutdown();
 	DisplayManager::get().shutdown();
 

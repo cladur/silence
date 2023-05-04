@@ -5,7 +5,7 @@
 	do {                                                                                                               \
 		FMOD_RESULT result = x;                                                                                        \
 		if (result != FMOD_OK) {                                                                                       \
-			SPDLOG_ERROR("Audio Manager: FMOD error! {}", result, FMOD_ErrorString(result));                           \
+			SPDLOG_ERROR("Audio Manager: FMOD error! {} {}", result, FMOD_ErrorString(result));                           \
 			abort();                                                                                                   \
 		}                                                                                                              \
 	} while (false)
@@ -160,4 +160,25 @@ FMOD_GUID AudioManager::path_to_guid(const std::string &path) {
 		return FMOD_GUID{ 0, 0, 0, "0000000" };
 	}
 	return guid;
+}
+
+FMOD::Studio::System *AudioManager::get_system() {
+	return system;
+}
+
+FMOD::Studio::EventInstance *AudioManager::create_event_instance(const std::string event_name) {
+	EventReference event_ref = EventReference(event_name);
+
+	FMOD::Studio::EventDescription *event_description = nullptr;
+	FMOD_RESULT res = system->getEvent((event_path_prefix + event_ref.path).c_str(), &event_description);
+	if (res != FMOD_OK) {
+		SPDLOG_ERROR(
+				"Audio Manager: Failed to get event description for {}. {}", event_ref.path, FMOD_ErrorString(res));
+		return nullptr;
+	}
+
+	FMOD::Studio::EventInstance *event_instance = nullptr;
+	FMOD_CHECK(event_description->createInstance(&event_instance));
+
+	return event_instance;
 }

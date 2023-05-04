@@ -190,7 +190,7 @@ void Editor::startup() {
 	RenderManager &render_manager = RenderManager::get();
 
 	FontManager::get().startup();
-	FontManager::get().load_font("resources/fonts/PoltawskiNowy.ttf", 48);
+	FontManager::get().load_font("resources/fonts/PoltawskiNowy.ttf", 48, "PoltawskiNowy");
 
 	// Additional setup
 	default_mappings();

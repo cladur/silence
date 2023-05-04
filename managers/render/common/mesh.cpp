@@ -88,3 +88,13 @@ void Mesh::load_from_asset(const char *path) {
 
 	SPDLOG_INFO("Mesh asset loaded successfully: {}", path);
 }
+
+std::vector<glm::vec3> Mesh::get_position_vertices() const {
+	std::vector<glm::vec3> result(vertices.size());
+
+	for (const MeshVertex &vertex : vertices) {
+		result.emplace_back(vertex.position);
+	}
+
+	return result;
+}
