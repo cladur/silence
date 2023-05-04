@@ -2,6 +2,7 @@
 #define SILENCE_MATERIAL_H
 
 #include "components/transform_component.h"
+#include "render/transparent_elements/transparent_object.h"
 #include "shader.h"
 
 struct ModelInstance;
@@ -41,6 +42,14 @@ public:
 	void startup() override;
 	void bind_resources(RenderScene &scene) override;
 	void bind_instance_resources(ModelInstance &instance, Transform &transform) override;
+};
+
+class MaterialTransparent : public Material {
+public:
+	void startup() override;
+	void bind_resources(RenderScene &scene) override;
+	void bind_instance_resources(ModelInstance &instance, Transform &transform) override;
+	void bind_object_resources(RenderScene &scene, TransparentObject &object);
 };
 
 #endif // SILENCE_MATERIAL_H

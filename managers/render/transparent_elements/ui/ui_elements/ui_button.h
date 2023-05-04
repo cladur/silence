@@ -31,8 +31,8 @@ public:
 			const std::string &hover_sound_name = "",
 			const std::string &click_sound_name = "");
 
-	void draw() override;
-	void draw(glm::vec3 parent_position, glm::vec2 parent_size) override;
+	void draw(RenderScene *scene) override;
+	void draw(RenderScene *scene, glm::vec3 parent_position, glm::vec2 parent_size) override;
 
 	bool clicked();
 	bool hovered();

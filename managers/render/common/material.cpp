@@ -1,4 +1,5 @@
 #include "material.h"
+#include <render/transparent_elements/ui/sprite_manager.h>
 
 #include "display/display_manager.h"
 
@@ -120,4 +121,59 @@ void MaterialSkybox::bind_resources(RenderScene &scene) {
 }
 
 void MaterialSkybox::bind_instance_resources(ModelInstance &instance, Transform &transform) {
+}
+
+void MaterialTransparent::startup() {
+	shader.load_from_files(shader_path("transparent.vert"), shader_path("transparent.frag"));
+}
+
+void MaterialTransparent::bind_resources(RenderScene &scene) {
+	shader.use();
+	shader.set_mat4("view", scene.view);
+}
+
+void MaterialTransparent::bind_instance_resources(ModelInstance &instance, Transform &transform) {
+}
+
+void MaterialTransparent::bind_object_resources(RenderScene &scene, TransparentObject &object) {
+	static Texture t;
+	static int textured = 0;
+	static glm::mat4 view = scene.view;
+	static glm::vec2 window_size = DisplayManager::get().get_window_size();
+
+	if (object.type == TransparentType::TEXT) {
+		t = FontManager::get().fonts[object.texture_name].texture;
+		shader.set_int("is_sprite", 0);
+
+	} else if (object.type == TransparentType::SPRITE) {
+		t = SpriteManager::get()->get_sprite_texture(object.texture_name);
+		shader.set_int("is_sprite", 1);
+	}
+	textured = !object.texture_name.empty();
+
+	if (object.vertices[0].is_screen_space) {
+		shader.set_mat4("projection", glm::ortho(0.0f, window_size.x, 0.0f, window_size.y, 0.1f, 100.0f));
+	} else {
+		shader.set_mat4("projection", scene.projection);
+	}
+
+	shader.set_int("_texture", 0);
+
+	shader.set_int("textured", textured);
+	if (object.billboard) {
+		auto right = glm::vec3(view[0][0], view[1][0], view[2][0]);
+		auto up = glm::vec3(view[0][1], view[1][1], view[2][1]);
+		auto look = glm::vec3(view[0][2], view[1][2], view[2][2]);
+		shader.set_vec3("camera_right", right);
+		shader.set_vec3("camera_up", up);
+		shader.set_vec3("camera_look", look);
+		shader.set_vec2("size", object.size);
+		shader.set_vec3("billboard_center", object.position);
+		shader.set_int("is_billboard", 1);
+	} else {
+		shader.set_int("is_billboard", 0);
+	}
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, t.id);
 }

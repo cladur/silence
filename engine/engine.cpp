@@ -83,6 +83,7 @@ void Engine::update(float dt) {
 
 	for (auto &scene : scenes) {
 		scene->update(dt);
+
 		scene->world.update(dt);
 	}
 
