@@ -1,11 +1,10 @@
-#include "scene.h"
+#include "editor_scene.h"
+#include "engine/scene.h"
+
 #include "display/display_manager.h"
-#include "ecs/world.h"
-#include "editor.h"
 #include "input/input_manager.h"
-#include "render/ecs/model_instance.h"
-#include "render/render_manager.h"
-#include <unordered_map>
+
+#include "editor.h"
 
 void handle_camera(Camera &cam, float dt) {
 	InputManager &input_manager = InputManager::get();
@@ -25,49 +24,18 @@ void handle_camera(Camera &cam, float dt) {
 	cam.rotate(mouse_delta.x * dt, mouse_delta.y * dt);
 }
 
-Scene::Scene() {
-	camera = Camera(glm::vec3(-4.0f, 2.6f, -4.0f));
-	camera.yaw = 45.0f;
-	camera.pitch = -20.0f;
-	camera.update_camera_vectors();
-
-	// ECS
-	world.startup();
-
-	// Components
-	world.register_component<Name>();
-	world.register_component<Transform>();
-	world.register_component<RigidBody>();
-	world.register_component<Gravity>();
-	world.register_component<Parent>();
-	world.register_component<Children>();
-	world.register_component<ModelInstance>();
-	world.register_component<FmodListener>();
-	world.register_component<StaticTag>();
-	world.register_component<ColliderTag>();
-	world.register_component<ColliderSphere>();
-	world.register_component<ColliderAABB>();
-	world.register_component<ColliderOBB>();
-
-	// Systems
-	world.register_system<PhysicsSystem>();
-	world.register_system<CollisionSystem>();
-	world.register_system<ParentSystem>();
-	world.register_system<RenderSystem>();
-
+EditorScene::EditorScene() {
 	multi_select_parent = world.create_entity();
 	world.add_component<Transform>(multi_select_parent, Transform());
 }
 
-void Scene::update(float dt) {
+void EditorScene::update(float dt) {
+	Scene::update(dt);
+
 	InputManager &input_manager = InputManager::get();
 	DisplayManager &display_manager = DisplayManager::get();
 
 	Editor::get()->viewport_hovered |= viewport_hovered;
-
-	world.update(dt);
-
-	get_render_scene().camera = camera;
 
 	auto &trans = world.get_component<Transform>(multi_select_parent);
 
@@ -84,54 +52,14 @@ void Scene::update(float dt) {
 		Editor::get()->controlling_camera = false;
 		display_manager.capture_mouse(false);
 	}
-
-	for (auto &entity : entities) {
-		if (world.has_component<Transform>(entity) && world.has_component<ModelInstance>(entity)) {
-			auto &transform = world.get_component<Transform>(entity);
-			auto &model_instance = world.get_component<ModelInstance>(entity);
-
-			get_render_scene().queue_draw(&model_instance, &transform);
-		}
-	}
 }
 
-RenderScene &Scene::get_render_scene() {
-	RenderManager &render_manager = RenderManager::get();
-	return render_manager.render_scenes[render_scene_idx];
-}
-
-void Scene::save_to_file(const std::string &path) {
-	if (!path.empty()) {
-		this->path = path;
-	}
-	if (this->path.empty()) {
-		return;
-	}
+void EditorScene::save_to_file(const std::string &path) {
 	clear_selection();
-	auto json = SceneManager::save_scene(world, entities);
-	SceneManager::save_json_to_file(this->path, json);
+	Scene::save_to_file(path);
 }
 
-void Scene::load_from_file(const std::string &path) {
-	if (path.empty()) {
-		SPDLOG_ERROR("Wrong path: ", path, " should not be empty");
-		assert(false);
-	}
-	this->path = path;
-	if (this->path.empty()) {
-		return;
-	}
-	std::ifstream file(this->path);
-	if (!file.is_open()) {
-		SPDLOG_WARN("Failed to open file: ", this->path);
-		return;
-	}
-	nlohmann::json scene_json = nlohmann::json::parse(file);
-	file.close();
-	SceneManager::load_scene_from_json_file(world, scene_json, "", entities);
-}
-
-void Scene::add_to_selection(Entity entity) {
+void EditorScene::add_to_selection(Entity entity) {
 	if (world.has_component<Parent>(entity)) {
 		Entity old_parent = world.get_component<Parent>(entity).parent;
 		child_to_parent[entity] = old_parent;
@@ -144,7 +72,7 @@ void Scene::add_to_selection(Entity entity) {
 	last_entity_selected = entity;
 }
 
-void Scene::remove_from_selection(Entity entity) {
+void EditorScene::remove_from_selection(Entity entity) {
 	if (child_to_parent.find(entity) != child_to_parent.end()) {
 		Entity old_parent = child_to_parent[entity];
 		if (old_parent == 0) {
@@ -161,14 +89,14 @@ void Scene::remove_from_selection(Entity entity) {
 			std::remove(entities_selected.begin(), entities_selected.end(), entity), entities_selected.end());
 }
 
-void Scene::clear_selection() {
+void EditorScene::clear_selection() {
 	while (!entities_selected.empty()) {
 		remove_from_selection(entities_selected[0]);
 	}
 	execute_reparent_queue();
 }
 
-void Scene::calculate_multi_select_parent() {
+void EditorScene::calculate_multi_select_parent() {
 	auto &transform = world.get_component<Transform>(multi_select_parent);
 	if (entities_selected.size() <= 1) {
 		transform.set_position(glm::vec3(0.0f));
@@ -208,7 +136,7 @@ void Scene::calculate_multi_select_parent() {
 	dummy_transform = transform;
 }
 
-void Scene::execute_reparent_queue() {
+void EditorScene::execute_reparent_queue() {
 	for (auto &pair : reparent_queue) {
 		world.reparent(pair.first, pair.second, true);
 	}

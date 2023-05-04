@@ -1,53 +1,16 @@
 #ifndef SILENCE_EDITOR_H
 #define SILENCE_EDITOR_H
 
-#include "audio/audio_manager.h"
-#include "display/display_manager.h"
-#include "editor/inspector_gui.h"
-#include "font/font_manager.h"
-#include "input/input_manager.h"
-#include "managers/render/common/material.h"
-#include <string>
+#include "engine/engine.h"
+#include "engine/scene.h"
 
-#include "imgui_impl_opengl3.h"
-#include "managers/render/ecs/render_system.h"
-#include "render/render_manager.h"
-
-#include "components/children_component.h"
-#include "components/collider_aabb.h"
-#include "components/collider_obb.h"
-#include "components/collider_sphere.h"
-#include "components/gravity_component.h"
-#include "components/name_component.h"
-#include "components/parent_component.h"
-#include "components/rigidbody_component.h"
-#include "components/transform_component.h"
-
-#include "ecs/systems/collider_components_factory.h"
-#include "ecs/systems/collision_system.h"
-#include "ecs/systems/parent_system.h"
-#include "ecs/systems/physics_system.h"
-#include "ecs/world.h"
-
-#include "audio/fmod_listener_system.h"
-#include "components/fmod_listener_component.h"
-#include "imgui_impl_glfw.h"
-
-#include "scene/scene_manager.h"
-#include "serialization.h"
-#include <imgui.h>
-#include <spdlog/spdlog.h>
-#include <fstream>
-
-#include "core/camera/camera.h"
+#include "editor_scene.h"
+#include "inspector_gui.h"
 
 #include <ImGuizmo.h>
 #include <nfd.h>
-#include <glm/gtc/type_ptr.hpp>
 
-#include "scene.h"
-
-class Editor {
+class Editor : public Engine {
 public:
 	Inspector inspector;
 
@@ -71,10 +34,11 @@ public:
 	bool should_run = true;
 
 	// Scenes
-	std::vector<Scene> scenes;
-	uint32_t active_scene = 0;
 	uint32_t scene_to_delete = 0;
 	bool scene_deletion_queued = false;
+	void create_scene(const std::string &name) override;
+	EditorScene &get_editor_scene(uint32_t index);
+	EditorScene &get_active_scene();
 
 	// Content Browser
 	std::string content_browser_current_path = "resources";
@@ -82,22 +46,18 @@ public:
 	uint32_t folder_texture;
 
 	static Editor *get();
-	void startup();
-	void shutdown();
-	void run();
-	void update(float dt);
+	void startup() override;
+	void shutdown() override;
+	void custom_update(float dt) override;
 
 	// GUI
 	void imgui_menu_bar();
-	void imgui_inspector(Scene &scene);
-	void imgui_scene(Scene &scene);
-	void imgui_viewport(Scene &scene, uint32_t scene_index);
+	void imgui_inspector(EditorScene &scene);
+	void imgui_scene(EditorScene &scene);
+	void imgui_viewport(EditorScene &scene, uint32_t scene_index);
 	void display_folder(const std::string &path);
 	void imgui_content_browser();
 	void imgui_settings();
-
-	void create_scene(const std::string &name);
-	uint32_t get_scene_index(const std::string &name);
 };
 
 #endif //SILENCE_EDITOR_H

@@ -5,10 +5,15 @@
 	do {                                                                                                               \
 		FMOD_RESULT result = x;                                                                                        \
 		if (result != FMOD_OK) {                                                                                       \
-			SPDLOG_ERROR("Audio Manager: FMOD error! {} {}", result, FMOD_ErrorString(result));                           \
+			SPDLOG_ERROR("Audio Manager: FMOD error! {} {}", result, FMOD_ErrorString(result));                        \
 			abort();                                                                                                   \
 		}                                                                                                              \
 	} while (false)
+
+AudioManager &AudioManager::get() {
+	static AudioManager instance;
+	return instance;
+}
 
 void AudioManager::startup() {
 	FMOD_CHECK(FMOD::Studio::System::create(&system));

@@ -1,7 +1,12 @@
 #include "editor.h"
-#include "ecs/world.h"
+
+#include "display/display_manager.h"
+#include "editor/editor_scene.h"
 #include "input/input_manager.h"
 #include "render/render_manager.h"
+
+#include "ecs/world.h"
+
 #include <imgui.h>
 #include <imgui_internal.h>
 
@@ -10,14 +15,6 @@
 
 #include "IconsMaterialDesign.h"
 #include "inspector_gui.h"
-// #include "IconsFontAwesome5.h"
-
-// template <typename T> void register_component() {
-// 	World &world = World::get();
-// 	int type_id = world.get_registered_components();
-// 	world.register_component<T>();
-// 	Inspector::add_mapping(type_id, []() { Inspector::show_component<T>(); });
-// }
 
 void default_mappings() {
 	InputManager &input_manager = InputManager::get();
@@ -181,16 +178,7 @@ Editor *Editor::get() {
 }
 
 void Editor::startup() {
-	// Managers
-	SPDLOG_INFO("Starting up engine systems...");
-	DisplayManager::get().startup("Silence Engine", true);
-	InputManager::get().startup();
-	RenderManager::get().startup();
-
-	RenderManager &render_manager = RenderManager::get();
-
-	FontManager::get().startup();
-	FontManager::get().load_font("resources/fonts/PoltawskiNowy.ttf", 48, "PoltawskiNowy");
+	Engine::startup();
 
 	// Additional setup
 	default_mappings();
@@ -228,48 +216,13 @@ void Editor::startup() {
 }
 
 void Editor::shutdown() {
-	// Shut everything down, in reverse order.
-	SPDLOG_INFO("Shutting down engine subsystems...");
-	InputManager::get().shutdown();
-	RenderManager::get().shutdown();
-	DisplayManager::get().shutdown();
+	Engine::shutdown();
 }
 
-void Editor::run() {
-	float target_frame_time = 1.0f / (float)DisplayManager::get().get_refresh_rate();
-	float dt = target_frame_time;
-
-	nlohmann::json scene;
-	while (should_run) {
-		auto start_time = std::chrono::high_resolution_clock::now();
-
-		// GAME LOGIC
-		update(dt);
-
-		auto stop_time = std::chrono::high_resolution_clock::now();
-
-		// TODO: This is a hack to make sure we don't go over the target frame time.
-		// We need to make calculate dt properly and make target frame time changeable.
-		while (std::chrono::duration<float, std::chrono::seconds::period>(stop_time - start_time).count() <
-				target_frame_time) {
-			stop_time = std::chrono::high_resolution_clock::now();
-		}
-
-		FrameMark;
-	}
-}
-
-void Editor::update(float dt) {
+void Editor::custom_update(float dt) {
 	InputManager &input_manager = InputManager::get();
 	DisplayManager &display_manager = DisplayManager::get();
 	RenderManager &render_manager = RenderManager::get();
-
-	//imgui new frame
-	ImGui_ImplOpenGL3_NewFrame();
-	ImGui_ImplGlfw_NewFrame();
-	ImGui::NewFrame();
-
-	DisplayManager::get().poll_events();
 
 	// Handle current gizmo operation
 	if (!controlling_camera && viewport_hovered) {
@@ -298,7 +251,8 @@ void Editor::update(float dt) {
 		}
 
 		if (input_manager.is_action_just_pressed("clear_selection")) {
-			scenes[active_scene].clear_selection();
+			auto editor_scene = dynamic_cast<EditorScene *>(scenes[active_scene].get());
+			get_editor_scene(active_scene).clear_selection();
 		}
 	}
 
@@ -318,9 +272,10 @@ void Editor::update(float dt) {
 	imgui_content_browser();
 	imgui_settings();
 	if (!scenes.empty()) {
-		inspector.world = &scenes[active_scene].world;
-		imgui_inspector(scenes[active_scene]);
-		imgui_scene(scenes[active_scene]);
+		auto &scene = get_editor_scene(active_scene);
+		inspector.world = &scene.world;
+		imgui_inspector(scene);
+		imgui_scene(scene);
 	} else {
 		ImGui::Begin("Scene");
 		ImGui::End();
@@ -330,7 +285,7 @@ void Editor::update(float dt) {
 
 	viewport_hovered = false;
 	for (int i = 0; i < scenes.size(); i++) {
-		Scene &scene = scenes[i];
+		auto &scene = dynamic_cast<EditorScene &>(*scenes[i]);
 		if (scene.is_visible) {
 			scene.update(dt);
 		}
@@ -344,28 +299,23 @@ void Editor::update(float dt) {
 		}
 		scene_deletion_queued = false;
 	}
-
-	input_manager.process_input();
-
-	render_manager.draw();
 }
 
 void Editor::create_scene(const std::string &name) {
-	Scene scene = {};
-	scene.name = name;
+	auto scene = std::make_unique<EditorScene>();
+	scene->name = name;
 
 	// Create RenderScene for scene
 	RenderManager &render_manager = RenderManager::get();
-	scene.render_scene_idx = render_manager.create_render_scene();
+	scene->render_scene_idx = render_manager.create_render_scene();
 
 	scenes.push_back(std::move(scene));
 }
 
-uint32_t Editor::get_scene_index(const std::string &name) {
-	for (int i = 0; i < scenes.size(); i++) {
-		if (scenes[i].name == name) {
-			return i;
-		}
-	}
-	return 0;
+EditorScene &Editor::get_editor_scene(uint32_t index) {
+	return dynamic_cast<EditorScene &>(*scenes[index]);
+}
+
+EditorScene &Editor::get_active_scene() {
+	return get_editor_scene(active_scene);
 }

@@ -1,11 +1,14 @@
 #include "ImGuizmo.h"
 #include "ecs/world.h"
 #include "editor.h"
+#include "input/input_manager.h"
 #include "inspector_gui.h"
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <imgui_stdlib.h>
 #include <filesystem>
+
+#include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
 
 #include "IconsMaterialDesign.h"
@@ -22,14 +25,14 @@ void Editor::imgui_menu_bar() {
 		}
 		if (ImGui::MenuItem(ICON_MD_SAVE " Save")) {
 			SPDLOG_INFO("Saving scene...");
-			if (scenes[active_scene].path.empty()) {
+			if (get_active_scene().path.empty()) {
 				nfdchar_t *out_path;
 				nfdfilteritem_t filter_item[1] = { { "Scene", "scn" } };
 				nfdresult_t result = NFD_SaveDialog(&out_path, filter_item, 1, nullptr, nullptr);
 				if (result == NFD_OKAY) {
 					auto filename = std::filesystem::path(out_path).filename().string();
-					scenes[active_scene].name = filename;
-					scenes[active_scene].save_to_file(out_path);
+					get_active_scene().name = filename;
+					get_active_scene().save_to_file(out_path);
 					NFD_FreePath(out_path);
 				} else if (result == NFD_CANCEL) {
 					puts("User pressed cancel.");
@@ -37,7 +40,7 @@ void Editor::imgui_menu_bar() {
 					printf("Error: %s\n", NFD_GetError());
 				}
 			} else {
-				scenes[active_scene].save_to_file();
+				get_active_scene().save_to_file("");
 			}
 		}
 		if (ImGui::MenuItem(ICON_MD_SAVE " Save as...")) {
@@ -47,8 +50,8 @@ void Editor::imgui_menu_bar() {
 			nfdresult_t result = NFD_SaveDialog(&out_path, filter_item, 1, nullptr, nullptr);
 			if (result == NFD_OKAY) {
 				auto filename = std::filesystem::path(out_path).filename().string();
-				scenes[active_scene].name = filename;
-				scenes[active_scene].save_to_file(out_path);
+				get_active_scene().name = filename;
+				get_active_scene().save_to_file(out_path);
 				NFD_FreePath(out_path);
 			} else if (result == NFD_CANCEL) {
 				puts("User pressed cancel.");
@@ -64,7 +67,7 @@ void Editor::imgui_menu_bar() {
 			if (result == NFD_OKAY) {
 				auto filename = std::filesystem::path(out_path).filename().string();
 				create_scene(filename);
-				scenes[scenes.size() - 1].load_from_file(out_path);
+				get_editor_scene(scenes.size() - 1).load_from_file(out_path);
 				NFD_FreePath(out_path);
 			} else if (result == NFD_CANCEL) {
 				puts("User pressed cancel.");
@@ -81,7 +84,7 @@ void Editor::imgui_menu_bar() {
 	ImGui::EndMainMenuBar();
 }
 
-void Editor::imgui_inspector(Scene &scene) {
+void Editor::imgui_inspector(EditorScene &scene) {
 	World &world = scene.world;
 	RenderManager &render_manager = RenderManager::get();
 	ImGui::Begin("Inspector");
@@ -107,7 +110,7 @@ void Editor::imgui_inspector(Scene &scene) {
 	ImGui::End();
 }
 
-void Editor::imgui_scene(Scene &scene) {
+void Editor::imgui_scene(EditorScene &scene) {
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 	ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(0, 0));
 
@@ -270,7 +273,7 @@ void Editor::imgui_scene(Scene &scene) {
 
 	ImGui::PopStyleVar(2);
 }
-void Editor::imgui_viewport(Scene &scene, uint32_t scene_index) {
+void Editor::imgui_viewport(EditorScene &scene, uint32_t scene_index) {
 	RenderManager &render_manager = RenderManager::get();
 
 	ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0);
