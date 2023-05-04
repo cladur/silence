@@ -37,10 +37,10 @@ Scene::Scene() {
 	world.register_component<ColliderOBB>();
 
 	// Systems
-	world.register_system<PhysicsSystem>();
-	world.register_system<CollisionSystem>();
-	world.register_system<ParentSystem>();
-	world.register_system<RenderSystem>();
+	world.register_system<PhysicsSystem>(UpdateOrder::EcsOnLoad);
+	world.register_system<CollisionSystem>(UpdateOrder::EcsOnStore);
+	world.register_system<ParentSystem>(UpdateOrder::EcsPreUpdate);
+	world.register_system<RenderSystem>(UpdateOrder::EcsOnUpdate);
 }
 
 void Scene::update(float dt) {

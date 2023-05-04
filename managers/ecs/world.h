@@ -8,6 +8,58 @@
 #include "system_manager.h"
 #include <memory>
 
+enum UpdateOrder {
+	EcsOnLoad,
+	EcsPostLoad,
+	EcsPreUpdate,
+	EcsOnUpdate,
+	EcsOnValidate,
+	EcsPostUpdate,
+	EcsPreStore,
+	EcsOnStore
+};
+
+template <typename T> class SortedVector {
+private:
+	std::vector<T> elements;
+	std::vector<UpdateOrder> priorities;
+	std::map<UpdateOrder, int> elements_per_phase;
+
+public:
+	void add(T element, UpdateOrder priority) {
+		int index = 0;
+		for (int i = 0; i < priority; i++) {
+			index += elements_per_phase[static_cast<UpdateOrder>(i)];
+		}
+		elements_per_phase[priority]++;
+		elements.insert(elements.begin() + index, element);
+		priorities.insert(priorities.begin() + index, priority);
+	}
+
+	T get(int index) {
+		return elements[index];
+	}
+
+	T operator[](int index) {
+		return elements[index];
+	}
+
+	std::vector<T>::iterator begin() {
+		return elements.begin();
+	}
+
+	// Add a method to get the end iterator
+	std::vector<T>::iterator end() {
+		return elements.end();
+	}
+
+	void print_values() {
+		for (int i = 0; i < elements.size(); i++) {
+			SPDLOG_WARN("Prio: {}", priorities[i]);
+		}
+	}
+};
+
 class World {
 private:
 	std::unique_ptr<ComponentManager> component_manager;
@@ -23,7 +75,7 @@ private:
 	std::vector<std::string> component_names;
 	std::unordered_map<std::string, int> component_ids;
 	int registered_components = 0;
-	std::vector<std::shared_ptr<BaseSystem>> systems;
+	SortedVector<std::shared_ptr<BaseSystem>> systems;
 
 public:
 	void startup();
@@ -99,15 +151,17 @@ public:
 	}
 
 	// System methods
-	template <typename T> void register_system() {
+	template <typename T> void register_system(UpdateOrder priority = UpdateOrder::EcsOnUpdate) {
 		auto system = system_manager->register_system<T>();
 		system->startup(*this);
-		systems.emplace_back(std::move(system));
+		//systems.emplace_back(std::move(system));
+		systems.add(std::move(system), priority);
 	}
 
 	void update(float dt) {
 		for (auto &system : systems) {
 			system->update(*this, dt);
+			systems.print_values();
 		}
 	}
 

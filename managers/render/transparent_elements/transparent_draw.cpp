@@ -1,7 +1,7 @@
 #include "transparent_draw.h"
 #include "display/display_manager.h"
 #include "render/render_scene.h"
-#include <_types/_uint32_t.h>
+//#include <_types/_uint32_t.h>
 #include <render/render_manager.h>
 #include <render/transparent_elements/ui/sprite_manager.h>
 
