@@ -73,7 +73,7 @@ void Engine::update(float dt) {
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
 
-	if (show_cvar_editor) {
+	if (true) {
 		CVarSystem::get()->draw_imgui_editor();
 	}
 
@@ -82,6 +82,7 @@ void Engine::update(float dt) {
 	custom_update(dt);
 
 	for (auto &scene : scenes) {
+		scene->update(dt);
 		scene->world.update(dt);
 	}
 

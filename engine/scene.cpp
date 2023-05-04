@@ -45,8 +45,6 @@ Scene::Scene() {
 }
 
 void Scene::update(float dt) {
-	world.update(dt);
-
 	get_render_scene().camera = camera;
 
 	for (auto &entity : entities) {
