@@ -20,11 +20,24 @@ void Editor::imgui_menu_bar() {
 	ImGui::BeginMainMenuBar();
 
 	if (ImGui::BeginMenu("File")) {
-		if (ImGui::MenuItem(ICON_MD_NEW_LABEL " New")) {
-			SPDLOG_INFO("Create scene...");
-			std::string name = fmt::format("New Scene {}", scenes.size());
-			create_scene(name);
+		if (ImGui::BeginMenu(ICON_MD_NEW_LABEL " New")) {
+			if (ImGui::MenuItem("Scene")) {
+				SPDLOG_INFO("Create scene...");
+				std::string name = fmt::format("New Scene {}", scenes.size());
+				create_scene(name);
+			}
+			if (ImGui::MenuItem("Archetype")) {
+				SPDLOG_INFO("Creating archetype...");
+				// TODO: Create archetype scene
+			}
+			if (ImGui::MenuItem("Prototype")) {
+				SPDLOG_INFO("Creating Prototype...");
+				// TODO: First show a file dialog to select a archetype
+				// After that create a prototype scene from it
+			}
+			ImGui::EndMenu();
 		}
+		// TODO: For "Save" and "Save as..." set different filters depending on the scene type (scn, arc, prt)
 		if (ImGui::MenuItem(ICON_MD_SAVE " Save")) {
 			SPDLOG_INFO("Saving scene...");
 			if (get_active_scene().path.empty()) {
@@ -82,9 +95,9 @@ void Editor::imgui_menu_bar() {
 			std::string archetype_or_prototype = is_archetype ? " prototype" : " archetype";
 			std::string menu_option = ICON_MD_AIRLINE_SEAT_LEGROOM_EXTRA " Save as " + archetype_or_prototype;
 			if (ImGui::MenuItem(menu_option.c_str())) {
-				std::string file_path = fmt::format("resources/archetypes/{}.arch", "name");
+				std::string file_path = fmt::format("resources/archetypes/{}.arc", "name");
 				if (is_archetype) {
-					file_path = fmt::format("resources/prototypes/{}.prot", "name");
+					file_path = fmt::format("resources/prototypes/{}.prt", "name");
 				}
 				Entity archetype_entity = get_editor_scene(active_scene).last_entity_selected;
 				if (archetype_entity <= 0) {
@@ -295,33 +308,33 @@ void Editor::imgui_scene(EditorScene &scene) {
 		}
 
 		ImGui::EndTable();
+	}
 
-		ImGui::EndChild();
+	ImGui::EndChild();
 
-		if (ImGui::BeginDragDropTarget()) {
-			SPDLOG_INFO("BeginDragDropTarget");
-			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_PROTOTYPE_PATH")) {
-				IM_ASSERT(payload->DataSize == sizeof(std::string));
-				// int payload_n = *(const int *)payload->Data;
-				// std::string prot_path = *(const std::string *)payload->Data;
-				std::string prot_path = drag_and_drop_path;
-				SPDLOG_INFO("payload");
+	if (ImGui::BeginDragDropTarget()) {
+		SPDLOG_INFO("BeginDragDropTarget");
+		if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_PROTOTYPE_PATH")) {
+			IM_ASSERT(payload->DataSize == sizeof(std::string));
+			// int payload_n = *(const int *)payload->Data;
+			// std::string prot_path = *(const std::string *)payload->Data;
+			std::string prot_path = drag_and_drop_path;
+			SPDLOG_INFO("payload");
 
-				Scene &scene = get_editor_scene(active_scene);
-				World &world = scene.world;
-				std::ifstream file(prot_path);
-				if (file.is_open()) {
-					nlohmann::json prototype_json;
-					file >> prototype_json;
-					world.deserialize_entity_json(prototype_json, scene.entities);
-					SPDLOG_INFO("Added prototype");
-				} else {
-					SPDLOG_ERROR("Failed to open {} prototype file", prot_path);
-				}
-				file.close();
+			Scene &scene = get_editor_scene(active_scene);
+			World &world = scene.world;
+			std::ifstream file(prot_path);
+			if (file.is_open()) {
+				nlohmann::json prototype_json;
+				file >> prototype_json;
+				world.deserialize_entity_json(prototype_json, scene.entities);
+				SPDLOG_INFO("Added prototype");
+			} else {
+				SPDLOG_ERROR("Failed to open {} prototype file", prot_path);
 			}
-			ImGui::EndDragDropTarget();
+			file.close();
 		}
+		ImGui::EndDragDropTarget();
 	}
 
 	ImGui::End();
@@ -698,7 +711,7 @@ void Editor::imgui_content_browser() {
 			if (entry.is_directory()) {
 				content_browser_current_path = entry.path().string();
 			} else {
-				if (extension == ".arch" || extension == ".prot") {
+				if (extension == ".arc" || extension == ".prt") {
 					SPDLOG_INFO("Creating {} scene", label);
 					create_scene(label, true);
 					Scene &scene = get_editor_scene(scenes.size() - 1);
@@ -716,7 +729,7 @@ void Editor::imgui_content_browser() {
 			}
 		}
 
-		if (extension == ".prot") {
+		if (extension == ".prt") {
 			if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
 				drag_and_drop_path = entry.path().string();
 				// Set payload to carry the index of our item (could be anything)
@@ -728,22 +741,6 @@ void Editor::imgui_content_browser() {
 				ImGui::EndDragDropSource();
 			}
 		}
-
-		//  else if (extension == ".prot") {
-		// 			Scene &scene = get_editor_scene(active_scene);
-		// 			World &world = scene.world;
-		// 			std::ifstream file(entry.path());
-		// 			if (file.is_open()) {
-		// 				nlohmann::json prototype_json;
-		// 				file >> prototype_json;
-		// 				world.deserialize_entity_json(prototype_json, scene.entities);
-		// 				Transform transform = world.get_component<Transform>(2);
-		// 				SPDLOG_ERROR("Transform: {}, {}, {}", transform.scale.x, transform.scale.y,
-		// transform.scale.z); 			} else { 				SPDLOG_ERROR("Failed to open {} prototype file",
-		// label);
-		// 			}
-		// 			file.close();
-		// 		}
 
 		ImGui::TableNextColumn();
 	}

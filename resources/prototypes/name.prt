@@ -1,8 +1,12 @@
 {
     "components": [
         {
+            "name": {
+                "name": "unnamed"
+            }
+        },
+        {
             "transform": {
-                "changed": false,
                 "orientation": {
                     "w": 1.0,
                     "x": 0.0,
@@ -15,15 +19,15 @@
                     "z": 0.0
                 },
                 "scale": {
-                    "x": 9.5,
-                    "y": 8.600000381469727,
+                    "x": 1.0,
+                    "y": 1.0,
                     "z": 1.0
                 }
             }
         },
         {
             "model_instance": {
-                "material_type": 2,
+                "material_type": 0,
                 "model_handle": 0
             }
         },
@@ -31,13 +35,8 @@
             "parent": {
                 "parent": 1
             }
-        },
-        {
-            "fmod_listener": {
-                "listener_id": 0
-            }
         }
     ],
     "entity": 0,
-    "signature": "00000000000000000000000011010010"
+    "signature": "00000000000000000000000001010011"
 }
