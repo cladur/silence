@@ -15,7 +15,6 @@ uniform vec3 camera_up;
 uniform vec3 camera_right;
 uniform vec3 camera_look;
 
-uniform vec2 size;
 uniform vec3 billboard_center;
 uniform int is_billboard;
 
