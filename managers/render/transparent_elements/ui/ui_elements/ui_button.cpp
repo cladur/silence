@@ -2,11 +2,8 @@
 #include <audio/audio_manager.h>
 #include <display/display_manager.h>
 #include <input/input_manager.h>
-#include <render/transparent_elements/text/text_draw.h>
 #include <render/transparent_elements/ui/sprite_manager.h>
-
-extern InputManager input_manager;
-extern AudioManager audio_manager;
+#include <render/render_scene.h>
 
 UIButton::UIButton(glm::vec3 position, glm::vec2 size, const std::string &text, const std::string &font_name,
 		const std::string &texture_name, const std::string &hover_sound_name, const std::string &click_sound_name) {
@@ -29,10 +26,11 @@ UIButton::UIButton(glm::vec3 position, glm::vec2 size, const std::string &text, 
 	//	}
 }
 
-void UIButton::draw() {
+void UIButton::draw(RenderScene *scene) {
 	if (!display) {
 		return;
 	}
+	auto &sprite_draw = scene->sprite_draw;
 	std::string tex = texture_name;
 	bool h = hovered();
 
@@ -40,30 +38,26 @@ void UIButton::draw() {
 		if (!hover_texture_name.empty()) {
 			tex = hover_texture_name;
 		}
-
-		if (!hover_event.path.empty() && !is_hovered) {
-			audio_manager.play_one_shot_2d(hover_event);
-			is_hovered = true;
-		}
 	}
 
 	if (texture_name.empty()) {
-		sprite_draw::draw_colored(position, size, color, is_screen_space);
+		sprite_draw.draw_colored(position, size, color, is_screen_space);
 	} else {
-		sprite_draw::draw_sprite(position, size, color, tex.c_str(), is_screen_space);
+		sprite_draw.draw_sprite(position, size, color, tex.c_str(), is_screen_space);
 	}
 
 	if (text.empty()) {
 		return;
 	}
-	// text_draw::draw_text(text, is_screen_space, position + glm::vec3(0.0f, 0.0f, 0.1f), text_color, text_scale,
-	// 		font_name, centered_x, centered_y, glm::vec3(0.0f));
+	scene->text_draw.draw_text(text, is_screen_space, position + glm::vec3(0.0f, 0.0f, 0.1f), text_color, text_scale,
+	 		font_name, centered_x, centered_y, glm::vec3(0.0f));
 }
 
-void UIButton::draw(glm::vec3 parent_position, glm::vec2 parent_size) {
+void UIButton::draw(RenderScene *scene, glm::vec3 parent_position, glm::vec2 parent_size) {
 	if (!display) {
 		return;
 	}
+
 	glm::vec3 new_pos = position + parent_position + glm::vec3(0.0f, 0.0f, 0.01f);
 	new_pos.z += 0.01f;
 
@@ -74,30 +68,19 @@ void UIButton::draw(glm::vec3 parent_position, glm::vec2 parent_size) {
 		if (!hover_texture_name.empty()) {
 			tex = hover_texture_name;
 		}
-
-		if (!hover_event.path.empty() && !is_hovered) {
-			audio_manager.play_one_shot_2d(hover_event);
-			is_hovered = true;
-		}
-	}
-
-	if (clicked()) {
-		if (!click_event.path.empty()) {
-			audio_manager.play_one_shot_2d(click_event);
-		}
 	}
 
 	if (texture_name.empty()) {
-		sprite_draw::draw_colored(new_pos, size, color, is_screen_space);
+		scene->sprite_draw.draw_colored(new_pos, size, color, is_screen_space);
 	} else {
-		sprite_draw::draw_sprite(new_pos, size, color, tex.c_str(), is_screen_space);
+		scene->sprite_draw.draw_sprite(new_pos, size, color, tex.c_str(), is_screen_space);
 	}
 
 	if (text.empty()) {
 		return;
 	}
-	// text_draw::draw_text(text, is_screen_space, new_pos + glm::vec3(0.0f, 0.0f, 0.5f), text_color, text_scale,
-	// 		font_name, centered_x, centered_y, glm::vec3(0.0f));
+	 scene->text_draw.draw_text(text, is_screen_space, new_pos + glm::vec3(0.0f, 0.0f, 0.5f), text_color, text_scale,
+	 		font_name, centered_x, centered_y, glm::vec3(0.0f));
 }
 
 bool UIButton::clicked() {
@@ -108,7 +91,7 @@ bool UIButton::clicked() {
 		return false;
 	}
 
-	auto mouse_pos = input_manager.get_mouse_position();
+	auto mouse_pos = InputManager::get().get_mouse_position();
 	mouse_pos.y = DisplayManager::get().get_window_size().y - mouse_pos.y;
 	mouse_pos.x = mouse_pos.x;
 	auto pos = position + parent_position;
@@ -139,7 +122,9 @@ bool UIButton::clicked() {
 	// check if mouse is over the button
 	if (mouse_pos.x > x_bounds.x && mouse_pos.x < x_bounds.y && mouse_pos.y > y_bounds.x && mouse_pos.y < y_bounds.y) {
 		// check if mouse is clicked
-		if (input_manager.is_action_just_pressed("mouse_left")) {
+		if (InputManager::get().is_action_just_pressed("mouse_left")) {
+			AudioManager::get().play_one_shot_2d(click_event);
+			SPDLOG_INFO("Button {} clicked. active: {}, display: {}", text, active, display);
 			return true;
 		}
 	}
@@ -154,7 +139,7 @@ bool UIButton::hovered() {
 		return false;
 	}
 
-	auto mouse_pos = input_manager.get_mouse_position();
+	auto mouse_pos = InputManager::get().get_mouse_position();
 	mouse_pos.y = DisplayManager::get().get_window_size().y - mouse_pos.y;
 	mouse_pos.x = mouse_pos.x;
 	auto pos = position + parent_position;
@@ -184,6 +169,10 @@ bool UIButton::hovered() {
 
 	// check if mouse is over the button
 	if (mouse_pos.x > x_bounds.x && mouse_pos.x < x_bounds.y && mouse_pos.y > y_bounds.x && mouse_pos.y < y_bounds.y) {
+		if (!is_hovered) {
+			AudioManager::get().play_one_shot_2d(hover_event);
+		}
+		is_hovered = true;
 		return true;
 	}
 	is_hovered = false;

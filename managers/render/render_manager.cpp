@@ -73,6 +73,7 @@ void RenderManager::shutdown() {
 }
 
 uint32_t RenderManager::create_render_scene() {
+	static int scene_count = 0;
 	RenderScene render_scene;
 	render_scene.startup();
 	render_scenes.push_back(render_scene);

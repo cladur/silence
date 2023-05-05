@@ -55,6 +55,9 @@ void AudioManager::load_startup_banks() {
 	FMOD_CHECK(system->loadBankFile(
 			(path_to_banks + "Master.strings" + bank_postfix).c_str(), FMOD_STUDIO_LOAD_BANK_NORMAL, &strings_bank));
 	SPDLOG_INFO("Audio Manager: Loaded bank: {}", (path_to_banks + "Master.strings" + bank_postfix).c_str());
+	load_bank("SFX");
+	load_bank("Music");
+	load_bank("Ambience");
 }
 
 void AudioManager::load_bank(const std::string &name) {

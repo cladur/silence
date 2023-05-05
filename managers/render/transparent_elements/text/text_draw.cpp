@@ -7,73 +7,6 @@ const uint32_t MAX_CHARACTERS = 1000;
 const uint32_t MAX_VERTEX_COUNT = 4 * MAX_CHARACTERS;
 const uint32_t MAX_INDEX_COUNT = 6 * MAX_CHARACTERS;
 
-void TextDraw::startup() {
-	glGenVertexArrays(1, &vao);
-	glGenBuffers(1, &vbo);
-	glGenBuffers(1, &ebo);
-
-	glBindVertexArray(vao);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
-	glBufferData(GL_ARRAY_BUFFER, MAX_VERTEX_COUNT * sizeof(TextVertex), nullptr, GL_DYNAMIC_DRAW);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, MAX_INDEX_COUNT * sizeof(uint32_t), nullptr, GL_DYNAMIC_DRAW);
-
-	// vertex positions
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(TextVertex), (void *)nullptr);
-	// vertex color
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(TextVertex), (void *)offsetof(TextVertex, color));
-	// vertex uv
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(TextVertex), (void *)offsetof(TextVertex, uv));
-	// is screen space
-	glEnableVertexAttribArray(3);
-	glVertexAttribIPointer(3, 1, GL_INT, sizeof(TextVertex), (void *)offsetof(TextVertex, is_screen_space));
-
-	glBindVertexArray(0);
-
-	shader.load_from_files(shader_path("text.vert"), shader_path("text.frag"));
-}
-
-void TextDraw::draw() {
-	ZoneScoped;
-	if (vertices.empty() || indices.empty()) {
-		return;
-	}
-
-	// TODO: Dynamically resize buffers?
-	if (vertices.size() > MAX_VERTEX_COUNT || indices.size() > MAX_INDEX_COUNT) {
-		SPDLOG_ERROR("Too many characters to draw!!!");
-		return;
-	}
-
-	shader.use();
-
-	// update buffers
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(TextVertex), &vertices[0]);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, indices.size() * sizeof(uint32_t), &indices[0]);
-
-	RenderManager &render_manager = RenderManager::get();
-	// shader.set_mat4("projection", render_manager->projection);
-	// shader.set_mat4("view", render_manager->view);
-	shader.set_int("font_atlas_map", 0);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, FontManager::get().fonts.begin()->second.texture.id);
-
-	glBindVertexArray(vao);
-	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
-	glBindVertexArray(0);
-
-	vertices.clear();
-	indices.clear();
-}
-
 void TextDraw::draw_text_2d(const std::string &text, const glm::vec2 &position, const glm::vec3 &color, float scale,
 		std::string font_name, bool center_x, bool center_y) {
 	draw_text(text, true, glm::vec3(position, 0.0f), color, scale, font_name);
@@ -108,7 +41,7 @@ void TextDraw::draw_text(const std::string &text, bool is_screen_space, const gl
 	float aspect = 1.0;
 
 	if (!is_screen_space) {
-		aspect = render_extent.x / render_extent.y;
+		aspect = current_scene->render_extent.x / current_scene->render_extent.y;
 		// We're scaling down the font even more if it's in screenspace coords, cause they are just [-1; 1]
 		scale *= 0.02f;
 	}
@@ -216,6 +149,6 @@ void TextDraw::draw_text(const std::string &text, bool is_screen_space, const gl
 	object.billboard = true;
 	object.size = text_size / 2.0f;
 	object.position = position;
-	// TODO: fix
-	// render_manager->transparent_draw.objects.push_back(object);
+
+	current_scene->transparent_objects.push_back(object);
 }

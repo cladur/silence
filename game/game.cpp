@@ -1,4 +1,5 @@
 #include "game.h"
+#include "audio/audio_manager.h"
 #include "display/display_manager.h"
 #include "input/input_manager.h"
 
@@ -27,6 +28,9 @@ void input_setup() {
 
 	input_manager.add_action("toggle_camera_control");
 	input_manager.add_key_to_action("toggle_camera_control", InputKey::ESCAPE);
+
+	input_manager.add_action("mouse_left");
+	input_manager.add_key_to_action("mouse_left", InputKey::MOUSE_LEFT);
 }
 
 void handle_camera(Camera &cam, float dt) {
@@ -76,6 +80,8 @@ void Game::custom_update(float dt) {
 		controlling_camera = !controlling_camera;
 		display_manager.capture_mouse(controlling_camera);
 	}
+
+	menu_test.update();
 
 	if (controlling_camera) {
 		Camera &cam = get_active_scene().camera;

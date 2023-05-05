@@ -9,14 +9,14 @@ public:
 	float min = 0.0f;
 	float max = 1.0f;
 	bool is_stepped = false;
-	sprite_draw::SliderAlignment slider_alignment = sprite_draw::SliderAlignment::LEFT_TO_RIGHT;
+	SliderAlignment slider_alignment = SliderAlignment::LEFT_TO_RIGHT;
 
 	UISlider() = default;
 	UISlider(float value, float min, float max);
 	~UISlider();
 
-	void draw() override;
-	void draw(glm::vec3 parent_position, glm::vec2 parent_size) override;
+	void draw(RenderScene *scene) override;
+	void draw(RenderScene *scene, glm::vec3 parent_position, glm::vec2 parent_size) override;
 };
 
 #endif //SILENCE_UI_SLIDER_H
