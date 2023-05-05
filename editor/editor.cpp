@@ -302,15 +302,34 @@ void Editor::custom_update(float dt) {
 	}
 }
 void Editor::create_scene(const std::string &name) {
-	create_scene(name, false);
+	create_scene(name, SceneType::GameScene);
 }
-void Editor::create_scene(const std::string &name, bool is_archetype) {
-	auto scene = std::make_unique<EditorScene>(is_archetype);
+void Editor::create_scene(const std::string &name, SceneType type, std::filesystem::path path) {
+	auto scene = std::make_unique<EditorScene>(type);
 	scene->name = name;
 
 	// Create RenderScene for scene
 	RenderManager &render_manager = RenderManager::get();
 	scene->render_scene_idx = render_manager.create_render_scene();
+
+	Entity entity;
+
+	switch (type) {
+		case SceneType::GameScene:
+			break;
+		case SceneType::Archetype:
+			entity = scene->world.create_entity();
+			scene->world.add_component<Transform>(entity, Transform{});
+			scene->entities.push_back(entity);
+			break;
+		case SceneType::Prototype:
+			nlohmann::json serialized_archetype;
+			std::ifstream file(path);
+			file >> serialized_archetype;
+			scene->world.deserialize_entity_json(serialized_archetype.back(), scene->entities);
+			file.close();
+			break;
+	}
 
 	scenes.push_back(std::move(scene));
 }
