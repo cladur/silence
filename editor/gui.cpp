@@ -1,20 +1,20 @@
-#include "ImGuizmo.h"
 #include "ecs/world.h"
 #include "editor.h"
 #include "input/input_manager.h"
-#include "inspector_gui.h"
-#include <imgui.h>
-#include <imgui_internal.h>
-#include <imgui_stdlib.h>
-#include <filesystem>
+#include "scene/scene_manager.h"
 
-#include <fstream>
+#include "inspector_gui.h"
+
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
 
+#include <imgui.h>
+#include <imgui_internal.h>
+#include <imgui_stdlib.h>
+
 #include "IconsMaterialDesign.h"
+#include "ImGuizmo.h"
 #include "nfd.h"
-#include "scene/scene_manager.h"
 
 void Editor::imgui_menu_bar() {
 	ImGui::BeginMainMenuBar();

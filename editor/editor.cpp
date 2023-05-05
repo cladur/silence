@@ -276,7 +276,6 @@ void Editor::custom_update(float dt) {
 		inspector.world = &scene.world;
 		World &w = scene.world;
 		Transform t = scene.world.get_component<Transform>(2);
-		SPDLOG_WARN("{} {} {}", t.scale.x, t.scale.y, t.scale.z);
 		imgui_inspector(scene);
 		imgui_scene(scene);
 	} else {

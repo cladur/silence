@@ -52,7 +52,6 @@ void Inspector::show_name() {
 
 void Inspector::show_transform() {
 	auto &transform = world->get_component<Transform>(selected_entity);
-	SPDLOG_WARN("Euler rot: {}, {}, {}", transform.scale.x, transform.scale.y, transform.scale.z);
 	bool changed = false;
 	if (ImGui::CollapsingHeader("Transform", tree_flags)) {
 		if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
@@ -75,8 +74,6 @@ void Inspector::show_transform() {
 
 		glm::vec3 euler_rot = glm::degrees(transform.get_euler_rot());
 		glm::vec3 prev_euler_rot = euler_rot;
-
-		SPDLOG_WARN("Euler rot: {}, {}, {}", transform.scale.x, transform.scale.y, transform.scale.z);
 
 		changed |= show_vec3("Position", transform.position);
 		changed |= show_vec3("Rotation", euler_rot, 1.0f);
