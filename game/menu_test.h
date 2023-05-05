@@ -8,6 +8,9 @@
 
 class MenuTest {
 private:
+
+	UIImage billboard_test;
+
 	UIAnchor root;
 	UIButton play_button;
 	UIButton options_button;

@@ -12,6 +12,13 @@ void MenuTest::startup(RenderScene &scene) {
 	SpriteManager::get()->load_sprite_texture("button_hover_square", "button_lit_square.ktx2");
 	SpriteManager::get()->load_sprite_texture("button_square", "button_unlit_square.ktx2");
 
+	billboard_test = UIImage(
+			glm::vec3(0.0f, 0.0f, 0.0f),
+			glm::vec2(2.0f, 2.0f),
+			"button_hover_square");
+	billboard_test.is_screen_space = false;
+	billboard_test.is_billboard = true;
+
 	root = UIAnchor(0.25f, 0.5f);
 	root.draw_anchor = true;
 
@@ -77,6 +84,7 @@ void MenuTest::startup(RenderScene &scene) {
 	options_root.add_child(minus_button);
 
 	// THE NECESSARY NEW PART (FOR NOW MAYBE)
+	scene.ui_draw.ui_objects.push_back(&billboard_test);
 	scene.ui_draw.ui_objects.push_back(&root);
 	scene.ui_draw.ui_objects.push_back(&title_root);
 	scene.ui_draw.ui_objects.push_back(&credits_root);

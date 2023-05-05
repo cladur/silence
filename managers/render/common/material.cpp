@@ -129,7 +129,6 @@ void MaterialTransparent::startup() {
 
 void MaterialTransparent::bind_resources(RenderScene &scene) {
 	shader.use();
-	shader.set_mat4("view", scene.view);
 }
 
 void MaterialTransparent::bind_instance_resources(ModelInstance &instance, Transform &transform) {
@@ -138,8 +137,10 @@ void MaterialTransparent::bind_instance_resources(ModelInstance &instance, Trans
 void MaterialTransparent::bind_object_resources(RenderScene &scene, TransparentObject &object) {
 	static Texture t;
 	static int textured = 0;
-	static glm::mat4 view = scene.view;
+	static glm::mat4 view;
 	static glm::vec2 window_size = DisplayManager::get().get_window_size();
+
+	view = scene.view;
 
 	if (object.type == TransparentType::TEXT) {
 		t = FontManager::get().fonts[object.texture_name].texture;
@@ -151,6 +152,7 @@ void MaterialTransparent::bind_object_resources(RenderScene &scene, TransparentO
 	}
 	textured = !object.texture_name.empty();
 
+	shader.set_mat4("view", view);
 	if (object.vertices[0].is_screen_space) {
 		shader.set_mat4("projection", glm::ortho(0.0f, window_size.x, 0.0f, window_size.y, 0.1f, 100.0f));
 	} else {
