@@ -28,7 +28,12 @@ void Editor::imgui_menu_bar() {
 			}
 			if (ImGui::MenuItem("Archetype")) {
 				SPDLOG_INFO("Creating archetype...");
-				// TODO: Create archetype scene
+				std::string name = fmt::format("New Archetype {}", scenes.size());
+				create_scene(name, true);
+				EditorScene &scene = get_editor_scene(scenes.size() - 1);
+				Entity entity = scene.world.create_entity();
+				scene.world.add_component<Transform>(entity, Transform{});
+				scene.entities.push_back(entity);
 			}
 			if (ImGui::MenuItem("Prototype")) {
 				SPDLOG_INFO("Creating Prototype...");
@@ -40,9 +45,14 @@ void Editor::imgui_menu_bar() {
 		// TODO: For "Save" and "Save as..." set different filters depending on the scene type (scn, arc, prt)
 		if (ImGui::MenuItem(ICON_MD_SAVE " Save")) {
 			SPDLOG_INFO("Saving scene...");
-			if (get_active_scene().path.empty()) {
+			EditorScene &scene = get_active_scene();
+			if (scene.path.empty()) {
 				nfdchar_t *out_path;
-				nfdfilteritem_t filter_item[1] = { { "Scene", "scn" } };
+				bool is_archetype = scene.is_archetype;
+				nfdfilteritem_t filter_scene[1] = { { "Scene", "scn" } };
+				nfdfilteritem_t filter_archetype[1] = { { "Archetype", "arc" } };
+				nfdfilteritem_t *filter_item = is_archetype ? filter_archetype : filter_scene;
+
 				nfdresult_t result = NFD_SaveDialog(&out_path, filter_item, 1, nullptr, nullptr);
 				if (result == NFD_OKAY) {
 					auto filename = std::filesystem::path(out_path).filename().string();
@@ -163,7 +173,8 @@ void Editor::imgui_scene(EditorScene &scene) {
 	ImGui::SetCursorPos(cursor_pos);
 
 	// ADD ENTITY BUTTON
-	if (ImGui::Button(ICON_MD_ADD, ImVec2(20, 20))) {
+	bool add_entity_button = !scene.is_archetype || scene.entities.empty();
+	if (add_entity_button && ImGui::Button(ICON_MD_ADD, ImVec2(20, 20))) {
 		ImGui::OpenPopup("Add Entity");
 	}
 
