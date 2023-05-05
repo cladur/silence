@@ -178,6 +178,8 @@ void Editor::imgui_scene(EditorScene &scene) {
 
 	static ImGuiTableFlags flags = ImGuiTableFlags_NoBordersInBody;
 
+	ImGui::BeginChild("DragDropTarget");
+
 	if (ImGui::BeginTable("Scene", 2, flags)) {
 		ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_None);
 		ImGui::TableSetupColumn("##", ImGuiTableColumnFlags_WidthFixed, 15.0f);
@@ -293,6 +295,33 @@ void Editor::imgui_scene(EditorScene &scene) {
 		}
 
 		ImGui::EndTable();
+
+		ImGui::EndChild();
+
+		if (ImGui::BeginDragDropTarget()) {
+			SPDLOG_INFO("BeginDragDropTarget");
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_PROTOTYPE_PATH")) {
+				IM_ASSERT(payload->DataSize == sizeof(std::string));
+				// int payload_n = *(const int *)payload->Data;
+				// std::string prot_path = *(const std::string *)payload->Data;
+				std::string prot_path = drag_and_drop_path;
+				SPDLOG_INFO("payload");
+
+				Scene &scene = get_editor_scene(active_scene);
+				World &world = scene.world;
+				std::ifstream file(prot_path);
+				if (file.is_open()) {
+					nlohmann::json prototype_json;
+					file >> prototype_json;
+					world.deserialize_entity_json(prototype_json, scene.entities);
+					SPDLOG_INFO("Added prototype");
+				} else {
+					SPDLOG_ERROR("Failed to open {} prototype file", prot_path);
+				}
+				file.close();
+			}
+			ImGui::EndDragDropTarget();
+		}
 	}
 
 	ImGui::End();
@@ -665,12 +694,12 @@ void Editor::imgui_content_browser() {
 
 		ImGui::EndGroup();
 
-		if (ImGui::IsItemClicked()) {
+		if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
 			if (entry.is_directory()) {
 				content_browser_current_path = entry.path().string();
 			} else {
-				if (extension == ".arch") {
-					SPDLOG_INFO("Creating {} archetype scene", label);
+				if (extension == ".arch" || extension == ".prot") {
+					SPDLOG_INFO("Creating {} scene", label);
 					create_scene(label, true);
 					Scene &scene = get_editor_scene(scenes.size() - 1);
 					World &world = scene.world;
@@ -680,26 +709,41 @@ void Editor::imgui_content_browser() {
 						file >> archetype_json;
 						world.deserialize_entity_json(archetype_json, scene.entities);
 					} else {
-						SPDLOG_ERROR("Failed to open {} archetype file", label);
-					}
-					file.close();
-				} else if (extension == ".prot" && !scenes.empty()) {
-					Scene &scene = get_editor_scene(active_scene);
-					World &world = scene.world;
-					std::ifstream file(entry.path());
-					if (file.is_open()) {
-						nlohmann::json prototype_json;
-						file >> prototype_json;
-						world.deserialize_entity_json(prototype_json, scene.entities);
-						Transform transform = world.get_component<Transform>(2);
-						SPDLOG_ERROR("Transform: {}, {}, {}", transform.scale.x, transform.scale.y, transform.scale.z);
-					} else {
-						SPDLOG_ERROR("Failed to open {} prototype file", label);
+						SPDLOG_ERROR("Failed to open {} file", label);
 					}
 					file.close();
 				}
 			}
 		}
+
+		if (extension == ".prot") {
+			if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
+				drag_and_drop_path = entry.path().string();
+				// Set payload to carry the index of our item (could be anything)
+				ImGui::SetDragDropPayload("DND_PROTOTYPE_PATH", &drag_and_drop_path, sizeof(std::string));
+
+				// Display preview (could be anything, e.g. when dragging an image we could decide to display
+				// the filename and a small preview of the image, etc.)
+				ImGui::Text("%s", label.c_str());
+				ImGui::EndDragDropSource();
+			}
+		}
+
+		//  else if (extension == ".prot") {
+		// 			Scene &scene = get_editor_scene(active_scene);
+		// 			World &world = scene.world;
+		// 			std::ifstream file(entry.path());
+		// 			if (file.is_open()) {
+		// 				nlohmann::json prototype_json;
+		// 				file >> prototype_json;
+		// 				world.deserialize_entity_json(prototype_json, scene.entities);
+		// 				Transform transform = world.get_component<Transform>(2);
+		// 				SPDLOG_ERROR("Transform: {}, {}, {}", transform.scale.x, transform.scale.y,
+		// transform.scale.z); 			} else { 				SPDLOG_ERROR("Failed to open {} prototype file",
+		// label);
+		// 			}
+		// 			file.close();
+		// 		}
 
 		ImGui::TableNextColumn();
 	}

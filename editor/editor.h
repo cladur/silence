@@ -18,6 +18,9 @@ public:
 	bool controlling_camera = false;
 	bool viewport_hovered = false;
 
+	// Drag and drop
+	std::string drag_and_drop_path;
+
 	// Gizmos
 	ImGuizmo::OPERATION current_gizmo_operation = ImGuizmo::TRANSLATE;
 	ImGuizmo::MODE current_gizmo_mode = ImGuizmo::WORLD;
