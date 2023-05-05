@@ -1,8 +1,8 @@
 #include "render_scene.h"
 
 #include "cvars/cvars.h"
-#include "render_manager.h"
 #include "game/menu_test.h"
+#include "render_manager.h"
 
 AutoCVarFloat cvar_fov = AutoCVarFloat("render.fov", "field of view", 70.0f);
 AutoCVarFloat cvar_draw_distance("render.draw_distance", "Distance cull", 5000);
