@@ -7,7 +7,7 @@ UIAnchor::UIAnchor(float x, float y) : x(x), y(y) {
 	size = glm::vec2(1.0f, 1.0f);
 	texture_name = "anchor_debug";
 	glm::vec2 d_size = DisplayManager::get().get_window_size();
-	position = glm::vec3(d_size.x * x, d_size.y * y, -99.0f);
+	position = glm::vec3(d_size.x * x, d_size.y * y, -5.0f);
 }
 
 void UIAnchor::draw(RenderScene *scene) {
@@ -28,6 +28,7 @@ void UIAnchor::draw(RenderScene *scene) {
 
 	for (auto &child : children) {
 		child->display = display;
+		child->parent_position = position;
 		child->draw(scene, position, size);
 	}
 }
@@ -49,6 +50,7 @@ void UIAnchor::draw(RenderScene *scene, glm::vec3 parent_position, glm::vec2 par
 	sprite_draw.draw_sprite(new_pos, size, color, texture_name.c_str(), is_screen_space, alignment);
 
 	for (auto &child : children) {
+		child->parent_position = new_pos;
 		child->draw(scene, new_pos, size);
 	}
 }

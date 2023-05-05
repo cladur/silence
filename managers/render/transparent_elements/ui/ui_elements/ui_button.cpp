@@ -124,7 +124,6 @@ bool UIButton::clicked() {
 		// check if mouse is clicked
 		if (InputManager::get().is_action_just_pressed("mouse_left")) {
 			AudioManager::get().play_one_shot_2d(click_event);
-			SPDLOG_INFO("Button {} clicked. active: {}, display: {}", text, active, display);
 			return true;
 		}
 	}

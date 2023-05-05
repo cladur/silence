@@ -62,9 +62,9 @@ TransparentObject SpriteDraw::default_vertex_data(const glm::vec3 &position, con
 	float sprite_y_aspect = 1.0f;
 
 	if (sprite_x_size > sprite_y_size) {
-		sprite_y_aspect = sprite_y_size / sprite_x_size;
+		sprite_y_aspect = (float)sprite_y_size / (float)sprite_x_size;
 	} else {
-		sprite_x_aspect = sprite_x_size / sprite_y_size;
+		sprite_x_aspect = (float)sprite_x_size / (float)sprite_y_size;
 	}
 
 	float x = aligned_position.x * aspect;
