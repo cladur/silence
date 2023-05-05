@@ -6,6 +6,9 @@
 
 AutoCVarFloat cvar_fov = AutoCVarFloat("render.fov", "field of view", 70.0f);
 AutoCVarFloat cvar_draw_distance("render.draw_distance", "Distance cull", 5000);
+AutoCVarFloat cvar_debug_cube_x_rotation("debug_cube.x_rotation", "Rotation of the debug cube on x axis", 0.0f, CVarFlags::EditFloatDrag);
+AutoCVarFloat cvar_debug_cube_y_rotation("debug_cube.y_rotation", "Rotation of the debug cube on y axis", 0.0f, CVarFlags::EditFloatDrag);
+AutoCVarFloat cvar_debug_cube_z_rotation("debug_cube.z_rotation", "Rotation of the debug cube on z axis", 0.0f, CVarFlags::EditFloatDrag);
 
 void RenderScene::startup() {
 	unlit_pass.startup();
@@ -48,6 +51,15 @@ void RenderScene::draw() {
 		debug_draw.draw_line(glm::vec3(i, 0, -10), glm::vec3(i, 0, 10), color);
 		debug_draw.draw_line(glm::vec3(-10, 0, i), glm::vec3(10, 0, i), color);
 	}
+
+	debug_draw.draw_box(
+			glm::vec3(5.0f, 0.0f, 0.0f),
+			glm::vec3(
+					cvar_debug_cube_x_rotation.get(),
+					cvar_debug_cube_y_rotation.get(),
+					cvar_debug_cube_z_rotation.get()),
+			glm::vec3(1.0f, 1.0f, 1.0f),
+			glm::vec3(0.0f, 0.0f, 1.0f));
 
 	// Clear the screen
 	glad_glClearColor(0.275f, 0.275f, 0.275f, 1.0f);
