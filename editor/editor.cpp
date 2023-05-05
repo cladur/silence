@@ -274,6 +274,9 @@ void Editor::custom_update(float dt) {
 	if (!scenes.empty()) {
 		auto &scene = get_editor_scene(active_scene);
 		inspector.world = &scene.world;
+		World &w = scene.world;
+		Transform t = scene.world.get_component<Transform>(2);
+		SPDLOG_WARN("{} {} {}", t.scale.x, t.scale.y, t.scale.z);
 		imgui_inspector(scene);
 		imgui_scene(scene);
 	} else {
@@ -285,6 +288,7 @@ void Editor::custom_update(float dt) {
 
 	viewport_hovered = false;
 	for (int i = 0; i < scenes.size(); i++) {
+		World &w = scenes[i]->world;
 		auto &scene = dynamic_cast<EditorScene &>(*scenes[i]);
 		if (scene.is_visible) {
 			scene.update(dt);
@@ -300,9 +304,11 @@ void Editor::custom_update(float dt) {
 		scene_deletion_queued = false;
 	}
 }
-
 void Editor::create_scene(const std::string &name) {
-	auto scene = std::make_unique<EditorScene>();
+	create_scene(name, false);
+}
+void Editor::create_scene(const std::string &name, bool is_archetype) {
+	auto scene = std::make_unique<EditorScene>(is_archetype);
 	scene->name = name;
 
 	// Create RenderScene for scene

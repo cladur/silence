@@ -181,7 +181,8 @@ public:
 	bool remove_child(Entity parent, Entity child, bool keep_transform = false);
 	bool has_child(Entity parent, Entity child);
 	bool reparent(Entity new_parent, Entity child, bool keep_transform = false);
-	void serialize_entity_json(nlohmann::json &json, Entity entity);
+	void serialize_entity_json(nlohmann::json &json, Entity entity, bool is_archetype = false);
+	void deserialize_entity_json(nlohmann::json &json, std::vector<Entity> &entities);
 	void deserialize_entities_json(nlohmann::json &json, std::vector<Entity> &entities);
 	void print_components();
 

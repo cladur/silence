@@ -30,6 +30,7 @@ public:
 		obj["position"] = nlohmann::json::object();
 		obj["orientation"] = nlohmann::json::object();
 		obj["scale"] = nlohmann::json::object();
+		obj["changed"] = true;
 		obj["position"]["x"] = position.x;
 		obj["position"]["y"] = position.y;
 		obj["position"]["z"] = position.z;
@@ -46,7 +47,7 @@ public:
 
 	void deserialize_json(nlohmann::json &j) {
 		nlohmann::json obj = Serializer::get_data("transform", j);
-		SPDLOG_WARN(obj.dump());
+		this->changed = obj["changed"];
 		position.x = obj["position"]["x"];
 		position.y = obj["position"]["y"];
 		position.z = obj["position"]["z"];

@@ -37,6 +37,7 @@ public:
 	uint32_t scene_to_delete = 0;
 	bool scene_deletion_queued = false;
 	void create_scene(const std::string &name) override;
+	void create_scene(const std::string &name, bool is_archetype);
 	EditorScene &get_editor_scene(uint32_t index);
 	EditorScene &get_active_scene();
 

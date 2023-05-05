@@ -8,11 +8,13 @@
 #include <imgui_stdlib.h>
 #include <filesystem>
 
+#include <fstream>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
 
 #include "IconsMaterialDesign.h"
 #include "nfd.h"
+#include "scene/scene_manager.h"
 
 void Editor::imgui_menu_bar() {
 	ImGui::BeginMainMenuBar();
@@ -73,6 +75,30 @@ void Editor::imgui_menu_bar() {
 				puts("User pressed cancel.");
 			} else {
 				printf("Error: %s\n", NFD_GetError());
+			}
+		}
+		if (!scenes.empty()) {
+			bool is_archetype = get_editor_scene(active_scene).is_archetype;
+			std::string archetype_or_prototype = is_archetype ? " prototype" : " archetype";
+			std::string menu_option = ICON_MD_AIRLINE_SEAT_LEGROOM_EXTRA " Save as " + archetype_or_prototype;
+			if (ImGui::MenuItem(menu_option.c_str())) {
+				std::string file_path = fmt::format("resources/archetypes/{}.arch", "name");
+				if (is_archetype) {
+					file_path = fmt::format("resources/prototypes/{}.prot", "name");
+				}
+				Entity archetype_entity = get_editor_scene(active_scene).last_entity_selected;
+				if (archetype_entity <= 0) {
+					puts("No entity selected");
+				} else {
+					World &world = get_editor_scene(active_scene).world;
+					nlohmann::json entity_json;
+					world.serialize_entity_json(entity_json, archetype_entity, true);
+
+					std::ofstream file(file_path);
+					file << entity_json.dump(4);
+
+					file.close();
+				}
 			}
 		}
 		if (ImGui::MenuItem(ICON_MD_CLOSE " Exit")) {
@@ -643,7 +669,35 @@ void Editor::imgui_content_browser() {
 			if (entry.is_directory()) {
 				content_browser_current_path = entry.path().string();
 			} else {
-				SPDLOG_INFO("Clicked on file {}", entry.path().string());
+				if (extension == ".arch") {
+					SPDLOG_INFO("Creating {} archetype scene", label);
+					create_scene(label, true);
+					Scene &scene = get_editor_scene(scenes.size() - 1);
+					World &world = scene.world;
+					std::ifstream file(entry.path());
+					if (file.is_open()) {
+						nlohmann::json archetype_json;
+						file >> archetype_json;
+						world.deserialize_entity_json(archetype_json, scene.entities);
+					} else {
+						SPDLOG_ERROR("Failed to open {} archetype file", label);
+					}
+					file.close();
+				} else if (extension == ".prot" && !scenes.empty()) {
+					Scene &scene = get_editor_scene(active_scene);
+					World &world = scene.world;
+					std::ifstream file(entry.path());
+					if (file.is_open()) {
+						nlohmann::json prototype_json;
+						file >> prototype_json;
+						world.deserialize_entity_json(prototype_json, scene.entities);
+						Transform transform = world.get_component<Transform>(2);
+						SPDLOG_ERROR("Transform: {}, {}, {}", transform.scale.x, transform.scale.y, transform.scale.z);
+					} else {
+						SPDLOG_ERROR("Failed to open {} prototype file", label);
+					}
+					file.close();
+				}
 			}
 		}
 

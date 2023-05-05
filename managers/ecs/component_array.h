@@ -3,6 +3,7 @@
 
 #include "component_array_interface.h"
 #include "core/serialization.h"
+#include <spdlog/spdlog.h>
 #include <memory>
 
 // An interface is needed so that the ComponentManager (seen later)
@@ -25,7 +26,6 @@ public:
 	void update_data(Entity entity, T component) {
 		assert(entityToIndexMap.find(entity) != entityToIndexMap.end() && "Component does not exist");
 
-		// Update existing entry
 		componentArray[entityToIndexMap[entity]] = component;
 	}
 

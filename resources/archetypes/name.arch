@@ -1,0 +1,38 @@
+{
+    "components": [
+        {
+            "transform": {
+                "changed": true,
+                "orientation": {
+                    "w": 1.0,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "position": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 11.5,
+                    "y": 16.200000762939453,
+                    "z": -120.80000305175781
+                }
+            }
+        },
+        {
+            "parent": {
+                "parent": 1
+            }
+        },
+        {
+            "model_instance": {
+                "material_type": 0,
+                "model_handle": 0
+            }
+        }
+    ],
+    "entity": 0,
+    "signature": "00000000000000000000000001010010"
+}

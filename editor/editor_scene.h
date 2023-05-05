@@ -5,11 +5,12 @@
 
 struct EditorScene : public Scene {
 	bool is_visible = false;
+	bool is_archetype = false;
 	bool viewport_hovered = false;
 	bool controlling_camera = false;
 	ImVec2 last_viewport_size = ImVec2(0, 0);
 
-	EditorScene();
+	EditorScene(bool is_archetype = false);
 	void update(float dt) override;
 
 	void save_to_file(const std::string &path) override;
