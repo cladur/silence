@@ -23,7 +23,6 @@ public:
 	int32_t get_ticks_per_second() const;
 	double get_duration() const;
 	const HierarchyData &get_root_node() const;
-	const std::unordered_map<std::string, Joint> &get_joint_map() const;
 	Bone *find_bone(const std::string &name);
 
 private:

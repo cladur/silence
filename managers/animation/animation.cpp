@@ -165,10 +165,6 @@ const HierarchyData &Animation::get_root_node() const {
 	return root_node;
 }
 
-const std::unordered_map<std::string, Joint> &Animation::get_joint_map() const {
-	return joint_map;
-}
-
 Bone *Animation::find_bone(const std::string &name) {
 	auto iter =
 			std::find_if(bones.begin(), bones.end(), [&](const Bone &Bone) { return Bone.get_bone_name() == name; });
