@@ -274,8 +274,6 @@ void Editor::custom_update(float dt) {
 	if (!scenes.empty()) {
 		auto &scene = get_editor_scene(active_scene);
 		inspector.world = &scene.world;
-		World &w = scene.world;
-		Transform t = scene.world.get_component<Transform>(2);
 		imgui_inspector(scene);
 		imgui_scene(scene);
 	} else {
