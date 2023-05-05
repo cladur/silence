@@ -11,6 +11,7 @@ void MenuTest::startup(RenderScene &scene) {
 	SpriteManager::get()->load_sprite_texture("button", "button_unlit_1.ktx2");
 	SpriteManager::get()->load_sprite_texture("button_hover_square", "button_lit_square.ktx2");
 	SpriteManager::get()->load_sprite_texture("button_square", "button_unlit_square.ktx2");
+	SpriteManager::get()->load_sprite_texture("anchor_debug", "anchor_debug.ktx2");
 
 	billboard_test = UIImage(
 			glm::vec3(0.0f, 0.0f, 0.0f),
@@ -20,7 +21,6 @@ void MenuTest::startup(RenderScene &scene) {
 	billboard_test.is_billboard = true;
 
 	root = UIAnchor(0.25f, 0.5f);
-	root.draw_anchor = true;
 
 	play_button = UIButton(glm::vec3(0.0f, 200.0f, 0.0f), glm::vec2(300.0f, 300.0f), "Play", "PoltawskiNowy", "button");
 	play_button.hover_texture_name = "button_hover";
@@ -36,6 +36,7 @@ void MenuTest::startup(RenderScene &scene) {
 	root.add_child(credits_button);
 
 	title_root = UIAnchor(0.75f, 0.5f);
+	title_root.draw_anchor = true;
 
 	title_text = UIText(glm::vec3(0.0f, 0.0f, 0.0f), 1.4f, "Silence", "PoltawskiNowy");
 	title_text.centered_x = true;
