@@ -190,3 +190,14 @@ FMOD::Studio::EventInstance *AudioManager::create_event_instance(const std::stri
 
 	return event_instance;
 }
+
+bool AudioManager::set_global_param_by_name(const std::string &name, float value) {
+	float val;
+	FMOD_RESULT res = system->getParameterByName(name.c_str(), &val);
+	if (res != FMOD_OK) {
+		SPDLOG_ERROR("Audio Manager: Failed to get parameter {}. {}", name, FMOD_ErrorString(res));
+		return false;
+	}
+	FMOD_CHECK(system->setParameterByName(name.c_str(), value));
+	return true;
+}

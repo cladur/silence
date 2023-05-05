@@ -68,6 +68,8 @@ public:
 	static FMOD_3D_ATTRIBUTES to_3d_attributes(glm::vec3 position, RigidBody *rigid_body = nullptr);
 
 	FMOD_GUID path_to_guid(const std::string &path);
+
+	bool set_global_param_by_name(const std::string &name, float value);
 };
 
 #endif //SILENCE_AUDIO_MANAGER_H
