@@ -24,8 +24,8 @@ void handle_camera(Camera &cam, float dt) {
 	cam.rotate(mouse_delta.x * dt, mouse_delta.y * dt);
 }
 
-EditorScene::EditorScene(bool is_archetype) {
-	this->is_archetype = is_archetype;
+EditorScene::EditorScene(SceneType type) {
+	this->type = type;
 	multi_select_parent = world.create_entity();
 	world.add_component<Transform>(multi_select_parent, Transform());
 }

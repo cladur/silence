@@ -1,1 +1,0 @@
-[{"components":[{"transform":{"orientation":{"w":1.0,"x":0.0,"y":0.0,"z":0.0},"position":{"x":0.0,"y":0.0,"z":0.0},"scale":{"x":9.300000190734863,"y":1.0,"z":1.0}}},{"model_instance":{"material_type":2,"model_handle":0}}],"entity":2,"signature":"00000000000000000000000001000010"}]

@@ -5,6 +5,7 @@
 
 #include "inspector_gui.h"
 
+#include <cstddef>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
 
@@ -29,16 +30,25 @@ void Editor::imgui_menu_bar() {
 			if (ImGui::MenuItem("Archetype")) {
 				SPDLOG_INFO("Creating archetype...");
 				std::string name = fmt::format("New Archetype {}", scenes.size());
-				create_scene(name, true);
-				EditorScene &scene = get_editor_scene(scenes.size() - 1);
-				Entity entity = scene.world.create_entity();
-				scene.world.add_component<Transform>(entity, Transform{});
-				scene.entities.push_back(entity);
+				create_scene(name, SceneType::Archetype);
 			}
 			if (ImGui::MenuItem("Prototype")) {
 				SPDLOG_INFO("Creating Prototype...");
 				// TODO: First show a file dialog to select a archetype
 				// After that create a prototype scene from it
+				nfdchar_t *in_path;
+				nfdfilteritem_t filter_item[1] = { { "Archetype", "arc" } };
+
+				nfdresult_t result = NFD_OpenDialog(&in_path, filter_item, 1, nullptr);
+				if (result == NFD_OKAY) {
+					std::string name = fmt::format("New Prototype {}", scenes.size());
+					create_scene(name, SceneType::Prototype, in_path);
+					NFD_FreePath(in_path);
+				} else if (result == NFD_CANCEL) {
+					puts("User pressed cancel.");
+				} else {
+					printf("Error: %s\n", NFD_GetError());
+				}
 			}
 			ImGui::EndMenu();
 		}
@@ -48,10 +58,22 @@ void Editor::imgui_menu_bar() {
 			EditorScene &scene = get_active_scene();
 			if (scene.path.empty()) {
 				nfdchar_t *out_path;
-				bool is_archetype = scene.is_archetype;
 				nfdfilteritem_t filter_scene[1] = { { "Scene", "scn" } };
 				nfdfilteritem_t filter_archetype[1] = { { "Archetype", "arc" } };
-				nfdfilteritem_t *filter_item = is_archetype ? filter_archetype : filter_scene;
+				nfdfilteritem_t filter_prototype[1] = { { "Prototype", "prt" } };
+				nfdfilteritem_t *filter_item;
+
+				switch (scene.type) {
+					case SceneType::GameScene:
+						filter_item = filter_scene;
+						break;
+					case SceneType::Archetype:
+						filter_item = filter_archetype;
+						break;
+					case SceneType::Prototype:
+						filter_item = filter_prototype;
+						break;
+				}
 
 				nfdresult_t result = NFD_SaveDialog(&out_path, filter_item, 1, nullptr, nullptr);
 				if (result == NFD_OKAY) {
@@ -71,12 +93,20 @@ void Editor::imgui_menu_bar() {
 		if (ImGui::MenuItem(ICON_MD_SAVE " Save as...")) {
 			SPDLOG_INFO("Saving scene as...");
 			nfdchar_t *out_path;
-			nfdfilteritem_t filter_item[1] = { { "Scene", "scn" } };
-			nfdresult_t result = NFD_SaveDialog(&out_path, filter_item, 1, nullptr, nullptr);
+			nfdfilteritem_t filter_item[3] = { { "Scene", "scn" }, { "Archetype", "arc" }, { "Prototype", "prt" } };
+			nfdresult_t result = NFD_SaveDialog(&out_path, filter_item, 3, nullptr, nullptr);
 			if (result == NFD_OKAY) {
 				auto filename = std::filesystem::path(out_path).filename().string();
+				auto extension = std::filesystem::path(out_path).extension().string();
 				get_active_scene().name = filename;
 				get_active_scene().save_to_file(out_path);
+				if (extension == ".scn") {
+					get_active_scene().type = SceneType::GameScene;
+				} else if (extension == ".arc") {
+					get_active_scene().type = SceneType::Archetype;
+				} else if (extension == ".prt") {
+					get_active_scene().type = SceneType::Prototype;
+				}
 				NFD_FreePath(out_path);
 			} else if (result == NFD_CANCEL) {
 				puts("User pressed cancel.");
@@ -87,12 +117,34 @@ void Editor::imgui_menu_bar() {
 		if (ImGui::MenuItem(ICON_MD_FOLDER_OPEN " Load")) {
 			SPDLOG_INFO(ICON_MD_CLOSE "Loading scene...");
 			nfdchar_t *out_path;
-			nfdfilteritem_t filter_item[1] = { { "Scene", "scn" } };
-			nfdresult_t result = NFD_OpenDialog(&out_path, filter_item, 1, nullptr);
+			nfdfilteritem_t filter_item[3] = { { "Scene", "scn" }, { "Archetype", "arc" }, { "Prototype", "prt" } };
+			nfdresult_t result = NFD_OpenDialog(&out_path, filter_item, 3, nullptr);
 			if (result == NFD_OKAY) {
 				auto filename = std::filesystem::path(out_path).filename().string();
-				create_scene(filename);
-				get_editor_scene(scenes.size() - 1).load_from_file(out_path);
+				auto extension = std::filesystem::path(out_path).extension().string();
+				if (extension == ".scn") {
+					create_scene(filename);
+				} else if (extension == ".arc") {
+					create_scene(filename, SceneType::Archetype);
+				} else if (extension == ".prt") {
+					if (scenes.empty()) {
+						SPDLOG_WARN("Can't load prototype into empty scene");
+					} else {
+						EditorScene &active_scene = get_active_scene();
+						bool is_archetype_or_prototype =
+								active_scene.type == SceneType::Archetype || active_scene.type == SceneType::Prototype;
+						if (!is_archetype_or_prototype) {
+							nlohmann::json entity_json;
+							std::ifstream file(out_path);
+							file >> entity_json;
+							active_scene.world.deserialize_entity_json(entity_json.back(), active_scene.entities);
+							file.close();
+						} else {
+							SPDLOG_WARN("Can't load prototype into archetype scene");
+						}
+					}
+				}
+
 				NFD_FreePath(out_path);
 			} else if (result == NFD_CANCEL) {
 				puts("User pressed cancel.");
@@ -100,39 +152,13 @@ void Editor::imgui_menu_bar() {
 				printf("Error: %s\n", NFD_GetError());
 			}
 		}
-		if (!scenes.empty()) {
-			bool is_archetype = get_editor_scene(active_scene).is_archetype;
-			std::string archetype_or_prototype = is_archetype ? " prototype" : " archetype";
-			std::string menu_option = ICON_MD_AIRLINE_SEAT_LEGROOM_EXTRA " Save as " + archetype_or_prototype;
-			if (ImGui::MenuItem(menu_option.c_str())) {
-				std::string file_path = fmt::format("resources/archetypes/{}.arc", "name");
-				if (is_archetype) {
-					file_path = fmt::format("resources/prototypes/{}.prt", "name");
-				}
-				Entity archetype_entity = get_editor_scene(active_scene).last_entity_selected;
-				if (archetype_entity <= 0) {
-					puts("No entity selected");
-				} else {
-					World &world = get_editor_scene(active_scene).world;
-					nlohmann::json entity_json;
-					world.serialize_entity_json(entity_json, archetype_entity, true);
-
-					std::ofstream file(file_path);
-					file << entity_json.dump(4);
-
-					file.close();
-				}
-			}
-		}
 		if (ImGui::MenuItem(ICON_MD_CLOSE " Exit")) {
 			should_run = false;
 		}
 		ImGui::EndMenu();
 	}
-
 	ImGui::EndMainMenuBar();
 }
-
 void Editor::imgui_inspector(EditorScene &scene) {
 	World &world = scene.world;
 	RenderManager &render_manager = RenderManager::get();
@@ -173,7 +199,8 @@ void Editor::imgui_scene(EditorScene &scene) {
 	ImGui::SetCursorPos(cursor_pos);
 
 	// ADD ENTITY BUTTON
-	bool add_entity_button = !scene.is_archetype || scene.entities.empty();
+	bool add_entity_button =
+			!(scene.type == SceneType::Archetype) & !(scene.type == SceneType::Prototype) || scene.entities.empty();
 	if (add_entity_button && ImGui::Button(ICON_MD_ADD, ImVec2(20, 20))) {
 		ImGui::OpenPopup("Add Entity");
 	}
@@ -722,9 +749,9 @@ void Editor::imgui_content_browser() {
 			if (entry.is_directory()) {
 				content_browser_current_path = entry.path().string();
 			} else {
-				if (extension == ".arc" || extension == ".prt") {
+				if (extension == ".arc") {
 					SPDLOG_INFO("Creating {} scene", label);
-					create_scene(label, true);
+					create_scene(label, SceneType::Archetype);
 					Scene &scene = get_editor_scene(scenes.size() - 1);
 					World &world = scene.world;
 					std::ifstream file(entry.path());
@@ -736,6 +763,23 @@ void Editor::imgui_content_browser() {
 						SPDLOG_ERROR("Failed to open {} file", label);
 					}
 					file.close();
+				} else if (extension == ".prt") {
+					if (scenes.empty()) {
+						create_scene(label, SceneType::Prototype, entry.path());
+					} else {
+						EditorScene &active_scene = get_active_scene();
+						bool is_archetype_or_prototype =
+								active_scene.type == SceneType::Archetype || active_scene.type == SceneType::Prototype;
+						if (!is_archetype_or_prototype) {
+							nlohmann::json entity_json;
+							std::ifstream file(entry.path());
+							file >> entity_json;
+							active_scene.world.deserialize_entity_json(entity_json.back(), active_scene.entities);
+							file.close();
+						} else {
+							SPDLOG_WARN("Can't load prototype into archetype scene");
+						}
+					}
 				}
 			}
 		}
