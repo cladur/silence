@@ -48,6 +48,9 @@ void Inspector::show_components() {
 }
 
 void Inspector::show_name() {
+	ImGui::CollapsingHeader("Name");
+
+	remove_component_popup<Name>();
 }
 
 void Inspector::show_transform() {
