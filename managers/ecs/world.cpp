@@ -114,35 +114,38 @@ bool World::reparent(Entity new_parent, Entity child, bool keep_transform) {
 	return add_child(new_parent, child);
 }
 
-void World::serialize_entity_json(nlohmann::json &json, Entity entity) {
-	json["entity"] = entity;
+void World::serialize_entity_json(nlohmann::json &json, Entity entity, bool is_archetype) {
+	Entity entity_to_serialize = is_archetype ? 0 : entity;
+	json["entity"] = entity_to_serialize;
 	json["signature"] = entity_manager->get_signature(entity).to_string();
 	json["components"] = nlohmann::json::array();
 	component_manager->serialize_entity(json["components"], entity);
 }
 
-void World::deserialize_entities_json(nlohmann::json &json, std::vector<Entity> &entities) {
+void World::deserialize_entity_json(nlohmann::json &json, std::vector<Entity> &entities) {
+	Entity serialized_entity = json["entity"];
+	serialized_entity = serialized_entity == 0 ? create_entity() : serialized_entity;
+	entities.push_back(serialized_entity);
+	SPDLOG_INFO("Entity {} created or loaded", serialized_entity);
+
+	std::string string_signature = json["signature"];
+	std::reverse(string_signature.begin(), string_signature.end());
+
 	serialization::IdToClassConstructor map = SceneManager::get_class_map();
-	Entity entity{};
-	Signature signature{};
-	std::string string_signature{};
-	for (auto &array_entity : json) {
-		entity = array_entity["entity"];
-		entities.push_back(entity);
-		SPDLOG_INFO("Entity {} created or loaded", entity);
-		create_entity(entity);
 
-		string_signature = array_entity["signature"];
-		std::reverse(string_signature.begin(), string_signature.end());
+	for (int i = 0; i < string_signature.size(); i++) {
+		int component_active = string_signature[i] - '0';
+		if (component_active) {
+			auto component = map[i](json["components"]);
 
-		for (int i = 0; i < string_signature.size(); i++) {
-			int component_active = string_signature[i] - '0';
-			if (component_active) {
-				auto component = map[i](array_entity["components"]);
-
-				ComponentVisitor::visit(*this, entity, component);
-			}
+			ComponentVisitor::visit(*this, serialized_entity, component);
 		}
+	}
+}
+
+void World::deserialize_entities_json(nlohmann::json &json, std::vector<Entity> &entities) {
+	for (auto &array_entity : json) {
+		deserialize_entity_json(array_entity, entities);
 	}
 }
 Signature World::get_entity_signature(Entity entity) {

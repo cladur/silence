@@ -8,7 +8,7 @@
 #include <glm/gtx/matrix_decompose.hpp>
 struct Transform {
 private:
-	bool changed;
+	bool changed = true;
 	bool changed_this_frame = false;
 
 	glm::mat4 local_model_matrix = glm::mat4(1.0f);
@@ -46,7 +46,7 @@ public:
 
 	void deserialize_json(nlohmann::json &j) {
 		nlohmann::json obj = Serializer::get_data("transform", j);
-		SPDLOG_WARN(obj.dump());
+		changed = true;
 		position.x = obj["position"]["x"];
 		position.y = obj["position"]["y"];
 		position.z = obj["position"]["z"];
@@ -99,7 +99,7 @@ public:
 		return glm::quat_cast(global_model_matrix);
 	}
 
-	[[nodiscard]] bool is_changed_this_frame() {
+	[[nodiscard]] bool is_changed_this_frame() const {
 		//		if (changed_this_frame) {
 		//			changed_this_frame = false;
 		//			return true;

@@ -24,8 +24,6 @@ void ModelInstance::serialize_json(nlohmann::json &j) {
 
 void ModelInstance::deserialize_json(nlohmann::json &j) {
 	nlohmann::json obj = Serializer::get_data("model_instance", j);
-	SPDLOG_WARN(obj.type_name());
-	SPDLOG_WARN(obj.dump());
 	model_handle = static_cast<Handle<Model>>(obj["model_handle"]);
 	material_type = static_cast<MaterialType>(obj["material_type"]);
 	// mesh = render_manager.get_mesh(obj["mesh"]);

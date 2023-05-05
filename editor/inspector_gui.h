@@ -31,8 +31,6 @@ private:
 	static void show_checkbox(const char *label, bool &value);
 	static void show_text(const char *label, const char *value);
 
-	int current_component_id = 0;
-
 	template <typename T> void remove_component_popup() {
 		std::string popup_name = fmt::format("Remove {}", typeid(T).name());
 		if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
@@ -47,7 +45,8 @@ private:
 
 	template <typename T> void remove_component_menu_item() {
 		if (ImGui::MenuItem("Remove component")) {
-			remove_component_queue.push(std::make_pair(selected_entity, current_component_id));
+			// Type to component id
+			remove_component_queue.emplace(selected_entity, world->get_component_id<T>());
 		}
 	}
 
