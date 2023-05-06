@@ -19,14 +19,16 @@ struct BufferSizes {
 };
 
 struct AnimationInfo {
-	std::unordered_map<uint64_t, BufferSizes> sizes;
-	std::unordered_map<uint64_t, std::string> node_names;
+	std::vector<BufferSizes> sizes;
+	std::vector<std::string> node_names;
 	size_t full_size;
+	float duration_seconds;
 	std::string original_file;
 };
 
+AnimationInfo read_animation_info(AssetFile *file);
 assets::AssetFile pack_animation(AnimationInfo *info, char *node_data);
-//void unpack_mesh(AnimationInfo *info, const char *source_buffer, size_t source_size, char *node_data);
+void unpack_animation(AnimationInfo *info, const char *source_buffer, std::vector<assets::NodeAnimation> &nodes);
 
 } //namespace assets
 

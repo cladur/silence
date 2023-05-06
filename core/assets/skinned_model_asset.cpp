@@ -5,27 +5,19 @@ assets::SkinnedModelInfo assets::read_skinned_model_info(AssetFile *file) {
 	SkinnedModelInfo info;
 	nlohmann::json model_metadata = nlohmann::json::parse(file->json);
 
-	//info.node_matrices = std::unordered_map<uint64_t,int>(model_metadata["node_matrices"]) ;
-	for (const auto &pair : model_metadata["node_matrices"].items()) {
-		auto value = pair.value();
-		info.node_matrices[value[0]] = value[1];
+	for (auto &[key, value] : model_metadata["bone_names"].items()) {
+		info.bone_names.push_back(value[1]);
 	}
 
-	//info.node_names = std::unordered_map<uint64_t, std::string>(model_metadata["node_names"]);
-	//auto nodenames =;
-	for (auto &[key, value] : model_metadata["node_names"].items()) {
-		info.node_names[value[0]] = value[1];
+	for (auto &[key, value] : model_metadata["bone_parents"].items()) {
+		info.bone_parents.push_back(value[1]);
 	}
+	info.bone_rotation_buffer_size = model_metadata["bone_rotation_buffer_size"];
+	info.bone_translation_buffer_size = model_metadata["bone_translation_buffer_size"];
 
-	//info.node_parents = std::unordered_map<uint64_t, uint64_t>(model_metadata["node_parents"]);
+	std::unordered_map<uint64_t, nlohmann::json> mesh_nodes = model_metadata["node_meshes"];
 
-	for (auto &[key, value] : model_metadata["node_parents"].items()) {
-		info.node_parents[value[0]] = value[1];
-	}
-
-	std::unordered_map<uint64_t, nlohmann::json> meshnodes = model_metadata["node_meshes"];
-
-	for (auto pair : meshnodes) {
+	for (auto pair : mesh_nodes) {
 		assets::SkinnedModelInfo::NodeMesh node;
 
 		node.mesh_path = pair.second["mesh_path"];
@@ -34,19 +26,15 @@ assets::SkinnedModelInfo assets::read_skinned_model_info(AssetFile *file) {
 		info.node_meshes[pair.first] = node;
 	}
 
-	size_t nmatrices = file->binary_blob.size() / (sizeof(float) * 16);
-	info.matrices.resize(nmatrices);
-
-	memcpy(info.matrices.data(), file->binary_blob.data(), file->binary_blob.size());
-
 	return info;
 }
 
-assets::AssetFile assets::pack_model(const SkinnedModelInfo &info) {
+assets::AssetFile assets::pack_model(const SkinnedModelInfo &info, char *bone_data) {
 	nlohmann::json model_metadata;
-	model_metadata["node_matrices"] = info.node_matrices;
-	model_metadata["node_names"] = info.node_names;
-	model_metadata["node_parents"] = info.node_parents;
+	model_metadata["bone_names"] = info.bone_names;
+	model_metadata["bone_parents"] = info.bone_parents;
+	model_metadata["bone_rotation_buffer_size"] = info.bone_rotation_buffer_size;
+	model_metadata["bone_translation_buffer_size"] = info.bone_translation_buffer_size;
 
 	std::unordered_map<uint64_t, nlohmann::json> meshindex;
 	for (const auto &pair : info.node_meshes) {
@@ -55,7 +43,6 @@ assets::AssetFile assets::pack_model(const SkinnedModelInfo &info) {
 		meshnode["material_path"] = pair.second.material_path;
 		meshindex[pair.first] = meshnode;
 	}
-
 	model_metadata["node_meshes"] = meshindex;
 
 	//core file header
@@ -66,8 +53,9 @@ assets::AssetFile assets::pack_model(const SkinnedModelInfo &info) {
 	file.type[3] = 'L';
 	file.version = 1;
 
-	file.binary_blob.resize(info.matrices.size() * sizeof(float) * 16);
-	memcpy(file.binary_blob.data(), info.matrices.data(), info.matrices.size() * sizeof(float) * 16);
+	size_t full_size = info.bone_translation_buffer_size + info.bone_rotation_buffer_size;
+	file.binary_blob.resize(full_size);
+	memcpy(file.binary_blob.data(), bone_data, full_size);
 
 	std::string stringified = model_metadata.dump();
 	file.json = stringified;

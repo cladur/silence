@@ -9,7 +9,7 @@ struct SkinnedVertexPNV32 {
 	float normal[3];
 	float uv[2];
 	float weight[4];
-	int32_t joint_id[4];
+	int32_t joint[4]; // joint is bone_id
 };
 
 struct SkinnedVertexP32N8C8V16 {
@@ -18,7 +18,7 @@ struct SkinnedVertexP32N8C8V16 {
 	uint8_t weight[4];
 	float position[3];
 	float uv[2];
-	int32_t joint_id[4];
+	int32_t joint[4];
 };
 
 enum class SkinnedVertexFormat : uint32_t {

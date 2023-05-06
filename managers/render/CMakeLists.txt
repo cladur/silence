@@ -25,7 +25,9 @@ add_library(${OPENGL_MANAGER_NAME} STATIC
         transparent_elements/ui/ui_elements/ui_anchor.cpp transparent_elements/ui/ui_elements/ui_anchor.h
         transparent_elements/ui/ui_elements/ui_image.cpp transparent_elements/ui/ui_elements/ui_image.h
         transparent_elements/ui/ui_elements/ui_text.cpp transparent_elements/ui/ui_elements/ui_text.h
-        transparent_elements/ui/ui_elements/ui_button.cpp transparent_elements/ui/ui_elements/ui_button.h)
+        transparent_elements/ui/ui_elements/ui_button.cpp transparent_elements/ui/ui_elements/ui_button.h
+        common/skinned_mesh.cpp common/skinned_mesh.h
+        common/skinned_model.cpp common/skinned_model.h)
 
 # Include directories
 target_include_directories(${OPENGL_MANAGER_NAME} PUBLIC ${MANAGER_DIR})
