@@ -23,6 +23,7 @@ private:
 	void show_modelinstance();
 	void show_fmodlistener();
 	void show_collidertag();
+	void show_statictag();
 	void show_collidersphere();
 	void show_collideraabb();
 	void show_colliderobb();

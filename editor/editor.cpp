@@ -304,7 +304,7 @@ void Editor::custom_update(float dt) {
 void Editor::create_scene(const std::string &name) {
 	create_scene(name, SceneType::GameScene);
 }
-void Editor::create_scene(const std::string &name, SceneType type, std::filesystem::path path) {
+void Editor::create_scene(const std::string &name, SceneType type, const std::string &path) {
 	auto scene = std::make_unique<EditorScene>(type);
 	scene->name = name;
 
@@ -316,7 +316,9 @@ void Editor::create_scene(const std::string &name, SceneType type, std::filesyst
 
 	switch (type) {
 		case SceneType::GameScene:
-			scene->load_from_file(path);
+			if (!path.empty()) {
+				scene->load_from_file(path);
+			}
 			break;
 		case SceneType::Archetype:
 			entity = scene->world.create_entity();
