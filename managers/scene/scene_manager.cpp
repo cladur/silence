@@ -26,7 +26,7 @@ void SceneManager::save_json_to_file(const std::string &file_name, const nlohman
 		std::filesystem::remove(path);
 	}
 	std::ofstream file(file_name);
-	file << json.dump();
+	file << json.dump(4);
 	file.close();
 	SPDLOG_INFO("Saved scene to file {}", file_name);
 }

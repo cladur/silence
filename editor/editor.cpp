@@ -316,6 +316,7 @@ void Editor::create_scene(const std::string &name, SceneType type, std::filesyst
 
 	switch (type) {
 		case SceneType::GameScene:
+			scene->load_from_file(path);
 			break;
 		case SceneType::Archetype:
 			entity = scene->world.create_entity();

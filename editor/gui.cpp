@@ -123,9 +123,9 @@ void Editor::imgui_menu_bar() {
 				auto filename = std::filesystem::path(out_path).filename().string();
 				auto extension = std::filesystem::path(out_path).extension().string();
 				if (extension == ".scn") {
-					create_scene(filename);
+					create_scene(filename, SceneType::GameScene, out_path);
 				} else if (extension == ".arc") {
-					create_scene(filename, SceneType::Archetype);
+					create_scene(filename, SceneType::Archetype, out_path);
 				} else if (extension == ".prt") {
 					if (scenes.empty()) {
 						SPDLOG_WARN("Can't load prototype into empty scene");
