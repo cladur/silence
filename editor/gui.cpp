@@ -785,7 +785,7 @@ void Editor::imgui_content_browser() {
 		}
 
 		if (extension == ".prt") {
-			if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
+			if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
 				drag_and_drop_path = entry.path().string();
 				// Set payload to carry the index of our item (could be anything)
 				ImGui::SetDragDropPayload("DND_PROTOTYPE_PATH", &drag_and_drop_path, sizeof(std::string));
