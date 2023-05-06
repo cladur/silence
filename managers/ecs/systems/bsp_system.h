@@ -18,10 +18,10 @@ struct BSPNode {
 
 class BSPSystem : public BaseSystem {
 public:
-	void startup(World &world);
-	void update(World &world, class CollisionSystem &collision_system);
+	void startup(World &world) override;
+	void update(World &world);
 	void resolve_collision(
-			World &world, BSPNode *node, Entity entity, class CollisionSystem &collision_system, bool force = false);
+			World &world, BSPNode *node, Entity entity, bool force = false);
 
 	std::shared_ptr<BSPNode> root;
 	void build_tree(World &world, int32_t depth);

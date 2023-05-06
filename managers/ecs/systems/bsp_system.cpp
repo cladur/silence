@@ -1,4 +1,5 @@
 #include "bsp_system.h"
+#include <physics/physics_manager.h>
 
 #include "collision_system.h"
 #include "components/collider_tag_component.h"
@@ -6,28 +7,28 @@
 #include "ecs/world.h"
 
 void BSPSystem::startup(World &world) {
-	Signature signature;
-	signature.set(world.get_component_type<ColliderTag>());
-	signature.set(world.get_component_type<StaticTag>());
-	world.set_system_component_whitelist<BSPSystem>(signature);
+	Signature white_signature, black_signature;
+	white_signature.set(world.get_component_type<ColliderTag>());
+	//white_signature.set(world.get_component_type<StaticTag>());
+	world.set_system_component_whitelist<BSPSystem>(white_signature);
 }
 
-void BSPSystem::update(World &world, CollisionSystem &collision_system) {
-	for (const Entity entity : collision_system.entities) {
-		resolve_collision(world, root.get(), entity, collision_system);
+void BSPSystem::update(World &world) {
+	for (const Entity entity : entities) {
+		resolve_collision(world, root.get(), entity);
 	}
 }
 
 void BSPSystem::resolve_collision(
-		World &world, BSPNode *node, Entity entity, CollisionSystem &collision_system, bool force) {
+		World &world, BSPNode *node, Entity entity, bool force) {
 	if (node == nullptr) {
 		return;
 	}
-	collision_system.resolve_collision(world, entity, node->entities);
+	PhysicsManager::get().resolve_collision(world, entity, node->entities);
 
 	if (force) {
-		resolve_collision(world, node->front.get(), entity, collision_system, force);
-		resolve_collision(world, node->back.get(), entity, collision_system, force);
+		resolve_collision(world, node->front.get(), entity, force);
+		resolve_collision(world, node->back.get(), entity, force);
 	}
 
 	Side side;
@@ -58,12 +59,12 @@ void BSPSystem::resolve_collision(
 	}
 
 	if (side == Side::FRONT) {
-		resolve_collision(world, node->front.get(), entity, collision_system);
+		resolve_collision(world, node->front.get(), entity);
 	} else if (side == Side::BACK) {
-		resolve_collision(world, node->back.get(), entity, collision_system, force);
+		resolve_collision(world, node->back.get(), entity, force);
 	} else {
-		resolve_collision(world, node->front.get(), entity, collision_system, true);
-		resolve_collision(world, node->back.get(), entity, collision_system, true);
+		resolve_collision(world, node->front.get(), entity, true);
+		resolve_collision(world, node->back.get(), entity, true);
 	}
 }
 

@@ -10,6 +10,7 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+#include "physics/physics_manager.h"
 
 void Engine::startup() {
 	// Managers
@@ -21,6 +22,7 @@ void Engine::startup() {
 	AudioManager::get().startup();
 	AdaptiveMusicManager::get().startup("adaptive_music_test");
 	AdaptiveMusicManager::get().play();
+	PhysicsManager::get();
 
 	FontManager::get().load_font("resources/fonts/PoltawskiNowy.ttf", 48, "PoltawskiNowy");
 }

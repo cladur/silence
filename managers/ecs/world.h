@@ -90,6 +90,10 @@ public:
 		component_manager->register_component<T>();
 
 		std::string type_name = typeid(T).name();
+		// if typename starts with struct, remove it
+		if (type_name.substr(0, 7) == "struct ") {
+			type_name.erase(0, 7);
+		}
 		// Remove number prefix from type name
 		while (type_name[0] >= '0' && type_name[0] <= '9') {
 			type_name.erase(0, 1);
@@ -174,10 +178,16 @@ public:
 
 	template <typename T> int get_component_id() {
 		std::string type_name = typeid(T).name();
+
+		// if typename starts with struct, remove it
+		if (type_name.substr(0, 7) == "struct ") {
+			type_name.erase(0, 7);
+		}
 		// Remove number prefix from type name
 		while (type_name[0] >= '0' && type_name[0] <= '9') {
 			type_name.erase(0, 1);
 		}
+
 		return component_ids[type_name];
 	}
 

@@ -765,7 +765,7 @@ void Editor::imgui_content_browser() {
 					file.close();
 				} else if (extension == ".prt") {
 					if (scenes.empty()) {
-						create_scene(label, SceneType::Prototype, entry.path());
+						create_scene(label, SceneType::Prototype, entry.path().string());
 					} else {
 						EditorScene &active_scene = get_active_scene();
 						bool is_archetype_or_prototype =
