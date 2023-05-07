@@ -110,6 +110,4 @@ void Scene::load_from_file(const std::string &path) {
 	SceneManager::load_scene_from_json_file(world, scene_json, "", entities);
 
 	bsp_tree = BSPSystem::build_tree(world, entities, 2);
-
-	BSPSystem::log_tree(bsp_tree.get());
 }

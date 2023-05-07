@@ -35,18 +35,16 @@ void ColliderDrawSystem::update(World &world, float dt) {
 					);
 		}
 
-		if (world.has_component<ColliderOBB>(entity)) {
-			auto col = world.get_component<ColliderOBB>(entity);
-			auto transform = world.get_component<Transform>(entity);
-		    world.get_parent_scene()->get_render_scene().debug_draw.draw_box(
-					transform.position + col.center,
-					transform.orientation,
-					col.range * 2.0f,
-					glm::vec3(1.0f, 1.0f, 1.0f)
-					);
-
-
-			// todo implement obb collider draw
-		}
+		// todo implement this when obb colliders are fixed
+//		if (world.has_component<ColliderOBB>(entity)) {
+//			auto col = world.get_component<ColliderOBB>(entity);
+//			auto transform = world.get_component<Transform>(entity);
+//		    world.get_parent_scene()->get_render_scene().debug_draw.draw_box(
+//					transform.position + col.center,
+//					transform.orientation,
+//					col.range * 2.0f,
+//					glm::vec3(1.0f, 1.0f, 1.0f)
+//					);
+//		}
 	}
 }

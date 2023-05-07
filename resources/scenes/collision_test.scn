@@ -2,26 +2,6 @@
     {
         "components": [
             {
-                "model_instance": {
-                    "material_type": 2,
-                    "model_handle": 0
-                }
-            },
-            {
-                "rigidbody": {
-                    "acceleration": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    "velocity": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    }
-                }
-            },
-            {
                 "name": {
                     "name": "static_box_left"
                 }
@@ -44,6 +24,26 @@
                         "y": 1.0,
                         "z": 1.0
                     }
+                }
+            },
+            {
+                "rigidbody": {
+                    "acceleration": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "velocity": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    }
+                }
+            },
+            {
+                "model_instance": {
+                    "material_type": 2,
+                    "model_handle": 0
                 }
             },
             {
@@ -73,26 +73,6 @@
     {
         "components": [
             {
-                "model_instance": {
-                    "material_type": 2,
-                    "model_handle": 0
-                }
-            },
-            {
-                "rigidbody": {
-                    "acceleration": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    "velocity": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    }
-                }
-            },
-            {
                 "name": {
                     "name": "static_box_right"
                 }
@@ -115,6 +95,26 @@
                         "y": 1.0,
                         "z": 1.0
                     }
+                }
+            },
+            {
+                "rigidbody": {
+                    "acceleration": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "velocity": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    }
+                }
+            },
+            {
+                "model_instance": {
+                    "material_type": 2,
+                    "model_handle": 0
                 }
             },
             {
@@ -144,26 +144,6 @@
     {
         "components": [
             {
-                "model_instance": {
-                    "material_type": 1,
-                    "model_handle": 0
-                }
-            },
-            {
-                "rigidbody": {
-                    "acceleration": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    "velocity": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    }
-                }
-            },
-            {
                 "name": {
                     "name": "player_test"
                 }
@@ -186,6 +166,26 @@
                         "y": 1.0,
                         "z": 1.0
                     }
+                }
+            },
+            {
+                "rigidbody": {
+                    "acceleration": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "velocity": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    }
+                }
+            },
+            {
+                "model_instance": {
+                    "material_type": 1,
+                    "model_handle": 0
                 }
             },
             {
@@ -212,9 +212,28 @@
     {
         "components": [
             {
-                "model_instance": {
-                    "material_type": 2,
-                    "model_handle": 0
+                "name": {
+                    "name": "static_box_three"
+                }
+            },
+            {
+                "transform": {
+                    "orientation": {
+                        "w": 0.727546751499176,
+                        "x": 0.43773767352104187,
+                        "y": -0.19574575126171112,
+                        "z": 0.4906577467918396
+                    },
+                    "position": {
+                        "x": -0.2997121512889862,
+                        "y": 0.0,
+                        "z": 5.823513984680176
+                    },
+                    "scale": {
+                        "x": 1.0000004768371582,
+                        "y": 1.0000007152557373,
+                        "z": 1.0000003576278687
+                    }
                 }
             },
             {
@@ -232,42 +251,32 @@
                 }
             },
             {
-                "name": {
-                    "name": "static_box_three"
+                "model_instance": {
+                    "material_type": 2,
+                    "model_handle": 0
                 }
-            },
-            {
-                "transform": {
-                    "orientation": {
-                        "w": 1.0,
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    "position": {
-                        "x": 0.3050559163093567,
-                        "y": 0.0,
-                        "z": 0.6477009057998657
-                    },
-                    "scale": {
-                        "x": 1.0,
-                        "y": 1.0,
-                        "z": 1.0
-                    }
-                }
-            },
-            {
-                "static_tag": {}
             },
             {
                 "collider_tag": {}
             },
             {
-                "collider_aabb": {
+                "collider_obb": {
                     "center": {
                         "x": 0.0,
                         "y": 0.5,
                         "z": 0.0
+                    },
+                    "orientation": {
+                        "0": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                        },
+                        "1": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                        }
                     },
                     "range": {
                         "x": 0.5,
@@ -278,6 +287,6 @@
             }
         ],
         "entity": 5,
-        "signature": "00000000000000000000101101000111"
+        "signature": "00000000000000000001001001000111"
     }
 ]
