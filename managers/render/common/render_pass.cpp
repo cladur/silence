@@ -1,5 +1,7 @@
 #include "render_pass.h"
 #include "material.h"
+#include "render/common/framebuffer.h"
+#include "render/common/utils.h"
 #include "render/render_manager.h"
 
 void UnlitPass::startup() {
@@ -29,17 +31,7 @@ void PBRPass::startup() {
 void PBRPass::draw(RenderScene &scene) {
 	RenderManager &render_manager = RenderManager::get();
 	material.bind_resources(scene);
-	for (auto &cmd : draw_commands) {
-		ModelInstance &instance = *cmd.model_instance;
-		Transform &transform = *cmd.transform;
-		material.bind_instance_resources(instance, transform);
-		Model &model = render_manager.get_model(instance.model_handle);
-		for (auto &mesh : model.meshes) {
-			material.bind_mesh_resources(mesh);
-			mesh.draw();
-		}
-	}
-	draw_commands.clear();
+	utils::render_quad();
 }
 
 void SkyboxPass::startup() {
@@ -89,15 +81,36 @@ void TransparentPass::startup() {
 	material.startup();
 }
 
+void GBufferPass::startup() {
+	material.startup();
+}
+
+void GBufferPass::draw(RenderScene &scene) {
+	RenderManager &render_manager = RenderManager::get();
+	material.bind_resources(scene);
+	for (auto &cmd : draw_commands) {
+		ModelInstance &instance = *cmd.model_instance;
+		Transform &transform = *cmd.transform;
+		material.bind_instance_resources(instance, transform);
+		Model &model = render_manager.get_model(instance.model_handle);
+		for (auto &mesh : model.meshes) {
+			material.bind_mesh_resources(mesh);
+			mesh.draw();
+		}
+	}
+	draw_commands.clear();
+}
+
 void TransparentPass::draw(RenderScene &scene) {
 	RenderManager &render_manager = RenderManager::get();
 	static std::vector<TransparentObject> screen_space_objects;
 	glm::vec3 cam_pos = scene.camera_pos;
 
 	// transparency sorting for world-space objects
-	std::sort(scene.transparent_objects.begin(), scene.transparent_objects.end(), [cam_pos](const TransparentObject &a, const TransparentObject &b) {
-		return glm::distance(cam_pos, a.position) > glm::distance(cam_pos, b.position);
-	});
+	std::sort(scene.transparent_objects.begin(), scene.transparent_objects.end(),
+			[cam_pos](const TransparentObject &a, const TransparentObject &b) {
+				return glm::distance(cam_pos, a.position) > glm::distance(cam_pos, b.position);
+			});
 
 	material.bind_resources(scene);
 

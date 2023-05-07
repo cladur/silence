@@ -2,6 +2,7 @@
 
 #include "core/components/transform_component.h"
 #include "ecs/world.h"
+#include "engine/scene.h"
 #include "managers/render/render_manager.h"
 
 void RenderSystem::startup(World &world) {
@@ -14,10 +15,10 @@ void RenderSystem::startup(World &world) {
 void RenderSystem::update(World &world, float dt) {
 	RenderManager &render_manager = RenderManager::get();
 
-	// for (auto const &entity : entities) {
-	// 	auto &transform = world.get_component<Transform>(entity);
-	// 	auto &model_instance = world.get_component<ModelInstance>(entity);
+	for (auto const &entity : entities) {
+		auto &transform = world.get_component<Transform>(entity);
+		auto &model_instance = world.get_component<ModelInstance>(entity);
 
-	// 	render_manager.queue_draw(&model_instance, &transform);
-	// }
+		world.get_parent_scene()->get_render_scene().queue_draw(&model_instance, &transform);
+	}
 }

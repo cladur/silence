@@ -45,6 +45,13 @@ public:
 	void draw(RenderScene &scene) override;
 };
 
+class GBufferPass : public RenderPass {
+public:
+	MaterialGBuffer material;
+	void startup() override;
+	void draw(RenderScene &scene) override;
+};
+
 class TransparentPass : public RenderPass {
 private:
 	//  render data

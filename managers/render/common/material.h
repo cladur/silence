@@ -52,4 +52,12 @@ public:
 	void bind_object_resources(RenderScene &scene, TransparentObject &object);
 };
 
+class MaterialGBuffer : public Material {
+public:
+	void startup() override;
+	void bind_resources(RenderScene &scene) override;
+	void bind_instance_resources(ModelInstance &instance, Transform &transform) override;
+	void bind_mesh_resources(Mesh &mesh);
+};
+
 #endif // SILENCE_MATERIAL_H

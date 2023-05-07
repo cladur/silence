@@ -5,6 +5,7 @@
 
 #include "camera/camera.h"
 
+#include "render/common/material.h"
 #include "render_pass.h"
 
 #include "render/render_manager.h"
@@ -39,6 +40,57 @@ void MaterialPBR::startup() {
 
 void MaterialPBR::bind_resources(RenderScene &scene) {
 	shader.use();
+	shader.set_vec3("camPos", scene.camera_pos);
+	shader.set_int("gPosition", 0);
+	shader.set_int("gNormal", 1);
+	shader.set_int("gAlbedo", 2);
+	shader.set_int("gAoRoughMetal", 3);
+
+	shader.set_int("irradiance_map", 5);
+	shader.set_int("prefilter_map", 6);
+	shader.set_int("brdf_lut", 7);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.position_texture_id);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.normal_texture_id);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.albedo_texture_id);
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.ao_rough_metal_texture_id);
+
+	glActiveTexture(GL_TEXTURE5);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, scene.skybox_pass.skybox.irradiance_map.id);
+	glActiveTexture(GL_TEXTURE6);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, scene.skybox_pass.skybox.prefilter_map.id);
+
+	glActiveTexture(GL_TEXTURE7);
+	// TODO: Use baked brdf lut instead (it's broken atm)
+	glBindTexture(GL_TEXTURE_2D, scene.skybox_pass.skybox.brdf_lut_texture);
+
+	shader.set_vec3("lightPositions[0]", glm::vec3(0.0f, 0.0f, 0.0f));
+	shader.set_vec3("lightPositions[1]", glm::vec3(0.0f, 0.0f, 0.0f));
+	shader.set_vec3("lightPositions[2]", glm::vec3(0.0f, 0.0f, 0.0f));
+	shader.set_vec3("lightPositions[3]", scene.camera_pos);
+
+	shader.set_vec3("lightColors[0]", glm::vec3(0.0f, 0.0f, 0.0f));
+	shader.set_vec3("lightColors[1]", glm::vec3(0.0f, 0.0f, 0.0f));
+	shader.set_vec3("lightColors[2]", glm::vec3(0.0f, 0.0f, 0.0f));
+	shader.set_vec3("lightColors[3]", glm::vec3(1.0f, 1.0f, 1.0f));
+}
+
+void MaterialPBR::bind_instance_resources(ModelInstance &instance, Transform &transform) {
+}
+
+void MaterialPBR::bind_mesh_resources(Mesh &mesh) {
+}
+
+void MaterialGBuffer::startup() {
+	shader.load_from_files(shader_path("gbuffer.vert"), shader_path("gbuffer.frag"));
+}
+
+void MaterialGBuffer::bind_resources(RenderScene &scene) {
+	shader.use();
 	shader.set_mat4("view", scene.view);
 	shader.set_mat4("projection", scene.projection);
 	shader.set_vec3("camPos", scene.camera_pos);
@@ -59,37 +111,13 @@ void MaterialPBR::bind_resources(RenderScene &scene) {
 	glActiveTexture(GL_TEXTURE7);
 	// TODO: Use baked brdf lut instead (it's broken atm)
 	glBindTexture(GL_TEXTURE_2D, scene.skybox_pass.skybox.brdf_lut_texture);
-
-	//	ImGui::Begin("PBR");
-	//	static bool baked = false;
-	//	if (ImGui::Button("Flip")) {
-	//		baked = !baked;
-	//	}
-	//	if (baked) {
-	//		ImGui::Text("Baked");
-	//		glBindTexture(GL_TEXTURE_2D, render_manager->skybox_pass.skybox.brdf_lut.id);
-	//	} else {
-	//		ImGui::Text("Not baked");
-	//		glBindTexture(GL_TEXTURE_2D, render_manager->skybox_pass.skybox.brdf_lut_texture);
-	//	}
-	//	ImGui::End();
-
-	shader.set_vec3("lightPositions[0]", glm::vec3(0.0f, 0.0f, 0.0f));
-	shader.set_vec3("lightPositions[1]", glm::vec3(0.0f, 0.0f, 0.0f));
-	shader.set_vec3("lightPositions[2]", glm::vec3(0.0f, 0.0f, 0.0f));
-	shader.set_vec3("lightPositions[3]", scene.camera_pos);
-
-	shader.set_vec3("lightColors[0]", glm::vec3(0.0f, 0.0f, 0.0f));
-	shader.set_vec3("lightColors[1]", glm::vec3(0.0f, 0.0f, 0.0f));
-	shader.set_vec3("lightColors[2]", glm::vec3(0.0f, 0.0f, 0.0f));
-	shader.set_vec3("lightColors[3]", glm::vec3(1.0f, 1.0f, 1.0f));
 }
 
-void MaterialPBR::bind_instance_resources(ModelInstance &instance, Transform &transform) {
+void MaterialGBuffer::bind_instance_resources(ModelInstance &instance, Transform &transform) {
 	shader.set_mat4("model", transform.get_global_model_matrix());
 }
 
-void MaterialPBR::bind_mesh_resources(Mesh &mesh) {
+void MaterialGBuffer::bind_mesh_resources(Mesh &mesh) {
 	for (int i = 0; i < mesh.textures.size(); i++) {
 		if (mesh.textures_present[i]) {
 			glActiveTexture(GL_TEXTURE0 + i);
