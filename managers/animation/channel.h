@@ -17,7 +17,7 @@ struct KeyRotation {
 
 class Channel {
 public:
-	Channel(const assets::NodeAnimation &node, const std::string &bone_name, int32_t id);
+	Channel(const assets::NodeAnimation &node, std::string bone_name, int32_t id);
 
 	void update(float animation_time);
 

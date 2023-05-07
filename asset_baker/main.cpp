@@ -488,48 +488,6 @@ bool extract_gltf_skinned_meshes(
 	return true;
 }
 
-bool extract_gltf_skins(
-		tg::Model &model, const fs::path &input, const fs::path &output_folder, const ConverterState &conv_state) {
-	for (auto mesh_index = 0; mesh_index < model.meshes.size(); mesh_index++) {
-		auto &mesh = model.meshes[mesh_index];
-
-		using SkinnedVertexFormat = assets::SkinnedVertexPNV32;
-		auto vertex_format_enum = assets::SkinnedVertexFormat::PNV32;
-
-		std::vector<SkinnedVertexFormat> vertices;
-		std::vector<uint32_t> indices;
-
-		for (auto prim_index = 0; prim_index < mesh.primitives.size(); prim_index++) {
-			vertices.clear();
-			indices.clear();
-
-			std::string mesh_name = calculate_gltf_mesh_name(model, mesh_index, prim_index);
-
-			auto &primitive = mesh.primitives[prim_index];
-
-			extract_gltf_indices(primitive, model, indices);
-			extract_gltf_skinned_vertices(primitive, model, vertices);
-
-			SkinnedMeshInfo mesh_info;
-			mesh_info.vertex_format = vertex_format_enum;
-			mesh_info.vertex_buffer_size = vertices.size() * sizeof(SkinnedVertexFormat);
-			mesh_info.index_buffer_size = indices.size() * sizeof(uint32_t);
-			mesh_info.index_size = indices.size();
-			mesh_info.original_file = input.string();
-			mesh_info.bounds = calculate_bounds(vertices.data(), vertices.size());
-			mesh_info.compression_mode = assets::CompressionMode::LZ4;
-
-			AssetFile new_file = pack_mesh(&mesh_info, (char *)vertices.data(), (char *)indices.data());
-
-			fs::path mesh_path = output_folder / (mesh_name + ".skinned_mesh");
-
-			save_binary_file(mesh_path.string().c_str(), new_file);
-		}
-	}
-
-	return true;
-}
-
 bool extract_gltf_animations(tg::Model &model, tg::Animation &animation, const fs::path &input,
 		const fs::path &output_folder, const ConverterState &conv_state) {
 	assets::AnimationInfo animation_info;
@@ -849,6 +807,48 @@ void extract_gltf_nodes(tinygltf::Model &model, const fs::path &input, const fs:
 void extract_gltf_skinned_nodes(tinygltf::Model &model, const fs::path &input, const fs::path &output_folder,
 		const ConverterState &conv_state) {
 	assets::SkinnedModelInfo model_info;
+	assets::JointData joint_data;
+	for (tg::Skin &skin : model.skins) {
+		tinygltf::Accessor &matrices_accessor = model.accessors[skin.inverseBindMatrices];
+
+		std::vector<uint8_t> matrices_data;
+		unpack_gltf_buffer(model, matrices_accessor, matrices_data);
+		joint_data.rotation.resize(skin.joints.size());
+		joint_data.translation.resize(skin.joints.size());
+		joint_data.id.resize(skin.joints.size());
+		model_info.joint_names.resize(skin.joints.size());
+		for (int32_t i = 0; i < matrices_accessor.count; ++i) {
+			joint_data.id[i] = skin.joints[i];
+			glm::mat4 transform_matrix{};
+			if (matrices_accessor.type == TINYGLTF_TYPE_MAT4 &&
+					matrices_accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT) {
+				memcpy(&transform_matrix, matrices_data.data() + i * sizeof(glm::mat4), sizeof(glm::mat4));
+			} else {
+				SPDLOG_ERROR("INVALID MATRIX TYPE");
+				assert(false);
+			}
+
+			glm::vec3 place_holder;
+			glm::vec4 place_holder2;
+
+			glm::vec3 glm_translation;
+			glm::quat glm_rotation;
+
+			glm::decompose(transform_matrix, place_holder, glm_rotation, glm_translation, place_holder, place_holder2);
+			std::array<float, 3> translation = { glm_translation[0], glm_translation[1], glm_translation[2] };
+			std::array<float, 4> rotation = { glm_rotation[0], glm_rotation[1], glm_rotation[2], glm_rotation[3] };
+
+			joint_data.translation[i] = translation;
+			joint_data.rotation[i] = rotation;
+
+			model_info.joint_names[i] = model.nodes[skin.joints[i]].name;
+		}
+		break; // Read only first skin, because idk how to use more than one skin, but maybe in the future
+	}
+	model_info.joint_rotation_buffer_size = joint_data.rotation.size() * sizeof(float) * 4;
+	model_info.joint_translation_buffer_size = joint_data.translation.size() * sizeof(float) * 3;
+	model_info.joint_id_buffer_size = joint_data.id.size() * sizeof(int32_t);
+
 	assets::BoneData bone_data;
 
 	bone_data.translation.resize(model.nodes.size());
@@ -861,7 +861,7 @@ void extract_gltf_skinned_nodes(tinygltf::Model &model, const fs::path &input, c
 	}
 
 	std::vector<uint64_t> mesh_nodes;
-	// Read only joint nodes
+	// Read only bone nodes
 	for (int i = 0; i < model.nodes.size(); i++) {
 		auto &node = model.nodes[i];
 
@@ -972,7 +972,7 @@ void extract_gltf_skinned_nodes(tinygltf::Model &model, const fs::path &input, c
 		}
 	}
 
-	assets::AssetFile new_file = assets::pack_model(model_info, (char *)(&bone_data));
+	assets::AssetFile new_file = assets::pack_model(model_info, (char *)(&bone_data), (char *)(&joint_data));
 
 	fs::path scene_filepath = (output_folder.parent_path()) / input.stem();
 

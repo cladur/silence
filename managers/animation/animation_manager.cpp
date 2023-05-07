@@ -4,9 +4,10 @@
 #include "render/common/skinned_model.h"
 #include <glm/gtx/quaternion.hpp>
 
-AnimationManager::AnimationManager(Animation &animation) {
+AnimationManager::AnimationManager(Animation &animation, SkinnedModel &model) {
 	current_time = 0.0f;
 	current_animation = &animation;
+	current_model = &model;
 
 	bone_matrices.reserve(MAX_BONE_COUNT);
 
@@ -20,46 +21,43 @@ void AnimationManager::update_animation(float dt) {
 		current_time += static_cast<float>(current_animation->get_ticks_per_second()) * dt;
 
 		current_time = fmod(current_time, static_cast<float>(current_animation->get_duration()));
-		calculate_bone_transform(&current_animation->get_root_node(), glm::mat4(1.0f));
+		calculate_bone_transform();
 	}
 }
 
-void AnimationManager::calculate_bone_transform(const Rig &rig, glm::mat4 parent_transform) {
+void AnimationManager::calculate_bone_transform() {
+	const Rig &rig = current_model->rig;
+	std::vector<glm::mat4> global_transforms(rig.names.size());
+	std::vector<glm::mat4> node_transforms(rig.names.size());
+
 	for (int32_t i = 0; i < rig.names.size(); ++i) {
+		std::string node_name = rig.names[i];
+		node_transforms[i] = glm::translate(glm::mat4(1.0f), rig.positions[i]) * glm::toMat4(rig.rotations[i]);
+
+		Channel *channel = current_animation->find_channel(node_name);
+		if (channel) {
+			channel->update(current_time);
+			node_transforms[i] = channel->get_local_transform();
+		}
+
+		int64_t parent_index = rig.parents[i];
+		if (parent_index >= 0) {
+			global_transforms[i] = node_transforms[i] * global_transforms[parent_index];
+		} else {
+			global_transforms[i] = node_transforms[i];
+		}
 	}
 
-	const std::string &node_name = node->name;
+	for (int32_t i = 0; i < rig.names.size(); ++i) {
+		std::string node_name = rig.names[i];
+		if (current_model->joint_map.find(node_name) != current_model->joint_map.end()) {
+			int32_t index = current_model->joint_map[node_name].id;
 
-	glm::vec3 pos_decomp = Bone::uint16_to_vec4(node->position);
-	glm::quat rot_decomp = Bone::uint16_to_quat(node->rotation);
+			glm::mat4 offset = glm::translate(glm::mat4(1.0f), current_model->joint_map[node_name].translation) *
+					glm::toMat4(current_model->joint_map[node_name].rotation);
 
-	glm::mat4 node_transform = glm::translate(glm::mat4(1.0f), pos_decomp);
-	node_transform *= glm::toMat4(rot_decomp);
-
-	Channel *bone = current_animation->find_bone(node_name);
-
-	if (bone) {
-		bone->update(current_time);
-		node_transform = bone->get_local_transform();
-	}
-
-	glm::mat4 global_transform = parent_transform * node_transform;
-
-	std::unordered_map<std::string, Bone> joint_map = current_animation->get_joint_map();
-	if (joint_map.find(node_name) != joint_map.end()) {
-		int32_t index = joint_map[node_name].id;
-
-		pos_decomp = Bone::uint16_to_vec4(joint_map[node_name].position);
-		rot_decomp = Bone::uint16_to_quat(joint_map[node_name].rotation);
-
-		glm::mat4 offset = glm::translate(glm::mat4(1.0f), pos_decomp);
-		offset *= glm::toMat4(rot_decomp);
-
-		bone_matrices[index] = global_transform * offset;
-	}
-
-	for (const HierarchyData &child : node->children) {
-		calculate_bone_transform(&child, global_transform);
+			bone_matrices[index] = global_transforms[i] * offset;
+		}
 	}
 }
 
@@ -67,6 +65,11 @@ void AnimationManager::change_animation(Animation *animation) {
 	current_animation = animation;
 	current_time = 0.0f;
 }
+
 const std::vector<glm::mat4> &AnimationManager::get_bone_matrices() const {
 	return bone_matrices;
+}
+
+void AnimationManager::change_model(SkinnedModel *model) {
+	current_model = model;
 }

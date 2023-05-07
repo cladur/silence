@@ -18,8 +18,8 @@ assets::AnimationInfo assets::read_animation_info(assets::AssetFile *file) {
 	std::vector<nlohmann::json> channels = metadata["channels"];
 	info.sizes.resize(channels.size());
 	for (int32_t i = 0; i < channels.size(); ++i) {
-		info.sizes[i].translations = channels[i]["translations"];
-		info.sizes[i].rotations = channels[i]["rotations"];
+		info.sizes[i].translations = channels[i]["translation"];
+		info.sizes[i].rotations = channels[i]["rotation"];
 		info.sizes[i].translation_times = channels[i]["translation_times"];
 		info.sizes[i].rotation_times = channels[i]["rotation_times"];
 	}
@@ -46,8 +46,8 @@ assets::AssetFile assets::pack_animation(assets::AnimationInfo *info, char *node
 	size_t actual_offset = 0;
 	for (auto &node : info->sizes) {
 		nlohmann::json channel;
-		channel["translations"] = node.translations;
-		channel["rotations"] = node.rotations;
+		channel["translation"] = node.translations;
+		channel["rotation"] = node.rotations;
 		channel["translation_times"] = node.translation_times;
 		channel["rotation_times"] = node.rotation_times;
 

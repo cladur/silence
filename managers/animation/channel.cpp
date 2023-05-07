@@ -2,9 +2,10 @@
 #include "animation_asset.h"
 #include "joint.h"
 #include <glm/gtx/quaternion.hpp>
+#include <utility>
 
-Channel::Channel(const assets::NodeAnimation &node, const std::string &bone_name, int32_t id) :
-		bone_name(bone_name), id(id), local_transform(1.0f) {
+Channel::Channel(const assets::NodeAnimation &node, std::string bone_name, int32_t id) :
+		bone_name(std::move(bone_name)), id(id), local_transform(1.0f) {
 	positions.reserve(node.translations.size());
 	for (int32_t position_index = 0; position_index < node.translations.size(); ++position_index) {
 		glm::vec3 pos = { node.translations[position_index][0], node.translations[position_index][1],

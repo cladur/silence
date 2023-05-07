@@ -35,3 +35,14 @@ int32_t Animation::get_ticks_per_second() const {
 double Animation::get_duration() const {
 	return duration_ms;
 }
+
+Channel *Animation::find_channel(const std::string &bone_name) {
+	auto iterator = std::find_if(channels.begin(), channels.end(),
+			[&](const Channel &channel) { return channel.get_bone_name() == bone_name; });
+
+	if (iterator == channels.end()) {
+		return nullptr;
+	} else {
+		return &(*iterator);
+	}
+}

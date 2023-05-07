@@ -22,19 +22,34 @@ void SkinnedModel::load_from_asset(const char *path) {
 	assets::SkinnedModelInfo model = assets::read_skinned_model_info(&file);
 
 	rig.parents = model.bone_parents;
-	for (int32_t i = 0; i < model.bone_names.size(); ++i) {
-		rig.names[model.bone_names[i]] = i;
-	}
+	rig.names = model.bone_names;
 
 	std::vector<glm::vec3> translations(model.bone_translation_buffer_size / sizeof(glm::vec3));
 	std::vector<glm::quat> rotations(model.bone_rotation_buffer_size / sizeof(glm::vec4));
 
 	memcpy(translations.data(), file.binary_blob.data(), model.bone_translation_buffer_size);
-	memcpy(translations.data(), file.binary_blob.data() + model.bone_translation_buffer_size,
+	memcpy(rotations.data(), file.binary_blob.data() + model.bone_translation_buffer_size,
 			model.bone_rotation_buffer_size);
-
 	rig.positions = translations;
 	rig.rotations = rotations;
+
+	std::vector<glm::vec3> joint_translations(model.joint_translation_buffer_size / sizeof(glm::vec3));
+	std::vector<glm::quat> joint_rotations(model.joint_rotation_buffer_size / sizeof(glm::vec4));
+	std::vector<int32_t> joint_ids(model.joint_id_buffer_size / sizeof(int32_t));
+
+	size_t rig_size = model.bone_translation_buffer_size + model.bone_rotation_buffer_size;
+	memcpy(joint_translations.data(), file.binary_blob.data() + rig_size, model.joint_translation_buffer_size);
+	memcpy(joint_rotations.data(), file.binary_blob.data() + rig_size + model.joint_translation_buffer_size,
+			model.joint_rotation_buffer_size);
+	memcpy(joint_ids.data(),
+			file.binary_blob.data() + rig_size + model.joint_translation_buffer_size + model.joint_rotation_buffer_size,
+			model.joint_id_buffer_size);
+
+	for (int32_t i = 0; i < model.joint_names.size(); ++i) {
+		joint_map[model.joint_names[i]].rotation = joint_rotations[i];
+		joint_map[model.joint_names[i]].translation = joint_translations[i];
+		joint_map[model.joint_names[i]].id = joint_ids[i];
+	}
 
 	std::vector<SkinnedMesh> model_renderables;
 	model_renderables.reserve(model.node_meshes.size());

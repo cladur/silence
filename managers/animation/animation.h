@@ -2,10 +2,8 @@
 #define SILENCE_ANIMATION_H
 
 #include "channel.h"
-#include <tiny_gltf.h>
 class SkinnedModel;
 class Bone;
-struct NodeAnimation;
 
 class Animation {
 public:
@@ -14,6 +12,7 @@ public:
 	void load_from_asset(const char *path);
 	int32_t get_ticks_per_second() const;
 	double get_duration() const;
+	Channel *find_channel(const std::string &bone_name);
 
 private:
 	const float SECONDS_TO_MS = 1000.0f;
