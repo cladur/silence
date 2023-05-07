@@ -22,13 +22,6 @@ public:
 	virtual void draw(RenderScene &scene) = 0;
 };
 
-class UnlitPass : public RenderPass {
-public:
-	MaterialUnlit material;
-	void startup() override;
-	void draw(RenderScene &scene) override;
-};
-
 class PBRPass : public RenderPass {
 public:
 	MaterialPBR material;

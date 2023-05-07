@@ -9,7 +9,6 @@ AutoCVarFloat cvar_fov = AutoCVarFloat("render.fov", "field of view", 70.0f);
 AutoCVarFloat cvar_draw_distance("render.draw_distance", "Distance cull", 5000);
 
 void RenderScene::startup() {
-	unlit_pass.startup();
 	g_buffer_pass.startup();
 	pbr_pass.startup();
 	skybox_pass.startup();
@@ -114,14 +113,14 @@ void RenderScene::queue_draw(ModelInstance *model_instance, Transform *transform
 
 	switch (model_instance->material_type) {
 		case MaterialType::Default: {
-			unlit_pass.draw_commands.push_back(draw_command);
-			break;
-		}
-		case MaterialType::Unlit: {
 			g_buffer_pass.draw_commands.push_back(draw_command);
 			break;
 		}
 		case MaterialType::PBR: {
+			g_buffer_pass.draw_commands.push_back(draw_command);
+			break;
+		}
+		default: {
 			g_buffer_pass.draw_commands.push_back(draw_command);
 			break;
 		}

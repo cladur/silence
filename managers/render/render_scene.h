@@ -21,7 +21,6 @@ struct RenderScene {
 	Camera camera;
 
 	RenderPass *default_pass;
-	UnlitPass unlit_pass;
 	GBufferPass g_buffer_pass;
 	PBRPass pbr_pass;
 	SkyboxPass skybox_pass;

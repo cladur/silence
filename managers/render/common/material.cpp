@@ -11,29 +11,6 @@
 #include "render/render_manager.h"
 #include "render/render_scene.h"
 
-void MaterialUnlit::startup() {
-	shader.load_from_files(shader_path("unlit.vert"), shader_path("unlit.frag"));
-}
-
-void MaterialUnlit::bind_resources(RenderScene &scene) {
-	shader.use();
-	shader.set_mat4("view", scene.view);
-	shader.set_mat4("projection", scene.projection);
-	shader.set_vec3("camPos", scene.camera_pos);
-	shader.set_int("albedo_map", 0);
-}
-
-void MaterialUnlit::bind_instance_resources(ModelInstance &instance, Transform &transform) {
-	shader.set_mat4("model", transform.get_global_model_matrix());
-}
-
-void MaterialUnlit::bind_mesh_resources(Mesh &mesh) {
-	if (mesh.textures_present[0]) {
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, mesh.textures[0].id);
-	}
-}
-
 void MaterialPBR::startup() {
 	shader.load_from_files(shader_path("pbr.vert"), shader_path("pbr.frag"));
 }
