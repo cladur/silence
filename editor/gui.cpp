@@ -12,6 +12,7 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <imgui_stdlib.h>
+#include <spdlog/spdlog.h>
 
 #include "IconsMaterialDesign.h"
 #include "ImGuizmo.h"
@@ -128,7 +129,7 @@ void Editor::imgui_menu_bar() {
 					create_scene(filename, SceneType::Archetype, out_path);
 				} else if (extension == ".prt") {
 					if (scenes.empty()) {
-						SPDLOG_WARN("Can't load prototype into empty scene");
+						create_scene(filename, SceneType::Archetype, out_path);
 					} else {
 						EditorScene &active_scene = get_active_scene();
 						bool is_archetype_or_prototype =
@@ -137,6 +138,7 @@ void Editor::imgui_menu_bar() {
 							nlohmann::json entity_json;
 							std::ifstream file(out_path);
 							file >> entity_json;
+							entity_json.back()["entity"] = 0;
 							active_scene.world.deserialize_entity_json(entity_json.back(), active_scene.entities);
 							file.close();
 						} else {
@@ -420,6 +422,24 @@ void Editor::imgui_viewport(EditorScene &scene, uint32_t scene_index) {
 
 	uint32_t render_image = scene.get_render_scene().render_framebuffer.texture_id;
 	ImGui::Image((void *)(intptr_t)render_image, viewport_size, ImVec2(0, 1), ImVec2(1, 0));
+
+	if (ImGui::BeginDragDropTarget()) {
+		if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_PROTOTYPE_PATH")) {
+			const std::string payload_n = *(const std::string *)payload->Data;
+			if (scene.type == SceneType::GameScene) {
+				nlohmann::json serialized_prototype;
+				std::ifstream file(payload_n);
+				file >> serialized_prototype;
+				serialized_prototype.back()["entity"] = 0;
+				scene.world.deserialize_entity_json(serialized_prototype.back(), scene.entities);
+				file.close();
+			} else {
+				SPDLOG_WARN("Can't add prototype to scene type other than GameScene");
+			}
+		}
+
+		ImGui::EndDragDropTarget();
+	}
 
 	// Draw gizmo
 	ImGuiIO &io = ImGui::GetIO();
@@ -749,23 +769,14 @@ void Editor::imgui_content_browser() {
 			if (entry.is_directory()) {
 				content_browser_current_path = entry.path().string();
 			} else {
-				if (extension == ".arc") {
-					SPDLOG_INFO("Creating {} scene", label);
-					create_scene(label, SceneType::Archetype);
-					Scene &scene = get_editor_scene(scenes.size() - 1);
-					World &world = scene.world;
-					std::ifstream file(entry.path());
-					if (file.is_open()) {
-						nlohmann::json archetype_json;
-						file >> archetype_json;
-						world.deserialize_entity_json(archetype_json, scene.entities);
-					} else {
-						SPDLOG_ERROR("Failed to open {} file", label);
-					}
-					file.close();
+				std::string name = entry.path().filename().string();
+				if (extension == ".scn") {
+					create_scene(name, SceneType::GameScene, entry.path().string());
+				} else if (extension == ".arc") {
+					create_scene(name, SceneType::Archetype, entry.path().string());
 				} else if (extension == ".prt") {
 					if (scenes.empty()) {
-						create_scene(label, SceneType::Prototype, entry.path().string());
+						create_scene(name, SceneType::Prototype, entry.path().string());
 					} else {
 						EditorScene &active_scene = get_active_scene();
 						bool is_archetype_or_prototype =
@@ -774,6 +785,8 @@ void Editor::imgui_content_browser() {
 							nlohmann::json entity_json;
 							std::ifstream file(entry.path());
 							file >> entity_json;
+							entity_json.back()["entity"] = 0;
+							SPDLOG_WARN(entity_json.dump(1));
 							active_scene.world.deserialize_entity_json(entity_json.back(), active_scene.entities);
 							file.close();
 						} else {
@@ -789,6 +802,19 @@ void Editor::imgui_content_browser() {
 				drag_and_drop_path = entry.path().string();
 				// Set payload to carry the index of our item (could be anything)
 				ImGui::SetDragDropPayload("DND_PROTOTYPE_PATH", &drag_and_drop_path, sizeof(std::string));
+
+				// Display preview (could be anything, e.g. when dragging an image we could decide to display
+				// the filename and a small preview of the image, etc.)
+				ImGui::Text("%s", label.c_str());
+				ImGui::EndDragDropSource();
+			}
+		}
+
+		if (extension == ".mdl") {
+			if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
+				drag_and_drop_path = entry.path().string();
+				// Set payload to carry the index of our item (could be anything)
+				ImGui::SetDragDropPayload("DND_MODEL_PATH", &drag_and_drop_path, sizeof(std::string));
 
 				// Display preview (could be anything, e.g. when dragging an image we could decide to display
 				// the filename and a small preview of the image, etc.)

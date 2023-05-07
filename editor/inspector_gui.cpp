@@ -125,7 +125,7 @@ void Inspector::show_parent() {
 	if (ImGui::CollapsingHeader("Parent", tree_flags)) {
 		remove_component_popup<Parent>();
 		float available_width = ImGui::GetContentRegionAvail().x;
-		ImGui::BeginTable("Model Instance", 2);
+		ImGui::BeginTable("Parent", 2);
 		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
 
 		std::string text_value = parent.parent != 0 ? std::to_string(parent.parent) : "None";
@@ -139,7 +139,7 @@ void Inspector::show_children() {
 	if (ImGui::CollapsingHeader("Children", tree_flags)) {
 		remove_component_popup<Children>();
 		float available_width = ImGui::GetContentRegionAvail().x;
-		ImGui::BeginTable("Model Instance", 2);
+		ImGui::BeginTable("Children", 2);
 		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
 		bool has_children = children.children_count != 0;
 
@@ -154,7 +154,7 @@ void Inspector::show_children() {
 		ImGui::TableSetColumnIndex(1);
 		if (has_children && ImGui::CollapsingHeader("Children list", tree_flags)) {
 			ImGui::EndTable();
-			ImGui::BeginTable("Model Instance2", 2);
+			ImGui::BeginTable("Children2", 2);
 			ImGui::TableSetupColumn("##Col12", ImGuiTableColumnFlags_WidthFixed, available_width * 0.2f);
 			for (int i = 0; i < children.children_count; i++) {
 				show_text("Child: ", children.children[i]);
@@ -228,6 +228,16 @@ void Inspector::show_modelinstance() {
 			ImGui::EndCombo();
 		}
 		ImGui::EndTable();
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_MODEL_PATH")) {
+				const std::string payload_n = *(const std::string *)payload->Data;
+				render_manager.load_model(payload_n.c_str());
+				modelinstance.model_handle = render_manager.get_model_handle(payload_n);
+			}
+
+			ImGui::EndDragDropTarget();
+		}
 	}
 }
 void Inspector::show_fmodlistener() {

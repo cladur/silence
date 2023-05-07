@@ -128,7 +128,7 @@ Handle<Model> RenderManager::load_model(const char *path) {
 	}
 
 	Model model = {};
-	model.load_from_asset(asset_path(path).c_str());
+	model.load_from_asset(path);
 
 	models.push_back(model);
 	Handle<Model> handle = {};
