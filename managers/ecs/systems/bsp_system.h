@@ -23,7 +23,6 @@ public:
 	void resolve_collision(
 			World &world, BSPNode *node, Entity entity, bool force = false);
 
-	//std::shared_ptr<BSPNode> root;
 	static std::shared_ptr<BSPNode> build_tree(World &world, std::vector<Entity> world_entities, int32_t depth);
 	static void process_node(World &world, const std::set<Entity> &objects, BSPNode *node, int32_t depth);
 

@@ -47,7 +47,7 @@ Scene::Scene() {
 	world.register_system<RenderSystem>();
 
 	//todo uncomment if bspsystem is fixed
-	//world.register_system<BSPSystem>();
+	// world.register_system<BSPSystem>();
 }
 
 void Scene::update(float dt) {

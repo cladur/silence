@@ -77,16 +77,9 @@ std::shared_ptr<BSPNode> BSPSystem::build_tree(World &world, std::vector<Entity>
 	std::set<Entity> statics;
 	for (auto &entity : world_entities) {
 		if (world.has_component<StaticTag>(entity)) {
-			if (world.has_component<Name>(entity)) {
-				SPDLOG_INFO("Adding static entity {} to BSP tree", world.get_component<Name>(entity).name);
-			} else {
-				SPDLOG_INFO("Adding static entity to BSP tree");
-			}
 			statics.insert(entity);
 		}
 	}
-
-	SPDLOG_INFO("statics size: {}", statics.size());
 
 	process_node(world, statics, root.get(), depth);
 	return root;
@@ -105,7 +98,6 @@ void BSPSystem::process_node(World &world, const std::set<Entity> &objects, BSPN
 	for (const Entity entity : objects) {
 		Transform &t = world.get_component<Transform>(entity);
 		if (world.has_component<ColliderAABB>(entity)) {
-			SPDLOG_INFO("Processing AABB collider");
 			ColliderAABB &aabb = world.get_component<ColliderAABB>(entity);
 			ColliderAABB c;
 			c.range = aabb.range * t.get_scale();
@@ -175,8 +167,6 @@ Plane BSPSystem::calculate_plane(World &world, const std::set<Entity> &colliders
 		SPDLOG_WARN("Plane has no colliders to process");
 		return plane;
 	}
-
-	SPDLOG_INFO(" ####### PROCESSING PLANE POINT ####### ");
 	for (const Entity collider : colliders) {
 		Transform &t = world.get_component<Transform>(collider);
 
@@ -185,10 +175,6 @@ Plane BSPSystem::calculate_plane(World &world, const std::set<Entity> &colliders
 			ColliderAABB c;
 			c.range = aabb.range * t.get_scale();
 			c.center = t.get_position() + aabb.center * c.range;
-//			SPDLOG_INFO("Processing AABB collider");
-//			SPDLOG_INFO("AABB center: ({}, {}, {}), range: ({}, {}, {})", aabb.center.x, aabb.center.y, aabb.center.z, aabb.range.x, aabb.range.y, aabb.range.z);
-//			SPDLOG_INFO("c center: ({}, {}, {}), c range: ({}, {}, {})", c.center.x, c.center.y, c.center.z, c.range.x, c.range.y, c.range.z);
-//
 			plane.point += c.center;
 		} else if (world.has_component<ColliderSphere>(collider)) {
 			ColliderSphere &sphere = world.get_component<ColliderSphere>(collider);
@@ -209,7 +195,6 @@ Plane BSPSystem::calculate_plane(World &world, const std::set<Entity> &colliders
 	}
 	plane.point /= colliders.size();
 
-	SPDLOG_INFO(" ####### PROCESSING PLANE NORMAL ####### ");
 	for (const Entity collider : colliders) {
 		Transform &t = world.get_component<Transform>(collider);
 
@@ -219,12 +204,7 @@ Plane BSPSystem::calculate_plane(World &world, const std::set<Entity> &colliders
 			c.range = aabb.range * t.get_scale();
 			c.center = t.get_position() + aabb.center * c.range;
 
-//			SPDLOG_INFO("Processing AABB collider");
-//			SPDLOG_INFO("AABB center: ({}, {}, {}), range: ({}, {}, {})", aabb.center.x, aabb.center.y, aabb.center.z, aabb.range.x, aabb.range.y, aabb.range.z);
-//			SPDLOG_INFO("c center: ({}, {}, {}), c range: ({}, {}, {})", c.center.x, c.center.y, c.center.z, c.range.x, c.range.y, c.range.z);
-
 			const glm::vec3 direction = plane.point - c.center;
-			SPDLOG_INFO("Direction: ({}, {}, {})", direction.x, direction.y, direction.z);
 			if (direction != glm::vec3(0.0f)) {
 				const glm::vec3 direction_abs = glm::abs(direction);
 				glm::vec3 normal(0.0f);
@@ -242,7 +222,6 @@ Plane BSPSystem::calculate_plane(World &world, const std::set<Entity> &colliders
 						normal.z = direction.z < 0.0f ? -1.0f : 1.0f;
 					}
 				}
-				SPDLOG_INFO("plane.normal ({}, {}, {}) + normal: ({}, {}, {})", plane.normal.x, plane.normal.y, plane.normal.z, normal.x, normal.y, normal.z);
 				plane.normal += normal;
 			}
 
@@ -283,7 +262,6 @@ Plane BSPSystem::calculate_plane(World &world, const std::set<Entity> &colliders
 			}
 		}
 	}
-	SPDLOG_INFO("plane.normal: ({}, {}, {})", plane.normal.x, plane.normal.y, plane.normal.z);
 	plane.normal /= colliders.size();
 
 	plane.normal = glm::normalize(plane.normal);
