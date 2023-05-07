@@ -294,6 +294,8 @@ void Editor::custom_update(float dt) {
 	}
 
 	if (scene_deletion_queued) {
+		EditorScene &scene = get_editor_scene(scene_to_delete);
+		render_manager.render_scenes.erase(render_manager.render_scenes.begin() + scene.render_scene_idx);
 		scenes.erase(scenes.begin() + scene_to_delete);
 		active_scene = 0;
 		scene_deletion_queued = false;
@@ -312,11 +314,19 @@ void Editor::create_scene(const std::string &name, SceneType type, const std::st
 
 	Entity entity;
 
+	if (!path.empty()) {
+		std::ifstream file(path);
+		nlohmann::json serialized_scene;
+		file >> serialized_scene;
+		serialized_scene.back()["entity"] = 0;
+		scene->world.deserialize_entities_json(serialized_scene, scene->entities);
+		scenes.push_back(std::move(scene));
+		file.close();
+		return;
+	}
+
 	switch (type) {
 		case SceneType::GameScene:
-			if (!path.empty()) {
-				scene->load_from_file(path);
-			}
 			break;
 		case SceneType::Archetype:
 			entity = scene->world.create_entity();
@@ -324,11 +334,7 @@ void Editor::create_scene(const std::string &name, SceneType type, const std::st
 			scene->entities.push_back(entity);
 			break;
 		case SceneType::Prototype:
-			nlohmann::json serialized_archetype;
-			std::ifstream file(path);
-			file >> serialized_archetype;
-			scene->world.deserialize_entity_json(serialized_archetype.back(), scene->entities);
-			file.close();
+			SPDLOG_ERROR("Nie wiem");
 			break;
 	}
 
