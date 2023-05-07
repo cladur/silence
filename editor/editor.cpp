@@ -325,17 +325,11 @@ void Editor::create_scene(const std::string &name, SceneType type, const std::st
 		return;
 	}
 
-	switch (type) {
-		case SceneType::GameScene:
-			break;
-		case SceneType::Archetype:
-			entity = scene->world.create_entity();
-			scene->world.add_component<Transform>(entity, Transform{});
-			scene->entities.push_back(entity);
-			break;
-		case SceneType::Prototype:
-			SPDLOG_ERROR("Nie wiem");
-			break;
+	if (type == SceneType::Prefab) {
+		entity = scene->world.create_entity();
+		scene->entities.push_back(entity);
+		scene->world.add_component<Name>(entity, Name{ "New prefab" });
+		scene->world.add_component<Transform>(entity, Transform{});
 	}
 
 	scenes.push_back(std::move(scene));
