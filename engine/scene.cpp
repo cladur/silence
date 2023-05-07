@@ -6,10 +6,14 @@
 #include "render/render_manager.h"
 #include <unordered_map>
 
+#include "ecs/systems/bsp_system.h"
+#include "ecs/systems/collider_draw.h"
 #include "ecs/systems/collision_system.h"
 #include "ecs/systems/parent_system.h"
 #include "ecs/systems/physics_system.h"
 #include "render/ecs/render_system.h"
+
+#define COLLISION_TEST_ENTITY 4
 
 Scene::Scene() {
 	camera = Camera(glm::vec3(-4.0f, 2.6f, -4.0f));
@@ -19,6 +23,7 @@ Scene::Scene() {
 
 	// ECS
 	world.startup();
+	world.parent_scene = this;
 
 	// Components
 	world.register_component<Name>();
@@ -41,19 +46,14 @@ Scene::Scene() {
 	world.register_system<CollisionSystem>();
 	world.register_system<ParentSystem>();
 	world.register_system<RenderSystem>();
+	world.register_system<ColliderDrawSystem>();
+
+	//todo uncomment if bspsystem is fixed
+	// world.register_system<BSPSystem>();
 }
 
 void Scene::update(float dt) {
 	get_render_scene().camera = camera;
-
-	for (auto &entity : entities) {
-		if (world.has_component<Transform>(entity) && world.has_component<ModelInstance>(entity)) {
-			auto &transform = world.get_component<Transform>(entity);
-			auto &model_instance = world.get_component<ModelInstance>(entity);
-
-			get_render_scene().queue_draw(&model_instance, &transform);
-		}
-	}
 }
 
 RenderScene &Scene::get_render_scene() {
@@ -89,4 +89,6 @@ void Scene::load_from_file(const std::string &path) {
 	nlohmann::json scene_json = nlohmann::json::parse(file);
 	file.close();
 	SceneManager::load_scene_from_json_file(world, scene_json, "", entities);
+
+	bsp_tree = BSPSystem::build_tree(world, entities, 2);
 }

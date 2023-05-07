@@ -10,6 +10,7 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+#include "physics/physics_manager.h"
 
 void Engine::startup() {
 	// Managers

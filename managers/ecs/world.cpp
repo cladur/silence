@@ -172,3 +172,7 @@ std::vector<std::string> &World::get_component_names() {
 int World::get_registered_components() {
 	return registered_components;
 }
+
+Scene *World::get_parent_scene() {
+	return parent_scene;
+}

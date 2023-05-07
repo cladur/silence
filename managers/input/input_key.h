@@ -44,6 +44,10 @@ enum class InputKey {
 	RIGHT_SHIFT,
 	LEFT_ALT,
 	RIGHT_ALT,
+	UP,
+	DOWN,
+	LEFT,
+	RIGHT,
 
 	MOUSE_LEFT,
 	MOUSE_RIGHT,
@@ -203,6 +207,14 @@ static InputKey glfw_key_to_input_key(int key) {
 			return InputKey::LEFT_ALT;
 		case GLFW_KEY_RIGHT_ALT:
 			return InputKey::RIGHT_ALT;
+		case GLFW_KEY_UP:
+			return InputKey::UP;
+		case GLFW_KEY_DOWN:
+			return InputKey::DOWN;
+		case GLFW_KEY_LEFT:
+			return InputKey::LEFT;
+		case GLFW_KEY_RIGHT:
+			return InputKey::RIGHT;
 		default:
 			return InputKey::UNKNOWN;
 	}

@@ -11,11 +11,6 @@
 		}                                                                                                              \
 	} while (false)
 
-
-//AutoCVarFloat music_drum_intensity("music.drum_intensity", "drum intensity volume" , 0.0f);
-//AutoCVarFloat music_intensity("music.intensity", "intensity volume" , 0.0f);
-//AutoCVarFloat music_lpf("music.lpf", "low pass filter" , 0.0f);
-
 AutoCVarFloat music_detection_level("music.detection_level", "detection level volume" , 0.0f);
 AutoCVarInt music_enemy_near_count("music.enemy_near_count", "number of enemies near" , 1);
 AutoCVarInt music_is_sprinting("music.is_sprinting", "is sprinting" , 0);

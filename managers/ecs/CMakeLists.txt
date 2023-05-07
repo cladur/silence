@@ -12,7 +12,7 @@ add_library(${ECS_MANAGER_NAME} STATIC
         systems/parent_system.cpp systems/parent_system.h
         systems/isolated_entities_system.cpp systems/isolated_entities_system.h
         systems/root_parent_system.cpp systems/root_parent_system.h
-        component_visitor.h systems/collision_system.cpp systems/collision_system.h systems/bsp_system.cpp systems/bsp_system.h)
+        component_visitor.h systems/collision_system.cpp systems/collision_system.h systems/bsp_system.cpp systems/bsp_system.h systems/collider_draw.cpp systems/collider_draw.h)
 
 target_include_directories(${ECS_MANAGER_NAME} PUBLIC ${MANAGER_DIR})
 

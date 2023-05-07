@@ -420,7 +420,7 @@ void Editor::imgui_viewport(EditorScene &scene, uint32_t scene_index) {
 		scene.last_viewport_size = viewport_size;
 	}
 
-	uint32_t render_image = scene.get_render_scene().render_framebuffer.get_texture_id();
+	uint32_t render_image = scene.get_render_scene().render_framebuffer.texture_id;
 	ImGui::Image((void *)(intptr_t)render_image, viewport_size, ImVec2(0, 1), ImVec2(1, 0));
 
 	if (ImGui::BeginDragDropTarget()) {
