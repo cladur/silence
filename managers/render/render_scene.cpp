@@ -26,8 +26,7 @@ void RenderScene::startup() {
 }
 
 void RenderScene::draw() {
-	debug_draw.projection = projection;
-	debug_draw.view = view;
+
 
 	// this just pushes all the elements to be drawn with transparent_pass.draw()
 	// no actual drawing happens here
@@ -39,15 +38,7 @@ void RenderScene::draw() {
 	render_framebuffer.bind();
 	glViewport(0, 0, (int)render_extent.x, (int)render_extent.y);
 
-	// Draw grid
-	for (int i = -10; i <= 10; i++) {
-		glm::vec4 color = glm::vec4(0.5, 0.5, 0.5, 1);
-		if (i == 0) {
-			color = glm::vec4(0.75, 0.75, 0.75, 1);
-		}
-		debug_draw.draw_line(glm::vec3(i, 0, -10), glm::vec3(i, 0, 10), color);
-		debug_draw.draw_line(glm::vec3(-10, 0, i), glm::vec3(10, 0, i), color);
-	}
+
 
 	// Clear the screen
 	glad_glClearColor(0.275f, 0.275f, 0.275f, 1.0f);
@@ -68,6 +59,18 @@ void RenderScene::draw() {
 		glDepthFunc(GL_LEQUAL);
 		skybox_pass.draw(*this);
 		glDepthFunc(GL_LESS);
+	}
+
+	debug_draw.projection = projection;
+	debug_draw.view = view;
+	// Draw grid
+	for (int i = -10; i <= 10; i++) {
+		glm::vec4 color = glm::vec4(0.5, 0.5, 0.5, 1);
+		if (i == 0) {
+			color = glm::vec4(0.75, 0.75, 0.75, 1);
+		}
+		debug_draw.draw_line(glm::vec3(i, 0, -10), glm::vec3(i, 0, 10), color);
+		debug_draw.draw_line(glm::vec3(-10, 0, i), glm::vec3(10, 0, i), color);
 	}
 
 	debug_draw.draw();

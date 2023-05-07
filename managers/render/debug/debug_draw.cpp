@@ -133,3 +133,38 @@ void DebugDraw::draw_sphere(const glm::vec3 &center, float radius, const glm::ve
 		}
 	}
 }
+void DebugDraw::draw_box(
+		const glm::vec3 &center, const glm::quat &orientation, const glm::vec3 &scale, const glm::vec3 &color) {
+	glm::vec3 vertices[8] = {
+		glm::vec3(- scale.x / 2.0f, - scale.y / 2.0f, - scale.z / 2.0f),
+		glm::vec3(+ scale.x / 2.0f, - scale.y / 2.0f, - scale.z / 2.0f),
+		glm::vec3(+ scale.x / 2.0f, + scale.y / 2.0f, - scale.z / 2.0f),
+		glm::vec3(- scale.x / 2.0f, + scale.y / 2.0f, - scale.z / 2.0f),
+		glm::vec3(- scale.x / 2.0f, - scale.y / 2.0f, + scale.z / 2.0f),
+		glm::vec3(+ scale.x / 2.0f, - scale.y / 2.0f, + scale.z / 2.0f),
+		glm::vec3(+ scale.x / 2.0f, + scale.y / 2.0f, + scale.z / 2.0f),
+		glm::vec3(- scale.x / 2.0f, + scale.y / 2.0f, + scale.z / 2.0f) };
+
+	glm::mat4 mat = glm::mat4(1.0f);
+
+	mat = glm::translate(mat, center);
+
+	mat = mat * glm::mat4_cast(orientation);
+
+	for (auto &v : vertices) {
+		v = glm::vec3(mat * glm::vec4(v, 1.0f));
+	}
+
+	draw_line(vertices[0], vertices[1], color);
+	draw_line(vertices[1], vertices[2], color);
+	draw_line(vertices[2], vertices[3], color);
+	draw_line(vertices[3], vertices[0], color);
+	draw_line(vertices[4], vertices[5], color);
+	draw_line(vertices[5], vertices[6], color);
+	draw_line(vertices[6], vertices[7], color);
+	draw_line(vertices[7], vertices[4], color);
+	draw_line(vertices[0], vertices[4], color);
+	draw_line(vertices[1], vertices[5], color);
+	draw_line(vertices[2], vertices[6], color);
+	draw_line(vertices[3], vertices[7], color);
+}

@@ -40,6 +40,7 @@
 // third party
 #include "glm/glm.hpp"
 #include "glm/gtc/quaternion.hpp"
+#include "glm/gtx/euler_angles.hpp"
 #include "imgui.h"
 #include "magic_enum.hpp"
 #include "nlohmann/json.hpp"

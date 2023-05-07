@@ -33,6 +33,12 @@ public:
 			const glm::vec3 &scale,
 			const glm::vec3 &color = glm::vec3(0.0f, 1.0f, 0.0f));
 
+	void draw_box(
+			const glm::vec3 &center,
+			const glm::quat &orientation,
+			const glm::vec3 &scale,
+			const glm::vec3 &color = glm::vec3(0.0f, 1.0f, 0.0f));
+
 	// Draw a sphere with center at "center" and radius "radius".
 	void draw_sphere(const glm::vec3 &center, float radius, const glm::vec3 &color = glm::vec3(0.0f, 1.0f, 0.0f));
 };
