@@ -1,50 +1,25 @@
 #version 330 core
 out vec4 FragColor;
 in vec2 TexCoords;
-in vec3 WorldPos;
-in vec3 Normal;
 
 // material parameters
-uniform sampler2D albedo_map;
-uniform sampler2D normal_map;
-uniform sampler2D ao_metallic_roughness_map;
-uniform sampler2D emissive_map;
-
-uniform bool has_ao_map;
-uniform bool has_emissive_map;
+uniform sampler2D gPosition;
+uniform sampler2D gNormal;
+uniform sampler2D gAlbedo;
+uniform sampler2D gAoRoughMetal;
 
 uniform samplerCube irradiance_map;
 uniform samplerCube prefilter_map;
 uniform sampler2D brdf_lut;
 
 // lights
-uniform vec3 lightPositions[4];
-uniform vec3 lightColors[4];
+const int NR_LIGHTS = 4;
+uniform vec3 lightPositions[NR_LIGHTS];
+uniform vec3 lightColors[NR_LIGHTS];
 
 uniform vec3 camPos;
 
 const float PI = 3.14159265359;
-// ----------------------------------------------------------------------------
-// Easy trick to get tangent-normals to world-space to keep PBR code simplified.
-// Don't worry if you don't get what's going on; you generally want to do normal 
-// mapping the usual way for performance anyways; I do plan make a note of this 
-// technique somewhere later in the normal mapping tutorial.
-vec3 getNormalFromMap()
-{
-    vec3 tangentNormal = texture(normal_map, TexCoords).xyz * 2.0 - 1.0;
-
-    vec3 Q1  = dFdx(WorldPos);
-    vec3 Q2  = dFdy(WorldPos);
-    vec2 st1 = dFdx(TexCoords);
-    vec2 st2 = dFdy(TexCoords);
-
-    vec3 N   = normalize(Normal);
-    vec3 T  = normalize(Q1*st2.t - Q2*st1.t);
-    vec3 B  = -normalize(cross(N, T));
-    mat3 TBN = mat3(T, B, N);
-
-    return normalize(TBN * tangentNormal);
-}
 // ----------------------------------------------------------------------------
 float DistributionGGX(vec3 N, vec3 H, float roughness)
 {
@@ -93,17 +68,14 @@ vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
 // ----------------------------------------------------------------------------
 void main()
 {
-    vec3 albedo = pow(texture(albedo_map, TexCoords).rgb, vec3(2.2));
-    vec3 ao_metallic_roughness = texture(ao_metallic_roughness_map, TexCoords).rgb;
+    vec3 WorldPos = texture(gPosition, TexCoords).rgb;
+    vec3 albedo = texture(gAlbedo, TexCoords).rgb;
+    vec3 ao_metallic_roughness = texture(gAoRoughMetal, TexCoords).rgb;
+    float ao = ao_metallic_roughness.r;
     float roughness = ao_metallic_roughness.g;
     float metallic = ao_metallic_roughness.b;
 
-    float ao = 1.0;
-    if (has_ao_map) {
-        ao = ao_metallic_roughness.r;
-    }
-
-    vec3 N = getNormalFromMap();
+    vec3 N = texture(gNormal, TexCoords).rgb;
     vec3 V = normalize(camPos - WorldPos);
     vec3 R = reflect(-V, N);
 
@@ -114,7 +86,7 @@ void main()
 
     // reflectance equation
     vec3 Lo = vec3(0.0);
-    for (int i = 0; i < 4; ++i)
+    for (int i = 0; i < NR_LIGHTS; ++i)
     {
         // calculate per-light radiance
         vec3 L = normalize(lightPositions[i] - WorldPos);
@@ -169,10 +141,6 @@ void main()
     vec3 ambient = (kD * diffuse + specular) * ao;
 
     vec3 color = ambient + Lo;
-
-    if (has_emissive_map) {
-        color += texture(emissive_map, TexCoords).rgb;
-    }
 
     // HDR tonemapping
     color = color / (color + vec3(1.0));

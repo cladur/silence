@@ -4,6 +4,7 @@
 #include "common/framebuffer.h"
 #include "common/render_pass.h"
 #include "debug/debug_draw.h"
+#include "render/common/render_pass.h"
 #include "render/transparent_elements/ui/sprite_draw.h"
 #include "transparent_elements/text/text_draw.h"
 #include "transparent_elements/transparent_object.h"
@@ -20,12 +21,13 @@ struct RenderScene {
 	Camera camera;
 
 	RenderPass *default_pass;
-	UnlitPass unlit_pass;
+	GBufferPass g_buffer_pass;
 	PBRPass pbr_pass;
 	SkyboxPass skybox_pass;
 	TransparentPass transparent_pass;
 
 	Framebuffer render_framebuffer;
+	GBuffer g_buffer;
 	glm::vec2 render_extent;
 
 	TextDraw text_draw;

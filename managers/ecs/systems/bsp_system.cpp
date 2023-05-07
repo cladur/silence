@@ -20,8 +20,7 @@ void BSPSystem::update(World &world, float dt) {
 	}
 }
 
-void BSPSystem::resolve_collision(
-		World &world, BSPNode *node, Entity entity, bool force) {
+void BSPSystem::resolve_collision(World &world, BSPNode *node, Entity entity, bool force) {
 	if (node == nullptr) {
 		return;
 	}
@@ -313,11 +312,6 @@ void BSPSystem::log_tree(BSPNode *node) {
 	if (node == nullptr) {
 		return;
 	}
-
-	std::cout << "Node: " << node << std::endl;
-	std::cout << "Plane: " << node->plane.point.x << ", " << node->plane.point.y << ", " << node->plane.point.z << std::endl;
-	std::cout << "Normal: " << node->plane.normal.x << ", " << node->plane.normal.y << ", " << node->plane.normal.z << std::endl;
-	std::cout << std::endl;
 
 	log_tree(node->front.get());
 	log_tree(node->back.get());

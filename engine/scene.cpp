@@ -54,25 +54,6 @@ Scene::Scene() {
 
 void Scene::update(float dt) {
 	get_render_scene().camera = camera;
-
-	for (auto &entity : entities) {
-		if (world.has_component<Transform>(entity) && world.has_component<ModelInstance>(entity)) {
-			auto &transform = world.get_component<Transform>(entity);
-			auto &model_instance = world.get_component<ModelInstance>(entity);
-
-			if (entity == COLLISION_TEST_ENTITY) {
-				// todo just testing, delete later
-				auto i_m = InputManager::get();
-				float forward = -i_m.get_axis("forward", "backward");
-				float right = -i_m.get_axis("right", "left");
-				float up = -i_m.get_axis("up", "down");
-
-				transform.add_position(glm::vec3(forward, up, right) * 5.0f * dt);
-			}
-
-			get_render_scene().queue_draw(&model_instance, &transform);
-		}
-	}
 }
 
 RenderScene &Scene::get_render_scene() {
