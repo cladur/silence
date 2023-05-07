@@ -6,93 +6,7 @@
 const uint32_t VERTEX_COUNT = 4;
 const uint32_t INDEX_COUNT = 6;
 
-void SpriteDraw::startup() {
-	glGenVertexArrays(1, &vao);
-	glGenBuffers(1, &vbo);
-	glGenBuffers(1, &ebo);
-
-	glBindVertexArray(vao);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
-	glBufferData(GL_ARRAY_BUFFER, VERTEX_COUNT * sizeof(SpriteVertex), nullptr, GL_DYNAMIC_DRAW);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, INDEX_COUNT * sizeof(uint32_t), nullptr, GL_DYNAMIC_DRAW);
-
-	// vertex positions
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(SpriteVertex), (void *)nullptr);
-	// vertex color
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(SpriteVertex), (void *)offsetof(SpriteVertex, color));
-	// vertex uv
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(SpriteVertex), (void *)offsetof(SpriteVertex, uv));
-	// is screen space
-	glEnableVertexAttribArray(3);
-	glVertexAttribIPointer(3, 1, GL_INT, sizeof(SpriteVertex), (void *)offsetof(SpriteVertex, is_screen_space));
-
-	glBindVertexArray(0);
-
-	shader.load_from_files(shader_path("sprite.vert"), shader_path("sprite.frag"));
-}
-
-void SpriteDraw::draw(RenderScene &render_scene) {
-	// this is probably super inefficient, but i had no clue how to manage multiple textures in a single batched draw
-	// call sort the sprites based on distance to camera to avoid transparency issues
-	auto cam_pos = render_scene.camera_pos;
-
-	std::sort(sprites.begin(), sprites.end(),
-			[](const Sprite &a, const Sprite &b) { return a.vertices[0].position.z < b.vertices[0].position.z; });
-
-	for (auto &sprite : sprites) {
-		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
-		glm::mat4 view = render_scene.view;
-		glm::mat4 proj = render_scene.projection;
-
-		glBufferSubData(GL_ARRAY_BUFFER, 0, sprite.vertices.size() * sizeof(SpriteVertex), &sprite.vertices[0]);
-
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sprite.indices.size() * sizeof(uint32_t), &sprite.indices[0]);
-
-		auto t = SpriteManager::get()->get_sprite_texture(sprite.texture_name);
-		int textured = !sprite.texture_name.empty();
-
-		if (sprite.vertices[0].is_screen_space == 1) {
-			glm::vec2 window_size = DisplayManager::get().get_framebuffer_size();
-			proj = glm::ortho(0.0f, window_size.x, 0.0f, window_size.y);
-		}
-
-		shader.use();
-		shader.set_mat4("projection", proj);
-		shader.set_mat4("view", view);
-		shader.set_int("textured", textured);
-		shader.set_int("sprite_texture", 0);
-		if (sprite.billboard) {
-			auto right = glm::vec3(view[0][0], view[1][0], view[2][0]);
-			auto up = glm::vec3(view[0][1], view[1][1], view[2][1]);
-			auto look = glm::vec3(view[0][2], view[1][2], view[2][2]);
-			shader.set_vec3("camera_right", right);
-			shader.set_vec3("camera_up", up);
-			shader.set_vec3("camera_look", look);
-			shader.set_vec2("size", sprite.size);
-			shader.set_vec3("billboard_center", sprite.position);
-			shader.set_int("is_billboard", 1);
-		} else {
-			shader.set_int("is_billboard", 0);
-		}
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, t.id);
-
-		glBindVertexArray(vao);
-		glDrawElements(GL_TRIANGLES, sprite.indices.size(), GL_UNSIGNED_INT, nullptr);
-		glBindVertexArray(0);
-	}
-	sprites.clear();
-}
-
-TransparentObject sprite_draw::default_vertex_data(const glm::vec3 &position, const glm::vec2 &size,
+TransparentObject SpriteDraw::default_vertex_data(const glm::vec3 &position, const glm::vec2 &size,
 		float sprite_x_size, float sprite_y_size, const glm::vec3 &color, bool is_screen_space, Alignment alignment) {
 	TransparentObject sprite = {};
 	sprite.position = position;
@@ -148,9 +62,9 @@ TransparentObject sprite_draw::default_vertex_data(const glm::vec3 &position, co
 	float sprite_y_aspect = 1.0f;
 
 	if (sprite_x_size > sprite_y_size) {
-		sprite_y_aspect = sprite_y_size / sprite_x_size;
+		sprite_y_aspect = (float)sprite_y_size / (float)sprite_x_size;
 	} else {
-		sprite_x_aspect = sprite_x_size / sprite_y_size;
+		sprite_x_aspect = (float)sprite_x_size / (float)sprite_y_size;
 	}
 
 	float x = aligned_position.x * aspect;
@@ -178,51 +92,51 @@ TransparentObject sprite_draw::default_vertex_data(const glm::vec3 &position, co
 	return sprite;
 }
 
-void sprite_draw::draw_colored(const glm::vec3 &position, const glm::vec2 &size, const glm::vec3 &color,
+void SpriteDraw::draw_colored(const glm::vec3 &position, const glm::vec2 &size, const glm::vec3 &color,
 		bool is_screen_space, Alignment alignment) {
 	TransparentObject sprite = default_vertex_data(position, size, 1.0f, 1.0f, color, is_screen_space, alignment);
-	auto manager = RenderManager::get();
-	// manager->transparent_draw.objects.push_back(sprite);
+
+	current_scene->transparent_objects.push_back(sprite);
 }
 
-void sprite_draw::draw_sprite(const glm::vec3 &position, const glm::vec2 &size, const glm::vec3 &color,
+void SpriteDraw::draw_sprite(const glm::vec3 &position, const glm::vec2 &size, const glm::vec3 &color,
 		const char *texture_name, bool is_screen_space, Alignment alignment) {
 	Texture t = SpriteManager::get()->get_sprite_texture(texture_name);
 
 	TransparentObject sprite =
 			default_vertex_data(position, size, (float)t.width, (float)t.height, color, is_screen_space, alignment);
 	sprite.texture_name = texture_name;
-	auto manager = RenderManager::get();
-	// manager->transparent_draw.objects.push_back(sprite);
+
+	current_scene->transparent_objects.push_back(sprite);
 }
 
-void sprite_draw::draw_sprite_billboard(
+void SpriteDraw::draw_sprite_billboard(
 		const glm::vec3 &position, const glm::vec2 &size, const glm::vec3 &color, const char *texture_name) {
 	Texture t = SpriteManager::get()->get_sprite_texture(texture_name);
 
 	TransparentObject sprite = default_vertex_data(
-			glm::vec3(0.0f), size, (float)t.width, (float)t.height, color, false, sprite_draw::Alignment::NONE);
+			glm::vec3(0.0f), size, (float)t.width, (float)t.height, color, false, Alignment::NONE);
 
 	sprite.texture_name = texture_name;
 	sprite.billboard = true;
 	sprite.size = size / 2.0f;
 	sprite.position = position;
-	auto manager = RenderManager::get();
-	// manager->transparent_draw.objects.push_back(sprite);
+
+	current_scene->transparent_objects.push_back(sprite);
 }
 
-void sprite_draw::draw_colored_billboard(const glm::vec3 &position, const glm::vec2 &size, const glm::vec3 &color) {
+void SpriteDraw::draw_colored_billboard(const glm::vec3 &position, const glm::vec2 &size, const glm::vec3 &color) {
 	TransparentObject sprite =
-			default_vertex_data(glm::vec3(0.0f), size, 1.0f, 1.0f, color, false, sprite_draw::Alignment::NONE);
+			default_vertex_data(glm::vec3(0.0f), size, 1.0f, 1.0f, color, false, Alignment::NONE);
 
 	sprite.billboard = true;
 	sprite.size = size / 2.0f;
 	sprite.position = position;
-	auto manager = RenderManager::get();
-	// manager->transparent_draw.objects.push_back(sprite);
+
+	current_scene->transparent_objects.push_back(sprite);
 }
 
-void sprite_draw::draw_slider_billboard(const glm::vec3 &position, float add_z, const glm::vec2 &size,
+void SpriteDraw::draw_slider_billboard(const glm::vec3 &position, float add_z, const glm::vec2 &size,
 		const glm::vec3 &color, float value, SliderAlignment slider_alignment) {
 	TransparentObject sprite = {};
 	sprite.vertices.resize(4);
@@ -285,6 +199,16 @@ void sprite_draw::draw_slider_billboard(const glm::vec3 &position, float add_z, 
 	sprite.billboard = true;
 	sprite.size = size / 2.0f;
 	sprite.position = position;
-	auto manager = RenderManager::get();
-	// manager->transparent_draw.objects.push_back(sprite);
+
+	current_scene->transparent_objects.push_back(sprite);
+}
+void SpriteDraw::draw_sprite_scene(RenderScene *scene, const glm::vec3 &position, const glm::vec2 &size,
+		const glm::vec3 &color, const char *texture_name, bool is_screen_space, Alignment alignment) {
+	Texture t = SpriteManager::get()->get_sprite_texture(texture_name);
+
+	TransparentObject sprite =
+			default_vertex_data(position, size, (float)t.width, (float)t.height, color, is_screen_space, alignment);
+	sprite.texture_name = texture_name;
+
+	scene->transparent_objects.push_back(sprite);
 }

@@ -1,4 +1,5 @@
 #include "game.h"
+#include "audio/audio_manager.h"
 #include "display/display_manager.h"
 #include "input/input_manager.h"
 
@@ -25,8 +26,30 @@ void input_setup() {
 	input_manager.add_action("move_faster");
 	input_manager.add_key_to_action("move_faster", InputKey::LEFT_SHIFT);
 
+	//add actions to arrows
+	input_manager.add_action("forward");
+	input_manager.add_key_to_action("forward", InputKey::UP);
+
+	input_manager.add_action("backward");
+	input_manager.add_key_to_action("backward", InputKey::DOWN);
+
+	input_manager.add_action("left");
+	input_manager.add_key_to_action("left", InputKey::LEFT);
+
+	input_manager.add_action("right");
+	input_manager.add_key_to_action("right", InputKey::RIGHT);
+
+	input_manager.add_action("up");
+	input_manager.add_key_to_action("up", InputKey::O);
+
+	input_manager.add_action("down");
+	input_manager.add_key_to_action("down", InputKey::L);
+
 	input_manager.add_action("toggle_camera_control");
 	input_manager.add_key_to_action("toggle_camera_control", InputKey::ESCAPE);
+
+	input_manager.add_action("mouse_left");
+	input_manager.add_key_to_action("mouse_left", InputKey::MOUSE_LEFT);
 }
 
 void handle_camera(Camera &cam, float dt) {
@@ -76,6 +99,8 @@ void Game::custom_update(float dt) {
 		controlling_camera = !controlling_camera;
 		display_manager.capture_mouse(controlling_camera);
 	}
+
+	//menu_test.update();
 
 	if (controlling_camera) {
 		Camera &cam = get_active_scene().camera;

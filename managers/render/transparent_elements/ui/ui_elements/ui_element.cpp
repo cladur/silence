@@ -1,9 +1,11 @@
 #include "ui_element.h"
-void UIElement::draw() {
+#include <render/render_scene.h>
+
+void UIElement::draw(RenderScene *scene) {
 
 }
 
-void UIElement::draw(glm::vec3 parent_position, glm::vec2 parent_size) {
+void UIElement::draw(RenderScene *scene, glm::vec3 parent_position, glm::vec2 parent_size) {
 
 }
 

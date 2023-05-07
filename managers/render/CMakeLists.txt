@@ -16,7 +16,7 @@ add_library(${OPENGL_MANAGER_NAME} STATIC
         ecs/render_system.cpp ecs/render_system.h
         ecs/model_instance.cpp ecs/model_instance.h
         debug/debug_draw.cpp debug/debug_draw.h
-        transparent_elements/transparent_draw.cpp transparent_elements/transparent_draw.h
+        transparent_elements/transparent_object.h
         transparent_elements/text/text_draw.cpp transparent_elements/text/text_draw.h
         transparent_elements/ui/sprite_manager.cpp transparent_elements/ui/sprite_manager.h
         transparent_elements/ui/sprite_draw.cpp transparent_elements/ui/sprite_draw.h
@@ -27,7 +27,9 @@ add_library(${OPENGL_MANAGER_NAME} STATIC
         transparent_elements/ui/ui_elements/ui_text.cpp transparent_elements/ui/ui_elements/ui_text.h
         transparent_elements/ui/ui_elements/ui_button.cpp transparent_elements/ui/ui_elements/ui_button.h
         common/skinned_mesh.cpp common/skinned_mesh.h
-        common/skinned_model.cpp common/skinned_model.h)
+        common/skinned_model.cpp common/skinned_model.h
+        transparent_elements/ui/ui_elements/ui_button.cpp transparent_elements/ui/ui_elements/ui_button.h
+        transparent_elements/ui_draw.cpp transparent_elements/ui_draw.h)
 
 # Include directories
 target_include_directories(${OPENGL_MANAGER_NAME} PUBLIC ${MANAGER_DIR})

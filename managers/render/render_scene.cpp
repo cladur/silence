@@ -1,6 +1,7 @@
 #include "render_scene.h"
 
 #include "cvars/cvars.h"
+#include "game/menu_test.h"
 #include "render_manager.h"
 
 AutoCVarFloat cvar_fov = AutoCVarFloat("render.fov", "field of view", 70.0f);
@@ -16,16 +17,24 @@ void RenderScene::startup() {
 	render_extent = glm::vec2(100, 100);
 	render_framebuffer.startup(render_extent.x, render_extent.y);
 
-	text_draw.startup();
+	text_draw.current_scene = this;
+	sprite_draw.current_scene = this;
+	ui_draw.current_scene = this;
+
 	debug_draw.startup();
-	sprite_draw.startup();
-	transparent_draw.startup();
+	transparent_pass.startup();
 }
 
 void RenderScene::draw() {
-	text_draw.render_extent = render_extent;
 	debug_draw.projection = projection;
 	debug_draw.view = view;
+
+	// this just pushes all the elements to be drawn with transparent_pass.draw()
+	// no actual drawing happens here
+//	sprite_draw.current_scene = this;
+//	text_draw.current_scene = this;
+//	ui_draw.current_scene = this;
+//	ui_draw.draw();
 
 	render_framebuffer.bind();
 	glViewport(0, 0, (int)render_extent.x, (int)render_extent.y);
@@ -65,12 +74,10 @@ void RenderScene::draw() {
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	text_draw.draw();
-	glDisable(GL_BLEND);
-
 	// ui needs to go last, later to be a different render target
 	//sprite_draw.draw();
-	transparent_draw.draw(*this);
+	transparent_pass.draw(*this);
+	glDisable(GL_BLEND);
 }
 
 void RenderScene::resize_framebuffer(uint32_t width, uint32_t height) {

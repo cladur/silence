@@ -36,6 +36,7 @@ void Inspector::show_components() {
 	SHOW_COMPONENT(ModelInstance, show_modelinstance);
 	SHOW_COMPONENT(FmodListener, show_fmodlistener);
 	SHOW_COMPONENT(ColliderTag, show_collidertag);
+	SHOW_COMPONENT(StaticTag, show_statictag);
 	SHOW_COMPONENT(ColliderSphere, show_collidersphere);
 	SHOW_COMPONENT(ColliderAABB, show_collideraabb);
 	SHOW_COMPONENT(ColliderOBB, show_colliderobb);
@@ -48,6 +49,9 @@ void Inspector::show_components() {
 }
 
 void Inspector::show_name() {
+	ImGui::CollapsingHeader("Name");
+
+	remove_component_popup<Name>();
 }
 
 void Inspector::show_transform() {
@@ -251,6 +255,20 @@ void Inspector::show_collidertag() {
 		ImGui::EndTable();
 	}
 }
+
+void Inspector::show_statictag() {
+	if (ImGui::CollapsingHeader("StaticTag", tree_flags)) {
+		remove_component_popup<StaticTag>();
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("Transform", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+
+		show_text("Static Tag", "Yes");
+
+		ImGui::EndTable();
+	}
+}
+
 void Inspector::show_collidersphere() {
 	auto &collidersphere = world->get_component<ColliderSphere>(selected_entity);
 	if (ImGui::CollapsingHeader("ColliderSphere", tree_flags)) {
@@ -398,6 +416,7 @@ void Inspector::show_add_component() {
 			SHOW_ADD_COMPONENT(ModelInstance);
 			SHOW_ADD_COMPONENT(FmodListener);
 			SHOW_ADD_COMPONENT(ColliderTag);
+			SHOW_ADD_COMPONENT(StaticTag);
 			SHOW_ADD_COMPONENT(ColliderSphere);
 			SHOW_ADD_COMPONENT(ColliderAABB);
 			SHOW_ADD_COMPONENT(ColliderOBB);

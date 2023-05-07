@@ -23,6 +23,7 @@ private:
 	void show_modelinstance();
 	void show_fmodlistener();
 	void show_collidertag();
+	void show_statictag();
 	void show_collidersphere();
 	void show_collideraabb();
 	void show_colliderobb();
@@ -30,8 +31,6 @@ private:
 	static bool show_float(const char *label, float &value, float speed = 0.1f);
 	static void show_checkbox(const char *label, bool &value);
 	static void show_text(const char *label, const char *value);
-
-	int current_component_id = 0;
 
 	template <typename T> void remove_component_popup() {
 		std::string popup_name = fmt::format("Remove {}", typeid(T).name());
@@ -47,7 +46,8 @@ private:
 
 	template <typename T> void remove_component_menu_item() {
 		if (ImGui::MenuItem("Remove component")) {
-			remove_component_queue.push(std::make_pair(selected_entity, current_component_id));
+			// Type to component id
+			remove_component_queue.emplace(selected_entity, world->get_component_id<T>());
 		}
 	}
 

@@ -4,11 +4,13 @@
 #include "common/framebuffer.h"
 #include "common/render_pass.h"
 #include "debug/debug_draw.h"
+#include "render/transparent_elements/ui/sprite_draw.h"
 #include "transparent_elements/text/text_draw.h"
-#include "transparent_elements/transparent_draw.h"
-#include "transparent_elements/ui/sprite_draw.h"
+#include "transparent_elements/transparent_object.h"
+//#include <game/menu_test.h>
 
 #include "camera/camera.h"
+#include "render/transparent_elements/ui_draw.h"
 
 struct RenderScene {
 	glm::mat4 projection;
@@ -21,6 +23,7 @@ struct RenderScene {
 	UnlitPass unlit_pass;
 	PBRPass pbr_pass;
 	SkyboxPass skybox_pass;
+	TransparentPass transparent_pass;
 
 	Framebuffer render_framebuffer;
 	glm::vec2 render_extent;
@@ -28,7 +31,8 @@ struct RenderScene {
 	TextDraw text_draw;
 	DebugDraw debug_draw;
 	SpriteDraw sprite_draw;
-	TransparentDraw transparent_draw;
+	UIDraw ui_draw;
+	std::vector<TransparentObject> transparent_objects;
 
 	std::vector<DrawCommand> draw_commands;
 

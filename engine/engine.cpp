@@ -6,9 +6,11 @@
 #include "input/input_manager.h"
 #include "render/render_manager.h"
 
+#include "audio/adaptive_music_manager.h"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+#include "physics/physics_manager.h"
 
 void Engine::startup() {
 	// Managers
@@ -18,6 +20,9 @@ void Engine::startup() {
 	RenderManager::get().startup();
 	FontManager::get().startup();
 	AudioManager::get().startup();
+	AdaptiveMusicManager::get().startup("adaptive_music_test");
+	// Uncomment if you want music
+	// AdaptiveMusicManager::get().play();
 
 	FontManager::get().load_font("resources/fonts/PoltawskiNowy.ttf", 48, "PoltawskiNowy");
 }
@@ -25,6 +30,7 @@ void Engine::startup() {
 void Engine::shutdown() {
 	// Managers
 	SPDLOG_INFO("Shutting down engine systems...");
+	AdaptiveMusicManager::get().shutdown();
 	AudioManager::get().shutdown();
 	FontManager::get().shutdown();
 	RenderManager::get().shutdown();
@@ -61,6 +67,8 @@ void Engine::update(float dt) {
 	DisplayManager &display_manager = DisplayManager::get();
 	RenderManager &render_manager = RenderManager::get();
 
+	AdaptiveMusicManager::get().update(dt);
+
 	if (display_manager.window_should_close()) {
 		should_run = false;
 	}
@@ -83,6 +91,7 @@ void Engine::update(float dt) {
 
 	for (auto &scene : scenes) {
 		scene->update(dt);
+
 		scene->world.update(dt);
 	}
 

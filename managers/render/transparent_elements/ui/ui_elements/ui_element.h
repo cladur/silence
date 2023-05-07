@@ -3,6 +3,8 @@
 
 #include "managers/render/transparent_elements/ui/sprite_draw.h"
 
+struct RenderScene;
+
 class UIElement {
 public:
 	glm::vec3 position = glm::vec3(0.0f);
@@ -12,15 +14,15 @@ public:
 	bool is_screen_space = true;
 	bool is_billboard = false;
 	std::vector<UIElement *> children;
-	sprite_draw::Alignment alignment = sprite_draw::Alignment::NONE;
+	Alignment alignment = Alignment::NONE;
 	bool display = true;
 
 	glm::vec3 parent_position = glm::vec3(0.0f);
 
 	UIElement() = default;
 
-	virtual void draw();
-	virtual void draw(glm::vec3 parent_position, glm::vec2 parent_size);
+	virtual void draw(RenderScene *scene);
+	virtual void draw(RenderScene *scene, glm::vec3 parent_position, glm::vec2 parent_size);
 	virtual void add_child(UIElement &child);
 };
 

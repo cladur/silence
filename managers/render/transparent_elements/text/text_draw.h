@@ -2,8 +2,8 @@
 #define SILENCE_TEXT_DRAW_H
 
 #include "font/font_manager.h"
-
 #include "render/common/shader.h"
+struct RenderScene;
 
 struct TextVertex {
 	glm::vec3 position;
@@ -13,19 +13,9 @@ struct TextVertex {
 };
 
 class TextDraw {
-private:
-	//  render data
-	unsigned int vao, vbo, ebo;
-	Shader shader;
-
 public:
-	std::vector<TextVertex> vertices;
-	std::vector<uint32_t> indices;
-
-	glm::vec2 render_extent;
-
-	void startup();
-	void draw();
+	TextDraw() = default;
+	RenderScene *current_scene;
 
 	void draw_text_2d(const std::string &text, const glm::vec2 &position,
 			const glm::vec3 &color = glm::vec3(1.0f, 1.0f, 1.0f), float scale = 1.0f, std::string font_name = nullptr,

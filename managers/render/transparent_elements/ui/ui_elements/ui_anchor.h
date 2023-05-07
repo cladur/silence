@@ -12,8 +12,8 @@ public:
 	UIAnchor() = default;
 	UIAnchor(float x, float y);
 
-	void draw() override;
-	void draw(glm::vec3 parent_position, glm::vec2 parent_size) override;
+	void draw(RenderScene *scene) override;
+	void draw(RenderScene *scene, glm::vec3 parent_position, glm::vec2 parent_size) override;
 };
 
 #endif //SILENCE_UI_ANCHOR_H

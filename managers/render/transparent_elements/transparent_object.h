@@ -1,8 +1,7 @@
-#ifndef SILENCE_TRANSPARENT_DRAW_H
-#define SILENCE_TRANSPARENT_DRAW_H
+#ifndef SILENCE_TRANSPARENT_OBJECT_H
+#define SILENCE_TRANSPARENT_OBJECT_H
 
 #include "render/common/shader.h"
-struct RenderScene;
 
 struct TransparentVertex {
 	glm::vec3 position;
@@ -27,16 +26,5 @@ struct TransparentObject {
 	std::string texture_name; // used to find either atlas for fonts or sprites
 };
 
-class TransparentDraw {
-private:
-	unsigned int vao, vbo, ebo;
-	Shader shader;
 
-public:
-	std::vector<TransparentObject> objects;
-
-	void startup();
-	void draw(RenderScene &render_scene);
-};
-
-#endif //SILENCE_TRANSPARENT_DRAW_H
+#endif //SILENCE_TRANSPARENT_OBJECT_H

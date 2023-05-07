@@ -285,6 +285,7 @@ void Editor::custom_update(float dt) {
 
 	viewport_hovered = false;
 	for (int i = 0; i < scenes.size(); i++) {
+		World &w = scenes[i]->world;
 		auto &scene = dynamic_cast<EditorScene &>(*scenes[i]);
 		if (scene.is_visible) {
 			scene.update(dt);
@@ -294,20 +295,42 @@ void Editor::custom_update(float dt) {
 
 	if (scene_deletion_queued) {
 		scenes.erase(scenes.begin() + scene_to_delete);
-		if (active_scene == scene_to_delete) {
-			active_scene = 0;
-		}
+		active_scene = 0;
 		scene_deletion_queued = false;
 	}
 }
-
 void Editor::create_scene(const std::string &name) {
-	auto scene = std::make_unique<EditorScene>();
+	create_scene(name, SceneType::GameScene);
+}
+void Editor::create_scene(const std::string &name, SceneType type, const std::string &path) {
+	auto scene = std::make_unique<EditorScene>(type);
 	scene->name = name;
 
 	// Create RenderScene for scene
 	RenderManager &render_manager = RenderManager::get();
 	scene->render_scene_idx = render_manager.create_render_scene();
+
+	Entity entity;
+
+	switch (type) {
+		case SceneType::GameScene:
+			if (!path.empty()) {
+				scene->load_from_file(path);
+			}
+			break;
+		case SceneType::Archetype:
+			entity = scene->world.create_entity();
+			scene->world.add_component<Transform>(entity, Transform{});
+			scene->entities.push_back(entity);
+			break;
+		case SceneType::Prototype:
+			nlohmann::json serialized_archetype;
+			std::ifstream file(path);
+			file >> serialized_archetype;
+			scene->world.deserialize_entity_json(serialized_archetype.back(), scene->entities);
+			file.close();
+			break;
+	}
 
 	scenes.push_back(std::move(scene));
 }

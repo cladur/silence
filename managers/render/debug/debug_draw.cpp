@@ -58,17 +58,32 @@ void DebugDraw::draw_line(const glm::vec3 &from, const glm::vec3 &to, const glm:
 }
 
 // Draw a box with center at "center" and scale "scale".
-void DebugDraw::draw_box(const glm::vec3 &center, const glm::vec3 &scale, const glm::vec3 &color) {
+void DebugDraw::draw_box(const glm::vec3 &center,
+		const glm::vec3 &rotation,
+		const glm::vec3 &scale,
+		const glm::vec3 &color) {
 	// Generate a box mesh, using draw_line to draw the lines
-	glm::vec3 vertices[8] = { glm::vec3(
-									  center.x - scale.x / 2.0f, center.y - scale.y / 2.0f, center.z - scale.z / 2.0f),
-		glm::vec3(center.x + scale.x / 2.0f, center.y - scale.y / 2.0f, center.z - scale.z / 2.0f),
-		glm::vec3(center.x + scale.x / 2.0f, center.y + scale.y / 2.0f, center.z - scale.z / 2.0f),
-		glm::vec3(center.x - scale.x / 2.0f, center.y + scale.y / 2.0f, center.z - scale.z / 2.0f),
-		glm::vec3(center.x - scale.x / 2.0f, center.y - scale.y / 2.0f, center.z + scale.z / 2.0f),
-		glm::vec3(center.x + scale.x / 2.0f, center.y - scale.y / 2.0f, center.z + scale.z / 2.0f),
-		glm::vec3(center.x + scale.x / 2.0f, center.y + scale.y / 2.0f, center.z + scale.z / 2.0f),
-		glm::vec3(center.x - scale.x / 2.0f, center.y + scale.y / 2.0f, center.z + scale.z / 2.0f) };
+	glm::vec3 vertices[8] = {
+		glm::vec3(- scale.x / 2.0f, - scale.y / 2.0f, - scale.z / 2.0f),
+		glm::vec3(+ scale.x / 2.0f, - scale.y / 2.0f, - scale.z / 2.0f),
+		glm::vec3(+ scale.x / 2.0f, + scale.y / 2.0f, - scale.z / 2.0f),
+		glm::vec3(- scale.x / 2.0f, + scale.y / 2.0f, - scale.z / 2.0f),
+		glm::vec3(- scale.x / 2.0f, - scale.y / 2.0f, + scale.z / 2.0f),
+		glm::vec3(+ scale.x / 2.0f, - scale.y / 2.0f, + scale.z / 2.0f),
+		glm::vec3(+ scale.x / 2.0f, + scale.y / 2.0f, + scale.z / 2.0f),
+		glm::vec3(- scale.x / 2.0f, + scale.y / 2.0f, + scale.z / 2.0f) };
+
+	glm::mat4 mat = glm::mat4(1.0f);
+
+	mat = glm::translate(mat, center);
+
+	mat = glm::rotate(mat, glm::radians(rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+	mat = glm::rotate(mat, glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+	mat = glm::rotate(mat, glm::radians(rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+
+	for (auto &v : vertices) {
+		v = glm::vec3(mat * glm::vec4(v, 1.0f));
+	}
 
 	draw_line(vertices[0], vertices[1], color);
 	draw_line(vertices[1], vertices[2], color);

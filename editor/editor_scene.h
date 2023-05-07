@@ -3,13 +3,16 @@
 
 #include "engine/scene.h"
 
+enum SceneType { GameScene, Archetype, Prototype };
+
 struct EditorScene : public Scene {
+	SceneType type;
 	bool is_visible = false;
 	bool viewport_hovered = false;
 	bool controlling_camera = false;
 	ImVec2 last_viewport_size = ImVec2(0, 0);
 
-	EditorScene();
+	EditorScene(SceneType type = SceneType::GameScene);
 	void update(float dt) override;
 
 	void save_to_file(const std::string &path) override;

@@ -60,6 +60,8 @@ public:
 	}
 };
 
+struct Scene;
+
 class World {
 private:
 	std::unique_ptr<ComponentManager> component_manager;
@@ -78,6 +80,8 @@ private:
 	SortedVector<std::shared_ptr<BaseSystem>> systems;
 
 public:
+	Scene *parent_scene;
+
 	void startup();
 
 	// Entity methods
@@ -90,6 +94,10 @@ public:
 		component_manager->register_component<T>();
 
 		std::string type_name = typeid(T).name();
+		// if typename starts with struct, remove it
+		if (type_name.substr(0, 7) == "struct ") {
+			type_name.erase(0, 7);
+		}
 		// Remove number prefix from type name
 		while (type_name[0] >= '0' && type_name[0] <= '9') {
 			type_name.erase(0, 1);
@@ -173,7 +181,18 @@ public:
 	}
 
 	template <typename T> int get_component_id() {
-		return component_ids[typeid(T).name()];
+		std::string type_name = typeid(T).name();
+
+		// if typename starts with struct, remove it
+		if (type_name.substr(0, 7) == "struct ") {
+			type_name.erase(0, 7);
+		}
+		// Remove number prefix from type name
+		while (type_name[0] >= '0' && type_name[0] <= '9') {
+			type_name.erase(0, 1);
+		}
+
+		return component_ids[type_name];
 	}
 
 	// Specific parent system methods
@@ -181,7 +200,8 @@ public:
 	bool remove_child(Entity parent, Entity child, bool keep_transform = false);
 	bool has_child(Entity parent, Entity child);
 	bool reparent(Entity new_parent, Entity child, bool keep_transform = false);
-	void serialize_entity_json(nlohmann::json &json, Entity entity);
+	void serialize_entity_json(nlohmann::json &json, Entity entity, bool is_archetype = false);
+	void deserialize_entity_json(nlohmann::json &json, std::vector<Entity> &entities);
 	void deserialize_entities_json(nlohmann::json &json, std::vector<Entity> &entities);
 	void print_components();
 
@@ -192,6 +212,8 @@ public:
 	Signature get_entity_signature(Entity entity);
 	std::vector<std::string> &get_component_names();
 	int get_registered_components();
+
+	Scene *get_parent_scene();
 };
 
 #endif //SILENCE_WORLD_H
