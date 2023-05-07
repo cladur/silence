@@ -31,10 +31,10 @@ void RenderScene::draw() {
 
 	// this just pushes all the elements to be drawn with transparent_pass.draw()
 	// no actual drawing happens here
-	sprite_draw.current_scene = this;
-	text_draw.current_scene = this;
-	ui_draw.current_scene = this;
-	ui_draw.draw();
+//	sprite_draw.current_scene = this;
+//	text_draw.current_scene = this;
+//	ui_draw.current_scene = this;
+//	ui_draw.draw();
 
 	render_framebuffer.bind();
 	glViewport(0, 0, (int)render_extent.x, (int)render_extent.y);

@@ -6,10 +6,13 @@
 #include "render/render_manager.h"
 #include <unordered_map>
 
+#include "ecs/systems/bsp_system.h"
 #include "ecs/systems/collision_system.h"
 #include "ecs/systems/parent_system.h"
 #include "ecs/systems/physics_system.h"
 #include "render/ecs/render_system.h"
+
+#define COLLISION_TEST_ENTITY 4
 
 Scene::Scene() {
 	camera = Camera(glm::vec3(-4.0f, 2.6f, -4.0f));
@@ -19,6 +22,7 @@ Scene::Scene() {
 
 	// ECS
 	world.startup();
+	world.parent_scene = this;
 
 	// Components
 	world.register_component<Name>();
@@ -41,6 +45,9 @@ Scene::Scene() {
 	world.register_system<CollisionSystem>();
 	world.register_system<ParentSystem>();
 	world.register_system<RenderSystem>();
+
+	//todo uncomment if bspsystem is fixed
+	// world.register_system<BSPSystem>();
 }
 
 void Scene::update(float dt) {
@@ -50,6 +57,16 @@ void Scene::update(float dt) {
 		if (world.has_component<Transform>(entity) && world.has_component<ModelInstance>(entity)) {
 			auto &transform = world.get_component<Transform>(entity);
 			auto &model_instance = world.get_component<ModelInstance>(entity);
+
+			if (entity == COLLISION_TEST_ENTITY) {
+				// todo just testing, delete later
+				auto i_m = InputManager::get();
+				float forward = -i_m.get_axis("forward", "backward");
+				float right = -i_m.get_axis("right", "left");
+				float up = -i_m.get_axis("up", "down");
+
+				transform.add_position(glm::vec3(forward, up, right) * 5.0f * dt);
+			}
 
 			get_render_scene().queue_draw(&model_instance, &transform);
 		}
@@ -89,4 +106,8 @@ void Scene::load_from_file(const std::string &path) {
 	nlohmann::json scene_json = nlohmann::json::parse(file);
 	file.close();
 	SceneManager::load_scene_from_json_file(world, scene_json, "", entities);
+
+	bsp_tree = BSPSystem::build_tree(world, entities, 2);
+
+	BSPSystem::log_tree(bsp_tree.get());
 }
