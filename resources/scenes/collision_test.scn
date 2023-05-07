@@ -2,6 +2,26 @@
     {
         "components": [
             {
+                "model_instance": {
+                    "material_type": 2,
+                    "model_handle": 0
+                }
+            },
+            {
+                "rigidbody": {
+                    "acceleration": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "velocity": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    }
+                }
+            },
+            {
                 "name": {
                     "name": "static_box_left"
                 }
@@ -27,26 +47,6 @@
                 }
             },
             {
-                "rigidbody": {
-                    "acceleration": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    "velocity": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    }
-                }
-            },
-            {
-                "model_instance": {
-                    "material_type": 2,
-                    "model_handle": 0
-                }
-            },
-            {
                 "static_tag": {}
             },
             {
@@ -56,7 +56,7 @@
                 "collider_aabb": {
                     "center": {
                         "x": 0.0,
-                        "y": 0.0,
+                        "y": 0.5,
                         "z": 0.0
                     },
                     "range": {
@@ -72,6 +72,26 @@
     },
     {
         "components": [
+            {
+                "model_instance": {
+                    "material_type": 2,
+                    "model_handle": 0
+                }
+            },
+            {
+                "rigidbody": {
+                    "acceleration": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "velocity": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    }
+                }
+            },
             {
                 "name": {
                     "name": "static_box_right"
@@ -98,26 +118,6 @@
                 }
             },
             {
-                "rigidbody": {
-                    "acceleration": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    "velocity": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    }
-                }
-            },
-            {
-                "model_instance": {
-                    "material_type": 2,
-                    "model_handle": 0
-                }
-            },
-            {
                 "static_tag": {}
             },
             {
@@ -127,7 +127,7 @@
                 "collider_aabb": {
                     "center": {
                         "x": 0.0,
-                        "y": 0.0,
+                        "y": 0.5,
                         "z": 0.0
                     },
                     "range": {
@@ -143,6 +143,26 @@
     },
     {
         "components": [
+            {
+                "model_instance": {
+                    "material_type": 1,
+                    "model_handle": 0
+                }
+            },
+            {
+                "rigidbody": {
+                    "acceleration": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "velocity": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    }
+                }
+            },
             {
                 "name": {
                     "name": "player_test"
@@ -169,33 +189,13 @@
                 }
             },
             {
-                "rigidbody": {
-                    "acceleration": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    "velocity": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    }
-                }
-            },
-            {
-                "model_instance": {
-                    "material_type": 1,
-                    "model_handle": 0
-                }
-            },
-            {
                 "collider_tag": {}
             },
             {
                 "collider_aabb": {
                     "center": {
                         "x": 0.0,
-                        "y": 0.0,
+                        "y": 0.5,
                         "z": 0.0
                     },
                     "range": {
@@ -211,6 +211,26 @@
     },
     {
         "components": [
+            {
+                "model_instance": {
+                    "material_type": 2,
+                    "model_handle": 0
+                }
+            },
+            {
+                "rigidbody": {
+                    "acceleration": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "velocity": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    }
+                }
+            },
             {
                 "name": {
                     "name": "static_box_three"
@@ -237,26 +257,6 @@
                 }
             },
             {
-                "rigidbody": {
-                    "acceleration": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    "velocity": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    }
-                }
-            },
-            {
-                "model_instance": {
-                    "material_type": 2,
-                    "model_handle": 0
-                }
-            },
-            {
                 "static_tag": {}
             },
             {
@@ -266,7 +266,7 @@
                 "collider_aabb": {
                     "center": {
                         "x": 0.0,
-                        "y": 0.0,
+                        "y": 0.5,
                         "z": 0.0
                     },
                     "range": {

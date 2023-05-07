@@ -7,6 +7,7 @@
 #include <unordered_map>
 
 #include "ecs/systems/bsp_system.h"
+#include "ecs/systems/collider_draw.h"
 #include "ecs/systems/collision_system.h"
 #include "ecs/systems/parent_system.h"
 #include "ecs/systems/physics_system.h"
@@ -45,6 +46,7 @@ Scene::Scene() {
 	world.register_system<CollisionSystem>();
 	world.register_system<ParentSystem>();
 	world.register_system<RenderSystem>();
+	world.register_system<ColliderDrawSystem>();
 
 	//todo uncomment if bspsystem is fixed
 	// world.register_system<BSPSystem>();
