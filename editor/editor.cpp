@@ -295,9 +295,7 @@ void Editor::custom_update(float dt) {
 
 	if (scene_deletion_queued) {
 		scenes.erase(scenes.begin() + scene_to_delete);
-		if (active_scene == scene_to_delete) {
-			active_scene = 0;
-		}
+		active_scene = 0;
 		scene_deletion_queued = false;
 	}
 }

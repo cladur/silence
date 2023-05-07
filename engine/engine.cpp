@@ -21,8 +21,8 @@ void Engine::startup() {
 	FontManager::get().startup();
 	AudioManager::get().startup();
 	AdaptiveMusicManager::get().startup("adaptive_music_test");
-	AdaptiveMusicManager::get().play();
-	PhysicsManager::get();
+	// Uncomment if you want music
+	// AdaptiveMusicManager::get().play();
 
 	FontManager::get().load_font("resources/fonts/PoltawskiNowy.ttf", 48, "PoltawskiNowy");
 }

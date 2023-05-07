@@ -6,6 +6,7 @@
 #include "render/render_manager.h"
 #include <unordered_map>
 
+#include "ecs/systems/bsp_system.h"
 #include "ecs/systems/collision_system.h"
 #include "ecs/systems/parent_system.h"
 #include "ecs/systems/physics_system.h"
@@ -21,6 +22,7 @@ Scene::Scene() {
 
 	// ECS
 	world.startup();
+	world.parent_scene = this;
 
 	// Components
 	world.register_component<Name>();
@@ -43,6 +45,9 @@ Scene::Scene() {
 	world.register_system<CollisionSystem>();
 	world.register_system<ParentSystem>();
 	world.register_system<RenderSystem>();
+
+	//todo uncomment if bspsystem is fixed
+	//world.register_system<BSPSystem>();
 }
 
 void Scene::update(float dt) {
@@ -101,4 +106,8 @@ void Scene::load_from_file(const std::string &path) {
 	nlohmann::json scene_json = nlohmann::json::parse(file);
 	file.close();
 	SceneManager::load_scene_from_json_file(world, scene_json, "", entities);
+
+	bsp_tree = BSPSystem::build_tree(world, entities, 2);
+
+	BSPSystem::log_tree(bsp_tree.get());
 }

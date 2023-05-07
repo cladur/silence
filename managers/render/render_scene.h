@@ -7,7 +7,7 @@
 #include "render/transparent_elements/ui/sprite_draw.h"
 #include "transparent_elements/text/text_draw.h"
 #include "transparent_elements/transparent_object.h"
-#include <game/menu_test.h>
+//#include <game/menu_test.h>
 
 #include "camera/camera.h"
 #include "render/transparent_elements/ui_draw.h"

@@ -2,6 +2,11 @@
     {
         "components": [
             {
+                "name": {
+                    "name": "static_box_left"
+                }
+            },
+            {
                 "transform": {
                     "orientation": {
                         "w": 1.0,
@@ -42,6 +47,9 @@
                 }
             },
             {
+                "static_tag": {}
+            },
+            {
                 "collider_tag": {}
             },
             {
@@ -60,10 +68,15 @@
             }
         ],
         "entity": 2,
-        "signature": "00000000000000000000101001000110"
+        "signature": "00000000000000000000101101000111"
     },
     {
         "components": [
+            {
+                "name": {
+                    "name": "static_box_right"
+                }
+            },
             {
                 "transform": {
                     "orientation": {
@@ -73,9 +86,9 @@
                         "z": 0.0
                     },
                     "position": {
-                        "x": 0.5048014521598816,
+                        "x": 2.3758580684661865,
                         "y": 0.0,
-                        "z": 1.2834917306900024
+                        "z": -0.5509921312332153
                     },
                     "scale": {
                         "x": 1.0,
@@ -105,6 +118,9 @@
                 }
             },
             {
+                "static_tag": {}
+            },
+            {
                 "collider_tag": {}
             },
             {
@@ -123,7 +139,7 @@
             }
         ],
         "entity": 3,
-        "signature": "00000000000000000000101001000110"
+        "signature": "00000000000000000000101101000111"
     },
     {
         "components": [
@@ -192,5 +208,76 @@
         ],
         "entity": 4,
         "signature": "00000000000000000000101001000111"
+    },
+    {
+        "components": [
+            {
+                "name": {
+                    "name": "static_box_three"
+                }
+            },
+            {
+                "transform": {
+                    "orientation": {
+                        "w": 1.0,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 0.3050559163093567,
+                        "y": 0.0,
+                        "z": 0.6477009057998657
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                }
+            },
+            {
+                "rigidbody": {
+                    "acceleration": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "velocity": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    }
+                }
+            },
+            {
+                "model_instance": {
+                    "material_type": 2,
+                    "model_handle": 0
+                }
+            },
+            {
+                "static_tag": {}
+            },
+            {
+                "collider_tag": {}
+            },
+            {
+                "collider_aabb": {
+                    "center": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "range": {
+                        "x": 0.5,
+                        "y": 0.5,
+                        "z": 0.5
+                    }
+                }
+            }
+        ],
+        "entity": 5,
+        "signature": "00000000000000000000101101000111"
     }
 ]

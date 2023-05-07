@@ -60,6 +60,8 @@ public:
 	}
 };
 
+struct Scene;
+
 class World {
 private:
 	std::unique_ptr<ComponentManager> component_manager;
@@ -78,6 +80,8 @@ private:
 	SortedVector<std::shared_ptr<BaseSystem>> systems;
 
 public:
+	Scene *parent_scene;
+
 	void startup();
 
 	// Entity methods
@@ -208,6 +212,8 @@ public:
 	Signature get_entity_signature(Entity entity);
 	std::vector<std::string> &get_component_names();
 	int get_registered_components();
+
+	Scene *get_parent_scene();
 };
 
 #endif //SILENCE_WORLD_H

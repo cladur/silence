@@ -124,7 +124,7 @@ void World::serialize_entity_json(nlohmann::json &json, Entity entity, bool is_a
 
 void World::deserialize_entity_json(nlohmann::json &json, std::vector<Entity> &entities) {
 	Entity serialized_entity = json["entity"];
-	serialized_entity = serialized_entity == 0 ? create_entity() : serialized_entity;
+	serialized_entity = serialized_entity == 0 ? create_entity() : create_entity(serialized_entity);
 	entities.push_back(serialized_entity);
 	SPDLOG_INFO("Entity {} created or loaded", serialized_entity);
 
@@ -171,4 +171,8 @@ std::vector<std::string> &World::get_component_names() {
 }
 int World::get_registered_components() {
 	return registered_components;
+}
+
+Scene *World::get_parent_scene() {
+	return parent_scene;
 }
