@@ -28,16 +28,6 @@ void RenderScene::startup() {
 }
 
 void RenderScene::draw() {
-	debug_draw.projection = projection;
-	debug_draw.view = view;
-
-	// this just pushes all the elements to be drawn with transparent_pass.draw()
-	// no actual drawing happens here
-	//	sprite_draw.current_scene = this;
-	//	text_draw.current_scene = this;
-	//	ui_draw.current_scene = this;
-	//	ui_draw.draw();
-
 	g_buffer.bind();
 	glViewport(0, 0, (int)render_extent.x, (int)render_extent.y);
 
@@ -73,11 +63,8 @@ void RenderScene::draw() {
 			GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 	render_framebuffer.bind();
 
-	if (draw_skybox) {
-		glDepthFunc(GL_LEQUAL);
-		skybox_pass.draw(*this);
-		glDepthFunc(GL_LESS);
-	}
+	debug_draw.projection = projection;
+	debug_draw.view = view;
 
 	// Draw grid
 	for (int i = -10; i <= 10; i++) {
@@ -91,11 +78,17 @@ void RenderScene::draw() {
 
 	debug_draw.draw();
 
+	if (draw_skybox) {
+		glDepthFunc(GL_LEQUAL);
+		skybox_pass.draw(*this);
+		glDepthFunc(GL_LESS);
+	}
+
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	// ui needs to go last, later to be a different render target
-	//sprite_draw.draw();
-	// transparent_pass.draw(*this);
+	// sprite_draw.draw();
+	transparent_pass.draw(*this);
 	glDisable(GL_BLEND);
 }
 
