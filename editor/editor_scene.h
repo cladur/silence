@@ -26,6 +26,8 @@ struct EditorScene : public Scene {
 	std::unordered_map<Entity, Entity> child_to_parent;
 	std::vector<std::pair<Entity, Entity>> reparent_queue;
 	std::vector<std::pair<Entity, Entity>> add_child_queue;
+	// Deletion queue
+	std::queue<Entity> entity_deletion_queue;
 
 	// Selection
 	void add_to_selection(Entity entity);
