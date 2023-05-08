@@ -3,10 +3,7 @@
 
 #include "render/common/material.h"
 #include "render/common/model.h"
-
-template <typename T> struct Handle {
-	uint32_t id;
-};
+#include "resource/resource_manager.h"
 
 struct ModelInstance {
 	Handle<Model> model_handle;

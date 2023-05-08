@@ -8,7 +8,9 @@ target_include_directories(${RESOURCE_MANAGER_NAME} PUBLIC ${MANAGER_DIR})
 
 target_link_libraries(${RESOURCE_MANAGER_NAME}
         PRIVATE
-        glfw
+        silence_render_manager
         silence_common
         silence_core
+        silence_assets
+        glad::glad
         )

@@ -5,6 +5,7 @@
 #include "managers/render/ecs/model_instance.h"
 #include "material.h"
 #include "model.h"
+#include "resource/resource_manager.h"
 #include "skybox.h"
 
 struct RenderScene;

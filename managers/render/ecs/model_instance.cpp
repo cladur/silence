@@ -3,14 +3,14 @@
 #include "render/render_manager.h"
 
 ModelInstance::ModelInstance() {
-	RenderManager &render_manager = RenderManager::get();
-	model_handle = render_manager.load_model("woodenBox/woodenBox.mdl");
+	ResourceManager &resource_manager = ResourceManager::get();
+	model_handle = resource_manager.load_model("woodenBox/woodenBox.mdl");
 	material_type = MaterialType::Default;
 }
 
 ModelInstance::ModelInstance(const char *path, MaterialType material_type) {
-	RenderManager &render_manager = RenderManager::get();
-	model_handle = render_manager.load_model(path);
+	ResourceManager &resource_manager = ResourceManager::get();
+	model_handle = resource_manager.load_model(path);
 	this->material_type = material_type;
 }
 void ModelInstance::serialize_json(nlohmann::json &j) {

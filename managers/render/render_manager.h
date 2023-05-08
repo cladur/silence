@@ -17,12 +17,10 @@
 
 #include "camera/camera.h"
 
+#include "resource/resource_manager.h"
+
 class RenderManager {
 private:
-	std::unordered_map<std::string, Texture> textures;
-	std::vector<Model> models;
-	std::unordered_map<std::string, Handle<Model>> name_to_model;
-
 public:
 	// Render scenes
 	std::vector<RenderScene> render_scenes;
@@ -38,13 +36,6 @@ public:
 	void draw_scene(RenderScene &render_scene);
 
 	void resize_framebuffer(uint32_t width, uint32_t height);
-
-	Handle<Model> load_model(const char *path);
-	void load_texture(const char *path);
-
-	Model &get_model(Handle<Model> handle);
-	Handle<Model> get_model_handle(std::string name);
-	std::vector<Model> &get_models();
 };
 
 #endif // SILENCE_RENDER_MANAGER_H
