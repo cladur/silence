@@ -30,9 +30,8 @@ public:
 	void draw();
 	void setup_mesh();
 	void load_from_asset(const char *path);
-	void create_fc_bounding_sphere();
 
-	std::vector<glm::vec3> get_position_vertices() const;
+	[[nodiscard]] std::vector<glm::vec3> get_position_vertices() const;
 
 	//  render data
 	unsigned int vao, vbo, ebo;

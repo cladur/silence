@@ -72,7 +72,7 @@ void Camera::set_fov(float fov) {
 
 void Camera::set_render_distance(float near, float far) {
 	this->near = near;
-    this->far = far;
+	this->far = far;
 }
 
 float Camera::get_fov() const {

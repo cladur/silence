@@ -14,8 +14,6 @@ struct Scene {
 
 	World world;
 
-	Camera camera;
-
 	std::vector<Entity> entities;
 
 	uint32_t render_scene_idx;

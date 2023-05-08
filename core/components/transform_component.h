@@ -102,9 +102,9 @@ public:
 
 	[[nodiscard]] glm::vec3 get_global_scale() const {
 		glm::vec3 scale;
-		scale.x = global_model_matrix[0][0];
-		scale.y = global_model_matrix[1][1];
-		scale.z = global_model_matrix[2][2];
+		scale.x = glm::length(glm::vec3(global_model_matrix[0]));
+		scale.y = glm::length(glm::vec3(global_model_matrix[1]));
+		scale.z = glm::length(glm::vec3(global_model_matrix[2]));
 		return scale;
 	}
 

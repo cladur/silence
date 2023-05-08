@@ -30,13 +30,8 @@ public:
 	float yaw;
 	float pitch;
 
-	explicit Camera(
-			glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f),
-			glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f),
-			float fov = 70.0f,
-			float near = 0.1f,
-			float far = 100.0f,
-			float yaw = 90.0f, float pitch = 0.0f);
+	explicit Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f),
+			float fov = 70.0f, float near = 0.1f, float far = 100.0f, float yaw = 90.0f, float pitch = 0.0f);
 
 	[[nodiscard]] glm::mat4 get_view_matrix() const;
 	[[nodiscard]] glm::vec3 get_position() const;
