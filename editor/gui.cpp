@@ -1,5 +1,6 @@
 #include "ecs/world.h"
 #include "editor.h"
+#include "editor/editor_scene.h"
 #include "input/input_manager.h"
 #include "scene/scene_manager.h"
 
@@ -43,7 +44,6 @@ void Editor::imgui_menu_bar() {
 				nfdchar_t *out_path;
 				nfdfilteritem_t filter_scene[1] = { { "Scene", "scn" } };
 				nfdfilteritem_t filter_prefab[1] = { { "Prefab", "pfb" } };
-				nfdfilteritem_t filter_prototype[1] = { { "Prototype", "prt" } };
 				nfdfilteritem_t *filter_item;
 
 				switch (scene.type) {
@@ -59,6 +59,7 @@ void Editor::imgui_menu_bar() {
 				if (result == NFD_OKAY) {
 					auto filename = std::filesystem::path(out_path).filename().string();
 					get_active_scene().name = filename;
+					get_active_scene().path = out_path;
 					get_active_scene().save_to_file(out_path);
 					NFD_FreePath(out_path);
 				} else if (result == NFD_CANCEL) {
@@ -79,6 +80,7 @@ void Editor::imgui_menu_bar() {
 				auto filename = std::filesystem::path(out_path).filename().string();
 				auto extension = std::filesystem::path(out_path).extension().string();
 				get_active_scene().name = filename;
+				get_active_scene().path = out_path;
 				get_active_scene().save_to_file(out_path);
 				if (extension == ".scn") {
 					get_active_scene().type = SceneType::GameScene;
@@ -269,6 +271,18 @@ void Editor::imgui_scene(EditorScene &scene) {
 				if (is_selected) {
 					ImGui::PopStyleColor();
 				}
+			}
+
+			if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+				ImGui::OpenPopup("EntityContextMenu");
+			}
+
+			if (ImGui::BeginPopup("EntityContextMenu")) {
+				if (ImGui::MenuItem("Remove Entity")) {
+					scene.entity_deletion_queue.push(entity);
+				}
+
+				ImGui::EndPopup();
 			}
 
 			if (ImGui::IsItemClicked()) {
