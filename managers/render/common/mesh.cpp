@@ -1,7 +1,5 @@
 #include "mesh.h"
-
 #include "glad/glad.h"
-
 #include "assets/mesh_asset.h"
 
 void Mesh::draw() {

@@ -35,8 +35,14 @@ void RenderScene::draw() {
 	glad_glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	// Update camera
+	camera.set_fov(cvar_fov.get());
+	camera.set_render_distance(0.1f, cvar_draw_distance.get());
+	camera.set_aspect_ratio(render_extent.x / render_extent.y);
+	camera.build_frustum();
+
 	projection = glm::perspective(
-			glm::radians(cvar_fov.get()), render_extent.x / render_extent.y, 0.1f, cvar_draw_distance.get());
+			glm::radians(camera.get_fov()), camera.get_aspect_ratio(), camera.get_near(), camera.get_far());
 	view = camera.get_view_matrix();
 	camera_pos = camera.get_position();
 
