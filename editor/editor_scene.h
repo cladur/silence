@@ -3,7 +3,7 @@
 
 #include "engine/scene.h"
 
-enum SceneType { GameScene, Archetype, Prototype };
+enum SceneType { GameScene, Prefab };
 
 struct EditorScene : public Scene {
 	SceneType type;
@@ -12,7 +12,7 @@ struct EditorScene : public Scene {
 	bool controlling_camera = false;
 	ImVec2 last_viewport_size = ImVec2(0, 0);
 
-	EditorScene(SceneType type = SceneType::GameScene);
+	explicit EditorScene(SceneType type = SceneType::GameScene);
 	void update(float dt) override;
 
 	void save_to_file(const std::string &path) override;
