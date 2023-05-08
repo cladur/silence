@@ -291,13 +291,21 @@ void Editor::custom_update(float dt) {
 			scene.update(dt);
 		}
 		imgui_viewport(scene, i);
+
+		if (!scene.entity_deletion_queue.empty()) {
+			Entity entity_to_remove = scene.entity_deletion_queue.front();
+			scene.entity_deletion_queue.pop();
+			scene.entities.erase(
+					std::remove(scene.entities.begin(), scene.entities.end(), entity_to_remove), scene.entities.end());
+			w.destroy_entity(entity_to_remove);
+		}
 	}
 
 	if (scene_deletion_queued) {
+		EditorScene &scene = get_editor_scene(scene_to_delete);
+		render_manager.render_scenes.erase(render_manager.render_scenes.begin() + scene.render_scene_idx);
 		scenes.erase(scenes.begin() + scene_to_delete);
-		if (active_scene == scene_to_delete) {
-			active_scene = 0;
-		}
+		active_scene = 0;
 		scene_deletion_queued = false;
 	}
 }
@@ -314,24 +322,22 @@ void Editor::create_scene(const std::string &name, SceneType type, const std::st
 
 	Entity entity;
 
-	switch (type) {
-		case SceneType::GameScene:
-			if (!path.empty()) {
-				scene->load_from_file(path);
-			}
-			break;
-		case SceneType::Archetype:
-			entity = scene->world.create_entity();
-			scene->world.add_component<Transform>(entity, Transform{});
-			scene->entities.push_back(entity);
-			break;
-		case SceneType::Prototype:
-			nlohmann::json serialized_archetype;
-			std::ifstream file(path);
-			file >> serialized_archetype;
-			scene->world.deserialize_entity_json(serialized_archetype.back(), scene->entities);
-			file.close();
-			break;
+	if (!path.empty()) {
+		std::ifstream file(path);
+		nlohmann::json serialized_scene;
+		file >> serialized_scene;
+		serialized_scene.back()["entity"] = 0;
+		scene->world.deserialize_entities_json(serialized_scene, scene->entities);
+		scenes.push_back(std::move(scene));
+		file.close();
+		return;
+	}
+
+	if (type == SceneType::Prefab) {
+		entity = scene->world.create_entity();
+		scene->entities.push_back(entity);
+		scene->world.add_component<Name>(entity, Name{ "New prefab" });
+		scene->world.add_component<Transform>(entity, Transform{});
 	}
 
 	scenes.push_back(std::move(scene));

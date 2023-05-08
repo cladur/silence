@@ -10,6 +10,7 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+#include "physics/physics_manager.h"
 
 void Engine::startup() {
 	// Managers
@@ -20,7 +21,8 @@ void Engine::startup() {
 	FontManager::get().startup();
 	AudioManager::get().startup();
 	AdaptiveMusicManager::get().startup("adaptive_music_test");
-	AdaptiveMusicManager::get().play();
+	// Uncomment if you want music
+	// AdaptiveMusicManager::get().play();
 
 	FontManager::get().load_font("resources/fonts/PoltawskiNowy.ttf", 48, "PoltawskiNowy");
 }
@@ -92,15 +94,6 @@ void Engine::update(float dt) {
 
 		scene->world.update(dt);
 	}
-
-	// scene.world.pre_animation_update(dt);
-	// AnimationManager::get().update_animations(dt);
-	// scene.world.post_animation_update(dt);
-	// PhysicsManager::get()->step(dt);
-	// AnimationManager::get().update_ragdolls(dt);
-	// scene.world.post_physics_update(dt);
-	// AnimationManager::get().finalize();
-	// scene.world.pre_render_update(dt);
 
 	AudioManager::get().update();
 

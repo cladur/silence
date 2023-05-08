@@ -39,7 +39,7 @@ add_library(${CORE_LIB_NAME} STATIC
         components/collider_obb.h
         cvars/cvars.cpp
         cvars/cvars.h
-        )
+        camera/frustum.cpp camera/frustum.h)
 
 target_include_directories(${CORE_LIB_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 

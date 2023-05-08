@@ -1,5 +1,6 @@
 #include "ecs/world.h"
 #include "editor.h"
+#include "editor/editor_scene.h"
 #include "input/input_manager.h"
 #include "scene/scene_manager.h"
 
@@ -12,6 +13,7 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <imgui_stdlib.h>
+#include <spdlog/spdlog.h>
 
 #include "IconsMaterialDesign.h"
 #include "ImGuizmo.h"
@@ -27,28 +29,10 @@ void Editor::imgui_menu_bar() {
 				std::string name = fmt::format("New Scene {}", scenes.size());
 				create_scene(name);
 			}
-			if (ImGui::MenuItem("Archetype")) {
-				SPDLOG_INFO("Creating archetype...");
-				std::string name = fmt::format("New Archetype {}", scenes.size());
-				create_scene(name, SceneType::Archetype);
-			}
-			if (ImGui::MenuItem("Prototype")) {
-				SPDLOG_INFO("Creating Prototype...");
-				// TODO: First show a file dialog to select a archetype
-				// After that create a prototype scene from it
-				nfdchar_t *in_path;
-				nfdfilteritem_t filter_item[1] = { { "Archetype", "arc" } };
-
-				nfdresult_t result = NFD_OpenDialog(&in_path, filter_item, 1, nullptr);
-				if (result == NFD_OKAY) {
-					std::string name = fmt::format("New Prototype {}", scenes.size());
-					create_scene(name, SceneType::Prototype, in_path);
-					NFD_FreePath(in_path);
-				} else if (result == NFD_CANCEL) {
-					puts("User pressed cancel.");
-				} else {
-					printf("Error: %s\n", NFD_GetError());
-				}
+			if (ImGui::MenuItem("Prefab")) {
+				SPDLOG_INFO("Creating prefab...");
+				std::string name = fmt::format("New Prefab {}", scenes.size());
+				create_scene(name, SceneType::Prefab);
 			}
 			ImGui::EndMenu();
 		}
@@ -59,19 +43,15 @@ void Editor::imgui_menu_bar() {
 			if (scene.path.empty()) {
 				nfdchar_t *out_path;
 				nfdfilteritem_t filter_scene[1] = { { "Scene", "scn" } };
-				nfdfilteritem_t filter_archetype[1] = { { "Archetype", "arc" } };
-				nfdfilteritem_t filter_prototype[1] = { { "Prototype", "prt" } };
+				nfdfilteritem_t filter_prefab[1] = { { "Prefab", "pfb" } };
 				nfdfilteritem_t *filter_item;
 
 				switch (scene.type) {
 					case SceneType::GameScene:
 						filter_item = filter_scene;
 						break;
-					case SceneType::Archetype:
-						filter_item = filter_archetype;
-						break;
-					case SceneType::Prototype:
-						filter_item = filter_prototype;
+					case SceneType::Prefab:
+						filter_item = filter_prefab;
 						break;
 				}
 
@@ -79,6 +59,7 @@ void Editor::imgui_menu_bar() {
 				if (result == NFD_OKAY) {
 					auto filename = std::filesystem::path(out_path).filename().string();
 					get_active_scene().name = filename;
+					get_active_scene().path = out_path;
 					get_active_scene().save_to_file(out_path);
 					NFD_FreePath(out_path);
 				} else if (result == NFD_CANCEL) {
@@ -93,19 +74,18 @@ void Editor::imgui_menu_bar() {
 		if (ImGui::MenuItem(ICON_MD_SAVE " Save as...")) {
 			SPDLOG_INFO("Saving scene as...");
 			nfdchar_t *out_path;
-			nfdfilteritem_t filter_item[3] = { { "Scene", "scn" }, { "Archetype", "arc" }, { "Prototype", "prt" } };
-			nfdresult_t result = NFD_SaveDialog(&out_path, filter_item, 3, nullptr, nullptr);
+			nfdfilteritem_t filter_item[2] = { { "Scene", "scn" }, { "Prefab", "pfb" } };
+			nfdresult_t result = NFD_SaveDialog(&out_path, filter_item, 2, nullptr, nullptr);
 			if (result == NFD_OKAY) {
 				auto filename = std::filesystem::path(out_path).filename().string();
 				auto extension = std::filesystem::path(out_path).extension().string();
 				get_active_scene().name = filename;
+				get_active_scene().path = out_path;
 				get_active_scene().save_to_file(out_path);
 				if (extension == ".scn") {
 					get_active_scene().type = SceneType::GameScene;
-				} else if (extension == ".arc") {
-					get_active_scene().type = SceneType::Archetype;
-				} else if (extension == ".prt") {
-					get_active_scene().type = SceneType::Prototype;
+				} else if (extension == ".pfb") {
+					get_active_scene().type = SceneType::Prefab;
 				}
 				NFD_FreePath(out_path);
 			} else if (result == NFD_CANCEL) {
@@ -117,26 +97,24 @@ void Editor::imgui_menu_bar() {
 		if (ImGui::MenuItem(ICON_MD_FOLDER_OPEN " Load")) {
 			SPDLOG_INFO(ICON_MD_CLOSE "Loading scene...");
 			nfdchar_t *out_path;
-			nfdfilteritem_t filter_item[3] = { { "Scene", "scn" }, { "Archetype", "arc" }, { "Prototype", "prt" } };
-			nfdresult_t result = NFD_OpenDialog(&out_path, filter_item, 3, nullptr);
+			nfdfilteritem_t filter_item[2] = { { "Scene", "scn" }, { "Prefab", "pfb" } };
+			nfdresult_t result = NFD_OpenDialog(&out_path, filter_item, 2, nullptr);
 			if (result == NFD_OKAY) {
 				auto filename = std::filesystem::path(out_path).filename().string();
 				auto extension = std::filesystem::path(out_path).extension().string();
 				if (extension == ".scn") {
 					create_scene(filename, SceneType::GameScene, out_path);
-				} else if (extension == ".arc") {
-					create_scene(filename, SceneType::Archetype, out_path);
-				} else if (extension == ".prt") {
+				} else if (extension == ".pfb") {
 					if (scenes.empty()) {
-						SPDLOG_WARN("Can't load prototype into empty scene");
+						create_scene(filename, SceneType::Prefab, out_path);
 					} else {
 						EditorScene &active_scene = get_active_scene();
-						bool is_archetype_or_prototype =
-								active_scene.type == SceneType::Archetype || active_scene.type == SceneType::Prototype;
-						if (!is_archetype_or_prototype) {
+						bool is_prefab = active_scene.type == SceneType::Prefab;
+						if (!is_prefab) {
 							nlohmann::json entity_json;
 							std::ifstream file(out_path);
 							file >> entity_json;
+							entity_json.back()["entity"] = 0;
 							active_scene.world.deserialize_entity_json(entity_json.back(), active_scene.entities);
 							file.close();
 						} else {
@@ -199,8 +177,7 @@ void Editor::imgui_scene(EditorScene &scene) {
 	ImGui::SetCursorPos(cursor_pos);
 
 	// ADD ENTITY BUTTON
-	bool add_entity_button =
-			!(scene.type == SceneType::Archetype) & !(scene.type == SceneType::Prototype) || scene.entities.empty();
+	bool add_entity_button = !(scene.type == SceneType::Prefab) || scene.entities.empty();
 	if (add_entity_button && ImGui::Button(ICON_MD_ADD, ImVec2(20, 20))) {
 		ImGui::OpenPopup("Add Entity");
 	}
@@ -294,6 +271,18 @@ void Editor::imgui_scene(EditorScene &scene) {
 				if (is_selected) {
 					ImGui::PopStyleColor();
 				}
+			}
+
+			if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+				ImGui::OpenPopup("EntityContextMenu");
+			}
+
+			if (ImGui::BeginPopup("EntityContextMenu")) {
+				if (ImGui::MenuItem("Remove Entity")) {
+					scene.entity_deletion_queue.push(entity);
+				}
+
+				ImGui::EndPopup();
 			}
 
 			if (ImGui::IsItemClicked()) {
@@ -418,8 +407,26 @@ void Editor::imgui_viewport(EditorScene &scene, uint32_t scene_index) {
 		scene.last_viewport_size = viewport_size;
 	}
 
-	uint32_t render_image = scene.get_render_scene().render_framebuffer.get_texture_id();
+	uint32_t render_image = scene.get_render_scene().render_framebuffer.texture_id;
 	ImGui::Image((void *)(intptr_t)render_image, viewport_size, ImVec2(0, 1), ImVec2(1, 0));
+
+	if (ImGui::BeginDragDropTarget()) {
+		if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_PREFAB_PATH")) {
+			const std::string payload_n = *(const std::string *)payload->Data;
+			if (scene.type == SceneType::GameScene) {
+				nlohmann::json serialized_prototype;
+				std::ifstream file(payload_n);
+				file >> serialized_prototype;
+				serialized_prototype.back()["entity"] = 0;
+				scene.world.deserialize_entity_json(serialized_prototype.back(), scene.entities);
+				file.close();
+			} else {
+				SPDLOG_WARN("Can't add prefab to scene type other than GameScene");
+			}
+		}
+
+		ImGui::EndDragDropTarget();
+	}
 
 	// Draw gizmo
 	ImGuiIO &io = ImGui::GetIO();
@@ -722,7 +729,31 @@ void Editor::imgui_content_browser() {
 		if (entry.is_directory()) {
 			entry_texture = folder_texture;
 		}
+		ImGui::PushID(label.c_str());
 		ImGui::ImageButton((ImTextureID)(uint64_t)entry_texture, thumbnail_size_vec2, thumbnail_uv0, thumbnail_uv1);
+		ImGui::PopID();
+
+		if (ImGui::BeginDragDropSource()) {
+			if (extension == ".pfb") {
+				drag_and_drop_path = entry.path().string();
+				SPDLOG_INFO("{}", drag_and_drop_path);
+				// Set payload to carry the index of our item (could be anything)
+				ImGui::SetDragDropPayload("DND_PREFAB_PATH", &drag_and_drop_path, sizeof(std::string));
+
+				// Display preview (could be anything, e.g. when dragging an image we could decide to display
+				// the filename and a small preview of the image, etc.)
+				ImGui::Text("%s", label.c_str());
+			} else if (extension == ".mdl") {
+				drag_and_drop_path = entry.path().string();
+				// Set payload to carry the index of our item (could be anything)
+				ImGui::SetDragDropPayload("DND_MODEL_PATH", &drag_and_drop_path, sizeof(std::string));
+
+				// Display preview (could be anything, e.g. when dragging an image we could decide to display
+				// the filename and a small preview of the image, etc.)
+				ImGui::Text("%s", label.c_str());
+			}
+			ImGui::EndDragDropSource();
+		}
 
 		ImGui::PopStyleColor(3);
 
@@ -749,31 +780,21 @@ void Editor::imgui_content_browser() {
 			if (entry.is_directory()) {
 				content_browser_current_path = entry.path().string();
 			} else {
-				if (extension == ".arc") {
-					SPDLOG_INFO("Creating {} scene", label);
-					create_scene(label, SceneType::Archetype);
-					Scene &scene = get_editor_scene(scenes.size() - 1);
-					World &world = scene.world;
-					std::ifstream file(entry.path());
-					if (file.is_open()) {
-						nlohmann::json archetype_json;
-						file >> archetype_json;
-						world.deserialize_entity_json(archetype_json, scene.entities);
-					} else {
-						SPDLOG_ERROR("Failed to open {} file", label);
-					}
-					file.close();
-				} else if (extension == ".prt") {
+				std::string name = entry.path().filename().string();
+				if (extension == ".scn") {
+					create_scene(name, SceneType::GameScene, entry.path().string());
+				} else if (extension == ".pfb") {
 					if (scenes.empty()) {
-						create_scene(label, SceneType::Prototype, entry.path().string());
+						create_scene(name, SceneType::Prefab, entry.path().string());
 					} else {
 						EditorScene &active_scene = get_active_scene();
-						bool is_archetype_or_prototype =
-								active_scene.type == SceneType::Archetype || active_scene.type == SceneType::Prototype;
-						if (!is_archetype_or_prototype) {
+						bool is_prefab = active_scene.type == SceneType::Prefab;
+						if (!is_prefab) {
 							nlohmann::json entity_json;
 							std::ifstream file(entry.path());
 							file >> entity_json;
+							entity_json.back()["entity"] = 0;
+							SPDLOG_WARN(entity_json.dump(1));
 							active_scene.world.deserialize_entity_json(entity_json.back(), active_scene.entities);
 							file.close();
 						} else {
@@ -781,19 +802,6 @@ void Editor::imgui_content_browser() {
 						}
 					}
 				}
-			}
-		}
-
-		if (extension == ".prt") {
-			if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
-				drag_and_drop_path = entry.path().string();
-				// Set payload to carry the index of our item (could be anything)
-				ImGui::SetDragDropPayload("DND_PROTOTYPE_PATH", &drag_and_drop_path, sizeof(std::string));
-
-				// Display preview (could be anything, e.g. when dragging an image we could decide to display
-				// the filename and a small preview of the image, etc.)
-				ImGui::Text("%s", label.c_str());
-				ImGui::EndDragDropSource();
 			}
 		}
 

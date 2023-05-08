@@ -26,6 +26,25 @@ void input_setup() {
 	input_manager.add_action("move_faster");
 	input_manager.add_key_to_action("move_faster", InputKey::LEFT_SHIFT);
 
+	//add actions to arrows
+	input_manager.add_action("forward");
+	input_manager.add_key_to_action("forward", InputKey::UP);
+
+	input_manager.add_action("backward");
+	input_manager.add_key_to_action("backward", InputKey::DOWN);
+
+	input_manager.add_action("left");
+	input_manager.add_key_to_action("left", InputKey::LEFT);
+
+	input_manager.add_action("right");
+	input_manager.add_key_to_action("right", InputKey::RIGHT);
+
+	input_manager.add_action("up");
+	input_manager.add_key_to_action("up", InputKey::O);
+
+	input_manager.add_action("down");
+	input_manager.add_key_to_action("down", InputKey::L);
+
 	input_manager.add_action("toggle_camera_control");
 	input_manager.add_key_to_action("toggle_camera_control", InputKey::ESCAPE);
 
@@ -81,10 +100,10 @@ void Game::custom_update(float dt) {
 		display_manager.capture_mouse(controlling_camera);
 	}
 
-	menu_test.update();
+	//menu_test.update();
 
 	if (controlling_camera) {
-		Camera &cam = get_active_scene().camera;
+		Camera &cam = get_active_scene().get_render_scene().camera;
 		handle_camera(cam, dt);
 	}
 

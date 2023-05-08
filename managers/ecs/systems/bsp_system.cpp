@@ -1,33 +1,34 @@
 #include "bsp_system.h"
+#include <physics/physics_manager.h>
 
-#include "collision_system.h"
-#include "components/collider_tag_component.h"
-#include "components/static_tag_component.h"
-#include "ecs/world.h"
+//#include "ecs/world.h"
+#include "engine/scene.h"
+
+struct StaticTag;
+struct ColliderTag;
 
 void BSPSystem::startup(World &world) {
-	Signature signature;
-	signature.set(world.get_component_type<ColliderTag>());
-	signature.set(world.get_component_type<StaticTag>());
-	world.set_system_component_whitelist<BSPSystem>(signature);
+	Signature white_signature;
+	white_signature.set(world.get_component_type<ColliderTag>());
+	//white_signature.set(world.get_component_type<StaticTag>());
+	world.set_system_component_whitelist<BSPSystem>(white_signature);
 }
 
-void BSPSystem::update(World &world, CollisionSystem &collision_system) {
-	for (const Entity entity : collision_system.entities) {
-		resolve_collision(world, root.get(), entity, collision_system);
+void BSPSystem::update(World &world, float dt) {
+	for (const Entity entity : entities) {
+		resolve_collision(world, world.get_parent_scene()->bsp_tree.get(), entity);
 	}
 }
 
-void BSPSystem::resolve_collision(
-		World &world, BSPNode *node, Entity entity, CollisionSystem &collision_system, bool force) {
+void BSPSystem::resolve_collision(World &world, BSPNode *node, Entity entity, bool force) {
 	if (node == nullptr) {
 		return;
 	}
-	collision_system.resolve_collision(world, entity, node->entities);
+	PhysicsManager::get().resolve_collision(world, entity, node->entities);
 
 	if (force) {
-		resolve_collision(world, node->front.get(), entity, collision_system, force);
-		resolve_collision(world, node->back.get(), entity, collision_system, force);
+		resolve_collision(world, node->front.get(), entity, force);
+		resolve_collision(world, node->back.get(), entity, force);
 	}
 
 	Side side;
@@ -58,18 +59,29 @@ void BSPSystem::resolve_collision(
 	}
 
 	if (side == Side::FRONT) {
-		resolve_collision(world, node->front.get(), entity, collision_system);
+		resolve_collision(world, node->front.get(), entity);
 	} else if (side == Side::BACK) {
-		resolve_collision(world, node->back.get(), entity, collision_system, force);
+		resolve_collision(world, node->back.get(), entity, force);
 	} else {
-		resolve_collision(world, node->front.get(), entity, collision_system, true);
-		resolve_collision(world, node->back.get(), entity, collision_system, true);
+		resolve_collision(world, node->front.get(), entity, true);
+		resolve_collision(world, node->back.get(), entity, true);
 	}
 }
 
-void BSPSystem::build_tree(World &world, int32_t depth) {
-	root = std::make_shared<BSPNode>();
-	process_node(world, entities, root.get(), depth);
+std::shared_ptr<BSPNode> BSPSystem::build_tree(World &world, std::vector<Entity> world_entities, int32_t depth) {
+	std::shared_ptr<BSPNode> root = std::make_shared<BSPNode>();
+
+	// this class' signature consists of all colliders and statics
+	// we need to filter get only statics to build the tree
+	std::set<Entity> statics;
+	for (auto &entity : world_entities) {
+		if (world.has_component<StaticTag>(entity)) {
+			statics.insert(entity);
+		}
+	}
+
+	process_node(world, statics, root.get(), depth);
+	return root;
 }
 
 void BSPSystem::process_node(World &world, const std::set<Entity> &objects, BSPNode *node, int32_t depth) {
@@ -154,7 +166,6 @@ Plane BSPSystem::calculate_plane(World &world, const std::set<Entity> &colliders
 		SPDLOG_WARN("Plane has no colliders to process");
 		return plane;
 	}
-
 	for (const Entity collider : colliders) {
 		Transform &t = world.get_component<Transform>(collider);
 
@@ -163,7 +174,6 @@ Plane BSPSystem::calculate_plane(World &world, const std::set<Entity> &colliders
 			ColliderAABB c;
 			c.range = aabb.range * t.get_scale();
 			c.center = t.get_position() + aabb.center * c.range;
-
 			plane.point += c.center;
 		} else if (world.has_component<ColliderSphere>(collider)) {
 			ColliderSphere &sphere = world.get_component<ColliderSphere>(collider);
@@ -211,7 +221,6 @@ Plane BSPSystem::calculate_plane(World &world, const std::set<Entity> &colliders
 						normal.z = direction.z < 0.0f ? -1.0f : 1.0f;
 					}
 				}
-
 				plane.normal += normal;
 			}
 
@@ -252,7 +261,6 @@ Plane BSPSystem::calculate_plane(World &world, const std::set<Entity> &colliders
 			}
 		}
 	}
-
 	plane.normal /= colliders.size();
 
 	plane.normal = glm::normalize(plane.normal);
@@ -298,6 +306,15 @@ Side BSPSystem::process_collider(World &world, const Plane &plane, const Collide
 	} else {
 		return Side::INTERSECT;
 	}
+}
+
+void BSPSystem::log_tree(BSPNode *node) {
+	if (node == nullptr) {
+		return;
+	}
+
+	log_tree(node->front.get());
+	log_tree(node->back.get());
 }
 
 Side BSPSystem::process_collider(World &world, const Plane &plane, const ColliderAABB &collider) {

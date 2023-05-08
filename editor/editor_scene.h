@@ -3,7 +3,7 @@
 
 #include "engine/scene.h"
 
-enum SceneType { GameScene, Archetype, Prototype };
+enum SceneType { GameScene, Prefab };
 
 struct EditorScene : public Scene {
 	SceneType type;
@@ -12,7 +12,7 @@ struct EditorScene : public Scene {
 	bool controlling_camera = false;
 	ImVec2 last_viewport_size = ImVec2(0, 0);
 
-	EditorScene(SceneType type = SceneType::GameScene);
+	explicit EditorScene(SceneType type = SceneType::GameScene);
 	void update(float dt) override;
 
 	void save_to_file(const std::string &path) override;
@@ -26,6 +26,8 @@ struct EditorScene : public Scene {
 	std::unordered_map<Entity, Entity> child_to_parent;
 	std::vector<std::pair<Entity, Entity>> reparent_queue;
 	std::vector<std::pair<Entity, Entity>> add_child_queue;
+	// Deletion queue
+	std::queue<Entity> entity_deletion_queue;
 
 	// Selection
 	void add_to_selection(Entity entity);

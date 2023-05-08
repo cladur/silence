@@ -17,4 +17,5 @@ target_link_libraries(${ENGINE_NAME} PUBLIC
         silence_font_manager
         silence_render_manager
         silence_resource_manager
+        silence_physics_manager
         )

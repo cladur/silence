@@ -1,0 +1,292 @@
+[
+    {
+        "components": [
+            {
+                "collider_aabb": {
+                    "center": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "range": {
+                        "x": 0.5,
+                        "y": 0.5,
+                        "z": 0.5
+                    }
+                }
+            },
+            {
+                "collider_tag": {}
+            },
+            {
+                "static_tag": {}
+            },
+            {
+                "model_instance": {
+                    "material_type": 1,
+                    "model_handle": 0
+                }
+            },
+            {
+                "name": {
+                    "name": "static_box_left"
+                }
+            },
+            {
+                "rigidbody": {
+                    "acceleration": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "velocity": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    }
+                }
+            },
+            {
+                "transform": {
+                    "orientation": {
+                        "w": 1.0,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": -0.30024194717407227,
+                        "y": 0.0,
+                        "z": -1.3763914108276367
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                }
+            }
+        ],
+        "entity": 2,
+        "signature": "00000000000000000000101101000111"
+    },
+    {
+        "components": [
+            {
+                "collider_aabb": {
+                    "center": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "range": {
+                        "x": 0.5,
+                        "y": 0.5,
+                        "z": 0.5
+                    }
+                }
+            },
+            {
+                "collider_tag": {}
+            },
+            {
+                "static_tag": {}
+            },
+            {
+                "model_instance": {
+                    "material_type": 1,
+                    "model_handle": 0
+                }
+            },
+            {
+                "name": {
+                    "name": "static_box_right"
+                }
+            },
+            {
+                "rigidbody": {
+                    "acceleration": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "velocity": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    }
+                }
+            },
+            {
+                "transform": {
+                    "orientation": {
+                        "w": 1.0,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 2.3758580684661865,
+                        "y": 0.0,
+                        "z": -0.5509921312332153
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                }
+            }
+        ],
+        "entity": 3,
+        "signature": "00000000000000000000101101000111"
+    },
+    {
+        "components": [
+            {
+                "collider_aabb": {
+                    "center": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "range": {
+                        "x": 0.5,
+                        "y": 0.5,
+                        "z": 0.5
+                    }
+                }
+            },
+            {
+                "collider_tag": {}
+            },
+            {
+                "model_instance": {
+                    "material_type": 1,
+                    "model_handle": 0
+                }
+            },
+            {
+                "name": {
+                    "name": "player_test"
+                }
+            },
+            {
+                "rigidbody": {
+                    "acceleration": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "velocity": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    }
+                }
+            },
+            {
+                "transform": {
+                    "orientation": {
+                        "w": 1.0,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": -4.000870704650879,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                }
+            }
+        ],
+        "entity": 4,
+        "signature": "00000000000000000000101001000111"
+    },
+    {
+        "components": [
+            {
+                "collider_obb": {
+                    "center": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "orientation": {
+                        "0": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                        },
+                        "1": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                        }
+                    },
+                    "range": {
+                        "x": 0.5,
+                        "y": 0.5,
+                        "z": 0.5
+                    }
+                }
+            },
+            {
+                "collider_tag": {}
+            },
+            {
+                "model_instance": {
+                    "material_type": 1,
+                    "model_handle": 0
+                }
+            },
+            {
+                "name": {
+                    "name": "static_box_three"
+                }
+            },
+            {
+                "rigidbody": {
+                    "acceleration": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "velocity": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    }
+                }
+            },
+            {
+                "transform": {
+                    "orientation": {
+                        "w": 0.727546751499176,
+                        "x": 0.43773773312568665,
+                        "y": -0.1957457959651947,
+                        "z": 0.4906577467918396
+                    },
+                    "position": {
+                        "x": -0.2997121512889862,
+                        "y": 0.0,
+                        "z": 5.823513984680176
+                    },
+                    "scale": {
+                        "x": 1.0000003576278687,
+                        "y": 1.0000007152557373,
+                        "z": 1.000000238418579
+                    }
+                }
+            }
+        ],
+        "entity": 5,
+        "signature": "00000000000000000001001001000111"
+    }
+]
