@@ -26,18 +26,23 @@ void ResourceManager::shutdown() {
 }
 
 Handle<Model> ResourceManager::load_model(const char *path) {
-	if (name_to_model.find(path) != name_to_model.end()) {
-		return name_to_model[path];
+	std::string name = path;
+	bool found_asset_path = name.find(ASSET_PATH) != std::string::npos;
+	if (found_asset_path) {
+		name = remove_asset_path(name);
+	}
+	if (name_to_model.find(name) != name_to_model.end()) {
+		return name_to_model[name];
 	}
 
 	Model model = {};
-	model.load_from_asset(asset_path(path).c_str());
+	model.load_from_asset(path);
 
 	models.push_back(model);
 	Handle<Model> handle = {};
 	handle.id = models.size() - 1;
 
-	name_to_model[path] = handle;
+	name_to_model[name] = handle;
 	return handle;
 }
 
