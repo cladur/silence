@@ -84,6 +84,7 @@ void Mesh::load_from_asset(const char *path) {
 		indices[i] = unpacked_indices[i];
 	}
 
+	create_fc_bounding_sphere();
 	setup_mesh();
 
 	SPDLOG_INFO("Mesh asset loaded successfully: {}", path);
@@ -97,4 +98,49 @@ std::vector<glm::vec3> Mesh::get_position_vertices() const {
 	}
 
 	return result;
+}
+
+// implements Ritter's bounding sphere algorithm
+// https://en.wikipedia.org/wiki/Bounding_sphere#Ritter.27s_bounding_sphere
+// it gives a sphere a bit bigger than a 'perfect' one
+void Mesh::create_fc_bounding_sphere() {
+	glm::vec3 min, max, center;
+	min = max = vertices[0].position;
+
+	for (auto &v : vertices) {
+
+		if (v.position.x < min.x) min.x = v.position.x;
+		if (v.position.y < min.y) min.y = v.position.y;
+		if (v.position.z < min.z) min.z = v.position.z;
+
+		if (v.position.x > max.x) max.x = v.position.x;
+		if (v.position.y > max.y) max.y = v.position.y;
+		if (v.position.z > max.z) max.z = v.position.z;
+	}
+
+	float x_distance = max.x - min.x;
+	float y_distance = max.y - min.y;
+	float z_distance = max.z - min.z;
+
+	float radius = glm::max(x_distance, glm::max(y_distance, z_distance)) / 2.0f;
+	center = (min + max) / 2.0f;
+	float radius_sq = radius * radius;
+
+	for (auto &v : vertices) {
+		glm::vec3 dir = v.position - center;
+		float distance_sq = pow(glm::length(dir), 2);
+		if (distance_sq > radius_sq) {
+            float dist = sqrt(distance_sq);
+			float dif = dist - radius;
+
+			radius = radius + dif;
+			radius_sq = radius * radius;
+
+			dif /= 2.0f;
+
+			center += dif * dir;
+        }
+	}
+
+	fc_bounding_sphere = {center, radius};
 }

@@ -5,6 +5,12 @@
 
 struct Shader;
 
+// for frustum culling
+struct MeshBoundingSphere {
+	glm::vec3 center;
+	float radius;
+};
+
 struct MeshVertex {
 	glm::vec3 position;
 	glm::vec3 normal;
@@ -20,11 +26,14 @@ public:
 	std::array<Texture, 4> textures;
 	std::array<bool, 4> textures_present;
 
+	MeshBoundingSphere fc_bounding_sphere;
+
 	bool has_ao_map = false;
 
 	void draw();
 	void setup_mesh();
 	void load_from_asset(const char *path);
+	void create_fc_bounding_sphere();
 
 	std::vector<glm::vec3> get_position_vertices() const;
 
