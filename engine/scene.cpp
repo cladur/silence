@@ -16,11 +16,6 @@
 #define COLLISION_TEST_ENTITY 4
 
 Scene::Scene() {
-	camera = Camera(glm::vec3(-4.0f, 2.6f, -4.0f));
-	camera.yaw = 45.0f;
-	camera.pitch = -20.0f;
-	camera.update_camera_vectors();
-
 	// ECS
 	world.startup();
 	world.parent_scene = this;
@@ -53,7 +48,6 @@ Scene::Scene() {
 }
 
 void Scene::update(float dt) {
-	get_render_scene().camera = camera;
 }
 
 RenderScene &Scene::get_render_scene() {

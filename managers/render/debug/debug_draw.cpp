@@ -58,20 +58,17 @@ void DebugDraw::draw_line(const glm::vec3 &from, const glm::vec3 &to, const glm:
 }
 
 // Draw a box with center at "center" and scale "scale".
-void DebugDraw::draw_box(const glm::vec3 &center,
-		const glm::vec3 &rotation,
-		const glm::vec3 &scale,
-		const glm::vec3 &color) {
+void DebugDraw::draw_box(
+		const glm::vec3 &center, const glm::vec3 &rotation, const glm::vec3 &scale, const glm::vec3 &color) {
 	// Generate a box mesh, using draw_line to draw the lines
-	glm::vec3 vertices[8] = {
-		glm::vec3(- scale.x / 2.0f, - scale.y / 2.0f, - scale.z / 2.0f),
-		glm::vec3(+ scale.x / 2.0f, - scale.y / 2.0f, - scale.z / 2.0f),
-		glm::vec3(+ scale.x / 2.0f, + scale.y / 2.0f, - scale.z / 2.0f),
-		glm::vec3(- scale.x / 2.0f, + scale.y / 2.0f, - scale.z / 2.0f),
-		glm::vec3(- scale.x / 2.0f, - scale.y / 2.0f, + scale.z / 2.0f),
-		glm::vec3(+ scale.x / 2.0f, - scale.y / 2.0f, + scale.z / 2.0f),
-		glm::vec3(+ scale.x / 2.0f, + scale.y / 2.0f, + scale.z / 2.0f),
-		glm::vec3(- scale.x / 2.0f, + scale.y / 2.0f, + scale.z / 2.0f) };
+	glm::vec3 vertices[8] = { glm::vec3(-scale.x / 2.0f, -scale.y / 2.0f, -scale.z / 2.0f),
+		glm::vec3(+scale.x / 2.0f, -scale.y / 2.0f, -scale.z / 2.0f),
+		glm::vec3(+scale.x / 2.0f, +scale.y / 2.0f, -scale.z / 2.0f),
+		glm::vec3(-scale.x / 2.0f, +scale.y / 2.0f, -scale.z / 2.0f),
+		glm::vec3(-scale.x / 2.0f, -scale.y / 2.0f, +scale.z / 2.0f),
+		glm::vec3(+scale.x / 2.0f, -scale.y / 2.0f, +scale.z / 2.0f),
+		glm::vec3(+scale.x / 2.0f, +scale.y / 2.0f, +scale.z / 2.0f),
+		glm::vec3(-scale.x / 2.0f, +scale.y / 2.0f, +scale.z / 2.0f) };
 
 	glm::mat4 mat = glm::mat4(1.0f);
 
@@ -102,8 +99,8 @@ void DebugDraw::draw_box(const glm::vec3 &center,
 // Draw a sphere with center at "center" and radius "radius".
 void DebugDraw::draw_sphere(const glm::vec3 &center, float radius, const glm::vec3 &color) {
 	// Generate a sphere mesh, using draw_line to draw the lines
-	const int num_segments = 8; // number of horizontal segments
-	const int num_rings = 4; // number of vertical rings
+	const int num_segments = 12; // number of horizontal segments
+	const int num_rings = 6; // number of vertical rings
 	const float pi = 3.14159265358979323846;
 	const float delta_ring = pi / num_rings;
 	const float delta_segment = 2.0f * pi / num_segments;
@@ -135,15 +132,14 @@ void DebugDraw::draw_sphere(const glm::vec3 &center, float radius, const glm::ve
 }
 void DebugDraw::draw_box(
 		const glm::vec3 &center, const glm::quat &orientation, const glm::vec3 &scale, const glm::vec3 &color) {
-	glm::vec3 vertices[8] = {
-		glm::vec3(- scale.x / 2.0f, - scale.y / 2.0f, - scale.z / 2.0f),
-		glm::vec3(+ scale.x / 2.0f, - scale.y / 2.0f, - scale.z / 2.0f),
-		glm::vec3(+ scale.x / 2.0f, + scale.y / 2.0f, - scale.z / 2.0f),
-		glm::vec3(- scale.x / 2.0f, + scale.y / 2.0f, - scale.z / 2.0f),
-		glm::vec3(- scale.x / 2.0f, - scale.y / 2.0f, + scale.z / 2.0f),
-		glm::vec3(+ scale.x / 2.0f, - scale.y / 2.0f, + scale.z / 2.0f),
-		glm::vec3(+ scale.x / 2.0f, + scale.y / 2.0f, + scale.z / 2.0f),
-		glm::vec3(- scale.x / 2.0f, + scale.y / 2.0f, + scale.z / 2.0f) };
+	glm::vec3 vertices[8] = { glm::vec3(-scale.x / 2.0f, -scale.y / 2.0f, -scale.z / 2.0f),
+		glm::vec3(+scale.x / 2.0f, -scale.y / 2.0f, -scale.z / 2.0f),
+		glm::vec3(+scale.x / 2.0f, +scale.y / 2.0f, -scale.z / 2.0f),
+		glm::vec3(-scale.x / 2.0f, +scale.y / 2.0f, -scale.z / 2.0f),
+		glm::vec3(-scale.x / 2.0f, -scale.y / 2.0f, +scale.z / 2.0f),
+		glm::vec3(+scale.x / 2.0f, -scale.y / 2.0f, +scale.z / 2.0f),
+		glm::vec3(+scale.x / 2.0f, +scale.y / 2.0f, +scale.z / 2.0f),
+		glm::vec3(-scale.x / 2.0f, +scale.y / 2.0f, +scale.z / 2.0f) };
 
 	glm::mat4 mat = glm::mat4(1.0f);
 

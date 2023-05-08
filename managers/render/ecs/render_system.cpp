@@ -14,7 +14,6 @@ void RenderSystem::startup(World &world) {
 
 void RenderSystem::update(World &world, float dt) {
 	RenderManager &render_manager = RenderManager::get();
-
 	for (auto const &entity : entities) {
 		auto &transform = world.get_component<Transform>(entity);
 		auto &model_instance = world.get_component<ModelInstance>(entity);

@@ -44,7 +44,7 @@ void EditorScene::update(float dt) {
 	if ((viewport_hovered && input_manager.is_action_pressed("control_camera") || controlling_camera)) {
 		controlling_camera = true;
 		Editor::get()->controlling_camera = true;
-		handle_camera(camera, dt);
+		handle_camera(get_render_scene().camera, dt);
 		display_manager.capture_mouse(true);
 	}
 

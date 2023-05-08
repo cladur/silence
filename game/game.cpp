@@ -103,7 +103,7 @@ void Game::custom_update(float dt) {
 	//menu_test.update();
 
 	if (controlling_camera) {
-		Camera &cam = get_active_scene().camera;
+		Camera &cam = get_active_scene().get_render_scene().camera;
 		handle_camera(cam, dt);
 	}
 

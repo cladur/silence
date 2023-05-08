@@ -3,11 +3,14 @@
 AutoCVarFloat cvar_camera_speed("camera.speed", "Camera Speed", 10, CVarFlags::EditFloatDrag);
 AutoCVarFloat cvar_camera_sensitivity("camera.sensitivity", "Camera Sensitivity", 50, CVarFlags::EditFloatDrag);
 
-Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch) :
+Camera::Camera(glm::vec3 position, glm::vec3 up, float fov, float near, float far, float yaw, float pitch) :
 		front(glm::vec3(0.0f, 0.0f, -1.0f)),
 		mouse_sensitivity(SENSITIVITY),
 		position(position),
 		up(up),
+		fov(fov),
+		near(near),
+		far(far),
 		yaw(yaw),
 		pitch(pitch) {
 	update_camera_vectors();
@@ -61,4 +64,53 @@ void Camera::update_camera_vectors() {
 
 	right = glm::normalize(glm::cross(front, glm::vec3(0.0f, 1.0f, 0.0f)));
 	up = glm::normalize(glm::cross(right, front));
+}
+
+void Camera::set_fov(float fov) {
+	this->fov = fov;
+}
+
+void Camera::set_render_distance(float near, float far) {
+	this->near = near;
+	this->far = far;
+}
+
+float Camera::get_fov() const {
+	return fov;
+}
+
+float Camera::get_near() const {
+	return near;
+}
+
+float Camera::get_far() const {
+	return far;
+}
+
+void Camera::set_aspect_ratio(float aspect_ratio) {
+	this->aspect_ratio = aspect_ratio;
+}
+
+float Camera::get_aspect_ratio() const {
+	return this->aspect_ratio;
+}
+
+glm::vec3 Camera::get_front() const {
+	return front;
+}
+
+glm::vec3 Camera::get_up() const {
+	return up;
+}
+
+glm::vec3 Camera::get_right() const {
+	return right;
+}
+
+Frustum Camera::get_frustum() const {
+	return frustum;
+}
+
+void Camera::build_frustum() {
+	frustum.create_frustum_from_camera(*this);
 }

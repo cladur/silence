@@ -6,6 +6,7 @@
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
+
 struct Transform {
 private:
 	bool changed = true;
@@ -97,6 +98,14 @@ public:
 	}
 	[[nodiscard]] glm::quat get_global_orientation() const {
 		return glm::quat_cast(global_model_matrix);
+	}
+
+	[[nodiscard]] glm::vec3 get_global_scale() const {
+		glm::vec3 scale;
+		scale.x = glm::length(glm::vec3(global_model_matrix[0]));
+		scale.y = glm::length(glm::vec3(global_model_matrix[1]));
+		scale.z = glm::length(glm::vec3(global_model_matrix[2]));
+		return scale;
 	}
 
 	[[nodiscard]] bool is_changed_this_frame() const {
