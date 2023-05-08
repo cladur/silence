@@ -29,7 +29,11 @@ add_library(${OPENGL_MANAGER_NAME} STATIC
         common/skinned_mesh.cpp common/skinned_mesh.h
         common/skinned_model.cpp common/skinned_model.h
         transparent_elements/ui/ui_elements/ui_button.cpp transparent_elements/ui/ui_elements/ui_button.h
-        transparent_elements/ui_draw.cpp transparent_elements/ui_draw.h)
+        transparent_elements/ui_draw.cpp transparent_elements/ui_draw.h
+        common/animation.cpp common/animation.h
+        common/channel.cpp common/channel.h
+        ecs/animation_system.h ecs/animation_system.cpp ecs/skinned_model_instance.cpp ecs/skinned_model_instance.h)
+
 
 # Include directories
 target_include_directories(${OPENGL_MANAGER_NAME} PUBLIC ${MANAGER_DIR})

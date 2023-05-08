@@ -3,7 +3,6 @@
 
 #include "channel.h"
 class SkinnedModel;
-class Bone;
 
 class Animation {
 public:

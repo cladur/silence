@@ -1,6 +1,6 @@
 #include "channel.h"
 #include "animation_asset.h"
-#include "joint.h"
+#include "managers/animation/joint.h"
 #include <glm/gtx/quaternion.hpp>
 #include <utility>
 

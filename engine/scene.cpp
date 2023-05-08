@@ -3,6 +3,7 @@
 #include "ecs/world.h"
 #include "editor/editor.h"
 #include "render/ecs/model_instance.h"
+#include "render/ecs/skinned_model_instance.h"
 #include "render/render_manager.h"
 #include <unordered_map>
 
@@ -32,6 +33,7 @@ Scene::Scene() {
 	world.register_component<Parent>();
 	world.register_component<Children>();
 	world.register_component<ModelInstance>();
+	world.register_component<SkinnedModelInstance>();
 	world.register_component<FmodListener>();
 	world.register_component<StaticTag>();
 	world.register_component<ColliderTag>();
@@ -69,6 +71,10 @@ void Scene::update(float dt) {
 			}
 
 			get_render_scene().queue_draw(&model_instance, &transform);
+		} else if (world.has_component<Transform>(entity) && world.has_component<SkinnedModelInstance>(entity)) {
+			auto &transform = world.get_component<Transform>(entity);
+			auto &model_instance = world.get_component<SkinnedModelInstance>(entity);
+			get_render_scene().queue_skinned_draw(&model_instance, &transform);
 		}
 	}
 }

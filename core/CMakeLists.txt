@@ -3,7 +3,7 @@ set(CORE_LIB_NAME "silence_core")
 
 add_library(${COMMON_LIB_NAME} INTERFACE
         pch.h
-        types.h)
+        types.h components/animation_component.h)
 
 add_library(${CORE_LIB_NAME} STATIC
         components/transform_component.h

@@ -860,7 +860,6 @@ void extract_gltf_skinned_nodes(tinygltf::Model &model, const fs::path &input, c
 		model_info.bone_parents[i] = -1;
 	}
 
-	std::vector<uint64_t> mesh_nodes;
 	// Read only bone nodes
 	for (int i = 0; i < model.nodes.size(); i++) {
 		auto &node = model.nodes[i];
@@ -934,6 +933,36 @@ void extract_gltf_skinned_nodes(tinygltf::Model &model, const fs::path &input, c
 			std::array<float, 4> r = { glm_rotation[0], glm_rotation[1], glm_rotation[2], glm_rotation[3] };
 			bone_data.translation[i] = t;
 			bone_data.rotation[i] = r;
+		}
+	}
+
+	std::vector<uint64_t> mesh_nodes;
+	for (int i = 0; i < model.nodes.size(); i++) {
+		auto &node = model.nodes[i];
+
+		if (node.mesh >= 0) {
+			auto mesh = model.meshes[node.mesh];
+
+			if (mesh.primitives.size() > 1) {
+				mesh_nodes.push_back(i);
+			} else {
+				auto primitive = mesh.primitives[0];
+				std::string meshname = calculate_gltf_mesh_name(model, node.mesh, 0);
+
+				fs::path meshpath = output_folder / (meshname + ".skinned_mesh");
+
+				int material = primitive.material;
+
+				std::string matname = calculate_gltf_material_name(model, material);
+
+				fs::path materialpath = output_folder / (matname + ".mat");
+
+				assets::SkinnedModelInfo::NodeMesh nmesh;
+				nmesh.mesh_path = conv_state.convert_to_export_relative(meshpath).string();
+				nmesh.material_path = conv_state.convert_to_export_relative(materialpath).string();
+
+				model_info.node_meshes[i] = nmesh;
+			}
 		}
 	}
 

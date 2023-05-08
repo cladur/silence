@@ -1,10 +1,24 @@
-#include "animation_manager.h"
-#include "animation.h"
-#include "joint.h"
+#include "animation_system.h"
+#include "core/components/transform_component.h"
+#include "ecs/world.h"
+#include "managers/animation/joint.h"
+#include "managers/render/common/animation.h"
+#include "managers/render/render_manager.h"
 #include "render/common/skinned_model.h"
 #include <glm/gtx/quaternion.hpp>
 
-AnimationManager::AnimationManager(Animation &animation, SkinnedModel &model) {
+void AnimationSystem::startup(World &world) {
+	Signature signature;
+	signature.set(world.get_component_type<Transform>());
+	signature.set(world.get_component_type<ModelInstance>());
+	world.set_system_component_whitelist<AnimationSystem>(signature);
+}
+
+void AnimationSystem::update(World &world, float dt) {
+	update_animation(dt);
+}
+
+AnimationSystem::AnimationSystem(Animation &animation, SkinnedModel &model) {
 	current_time = 0.0f;
 	current_animation = &animation;
 	current_model = &model;
@@ -15,7 +29,8 @@ AnimationManager::AnimationManager(Animation &animation, SkinnedModel &model) {
 		bone_matrices.emplace_back(1.0f);
 	}
 }
-void AnimationManager::update_animation(float dt) {
+
+void AnimationSystem::update_animation(float dt) {
 	delta_time = dt;
 	if (current_animation) {
 		current_time += static_cast<float>(current_animation->get_ticks_per_second()) * dt;
@@ -25,7 +40,7 @@ void AnimationManager::update_animation(float dt) {
 	}
 }
 
-void AnimationManager::calculate_bone_transform() {
+void AnimationSystem::calculate_bone_transform() {
 	const Rig &rig = current_model->rig;
 	std::vector<glm::mat4> global_transforms(rig.names.size());
 	std::vector<glm::mat4> node_transforms(rig.names.size());
@@ -61,15 +76,15 @@ void AnimationManager::calculate_bone_transform() {
 	}
 }
 
-void AnimationManager::change_animation(Animation *animation) {
+void AnimationSystem::change_animation(Animation *animation) {
 	current_animation = animation;
 	current_time = 0.0f;
 }
 
-const std::vector<glm::mat4> &AnimationManager::get_bone_matrices() const {
+const std::vector<glm::mat4> &AnimationSystem::get_bone_matrices() const {
 	return bone_matrices;
 }
 
-void AnimationManager::change_model(SkinnedModel *model) {
+void AnimationSystem::change_model(SkinnedModel *model) {
 	current_model = model;
 }

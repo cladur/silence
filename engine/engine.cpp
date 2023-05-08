@@ -96,12 +96,12 @@ void Engine::update(float dt) {
 	}
 
 	// scene.world.pre_animation_update(dt);
-	// AnimationManager::get().update_animations(dt);
+	// AnimationSystem::get().update_animations(dt);
 	// scene.world.post_animation_update(dt);
 	// PhysicsManager::get()->step(dt);
-	// AnimationManager::get().update_ragdolls(dt);
+	// AnimationSystem::get().update_ragdolls(dt);
 	// scene.world.post_physics_update(dt);
-	// AnimationManager::get().finalize();
+	// AnimationSystem::get().finalize();
 	// scene.world.pre_render_update(dt);
 
 	AudioManager::get().update();

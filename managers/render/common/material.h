@@ -7,6 +7,10 @@
 
 struct ModelInstance;
 struct Mesh;
+
+struct SkinnedModelInstance;
+struct SkinnedMesh;
+
 struct RenderScene;
 
 enum class MaterialType { Default, Unlit, PBR };
@@ -19,6 +23,24 @@ public:
 	// TODO: Shutdown
 	virtual void bind_resources(RenderScene &scene) = 0;
 	virtual void bind_instance_resources(ModelInstance &instance, Transform &transform) = 0;
+};
+
+class MaterialSkinned {
+public:
+	Shader shader;
+
+	virtual void startup() = 0;
+	// TODO: Shutdown
+	virtual void bind_resources(RenderScene &scene) = 0;
+	virtual void bind_instance_resources(SkinnedModelInstance &instance, Transform &transform) = 0;
+};
+
+class MaterialSkinnedUnlit : public MaterialSkinned {
+public:
+	void startup() override;
+	void bind_resources(RenderScene &scene) override;
+	void bind_instance_resources(SkinnedModelInstance &instance, Transform &transform) override;
+	void bind_mesh_resources(SkinnedMesh &mesh);
 };
 
 class MaterialUnlit : public Material {

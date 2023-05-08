@@ -1,5 +1,4 @@
 #include "animation.h"
-#include "joint.h"
 
 void Animation::load_from_asset(const char *path) {
 	name = path;

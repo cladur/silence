@@ -2,6 +2,26 @@
 #include "material.h"
 #include "render/render_manager.h"
 
+void SkinnedPassUnlit::startup() {
+	material.startup();
+}
+
+void SkinnedPassUnlit::draw(RenderScene &scene) {
+	RenderManager &render_manager = RenderManager::get();
+	material.bind_resources(scene);
+	for (auto &cmd : draw_commands) {
+		SkinnedModelInstance &instance = *cmd.model_instance;
+		Transform &transform = *cmd.transform;
+		material.bind_instance_resources(instance, transform);
+		SkinnedModel &model = render_manager.get_skinned_model(instance.model_handle);
+		for (auto &mesh : model.meshes) {
+			material.bind_mesh_resources(mesh);
+			mesh.draw();
+		}
+	}
+	draw_commands.clear();
+}
+
 void UnlitPass::startup() {
 	material.startup();
 }
@@ -95,9 +115,10 @@ void TransparentPass::draw(RenderScene &scene) {
 	glm::vec3 cam_pos = scene.camera_pos;
 
 	// transparency sorting for world-space objects
-	std::sort(scene.transparent_objects.begin(), scene.transparent_objects.end(), [cam_pos](const TransparentObject &a, const TransparentObject &b) {
-		return glm::distance(cam_pos, a.position) > glm::distance(cam_pos, b.position);
-	});
+	std::sort(scene.transparent_objects.begin(), scene.transparent_objects.end(),
+			[cam_pos](const TransparentObject &a, const TransparentObject &b) {
+				return glm::distance(cam_pos, a.position) > glm::distance(cam_pos, b.position);
+			});
 
 	material.bind_resources(scene);
 

@@ -160,3 +160,35 @@ Handle<Model> RenderManager::get_model_handle(std::string name) {
 	}
 	return name_to_model[name];
 }
+
+SkinnedModel &RenderManager::get_skinned_model(Handle<SkinnedModel> handle) {
+	return skinned_models[handle.id];
+}
+
+Handle<SkinnedModel> RenderManager::get_skinned_model_handle(std::string name) {
+	bool found_asset_path = name.find(ASSET_PATH) != std::string::npos;
+	if (found_asset_path) {
+		name = remove_asset_path(name);
+	}
+	return name_to_skinned_model[name];
+}
+
+std::vector<SkinnedModel> &RenderManager::get_skinned_models() {
+	return skinned_models;
+}
+
+Handle<SkinnedModel> RenderManager::load_skinned_model(const char *path) {
+	if (name_to_skinned_model.find(path) != name_to_skinned_model.end()) {
+		return name_to_skinned_model[path];
+	}
+
+	SkinnedModel model = {};
+	model.load_from_asset(asset_path(path).c_str());
+
+	skinned_models.push_back(model);
+	Handle<SkinnedModel> handle = {};
+	handle.id = skinned_models.size() - 1;
+
+	name_to_skinned_model[path] = handle;
+	return handle;
+}

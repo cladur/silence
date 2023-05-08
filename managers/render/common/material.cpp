@@ -10,6 +10,29 @@
 #include "render/render_manager.h"
 #include "render/render_scene.h"
 
+void MaterialSkinnedUnlit::startup() {
+	shader.load_from_files(shader_path("skinned_unlit.vert"), shader_path("unlit.frag"));
+}
+
+void MaterialSkinnedUnlit::bind_resources(RenderScene &scene) {
+	shader.use();
+	shader.set_mat4("view", scene.view);
+	shader.set_mat4("projection", scene.projection);
+	shader.set_vec3("camPos", scene.camera_pos);
+	shader.set_int("albedo_map", 0);
+}
+
+void MaterialSkinnedUnlit::bind_instance_resources(SkinnedModelInstance &instance, Transform &transform) {
+	shader.set_mat4("model", transform.get_global_model_matrix());
+}
+
+void MaterialSkinnedUnlit::bind_mesh_resources(SkinnedMesh &mesh) {
+	if (mesh.textures_present[0]) {
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, mesh.textures[0].id);
+	}
+}
+
 void MaterialUnlit::startup() {
 	shader.load_from_files(shader_path("unlit.vert"), shader_path("unlit.frag"));
 }

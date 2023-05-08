@@ -5,17 +5,20 @@ assets::SkinnedModelInfo assets::read_skinned_model_info(AssetFile *file) {
 	SkinnedModelInfo info;
 	nlohmann::json model_metadata = nlohmann::json::parse(file->json);
 
-	for (auto &[key, value] : model_metadata["bone_names"].items()) {
-		info.bone_names.push_back(value[1]);
-	}
+	info.bone_names = model_metadata["bone_names"].get<std::vector<std::string>>();
+	//	for (auto &[key, value] : model_metadata["bone_names"].items()) {
+	//		info.bone_names.push_back(value[1]);
+	//	}
 
-	for (auto &[key, value] : model_metadata["joint_names"].items()) {
-		info.joint_names.push_back(value[1]);
-	}
+	info.joint_names = model_metadata["joint_names"].get<std::vector<std::string>>();
+	//	for (auto &[key, value] : model_metadata["joint_names"].items()) {
+	//		info.joint_names.push_back(value[1]);
+	//	}
 
-	for (auto &[key, value] : model_metadata["bone_parents"].items()) {
-		info.bone_parents.push_back(value[1]);
-	}
+	info.bone_parents = model_metadata["bone_parents"].get<std::vector<int64_t>>();
+	//	for (auto &[key, value] : model_metadata["bone_parents"].items()) {
+	//		info.bone_parents.push_back(value[1]);
+	//	}
 	info.bone_rotation_buffer_size = model_metadata["bone_rotation_buffer_size"];
 	info.bone_translation_buffer_size = model_metadata["bone_translation_buffer_size"];
 
