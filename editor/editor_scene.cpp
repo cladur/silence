@@ -40,6 +40,7 @@ void EditorScene::update(float dt) {
 
 	auto &trans = world.get_component<Transform>(multi_select_parent);
 
+
 	// Handle camera movement
 	if ((viewport_hovered && input_manager.is_action_pressed("control_camera") || controlling_camera)) {
 		controlling_camera = true;

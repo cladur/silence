@@ -90,6 +90,8 @@ void RenderScene::draw() {
 		debug_draw.draw_line(glm::vec3(-10, 0, i), glm::vec3(10, 0, i), color);
 	}
 
+	debug_draw.draw_arrow(glm::vec3(0, 5, 0), glm::vec3(0, 10, 0), glm::vec4(1, 0, 0, 1));
+
 	debug_draw.draw();
 
 	if (draw_skybox) {
