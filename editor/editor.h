@@ -25,7 +25,6 @@ public:
 	ImGuizmo::OPERATION current_gizmo_operation = ImGuizmo::TRANSLATE;
 	ImGuizmo::MODE current_gizmo_mode = ImGuizmo::WORLD;
 	bool use_snapping = false;
-	bool use_individual_origins = false;
 	float translation_snap = 1.0f;
 	float rotation_snap = 15.0f;
 	float scale_snap = 10.0f;
@@ -45,8 +44,6 @@ public:
 	EditorScene &get_editor_scene(uint32_t index);
 	EditorScene &get_active_scene();
 
-	
-
 	// Content Browser
 	std::string content_browser_current_path = "resources";
 	uint32_t file_texture;
@@ -60,6 +57,7 @@ public:
 	// GUI
 	void imgui_menu_bar();
 	void imgui_inspector(EditorScene &scene);
+	void display_entity(EditorScene &scene, Entity entity, const std::string &name);
 	void imgui_scene(EditorScene &scene);
 	void imgui_viewport(EditorScene &scene, uint32_t scene_index);
 	void display_folder(const std::string &path);

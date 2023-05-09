@@ -142,8 +142,8 @@ void Editor::imgui_inspector(EditorScene &scene) {
 	RenderManager &render_manager = RenderManager::get();
 	ImGui::Begin("Inspector");
 
-	if (scene.last_entity_selected > 0) {
-		Entity active_entity = scene.last_entity_selected;
+	if (scene.selected_entity > 0) {
+		Entity active_entity = scene.selected_entity;
 		if (world.has_component<Name>(active_entity)) {
 			auto &name = world.get_component<Name>(active_entity);
 			ImGui::SetNextItemWidth(-FLT_MIN);
@@ -163,13 +163,110 @@ void Editor::imgui_inspector(EditorScene &scene) {
 	ImGui::End();
 }
 
+void Editor::display_entity(EditorScene &scene, Entity entity, const std::string &name) {
+	World &world = scene.world;
+
+	InputManager &input_manager = InputManager::get();
+
+	static ImGuiTreeNodeFlags base_flags =
+			ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanFullWidth;
+
+	ImGuiTreeNodeFlags node_flags = base_flags;
+
+	bool is_selected = scene.selected_entity == entity;
+
+	if (is_selected) {
+		node_flags |= ImGuiTreeNodeFlags_Selected;
+	}
+
+	bool is_leaf = true;
+	if (is_leaf) {
+		node_flags |= ImGuiTreeNodeFlags_Leaf;
+	}
+
+	bool window_focused = ImGui::IsWindowFocused();
+
+	if (window_focused) {
+		ImVec4 blue = ImVec4(43.0f / 255.0f, 93.0f / 255.0f, 134.0f / 255.0f, 1.0f);
+		if (is_selected) {
+			ImGui::PushStyleColor(ImGuiCol_HeaderHovered, blue);
+		}
+		ImGui::PushStyleColor(ImGuiCol_Header, blue);
+	} else {
+		if (is_selected) {
+			ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(77.0f / 255.0f, 77.0f / 255.0f, 77.0f / 255.0f, 1.0f));
+		}
+	}
+
+	// TODO: Add icons for different types of entities
+	// Or, a seperate column that displays all components of the entity (sort of like the visibility icon)
+	bool node_open = ImGui::TreeNodeEx(name.c_str(), node_flags);
+
+	if (window_focused) {
+		if (is_selected) {
+			ImGui::PopStyleColor();
+		}
+		ImGui::PopStyleColor();
+	} else {
+		if (is_selected) {
+			ImGui::PopStyleColor();
+		}
+	}
+
+	if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
+		ImGui::SetDragDropPayload("DND_ENTITY", &entity, sizeof(Entity));
+		ImGui::EndDragDropSource();
+	}
+
+	if (ImGui::BeginDragDropTarget()) {
+		if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
+			Entity payload_entity = *(Entity *)payload->Data;
+			if (entity != payload_entity) {
+				world.reparent(entity, payload_entity, true);
+			}
+		}
+		ImGui::EndDragDropTarget();
+	}
+
+	if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+		ImGui::OpenPopup("EntityContextMenu");
+	}
+
+	if (ImGui::BeginPopup("EntityContextMenu")) {
+		if (ImGui::MenuItem("Remove Entity")) {
+			scene.entity_deletion_queue.push(entity);
+		}
+
+		ImGui::EndPopup();
+	}
+
+	if (ImGui::IsItemClicked()) {
+		scene.selected_entity = entity;
+	}
+
+	if (node_open) {
+		if (world.has_component<Children>(entity)) {
+			auto &children = world.get_component<Children>(entity);
+			for (int i = 0; i < children.children_count; i++) {
+				Entity child_entity = children.children[i];
+				std::string child_name = std::to_string(child_entity);
+				if (world.has_component<Name>(child_entity)) {
+					child_name = world.get_component<Name>(child_entity).name;
+				}
+				display_entity(scene, child_entity, child_name);
+			}
+		}
+
+		ImGui::TreePop();
+	}
+}
+
 void Editor::imgui_scene(EditorScene &scene) {
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 	ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(0, 0));
 
 	ImGui::Begin("Scene");
 	World &world = scene.world;
-	InputManager &input_manager = InputManager::get();
 
 	ImVec2 cursor_pos = ImGui::GetCursorPos();
 	cursor_pos.x += 4;
@@ -188,7 +285,7 @@ void Editor::imgui_scene(EditorScene &scene) {
 			Entity new_entity = world.create_entity();
 			world.add_component(new_entity, Transform{});
 			scene.entities.push_back(new_entity);
-			scene.last_entity_selected = new_entity;
+			scene.selected_entity = new_entity;
 		}
 		ImGui::SeparatorText("Prefabs");
 
@@ -208,12 +305,15 @@ void Editor::imgui_scene(EditorScene &scene) {
 
 	ImGui::BeginChild("DragDropTarget");
 
-	if (ImGui::BeginTable("Scene", 2, flags)) {
+	if (ImGui::BeginTable("Scene", 1, flags)) {
 		ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_None);
-		ImGui::TableSetupColumn("##", ImGuiTableColumnFlags_WidthFixed, 15.0f);
-		// ImGui::TableHeadersRow();
 
 		for (auto &entity : scene.entities) {
+			// We skip children, their parents will draw them
+			if (world.has_component<Parent>(entity)) {
+				continue;
+			}
+
 			std::string name = std::to_string(entity);
 			if (world.has_component<Name>(entity)) {
 				name = world.get_component<Name>(entity).name;
@@ -226,112 +326,7 @@ void Editor::imgui_scene(EditorScene &scene) {
 			ImGui::TableNextRow();
 			ImGui::TableNextColumn();
 
-			static ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow |
-					ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanFullWidth;
-
-			ImGuiTreeNodeFlags node_flags = base_flags;
-
-			bool is_selected = (std::find(scene.entities_selected.begin(), scene.entities_selected.end(), entity) !=
-					scene.entities_selected.end());
-
-			if (is_selected) {
-				node_flags |= ImGuiTreeNodeFlags_Selected;
-			}
-
-			bool is_leaf = true;
-			if (is_leaf) {
-				node_flags |= ImGuiTreeNodeFlags_Leaf;
-			}
-
-			bool window_focused = ImGui::IsWindowFocused();
-
-			if (window_focused) {
-				ImVec4 blue = ImVec4(43.0f / 255.0f, 93.0f / 255.0f, 134.0f / 255.0f, 1.0f);
-				if (is_selected) {
-					ImGui::PushStyleColor(ImGuiCol_HeaderHovered, blue);
-				}
-				ImGui::PushStyleColor(ImGuiCol_Header, blue);
-			} else {
-				if (is_selected) {
-					ImGui::PushStyleColor(
-							ImGuiCol_Header, ImVec4(77.0f / 255.0f, 77.0f / 255.0f, 77.0f / 255.0f, 1.0f));
-				}
-			}
-
-			// TODO: Add icons for different types of entities
-			// Or, a seperate column that displays all components of the entity (sort of like the visibility icon)
-			bool node_open = ImGui::TreeNodeEx(name.c_str(), node_flags);
-
-			if (window_focused) {
-				if (is_selected) {
-					ImGui::PopStyleColor();
-				}
-				ImGui::PopStyleColor();
-			} else {
-				if (is_selected) {
-					ImGui::PopStyleColor();
-				}
-			}
-
-			if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
-				ImGui::OpenPopup("EntityContextMenu");
-			}
-
-			if (ImGui::BeginPopup("EntityContextMenu")) {
-				if (ImGui::MenuItem("Remove Entity")) {
-					scene.entity_deletion_queue.push(entity);
-				}
-
-				ImGui::EndPopup();
-			}
-
-			if (ImGui::IsItemClicked()) {
-				if (input_manager.is_action_pressed("select_multiple")) {
-					if (is_selected) {
-						scene.clear_selection();
-					} else {
-						scene.add_to_selection(entity);
-					}
-				} else if (input_manager.is_action_pressed("select_rows") && scene.last_entity_selected != 0) {
-					// Select all entities between last_entity_selected and entity
-					scene.clear_selection();
-					uint32_t min = std::min(scene.last_entity_selected, entity);
-					uint32_t max = std::max(scene.last_entity_selected, entity);
-					for (uint32_t i = min; i <= max; i++) {
-						scene.add_to_selection(i);
-					}
-				} else {
-					scene.clear_selection();
-					scene.add_to_selection(entity);
-				}
-				scene.calculate_multi_select_parent();
-				scene.execute_reparent_queue();
-			}
-
-			ImGui::TableNextColumn();
-			static bool visible = true;
-			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
-			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0, 0, 0, 0));
-			ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0, 0, 0, 0));
-			ImGui::PushStyleColor(ImGuiCol_BorderShadow, ImVec4(0, 0, 0, 0));
-			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
-
-			if (visible) {
-				if (ImGui::Button(ICON_MD_VISIBILITY, ImVec2(15, 15))) {
-					visible = false;
-				}
-			} else {
-				if (ImGui::Button(ICON_MD_VISIBILITY_OFF, ImVec2(15, 15))) {
-					visible = true;
-				}
-			}
-
-			if (node_open) {
-				ImGui::TreePop();
-			}
-
-			ImGui::PopStyleVar();
-			ImGui::PopStyleColor(4);
+			display_entity(scene, entity, name);
 		}
 
 		ImGui::EndTable();
@@ -340,7 +335,6 @@ void Editor::imgui_scene(EditorScene &scene) {
 	ImGui::EndChild();
 
 	if (ImGui::BeginDragDropTarget()) {
-		SPDLOG_INFO("BeginDragDropTarget");
 		if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_PROTOTYPE_PATH")) {
 			IM_ASSERT(payload->DataSize == sizeof(std::string));
 			// int payload_n = *(const int *)payload->Data;
@@ -360,6 +354,17 @@ void Editor::imgui_scene(EditorScene &scene) {
 				SPDLOG_ERROR("Failed to open {} prototype file", prot_path);
 			}
 			file.close();
+		}
+		ImGui::EndDragDropTarget();
+	}
+
+	if (ImGui::BeginDragDropTarget()) {
+		if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
+			Entity payload_entity = *(Entity *)payload->Data;
+			if (world.has_component<Parent>(payload_entity)) {
+				Entity parent = world.get_component<Parent>(payload_entity).parent;
+				world.remove_child(parent, payload_entity, true);
+			}
 		}
 		ImGui::EndDragDropTarget();
 	}
@@ -434,7 +439,7 @@ void Editor::imgui_viewport(EditorScene &scene, uint32_t scene_index) {
 	glm::mat4 *view = &scene.get_render_scene().view;
 	glm::mat4 *projection = &scene.get_render_scene().projection;
 
-	if (!scene.entities_selected.empty()) {
+	if (scene.selected_entity != 0) {
 		float *snap = nullptr;
 		static float snap_values[3] = { 0.0f, 0.0f, 0.0f };
 
@@ -449,17 +454,8 @@ void Editor::imgui_viewport(EditorScene &scene, uint32_t scene_index) {
 			snap = snap_values;
 		}
 
-		auto &multi_transform = scene.world.get_component<Transform>(scene.multi_select_parent);
-		auto &transform = scene.world.get_component<Transform>(scene.entities_selected[0]);
-		glm::mat4 temp_matrix = glm::mat4(1.0f);
-
-		if (scene.entities_selected.size() == 1) {
-			temp_matrix = transform.get_global_model_matrix();
-		} else if (current_gizmo_operation == ImGuizmo::ROTATE && use_individual_origins) {
-			temp_matrix = scene.dummy_transform.get_global_model_matrix();
-		} else {
-			temp_matrix = multi_transform.get_global_model_matrix();
-		}
+		auto &transform = scene.world.get_component<Transform>(scene.selected_entity);
+		glm::mat4 temp_matrix = transform.get_global_model_matrix();
 
 		static auto prev_scale = glm::vec3(1.0f);
 		if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
@@ -472,48 +468,15 @@ void Editor::imgui_viewport(EditorScene &scene, uint32_t scene_index) {
 			glm::vec3 skew;
 			glm::vec4 perspective;
 
-			if (scene.entities_selected.size() == 1) {
-				glm::mat4 parent_matrix = glm::mat4(1.0f);
-				if (scene.world.has_component<Parent>(scene.entities_selected[0])) {
-					auto &parent = scene.world.get_component<Parent>(scene.entities_selected[0]);
-					auto &parent_transform = scene.world.get_component<Transform>(parent.parent);
-					parent_matrix = glm::inverse(parent_transform.get_global_model_matrix());
-				}
-				glm::decompose(parent_matrix * temp_matrix, transform.scale, transform.orientation, transform.position,
-						skew, perspective);
-				transform.set_changed(true);
-			} else if (use_individual_origins) {
-				glm::vec3 scale;
-				glm::quat orientation;
-				glm::vec3 position;
-
-				glm::decompose(delta_matrix, scale, orientation, position, skew, perspective);
-				glm::vec3 delta_scale = scale / prev_scale;
-				prev_scale = scale;
-
-				for (auto &entity : scene.entities_selected) {
-					auto &t = scene.world.get_component<Transform>(entity);
-
-					t.add_orientation(orientation);
-
-					if (current_gizmo_operation == ImGuizmo::SCALE) {
-						t.scale *= delta_scale;
-					}
-					t.set_changed(true);
-				}
-
-				glm::decompose(temp_matrix, scale, orientation, multi_transform.position, skew, perspective);
-				multi_transform.set_changed(true);
-
-				glm::decompose(temp_matrix, scene.dummy_transform.scale, scene.dummy_transform.orientation,
-						scene.dummy_transform.position, skew, perspective);
-				scene.dummy_transform.set_changed(true);
-				scene.dummy_transform.update_global_model_matrix();
-			} else {
-				glm::decompose(temp_matrix, multi_transform.scale, multi_transform.orientation,
-						multi_transform.position, skew, perspective);
-				multi_transform.set_changed(true);
+			glm::mat4 parent_matrix = glm::mat4(1.0f);
+			if (scene.world.has_component<Parent>(scene.selected_entity)) {
+				auto &parent = scene.world.get_component<Parent>(scene.selected_entity);
+				auto &parent_transform = scene.world.get_component<Transform>(parent.parent);
+				parent_matrix = glm::inverse(parent_transform.get_global_model_matrix());
 			}
+			glm::decompose(parent_matrix * temp_matrix, transform.scale, transform.orientation, transform.position,
+					skew, perspective);
+			transform.set_changed(true);
 		}
 	}
 
@@ -593,16 +556,6 @@ void Editor::imgui_viewport(EditorScene &scene, uint32_t scene_index) {
 		ImGui::OpenPopup("Gizmo Settings");
 	}
 	ImGui::SameLine();
-	// INDIVIDUAL ORIGINS
-	if (use_individual_origins) {
-		ImGui::PushStyleColor(ImGuiCol_Button, active_color);
-		push_count++;
-	}
-	if (ImGui::Button(ICON_MD_TRIP_ORIGIN)) {
-		use_individual_origins = !use_individual_origins;
-	}
-	ImGui::PopStyleColor(push_count);
-	push_count = 0;
 
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 8));
 	if (ImGui::BeginPopup("Gizmo Settings")) {
