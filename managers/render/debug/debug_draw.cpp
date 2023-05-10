@@ -1,6 +1,7 @@
 #include "debug_draw.h"
 
 #include "render/render_manager.h"
+#include <glm/geometric.hpp>
 
 const uint32_t MAX_VERTEX_COUNT = 10000;
 
@@ -55,6 +56,29 @@ void DebugDraw::draw() {
 void DebugDraw::draw_line(const glm::vec3 &from, const glm::vec3 &to, const glm::vec3 &color) {
 	vertices.push_back({ from, color });
 	vertices.push_back({ to, color });
+}
+
+void DebugDraw::draw_arrow(const glm::vec3 &from, const glm::vec3 &to, const glm::vec3 &color) {
+	draw_line(from, to, color);
+
+	glm::vec3 part_of_line = (to - from) * 0.2f;
+
+	draw_cone(to, to - part_of_line, 0.25f, 10, color);
+}
+
+void DebugDraw::draw_cone(
+		const glm::vec3 &from, const glm::vec3 &to, float radius_scale, int num_of_segments, const glm::vec3 &color) {
+	float two_pi = 6.28318530718;
+	float step = two_pi / float(num_of_segments);
+	float current_step = 0.0f;
+	glm::vec3 new_to;
+	for (int i = 0; i <= num_of_segments; i++) {
+		current_step += step;
+
+		new_to = glm::vec3(to.x + radius_scale * cos(current_step), to.y, to.z + radius_scale * sin(current_step));
+
+		draw_line(from, new_to, color);
+	}
 }
 
 // Draw a box with center at "center" and scale "scale".

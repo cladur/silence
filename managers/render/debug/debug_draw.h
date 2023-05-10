@@ -1,3 +1,4 @@
+
 #ifndef SILENCE_DEBUG_DRAW_H
 #define SILENCE_DEBUG_DRAW_H
 
@@ -38,6 +39,9 @@ public:
 
 	void draw_frustum(const glm::vec3 &center, const glm::quat &orientation, float fov, float aspect, float near,
 			float far, const glm::vec3 &color = glm::vec3(0.0f, 1.0f, 0.0f));
+	void draw_arrow(const glm::vec3 &from, const glm::vec3 &to, const glm::vec3 &color = glm::vec3(0.0f, 1.0f, 0.0f));
+	void draw_cone(const glm::vec3 &from, const glm::vec3 &to, float radius_scale, int num_of_segments,
+			const glm::vec3 &color = glm::vec3(0.0f, 0.1f, 0.0f));
 };
 
 #endif //SILENCE_DEBUG_DRAW_H
