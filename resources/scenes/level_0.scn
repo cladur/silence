@@ -165,7 +165,7 @@
                     "material_type": 0,
                     "model_name": "scorpion/scorpion_idle.skinmdl"
                 },
-                "component_name": "ModelInstance"
+                "component_name": "SkinnedModelInstance"
             },
             {
                 "component_data": {

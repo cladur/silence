@@ -217,18 +217,23 @@ std::vector<SkinnedModel> &RenderManager::get_skinned_models() {
 }
 
 Handle<SkinnedModel> RenderManager::load_skinned_model(const char *path) {
-	if (name_to_skinned_model.find(path) != name_to_skinned_model.end()) {
-		return name_to_skinned_model[path];
+	std::string name = path;
+	bool found_asset_path = name.find(ASSET_PATH) != std::string::npos;
+	if (found_asset_path) {
+		name = remove_asset_path(name);
+	}
+	if (name_to_skinned_model.find(name) != name_to_skinned_model.end()) {
+		return name_to_skinned_model[name];
 	}
 
 	SkinnedModel model = {};
-	model.load_from_asset(asset_path(path).c_str());
+	model.load_from_asset(path);
 
 	skinned_models.push_back(model);
 	Handle<SkinnedModel> handle = {};
 	handle.id = skinned_models.size() - 1;
 
-	name_to_skinned_model[path] = handle;
+	name_to_skinned_model[name] = handle;
 	return handle;
 }
 std::string RenderManager::get_model_name(Handle<Model> handle) {

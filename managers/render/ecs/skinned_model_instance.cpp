@@ -4,7 +4,7 @@
 
 SkinnedModelInstance::SkinnedModelInstance() {
 	RenderManager &render_manager = RenderManager::get();
-	model_handle = render_manager.load_skinned_model("scorpion/scorpion_idle.skinmdl");
+	model_handle = render_manager.load_skinned_model(asset_path("scorpion/scorpion_idle.skinmdl").c_str());
 	material_type = MaterialType::Default;
 
 	glGenBuffers(1, &skinning_buffer);
@@ -33,7 +33,7 @@ void SkinnedModelInstance::serialize_json(nlohmann::json &serialized_scene) {
 	serialized_component["material_type"] = material_type;
 	serialized_scene.push_back(nlohmann::json::object());
 	serialized_scene.back()["component_data"] = serialized_component;
-	serialized_scene.back()["component_name"] = "ModelInstance";
+	serialized_scene.back()["component_name"] = "SkinnedModelInstance";
 }
 
 void SkinnedModelInstance::deserialize_json(nlohmann::json &serialized_component) {
