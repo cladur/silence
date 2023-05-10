@@ -40,8 +40,14 @@ public:
 	void draw_frustum(const glm::vec3 &center, const glm::quat &orientation, float fov, float aspect, float near,
 			float far, const glm::vec3 &color = glm::vec3(0.0f, 1.0f, 0.0f));
 	void draw_arrow(const glm::vec3 &from, const glm::vec3 &to, const glm::vec3 &color = glm::vec3(0.0f, 1.0f, 0.0f));
-	void draw_cone(const glm::vec3 &from, const glm::vec3 &to, float radius_scale, int num_of_segments,
-			const glm::vec3 &color = glm::vec3(0.0f, 0.1f, 0.0f));
+	void draw_arrow(const glm::vec3 &from, const glm::vec3 &to, float length,
+			const glm::vec3 &color = glm::vec3(0.0f, 1.0f, 0.0f));
+	void draw_cone(const glm::vec3 &from, const glm::vec3 &to, float radius,
+			const glm::vec3 &color = glm::vec3(0.0f, 1.0f, 0.0f), int num_of_segments = 32);
+	void draw_cone(const glm::vec3 &from, const glm::vec3 &to, float length, float radius,
+			const glm::vec3 &color = glm::vec3(0.0f, 1.0f, 0.0f), int num_of_segments = 32);
+	void draw_circle(const glm::vec3 &center, glm::vec3 direction, float radius,
+			const glm::vec3 &color = glm::vec3(0.0f, 1.0f, 0.0f), int num_of_segments = 32);
 };
 
 #endif //SILENCE_DEBUG_DRAW_H

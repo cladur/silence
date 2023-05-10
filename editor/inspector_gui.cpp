@@ -360,7 +360,7 @@ void Inspector::show_light() {
 		ImGui::BeginTable("Light", 2);
 		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
 
-		show_vec3("Color", light.color);
+		show_vec3("Color", light.color, 1.0f, 255.0f, 0.0f, 255.0f);
 
 		ImGui::TableNextRow();
 		ImGui::TableSetColumnIndex(0);
@@ -383,7 +383,8 @@ void Inspector::show_light() {
 	}
 }
 
-bool Inspector::show_vec3(const char *label, glm::vec3 &vec3, float speed, float reset_value) {
+bool Inspector::show_vec3(
+		const char *label, glm::vec3 &vec3, float speed, float reset_value, float min_value, float max_value) {
 	bool changed = false;
 
 	ImGui::TableNextRow();
@@ -395,7 +396,7 @@ bool Inspector::show_vec3(const char *label, glm::vec3 &vec3, float speed, float
 	}
 	ImGui::TableSetColumnIndex(1);
 	ImGui::SetNextItemWidth(-FLT_MIN);
-	changed |= ImGui::DragFloat3(fmt::format("##{}", label).c_str(), &vec3.x, speed);
+	changed |= ImGui::DragFloat3(fmt::format("##{}", label).c_str(), &vec3.x, speed, min_value, max_value);
 	return changed;
 }
 

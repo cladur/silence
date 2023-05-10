@@ -103,8 +103,6 @@ void RenderScene::draw() {
 		debug_draw.draw_line(glm::vec3(-10, 0, i), glm::vec3(10, 0, i), color);
 	}
 
-	debug_draw.draw_arrow(glm::vec3(0, 5, 0), glm::vec3(0, 10, 0), glm::vec4(1, 0, 0, 1));
-
 	debug_draw.draw();
 
 	if (draw_skybox) {
@@ -133,18 +131,20 @@ void RenderScene::queue_draw(ModelInstance *model_instance, Transform *transform
 	draw_command.model_instance = model_instance;
 	draw_command.transform = transform;
 
-	switch (model_instance->material_type) {
-		case MaterialType::Default: {
-			g_buffer_pass.draw_commands.push_back(draw_command);
-			break;
-		}
-		case MaterialType::PBR: {
-			g_buffer_pass.draw_commands.push_back(draw_command);
-			break;
-		}
-		default: {
-			g_buffer_pass.draw_commands.push_back(draw_command);
-			break;
-		}
-	}
+	g_buffer_pass.draw_commands.push_back(draw_command);
+
+	// switch (model_instance->material_type) {
+	// 	case MaterialType::Default: {
+	// 		g_buffer_pass.draw_commands.push_back(draw_command);
+	// 		break;
+	// 	}
+	// 	case MaterialType::PBR: {
+	// 		g_buffer_pass.draw_commands.push_back(draw_command);
+	// 		break;
+	// 	}
+	// 	default: {
+	// 		g_buffer_pass.draw_commands.push_back(draw_command);
+	// 		break;
+	// 	}
+	// }
 }

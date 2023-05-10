@@ -9,10 +9,12 @@
 #include "ecs/systems/bsp_system.h"
 #include "ecs/systems/collider_draw.h"
 #include "ecs/systems/collision_system.h"
+#include "ecs/systems/light_system.h"
 #include "ecs/systems/parent_system.h"
 #include "ecs/systems/physics_system.h"
 #include "render/ecs/frustum_draw_system.h"
 #include "render/ecs/render_system.h"
+
 
 #define COLLISION_TEST_ENTITY 4
 
@@ -46,6 +48,7 @@ Scene::Scene() {
 	world.register_system<RenderSystem>();
 	world.register_system<ColliderDrawSystem>();
 	world.register_system<FrustumDrawSystem>();
+	world.register_system<LightSystem>();
 
 	//todo uncomment if bspsystem is fixed
 	// world.register_system<BSPSystem>();

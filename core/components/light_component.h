@@ -8,6 +8,10 @@ public:
 	glm::vec3 color{};
 	LightType type = POINT_LIGHT;
 
+	[[nodiscard]] glm::vec3 get_color() const {
+		return { color.r / 255.0f, color.g / 255.0f, color.b / 255.0f };
+	}
+
 	void serialize_json(nlohmann::json &serialized_scene) {
 		nlohmann::json::object_t serialized_component;
 		serialized_component["color"] = nlohmann::json::object();

@@ -29,7 +29,8 @@ private:
 	void show_collideraabb();
 	void show_colliderobb();
 	void show_light();
-	static bool show_vec3(const char *label, glm::vec3 &vec3, float speed = 0.1f, float reset_value = 0.0f);
+	static bool show_vec3(const char *label, glm::vec3 &vec3, float speed = 0.1f, float reset_value = 0.0f,
+			float min_value = 100.0f, float max_value = 100.0f);
 	static bool show_float(const char *label, float &value, float speed = 0.1f);
 	static void show_checkbox(const char *label, bool &value);
 	static void show_text(const char *label, const char *value);
