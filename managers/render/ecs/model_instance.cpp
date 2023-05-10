@@ -1,10 +1,11 @@
 #include "model_instance.h"
 
 #include "render/render_manager.h"
+#include "types.h"
 
 ModelInstance::ModelInstance() {
 	RenderManager &render_manager = RenderManager::get();
-	model_handle = render_manager.load_model("woodenBox/woodenBox.mdl");
+	model_handle = render_manager.load_model(asset_path("woodenBox/woodenBox.mdl").c_str());
 	material_type = MaterialType::Default;
 }
 

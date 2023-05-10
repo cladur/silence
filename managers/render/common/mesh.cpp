@@ -1,8 +1,6 @@
 #include "mesh.h"
-
-#include "glad/glad.h"
-
 #include "assets/mesh_asset.h"
+#include "glad/glad.h"
 
 void Mesh::draw() {
 	// draw mesh
@@ -84,6 +82,8 @@ void Mesh::load_from_asset(const char *path) {
 		indices[i] = unpacked_indices[i];
 	}
 
+	auto center = glm::vec3(mesh_info.bounds.origin[0], mesh_info.bounds.origin[1], mesh_info.bounds.origin[2]);
+	fc_bounding_sphere = { center, mesh_info.bounds.radius };
 	setup_mesh();
 
 	SPDLOG_INFO("Mesh asset loaded successfully: {}", path);

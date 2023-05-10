@@ -103,7 +103,9 @@ bool World::has_child(Entity parent, Entity child) {
 }
 
 bool World::reparent(Entity new_parent, Entity child, bool keep_transform) {
-	remove_child(get_component<Parent>(child).parent, child, keep_transform);
+	if (has_component<Parent>(child)) {
+		remove_child(get_component<Parent>(child).parent, child, keep_transform);
+	}
 
 	if (has_component<Transform>(new_parent) && has_component<Transform>(child)) {
 		auto &child_transform = get_component<Transform>(child);

@@ -1,5 +1,6 @@
 #include "ecs/world.h"
 #include "editor.h"
+#include "editor/editor_scene.h"
 #include "input/input_manager.h"
 #include "scene/scene_manager.h"
 
@@ -12,6 +13,7 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <imgui_stdlib.h>
+#include <spdlog/spdlog.h>
 
 #include "IconsMaterialDesign.h"
 #include "ImGuizmo.h"
@@ -27,28 +29,10 @@ void Editor::imgui_menu_bar() {
 				std::string name = fmt::format("New Scene {}", scenes.size());
 				create_scene(name);
 			}
-			if (ImGui::MenuItem("Archetype")) {
-				SPDLOG_INFO("Creating archetype...");
-				std::string name = fmt::format("New Archetype {}", scenes.size());
-				create_scene(name, SceneType::Archetype);
-			}
-			if (ImGui::MenuItem("Prototype")) {
-				SPDLOG_INFO("Creating Prototype...");
-				// TODO: First show a file dialog to select a archetype
-				// After that create a prototype scene from it
-				nfdchar_t *in_path;
-				nfdfilteritem_t filter_item[1] = { { "Archetype", "arc" } };
-
-				nfdresult_t result = NFD_OpenDialog(&in_path, filter_item, 1, nullptr);
-				if (result == NFD_OKAY) {
-					std::string name = fmt::format("New Prototype {}", scenes.size());
-					create_scene(name, SceneType::Prototype, in_path);
-					NFD_FreePath(in_path);
-				} else if (result == NFD_CANCEL) {
-					puts("User pressed cancel.");
-				} else {
-					printf("Error: %s\n", NFD_GetError());
-				}
+			if (ImGui::MenuItem("Prefab")) {
+				SPDLOG_INFO("Creating prefab...");
+				std::string name = fmt::format("New Prefab {}", scenes.size());
+				create_scene(name, SceneType::Prefab);
 			}
 			ImGui::EndMenu();
 		}
@@ -59,19 +43,15 @@ void Editor::imgui_menu_bar() {
 			if (scene.path.empty()) {
 				nfdchar_t *out_path;
 				nfdfilteritem_t filter_scene[1] = { { "Scene", "scn" } };
-				nfdfilteritem_t filter_archetype[1] = { { "Archetype", "arc" } };
-				nfdfilteritem_t filter_prototype[1] = { { "Prototype", "prt" } };
+				nfdfilteritem_t filter_prefab[1] = { { "Prefab", "pfb" } };
 				nfdfilteritem_t *filter_item;
 
 				switch (scene.type) {
 					case SceneType::GameScene:
 						filter_item = filter_scene;
 						break;
-					case SceneType::Archetype:
-						filter_item = filter_archetype;
-						break;
-					case SceneType::Prototype:
-						filter_item = filter_prototype;
+					case SceneType::Prefab:
+						filter_item = filter_prefab;
 						break;
 				}
 
@@ -79,6 +59,7 @@ void Editor::imgui_menu_bar() {
 				if (result == NFD_OKAY) {
 					auto filename = std::filesystem::path(out_path).filename().string();
 					get_active_scene().name = filename;
+					get_active_scene().path = out_path;
 					get_active_scene().save_to_file(out_path);
 					NFD_FreePath(out_path);
 				} else if (result == NFD_CANCEL) {
@@ -93,19 +74,18 @@ void Editor::imgui_menu_bar() {
 		if (ImGui::MenuItem(ICON_MD_SAVE " Save as...")) {
 			SPDLOG_INFO("Saving scene as...");
 			nfdchar_t *out_path;
-			nfdfilteritem_t filter_item[3] = { { "Scene", "scn" }, { "Archetype", "arc" }, { "Prototype", "prt" } };
-			nfdresult_t result = NFD_SaveDialog(&out_path, filter_item, 3, nullptr, nullptr);
+			nfdfilteritem_t filter_item[2] = { { "Scene", "scn" }, { "Prefab", "pfb" } };
+			nfdresult_t result = NFD_SaveDialog(&out_path, filter_item, 2, nullptr, nullptr);
 			if (result == NFD_OKAY) {
 				auto filename = std::filesystem::path(out_path).filename().string();
 				auto extension = std::filesystem::path(out_path).extension().string();
 				get_active_scene().name = filename;
+				get_active_scene().path = out_path;
 				get_active_scene().save_to_file(out_path);
 				if (extension == ".scn") {
 					get_active_scene().type = SceneType::GameScene;
-				} else if (extension == ".arc") {
-					get_active_scene().type = SceneType::Archetype;
-				} else if (extension == ".prt") {
-					get_active_scene().type = SceneType::Prototype;
+				} else if (extension == ".pfb") {
+					get_active_scene().type = SceneType::Prefab;
 				}
 				NFD_FreePath(out_path);
 			} else if (result == NFD_CANCEL) {
@@ -117,26 +97,24 @@ void Editor::imgui_menu_bar() {
 		if (ImGui::MenuItem(ICON_MD_FOLDER_OPEN " Load")) {
 			SPDLOG_INFO(ICON_MD_CLOSE "Loading scene...");
 			nfdchar_t *out_path;
-			nfdfilteritem_t filter_item[3] = { { "Scene", "scn" }, { "Archetype", "arc" }, { "Prototype", "prt" } };
-			nfdresult_t result = NFD_OpenDialog(&out_path, filter_item, 3, nullptr);
+			nfdfilteritem_t filter_item[2] = { { "Scene", "scn" }, { "Prefab", "pfb" } };
+			nfdresult_t result = NFD_OpenDialog(&out_path, filter_item, 2, nullptr);
 			if (result == NFD_OKAY) {
 				auto filename = std::filesystem::path(out_path).filename().string();
 				auto extension = std::filesystem::path(out_path).extension().string();
 				if (extension == ".scn") {
 					create_scene(filename, SceneType::GameScene, out_path);
-				} else if (extension == ".arc") {
-					create_scene(filename, SceneType::Archetype, out_path);
-				} else if (extension == ".prt") {
+				} else if (extension == ".pfb") {
 					if (scenes.empty()) {
-						SPDLOG_WARN("Can't load prototype into empty scene");
+						create_scene(filename, SceneType::Prefab, out_path);
 					} else {
 						EditorScene &active_scene = get_active_scene();
-						bool is_archetype_or_prototype =
-								active_scene.type == SceneType::Archetype || active_scene.type == SceneType::Prototype;
-						if (!is_archetype_or_prototype) {
+						bool is_prefab = active_scene.type == SceneType::Prefab;
+						if (!is_prefab) {
 							nlohmann::json entity_json;
 							std::ifstream file(out_path);
 							file >> entity_json;
+							entity_json.back()["entity"] = 0;
 							active_scene.world.deserialize_entity_json(entity_json.back(), active_scene.entities);
 							file.close();
 						} else {
@@ -164,8 +142,8 @@ void Editor::imgui_inspector(EditorScene &scene) {
 	RenderManager &render_manager = RenderManager::get();
 	ImGui::Begin("Inspector");
 
-	if (scene.last_entity_selected > 0) {
-		Entity active_entity = scene.last_entity_selected;
+	if (scene.selected_entity > 0) {
+		Entity active_entity = scene.selected_entity;
 		if (world.has_component<Name>(active_entity)) {
 			auto &name = world.get_component<Name>(active_entity);
 			ImGui::SetNextItemWidth(-FLT_MIN);
@@ -185,13 +163,110 @@ void Editor::imgui_inspector(EditorScene &scene) {
 	ImGui::End();
 }
 
+void Editor::display_entity(EditorScene &scene, Entity entity, const std::string &name) {
+	World &world = scene.world;
+
+	InputManager &input_manager = InputManager::get();
+
+	static ImGuiTreeNodeFlags base_flags =
+			ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanFullWidth;
+
+	ImGuiTreeNodeFlags node_flags = base_flags;
+
+	bool is_selected = scene.selected_entity == entity;
+
+	if (is_selected) {
+		node_flags |= ImGuiTreeNodeFlags_Selected;
+	}
+
+	bool is_leaf = true;
+	if (is_leaf) {
+		node_flags |= ImGuiTreeNodeFlags_Leaf;
+	}
+
+	bool window_focused = ImGui::IsWindowFocused();
+
+	if (window_focused) {
+		ImVec4 blue = ImVec4(43.0f / 255.0f, 93.0f / 255.0f, 134.0f / 255.0f, 1.0f);
+		if (is_selected) {
+			ImGui::PushStyleColor(ImGuiCol_HeaderHovered, blue);
+		}
+		ImGui::PushStyleColor(ImGuiCol_Header, blue);
+	} else {
+		if (is_selected) {
+			ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(77.0f / 255.0f, 77.0f / 255.0f, 77.0f / 255.0f, 1.0f));
+		}
+	}
+
+	// TODO: Add icons for different types of entities
+	// Or, a seperate column that displays all components of the entity (sort of like the visibility icon)
+	bool node_open = ImGui::TreeNodeEx(name.c_str(), node_flags);
+
+	if (window_focused) {
+		if (is_selected) {
+			ImGui::PopStyleColor();
+		}
+		ImGui::PopStyleColor();
+	} else {
+		if (is_selected) {
+			ImGui::PopStyleColor();
+		}
+	}
+
+	if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
+		ImGui::SetDragDropPayload("DND_ENTITY", &entity, sizeof(Entity));
+		ImGui::EndDragDropSource();
+	}
+
+	if (ImGui::BeginDragDropTarget()) {
+		if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
+			Entity payload_entity = *(Entity *)payload->Data;
+			if (entity != payload_entity) {
+				world.reparent(entity, payload_entity, true);
+			}
+		}
+		ImGui::EndDragDropTarget();
+	}
+
+	if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+		ImGui::OpenPopup("EntityContextMenu");
+	}
+
+	if (ImGui::BeginPopup("EntityContextMenu")) {
+		if (ImGui::MenuItem("Remove Entity")) {
+			scene.entity_deletion_queue.push(entity);
+		}
+
+		ImGui::EndPopup();
+	}
+
+	if (ImGui::IsItemClicked()) {
+		scene.selected_entity = entity;
+	}
+
+	if (node_open) {
+		if (world.has_component<Children>(entity)) {
+			auto &children = world.get_component<Children>(entity);
+			for (int i = 0; i < children.children_count; i++) {
+				Entity child_entity = children.children[i];
+				std::string child_name = std::to_string(child_entity);
+				if (world.has_component<Name>(child_entity)) {
+					child_name = world.get_component<Name>(child_entity).name;
+				}
+				display_entity(scene, child_entity, child_name);
+			}
+		}
+
+		ImGui::TreePop();
+	}
+}
+
 void Editor::imgui_scene(EditorScene &scene) {
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 	ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(0, 0));
 
 	ImGui::Begin("Scene");
 	World &world = scene.world;
-	InputManager &input_manager = InputManager::get();
 
 	ImVec2 cursor_pos = ImGui::GetCursorPos();
 	cursor_pos.x += 4;
@@ -199,8 +274,7 @@ void Editor::imgui_scene(EditorScene &scene) {
 	ImGui::SetCursorPos(cursor_pos);
 
 	// ADD ENTITY BUTTON
-	bool add_entity_button =
-			!(scene.type == SceneType::Archetype) & !(scene.type == SceneType::Prototype) || scene.entities.empty();
+	bool add_entity_button = !(scene.type == SceneType::Prefab) || scene.entities.empty();
 	if (add_entity_button && ImGui::Button(ICON_MD_ADD, ImVec2(20, 20))) {
 		ImGui::OpenPopup("Add Entity");
 	}
@@ -211,7 +285,7 @@ void Editor::imgui_scene(EditorScene &scene) {
 			Entity new_entity = world.create_entity();
 			world.add_component(new_entity, Transform{});
 			scene.entities.push_back(new_entity);
-			scene.last_entity_selected = new_entity;
+			scene.selected_entity = new_entity;
 		}
 		ImGui::SeparatorText("Prefabs");
 
@@ -231,12 +305,15 @@ void Editor::imgui_scene(EditorScene &scene) {
 
 	ImGui::BeginChild("DragDropTarget");
 
-	if (ImGui::BeginTable("Scene", 2, flags)) {
+	if (ImGui::BeginTable("Scene", 1, flags)) {
 		ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_None);
-		ImGui::TableSetupColumn("##", ImGuiTableColumnFlags_WidthFixed, 15.0f);
-		// ImGui::TableHeadersRow();
 
 		for (auto &entity : scene.entities) {
+			// We skip children, their parents will draw them
+			if (world.has_component<Parent>(entity)) {
+				continue;
+			}
+
 			std::string name = std::to_string(entity);
 			if (world.has_component<Name>(entity)) {
 				name = world.get_component<Name>(entity).name;
@@ -249,100 +326,7 @@ void Editor::imgui_scene(EditorScene &scene) {
 			ImGui::TableNextRow();
 			ImGui::TableNextColumn();
 
-			static ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow |
-					ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanFullWidth;
-
-			ImGuiTreeNodeFlags node_flags = base_flags;
-
-			bool is_selected = (std::find(scene.entities_selected.begin(), scene.entities_selected.end(), entity) !=
-					scene.entities_selected.end());
-
-			if (is_selected) {
-				node_flags |= ImGuiTreeNodeFlags_Selected;
-			}
-
-			bool is_leaf = true;
-			if (is_leaf) {
-				node_flags |= ImGuiTreeNodeFlags_Leaf;
-			}
-
-			bool window_focused = ImGui::IsWindowFocused();
-
-			if (window_focused) {
-				ImVec4 blue = ImVec4(43.0f / 255.0f, 93.0f / 255.0f, 134.0f / 255.0f, 1.0f);
-				if (is_selected) {
-					ImGui::PushStyleColor(ImGuiCol_HeaderHovered, blue);
-				}
-				ImGui::PushStyleColor(ImGuiCol_Header, blue);
-			} else {
-				if (is_selected) {
-					ImGui::PushStyleColor(
-							ImGuiCol_Header, ImVec4(77.0f / 255.0f, 77.0f / 255.0f, 77.0f / 255.0f, 1.0f));
-				}
-			}
-
-			// TODO: Add icons for different types of entities
-			// Or, a seperate column that displays all components of the entity (sort of like the visibility icon)
-			bool node_open = ImGui::TreeNodeEx(name.c_str(), node_flags);
-
-			if (window_focused) {
-				if (is_selected) {
-					ImGui::PopStyleColor();
-				}
-				ImGui::PopStyleColor();
-			} else {
-				if (is_selected) {
-					ImGui::PopStyleColor();
-				}
-			}
-
-			if (ImGui::IsItemClicked()) {
-				if (input_manager.is_action_pressed("select_multiple")) {
-					if (is_selected) {
-						scene.clear_selection();
-					} else {
-						scene.add_to_selection(entity);
-					}
-				} else if (input_manager.is_action_pressed("select_rows") && scene.last_entity_selected != 0) {
-					// Select all entities between last_entity_selected and entity
-					scene.clear_selection();
-					uint32_t min = std::min(scene.last_entity_selected, entity);
-					uint32_t max = std::max(scene.last_entity_selected, entity);
-					for (uint32_t i = min; i <= max; i++) {
-						scene.add_to_selection(i);
-					}
-				} else {
-					scene.clear_selection();
-					scene.add_to_selection(entity);
-				}
-				scene.calculate_multi_select_parent();
-				scene.execute_reparent_queue();
-			}
-
-			ImGui::TableNextColumn();
-			static bool visible = true;
-			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
-			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0, 0, 0, 0));
-			ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0, 0, 0, 0));
-			ImGui::PushStyleColor(ImGuiCol_BorderShadow, ImVec4(0, 0, 0, 0));
-			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
-
-			if (visible) {
-				if (ImGui::Button(ICON_MD_VISIBILITY, ImVec2(15, 15))) {
-					visible = false;
-				}
-			} else {
-				if (ImGui::Button(ICON_MD_VISIBILITY_OFF, ImVec2(15, 15))) {
-					visible = true;
-				}
-			}
-
-			if (node_open) {
-				ImGui::TreePop();
-			}
-
-			ImGui::PopStyleVar();
-			ImGui::PopStyleColor(4);
+			display_entity(scene, entity, name);
 		}
 
 		ImGui::EndTable();
@@ -351,7 +335,6 @@ void Editor::imgui_scene(EditorScene &scene) {
 	ImGui::EndChild();
 
 	if (ImGui::BeginDragDropTarget()) {
-		SPDLOG_INFO("BeginDragDropTarget");
 		if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_PROTOTYPE_PATH")) {
 			IM_ASSERT(payload->DataSize == sizeof(std::string));
 			// int payload_n = *(const int *)payload->Data;
@@ -371,6 +354,17 @@ void Editor::imgui_scene(EditorScene &scene) {
 				SPDLOG_ERROR("Failed to open {} prototype file", prot_path);
 			}
 			file.close();
+		}
+		ImGui::EndDragDropTarget();
+	}
+
+	if (ImGui::BeginDragDropTarget()) {
+		if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
+			Entity payload_entity = *(Entity *)payload->Data;
+			if (world.has_component<Parent>(payload_entity)) {
+				Entity parent = world.get_component<Parent>(payload_entity).parent;
+				world.remove_child(parent, payload_entity, true);
+			}
 		}
 		ImGui::EndDragDropTarget();
 	}
@@ -418,8 +412,26 @@ void Editor::imgui_viewport(EditorScene &scene, uint32_t scene_index) {
 		scene.last_viewport_size = viewport_size;
 	}
 
-	uint32_t render_image = scene.get_render_scene().render_framebuffer.get_texture_id();
+	uint32_t render_image = scene.get_render_scene().render_framebuffer.texture_id;
 	ImGui::Image((void *)(intptr_t)render_image, viewport_size, ImVec2(0, 1), ImVec2(1, 0));
+
+	if (ImGui::BeginDragDropTarget()) {
+		if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_PREFAB_PATH")) {
+			const std::string payload_n = *(const std::string *)payload->Data;
+			if (scene.type == SceneType::GameScene) {
+				nlohmann::json serialized_prototype;
+				std::ifstream file(payload_n);
+				file >> serialized_prototype;
+				serialized_prototype.back()["entity"] = 0;
+				scene.world.deserialize_entity_json(serialized_prototype.back(), scene.entities);
+				file.close();
+			} else {
+				SPDLOG_WARN("Can't add prefab to scene type other than GameScene");
+			}
+		}
+
+		ImGui::EndDragDropTarget();
+	}
 
 	// Draw gizmo
 	ImGuiIO &io = ImGui::GetIO();
@@ -427,7 +439,7 @@ void Editor::imgui_viewport(EditorScene &scene, uint32_t scene_index) {
 	glm::mat4 *view = &scene.get_render_scene().view;
 	glm::mat4 *projection = &scene.get_render_scene().projection;
 
-	if (!scene.entities_selected.empty()) {
+	if (scene.selected_entity != 0) {
 		float *snap = nullptr;
 		static float snap_values[3] = { 0.0f, 0.0f, 0.0f };
 
@@ -442,17 +454,8 @@ void Editor::imgui_viewport(EditorScene &scene, uint32_t scene_index) {
 			snap = snap_values;
 		}
 
-		auto &multi_transform = scene.world.get_component<Transform>(scene.multi_select_parent);
-		auto &transform = scene.world.get_component<Transform>(scene.entities_selected[0]);
-		glm::mat4 temp_matrix = glm::mat4(1.0f);
-
-		if (scene.entities_selected.size() == 1) {
-			temp_matrix = transform.get_global_model_matrix();
-		} else if (current_gizmo_operation == ImGuizmo::ROTATE && use_individual_origins) {
-			temp_matrix = scene.dummy_transform.get_global_model_matrix();
-		} else {
-			temp_matrix = multi_transform.get_global_model_matrix();
-		}
+		auto &transform = scene.world.get_component<Transform>(scene.selected_entity);
+		glm::mat4 temp_matrix = transform.get_global_model_matrix();
 
 		static auto prev_scale = glm::vec3(1.0f);
 		if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
@@ -465,48 +468,15 @@ void Editor::imgui_viewport(EditorScene &scene, uint32_t scene_index) {
 			glm::vec3 skew;
 			glm::vec4 perspective;
 
-			if (scene.entities_selected.size() == 1) {
-				glm::mat4 parent_matrix = glm::mat4(1.0f);
-				if (scene.world.has_component<Parent>(scene.entities_selected[0])) {
-					auto &parent = scene.world.get_component<Parent>(scene.entities_selected[0]);
-					auto &parent_transform = scene.world.get_component<Transform>(parent.parent);
-					parent_matrix = glm::inverse(parent_transform.get_global_model_matrix());
-				}
-				glm::decompose(parent_matrix * temp_matrix, transform.scale, transform.orientation, transform.position,
-						skew, perspective);
-				transform.set_changed(true);
-			} else if (use_individual_origins) {
-				glm::vec3 scale;
-				glm::quat orientation;
-				glm::vec3 position;
-
-				glm::decompose(delta_matrix, scale, orientation, position, skew, perspective);
-				glm::vec3 delta_scale = scale / prev_scale;
-				prev_scale = scale;
-
-				for (auto &entity : scene.entities_selected) {
-					auto &t = scene.world.get_component<Transform>(entity);
-
-					t.add_orientation(orientation);
-
-					if (current_gizmo_operation == ImGuizmo::SCALE) {
-						t.scale *= delta_scale;
-					}
-					t.set_changed(true);
-				}
-
-				glm::decompose(temp_matrix, scale, orientation, multi_transform.position, skew, perspective);
-				multi_transform.set_changed(true);
-
-				glm::decompose(temp_matrix, scene.dummy_transform.scale, scene.dummy_transform.orientation,
-						scene.dummy_transform.position, skew, perspective);
-				scene.dummy_transform.set_changed(true);
-				scene.dummy_transform.update_global_model_matrix();
-			} else {
-				glm::decompose(temp_matrix, multi_transform.scale, multi_transform.orientation,
-						multi_transform.position, skew, perspective);
-				multi_transform.set_changed(true);
+			glm::mat4 parent_matrix = glm::mat4(1.0f);
+			if (scene.world.has_component<Parent>(scene.selected_entity)) {
+				auto &parent = scene.world.get_component<Parent>(scene.selected_entity);
+				auto &parent_transform = scene.world.get_component<Transform>(parent.parent);
+				parent_matrix = glm::inverse(parent_transform.get_global_model_matrix());
 			}
+			glm::decompose(parent_matrix * temp_matrix, transform.scale, transform.orientation, transform.position,
+					skew, perspective);
+			transform.set_changed(true);
 		}
 	}
 
@@ -586,16 +556,6 @@ void Editor::imgui_viewport(EditorScene &scene, uint32_t scene_index) {
 		ImGui::OpenPopup("Gizmo Settings");
 	}
 	ImGui::SameLine();
-	// INDIVIDUAL ORIGINS
-	if (use_individual_origins) {
-		ImGui::PushStyleColor(ImGuiCol_Button, active_color);
-		push_count++;
-	}
-	if (ImGui::Button(ICON_MD_TRIP_ORIGIN)) {
-		use_individual_origins = !use_individual_origins;
-	}
-	ImGui::PopStyleColor(push_count);
-	push_count = 0;
 
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 8));
 	if (ImGui::BeginPopup("Gizmo Settings")) {
@@ -722,7 +682,31 @@ void Editor::imgui_content_browser() {
 		if (entry.is_directory()) {
 			entry_texture = folder_texture;
 		}
+		ImGui::PushID(label.c_str());
 		ImGui::ImageButton((ImTextureID)(uint64_t)entry_texture, thumbnail_size_vec2, thumbnail_uv0, thumbnail_uv1);
+		ImGui::PopID();
+
+		if (ImGui::BeginDragDropSource()) {
+			if (extension == ".pfb") {
+				drag_and_drop_path = entry.path().string();
+				SPDLOG_INFO("{}", drag_and_drop_path);
+				// Set payload to carry the index of our item (could be anything)
+				ImGui::SetDragDropPayload("DND_PREFAB_PATH", &drag_and_drop_path, sizeof(std::string));
+
+				// Display preview (could be anything, e.g. when dragging an image we could decide to display
+				// the filename and a small preview of the image, etc.)
+				ImGui::Text("%s", label.c_str());
+			} else if (extension == ".mdl") {
+				drag_and_drop_path = entry.path().string();
+				// Set payload to carry the index of our item (could be anything)
+				ImGui::SetDragDropPayload("DND_MODEL_PATH", &drag_and_drop_path, sizeof(std::string));
+
+				// Display preview (could be anything, e.g. when dragging an image we could decide to display
+				// the filename and a small preview of the image, etc.)
+				ImGui::Text("%s", label.c_str());
+			}
+			ImGui::EndDragDropSource();
+		}
 
 		ImGui::PopStyleColor(3);
 
@@ -749,31 +733,21 @@ void Editor::imgui_content_browser() {
 			if (entry.is_directory()) {
 				content_browser_current_path = entry.path().string();
 			} else {
-				if (extension == ".arc") {
-					SPDLOG_INFO("Creating {} scene", label);
-					create_scene(label, SceneType::Archetype);
-					Scene &scene = get_editor_scene(scenes.size() - 1);
-					World &world = scene.world;
-					std::ifstream file(entry.path());
-					if (file.is_open()) {
-						nlohmann::json archetype_json;
-						file >> archetype_json;
-						world.deserialize_entity_json(archetype_json, scene.entities);
-					} else {
-						SPDLOG_ERROR("Failed to open {} file", label);
-					}
-					file.close();
-				} else if (extension == ".prt") {
+				std::string name = entry.path().filename().string();
+				if (extension == ".scn") {
+					create_scene(name, SceneType::GameScene, entry.path().string());
+				} else if (extension == ".pfb") {
 					if (scenes.empty()) {
-						create_scene(label, SceneType::Prototype, entry.path().string());
+						create_scene(name, SceneType::Prefab, entry.path().string());
 					} else {
 						EditorScene &active_scene = get_active_scene();
-						bool is_archetype_or_prototype =
-								active_scene.type == SceneType::Archetype || active_scene.type == SceneType::Prototype;
-						if (!is_archetype_or_prototype) {
+						bool is_prefab = active_scene.type == SceneType::Prefab;
+						if (!is_prefab) {
 							nlohmann::json entity_json;
 							std::ifstream file(entry.path());
 							file >> entity_json;
+							entity_json.back()["entity"] = 0;
+							SPDLOG_WARN(entity_json.dump(1));
 							active_scene.world.deserialize_entity_json(entity_json.back(), active_scene.entities);
 							file.close();
 						} else {
@@ -781,19 +755,6 @@ void Editor::imgui_content_browser() {
 						}
 					}
 				}
-			}
-		}
-
-		if (extension == ".prt") {
-			if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
-				drag_and_drop_path = entry.path().string();
-				// Set payload to carry the index of our item (could be anything)
-				ImGui::SetDragDropPayload("DND_PROTOTYPE_PATH", &drag_and_drop_path, sizeof(std::string));
-
-				// Display preview (could be anything, e.g. when dragging an image we could decide to display
-				// the filename and a small preview of the image, etc.)
-				ImGui::Text("%s", label.c_str());
-				ImGui::EndDragDropSource();
 			}
 		}
 

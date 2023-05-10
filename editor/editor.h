@@ -25,7 +25,6 @@ public:
 	ImGuizmo::OPERATION current_gizmo_operation = ImGuizmo::TRANSLATE;
 	ImGuizmo::MODE current_gizmo_mode = ImGuizmo::WORLD;
 	bool use_snapping = false;
-	bool use_individual_origins = false;
 	float translation_snap = 1.0f;
 	float rotation_snap = 15.0f;
 	float scale_snap = 10.0f;
@@ -39,6 +38,7 @@ public:
 	// Scenes
 	uint32_t scene_to_delete = 0;
 	bool scene_deletion_queued = false;
+
 	void create_scene(const std::string &name) override;
 	void create_scene(const std::string &name, SceneType type, const std::string &path = "");
 	EditorScene &get_editor_scene(uint32_t index);
@@ -57,6 +57,7 @@ public:
 	// GUI
 	void imgui_menu_bar();
 	void imgui_inspector(EditorScene &scene);
+	void display_entity(EditorScene &scene, Entity entity, const std::string &name);
 	void imgui_scene(EditorScene &scene);
 	void imgui_viewport(EditorScene &scene, uint32_t scene_index);
 	void display_folder(const std::string &path);

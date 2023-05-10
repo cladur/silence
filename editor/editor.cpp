@@ -59,8 +59,6 @@ void default_mappings() {
 	input_manager.add_key_to_action("toggle_gizmo_mode", InputKey::T);
 	input_manager.add_action("toggle_snapping");
 	input_manager.add_key_to_action("toggle_snapping", InputKey::Y);
-	input_manager.add_action("toggle_individual_origins");
-	input_manager.add_key_to_action("toggle_individual_origins", InputKey::U);
 
 	input_manager.add_action("clear_selection");
 	input_manager.add_key_to_action("clear_selection", InputKey::ESCAPE);
@@ -246,13 +244,9 @@ void Editor::custom_update(float dt) {
 			use_snapping = !use_snapping;
 		}
 
-		if (input_manager.is_action_just_pressed("toggle_individual_origins")) {
-			use_individual_origins = !use_individual_origins;
-		}
-
 		if (input_manager.is_action_just_pressed("clear_selection")) {
 			auto editor_scene = dynamic_cast<EditorScene *>(scenes[active_scene].get());
-			get_editor_scene(active_scene).clear_selection();
+			get_editor_scene(active_scene).selected_entity = 0;
 		}
 	}
 
@@ -294,6 +288,8 @@ void Editor::custom_update(float dt) {
 	}
 
 	if (scene_deletion_queued) {
+		EditorScene &scene = get_editor_scene(scene_to_delete);
+		render_manager.render_scenes.erase(render_manager.render_scenes.begin() + scene.render_scene_idx);
 		scenes.erase(scenes.begin() + scene_to_delete);
 		active_scene = 0;
 		scene_deletion_queued = false;
@@ -312,24 +308,22 @@ void Editor::create_scene(const std::string &name, SceneType type, const std::st
 
 	Entity entity;
 
-	switch (type) {
-		case SceneType::GameScene:
-			if (!path.empty()) {
-				scene->load_from_file(path);
-			}
-			break;
-		case SceneType::Archetype:
-			entity = scene->world.create_entity();
-			scene->world.add_component<Transform>(entity, Transform{});
-			scene->entities.push_back(entity);
-			break;
-		case SceneType::Prototype:
-			nlohmann::json serialized_archetype;
-			std::ifstream file(path);
-			file >> serialized_archetype;
-			scene->world.deserialize_entity_json(serialized_archetype.back(), scene->entities);
-			file.close();
-			break;
+	if (!path.empty()) {
+		std::ifstream file(path);
+		nlohmann::json serialized_scene;
+		file >> serialized_scene;
+		serialized_scene.back()["entity"] = 0;
+		scene->world.deserialize_entities_json(serialized_scene, scene->entities);
+		scenes.push_back(std::move(scene));
+		file.close();
+		return;
+	}
+
+	if (type == SceneType::Prefab) {
+		entity = scene->world.create_entity();
+		scene->entities.push_back(entity);
+		scene->world.add_component<Name>(entity, Name{ "New prefab" });
+		scene->world.add_component<Transform>(entity, Transform{});
 	}
 
 	scenes.push_back(std::move(scene));

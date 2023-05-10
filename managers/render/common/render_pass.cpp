@@ -1,5 +1,7 @@
 #include "render_pass.h"
 #include "material.h"
+#include "render/common/framebuffer.h"
+#include "render/common/utils.h"
 #include "render/render_manager.h"
 
 void SkinnedPassUnlit::startup() {
@@ -22,26 +24,6 @@ void SkinnedPassUnlit::draw(RenderScene &scene) {
 	draw_commands.clear();
 }
 
-void UnlitPass::startup() {
-	material.startup();
-}
-
-void UnlitPass::draw(RenderScene &scene) {
-	RenderManager &render_manager = RenderManager::get();
-	material.bind_resources(scene);
-	for (auto &cmd : draw_commands) {
-		ModelInstance &instance = *cmd.model_instance;
-		Transform &transform = *cmd.transform;
-		material.bind_instance_resources(instance, transform);
-		Model &model = render_manager.get_model(instance.model_handle);
-		for (auto &mesh : model.meshes) {
-			material.bind_mesh_resources(mesh);
-			mesh.draw();
-		}
-	}
-	draw_commands.clear();
-}
-
 void PBRPass::startup() {
 	material.startup();
 }
@@ -49,17 +31,7 @@ void PBRPass::startup() {
 void PBRPass::draw(RenderScene &scene) {
 	RenderManager &render_manager = RenderManager::get();
 	material.bind_resources(scene);
-	for (auto &cmd : draw_commands) {
-		ModelInstance &instance = *cmd.model_instance;
-		Transform &transform = *cmd.transform;
-		material.bind_instance_resources(instance, transform);
-		Model &model = render_manager.get_model(instance.model_handle);
-		for (auto &mesh : model.meshes) {
-			material.bind_mesh_resources(mesh);
-			mesh.draw();
-		}
-	}
-	draw_commands.clear();
+	utils::render_quad();
 }
 
 void SkyboxPass::startup() {
@@ -107,6 +79,28 @@ void TransparentPass::startup() {
 
 	glBindVertexArray(0);
 	material.startup();
+}
+
+void GBufferPass::startup() {
+	material.startup();
+}
+
+void GBufferPass::draw(RenderScene &scene) {
+	RenderManager &render_manager = RenderManager::get();
+	material.bind_resources(scene);
+	for (auto &cmd : draw_commands) {
+		ModelInstance &instance = *cmd.model_instance;
+		Transform &transform = *cmd.transform;
+		material.bind_instance_resources(instance, transform);
+		Model &model = render_manager.get_model(instance.model_handle);
+		for (auto &mesh : model.meshes) {
+			if (mesh.fc_bounding_sphere.is_on_frustum(scene.camera.get_frustum(), transform, scene)) {
+				material.bind_mesh_resources(mesh);
+				mesh.draw();
+			}
+		}
+	}
+	draw_commands.clear();
 }
 
 void TransparentPass::draw(RenderScene &scene) {

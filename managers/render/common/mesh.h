@@ -1,7 +1,10 @@
 #ifndef SILENCE_MESH_H
 #define SILENCE_MESH_H
 
+#include "camera/frustum.h"
+#include "mesh_bounding_sphere.h"
 #include "texture.h"
+#include <components/transform_component.h>
 
 struct Shader;
 
@@ -20,13 +23,15 @@ public:
 	std::array<Texture, 4> textures;
 	std::array<bool, 4> textures_present;
 
+	MeshBoundingSphere fc_bounding_sphere;
+
 	bool has_ao_map = false;
 
 	void draw();
 	void setup_mesh();
 	void load_from_asset(const char *path);
 
-	std::vector<glm::vec3> get_position_vertices() const;
+	[[nodiscard]] std::vector<glm::vec3> get_position_vertices() const;
 
 	//  render data
 	unsigned int vao, vbo, ebo;

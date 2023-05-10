@@ -3,12 +3,14 @@
 #include "cvars/cvars.h"
 #include "game/menu_test.h"
 #include "render_manager.h"
+#include <glad/glad.h>
 
 AutoCVarFloat cvar_fov = AutoCVarFloat("render.fov", "field of view", 70.0f);
 AutoCVarFloat cvar_draw_distance("render.draw_distance", "Distance cull", 5000);
+AutoCVarInt cvar_freeze_frustum("render.freeze_frustum", "Freeze frustum", 0, CVarFlags::EditCheckbox);
 
 void RenderScene::startup() {
-	unlit_pass.startup();
+	g_buffer_pass.startup();
 	pbr_pass.startup();
 	skybox_pass.startup();
 	skinned_unlit_pass.startup();
@@ -17,6 +19,7 @@ void RenderScene::startup() {
 	// Size of the viewport doesn't matter here, it will be resized either way
 	render_extent = glm::vec2(100, 100);
 	render_framebuffer.startup(render_extent.x, render_extent.y);
+	g_buffer.startup(render_extent.x, render_extent.y);
 
 	text_draw.current_scene = this;
 	sprite_draw.current_scene = this;
@@ -24,21 +27,61 @@ void RenderScene::startup() {
 
 	debug_draw.startup();
 	transparent_pass.startup();
+
+	camera = Camera(glm::vec3(-4.0f, 2.6f, -4.0f));
+	camera.yaw = 45.0f;
+	camera.pitch = -20.0f;
+	camera.update_camera_vectors();
 }
 
 void RenderScene::draw() {
-	debug_draw.projection = projection;
-	debug_draw.view = view;
+	g_buffer.bind();
+	glViewport(0, 0, (int)render_extent.x, (int)render_extent.y);
 
-	// this just pushes all the elements to be drawn with transparent_pass.draw()
-	// no actual drawing happens here
-	//	sprite_draw.current_scene = this;
-	//	text_draw.current_scene = this;
-	//	ui_draw.current_scene = this;
-	//	ui_draw.draw();
+	// Clear the screen
+	glad_glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	// Update camera
+	camera.set_fov(cvar_fov.get());
+	camera.set_render_distance(0.1f, cvar_draw_distance.get());
+	camera.set_aspect_ratio(render_extent.x / render_extent.y);
+	if (!cvar_freeze_frustum.get()) {
+		camera.build_frustum();
+	}
+
+	projection = glm::perspective(
+			glm::radians(camera.get_fov()), camera.get_aspect_ratio(), camera.get_near(), camera.get_far());
+	view = camera.get_view_matrix();
+	camera_pos = camera.get_position();
+
+	// Enable depth testing
+	glEnable(GL_DEPTH_TEST);
+
+	skinned_unlit_pass.draw(*this);
+	unlit_pass.draw(*this);
+	// unlit_pass.draw(*this);
+	g_buffer_pass.draw(*this);
 
 	render_framebuffer.bind();
-	glViewport(0, 0, (int)render_extent.x, (int)render_extent.y);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	pbr_pass.draw(*this);
+
+	// 2.5. copy content of geometry's depth buffer to default framebuffer's depth buffer
+	// ----------------------------------------------------------------------------------
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, g_buffer.framebuffer_id);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, render_framebuffer.framebuffer_id); // write to default framebuffer
+	// blit to default framebuffer. Note that this may or may not work as the internal formats of both the FBO and
+	// default framebuffer have to match. the internal formats are implementation defined. This works on all of my
+	// systems, but if it doesn't on yours you'll likely have to write to the depth buffer in another shader stage (or
+	// somehow see to match the default framebuffer's internal format with the FBO's internal format).
+	glBlitFramebuffer(0, 0, render_extent.x, render_extent.y, 0, 0, render_extent.x, render_extent.y,
+			GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+	render_framebuffer.bind();
+
+	debug_draw.projection = projection;
+	debug_draw.view = view;
 
 	// Draw grid
 	for (int i = -10; i <= 10; i++) {
@@ -50,21 +93,7 @@ void RenderScene::draw() {
 		debug_draw.draw_line(glm::vec3(-10, 0, i), glm::vec3(10, 0, i), color);
 	}
 
-	// Clear the screen
-	glad_glClearColor(0.275f, 0.275f, 0.275f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	projection = glm::perspective(
-			glm::radians(cvar_fov.get()), render_extent.x / render_extent.y, 0.1f, cvar_draw_distance.get());
-	view = camera.get_view_matrix();
-	camera_pos = camera.get_position();
-
-	// Enable depth testing
-	glEnable(GL_DEPTH_TEST);
-
-	skinned_unlit_pass.draw(*this);
-	unlit_pass.draw(*this);
-	pbr_pass.draw(*this);
+	debug_draw.draw();
 
 	if (draw_skybox) {
 		glDepthFunc(GL_LEQUAL);
@@ -72,18 +101,17 @@ void RenderScene::draw() {
 		glDepthFunc(GL_LESS);
 	}
 
-	debug_draw.draw();
-
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	// ui needs to go last, later to be a different render target
-	//sprite_draw.draw();
+	// sprite_draw.draw();
 	transparent_pass.draw(*this);
 	glDisable(GL_BLEND);
 }
 
 void RenderScene::resize_framebuffer(uint32_t width, uint32_t height) {
 	render_framebuffer.resize(width, height);
+	g_buffer.resize(width, height);
 
 	render_extent = glm::vec2(width, height);
 }
@@ -95,15 +123,15 @@ void RenderScene::queue_draw(ModelInstance *model_instance, Transform *transform
 
 	switch (model_instance->material_type) {
 		case MaterialType::Default: {
-			unlit_pass.draw_commands.push_back(draw_command);
-			break;
-		}
-		case MaterialType::Unlit: {
-			unlit_pass.draw_commands.push_back(draw_command);
+			g_buffer_pass.draw_commands.push_back(draw_command);
 			break;
 		}
 		case MaterialType::PBR: {
-			pbr_pass.draw_commands.push_back(draw_command);
+			g_buffer_pass.draw_commands.push_back(draw_command);
+			break;
+		}
+		default: {
+			g_buffer_pass.draw_commands.push_back(draw_command);
 			break;
 		}
 	}

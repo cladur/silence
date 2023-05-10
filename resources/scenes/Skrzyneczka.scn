@@ -3,7 +3,7 @@
         "components": [
             {
                 "model_instance": {
-                    "material_type": 2,
+                    "material_type": 1,
                     "model_handle": 0
                 }
             },
