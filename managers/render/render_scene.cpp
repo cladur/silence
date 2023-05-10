@@ -138,20 +138,22 @@ void RenderScene::queue_draw(ModelInstance *model_instance, Transform *transform
 	draw_command.model_instance = model_instance;
 	draw_command.transform = transform;
 
-	switch (model_instance->material_type) {
-		case MaterialType::Default: {
-			g_buffer_pass.draw_commands.push_back(draw_command);
-			break;
-		}
-		case MaterialType::PBR: {
-			g_buffer_pass.draw_commands.push_back(draw_command);
-			break;
-		}
-		default: {
-			g_buffer_pass.draw_commands.push_back(draw_command);
-			break;
-		}
-	}
+	g_buffer_pass.draw_commands.push_back(draw_command);
+
+	// switch (model_instance->material_type) {
+	// 	case MaterialType::Default: {
+	// 		g_buffer_pass.draw_commands.push_back(draw_command);
+	// 		break;
+	// 	}
+	// 	case MaterialType::PBR: {
+	// 		g_buffer_pass.draw_commands.push_back(draw_command);
+	// 		break;
+	// 	}
+	// 	default: {
+	// 		g_buffer_pass.draw_commands.push_back(draw_command);
+	// 		break;
+	// 	}
+	// }
 }
 
 void RenderScene::queue_skinned_draw(SkinnedModelInstance *model_instance, Transform *transform) {

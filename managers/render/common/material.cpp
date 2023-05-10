@@ -80,15 +80,15 @@ void MaterialPBR::bind_resources(RenderScene &scene) {
 	// TODO: Use baked brdf lut instead (it's broken atm)
 	glBindTexture(GL_TEXTURE_2D, scene.skybox_pass.skybox.brdf_lut_texture);
 
-	shader.set_vec3("lightPositions[0]", glm::vec3(0.0f, 0.0f, 0.0f));
-	shader.set_vec3("lightPositions[1]", glm::vec3(0.0f, 0.0f, 0.0f));
-	shader.set_vec3("lightPositions[2]", glm::vec3(0.0f, 0.0f, 0.0f));
-	shader.set_vec3("lightPositions[3]", scene.camera_pos);
+	// shader.set_vec3("lightPositions[0]", glm::vec3(0.0f, 0.0f, 0.0f));
+	// shader.set_vec3("lightPositions[1]", glm::vec3(0.0f, 0.0f, 0.0f));
+	// shader.set_vec3("lightPositions[2]", glm::vec3(0.0f, 0.0f, 0.0f));
+	// shader.set_vec3("lightPositions[3]", scene.camera_pos);
 
-	shader.set_vec3("lightColors[0]", glm::vec3(0.0f, 0.0f, 0.0f));
-	shader.set_vec3("lightColors[1]", glm::vec3(0.0f, 0.0f, 0.0f));
-	shader.set_vec3("lightColors[2]", glm::vec3(0.0f, 0.0f, 0.0f));
-	shader.set_vec3("lightColors[3]", glm::vec3(1.0f, 1.0f, 1.0f));
+	// shader.set_vec3("lightColors[0]", glm::vec3(0.0f, 0.0f, 0.0f));
+	// shader.set_vec3("lightColors[1]", glm::vec3(0.0f, 0.0f, 0.0f));
+	// shader.set_vec3("lightColors[2]", glm::vec3(0.0f, 0.0f, 0.0f));
+	// shader.set_vec3("lightColors[3]", glm::vec3(1.0f, 1.0f, 1.0f));
 }
 
 void MaterialPBR::bind_instance_resources(ModelInstance &instance, Transform &transform) {

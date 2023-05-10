@@ -1,6 +1,8 @@
 #include "debug_draw.h"
 
 #include "render/render_manager.h"
+#include <corecrt_math.h>
+#include <glm/geometric.hpp>
 
 const uint32_t MAX_VERTEX_COUNT = 100000;
 
@@ -55,6 +57,114 @@ void DebugDraw::draw() {
 void DebugDraw::draw_line(const glm::vec3 &from, const glm::vec3 &to, const glm::vec3 &color) {
 	vertices.push_back({ from, color });
 	vertices.push_back({ to, color });
+}
+
+void DebugDraw::draw_arrow(const glm::vec3 &from, const glm::vec3 &to, const glm::vec3 &color) {
+	draw_line(from, to, color);
+
+	glm::vec3 part_of_line = (to - from) * 0.2f;
+	float line_length = glm::length(to - from);
+
+	draw_cone(to, to - part_of_line, line_length * 0.05f, color);
+}
+
+void DebugDraw::draw_arrow(const glm::vec3 &from, const glm::vec3 &to, float length, const glm::vec3 &color) {
+	glm::vec3 end_point = from + length * normalize(to - from);
+	draw_line(from, end_point, color);
+
+	glm::vec3 part_of_line = (end_point - from) * 0.2f;
+	float line_length = glm::length(end_point - from);
+	glm::vec3 new_to = end_point - part_of_line;
+
+	draw_cone(end_point, new_to, line_length * 0.05f, color);
+}
+
+void DebugDraw::draw_cone(
+		const glm::vec3 &from, const glm::vec3 &to, float radius, const glm::vec3 &color, int num_of_segments) {
+	glm::vec3 normalized_direction = normalize(to - from);
+	glm::vec3 v1 = normalize(cross(normalized_direction, glm::vec3(0, 0, 1)));
+	if ((v1.x == 0 && v1.y == 0 && v1.z == 0) || (isnan(v1.x) || isnan(v1.y) || isnan(v1.z))) {
+		v1 = normalize(cross(normalized_direction, glm::vec3(1, 0, 0)));
+	}
+	glm::vec3 v2 = normalize(cross(normalized_direction, v1));
+
+	float two_pi = 6.28318530718;
+	float step = two_pi / float(num_of_segments);
+	float current_step = 0.0f;
+	//glm::vec3 new_point;
+
+	glm::vec3 old_point = to + radius * (cos(current_step) * v1 + sin(current_step) * v2);
+	glm::vec3 new_point;
+
+	for (int i = 0; i <= num_of_segments; i++) {
+		current_step = (float)i * step;
+
+		new_point = to + radius * (cos(current_step) * v1 + sin(current_step) * v2);
+
+		draw_line(from, new_point, color);
+
+		old_point = new_point;
+	}
+
+	draw_circle(to, normalized_direction, radius, color, num_of_segments);
+}
+
+void DebugDraw::draw_cone(const glm::vec3 &from, const glm::vec3 &to, float length, float radius,
+		const glm::vec3 &color, int num_of_segments) {
+	glm::vec3 normalized_direction = normalize(to - from);
+	glm::vec3 v1 = normalize(cross(normalized_direction, glm::vec3(0, 0, 1)));
+	if ((v1.x == 0 && v1.y == 0 && v1.z == 0) || (isnan(v1.x) || isnan(v1.y) || isnan(v1.z))) {
+		v1 = normalize(cross(normalized_direction, glm::vec3(1, 0, 0)));
+	}
+	glm::vec3 v2 = normalize(cross(normalized_direction, v1));
+
+	glm::vec3 end_point = from + length * normalized_direction;
+	float two_pi = 6.28318530718;
+	float step = two_pi / float(num_of_segments);
+	float current_step = 0.0f;
+	//glm::vec3 new_point;
+
+	glm::vec3 old_point = end_point + radius * (cos(current_step) * v1 + sin(current_step) * v2);
+	glm::vec3 new_point;
+
+	for (int i = 0; i <= num_of_segments; i++) {
+		current_step = (float)i * step;
+
+		new_point = end_point + radius * (cos(current_step) * v1 + sin(current_step) * v2);
+
+		draw_line(from, new_point, color);
+
+		old_point = new_point;
+	}
+
+	draw_circle(end_point, normalized_direction, radius, color, num_of_segments);
+}
+
+void DebugDraw::draw_circle(
+		const glm::vec3 &center, const glm::vec3 direction, float radius, const glm::vec3 &color, int num_of_segments) {
+	glm::vec3 normalized_direction = normalize(direction);
+	glm::vec3 v1 = normalize(cross(normalized_direction, glm::vec3(0, 0, 1)));
+
+	if ((v1.x == 0 && v1.y == 0 && v1.z == 0) || (isnan(v1.x) || isnan(v1.y) || isnan(v1.z))) {
+		v1 = normalize(cross(normalized_direction, glm::vec3(1, 0, 0)));
+	}
+
+	glm::vec3 v2 = normalize(cross(normalized_direction, v1));
+
+	float two_pi = 6.28318530718;
+	float step = two_pi / float(num_of_segments);
+	float current_step = 0.0f;
+	glm::vec3 old_point = center + radius * (cos(current_step) * v1 + sin(current_step) * v2);
+	glm::vec3 new_point;
+	for (int i = 0; i <= num_of_segments; i++) {
+		current_step = (float)i * step;
+
+		new_point = center + radius * (cos(current_step) * v1 + sin(current_step) * v2);
+
+		draw_line(old_point, new_point, color);
+
+		old_point = new_point;
+	}
 }
 
 // Draw a box with center at "center" and scale "scale".

@@ -13,7 +13,7 @@ uniform samplerCube prefilter_map;
 uniform sampler2D brdf_lut;
 
 // lights
-const int NR_LIGHTS = 4;
+const int NR_LIGHTS = 32;
 uniform vec3 lightPositions[NR_LIGHTS];
 uniform vec3 lightColors[NR_LIGHTS];
 
