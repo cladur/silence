@@ -355,19 +355,21 @@ void Inspector::show_animationinstance() {
 			for (const auto &model : models) {
 				bool is_selected =
 						(animation_instance.animation_handle.id == render_manager.get_animation_handle(model.name).id);
-				std::string model_name = model.name;
-				std::size_t model_slash_pos = model_name.find_last_of("/\\");
 
-				if (model_slash_pos != std::string::npos) {
-					model_name = model_name.substr(model_slash_pos + 1);
-					std::size_t model_dot_pos = model_name.find_last_of('.');
-					if (model_dot_pos != std::string::npos) {
-						model_name = model_name.substr(0, model_dot_pos);
+				auto animation_handle = render_manager.get_animation_handle(model.name);
+				auto animation = render_manager.get_animation(animation_handle);
+				std::string animation_name = animation.name;
+				std::size_t animation_slash_pos = animation_name.find_last_of("/\\");
+				if (animation_slash_pos != std::string::npos) {
+					animation_name = animation_name.substr(animation_slash_pos + 1);
+					std::size_t animation_dot_pos = animation_name.find_last_of('.');
+					if (animation_dot_pos != std::string::npos) {
+						animation_name = animation_name.substr(0, animation_dot_pos);
 					}
 				}
-				if (ImGui::Selectable(model_name.c_str(), is_selected)) {
-					Handle<Animation> new_handle = render_manager.get_animation_handle(model.name);
-					animation_instance.animation_handle = new_handle;
+
+				if (ImGui::Selectable(animation_name.c_str(), is_selected)) {
+					animation_instance.animation_handle = animation_handle;
 				}
 				if (is_selected) {
 					ImGui::SetItemDefaultFocus();
