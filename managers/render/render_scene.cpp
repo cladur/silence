@@ -58,8 +58,6 @@ void RenderScene::draw() {
 	// Enable depth testing
 	glEnable(GL_DEPTH_TEST);
 
-	skinned_unlit_pass.draw(*this);
-	unlit_pass.draw(*this);
 	// unlit_pass.draw(*this);
 	g_buffer_pass.draw(*this);
 
@@ -94,6 +92,7 @@ void RenderScene::draw() {
 	}
 
 	debug_draw.draw();
+	skinned_unlit_pass.draw(*this);
 
 	if (draw_skybox) {
 		glDepthFunc(GL_LEQUAL);

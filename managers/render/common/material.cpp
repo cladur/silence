@@ -26,21 +26,17 @@ void MaterialSkinnedUnlit::bind_resources(RenderScene &scene) {
 
 void MaterialSkinnedUnlit::bind_instance_resources(SkinnedModelInstance &instance, Transform &transform) {
 	shader.set_mat4("model", transform.get_global_model_matrix());
-	GLuint skinningBuffer;
 	//TODO: make this functionality in shader function
-	glGenBuffers(1, &skinningBuffer);
-	glBindBuffer(GL_UNIFORM_BUFFER, skinningBuffer);
+	glBindBuffer(GL_UNIFORM_BUFFER, instance.skinning_buffer);
 	if (!instance.bone_matrices.empty()) {
-		glBufferData(GL_UNIFORM_BUFFER, sizeof(glm::mat4) * 512, instance.bone_matrices.data(), GL_DYNAMIC_DRAW);
-	} else {
-		std::vector<glm::mat4> m(512, glm::mat4(1.0f));
-		glBufferData(GL_UNIFORM_BUFFER, sizeof(glm::mat4) * 512, m.data(), GL_DYNAMIC_DRAW);
+		glBufferSubData(
+				GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4) * instance.bone_matrices.size(), instance.bone_matrices.data());
 	}
 
-	GLuint bindingIndex = 1; // indeks bufora
-	GLuint bufferIndex = glGetUniformBlockIndex(shader.id, "SkinningBuffer");
-	glUniformBlockBinding(shader.id, bufferIndex, bindingIndex);
-	glBindBufferBase(GL_UNIFORM_BUFFER, bindingIndex, skinningBuffer);
+	GLuint binding_index = 1;
+	GLuint buffer_index = glGetUniformBlockIndex(shader.id, "SkinningBuffer");
+	glUniformBlockBinding(shader.id, buffer_index, binding_index);
+	glBindBufferBase(GL_UNIFORM_BUFFER, binding_index, instance.skinning_buffer);
 }
 
 void MaterialSkinnedUnlit::bind_mesh_resources(SkinnedMesh &mesh) {

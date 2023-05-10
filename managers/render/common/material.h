@@ -43,14 +43,6 @@ public:
 	void bind_mesh_resources(SkinnedMesh &mesh);
 };
 
-class MaterialUnlit : public Material {
-public:
-	void startup() override;
-	void bind_resources(RenderScene &scene) override;
-	void bind_instance_resources(ModelInstance &instance, Transform &transform) override;
-	void bind_mesh_resources(Mesh &mesh);
-};
-
 class MaterialPBR : public Material {
 public:
 	void startup() override;

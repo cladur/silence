@@ -10,9 +10,11 @@ public:
 	Handle<SkinnedModel> model_handle;
 	MaterialType material_type = MaterialType::Default;
 	std::vector<glm::mat4> bone_matrices;
+	GLuint skinning_buffer;
 	bool in_shadow_pass = true;
 
 	SkinnedModelInstance();
+	void release();
 	explicit SkinnedModelInstance(const char *path, MaterialType material_type = MaterialType::Default);
 
 	void serialize_json(nlohmann::json &j);

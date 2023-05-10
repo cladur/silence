@@ -6,12 +6,24 @@ SkinnedModelInstance::SkinnedModelInstance() {
 	RenderManager &render_manager = RenderManager::get();
 	model_handle = render_manager.load_skinned_model("scorpion/scorpion.skinmdl");
 	material_type = MaterialType::Default;
+
+	glGenBuffers(1, &skinning_buffer);
+	glBindBuffer(GL_UNIFORM_BUFFER, skinning_buffer);
+	std::vector<glm::mat4> m(512, glm::mat4(1.0f));
+	glBufferData(GL_UNIFORM_BUFFER, sizeof(glm::mat4) * 512, m.data(), GL_DYNAMIC_DRAW);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
 SkinnedModelInstance::SkinnedModelInstance(const char *path, MaterialType material_type) {
 	RenderManager &render_manager = RenderManager::get();
 	model_handle = render_manager.load_skinned_model(path);
 	this->material_type = material_type;
+
+	glGenBuffers(1, &skinning_buffer);
+	glBindBuffer(GL_UNIFORM_BUFFER, skinning_buffer);
+	std::vector<glm::mat4> m(512, glm::mat4(1.0f));
+	glBufferData(GL_UNIFORM_BUFFER, sizeof(glm::mat4) * 512, m.data(), GL_DYNAMIC_DRAW);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
 void SkinnedModelInstance::serialize_json(nlohmann::json &j) {
@@ -41,4 +53,9 @@ void SkinnedModelInstance::deserialize_json(nlohmann::json &j) {
 	//	scale.x = obj["scale"]["x"];
 	//	scale.y = obj["scale"]["y"];
 	//	scale.z = obj["scale"]["z"];
+}
+
+void SkinnedModelInstance::release() {
+	glDeleteBuffers(
+			1, &skinning_buffer); // added this method because destructor is called multiply times when adding to entity
 }
