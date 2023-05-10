@@ -195,14 +195,14 @@ void Inspector::show_skinnedmodelinstance() {
 		}
 
 		float available_width = ImGui::GetContentRegionAvail().x;
-		ImGui::BeginTable("Model Instance", 2);
+		ImGui::BeginTable("Skinned Model Instance", 2);
 		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
 		ImGui::TableNextRow();
 		ImGui::TableSetColumnIndex(0);
 		ImGui::Text("Model");
 		ImGui::TableSetColumnIndex(1);
 		ImGui::SetNextItemWidth(-FLT_MIN);
-		if (ImGui::BeginCombo("##Model", name.c_str())) {
+		if (ImGui::BeginCombo("##Skinned Model", name.c_str())) {
 			for (const auto &model : models) {
 				bool is_selected =
 						(modelinstance.model_handle.id == render_manager.get_skinned_model_handle(model.name).id);
@@ -231,7 +231,7 @@ void Inspector::show_skinnedmodelinstance() {
 		ImGui::Text("Material");
 		ImGui::TableSetColumnIndex(1);
 		ImGui::SetNextItemWidth(-FLT_MIN);
-		if (ImGui::BeginCombo("##Material", magic_enum::enum_name(modelinstance.material_type).data())) {
+		if (ImGui::BeginCombo("##Skinned Material", magic_enum::enum_name(modelinstance.material_type).data())) {
 			for (auto material : magic_enum::enum_values<MaterialType>()) {
 				bool is_selected = (modelinstance.material_type == material);
 				if (ImGui::Selectable(magic_enum::enum_name(material).data(), is_selected)) {
@@ -382,7 +382,7 @@ void Inspector::show_fmodlistener() {
 	if (ImGui::CollapsingHeader("FmodListener", tree_flags)) {
 		remove_component_popup<FmodListener>();
 		float available_width = ImGui::GetContentRegionAvail().x;
-		ImGui::BeginTable("Transform", 2);
+		ImGui::BeginTable("FmodListener", 2);
 		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
 
 		show_text("Listener: ", fmodlistener.listener_id);
@@ -390,7 +390,6 @@ void Inspector::show_fmodlistener() {
 		ImGui::EndTable();
 	}
 }
-
 
 void Inspector::show_camera() {
 	auto &camera = world->get_component<Camera>(selected_entity);
