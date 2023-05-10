@@ -320,7 +320,6 @@ void Editor::create_scene(const std::string &name, SceneType type, const std::st
 		std::ifstream file(path);
 		nlohmann::json serialized_scene;
 		file >> serialized_scene;
-		SPDLOG_WARN(serialized_scene.dump(2));
 		serialized_scene.back()["entity"] = 0;
 		scene->world.deserialize_entities_json(serialized_scene, scene->entities);
 		scenes.push_back(std::move(scene));

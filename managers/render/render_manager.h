@@ -44,6 +44,7 @@ public:
 
 	Model &get_model(Handle<Model> handle);
 	Handle<Model> get_model_handle(std::string name);
+	std::string get_model_name(Handle<Model> handle);
 	std::vector<Model> &get_models();
 };
 
