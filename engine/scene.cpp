@@ -36,6 +36,7 @@ Scene::Scene() {
 	world.register_component<ColliderSphere>();
 	world.register_component<ColliderAABB>();
 	world.register_component<ColliderOBB>();
+	world.register_component<Light>();
 
 	// Systems
 	// TODO: Set update order instead of using default value

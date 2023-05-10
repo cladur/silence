@@ -6,22 +6,22 @@ struct Children {
 	std::uint8_t children_count{};
 	std::array<Entity, MAX_CHILDREN> children{};
 
-	void serialize_json(nlohmann::json &j) {
-		nlohmann::json::object_t obj;
-		obj["children_count"] = children_count;
-		obj["children"] = nlohmann::json::array();
+	void serialize_json(nlohmann::json &serialized_scene) {
+		nlohmann::json::object_t serialized_component;
+		serialized_component["children_count"] = children_count;
+		serialized_component["children"] = nlohmann::json::array();
 		for (int i = 0; i < children_count; i++) {
-			obj["children"].push_back(children[i]);
+			serialized_component["children"].push_back(children[i]);
 		}
-		j.push_back(nlohmann::json::object());
-		j.back()["children"] = obj;
+		serialized_scene.push_back(nlohmann::json::object());
+		serialized_scene.back()["component_data"] = serialized_component;
+		serialized_scene.back()["component_name"] = "Children";
 	}
 
-	void deserialize_json(nlohmann::json &j) {
-		nlohmann::json obj = Serializer::get_data("children", j);
-		children_count = obj["children_count"];
+	void deserialize_json(nlohmann::json &serialized_component) {
+		children_count = serialized_component["children_count"];
 		for (int i = 0; i < children_count; i++) {
-			children[i] = obj["children"][i];
+			children[i] = serialized_component["children"][i];
 		}
 	}
 
