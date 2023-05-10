@@ -288,6 +288,14 @@ void extract_gltf_skinned_vertices(
 			vertices[i].joint[1] = *(dtf + (i * 4) + 1);
 			vertices[i].joint[2] = *(dtf + (i * 4) + 2);
 			vertices[i].joint[3] = *(dtf + (i * 4) + 3);
+		} else if (joint_accessor.type == TINYGLTF_TYPE_VEC4 &&
+				joint_accessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT) {
+			auto *dtf = (uint16_t *)joint_data.data();
+
+			vertices[i].joint[0] = *(dtf + (i * 4) + 0);
+			vertices[i].joint[1] = *(dtf + (i * 4) + 1);
+			vertices[i].joint[2] = *(dtf + (i * 4) + 2);
+			vertices[i].joint[3] = *(dtf + (i * 4) + 3);
 		} else {
 			SPDLOG_ERROR("INVALID JOINT TYPE");
 			assert(false);
@@ -332,28 +340,28 @@ void extract_gltf_animation_nodes(
 
 	const int32_t node_index = channel.target_node;
 	std::string node_name = model.nodes[node_index].name;
-
+	constexpr int32_t SECONDS_TO_MS = 1000;
 	if (transform_accessor.type == TINYGLTF_TYPE_VEC3 &&
 			transform_accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT) {
 		auto *times = (float *)times_data.data();
-		auto *transforms = (float *)times_data.data();
+		auto *transforms = (float *)transform_data.data();
 		node.translation_times.reserve(times_accessor.count);
-		node.translations.reserve(transform_accessor.count);
+		node.translations.reserve(times_accessor.count);
 
-		for (size_t i = 0; i < transform_accessor.count; ++i) {
-			node.translation_times.push_back(times[i]);
+		for (size_t i = 0; i < times_accessor.count; ++i) {
+			node.translation_times.push_back(times[i] * SECONDS_TO_MS);
 			std::array<float, 3> translation = { transforms[i * 3], transforms[i * 3 + 1], transforms[i * 3 + 2] };
 			node.translations.emplace_back(translation);
 		}
 	} else if (transform_accessor.type == TINYGLTF_TYPE_VEC4 &&
 			transform_accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT) {
 		auto *times = (float *)times_data.data();
-		auto *transforms = (float *)times_data.data();
+		auto *transforms = (float *)transform_data.data();
 		node.rotation_times.reserve(times_accessor.count);
-		node.rotations.reserve(transform_accessor.count);
+		node.rotations.reserve(times_accessor.count);
 
-		for (size_t i = 0; i < transform_accessor.count; ++i) {
-			node.rotation_times.push_back(times[i]);
+		for (size_t i = 0; i < times_accessor.count; ++i) {
+			node.rotation_times.push_back(times[i] * SECONDS_TO_MS);
 			std::array<float, 4> translation = { transforms[i * 4], transforms[i * 4 + 1], transforms[i * 4 + 2],
 				transforms[i * 4 + 3] };
 			node.rotations.emplace_back(translation);
@@ -500,20 +508,31 @@ bool extract_gltf_animations(tg::Model &model, tg::Animation &animation, const f
 		if (strcmp(channel.target_path.c_str(), "scale") == 0) { //Skip scale
 			continue;
 		}
-		assets::NodeAnimation node;
 		const int32_t node_index = channel.target_node;
 		std::string node_name = model.nodes[node_index].name;
-		extract_gltf_animation_nodes(channel, animation, model, node);
+		assets::NodeAnimation *node = &nodes[node_index];
+		extract_gltf_animation_nodes(channel, animation, model, *node);
 
-		animation_info.sizes[node_index].translations = node.translations.size() * 3;
-		animation_info.sizes[node_index].translation_times = node.translation_times.size();
-		animation_info.sizes[node_index].rotations = node.rotations.size() * 4;
-		animation_info.sizes[node_index].rotation_times = node.rotation_times.size();
+		if (strcmp(channel.target_path.c_str(), "translation") == 0) {
+			animation_info.sizes[node_index].translations = node->translations.size() * sizeof(glm::vec3);
+			animation_info.sizes[node_index].translation_times = node->translation_times.size() * sizeof(float);
+			full_size += node->translations.size() * sizeof(glm::vec3) + node->translation_times.size() * sizeof(float);
+		} else if (strcmp(channel.target_path.c_str(), "rotation") == 0) {
+			animation_info.sizes[node_index].rotations = node->rotations.size() * sizeof(glm::quat);
+			animation_info.sizes[node_index].rotation_times = node->rotation_times.size() * sizeof(float);
+			full_size += node->rotations.size() * sizeof(glm::quat) + node->rotation_times.size() * sizeof(float);
+		}
+
 		animation_info.node_names[node_index] = node_name;
+	}
 
-		full_size += node.translations.size() * 3 + node.translation_times.size() + node.rotations.size() * 4 +
-				node.rotation_times.size();
-		nodes[node_index] = node;
+	// TODO: Optimize it
+	for (int32_t i = nodes.size() - 1; i >= 0; --i) {
+		if (nodes[i].translations.empty() || nodes[i].rotations.empty()) {
+			nodes.erase(nodes.begin() + i);
+			animation_info.sizes.erase(animation_info.sizes.begin() + i);
+			animation_info.node_names.erase(animation_info.node_names.begin() + i);
+		}
 	}
 
 	if (!model.accessors.empty() && !animation.samplers.empty() &&
@@ -527,7 +546,7 @@ bool extract_gltf_animations(tg::Model &model, tg::Animation &animation, const f
 	animation_info.full_size = full_size;
 	std::string animation_name = animation.name;
 
-	AssetFile new_file = assets::pack_animation(&animation_info, (char *)nodes.data());
+	AssetFile new_file = assets::pack_animation(&animation_info, nodes);
 
 	fs::path animation_path = output_folder / (animation_name + ".anim");
 
@@ -818,7 +837,6 @@ void extract_gltf_skinned_nodes(tinygltf::Model &model, const fs::path &input, c
 		joint_data.id.resize(skin.joints.size());
 		model_info.joint_names.resize(skin.joints.size());
 		for (int32_t i = 0; i < matrices_accessor.count; ++i) {
-			joint_data.id[i] = skin.joints[i];
 			glm::mat4 transform_matrix{};
 			if (matrices_accessor.type == TINYGLTF_TYPE_MAT4 &&
 					matrices_accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT) {
@@ -840,7 +858,7 @@ void extract_gltf_skinned_nodes(tinygltf::Model &model, const fs::path &input, c
 
 			joint_data.translation[i] = translation;
 			joint_data.rotation[i] = rotation;
-
+			joint_data.id[i] = i;
 			model_info.joint_names[i] = model.nodes[skin.joints[i]].name;
 		}
 		break; // Read only first skin, because idk how to use more than one skin, but maybe in the future
@@ -855,6 +873,7 @@ void extract_gltf_skinned_nodes(tinygltf::Model &model, const fs::path &input, c
 	bone_data.rotation.resize(model.nodes.size());
 	model_info.bone_names.resize(model.nodes.size());
 	model_info.bone_parents.resize(model.nodes.size());
+	model_info.bone_children.resize(model.nodes.size());
 	// -1 means that node is root
 	for (int32_t i = 0; i < model.nodes.size(); ++i) {
 		model_info.bone_parents[i] = -1;
@@ -876,8 +895,12 @@ void extract_gltf_skinned_nodes(tinygltf::Model &model, const fs::path &input, c
 					(float)node.rotation[1], (float)node.rotation[2]));
 
 			transform_matrix = translation * rotation;
+		} else if (!node.matrix.empty()) {
+			for (int32_t j = 0; j < node.matrix.size(); j++) {
+				transform_matrix[j / 4][j % 4] = node.matrix[j];
+			}
 		} else {
-			continue;
+			transform_matrix = glm::mat4(1.0f);
 		}
 
 		glm::vec3 place_holder;
@@ -893,6 +916,7 @@ void extract_gltf_skinned_nodes(tinygltf::Model &model, const fs::path &input, c
 		bone_data.translation[i] = translation;
 		bone_data.rotation[i] = rotation;
 		model_info.bone_names[i] = node_name;
+		model_info.bone_children[i] = model.nodes[i].children;
 	}
 	model_info.bone_rotation_buffer_size = bone_data.rotation.size() * sizeof(float) * 4;
 	model_info.bone_translation_buffer_size = bone_data.translation.size() * sizeof(float) * 3;
@@ -907,32 +931,34 @@ void extract_gltf_skinned_nodes(tinygltf::Model &model, const fs::path &input, c
 
 	//for every gltf node that is a root node (no parents), apply the coordinate fixup
 
-	glm::mat4 flip = glm::mat4{ 1.0 };
-	flip[1][1] = -1;
-	glm::mat4 rotation = glm::rotate(glm::mat4(1.0), glm::radians(-180.f), glm::vec3{ 1, 0, 0 });
+	//	glm::mat4 flip = glm::mat4{ 1.0 };
+	//	flip[1][1] = -1;
+	//	glm::mat4 rotation = glm::rotate(glm::mat4(1.0), glm::radians(-180.f), glm::vec3{ 1, 0, 0 });
 
 	for (int32_t i = 0; i < model_info.bone_parents.size(); ++i) {
 		if (model_info.bone_parents[i] == -1) {
-			//no parent, root node
-			glm::vec3 translation = { bone_data.translation[i][0], bone_data.translation[i][1],
-				bone_data.translation[i][2] };
-			glm::quat rotate = { bone_data.rotation[i][0], bone_data.rotation[i][1], bone_data.rotation[i][2],
-				bone_data.rotation[i][3] };
-
-			glm::mat4 matrix = glm::translate(glm::mat4(1.0f), translation) * glm::mat4(rotate);
-			matrix = rotation * (flip * matrix);
-
-			glm::vec3 place_holder;
-			glm::vec4 place_holder2;
-
-			glm::vec3 glm_translation;
-			glm::quat glm_rotation;
-
-			glm::decompose(matrix, place_holder, glm_rotation, glm_translation, place_holder, place_holder2);
-			std::array<float, 3> t = { glm_translation[0], glm_translation[1], glm_translation[2] };
-			std::array<float, 4> r = { glm_rotation[0], glm_rotation[1], glm_rotation[2], glm_rotation[3] };
-			bone_data.translation[i] = t;
-			bone_data.rotation[i] = r;
+			model_info.root = i;
+			break;
+			//			//no parent, root node
+			//			glm::vec3 translation = { bone_data.translation[i][0], bone_data.translation[i][1],
+			//				bone_data.translation[i][2] };
+			//			glm::quat rotate = { bone_data.rotation[i][0], bone_data.rotation[i][1],
+			//bone_data.rotation[i][2], 				bone_data.rotation[i][3] };
+			//
+			//			glm::mat4 matrix = glm::translate(glm::mat4(1.0f), translation) * glm::mat4(rotate);
+			//			matrix = rotation * (flip * matrix);
+			//
+			//			glm::vec3 place_holder;
+			//			glm::vec4 place_holder2;
+			//
+			//			glm::vec3 glm_translation;
+			//			glm::quat glm_rotation;
+			//
+			//			glm::decompose(matrix, place_holder, glm_rotation, glm_translation, place_holder,
+			//place_holder2); 			std::array<float, 3> t = { glm_translation[0], glm_translation[1],
+			//glm_translation[2] }; 			std::array<float, 4> r = { glm_rotation[0], glm_rotation[1],
+			//glm_rotation[2],
+			//glm_rotation[3] }; 			bone_data.translation[i] = t; 			bone_data.rotation[i] = r;
 		}
 	}
 
@@ -1001,7 +1027,7 @@ void extract_gltf_skinned_nodes(tinygltf::Model &model, const fs::path &input, c
 		}
 	}
 
-	assets::AssetFile new_file = assets::pack_model(model_info, (char *)(&bone_data), (char *)(&joint_data));
+	assets::AssetFile new_file = assets::pack_model(model_info, bone_data, joint_data);
 
 	fs::path scene_filepath = (output_folder.parent_path()) / input.stem();
 

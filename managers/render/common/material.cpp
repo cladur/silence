@@ -9,6 +9,7 @@
 
 #include "render/render_manager.h"
 #include "render/render_scene.h"
+#include <glm/gtc/type_ptr.hpp>
 
 void MaterialSkinnedUnlit::startup() {
 	shader.load_from_files(shader_path("skinned_unlit.vert"), shader_path("unlit.frag"));
@@ -24,6 +25,21 @@ void MaterialSkinnedUnlit::bind_resources(RenderScene &scene) {
 
 void MaterialSkinnedUnlit::bind_instance_resources(SkinnedModelInstance &instance, Transform &transform) {
 	shader.set_mat4("model", transform.get_global_model_matrix());
+	GLuint skinningBuffer;
+	//TODO: make this functionality in shader function
+	glGenBuffers(1, &skinningBuffer);
+	glBindBuffer(GL_UNIFORM_BUFFER, skinningBuffer);
+	if (!instance.bone_matrices.empty()) {
+		glBufferData(GL_UNIFORM_BUFFER, sizeof(glm::mat4) * 512, instance.bone_matrices.data(), GL_DYNAMIC_DRAW);
+	} else {
+		std::vector<glm::mat4> m(512, glm::mat4(1.0f));
+		glBufferData(GL_UNIFORM_BUFFER, sizeof(glm::mat4) * 512, m.data(), GL_DYNAMIC_DRAW);
+	}
+
+	GLuint bindingIndex = 1; // indeks bufora
+	GLuint bufferIndex = glGetUniformBlockIndex(shader.id, "SkinningBuffer");
+	glUniformBlockBinding(shader.id, bufferIndex, bindingIndex);
+	glBindBufferBase(GL_UNIFORM_BUFFER, bindingIndex, skinningBuffer);
 }
 
 void MaterialSkinnedUnlit::bind_mesh_resources(SkinnedMesh &mesh) {

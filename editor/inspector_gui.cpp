@@ -35,6 +35,7 @@ void Inspector::show_components() {
 	SHOW_COMPONENT(Children, show_children);
 	SHOW_COMPONENT(ModelInstance, show_modelinstance);
 	SHOW_COMPONENT(SkinnedModelInstance, show_skinnedmodelinstance);
+	SHOW_COMPONENT(AnimationInstance, show_animationinstance);
 	SHOW_COMPONENT(FmodListener, show_fmodlistener);
 	SHOW_COMPONENT(ColliderTag, show_collidertag);
 	SHOW_COMPONENT(StaticTag, show_statictag);
@@ -302,6 +303,58 @@ void Inspector::show_modelinstance() {
 	}
 }
 
+void Inspector::show_animationinstance() {
+	auto &animation_instance = world->get_component<AnimationInstance>(selected_entity);
+	auto models = render_manager.get_skinned_models();
+	if (ImGui::CollapsingHeader("Animation Instance", tree_flags)) {
+		remove_component_popup<ModelInstance>();
+		std::string name = render_manager.get_animation(animation_instance.animation_handle).name;
+		std::size_t last_slash_pos = name.find_last_of("/\\");
+
+		if (last_slash_pos != std::string::npos) {
+			name = name.substr(last_slash_pos + 1);
+			std::size_t dot_pos = name.find_last_of('.');
+			if (dot_pos != std::string::npos) {
+				name = name.substr(0, dot_pos);
+			}
+		}
+
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("Animation Instance", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Animation");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		if (ImGui::BeginCombo("##Animation", name.c_str())) {
+			for (const auto &model : models) {
+				bool is_selected =
+						(animation_instance.animation_handle.id == render_manager.get_animation_handle(model.name).id);
+				std::string model_name = model.name;
+				std::size_t model_slash_pos = model_name.find_last_of("/\\");
+
+				if (model_slash_pos != std::string::npos) {
+					model_name = model_name.substr(model_slash_pos + 1);
+					std::size_t model_dot_pos = model_name.find_last_of('.');
+					if (model_dot_pos != std::string::npos) {
+						model_name = model_name.substr(0, model_dot_pos);
+					}
+				}
+				if (ImGui::Selectable(model_name.c_str(), is_selected)) {
+					Handle<Animation> new_handle = render_manager.get_animation_handle(model.name);
+					animation_instance.animation_handle = new_handle;
+				}
+				if (is_selected) {
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+			ImGui::EndCombo();
+		}
+		ImGui::EndTable();
+	}
+}
+
 void Inspector::show_fmodlistener() {
 	auto &fmodlistener = world->get_component<FmodListener>(selected_entity);
 	if (ImGui::CollapsingHeader("FmodListener", tree_flags)) {
@@ -491,6 +544,7 @@ void Inspector::show_add_component() {
 			SHOW_ADD_COMPONENT(Children);
 			SHOW_ADD_COMPONENT(ModelInstance);
 			SHOW_ADD_COMPONENT(SkinnedModelInstance);
+			SHOW_ADD_COMPONENT(AnimationInstance);
 			SHOW_ADD_COMPONENT(FmodListener);
 			SHOW_ADD_COMPONENT(ColliderTag);
 			SHOW_ADD_COMPONENT(StaticTag);

@@ -27,7 +27,7 @@ struct AnimationInfo {
 };
 
 AnimationInfo read_animation_info(AssetFile *file);
-assets::AssetFile pack_animation(AnimationInfo *info, char *node_data);
+assets::AssetFile pack_animation(AnimationInfo *info, std::vector<assets::NodeAnimation> &nodes);
 void unpack_animation(AnimationInfo *info, const char *source_buffer, std::vector<assets::NodeAnimation> &nodes);
 
 } //namespace assets

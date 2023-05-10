@@ -32,7 +32,7 @@ add_library(${OPENGL_MANAGER_NAME} STATIC
         transparent_elements/ui_draw.cpp transparent_elements/ui_draw.h
         common/animation.cpp common/animation.h
         common/channel.cpp common/channel.h
-        ecs/animation_system.h ecs/animation_system.cpp ecs/skinned_model_instance.cpp ecs/skinned_model_instance.h)
+        ecs/animation_system.h ecs/animation_system.cpp ecs/skinned_model_instance.cpp ecs/skinned_model_instance.h ecs/animation_instance.cpp ecs/animation_instance.h)
 
 
 # Include directories

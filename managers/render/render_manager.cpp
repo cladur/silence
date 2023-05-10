@@ -150,15 +150,49 @@ void RenderManager::load_texture(const char *path) {
 Model &RenderManager::get_model(Handle<Model> handle) {
 	return models[handle.id];
 }
+
 std::vector<Model> &RenderManager::get_models() {
 	return models;
 }
+
 Handle<Model> RenderManager::get_model_handle(std::string name) {
 	bool found_asset_path = name.find(ASSET_PATH) != std::string::npos;
 	if (found_asset_path) {
 		name = remove_asset_path(name);
 	}
 	return name_to_model[name];
+}
+
+Handle<Animation> RenderManager::load_animation(const char *path) {
+	if (name_to_animation.find(path) != name_to_animation.end()) {
+		return name_to_animation[path];
+	}
+
+	Animation animation = {};
+	animation.load_from_asset(asset_path(path).c_str());
+
+	animations.push_back(animation);
+	Handle<Animation> handle = {};
+	handle.id = animations.size() - 1;
+
+	name_to_animation[path] = handle;
+	return handle;
+}
+
+Animation &RenderManager::get_animation(Handle<Animation> handle) {
+	return animations[handle.id];
+}
+
+Handle<Animation> RenderManager::get_animation_handle(std::string name) {
+	bool found_asset_path = name.find(ASSET_PATH) != std::string::npos;
+	if (found_asset_path) {
+		name = remove_asset_path(name);
+	}
+	return name_to_animation[name];
+}
+
+std::vector<Animation> &RenderManager::get_animations() {
+	return animations;
 }
 
 SkinnedModel &RenderManager::get_skinned_model(Handle<SkinnedModel> handle) {

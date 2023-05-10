@@ -11,9 +11,7 @@ assets::AnimationInfo assets::read_animation_info(assets::AssetFile *file) {
 	info.full_size = metadata["full_size"];
 	info.original_file = metadata["original_file"];
 	info.duration_seconds = metadata["duration_seconds"];
-	for (auto &[key, value] : metadata["node_names"].items()) {
-		info.node_names.push_back(value[1]);
-	}
+	info.node_names = metadata["node_names"].get<std::vector<std::string>>();
 
 	std::vector<nlohmann::json> channels = metadata["channels"];
 	info.sizes.resize(channels.size());
@@ -27,7 +25,7 @@ assets::AnimationInfo assets::read_animation_info(assets::AssetFile *file) {
 	return info;
 }
 
-assets::AssetFile assets::pack_animation(assets::AnimationInfo *info, char *node_data) {
+assets::AssetFile assets::pack_animation(assets::AnimationInfo *info, std::vector<assets::NodeAnimation> &nodes) {
 	AssetFile file;
 	file.type[0] = 'A';
 	file.type[1] = 'N';
@@ -44,20 +42,38 @@ assets::AssetFile assets::pack_animation(assets::AnimationInfo *info, char *node
 	metadata["original_file"] = info->original_file;
 	nlohmann::json channels;
 	size_t actual_offset = 0;
-	for (auto &node : info->sizes) {
+	for (int32_t i = 0; i < info->sizes.size(); ++i) {
 		nlohmann::json channel;
-		channel["translation"] = node.translations;
-		channel["rotation"] = node.rotations;
-		channel["translation_times"] = node.translation_times;
-		channel["rotation_times"] = node.rotation_times;
+		channel["translation"] = info->sizes[i].translations;
+		channel["rotation"] = info->sizes[i].rotations;
+		channel["translation_times"] = info->sizes[i].translation_times;
+		channel["rotation_times"] = info->sizes[i].rotation_times;
 
 		channels.push_back(channel);
-		size_t node_size = node.translations + node.translation_times + node.rotations + node.rotation_times;
 
 		//copy node data
-		memcpy(merged_buffer.data() + actual_offset, node_data, node_size);
-		actual_offset += node_size;
+		memcpy(merged_buffer.data() + actual_offset, nodes[i].translations.data(), info->sizes[i].translations);
+		actual_offset += info->sizes[i].translations;
+
+		memcpy(merged_buffer.data() + actual_offset, nodes[i].translation_times.data(),
+				info->sizes[i].translation_times);
+		actual_offset += info->sizes[i].translation_times;
+
+		memcpy(merged_buffer.data() + actual_offset, nodes[i].rotations.data(), info->sizes[i].rotations);
+		actual_offset += info->sizes[i].rotations;
+
+		memcpy(merged_buffer.data() + actual_offset, nodes[i].rotation_times.data(), info->sizes[i].rotation_times);
+		actual_offset += info->sizes[i].rotation_times;
+		// Once I've got a bug that appears in CaesiumMan.gltf, last value of rotation_times was wrong after load but
+		// before save it was correct
+		//		float z = 0;
+		//		memcpy(&z, merged_buffer.data() + (actual_offset - 4), sizeof(float));
+		//		SPDLOG_INFO("{}", z);
+		//		for (auto &n : nodes[i].rotation_times) {
+		//			SPDLOG_INFO("{}", n);
+		//		}
 	}
+	//	SPDLOG_INFO("{} {}", actual_offset, info->full_size);
 
 	metadata["channels"] = channels;
 	metadata["duration_seconds"] = info->duration_seconds;
@@ -88,24 +104,33 @@ void assets::unpack_animation(
 	LZ4_decompress_safe(source_buffer, decompressed_buffer.data(), static_cast<int>(info->full_size),
 			static_cast<int>(decompressed_buffer.size()));
 
+	nodes.resize(info->sizes.size());
 	size_t actual_offset = 0;
 	for (int32_t i = 0; i < info->sizes.size(); ++i) {
-		nodes[i].rotations.resize(info->sizes[i].rotations);
-		memcpy(nodes[i].rotations.data(), decompressed_buffer.data() + actual_offset, nodes[i].rotations.size());
-		actual_offset += nodes[i].rotations.size();
+		nodes[i].translations.resize(info->sizes[i].translations / sizeof(glm::vec3));
+		memcpy(nodes[i].translations.data(), decompressed_buffer.data() + actual_offset, info->sizes[i].translations);
+		actual_offset += info->sizes[i].translations;
 
-		nodes[i].translations.resize(info->sizes[i].translations);
-		memcpy(nodes[i].translations.data(), decompressed_buffer.data() + actual_offset, nodes[i].translations.size());
-		actual_offset += nodes[i].translations.size();
-
-		nodes[i].translation_times.resize(info->sizes[i].translation_times);
+		nodes[i].translation_times.resize(info->sizes[i].translation_times / sizeof(float));
 		memcpy(nodes[i].translation_times.data(), decompressed_buffer.data() + actual_offset,
-				nodes[i].translation_times.size());
-		actual_offset += nodes[i].translation_times.size();
+				info->sizes[i].translation_times);
+		actual_offset += info->sizes[i].translation_times;
 
-		nodes[i].rotation_times.resize(info->sizes[i].rotation_times);
+		nodes[i].rotations.resize(info->sizes[i].rotations / sizeof(glm::quat));
+		memcpy(nodes[i].rotations.data(), decompressed_buffer.data() + actual_offset, info->sizes[i].rotations);
+		actual_offset += info->sizes[i].rotations;
+
+		nodes[i].rotation_times.resize(info->sizes[i].rotation_times / sizeof(float));
 		memcpy(nodes[i].rotation_times.data(), decompressed_buffer.data() + actual_offset,
-				nodes[i].rotation_times.size());
-		actual_offset += nodes[i].rotation_times.size();
+				info->sizes[i].rotation_times);
+		actual_offset += info->sizes[i].rotation_times;
+		// Once I've got a bug that appears in CaesiumMan.gltf, last value of rotation_times was wrong after load but
+		// before save it was correct
+		//		float z = 0;
+		//		memcpy(&z, decompressed_buffer.data() + (actual_offset - 4), sizeof(float));
+		//		SPDLOG_INFO("{}", z);
+		//		for (auto &n : nodes[i].rotation_times) {
+		//			SPDLOG_INFO("{}", n);
+		//		}
 	}
 }

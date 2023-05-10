@@ -4,7 +4,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
-class Bone {
+class OldJoint {
 public:
 	int32_t id;
 

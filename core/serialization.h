@@ -14,6 +14,7 @@
 #include "components/static_tag_component.h"
 #include "components/transform_component.h"
 
+#include "managers/render/ecs/animation_instance.h"
 #include "managers/render/ecs/model_instance.h"
 #include "managers/render/ecs/skinned_model_instance.h"
 
@@ -29,8 +30,8 @@ concept Deserializable = requires(T t, nlohmann::json &j) {
 	{ t.deserialize_json(j) };
 };
 
-typedef std::variant<Children, Parent, Transform, RigidBody, FmodListener, Gravity, ModelInstance, SkinnedModelInstance,
-		Name, ColliderTag, StaticTag, ColliderSphere, ColliderAABB, ColliderOBB>
+typedef std::variant<Children, Parent, Transform, RigidBody, FmodListener, Gravity, ModelInstance, AnimationInstance,
+		SkinnedModelInstance, Name, ColliderTag, StaticTag, ColliderSphere, ColliderAABB, ColliderOBB>
 		variant_type;
 
 template <typename T>

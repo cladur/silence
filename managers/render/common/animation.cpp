@@ -31,7 +31,7 @@ int32_t Animation::get_ticks_per_second() const {
 	return ticks_per_second;
 }
 
-double Animation::get_duration() const {
+float Animation::get_duration() const {
 	return duration_ms;
 }
 

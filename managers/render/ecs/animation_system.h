@@ -3,8 +3,15 @@
 
 #include "ecs/systems/base_system.h"
 class Animation;
-class SkinnedModel;
-class Rig;
+class SkinnedModelInstance;
+class Bone;
+
+struct AnimData {
+	Animation *animation;
+	SkinnedModelInstance *model;
+	float current_time;
+};
+
 class AnimationSystem : public BaseSystem {
 public:
 	void startup(World &world) override;
@@ -12,24 +19,10 @@ public:
 
 	const int32_t MAX_BONE_COUNT = 512;
 
-	explicit AnimationSystem(Animation &animation, SkinnedModel &model);
+	void update_animation(AnimData &data, float dt);
 
-	void update_animation(float dt);
-
-	void change_animation(Animation *animation);
-
-	void change_model(SkinnedModel *model);
-
-	void calculate_bone_transform();
-
-	const std::vector<glm::mat4> &get_bone_matrices() const;
-
-private:
-	std::vector<glm::mat4> bone_matrices;
-	Animation *current_animation;
-	SkinnedModel *current_model;
-	float current_time;
-	float delta_time = 0.0f;
+	void calculate_bone_transform(AnimData &data, const Bone &bone, const glm::mat4 &parent_transform);
+	std::unordered_map<Entity, AnimData> animation_map;
 };
 
 #endif //SILENCE_ANIMATOR_H

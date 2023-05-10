@@ -1,7 +1,7 @@
 #ifndef SILENCE_BONE_H
 #define SILENCE_BONE_H
 
-#include "animation_asset.h"
+#include "assets/animation_asset.h"
 
 struct KeyPosition {
 	//	uint16_t position[3];
@@ -28,14 +28,14 @@ public:
 	int32_t get_position_index(float animation_time);
 	int32_t get_rotation_index(float animation_time);
 
+	std::vector<KeyPosition> positions;
+	std::vector<KeyRotation> rotations;
+
 private:
 	float get_scale_factor(float last_time_stamp, float next_time_stamp, float animation_time);
 
 	glm::mat4 interpolate_position(float animation_time);
 	glm::mat4 interpolate_rotation(float animation_time);
-
-	std::vector<KeyPosition> positions;
-	std::vector<KeyRotation> rotations;
 
 	glm::mat4 local_transform;
 	std::string bone_name;

@@ -7,7 +7,7 @@
 Channel::Channel(const assets::NodeAnimation &node, std::string bone_name, int32_t id) :
 		bone_name(std::move(bone_name)), id(id), local_transform(1.0f) {
 	positions.reserve(node.translations.size());
-	for (int32_t position_index = 0; position_index < node.translations.size(); ++position_index) {
+	for (int32_t position_index = 0; position_index < node.translation_times.size(); ++position_index) {
 		glm::vec3 pos = { node.translations[position_index][0], node.translations[position_index][1],
 			node.translations[position_index][2] };
 
@@ -26,12 +26,13 @@ Channel::Channel(const assets::NodeAnimation &node, std::string bone_name, int32
 	}
 
 	rotations.reserve(node.rotations.size());
-	for (int32_t rotation_index = 0; rotation_index < node.rotations.size(); ++rotation_index) {
-		glm::quat rot = { node.rotations[rotation_index][0], node.rotations[rotation_index][1],
-			node.rotations[rotation_index][2], node.rotations[rotation_index][3] };
+	for (int32_t rotation_index = 0; rotation_index < node.rotation_times.size(); ++rotation_index) {
+		// w x y z
+		glm::quat rot = { node.rotations[rotation_index][3], node.rotations[rotation_index][0],
+			node.rotations[rotation_index][1], node.rotations[rotation_index][2] };
 		//		uint16_t rot[3];
 		//		Bone::quat_to_uint16(glm_rot, rot);
-		float time_stamp = node.translation_times[rotation_index];
+		float time_stamp = node.rotation_times[rotation_index];
 
 		KeyRotation data{};
 
@@ -64,6 +65,8 @@ int32_t Channel::get_position_index(float animation_time) {
 			return index;
 		}
 	}
+	SPDLOG_WARN("Position index not found");
+	assert(false);
 	return 0;
 }
 
@@ -73,6 +76,8 @@ int32_t Channel::get_rotation_index(float animation_time) {
 			return index;
 		}
 	}
+	SPDLOG_WARN("Rotation index not found");
+	assert(false);
 	return 0;
 }
 

@@ -21,6 +21,7 @@ private:
 	void show_parent();
 	void show_children();
 	void show_skinnedmodelinstance();
+	void show_animationinstance();
 	void show_modelinstance();
 	void show_fmodlistener();
 	void show_collidertag();

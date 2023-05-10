@@ -4,7 +4,7 @@
 
 SkinnedModelInstance::SkinnedModelInstance() {
 	RenderManager &render_manager = RenderManager::get();
-	model_handle = render_manager.load_skinned_model("scorpion/scorpion_walk.skinmdl");
+	model_handle = render_manager.load_skinned_model("scorpion/scorpion.skinmdl");
 	material_type = MaterialType::Default;
 }
 

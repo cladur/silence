@@ -34,11 +34,11 @@ void SkinnedMesh::setup_mesh() {
 	// vertex texture coords
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(SkinnedMeshVertex), (void *)offsetof(SkinnedMeshVertex, uv));
-	// vertex texture coords
+	// vertex weights
 	glEnableVertexAttribArray(3);
 	glVertexAttribPointer(
 			3, 4, GL_FLOAT, GL_FALSE, sizeof(SkinnedMeshVertex), (void *)offsetof(SkinnedMeshVertex, weight));
-	// vertex texture coords
+	// vertex bone_ids
 	glEnableVertexAttribArray(4);
 	glVertexAttribIPointer(4, 4, GL_INT, sizeof(SkinnedMeshVertex), (void *)offsetof(SkinnedMeshVertex, joint_id));
 
@@ -101,6 +101,11 @@ void SkinnedMesh::load_from_asset(const char *path) {
 	for (size_t i = 0; i < indices.size(); i++) {
 		indices[i] = unpacked_indices[i];
 	}
+
+	//	for (auto &s : vertices) {
+	//		SPDLOG_INFO("w {} {} {} {}", s.weight[0], s.weight[1], s.weight[2], s.weight[3]);
+	//		SPDLOG_INFO("i {} {} {} {}", s.joint_id[0], s.joint_id[1], s.joint_id[2], s.joint_id[3]);
+	//	}
 
 	setup_mesh();
 

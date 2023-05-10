@@ -1,6 +1,0 @@
-#ifndef SILENCE_ANIMATION_COMPONENT_H
-#define SILENCE_ANIMATION_COMPONENT_H
-
-struct AnimationComponent {};
-
-#endif //SILENCE_ANIMATION_COMPONENT_H

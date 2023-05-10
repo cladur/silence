@@ -17,7 +17,7 @@ const int MAX_BONES = 512;
 const int MAX_BONE_INFLUENCE = 4;
 layout (binding = 1) uniform SkinningBuffer
 {
-    mat4 bones[512];
+    mat4 bones[MAX_BONES];
 } skin;
 
 void main() {
@@ -31,7 +31,7 @@ void main() {
     {
         if (aWeights[i] > 0.0f && aBoneIds[i] < MAX_BONES)
         {
-            mat4 bone = mat4(1.0f);
+            mat4 bone = skin.bones[aBoneIds[i]];
             float weight = aWeights[i];
 
             skinned_pos += (bone * pos) * weight;

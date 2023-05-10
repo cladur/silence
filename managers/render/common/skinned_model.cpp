@@ -5,6 +5,7 @@
 
 #include "managers/render/render_manager.h"
 
+//TODO: Remove rig
 void SkinnedModel::load_from_asset(const char *path) {
 	name = path;
 
@@ -13,48 +14,53 @@ void SkinnedModel::load_from_asset(const char *path) {
 	assets::AssetFile file;
 	bool loaded = assets::load_binary_file(path, file);
 	if (!loaded) {
-		SPDLOG_ERROR("Error when loading model file at path {}", path);
+		SPDLOG_ERROR("Error when loading info file at path {}", path);
 		assert(false);
 	} else {
 		SPDLOG_INFO("Model {} loaded to cache", path);
 	}
 
-	assets::SkinnedModelInfo model = assets::read_skinned_model_info(&file);
+	assets::SkinnedModelInfo info = assets::read_skinned_model_info(&file);
 
-	rig.parents = model.bone_parents;
-	rig.names = model.bone_names;
+	rig.children = info.bone_children;
 
-	std::vector<glm::vec3> translations(model.bone_translation_buffer_size / sizeof(glm::vec3));
-	std::vector<glm::quat> rotations(model.bone_rotation_buffer_size / sizeof(glm::vec4));
+	rig.parents = info.bone_parents;
+	rig.names = info.bone_names;
 
-	memcpy(translations.data(), file.binary_blob.data(), model.bone_translation_buffer_size);
-	memcpy(rotations.data(), file.binary_blob.data() + model.bone_translation_buffer_size,
-			model.bone_rotation_buffer_size);
+	std::vector<glm::vec3> translations(info.bone_translation_buffer_size / sizeof(glm::vec3));
+	std::vector<glm::quat> rotations(info.bone_rotation_buffer_size / sizeof(glm::quat));
+
+	memcpy(translations.data(), file.binary_blob.data(), info.bone_translation_buffer_size);
+	memcpy(rotations.data(), file.binary_blob.data() + info.bone_translation_buffer_size,
+			info.bone_rotation_buffer_size);
 	rig.positions = translations;
 	rig.rotations = rotations;
 
-	std::vector<glm::vec3> joint_translations(model.joint_translation_buffer_size / sizeof(glm::vec3));
-	std::vector<glm::quat> joint_rotations(model.joint_rotation_buffer_size / sizeof(glm::vec4));
-	std::vector<int32_t> joint_ids(model.joint_id_buffer_size / sizeof(int32_t));
+	std::vector<glm::vec3> joint_translations(info.joint_translation_buffer_size / sizeof(glm::vec3));
+	std::vector<glm::quat> joint_rotations(info.joint_rotation_buffer_size / sizeof(glm::quat));
+	std::vector<int32_t> joint_ids(info.joint_id_buffer_size / sizeof(int32_t));
 
-	size_t rig_size = model.bone_translation_buffer_size + model.bone_rotation_buffer_size;
-	memcpy(joint_translations.data(), file.binary_blob.data() + rig_size, model.joint_translation_buffer_size);
-	memcpy(joint_rotations.data(), file.binary_blob.data() + rig_size + model.joint_translation_buffer_size,
-			model.joint_rotation_buffer_size);
+	size_t rig_size = info.bone_translation_buffer_size + info.bone_rotation_buffer_size;
+	memcpy(joint_translations.data(), file.binary_blob.data() + rig_size, info.joint_translation_buffer_size);
+	memcpy(joint_rotations.data(), file.binary_blob.data() + rig_size + info.joint_translation_buffer_size,
+			info.joint_rotation_buffer_size);
 	memcpy(joint_ids.data(),
-			file.binary_blob.data() + rig_size + model.joint_translation_buffer_size + model.joint_rotation_buffer_size,
-			model.joint_id_buffer_size);
+			file.binary_blob.data() + rig_size + info.joint_translation_buffer_size + info.joint_rotation_buffer_size,
+			info.joint_id_buffer_size);
 
-	for (int32_t i = 0; i < model.joint_names.size(); ++i) {
-		joint_map[model.joint_names[i]].rotation = joint_rotations[i];
-		joint_map[model.joint_names[i]].translation = joint_translations[i];
-		joint_map[model.joint_names[i]].id = joint_ids[i];
+	for (int32_t i = 0; i < info.joint_names.size(); ++i) {
+		joint_map[info.joint_names[i]].rotation = joint_rotations[i];
+		joint_map[info.joint_names[i]].translation = joint_translations[i];
+		joint_map[info.joint_names[i]].id = joint_ids[i];
 	}
 
-	std::vector<SkinnedMesh> model_renderables;
-	model_renderables.reserve(model.node_meshes.size());
+	root = Bone{};
+	process_bone(info.root, root);
 
-	for (auto &[k, v] : model.node_meshes) {
+	std::vector<SkinnedMesh> model_renderables;
+	model_renderables.reserve(info.node_meshes.size());
+
+	for (auto &[k, v] : info.node_meshes) {
 		//load mesh
 
 		SkinnedMesh mesh{};
@@ -113,5 +119,21 @@ void SkinnedModel::load_from_asset(const char *path) {
 		}
 
 		meshes.push_back(mesh);
+	}
+	rig.children.clear();
+	rig.rotations.clear();
+	rig.positions.clear();
+	rig.names.clear();
+	rig.parents.clear();
+}
+
+void SkinnedModel::process_bone(int32_t bone_index, Bone &bone) {
+	bone.name = rig.names[bone_index];
+	bone.translation = rig.positions[bone_index];
+	bone.rotation = rig.rotations[bone_index];
+	bone.children.reserve(rig.children[bone_index].size());
+	for (int32_t i = 0; i < rig.children[bone_index].size(); ++i) {
+		bone.children.emplace_back();
+		process_bone(rig.children[bone_index][i], bone.children[i]);
 	}
 }
