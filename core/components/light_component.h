@@ -5,7 +5,7 @@ enum LightType { POINT_LIGHT, DIRECTIONAL_LIGHT, SPOT_LIGHT };
 
 struct Light {
 public:
-	glm::vec4 color{};
+	glm::vec3 color{};
 	LightType type = POINT_LIGHT;
 
 	void serialize_json(nlohmann::json &serialized_scene) {
@@ -14,7 +14,6 @@ public:
 		serialized_component["color"]["r"] = color.r;
 		serialized_component["color"]["g"] = color.g;
 		serialized_component["color"]["b"] = color.b;
-		serialized_component["color"]["a"] = color.a;
 		serialized_component["type"] = type;
 		serialized_scene.push_back(nlohmann::json::object());
 		serialized_scene.back()["component_data"] = serialized_component;
@@ -25,7 +24,6 @@ public:
 		color.r = serialized_component["color"]["r"];
 		color.g = serialized_component["color"]["g"];
 		color.b = serialized_component["color"]["b"];
-		color.a = serialized_component["color"]["a"];
 		type = serialized_component["type"];
 	}
 };

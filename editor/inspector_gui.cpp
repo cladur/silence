@@ -3,6 +3,7 @@
 #include "components/collider_sphere.h"
 #include "components/collider_tag_component.h"
 #include "components/fmod_listener_component.h"
+#include "components/light_component.h"
 #include "components/rigidbody_component.h"
 #include "render/ecs/model_instance.h"
 #include <imgui.h>
@@ -43,6 +44,7 @@ void Inspector::show_components() {
 	SHOW_COMPONENT(ColliderSphere, show_collidersphere);
 	SHOW_COMPONENT(ColliderAABB, show_collideraabb);
 	SHOW_COMPONENT(ColliderOBB, show_colliderobb);
+	SHOW_COMPONENT(Light, show_light);
 
 	for (int i = 0; i < remove_component_queue.size(); i++) {
 		auto [entity, component_to_remove] = remove_component_queue.front();
@@ -350,6 +352,37 @@ void Inspector::show_colliderobb() {
 		ImGui::EndTable();
 	}
 }
+void Inspector::show_light() {
+	auto &light = world->get_component<Light>(selected_entity);
+	if (ImGui::CollapsingHeader("Light", tree_flags)) {
+		remove_component_popup<Light>();
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("Light", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+
+		show_vec3("Color", light.color);
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Light type");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		if (ImGui::BeginCombo("##Light type", magic_enum::enum_name(light.type).data())) {
+			for (auto type : magic_enum::enum_values<LightType>()) {
+				bool is_selected = (light.type == type);
+				if (ImGui::Selectable(magic_enum::enum_name(type).data(), is_selected)) {
+					light.type = type;
+				}
+				if (is_selected) {
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+			ImGui::EndCombo();
+		}
+		ImGui::EndTable();
+	}
+}
+
 bool Inspector::show_vec3(const char *label, glm::vec3 &vec3, float speed, float reset_value) {
 	bool changed = false;
 
@@ -458,6 +491,7 @@ void Inspector::show_add_component() {
 			SHOW_ADD_COMPONENT(ColliderSphere);
 			SHOW_ADD_COMPONENT(ColliderAABB);
 			SHOW_ADD_COMPONENT(ColliderOBB);
+			SHOW_ADD_COMPONENT(Light);
 
 			ImGui::EndPopup();
 		}
