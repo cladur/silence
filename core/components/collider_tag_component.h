@@ -3,14 +3,15 @@
 
 // This component is intentionally empty because it is only for recognize that entity has collision component
 struct ColliderTag {
-	void serialize_json(nlohmann::json &j) {
-		nlohmann::json::object_t obj;
-		j.push_back(nlohmann::json::object());
-		j.back()["collider_tag"] = obj;
+	void serialize_json(nlohmann::json &serialized_scene) {
+		nlohmann::json::object_t serialized_component;
+		serialized_scene.push_back(nlohmann::json::object());
+		serialized_scene.back()["component_data"] = serialized_component;
+		serialized_scene.back()["component_name"] = "ColliderTag";
 	}
 
-	void deserialize_json(nlohmann::json &j) {
-		nlohmann::json obj = Serializer::get_data("collider_tag", j);
+	void deserialize_json(nlohmann::json &serialized_component) {
+		
 	}
 };
 

@@ -285,6 +285,14 @@ void Editor::custom_update(float dt) {
 			scene.update(dt);
 		}
 		imgui_viewport(scene, i);
+
+		if (!scene.entity_deletion_queue.empty()) {
+			Entity entity_to_remove = scene.entity_deletion_queue.front();
+			scene.entity_deletion_queue.pop();
+			scene.entities.erase(
+					std::remove(scene.entities.begin(), scene.entities.end(), entity_to_remove), scene.entities.end());
+			w.destroy_entity(entity_to_remove);
+		}
 	}
 
 	if (scene_deletion_queued) {
@@ -312,6 +320,7 @@ void Editor::create_scene(const std::string &name, SceneType type, const std::st
 		std::ifstream file(path);
 		nlohmann::json serialized_scene;
 		file >> serialized_scene;
+		SPDLOG_WARN(serialized_scene.dump(2));
 		serialized_scene.back()["entity"] = 0;
 		scene->world.deserialize_entities_json(serialized_scene, scene->entities);
 		scenes.push_back(std::move(scene));

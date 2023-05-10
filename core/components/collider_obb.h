@@ -6,43 +6,43 @@ struct ColliderOBB {
 	glm::vec3 orientation[2];
 	glm::vec3 range;
 
-	void serialize_json(nlohmann::json &j) {
-		nlohmann::json::object_t obj;
-		obj["center"] = nlohmann::json::object();
-		obj["range"] = nlohmann::json::object();
-		obj["orientation"] = nlohmann::json::object();
-		obj["orientation"]["0"] = nlohmann::json::object();
-		obj["orientation"]["1"] = nlohmann::json::object();
-		obj["center"]["x"] = center.x;
-		obj["center"]["y"] = center.y;
-		obj["center"]["z"] = center.z;
-		obj["orientation"]["0"]["x"] = orientation[0].x;
-		obj["orientation"]["0"]["y"] = orientation[0].y;
-		obj["orientation"]["0"]["z"] = orientation[0].z;
-		obj["orientation"]["1"]["x"] = orientation[1].x;
-		obj["orientation"]["1"]["y"] = orientation[1].y;
-		obj["orientation"]["1"]["z"] = orientation[1].z;
-		obj["range"]["x"] = range.x;
-		obj["range"]["y"] = range.y;
-		obj["range"]["z"] = range.z;
-		j.push_back(nlohmann::json::object());
-		j.back()["collider_obb"] = obj;
+	void serialize_json(nlohmann::json &serialized_scene) {
+		nlohmann::json::object_t serialized_component;
+		serialized_component["center"] = nlohmann::json::object();
+		serialized_component["range"] = nlohmann::json::object();
+		serialized_component["orientation"] = nlohmann::json::object();
+		serialized_component["orientation"]["0"] = nlohmann::json::object();
+		serialized_component["orientation"]["1"] = nlohmann::json::object();
+		serialized_component["center"]["x"] = center.x;
+		serialized_component["center"]["y"] = center.y;
+		serialized_component["center"]["z"] = center.z;
+		serialized_component["orientation"]["0"]["x"] = orientation[0].x;
+		serialized_component["orientation"]["0"]["y"] = orientation[0].y;
+		serialized_component["orientation"]["0"]["z"] = orientation[0].z;
+		serialized_component["orientation"]["1"]["x"] = orientation[1].x;
+		serialized_component["orientation"]["1"]["y"] = orientation[1].y;
+		serialized_component["orientation"]["1"]["z"] = orientation[1].z;
+		serialized_component["range"]["x"] = range.x;
+		serialized_component["range"]["y"] = range.y;
+		serialized_component["range"]["z"] = range.z;
+		serialized_scene.push_back(nlohmann::json::object());
+		serialized_scene.back()["component_data"] = serialized_component;
+		serialized_scene.back()["component_name"] = "ColliderOBB";
 	}
 
-	void deserialize_json(nlohmann::json &j) {
-		nlohmann::json obj = Serializer::get_data("collider_obb", j);
-		center.x = obj["center"]["x"];
-		center.y = obj["center"]["y"];
-		center.z = obj["center"]["z"];
-		orientation[0].x = obj["orientation"]["0"]["x"];
-		orientation[0].y = obj["orientation"]["0"]["y"];
-		orientation[0].z = obj["orientation"]["0"]["z"];
-		orientation[1].x = obj["orientation"]["1"]["x"];
-		orientation[1].y = obj["orientation"]["1"]["y"];
-		orientation[1].z = obj["orientation"]["1"]["z"];
-		range.x = obj["range"]["x"];
-		range.y = obj["range"]["y"];
-		range.z = obj["range"]["z"];
+	void deserialize_json(nlohmann::json &serialized_component) {
+		center.x = serialized_component["center"]["x"];
+		center.y = serialized_component["center"]["y"];
+		center.z = serialized_component["center"]["z"];
+		orientation[0].x = serialized_component["orientation"]["0"]["x"];
+		orientation[0].y = serialized_component["orientation"]["0"]["y"];
+		orientation[0].z = serialized_component["orientation"]["0"]["z"];
+		orientation[1].x = serialized_component["orientation"]["1"]["x"];
+		orientation[1].y = serialized_component["orientation"]["1"]["y"];
+		orientation[1].z = serialized_component["orientation"]["1"]["z"];
+		range.x = serialized_component["range"]["x"];
+		range.y = serialized_component["range"]["y"];
+		range.z = serialized_component["range"]["z"];
 	}
 
 	void setup_collider(const std::vector<glm::vec3> &vertices) {
