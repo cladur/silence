@@ -4,7 +4,7 @@
 
 SkinnedModelInstance::SkinnedModelInstance() {
 	RenderManager &render_manager = RenderManager::get();
-	model_handle = render_manager.load_skinned_model("scorpion/scorpion.skinmdl");
+	model_handle = render_manager.load_skinned_model("scorpion/scorpion_idle.skinmdl");
 	material_type = MaterialType::Default;
 
 	glGenBuffers(1, &skinning_buffer);

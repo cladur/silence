@@ -3,7 +3,7 @@
 #include "lz4.h"
 #include <nlohmann/json.hpp>
 
-assets::SkinnedVertexFormat parse_mesh_format(const char *f) {
+assets::SkinnedVertexFormat parse_skinned_mesh_format(const char *f) {
 	if (strcmp(f, "PNV32") == 0) {
 		return assets::SkinnedVertexFormat::PNV32;
 	} else if (strcmp(f, "P32N8C8V16") == 0) {
@@ -41,7 +41,7 @@ assets::SkinnedMeshInfo assets::read_skinned_mesh_info(AssetFile *file) {
 	info.bounds.extents[2] = bounds_data[6];
 
 	std::string vertex_format = metadata["vertex_format"];
-	info.vertex_format = parse_mesh_format(vertex_format.c_str());
+	info.vertex_format = parse_skinned_mesh_format(vertex_format.c_str());
 	return info;
 }
 

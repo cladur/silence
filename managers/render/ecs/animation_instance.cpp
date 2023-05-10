@@ -4,7 +4,7 @@
 
 AnimationInstance::AnimationInstance() {
 	RenderManager &render_manager = RenderManager::get();
-	animation_handle = render_manager.load_animation("scorpion/scorpion_ANIM_GLTF/00_walk.anim");
+	animation_handle = render_manager.load_animation("scorpion/scorpion_idle_ANIM_GLTF/00_walk.anim");
 }
 
 AnimationInstance::AnimationInstance(const char *path) {
