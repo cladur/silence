@@ -17,6 +17,7 @@
 #include "transparent_elements/text/text_draw.h"
 
 #include "debug_camera/debug_camera.h"
+#include <string>
 
 class RenderManager {
 private:
@@ -51,17 +52,19 @@ public:
 
 	Model &get_model(Handle<Model> handle);
 	Handle<Model> get_model_handle(std::string name);
+	std::string get_model_name(Handle<Model> handle);
 	std::vector<Model> &get_models();
 
 	Handle<Animation> load_animation(const char *path);
 	Animation &get_animation(Handle<Animation> handle);
 	Handle<Animation> get_animation_handle(std::string name);
 	std::vector<Animation> &get_animations();
-	
+
 	// stuff to remove later
 	Handle<SkinnedModel> load_skinned_model(const char *path);
 	SkinnedModel &get_skinned_model(Handle<SkinnedModel> handle);
 	Handle<SkinnedModel> get_skinned_model_handle(std::string name);
+	std::string get_skinned_model_name(Handle<SkinnedModel> handle);
 	std::vector<SkinnedModel> &get_skinned_models();
 };
 

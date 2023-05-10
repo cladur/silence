@@ -13,16 +13,16 @@ struct Parent {
 		parent = entity;
 	}
 
-	void serialize_json(nlohmann::json &j) {
-		nlohmann::json::object_t obj;
-		obj["parent"] = parent;
-		j.push_back(nlohmann::json::object());
-		j.back()["parent"] = obj;
+	void serialize_json(nlohmann::json &serialized_scene) {
+		nlohmann::json::object_t serialized_component;
+		serialized_component["parent"] = parent;
+		serialized_scene.push_back(nlohmann::json::object());
+		serialized_scene.back()["component_data"] = serialized_component;
+		serialized_scene.back()["component_name"] = "Parent";
 	}
 
-	void deserialize_json(nlohmann::json &j) {
-		nlohmann::json obj = Serializer::get_data("parent", j);
-		parent = obj["parent"];
+	void deserialize_json(nlohmann::json &serialized_component) {
+		parent = serialized_component["parent"];
 	}
 };
 

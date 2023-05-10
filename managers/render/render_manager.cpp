@@ -231,3 +231,20 @@ Handle<SkinnedModel> RenderManager::load_skinned_model(const char *path) {
 	name_to_skinned_model[path] = handle;
 	return handle;
 }
+std::string RenderManager::get_model_name(Handle<Model> handle) {
+	for (auto &pair : name_to_model) {
+		if (pair.second.id == handle.id) {
+			return pair.first;
+		}
+	}
+	return "";
+}
+
+std::string RenderManager::get_skinned_model_name(Handle<SkinnedModel> handle) {
+	for (auto &pair : name_to_skinned_model) {
+		if (pair.second.id == handle.id) {
+			return pair.first;
+		}
+	}
+	return "";
+}

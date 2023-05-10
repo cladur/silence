@@ -5,16 +5,16 @@ struct Name {
 public:
 	std::string name;
 
-	void serialize_json(nlohmann::json &j) {
-		nlohmann::json::object_t obj;
-		obj["name"] = name;
-		j.push_back(nlohmann::json::object());
-		j.back()["name"] = obj;
+	void serialize_json(nlohmann::json &serialized_scene) {
+		nlohmann::json::object_t serialized_component;
+		serialized_component["name"] = name;
+		serialized_scene.push_back(nlohmann::json::object());
+		serialized_scene.back()["component_data"] = serialized_component;
+		serialized_scene.back()["component_name"] = "Name";
 	}
 
-	void deserialize_json(nlohmann::json &j) {
-		nlohmann::json obj = Serializer::get_data("name", j);
-		name = obj["name"];
+	void deserialize_json(nlohmann::json &serialized_component) {
+		name = serialized_component["name"];
 	}
 
 	//constructor

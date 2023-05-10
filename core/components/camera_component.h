@@ -5,16 +5,16 @@ struct Camera {
 public:
 	float fov = 70.0f;
 
-	void serialize_json(nlohmann::json &j) {
-		nlohmann::json::object_t obj;
-		obj["fov"] = fov;
-		j.push_back(nlohmann::json::object());
-		j.back()["camera"] = obj;
+	void serialize_json(nlohmann::json &serialized_scene) {
+		nlohmann::json::object_t serialized_component;
+		serialized_component["fov"] = fov;
+		serialized_scene.push_back(nlohmann::json::object());
+		serialized_scene.back()["component_data"] = serialized_component;
+		serialized_scene.back()["component_name"] = "Camera";
 	}
 
-	void deserialize_json(nlohmann::json &j) {
-		nlohmann::json obj = Serializer::get_data("camera", j);
-		fov = obj["fov"];
+	void deserialize_json(nlohmann::json &serialized_component) {
+		fov = serialized_component["fov"];
 	}
 };
 

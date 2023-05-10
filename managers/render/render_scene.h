@@ -11,7 +11,6 @@
 #include "transparent_elements/transparent_object.h"
 
 #include "debug_camera/debug_camera.h"
-#include "render/transparent_elements/ui_draw.h"
 
 struct RenderScene {
 	glm::mat4 projection;
@@ -37,10 +36,8 @@ struct RenderScene {
 	GBuffer g_buffer;
 	glm::vec2 render_extent;
 
-	TextDraw text_draw;
 	DebugDraw debug_draw;
-	SpriteDraw sprite_draw;
-	UIDraw ui_draw;
+
 	std::vector<TransparentObject> transparent_objects;
 
 	std::vector<DrawCommand> draw_commands;

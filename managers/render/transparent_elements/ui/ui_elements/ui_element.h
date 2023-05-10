@@ -10,7 +10,7 @@ public:
 	glm::vec3 position = glm::vec3(0.0f);
 	glm::vec2 size = glm::vec2(1.0f);
 	glm::vec3 color = glm::vec3(1.0f);
-	std::string texture_name;
+	std::string texture_name = "";
 	bool is_screen_space = true;
 	bool is_billboard = false;
 	std::vector<UIElement *> children;
@@ -21,8 +21,8 @@ public:
 
 	UIElement() = default;
 
-	virtual void draw(RenderScene *scene);
-	virtual void draw(RenderScene *scene, glm::vec3 parent_position, glm::vec2 parent_size);
+	virtual void draw();
+	virtual void draw(glm::vec3 parent_position, glm::vec2 parent_size);
 	virtual void add_child(UIElement &child);
 };
 

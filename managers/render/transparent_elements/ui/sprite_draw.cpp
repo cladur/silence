@@ -96,7 +96,7 @@ void SpriteDraw::draw_colored(const glm::vec3 &position, const glm::vec2 &size, 
 		bool is_screen_space, Alignment alignment) {
 	TransparentObject sprite = default_vertex_data(position, size, 1.0f, 1.0f, color, is_screen_space, alignment);
 
-	current_scene->transparent_objects.push_back(sprite);
+	r_scene->transparent_objects.push_back(sprite);
 }
 
 void SpriteDraw::draw_sprite(const glm::vec3 &position, const glm::vec2 &size, const glm::vec3 &color,
@@ -107,7 +107,7 @@ void SpriteDraw::draw_sprite(const glm::vec3 &position, const glm::vec2 &size, c
 			default_vertex_data(position, size, (float)t.width, (float)t.height, color, is_screen_space, alignment);
 	sprite.texture_name = texture_name;
 
-	current_scene->transparent_objects.push_back(sprite);
+	r_scene->transparent_objects.push_back(sprite);
 }
 
 void SpriteDraw::draw_sprite_billboard(
@@ -122,7 +122,7 @@ void SpriteDraw::draw_sprite_billboard(
 	sprite.size = size / 2.0f;
 	sprite.position = position;
 
-	current_scene->transparent_objects.push_back(sprite);
+	r_scene->transparent_objects.push_back(sprite);
 }
 
 void SpriteDraw::draw_colored_billboard(const glm::vec3 &position, const glm::vec2 &size, const glm::vec3 &color) {
@@ -133,7 +133,7 @@ void SpriteDraw::draw_colored_billboard(const glm::vec3 &position, const glm::ve
 	sprite.size = size / 2.0f;
 	sprite.position = position;
 
-	current_scene->transparent_objects.push_back(sprite);
+	r_scene->transparent_objects.push_back(sprite);
 }
 
 void SpriteDraw::draw_slider_billboard(const glm::vec3 &position, float add_z, const glm::vec2 &size,
@@ -200,8 +200,9 @@ void SpriteDraw::draw_slider_billboard(const glm::vec3 &position, float add_z, c
 	sprite.size = size / 2.0f;
 	sprite.position = position;
 
-	current_scene->transparent_objects.push_back(sprite);
+	r_scene->transparent_objects.push_back(sprite);
 }
+
 void SpriteDraw::draw_sprite_scene(RenderScene *scene, const glm::vec3 &position, const glm::vec2 &size,
 		const glm::vec3 &color, const char *texture_name, bool is_screen_space, Alignment alignment) {
 	Texture t = SpriteManager::get()->get_sprite_texture(texture_name);

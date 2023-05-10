@@ -285,6 +285,14 @@ void Editor::custom_update(float dt) {
 			scene.update(dt);
 		}
 		imgui_viewport(scene, i);
+
+		if (!scene.entity_deletion_queue.empty()) {
+			Entity entity_to_remove = scene.entity_deletion_queue.front();
+			scene.entity_deletion_queue.pop();
+			scene.entities.erase(
+					std::remove(scene.entities.begin(), scene.entities.end(), entity_to_remove), scene.entities.end());
+			w.destroy_entity(entity_to_remove);
+		}
 	}
 
 	if (scene_deletion_queued) {
