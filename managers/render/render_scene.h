@@ -24,6 +24,9 @@ struct RenderScene {
 	float aspect_ratio;
 
 	RenderPass *default_pass;
+#ifdef WIN32
+	SkinnedPassUnlit skinned_unlit_pass;
+#endif
 	GBufferPass g_buffer_pass;
 	PBRPass pbr_pass;
 	SkyboxPass skybox_pass;
@@ -46,6 +49,7 @@ struct RenderScene {
 	void resize_framebuffer(uint32_t width, uint32_t height);
 
 	void queue_draw(ModelInstance *model_instance, Transform *transform);
+	void queue_skinned_draw(SkinnedModelInstance *model_instance, Transform *transform);
 };
 
 #endif //SILENCE_RENDER_SCENE_H

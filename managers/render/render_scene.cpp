@@ -18,6 +18,9 @@ void RenderScene::startup() {
 	g_buffer_pass.startup();
 	pbr_pass.startup();
 	skybox_pass.startup();
+#ifdef WIN32
+	skinned_unlit_pass.startup();
+#endif
 	default_pass = &pbr_pass;
 
 	// Size of the viewport doesn't matter here, it will be resized either way
@@ -105,6 +108,9 @@ void RenderScene::draw() {
 	}
 
 	debug_draw.draw();
+#ifdef WIN32
+	skinned_unlit_pass.draw(*this);
+#endif
 
 	if (draw_skybox) {
 		glDepthFunc(GL_LEQUAL);
@@ -146,4 +152,14 @@ void RenderScene::queue_draw(ModelInstance *model_instance, Transform *transform
 			break;
 		}
 	}
+}
+
+void RenderScene::queue_skinned_draw(SkinnedModelInstance *model_instance, Transform *transform) {
+	SkinnedDrawCommand draw_command = {};
+	draw_command.model_instance = model_instance;
+	draw_command.transform = transform;
+
+#ifdef WIN32
+	skinned_unlit_pass.draw_commands.push_back(draw_command);
+#endif
 }

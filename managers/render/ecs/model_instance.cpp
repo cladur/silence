@@ -15,7 +15,6 @@ ModelInstance::ModelInstance(const char *path, MaterialType material_type) {
 	this->material_type = material_type;
 }
 void ModelInstance::serialize_json(nlohmann::json &serialized_scene) {
-	// TODO good serialization
 	nlohmann::json::object_t serialized_component;
 	RenderManager &render_manager = RenderManager::get();
 	serialized_component["model_name"] = render_manager.get_model_name(model_handle);

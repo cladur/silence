@@ -2,7 +2,9 @@
 #include "display/display_manager.h"
 #include "ecs/world.h"
 #include "editor/editor.h"
+#include "render/ecs/animation_instance.h"
 #include "render/ecs/model_instance.h"
+#include "render/ecs/skinned_model_instance.h"
 #include "render/render_manager.h"
 #include <unordered_map>
 
@@ -11,8 +13,10 @@
 #include "ecs/systems/collision_system.h"
 #include "ecs/systems/parent_system.h"
 #include "ecs/systems/physics_system.h"
+#include "render/ecs/animation_system.h"
 #include "render/ecs/frustum_draw_system.h"
 #include "render/ecs/render_system.h"
+#include "render/ecs/skinned_render_system.h"
 
 #define COLLISION_TEST_ENTITY 4
 
@@ -29,6 +33,8 @@ Scene::Scene() {
 	world.register_component<Parent>();
 	world.register_component<Children>();
 	world.register_component<ModelInstance>();
+	world.register_component<SkinnedModelInstance>();
+	world.register_component<AnimationInstance>();
 	world.register_component<FmodListener>();
 	world.register_component<Camera>();
 	world.register_component<StaticTag>();
@@ -44,7 +50,9 @@ Scene::Scene() {
 	world.register_system<CollisionSystem>();
 	world.register_system<ParentSystem>();
 	world.register_system<RenderSystem>();
+	world.register_system<SkinnedRenderSystem>();
 	world.register_system<ColliderDrawSystem>();
+	world.register_system<AnimationSystem>();
 	world.register_system<FrustumDrawSystem>();
 
 	//todo uncomment if bspsystem is fixed

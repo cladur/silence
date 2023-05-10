@@ -5,6 +5,26 @@
 #include "render/render_manager.h"
 #include <tracy/tracy.hpp>
 
+void SkinnedPassUnlit::startup() {
+	material.startup();
+}
+
+void SkinnedPassUnlit::draw(RenderScene &scene) {
+	RenderManager &render_manager = RenderManager::get();
+	material.bind_resources(scene);
+	for (auto &cmd : draw_commands) {
+		SkinnedModelInstance &instance = *cmd.model_instance;
+		Transform &transform = *cmd.transform;
+		material.bind_instance_resources(instance, transform);
+		SkinnedModel &model = render_manager.get_skinned_model(instance.model_handle);
+		for (auto &mesh : model.meshes) {
+			material.bind_mesh_resources(mesh);
+			mesh.draw();
+		}
+	}
+	draw_commands.clear();
+}
+
 void PBRPass::startup() {
 	material.startup();
 }
