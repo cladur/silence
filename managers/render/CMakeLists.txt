@@ -13,7 +13,9 @@ add_library(${OPENGL_MANAGER_NAME} STATIC
         common/skybox.cpp common/skybox.h
         common/utils.cpp common/utils.h
         common/framebuffer.cpp common/framebuffer.h
+        common/frustum.cpp common/frustum.h
         ecs/render_system.cpp ecs/render_system.h
+        ecs/frustum_draw_system.cpp ecs/frustum_draw_system.h
         ecs/model_instance.cpp ecs/model_instance.h
         debug/debug_draw.cpp debug/debug_draw.h
         transparent_elements/transparent_object.h

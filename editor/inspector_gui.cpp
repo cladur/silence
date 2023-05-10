@@ -37,6 +37,7 @@ void Inspector::show_components() {
 	SHOW_COMPONENT(Children, show_children);
 	SHOW_COMPONENT(ModelInstance, show_modelinstance);
 	SHOW_COMPONENT(FmodListener, show_fmodlistener);
+	SHOW_COMPONENT(Camera, show_camera);
 	SHOW_COMPONENT(ColliderTag, show_collidertag);
 	SHOW_COMPONENT(StaticTag, show_statictag);
 	SHOW_COMPONENT(ColliderSphere, show_collidersphere);
@@ -264,6 +265,21 @@ void Inspector::show_fmodlistener() {
 		ImGui::EndTable();
 	}
 }
+
+void Inspector::show_camera() {
+	auto &camera = world->get_component<Camera>(selected_entity);
+	if (ImGui::CollapsingHeader("Camera", tree_flags)) {
+		remove_component_popup<Camera>();
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("Transform", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+
+		show_float("Fov", camera.fov);
+
+		ImGui::EndTable();
+	}
+}
+
 void Inspector::show_collidertag() {
 	if (ImGui::CollapsingHeader("ColliderTag", tree_flags)) {
 		remove_component_popup<ColliderTag>();
@@ -436,6 +452,7 @@ void Inspector::show_add_component() {
 			SHOW_ADD_COMPONENT(Children);
 			SHOW_ADD_COMPONENT(ModelInstance);
 			SHOW_ADD_COMPONENT(FmodListener);
+			SHOW_ADD_COMPONENT(Camera);
 			SHOW_ADD_COMPONENT(ColliderTag);
 			SHOW_ADD_COMPONENT(StaticTag);
 			SHOW_ADD_COMPONENT(ColliderSphere);

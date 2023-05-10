@@ -6,7 +6,7 @@
 
 #include "editor.h"
 
-void handle_camera(Camera &cam, float dt) {
+void handle_camera(DebugCamera &cam, float dt) {
 	InputManager &input_manager = InputManager::get();
 	float forward = input_manager.get_axis("move_backward", "move_forward");
 	float right = input_manager.get_axis("move_left", "move_right");
@@ -40,7 +40,7 @@ void EditorScene::update(float dt) {
 	if ((viewport_hovered && input_manager.is_action_pressed("control_camera") || controlling_camera)) {
 		controlling_camera = true;
 		Editor::get()->controlling_camera = true;
-		handle_camera(get_render_scene().camera, dt);
+		handle_camera(get_render_scene().debug_camera, dt);
 		display_manager.capture_mouse(true);
 	}
 

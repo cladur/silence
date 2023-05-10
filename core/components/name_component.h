@@ -1,5 +1,3 @@
-#include <utility>
-
 #ifndef SILENCE_NAME_H
 #define SILENCE_NAME_H
 

@@ -1,6 +1,7 @@
 #ifndef SILENCE_SERIALIZATION_H
 #define SILENCE_SERIALIZATION_H
 
+#include "components/camera_component.h"
 #include "components/children_component.h"
 #include "components/collider_aabb.h"
 #include "components/collider_obb.h"
@@ -28,8 +29,8 @@ concept Deserializable = requires(T t, nlohmann::json &j) {
 	{ t.deserialize_json(j) };
 };
 
-typedef std::variant<Children, Parent, Transform, RigidBody, FmodListener, Gravity, ModelInstance, Name, ColliderTag,
-		StaticTag, ColliderSphere, ColliderAABB, ColliderOBB>
+typedef std::variant<Children, Parent, Transform, RigidBody, FmodListener, Camera, Gravity, ModelInstance, Name,
+		ColliderTag, StaticTag, ColliderSphere, ColliderAABB, ColliderOBB>
 		variant_type;
 
 template <typename T>

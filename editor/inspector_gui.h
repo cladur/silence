@@ -22,6 +22,7 @@ private:
 	void show_children();
 	void show_modelinstance();
 	void show_fmodlistener();
+	void show_camera();
 	void show_collidertag();
 	void show_statictag();
 	void show_collidersphere();
