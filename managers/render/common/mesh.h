@@ -26,6 +26,7 @@ public:
 	MeshBoundingSphere fc_bounding_sphere;
 
 	bool has_ao_map = false;
+	bool has_normal_map = false;
 
 	void draw();
 	void setup_mesh();

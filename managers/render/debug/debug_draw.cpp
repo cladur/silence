@@ -3,7 +3,7 @@
 #include "render/render_manager.h"
 #include <glm/geometric.hpp>
 
-const uint32_t MAX_VERTEX_COUNT = 10000;
+const uint32_t MAX_VERTEX_COUNT = 100000;
 
 void DebugDraw::startup() {
 	glGenVertexArrays(1, &vao);
