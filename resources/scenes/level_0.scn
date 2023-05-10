@@ -1,0 +1,161 @@
+[
+    {
+        "components": [
+            {
+                "component_data": {
+                    "material_type": 0,
+                    "model_name": "woodenBox/woodenBox.mdl"
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
+                    "name": "Skrzyneczka"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 1.0,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 0.0,
+                        "y": 0.5,
+                        "z": 0.0
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                },
+                "component_name": "Transform"
+            }
+        ],
+        "entity": 1,
+        "signature": "00000000000000000000000001000011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_16x16x1.mdl"
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
+                    "name": "Floor"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 1.0,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 0.0,
+                        "y": -1.0,
+                        "z": 0.0
+                    },
+                    "scale": {
+                        "x": 1.999999761581421,
+                        "y": 0.9999998807907104,
+                        "z": 1.999999761581421
+                    }
+                },
+                "component_name": "Transform"
+            }
+        ],
+        "entity": 2,
+        "signature": "00000000000000000000000001000011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "fov": 70.0
+                },
+                "component_name": "Camera"
+            },
+            {
+                "component_data": {
+                    "name": "Camera"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.9914222955703735,
+                        "x": -0.1306973546743393,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": -0.9855152368545532,
+                        "y": 3.6136457920074463,
+                        "z": 8.132196426391602
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 0.9999999403953552
+                    }
+                },
+                "component_name": "Transform"
+            }
+        ],
+        "entity": 3,
+        "signature": "00000000000000000000000100000011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_4x4x4.mdl"
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
+                    "name": "Box"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 1.0,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": -4.0,
+                        "y": 0.0,
+                        "z": -5.0
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                },
+                "component_name": "Transform"
+            }
+        ],
+        "entity": 4,
+        "signature": "00000000000000000000000001000011"
+    }
+]

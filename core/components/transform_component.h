@@ -26,38 +26,38 @@ public:
 	glm::vec3 position{};
 	glm::quat orientation{};
 	glm::vec3 scale{};
-	void serialize_json(nlohmann::json &j) {
-		nlohmann::json::object_t obj;
-		obj["position"] = nlohmann::json::object();
-		obj["orientation"] = nlohmann::json::object();
-		obj["scale"] = nlohmann::json::object();
-		obj["position"]["x"] = position.x;
-		obj["position"]["y"] = position.y;
-		obj["position"]["z"] = position.z;
-		obj["orientation"]["x"] = orientation.x;
-		obj["orientation"]["y"] = orientation.y;
-		obj["orientation"]["z"] = orientation.z;
-		obj["orientation"]["w"] = orientation.w;
-		obj["scale"]["x"] = scale.x;
-		obj["scale"]["y"] = scale.y;
-		obj["scale"]["z"] = scale.z;
-		j.push_back(nlohmann::json::object());
-		j.back()["transform"] = obj;
+	void serialize_json(nlohmann::json &serialized_scene) {
+		nlohmann::json::object_t serialized_component;
+		serialized_component["position"] = nlohmann::json::object();
+		serialized_component["orientation"] = nlohmann::json::object();
+		serialized_component["scale"] = nlohmann::json::object();
+		serialized_component["position"]["x"] = position.x;
+		serialized_component["position"]["y"] = position.y;
+		serialized_component["position"]["z"] = position.z;
+		serialized_component["orientation"]["x"] = orientation.x;
+		serialized_component["orientation"]["y"] = orientation.y;
+		serialized_component["orientation"]["z"] = orientation.z;
+		serialized_component["orientation"]["w"] = orientation.w;
+		serialized_component["scale"]["x"] = scale.x;
+		serialized_component["scale"]["y"] = scale.y;
+		serialized_component["scale"]["z"] = scale.z;
+		serialized_scene.push_back(nlohmann::json::object());
+		serialized_scene.back()["component_data"] = serialized_component;
+		serialized_scene.back()["component_name"] = "Transform";
 	}
 
-	void deserialize_json(nlohmann::json &j) {
-		nlohmann::json obj = Serializer::get_data("transform", j);
+	void deserialize_json(nlohmann::json &serialized_component) {
 		changed = true;
-		position.x = obj["position"]["x"];
-		position.y = obj["position"]["y"];
-		position.z = obj["position"]["z"];
-		orientation.x = obj["orientation"]["x"];
-		orientation.y = obj["orientation"]["y"];
-		orientation.z = obj["orientation"]["z"];
-		orientation.w = obj["orientation"]["w"];
-		scale.x = obj["scale"]["x"];
-		scale.y = obj["scale"]["y"];
-		scale.z = obj["scale"]["z"];
+		position.x = serialized_component["position"]["x"];
+		position.y = serialized_component["position"]["y"];
+		position.z = serialized_component["position"]["z"];
+		orientation.x = serialized_component["orientation"]["x"];
+		orientation.y = serialized_component["orientation"]["y"];
+		orientation.z = serialized_component["orientation"]["z"];
+		orientation.w = serialized_component["orientation"]["w"];
+		scale.x = serialized_component["scale"]["x"];
+		scale.y = serialized_component["scale"]["y"];
+		scale.z = serialized_component["scale"]["z"];
 	}
 	//constructor
 	Transform(glm::vec3 position, glm::vec3 euler_rot, glm::vec3 scale) {
@@ -86,6 +86,24 @@ public:
 	[[nodiscard]] glm::vec3 get_scale() const {
 		return scale;
 	}
+
+	[[nodiscard]] glm::vec3 get_global_forward() const {
+		return glm::normalize(glm::vec3(global_model_matrix[2]));
+	}
+	[[nodiscard]] glm::vec3 get_global_up() const {
+		return glm::normalize(glm::vec3(global_model_matrix[1]));
+	}
+	[[nodiscard]] glm::vec3 get_global_right() const {
+		return glm::normalize(glm::vec3(global_model_matrix[0]));
+	}
+
+	[[nodiscard]] glm::mat4 get_local_model_matrix() const {
+		return local_model_matrix;
+	}
+	[[nodiscard]] glm::mat4 get_global_model_matrix() const {
+		return global_model_matrix;
+	}
+
 	[[nodiscard]] bool is_changed() const {
 		return changed;
 	}

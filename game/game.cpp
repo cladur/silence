@@ -1,5 +1,7 @@
 #include "game.h"
+
 #include "audio/audio_manager.h"
+#include "cvars/cvars.h"
 #include "display/display_manager.h"
 #include "fmod_studio.hpp"
 #include "input/input_manager.h"
@@ -237,6 +239,9 @@ void input_setup() {
 	input_manager.add_action("move_faster");
 	input_manager.add_key_to_action("move_faster", InputKey::LEFT_SHIFT);
 
+	input_manager.add_action("control_camera");
+	input_manager.add_key_to_action("control_camera", InputKey::MOUSE_RIGHT);
+
 	//add actions to arrows
 	input_manager.add_action("forward");
 	input_manager.add_key_to_action("forward", InputKey::UP);
@@ -256,14 +261,14 @@ void input_setup() {
 	input_manager.add_action("down");
 	input_manager.add_key_to_action("down", InputKey::L);
 
-	input_manager.add_action("toggle_camera_control");
-	input_manager.add_key_to_action("toggle_camera_control", InputKey::ESCAPE);
+	input_manager.add_action("toggle_debug_mode");
+	input_manager.add_key_to_action("toggle_debug_mode", InputKey::ESCAPE);
 
 	input_manager.add_action("mouse_left");
 	input_manager.add_key_to_action("mouse_left", InputKey::MOUSE_LEFT);
 }
 
-void handle_camera(Camera &cam, float dt) {
+void handle_camera(DebugCamera &cam, float dt) {
 	InputManager &input_manager = InputManager::get();
 	float forward = input_manager.get_axis("move_backward", "move_forward");
 	float right = input_manager.get_axis("move_left", "move_right");
@@ -285,7 +290,12 @@ void Game::startup() {
 	Engine::startup();
 
 	input_setup();
-	gui_setup();
+	// gui_setup();
+
+	// Disable debug stuff on startup
+	CVarSystem::get()->set_int_cvar("debug_draw.frustum.draw", 0);
+	CVarSystem::get()->set_int_cvar("debug_draw.collision.draw", 0);
+	CVarSystem::get()->set_int_cvar("debug_camera.use", 0);
 }
 
 void Game::shutdown() {
@@ -307,23 +317,34 @@ void Game::custom_update(float dt) {
 	}
 
 	// Handle camera
-	if (input_manager.is_action_just_pressed("toggle_camera_control")) {
-		controlling_camera = !controlling_camera;
-		display_manager.capture_mouse(controlling_camera);
+	if (input_manager.is_action_just_pressed("toggle_debug_mode")) {
+		in_debug_mode = !in_debug_mode;
+		CVarSystem::get()->set_int_cvar("debug_draw.frustum.draw", in_debug_mode);
+		CVarSystem::get()->set_int_cvar("debug_camera.use", in_debug_mode);
+		show_cvar_editor = in_debug_mode;
+
+		if (in_debug_mode) {
+			DebugCamera &cam = get_active_scene().get_render_scene().debug_camera;
+			cam.set_transform(get_active_scene().get_render_scene().camera_transform);
+		}
 	}
 
 	ui_update();
 
-	if (controlling_camera) {
-		Camera &cam = get_active_scene().get_render_scene().camera;
+	// get imgui io
+	ImGuiIO &io = ImGui::GetIO();
+	if (in_debug_mode && input_manager.is_action_pressed("control_camera") && io.WantCaptureMouse == false) {
+		display_manager.capture_mouse(true);
+		DebugCamera &cam = get_active_scene().get_render_scene().debug_camera;
 		handle_camera(cam, dt);
+	} else {
+		display_manager.capture_mouse(false);
 	}
 
 	// ImGui
-	if (!controlling_camera) {
-		ImGui::Begin("Game");
-		ImGui::Text("Press ESC to control camera");
-		ImGui::Checkbox("Show cvar editor", &show_cvar_editor);
+	if (in_debug_mode) {
+		ImGui::Begin("Debug Menu");
+		ImGui::Text("Press ESC to get back to the game");
 		ImGui::End();
 	}
 }

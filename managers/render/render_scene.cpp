@@ -6,9 +6,13 @@
 #include "render_manager.h"
 #include <glad/glad.h>
 
-AutoCVarFloat cvar_fov = AutoCVarFloat("render.fov", "field of view", 70.0f);
-AutoCVarFloat cvar_draw_distance("render.draw_distance", "Distance cull", 5000);
-AutoCVarInt cvar_freeze_frustum("render.freeze_frustum", "Freeze frustum", 0, CVarFlags::EditCheckbox);
+AutoCVarFloat cvar_draw_distance_near("render.draw_distance.near", "Near distance cull", 0.1);
+AutoCVarFloat cvar_draw_distance_far("render.draw_distance.far", "Far distance cull", 5000);
+AutoCVarInt cvar_frustum_freeze("render.frustum.freeze", "Freeze frustum", 0, CVarFlags::EditCheckbox);
+AutoCVarInt cvar_frustum_force_scene_camera("render.frustum.force_scene_camera",
+		"Force frustum culling using scene camera, even if we're currently using debug camera", 0,
+		CVarFlags::EditCheckbox);
+AutoCVarInt cvar_debug_camera_use("debug_camera.use", "Use debug camera", 1, CVarFlags::EditCheckbox);
 
 void RenderScene::startup() {
 	g_buffer_pass.startup();
@@ -24,10 +28,10 @@ void RenderScene::startup() {
 	debug_draw.startup();
 	transparent_pass.startup();
 
-	camera = Camera(glm::vec3(-4.0f, 2.6f, -4.0f));
-	camera.yaw = 45.0f;
-	camera.pitch = -20.0f;
-	camera.update_camera_vectors();
+	debug_camera = DebugCamera(glm::vec3(-4.0f, 2.6f, -4.0f));
+	debug_camera.yaw = 45.0f;
+	debug_camera.pitch = -20.0f;
+	debug_camera.update_camera_vectors();
 	UIManager::get().set_render_scene(this);
 }
 
@@ -39,18 +43,27 @@ void RenderScene::draw() {
 	glad_glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	// Update camera
-	camera.set_fov(cvar_fov.get());
-	camera.set_render_distance(0.1f, cvar_draw_distance.get());
-	camera.set_aspect_ratio(render_extent.x / render_extent.y);
-	if (!cvar_freeze_frustum.get()) {
-		camera.build_frustum();
+	aspect_ratio = render_extent.x / render_extent.y;
+
+	if (!cvar_frustum_freeze.get()) {
+		if (cvar_debug_camera_use.get() && !cvar_frustum_force_scene_camera.get()) {
+			frustum.create_frustum_from_camera(debug_camera, aspect_ratio);
+		} else {
+			frustum.create_frustum_from_camera(camera_params, camera_transform, aspect_ratio);
+		}
 	}
 
-	projection = glm::perspective(
-			glm::radians(camera.get_fov()), camera.get_aspect_ratio(), camera.get_near(), camera.get_far());
-	view = camera.get_view_matrix();
-	camera_pos = camera.get_position();
+	if (cvar_debug_camera_use.get()) {
+		projection = glm::perspective(glm::radians(*CVarSystem::get()->get_float_cvar("debug_camera.fov")),
+				aspect_ratio, cvar_draw_distance_near.get(), cvar_draw_distance_far.get());
+		view = debug_camera.get_view_matrix();
+		camera_pos = debug_camera.get_position();
+	} else {
+		projection = glm::perspective(glm::radians(camera_params.fov), aspect_ratio, cvar_draw_distance_near.get(),
+				cvar_draw_distance_far.get());
+		view = glm::inverse(camera_transform.get_global_model_matrix());
+		camera_pos = camera_transform.get_global_position();
+	}
 
 	UIManager::get().set_render_scene(this);
 	UIManager::get().draw();

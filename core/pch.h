@@ -41,6 +41,7 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/quaternion.hpp"
 #include "glm/gtx/euler_angles.hpp"
+#include "glm/gtx/string_cast.hpp"
 #include "imgui.h"
 #include "magic_enum.hpp"
 #include "nlohmann/json.hpp"

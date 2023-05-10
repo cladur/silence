@@ -75,7 +75,7 @@ void GBufferPass::draw(RenderScene &scene) {
 		material.bind_instance_resources(instance, transform);
 		Model &model = render_manager.get_model(instance.model_handle);
 		for (auto &mesh : model.meshes) {
-			if (mesh.fc_bounding_sphere.is_on_frustum(scene.camera.get_frustum(), transform, scene)) {
+			if (mesh.fc_bounding_sphere.is_on_frustum(scene.frustum, transform, scene)) {
 				material.bind_mesh_resources(mesh);
 				mesh.draw();
 			}

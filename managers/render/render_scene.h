@@ -3,20 +3,25 @@
 
 #include "common/framebuffer.h"
 #include "common/render_pass.h"
+#include "components/camera_component.h"
 #include "debug/debug_draw.h"
 #include "render/common/render_pass.h"
 #include "render/transparent_elements/ui/sprite_draw.h"
 #include "transparent_elements/text/text_draw.h"
 #include "transparent_elements/transparent_object.h"
 
-#include "camera/camera.h"
+#include "debug_camera/debug_camera.h"
 
 struct RenderScene {
 	glm::mat4 projection;
 	glm::mat4 view;
 	glm::vec3 camera_pos;
 
-	Camera camera;
+	DebugCamera debug_camera;
+	Transform camera_transform;
+	Camera camera_params;
+	Frustum frustum;
+	float aspect_ratio;
 
 	RenderPass *default_pass;
 	GBufferPass g_buffer_pass;

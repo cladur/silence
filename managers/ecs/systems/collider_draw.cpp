@@ -2,7 +2,7 @@
 #include "engine/scene.h"
 
 AutoCVarInt cvar_collider_draw_system_enabled(
-		"physics.draw_colliders", "enable collider draw system", 0, CVarFlags::EditCheckbox);
+		"debug_draw.collision.draw", "enable collider draw system", 0, CVarFlags::EditCheckbox);
 
 void ColliderDrawSystem::startup(World &world) {
 	Signature white_signature;

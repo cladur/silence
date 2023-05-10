@@ -174,7 +174,7 @@ FMOD::Studio::System *AudioManager::get_system() {
 	return system;
 }
 
-FMOD::Studio::EventInstance *AudioManager::create_event_instance(const std::string event_name) {
+FMOD::Studio::EventInstance *AudioManager::create_event_instance(const std::string &event_name) {
 	EventReference event_ref = EventReference(event_name);
 
 	FMOD::Studio::EventDescription *event_description = nullptr;

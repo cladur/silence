@@ -13,7 +13,9 @@ add_library(${OPENGL_MANAGER_NAME} STATIC
         common/skybox.cpp common/skybox.h
         common/utils.cpp common/utils.h
         common/framebuffer.cpp common/framebuffer.h
+        common/frustum.cpp common/frustum.h
         ecs/render_system.cpp ecs/render_system.h
+        ecs/frustum_draw_system.cpp ecs/frustum_draw_system.h
         ecs/model_instance.cpp ecs/model_instance.h
         debug/debug_draw.cpp debug/debug_draw.h
         transparent_elements/transparent_object.h
@@ -37,8 +39,12 @@ find_package(glad CONFIG REQUIRED)
 
 target_link_libraries(${OPENGL_MANAGER_NAME}
         PUBLIC
+        # TODO: Remove these dependencies
         fmod
         PRIVATE
+        silence_input_manager
+        silence_audio_manager
+
         silence_common
         silence_core
         silence_assets

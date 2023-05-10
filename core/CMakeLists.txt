@@ -29,7 +29,7 @@ add_library(${CORE_LIB_NAME} STATIC
         behavior_tree/decorator_nodes/retry_node.h
         behavior_tree/decorator_nodes/invert_node.h
         serialization.h
-        camera/camera.cpp camera/camera.h
+        debug_camera/debug_camera.cpp debug_camera/debug_camera.h
         components/collider_tag_component.h
         components/static_tag_component.h
         components/collider_aabb.h
@@ -38,8 +38,7 @@ add_library(${CORE_LIB_NAME} STATIC
         components/collider_sphere.h
         components/collider_obb.h
         cvars/cvars.cpp
-        cvars/cvars.h
-        camera/frustum.cpp camera/frustum.h)
+        cvars/cvars.h)
 
 target_include_directories(${CORE_LIB_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 

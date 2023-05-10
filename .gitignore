@@ -25,3 +25,4 @@ thirdparty/fmod/plugins
 *.mesh
 resources/assets_export
 resources/assets_tmp
+*.blend1

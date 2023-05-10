@@ -165,3 +165,12 @@ Handle<Model> RenderManager::get_model_handle(std::string name) {
 	}
 	return name_to_model[name];
 }
+
+std::string RenderManager::get_model_name(Handle<Model> handle) {
+	for (auto &pair : name_to_model) {
+		if (pair.second.id == handle.id) {
+			return pair.first;
+		}
+	}
+	return "";
+}

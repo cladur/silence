@@ -4,21 +4,21 @@
 struct Gravity {
 	glm::vec3 force;
 
-	void serialize_json(nlohmann::json &j) {
-		nlohmann::json::object_t obj;
-		obj["force"] = nlohmann::json::object();
-		obj["force"]["x"] = force.x;
-		obj["force"]["y"] = force.y;
-		obj["force"]["z"] = force.z;
-		j.push_back(nlohmann::json::object());
-		j.back()["gravity"] = obj;
+	void serialize_json(nlohmann::json &serialized_scene) {
+		nlohmann::json::object_t serialized_component;
+		serialized_component["force"] = nlohmann::json::object();
+		serialized_component["force"]["x"] = force.x;
+		serialized_component["force"]["y"] = force.y;
+		serialized_component["force"]["z"] = force.z;
+		serialized_scene.push_back(nlohmann::json::object());
+		serialized_scene.back()["component_data"] = serialized_component;
+		serialized_scene.back()["component_name"] = "Gravity";
 	}
 
-	void deserialize_json(nlohmann::json &j) {
-		nlohmann::json obj = Serializer::get_data("gravity", j);
-		force.x = obj["force"]["x"];
-		force.y = obj["force"]["y"];
-		force.z = obj["force"]["z"];
+	void deserialize_json(nlohmann::json &serialized_component) {
+		force.x = serialized_component["force"]["x"];
+		force.y = serialized_component["force"]["y"];
+		force.z = serialized_component["force"]["z"];
 	}
 };
 

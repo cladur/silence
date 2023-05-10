@@ -1,7 +1,9 @@
 #ifndef SILENCE_FRUSTUM_H
 #define SILENCE_FRUSTUM_H
 
+class DebugCamera;
 class Camera;
+class Transform;
 
 struct FrustumPlane {
 	glm::vec3 normal = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -27,7 +29,10 @@ struct Frustum {
 	FrustumPlane near;
 	FrustumPlane far;
 
-	void create_frustum_from_camera(Camera cam);
+	Frustum() = default;
+
+	void create_frustum_from_camera(const DebugCamera &cam, float aspect_ratio);
+	void create_frustum_from_camera(const Camera &camera, const Transform &transform, float aspect_ratio);
 };
 
 #endif //SILENCE_FRUSTUM_H

@@ -3,7 +3,7 @@
 
 #include "display/display_manager.h"
 
-#include "camera/camera.h"
+#include "debug_camera/debug_camera.h"
 
 #include "render/common/material.h"
 #include "render_pass.h"
@@ -104,9 +104,14 @@ void MaterialGBuffer::bind_mesh_resources(Mesh &mesh) {
 	// We flip the bools here, to force the update of uniforms on the first mesh
 	static bool is_ao_map_set = !mesh.has_ao_map;
 	static bool is_emissive_map_set = !mesh.textures_present[3];
+	static bool is_normal_map_set = !mesh.textures_present[1];
 	if (is_ao_map_set != mesh.has_ao_map) {
 		shader.set_bool("has_ao_map", mesh.has_ao_map);
 		is_ao_map_set = mesh.has_ao_map;
+	}
+	if (is_normal_map_set != mesh.has_normal_map) {
+		shader.set_bool("has_normal_map", mesh.has_normal_map);
+		is_normal_map_set = mesh.has_normal_map;
 	}
 	if (is_emissive_map_set != mesh.textures_present[3]) {
 		shader.set_bool("has_emissive_map", mesh.textures_present[3]);
