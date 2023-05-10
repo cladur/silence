@@ -1,7 +1,7 @@
 #ifndef SILENCE_MESH_H
 #define SILENCE_MESH_H
 
-#include "camera/frustum.h"
+#include "frustum.h"
 #include "mesh_bounding_sphere.h"
 #include "texture.h"
 #include <components/transform_component.h>

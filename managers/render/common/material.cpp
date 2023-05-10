@@ -3,7 +3,7 @@
 
 #include "display/display_manager.h"
 
-#include "camera/camera.h"
+#include "debug_camera/debug_camera.h"
 
 #include "render/common/material.h"
 #include "render_pass.h"

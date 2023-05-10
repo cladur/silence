@@ -86,6 +86,24 @@ public:
 	[[nodiscard]] glm::vec3 get_scale() const {
 		return scale;
 	}
+
+	[[nodiscard]] glm::vec3 get_global_forward() const {
+		return glm::normalize(glm::vec3(global_model_matrix[2]));
+	}
+	[[nodiscard]] glm::vec3 get_global_up() const {
+		return glm::normalize(glm::vec3(global_model_matrix[1]));
+	}
+	[[nodiscard]] glm::vec3 get_global_right() const {
+		return glm::normalize(glm::vec3(global_model_matrix[0]));
+	}
+
+	[[nodiscard]] glm::mat4 get_local_model_matrix() const {
+		return local_model_matrix;
+	}
+	[[nodiscard]] glm::mat4 get_global_model_matrix() const {
+		return global_model_matrix;
+	}
+
 	[[nodiscard]] bool is_changed() const {
 		return changed;
 	}

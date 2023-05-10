@@ -164,3 +164,40 @@ void DebugDraw::draw_box(
 	draw_line(vertices[2], vertices[6], color);
 	draw_line(vertices[3], vertices[7], color);
 }
+
+void DebugDraw::draw_frustum(const glm::vec3 &center, const glm::quat &orientation, float fov, float aspect, float near,
+		float far, const glm::vec3 &color) {
+	// Calculate the four corners of the near plane of the frustum
+	float tan_half_fov = tan(glm::radians(fov) / 2);
+	float near_height = 2 * near * tan_half_fov;
+	float near_width = near_height * aspect;
+	glm::vec3 near_top_left = center + orientation * glm::vec3(-near_width / 2, near_height / 2, -near);
+	glm::vec3 near_top_right = center + orientation * glm::vec3(near_width / 2, near_height / 2, -near);
+	glm::vec3 near_bottom_left = center + orientation * glm::vec3(-near_width / 2, -near_height / 2, -near);
+	glm::vec3 near_bottom_right = center + orientation * glm::vec3(near_width / 2, -near_height / 2, -near);
+
+	// Calculate the four corners of the far plane of the frustum
+	float far_height = 2 * far * tan_half_fov;
+	float far_width = far_height * aspect;
+	glm::vec3 far_top_left = center + orientation * glm::vec3(-far_width / 2, far_height / 2, -far);
+	glm::vec3 far_top_right = center + orientation * glm::vec3(far_width / 2, far_height / 2, -far);
+	glm::vec3 far_bottom_left = center + orientation * glm::vec3(-far_width / 2, -far_height / 2, -far);
+	glm::vec3 far_bottom_right = center + orientation * glm::vec3(far_width / 2, -far_height / 2, -far);
+
+	// Draw the lines of the frustum using the draw_line function
+	// Near to Far lines
+	draw_line(near_top_left, far_top_left, color);
+	draw_line(near_top_right, far_top_right, color);
+	draw_line(near_bottom_left, far_bottom_left, color);
+	draw_line(near_bottom_right, far_bottom_right, color);
+	// Near rectangle
+	draw_line(near_top_left, near_top_right, color);
+	draw_line(near_top_right, near_bottom_right, color);
+	draw_line(near_bottom_right, near_bottom_left, color);
+	draw_line(near_bottom_left, near_top_left, color);
+	// Far rectangle
+	draw_line(far_top_left, far_top_right, color);
+	draw_line(far_top_right, far_bottom_right, color);
+	draw_line(far_bottom_right, far_bottom_left, color);
+	draw_line(far_bottom_left, far_top_left, color);
+}

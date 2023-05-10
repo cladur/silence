@@ -5,8 +5,8 @@
 #include "managers/render/common/texture.h"
 #include "managers/render/common/utils.h"
 
-#include "core/camera/camera.h"
-Camera camera;
+#include "core/debug_camera/debug_camera.h"
+DebugCamera camera;
 
 void OpenGLContext::startup() {
 	glfwInit();

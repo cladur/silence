@@ -16,7 +16,7 @@
 #include "debug/debug_draw.h"
 #include "transparent_elements/text/text_draw.h"
 
-#include "camera/camera.h"
+#include "debug_camera/debug_camera.h"
 
 class RenderManager {
 private:

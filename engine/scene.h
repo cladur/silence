@@ -22,7 +22,7 @@ struct Scene {
 
 	Scene();
 	virtual void update(float dt);
-	RenderScene &get_render_scene();
+	[[nodiscard]] RenderScene &get_render_scene() const;
 
 	// Serialization
 	virtual void save_to_file(const std::string &path);

@@ -1,7 +1,7 @@
 #include "mesh_bounding_sphere.h"
-#include <camera/frustum.h>
-#include <components/transform_component.h>
-#include <render/render_scene.h>
+#include "components/transform_component.h"
+#include "frustum.h"
+#include "render/render_scene.h"
 
 AutoCVarInt cvar_draw_bounding_spheres(
 		"render.draw_bounding_spheres", "Draw bounding spheres", 0, CVarFlags::EditCheckbox);
