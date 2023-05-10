@@ -11,7 +11,6 @@
 #include "transparent_elements/transparent_object.h"
 
 #include "debug_camera/debug_camera.h"
-#include "render/transparent_elements/ui_draw.h"
 
 struct RenderScene {
 	glm::mat4 projection;
@@ -25,6 +24,9 @@ struct RenderScene {
 	float aspect_ratio;
 
 	RenderPass *default_pass;
+#ifdef WIN32
+	SkinnedPassUnlit skinned_unlit_pass;
+#endif
 	GBufferPass g_buffer_pass;
 	PBRPass pbr_pass;
 	SkyboxPass skybox_pass;
@@ -34,10 +36,8 @@ struct RenderScene {
 	GBuffer g_buffer;
 	glm::vec2 render_extent;
 
-	TextDraw text_draw;
 	DebugDraw debug_draw;
-	SpriteDraw sprite_draw;
-	UIDraw ui_draw;
+
 	std::vector<TransparentObject> transparent_objects;
 
 	std::vector<DrawCommand> draw_commands;
@@ -49,6 +49,7 @@ struct RenderScene {
 	void resize_framebuffer(uint32_t width, uint32_t height);
 
 	void queue_draw(ModelInstance *model_instance, Transform *transform);
+	void queue_skinned_draw(SkinnedModelInstance *model_instance, Transform *transform);
 };
 
 #endif //SILENCE_RENDER_SCENE_H

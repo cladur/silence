@@ -1,7 +1,10 @@
+#include "animation_asset.h"
 #include "asset_loader.h"
 #include "material_asset.h"
 #include "mesh_asset.h"
 #include "model_asset.h"
+#include "skinned_mesh_asset.h"
+#include "skinned_model_asset.h"
 #include "texture_asset.h"
 #include <ktx.h>
 #include <filesystem>
@@ -17,6 +20,7 @@
 #include "tiny_gltf.h"
 
 #include "opengl_context.h"
+#include <glm/gtx/matrix_decompose.hpp>
 
 namespace tg = tinygltf;
 namespace fs = std::filesystem;
@@ -111,17 +115,17 @@ std::string calculate_gltf_mesh_name(tg::Model &model, int mesh_index, int primi
 	return meshname;
 }
 
-void unpack_gltf_buffer(tg::Model &model, tg::Accessor &accesor, std::vector<uint8_t> &output_buffer) {
-	int buffer_id = accesor.bufferView;
-	size_t element_size = tg::GetComponentSizeInBytes(accesor.componentType);
+void unpack_gltf_buffer(tg::Model &model, tg::Accessor &accessor, std::vector<uint8_t> &output_buffer) {
+	int buffer_id = accessor.bufferView;
+	size_t element_size = tg::GetComponentSizeInBytes(accessor.componentType);
 
 	tg::BufferView &buffer_view = model.bufferViews[buffer_id];
 
 	tg::Buffer &buffer_data = (model.buffers[buffer_view.buffer]);
 
-	uint8_t *data_ptr = buffer_data.data.data() + accesor.byteOffset + buffer_view.byteOffset;
+	uint8_t *data_ptr = buffer_data.data.data() + accessor.byteOffset + buffer_view.byteOffset;
 
-	int components = tg::GetNumComponentsInType(accesor.type);
+	int components = tg::GetNumComponentsInType(accessor.type);
 
 	element_size *= components;
 
@@ -130,9 +134,9 @@ void unpack_gltf_buffer(tg::Model &model, tg::Accessor &accesor, std::vector<uin
 		stride = element_size;
 	}
 
-	output_buffer.resize(accesor.count * element_size);
+	output_buffer.resize(accessor.count * element_size);
 
-	for (int i = 0; i < accesor.count; i++) {
+	for (int i = 0; i < accessor.count; i++) {
 		uint8_t *dataindex = data_ptr + stride * i;
 		uint8_t *targetptr = output_buffer.data() + element_size * i;
 
@@ -206,6 +210,164 @@ void extract_gltf_vertices(tg::Primitive &primitive, tg::Model &model, std::vect
 		} else {
 			assert(false);
 		}
+	}
+}
+
+void extract_gltf_skinned_vertices(
+		tg::Primitive &primitive, tg::Model &model, std::vector<assets::SkinnedVertexPNV32> &vertices) {
+	tg::Accessor &pos_accesor = model.accessors[primitive.attributes["POSITION"]];
+
+	vertices.resize(pos_accesor.count);
+
+	std::vector<uint8_t> pos_data;
+	unpack_gltf_buffer(model, pos_accesor, pos_data);
+
+	for (int i = 0; i < vertices.size(); i++) {
+		if (pos_accesor.type == TINYGLTF_TYPE_VEC3 && pos_accesor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT) {
+			auto *dtf = (float *)pos_data.data();
+
+			//vec3f
+			vertices[i].position[0] = *(dtf + (i * 3) + 0);
+			vertices[i].position[1] = *(dtf + (i * 3) + 1);
+			vertices[i].position[2] = *(dtf + (i * 3) + 2);
+		} else {
+			SPDLOG_ERROR("INVALID POSITION TYPE");
+			assert(false);
+		}
+	}
+
+	tg::Accessor &normal_accesor = model.accessors[primitive.attributes["NORMAL"]];
+
+	std::vector<uint8_t> normal_data;
+	unpack_gltf_buffer(model, normal_accesor, normal_data);
+
+	for (int i = 0; i < vertices.size(); i++) {
+		if (normal_accesor.type == TINYGLTF_TYPE_VEC3 &&
+				normal_accesor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT) {
+			auto *dtf = (float *)normal_data.data();
+
+			//vec3f
+			vertices[i].normal[0] = *(dtf + (i * 3) + 0);
+			vertices[i].normal[1] = *(dtf + (i * 3) + 1);
+			vertices[i].normal[2] = *(dtf + (i * 3) + 2);
+		} else {
+			SPDLOG_ERROR("INVALID NORMAL TYPE");
+			assert(false);
+		}
+	}
+
+	tg::Accessor &uv_accesor = model.accessors[primitive.attributes["TEXCOORD_0"]];
+
+	std::vector<uint8_t> uv_data;
+	unpack_gltf_buffer(model, uv_accesor, uv_data);
+
+	for (int i = 0; i < vertices.size(); i++) {
+		if (uv_accesor.type == TINYGLTF_TYPE_VEC2 && uv_accesor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT) {
+			auto *dtf = (float *)uv_data.data();
+
+			//vec3f
+			vertices[i].uv[0] = *(dtf + (i * 2) + 0);
+			vertices[i].uv[1] = *(dtf + (i * 2) + 1);
+		} else {
+			SPDLOG_ERROR("INVALID UV TYPE");
+			assert(false);
+		}
+	}
+
+	tg::Accessor &joint_accessor = model.accessors[primitive.attributes.find("JOINTS_0")->second];
+
+	std::vector<uint8_t> joint_data;
+	unpack_gltf_buffer(model, joint_accessor, joint_data);
+
+	for (int i = 0; i < vertices.size(); i++) {
+		if (joint_accessor.type == TINYGLTF_TYPE_VEC4 &&
+				joint_accessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE) {
+			auto *dtf = (uint8_t *)joint_data.data();
+
+			vertices[i].joint[0] = *(dtf + (i * 4) + 0);
+			vertices[i].joint[1] = *(dtf + (i * 4) + 1);
+			vertices[i].joint[2] = *(dtf + (i * 4) + 2);
+			vertices[i].joint[3] = *(dtf + (i * 4) + 3);
+		} else if (joint_accessor.type == TINYGLTF_TYPE_VEC4 &&
+				joint_accessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT) {
+			auto *dtf = (uint16_t *)joint_data.data();
+
+			vertices[i].joint[0] = *(dtf + (i * 4) + 0);
+			vertices[i].joint[1] = *(dtf + (i * 4) + 1);
+			vertices[i].joint[2] = *(dtf + (i * 4) + 2);
+			vertices[i].joint[3] = *(dtf + (i * 4) + 3);
+		} else {
+			SPDLOG_ERROR("INVALID JOINT TYPE");
+			assert(false);
+		}
+	}
+
+	tg::Accessor &weight_accessor = model.accessors[primitive.attributes.find("WEIGHTS_0")->second];
+
+	std::vector<uint8_t> weight_data;
+	unpack_gltf_buffer(model, weight_accessor, weight_data);
+
+	for (int i = 0; i < vertices.size(); i++) {
+		if (weight_accessor.type == TINYGLTF_TYPE_VEC4 &&
+				weight_accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT) {
+			auto *dtf = (float *)weight_data.data();
+
+			//vec3f
+			vertices[i].weight[0] = *(dtf + (i * 4) + 0);
+			vertices[i].weight[1] = *(dtf + (i * 4) + 1);
+			vertices[i].weight[2] = *(dtf + (i * 4) + 2);
+			vertices[i].weight[3] = *(dtf + (i * 4) + 3);
+		} else {
+			SPDLOG_ERROR("INVALID WEIGHT TYPE");
+			assert(false);
+		}
+	}
+}
+
+void extract_gltf_animation_nodes(
+		tg::AnimationChannel &channel, tg::Animation &animation, tg::Model &model, assets::NodeAnimation &node) {
+	const tinygltf::AnimationSampler &sampler = animation.samplers[channel.sampler];
+
+	tg::Accessor &times_accessor = model.accessors[sampler.input];
+
+	std::vector<uint8_t> times_data;
+	unpack_gltf_buffer(model, times_accessor, times_data);
+
+	tg::Accessor &transform_accessor = model.accessors[sampler.output];
+
+	std::vector<uint8_t> transform_data;
+	unpack_gltf_buffer(model, transform_accessor, transform_data);
+
+	const int32_t node_index = channel.target_node;
+	std::string node_name = model.nodes[node_index].name;
+	constexpr int32_t SECONDS_TO_MS = 1000;
+	if (transform_accessor.type == TINYGLTF_TYPE_VEC3 &&
+			transform_accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT) {
+		auto *times = (float *)times_data.data();
+		auto *transforms = (float *)transform_data.data();
+		node.translation_times.reserve(times_accessor.count);
+		node.translations.reserve(times_accessor.count);
+
+		for (size_t i = 0; i < times_accessor.count; ++i) {
+			node.translation_times.push_back(times[i] * SECONDS_TO_MS);
+			std::array<float, 3> translation = { transforms[i * 3], transforms[i * 3 + 1], transforms[i * 3 + 2] };
+			node.translations.emplace_back(translation);
+		}
+	} else if (transform_accessor.type == TINYGLTF_TYPE_VEC4 &&
+			transform_accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT) {
+		auto *times = (float *)times_data.data();
+		auto *transforms = (float *)transform_data.data();
+		node.rotation_times.reserve(times_accessor.count);
+		node.rotations.reserve(times_accessor.count);
+
+		for (size_t i = 0; i < times_accessor.count; ++i) {
+			node.rotation_times.push_back(times[i] * SECONDS_TO_MS);
+			std::array<float, 4> translation = { transforms[i * 4], transforms[i * 4 + 1], transforms[i * 4 + 2],
+				transforms[i * 4 + 3] };
+			node.rotations.emplace_back(translation);
+		}
+	} else {
+		SPDLOG_WARN("Invalid transform type at node: {}", node_name);
 	}
 }
 
@@ -288,6 +450,107 @@ bool extract_gltf_meshes(
 			save_binary_file(mesh_path.string().c_str(), new_file);
 		}
 	}
+
+	return true;
+}
+
+bool extract_gltf_skinned_meshes(
+		tg::Model &model, const fs::path &input, const fs::path &output_folder, const ConverterState &conv_state) {
+	for (auto mesh_index = 0; mesh_index < model.meshes.size(); mesh_index++) {
+		auto &mesh = model.meshes[mesh_index];
+
+		using SkinnedVertexFormat = assets::SkinnedVertexPNV32;
+		auto vertex_format_enum = assets::SkinnedVertexFormat::PNV32;
+
+		std::vector<SkinnedVertexFormat> vertices;
+		std::vector<uint32_t> indices;
+
+		for (auto prim_index = 0; prim_index < mesh.primitives.size(); prim_index++) {
+			vertices.clear();
+			indices.clear();
+
+			std::string mesh_name = calculate_gltf_mesh_name(model, mesh_index, prim_index);
+
+			auto &primitive = mesh.primitives[prim_index];
+
+			extract_gltf_indices(primitive, model, indices);
+			extract_gltf_skinned_vertices(primitive, model, vertices);
+
+			SkinnedMeshInfo mesh_info;
+			mesh_info.vertex_format = vertex_format_enum;
+			mesh_info.vertex_buffer_size = vertices.size() * sizeof(SkinnedVertexFormat);
+			mesh_info.index_buffer_size = indices.size() * sizeof(uint32_t);
+			mesh_info.index_size = indices.size();
+			mesh_info.original_file = input.string();
+			mesh_info.bounds = calculate_bounds(vertices.data(), vertices.size());
+			mesh_info.compression_mode = assets::CompressionMode::LZ4;
+
+			AssetFile new_file = pack_mesh(&mesh_info, (char *)vertices.data(), (char *)indices.data());
+
+			fs::path mesh_path = output_folder / (mesh_name + ".skinned_mesh");
+
+			save_binary_file(mesh_path.string().c_str(), new_file);
+		}
+	}
+
+	return true;
+}
+
+bool extract_gltf_animations(tg::Model &model, tg::Animation &animation, const fs::path &input,
+		const fs::path &output_folder, const ConverterState &conv_state) {
+	assets::AnimationInfo animation_info;
+	size_t full_size = 0;
+	std::vector<assets::NodeAnimation> nodes(model.nodes.size());
+	animation_info.sizes.resize(model.nodes.size());
+	animation_info.node_names.resize(model.nodes.size());
+
+	for (tinygltf::AnimationChannel &channel : animation.channels) {
+		if (strcmp(channel.target_path.c_str(), "scale") == 0) { //Skip scale
+			continue;
+		}
+		const int32_t node_index = channel.target_node;
+		std::string node_name = model.nodes[node_index].name;
+		assets::NodeAnimation *node = &nodes[node_index];
+		extract_gltf_animation_nodes(channel, animation, model, *node);
+
+		if (strcmp(channel.target_path.c_str(), "translation") == 0) {
+			animation_info.sizes[node_index].translations = node->translations.size() * sizeof(glm::vec3);
+			animation_info.sizes[node_index].translation_times = node->translation_times.size() * sizeof(float);
+			full_size += node->translations.size() * sizeof(glm::vec3) + node->translation_times.size() * sizeof(float);
+		} else if (strcmp(channel.target_path.c_str(), "rotation") == 0) {
+			animation_info.sizes[node_index].rotations = node->rotations.size() * sizeof(glm::quat);
+			animation_info.sizes[node_index].rotation_times = node->rotation_times.size() * sizeof(float);
+			full_size += node->rotations.size() * sizeof(glm::quat) + node->rotation_times.size() * sizeof(float);
+		}
+
+		animation_info.node_names[node_index] = node_name;
+	}
+
+	// TODO: Optimize it
+	for (int32_t i = nodes.size() - 1; i >= 0; --i) {
+		if (nodes[i].translations.empty() || nodes[i].rotations.empty()) {
+			nodes.erase(nodes.begin() + i);
+			animation_info.sizes.erase(animation_info.sizes.begin() + i);
+			animation_info.node_names.erase(animation_info.node_names.begin() + i);
+		}
+	}
+
+	if (!model.accessors.empty() && !animation.samplers.empty() &&
+			!model.accessors[animation.samplers[0].input].maxValues.empty()) {
+		animation_info.duration_seconds = (float)model.accessors[animation.samplers[0].input].maxValues[0];
+	} else {
+		animation_info.duration_seconds = 0.0f;
+	}
+
+	animation_info.original_file = input.string();
+	animation_info.full_size = full_size;
+	std::string animation_name = animation.name;
+
+	AssetFile new_file = assets::pack_animation(&animation_info, nodes);
+
+	fs::path animation_path = output_folder / (animation_name + ".anim");
+
+	save_binary_file(animation_path.string().c_str(), new_file);
 
 	return true;
 }
@@ -560,6 +823,220 @@ void extract_gltf_nodes(tinygltf::Model &model, const fs::path &input, const fs:
 	save_binary_file(scenefilepath.string().c_str(), new_file);
 }
 
+void extract_gltf_skinned_nodes(tinygltf::Model &model, const fs::path &input, const fs::path &output_folder,
+		const ConverterState &conv_state) {
+	assets::SkinnedModelInfo model_info;
+	assets::JointData joint_data;
+	for (tg::Skin &skin : model.skins) {
+		tinygltf::Accessor &matrices_accessor = model.accessors[skin.inverseBindMatrices];
+
+		std::vector<uint8_t> matrices_data;
+		unpack_gltf_buffer(model, matrices_accessor, matrices_data);
+		joint_data.rotation.resize(skin.joints.size());
+		joint_data.translation.resize(skin.joints.size());
+		joint_data.id.resize(skin.joints.size());
+		model_info.joint_names.resize(skin.joints.size());
+		for (int32_t i = 0; i < matrices_accessor.count; ++i) {
+			glm::mat4 transform_matrix{};
+			if (matrices_accessor.type == TINYGLTF_TYPE_MAT4 &&
+					matrices_accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT) {
+				memcpy(&transform_matrix, matrices_data.data() + i * sizeof(glm::mat4), sizeof(glm::mat4));
+			} else {
+				SPDLOG_ERROR("INVALID MATRIX TYPE");
+				assert(false);
+			}
+
+			glm::vec3 place_holder;
+			glm::vec4 place_holder2;
+
+			glm::vec3 glm_translation;
+			glm::quat glm_rotation;
+
+			glm::decompose(transform_matrix, place_holder, glm_rotation, glm_translation, place_holder, place_holder2);
+			std::array<float, 3> translation = { glm_translation[0], glm_translation[1], glm_translation[2] };
+			std::array<float, 4> rotation = { glm_rotation[0], glm_rotation[1], glm_rotation[2], glm_rotation[3] };
+
+			joint_data.translation[i] = translation;
+			joint_data.rotation[i] = rotation;
+			joint_data.id[i] = i;
+			model_info.joint_names[i] = model.nodes[skin.joints[i]].name;
+		}
+		break; // Read only first skin, because idk how to use more than one skin, but maybe in the future
+	}
+	model_info.joint_rotation_buffer_size = joint_data.rotation.size() * sizeof(float) * 4;
+	model_info.joint_translation_buffer_size = joint_data.translation.size() * sizeof(float) * 3;
+	model_info.joint_id_buffer_size = joint_data.id.size() * sizeof(int32_t);
+
+	assets::BoneData bone_data;
+
+	bone_data.translation.resize(model.nodes.size());
+	bone_data.rotation.resize(model.nodes.size());
+	model_info.bone_names.resize(model.nodes.size());
+	model_info.bone_parents.resize(model.nodes.size());
+	model_info.bone_children.resize(model.nodes.size());
+	// -1 means that node is root
+	for (int32_t i = 0; i < model.nodes.size(); ++i) {
+		model_info.bone_parents[i] = -1;
+	}
+
+	// Read only bone nodes
+	for (int i = 0; i < model.nodes.size(); i++) {
+		auto &node = model.nodes[i];
+
+		std::string node_name = node.name;
+		glm::mat4 transform_matrix;
+
+		bool is_node_bone = !node.translation.empty() && !node.rotation.empty();
+		if (is_node_bone) {
+			glm::mat4 translation = glm::translate(
+					glm::mat4(1.0f), glm::vec3{ node.translation[0], node.translation[1], node.translation[2] });
+
+			glm::mat4 rotation = glm::mat4(glm::quat((float)node.rotation[3], (float)node.rotation[0],
+					(float)node.rotation[1], (float)node.rotation[2]));
+
+			transform_matrix = translation * rotation;
+		} else if (!node.matrix.empty()) {
+			for (int32_t j = 0; j < node.matrix.size(); j++) {
+				transform_matrix[j / 4][j % 4] = node.matrix[j];
+			}
+		} else {
+			transform_matrix = glm::mat4(1.0f);
+		}
+
+		glm::vec3 place_holder;
+		glm::vec4 place_holder2;
+
+		glm::vec3 glm_translation;
+		glm::quat glm_rotation;
+
+		glm::decompose(transform_matrix, place_holder, glm_rotation, glm_translation, place_holder, place_holder2);
+		std::array<float, 3> translation = { glm_translation[0], glm_translation[1], glm_translation[2] };
+		std::array<float, 4> rotation = { glm_rotation[0], glm_rotation[1], glm_rotation[2], glm_rotation[3] };
+
+		bone_data.translation[i] = translation;
+		bone_data.rotation[i] = rotation;
+		model_info.bone_names[i] = node_name;
+		model_info.bone_children[i] = model.nodes[i].children;
+	}
+	model_info.bone_rotation_buffer_size = bone_data.rotation.size() * sizeof(float) * 4;
+	model_info.bone_translation_buffer_size = bone_data.translation.size() * sizeof(float) * 3;
+
+	//calculate parent hierarchies
+	//gltf stores children, but we want parent
+	for (int i = 0; i < model.nodes.size(); i++) {
+		for (int32_t child : model.nodes[i].children) {
+			model_info.bone_parents[child] = i;
+		}
+	}
+
+	//for every gltf node that is a root node (no parents), apply the coordinate fixup
+
+	//	glm::mat4 flip = glm::mat4{ 1.0 };
+	//	flip[1][1] = -1;
+	//	glm::mat4 rotation = glm::rotate(glm::mat4(1.0), glm::radians(-180.f), glm::vec3{ 1, 0, 0 });
+
+	for (int32_t i = 0; i < model_info.bone_parents.size(); ++i) {
+		if (model_info.bone_parents[i] == -1) {
+			model_info.root = i;
+			break;
+			//			//no parent, root node
+			//			glm::vec3 translation = { bone_data.translation[i][0], bone_data.translation[i][1],
+			//				bone_data.translation[i][2] };
+			//			glm::quat rotate = { bone_data.rotation[i][0], bone_data.rotation[i][1],
+			//bone_data.rotation[i][2], 				bone_data.rotation[i][3] };
+			//
+			//			glm::mat4 matrix = glm::translate(glm::mat4(1.0f), translation) * glm::mat4(rotate);
+			//			matrix = rotation * (flip * matrix);
+			//
+			//			glm::vec3 place_holder;
+			//			glm::vec4 place_holder2;
+			//
+			//			glm::vec3 glm_translation;
+			//			glm::quat glm_rotation;
+			//
+			//			glm::decompose(matrix, place_holder, glm_rotation, glm_translation, place_holder,
+			//place_holder2); 			std::array<float, 3> t = { glm_translation[0], glm_translation[1],
+			//glm_translation[2] }; 			std::array<float, 4> r = { glm_rotation[0], glm_rotation[1],
+			//glm_rotation[2],
+			//glm_rotation[3] }; 			bone_data.translation[i] = t; 			bone_data.rotation[i] = r;
+		}
+	}
+
+	std::vector<uint64_t> mesh_nodes;
+	for (int i = 0; i < model.nodes.size(); i++) {
+		auto &node = model.nodes[i];
+
+		if (node.mesh >= 0) {
+			auto mesh = model.meshes[node.mesh];
+
+			if (mesh.primitives.size() > 1) {
+				mesh_nodes.push_back(i);
+			} else {
+				auto primitive = mesh.primitives[0];
+				std::string meshname = calculate_gltf_mesh_name(model, node.mesh, 0);
+
+				fs::path meshpath = output_folder / (meshname + ".skinned_mesh");
+
+				int material = primitive.material;
+
+				std::string matname = calculate_gltf_material_name(model, material);
+
+				fs::path materialpath = output_folder / (matname + ".mat");
+
+				assets::SkinnedModelInfo::NodeMesh nmesh;
+				nmesh.mesh_path = conv_state.convert_to_export_relative(meshpath).string();
+				nmesh.material_path = conv_state.convert_to_export_relative(materialpath).string();
+
+				model_info.node_meshes[i] = nmesh;
+			}
+		}
+	}
+
+	int node_index = (int)model.nodes.size();
+	//iterate nodes with mesh, convert each submesh into a node
+	for (int i = 0; i < mesh_nodes.size(); i++) {
+		auto &node = model.nodes[i];
+
+		if (node.mesh < 0) {
+			break;
+		}
+
+		auto mesh = model.meshes[node.mesh];
+
+		for (int prim_index = 0; prim_index < mesh.primitives.size(); prim_index++) {
+			auto primitive = mesh.primitives[prim_index];
+			int newnode = node_index++;
+
+			auto prim_index_string = std::to_string(prim_index);
+
+			model_info.bone_names[newnode] = model_info.bone_names[i] + "_PRIM_" + prim_index_string;
+
+			int material = primitive.material;
+			auto mat = model.materials[material];
+			std::string matname = calculate_gltf_material_name(model, material);
+			std::string meshname = calculate_gltf_mesh_name(model, node.mesh, prim_index);
+
+			fs::path materialpath = output_folder / (matname + ".mat");
+			fs::path meshpath = output_folder / (meshname + ".skinned_mesh");
+
+			assets::SkinnedModelInfo::NodeMesh nmesh;
+			nmesh.mesh_path = conv_state.convert_to_export_relative(meshpath).string();
+			nmesh.material_path = conv_state.convert_to_export_relative(materialpath).string();
+
+			model_info.node_meshes[newnode] = nmesh;
+		}
+	}
+
+	assets::AssetFile new_file = assets::pack_model(model_info, bone_data, joint_data);
+
+	fs::path scene_filepath = (output_folder.parent_path()) / input.stem();
+
+	scene_filepath.replace_extension(".skinmdl");
+
+	//save to disk
+	save_binary_file(scene_filepath.string().c_str(), new_file);
+}
+
 int main(int argc, char *argv[]) {
 	if (argc < 2) {
 		SPDLOG_ERROR("You need to put a resources directory as an argument");
@@ -569,6 +1046,8 @@ int main(int argc, char *argv[]) {
 	fs::path path{ argv[1] };
 
 	const fs::path &asset_dir = path / "assets";
+	const fs::path &skinned_meshes_dir = path / "skinned_assets";
+	const fs::path &animations_dir = path / "animations";
 	const fs::path &export_dir = path / "assets_export";
 	const fs::path &tmp_dir = path / "assets_tmp";
 	const fs::path &cubemap_dir = path / "cubemaps";
@@ -646,6 +1125,114 @@ int main(int argc, char *argv[]) {
 			extract_gltf_meshes(model, p.path(), folder, conv_state);
 			extract_gltf_materials(model, p.path(), folder, conv_state);
 			extract_gltf_nodes(model, p.path(), folder, conv_state);
+		}
+	}
+
+	for (auto &p : fs::recursive_directory_iterator(skinned_meshes_dir)) {
+		SPDLOG_INFO("File: {}", p.path().string());
+
+		auto relative = p.path().lexically_proximate(skinned_meshes_dir);
+		auto export_path = export_dir / relative;
+
+		if (!fs::is_directory(export_path.parent_path())) {
+			fs::create_directory(export_path.parent_path());
+		}
+
+		if (p.path().extension() == ".png" || p.path().extension() == ".jpg" || p.path().extension() == ".jpeg") {
+			SPDLOG_INFO("found a texture");
+
+			auto new_path = p.path();
+			new_path.replace_extension(".ktx2");
+
+			auto folder = export_path.parent_path() / new_path.filename().string();
+
+			futures.push_back(std::async([p, folder]() { convert_image(p.path(), folder); }));
+		}
+
+		if (p.path().extension() == ".gltf") {
+			SPDLOG_INFO("found a glTF model");
+
+			using namespace tg;
+			Model model;
+			std::string err;
+			std::string warn;
+
+			TinyGLTF loader;
+
+			bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, p.path().generic_string());
+
+			if (!warn.empty()) {
+				SPDLOG_WARN("Warn: %s\n", warn.c_str());
+			}
+
+			if (!err.empty()) {
+				SPDLOG_ERROR("Err: %s\n", err.c_str());
+				continue;
+			}
+
+			if (!ret) {
+				SPDLOG_ERROR("Failed to load gltf file: {} - {} - {}", p.path().string(), err, warn);
+				continue;
+			}
+
+			auto folder = export_path.parent_path() / (p.path().stem().string() + "_GLTF");
+			fs::create_directory(folder);
+
+			extract_gltf_skinned_meshes(model, p.path(), folder, conv_state);
+			extract_gltf_materials(model, p.path(), folder, conv_state);
+			extract_gltf_skinned_nodes(model, p.path(), folder, conv_state);
+		}
+	}
+
+	for (auto &p : fs::recursive_directory_iterator(animations_dir)) {
+		SPDLOG_INFO("File: {}", p.path().string());
+
+		auto relative = p.path().lexically_proximate(animations_dir);
+		auto export_path = export_dir / relative;
+
+		if (!fs::is_directory(export_path.parent_path())) {
+			fs::create_directory(export_path.parent_path());
+		}
+
+		if (p.path().extension() == ".gltf") {
+			SPDLOG_INFO("found a glTF model");
+
+			using namespace tg;
+			Model model;
+			std::string err;
+			std::string warn;
+
+			TinyGLTF loader;
+
+			bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, p.path().generic_string());
+
+			if (!warn.empty()) {
+				SPDLOG_WARN("Warn: %s\n", warn.c_str());
+			}
+
+			if (!err.empty()) {
+				SPDLOG_ERROR("Err: %s\n", err.c_str());
+				continue;
+			}
+
+			if (!ret) {
+				SPDLOG_ERROR("Failed to load gltf file: {} - {} - {}", p.path().string(), err, warn);
+				continue;
+			}
+
+			if (model.animations.empty()) {
+				SPDLOG_ERROR("Model does not have any animations: {}", p.path().string());
+				continue;
+			}
+
+			// Read animations
+			for (Animation &animation : model.animations) {
+				auto folder = export_path.parent_path() / (p.path().stem().string() + "_ANIM_GLTF");
+
+				fs::create_directory(folder);
+
+				extract_gltf_animations(model, animation, p.path(), folder, conv_state);
+			}
 		}
 	}
 

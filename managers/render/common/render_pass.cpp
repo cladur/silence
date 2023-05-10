@@ -3,6 +3,27 @@
 #include "render/common/framebuffer.h"
 #include "render/common/utils.h"
 #include "render/render_manager.h"
+#include <tracy/tracy.hpp>
+
+void SkinnedPassUnlit::startup() {
+	material.startup();
+}
+
+void SkinnedPassUnlit::draw(RenderScene &scene) {
+	RenderManager &render_manager = RenderManager::get();
+	material.bind_resources(scene);
+	for (auto &cmd : draw_commands) {
+		SkinnedModelInstance &instance = *cmd.model_instance;
+		Transform &transform = *cmd.transform;
+		material.bind_instance_resources(instance, transform);
+		SkinnedModel &model = render_manager.get_skinned_model(instance.model_handle);
+		for (auto &mesh : model.meshes) {
+			material.bind_mesh_resources(mesh);
+			mesh.draw();
+		}
+	}
+	draw_commands.clear();
+}
 
 void PBRPass::startup() {
 	material.startup();
@@ -84,6 +105,7 @@ void GBufferPass::draw(RenderScene &scene) {
 }
 
 void TransparentPass::draw(RenderScene &scene) {
+	ZoneScopedNC("TransparentPass::draw()", 0xad074f);
 	RenderManager &render_manager = RenderManager::get();
 	static std::vector<TransparentObject> screen_space_objects;
 	glm::vec3 cam_pos = scene.camera_pos;

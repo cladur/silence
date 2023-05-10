@@ -15,7 +15,7 @@ void DebugDraw::startup() {
 
 	glBufferData(GL_ARRAY_BUFFER, MAX_VERTEX_COUNT * sizeof(DebugVertex), nullptr, GL_DYNAMIC_DRAW);
 
-	// vertex positions
+	// vertex translation
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(DebugVertex), (void *)nullptr);
 	// vertex color

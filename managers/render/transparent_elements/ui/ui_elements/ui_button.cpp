@@ -2,8 +2,8 @@
 #include <audio/audio_manager.h>
 #include <display/display_manager.h>
 #include <input/input_manager.h>
+#include <render/transparent_elements/ui_manager.h>
 #include <render/transparent_elements/ui/sprite_manager.h>
-#include <render/render_scene.h>
 
 UIButton::UIButton(glm::vec3 position, glm::vec2 size, const std::string &text, const std::string &font_name,
 		const std::string &texture_name, const std::string &hover_sound_name, const std::string &click_sound_name) {
@@ -26,11 +26,11 @@ UIButton::UIButton(glm::vec3 position, glm::vec2 size, const std::string &text, 
 	//	}
 }
 
-void UIButton::draw(RenderScene *scene) {
+void UIButton::draw() {
 	if (!display) {
 		return;
 	}
-	auto &sprite_draw = scene->sprite_draw;
+	auto &ui_manager = UIManager::get();
 	std::string tex = texture_name;
 	bool h = hovered();
 
@@ -41,22 +41,24 @@ void UIButton::draw(RenderScene *scene) {
 	}
 
 	if (texture_name.empty()) {
-		sprite_draw.draw_colored(position, size, color, is_screen_space);
+		ui_manager.sprite_draw.draw_colored(position, size, color, is_screen_space);
 	} else {
-		sprite_draw.draw_sprite(position, size, color, tex.c_str(), is_screen_space);
+		ui_manager.sprite_draw.draw_sprite(position, size, color, tex.c_str(), is_screen_space);
 	}
 
 	if (text.empty()) {
 		return;
 	}
-	scene->text_draw.draw_text(text, is_screen_space, position + glm::vec3(0.0f, 0.0f, 0.1f), text_color, text_scale,
+	ui_manager.text_draw.draw_text(text, is_screen_space, position + glm::vec3(0.0f, 0.0f, 0.1f), text_color, text_scale,
 	 		font_name, centered_x, centered_y, glm::vec3(0.0f));
 }
 
-void UIButton::draw(RenderScene *scene, glm::vec3 parent_position, glm::vec2 parent_size) {
+void UIButton::draw(glm::vec3 parent_position, glm::vec2 parent_size) {
 	if (!display) {
 		return;
 	}
+
+	auto &ui_manager = UIManager::get();
 
 	glm::vec3 new_pos = position + parent_position + glm::vec3(0.0f, 0.0f, 0.01f);
 	new_pos.z += 0.01f;
@@ -71,15 +73,15 @@ void UIButton::draw(RenderScene *scene, glm::vec3 parent_position, glm::vec2 par
 	}
 
 	if (texture_name.empty()) {
-		scene->sprite_draw.draw_colored(new_pos, size, color, is_screen_space);
+		ui_manager.sprite_draw.draw_colored(new_pos, size, color, is_screen_space);
 	} else {
-		scene->sprite_draw.draw_sprite(new_pos, size, color, tex.c_str(), is_screen_space);
+		ui_manager.sprite_draw.draw_sprite(new_pos, size, color, tex.c_str(), is_screen_space);
 	}
 
 	if (text.empty()) {
 		return;
 	}
-	 scene->text_draw.draw_text(text, is_screen_space, new_pos + glm::vec3(0.0f, 0.0f, 0.5f), text_color, text_scale,
+	ui_manager.text_draw.draw_text(text, is_screen_space, new_pos + glm::vec3(0.0f, 0.0f, 0.5f), text_color, text_scale,
 	 		font_name, centered_x, centered_y, glm::vec3(0.0f));
 }
 
