@@ -25,7 +25,9 @@ add_library(${OPENGL_MANAGER_NAME} STATIC
         transparent_elements/ui/ui_elements/ui_anchor.cpp transparent_elements/ui/ui_elements/ui_anchor.h
         transparent_elements/ui/ui_elements/ui_image.cpp transparent_elements/ui/ui_elements/ui_image.h
         transparent_elements/ui/ui_elements/ui_text.cpp transparent_elements/ui/ui_elements/ui_text.h
-        transparent_elements/ui/ui_elements/ui_button.cpp transparent_elements/ui/ui_elements/ui_button.h transparent_elements/ui_draw.cpp transparent_elements/ui_draw.h common/mesh_bounding_sphere.cpp common/mesh_bounding_sphere.h)
+        transparent_elements/ui/ui_elements/ui_button.cpp transparent_elements/ui/ui_elements/ui_button.h common/mesh_bounding_sphere.cpp common/mesh_bounding_sphere.h
+        transparent_elements/ui_manager.h 
+        transparent_elements/ui_manager.cpp)
 
 # Include directories
 target_include_directories(${OPENGL_MANAGER_NAME} PUBLIC ${MANAGER_DIR})

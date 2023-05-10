@@ -15,7 +15,7 @@ struct TextVertex {
 class TextDraw {
 public:
 	TextDraw() = default;
-	RenderScene *current_scene;
+	RenderScene *r_scene;
 
 	void draw_text_2d(const std::string &text, const glm::vec2 &position,
 			const glm::vec3 &color = glm::vec3(1.0f, 1.0f, 1.0f), float scale = 1.0f, std::string font_name = nullptr,

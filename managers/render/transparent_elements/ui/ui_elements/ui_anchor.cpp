@@ -1,6 +1,6 @@
 #include "ui_anchor.h"
 #include <display/display_manager.h>
-#include <render/render_scene.h>
+#include <render/transparent_elements/ui_manager.h>
 
 UIAnchor::UIAnchor(float x, float y) : x(x), y(y) {
 	alignment = Alignment::NONE;
@@ -10,7 +10,7 @@ UIAnchor::UIAnchor(float x, float y) : x(x), y(y) {
 	position = glm::vec3(d_size.x * x, d_size.y * y, -5.0f);
 }
 
-void UIAnchor::draw(RenderScene *scene) {
+void UIAnchor::draw() {
 	if (!display) {
 		for (auto &child : children) {
 			child->display = false;
@@ -18,22 +18,24 @@ void UIAnchor::draw(RenderScene *scene) {
 		return;
 	}
 
+	auto &ui_manager = UIManager::get();
+
 	glm::vec2 d_size = DisplayManager::get().get_window_size();
 	position = glm::vec3(d_size.x * x, d_size.y * y, -1.0f);
 
 	if (draw_anchor) {
-		scene->sprite_draw.draw_sprite(
+		ui_manager.sprite_draw.draw_sprite(
 				position, glm::vec2(66.0f, 66.0f), color, texture_name.c_str(), is_screen_space, alignment);
 	}
 
 	for (auto &child : children) {
 		child->display = display;
 		child->parent_position = position;
-		child->draw(scene, position, size);
+		child->draw(position, size);
 	}
 }
 
-void UIAnchor::draw(RenderScene *scene, glm::vec3 parent_position, glm::vec2 parent_size) {
+void UIAnchor::draw(glm::vec3 parent_position, glm::vec2 parent_size) {
 	if (!display) {
 		for (auto &child : children) {
 			child->display = false;
@@ -41,16 +43,17 @@ void UIAnchor::draw(RenderScene *scene, glm::vec3 parent_position, glm::vec2 par
 		return;
 	}
 
-	auto &sprite_draw = scene->sprite_draw;
+	auto &ui_manager = UIManager::get();
+
 	glm::vec2 d_size = parent_size;
 
 	glm::vec3 new_pos =
 			parent_position - glm::vec3(parent_size / 2.0f, 0.0f) + glm::vec3(d_size.x * x, d_size.y * y, 0.01f);
 
-	sprite_draw.draw_sprite(new_pos, size, color, texture_name.c_str(), is_screen_space, alignment);
+	ui_manager.sprite_draw.draw_sprite(new_pos, size, color, texture_name.c_str(), is_screen_space, alignment);
 
 	for (auto &child : children) {
 		child->parent_position = new_pos;
-		child->draw(scene, new_pos, size);
+		child->draw(new_pos, size);
 	}
 }

@@ -1,42 +1,44 @@
-#ifndef SILENCE_MENU_TEST_H
-#define SILENCE_MENU_TEST_H
+// #ifndef SILENCE_MENU_TEST_H
+// #define SILENCE_MENU_TEST_H
 
-#include "render/transparent_elements/ui/ui_elements/ui_anchor.h"
-#include "render/transparent_elements/ui/ui_elements/ui_button.h"
-#include "render/transparent_elements/ui/ui_elements/ui_image.h"
-#include "render/transparent_elements/ui/ui_elements/ui_text.h"
+// #include "render/transparent_elements/ui/ui_elements/ui_anchor.h"
+// #include "render/transparent_elements/ui/ui_elements/ui_button.h"
+// #include "render/transparent_elements/ui/ui_elements/ui_image.h"
+// #include "render/transparent_elements/ui/ui_elements/ui_text.h"
 
-class MenuTest {
-private:
+// struct Scene;
 
-	UIImage billboard_test;
+// class MenuTest {
+// private:
 
-	UIAnchor root;
-	UIButton play_button;
-	UIButton options_button;
-	UIButton credits_button;
+// 	UIImage billboard_test;
 
-	UIAnchor title_root;
-	UIText title_text;
+// 	UIAnchor root;
+// 	UIButton play_button;
+// 	UIButton options_button;
+// 	UIButton credits_button;
 
-	UIAnchor credits_root;
-	UIText credits_text;
+// 	UIAnchor title_root;
+// 	UIText title_text;
 
-	UIAnchor options_root;
-	UIText master_volume;
-	UIImage volume_meter[10];
-	UIButton plus_button;
-	UIButton minus_button;
+// 	UIAnchor credits_root;
+// 	UIText credits_text;
 
-	UIAnchor back_button_root;
-	UIButton back_button;
+// 	UIAnchor options_root;
+// 	UIText master_volume;
+// 	UIImage volume_meter[10];
+// 	UIButton plus_button;
+// 	UIButton minus_button;
 
-	FMOD::Studio::Bus *master_bus = nullptr;
+// 	UIAnchor back_button_root;
+// 	UIButton back_button;
 
-public:
-	MenuTest() = default;
-	void startup(RenderScene &scene);
-	void update();
-};
+// 	FMOD::Studio::Bus *master_bus = nullptr;
 
-#endif //SILENCE_MENU_TEST_H
+// public:
+// 	MenuTest() = default;
+// 	void startup(Scene &scene);
+// 	void update();
+// };
+
+// #endif //SILENCE_MENU_TEST_H

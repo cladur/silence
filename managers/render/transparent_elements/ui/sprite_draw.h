@@ -23,7 +23,7 @@ enum class SliderAlignment { LEFT_TO_RIGHT, RIGHT_TO_LEFT, TOP_TO_BOTTOM, BOTTOM
 class SpriteDraw {
 public:
 	SpriteDraw() = default;
-	RenderScene* current_scene;
+	RenderScene *r_scene;
 
 	TransparentObject default_vertex_data(const glm::vec3 &position, const glm::vec2 &size, float sprite_x_size,
 			float sprite_y_size, const glm::vec3 &color, bool is_screen_space, Alignment alignment = Alignment::CENTER);
