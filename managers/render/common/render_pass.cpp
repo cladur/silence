@@ -3,6 +3,7 @@
 #include "render/common/framebuffer.h"
 #include "render/common/utils.h"
 #include "render/render_manager.h"
+#include <tracy/tracy.hpp>
 
 void PBRPass::startup() {
 	material.startup();
@@ -84,6 +85,7 @@ void GBufferPass::draw(RenderScene &scene) {
 }
 
 void TransparentPass::draw(RenderScene &scene) {
+	ZoneScopedNC("TransparentPass::draw()", 0xad074f);
 	RenderManager &render_manager = RenderManager::get();
 	static std::vector<TransparentObject> screen_space_objects;
 	glm::vec3 cam_pos = scene.camera_pos;

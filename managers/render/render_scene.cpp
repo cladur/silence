@@ -2,6 +2,7 @@
 
 #include "cvars/cvars.h"
 #include "game/menu_test.h"
+#include "render/transparent_elements/ui_manager.h"
 #include "render_manager.h"
 #include <glad/glad.h>
 
@@ -24,10 +25,6 @@ void RenderScene::startup() {
 	render_framebuffer.startup(render_extent.x, render_extent.y);
 	g_buffer.startup(render_extent.x, render_extent.y);
 
-	text_draw.current_scene = this;
-	sprite_draw.current_scene = this;
-	ui_draw.current_scene = this;
-
 	debug_draw.startup();
 	transparent_pass.startup();
 
@@ -35,6 +32,7 @@ void RenderScene::startup() {
 	debug_camera.yaw = 45.0f;
 	debug_camera.pitch = -20.0f;
 	debug_camera.update_camera_vectors();
+	UIManager::get().set_render_scene(this);
 }
 
 void RenderScene::draw() {
@@ -66,6 +64,9 @@ void RenderScene::draw() {
 		view = glm::inverse(camera_transform.get_global_model_matrix());
 		camera_pos = camera_transform.get_global_position();
 	}
+
+	UIManager::get().set_render_scene(this);
+	UIManager::get().draw();
 
 	// Enable depth testing
 	glEnable(GL_DEPTH_TEST);

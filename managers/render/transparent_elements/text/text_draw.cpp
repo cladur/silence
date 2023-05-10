@@ -41,7 +41,7 @@ void TextDraw::draw_text(const std::string &text, bool is_screen_space, const gl
 	float aspect = 1.0;
 
 	if (!is_screen_space) {
-		aspect = current_scene->render_extent.x / current_scene->render_extent.y;
+		aspect = r_scene->render_extent.x / r_scene->render_extent.y;
 		// We're scaling down the font even more if it's in screenspace coords, cause they are just [-1; 1]
 		scale *= 0.02f;
 	}
@@ -150,5 +150,5 @@ void TextDraw::draw_text(const std::string &text, bool is_screen_space, const gl
 	object.size = text_size / 2.0f;
 	object.position = position;
 
-	current_scene->transparent_objects.push_back(object);
+	r_scene->transparent_objects.push_back(object);
 }

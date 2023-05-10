@@ -1,6 +1,6 @@
 #include "ui_slider.h"
 #include "render/transparent_elements/ui/sprite_draw.h"
-#include <render/render_scene.h>
+#include <render/transparent_elements/ui_manager.h>
 
 UISlider::UISlider(float value, float min, float max)
 	: value(value), min(min), max(max) {
@@ -9,9 +9,9 @@ UISlider::UISlider(float value, float min, float max)
 UISlider::~UISlider() {
 }
 
-void UISlider::draw(RenderScene *scene) {
+void UISlider::draw() {
 	if (!display) { return; }
-	auto &sprite_draw = scene->sprite_draw;
+	auto &ui_manager = UIManager::get();
 	value = std::clamp(value, min, max);
 	if (!is_billboard) {
 		glm::vec2 new_size = size;
@@ -36,17 +36,17 @@ void UISlider::draw(RenderScene *scene) {
 				break;
 		}
 
-		sprite_draw.draw_colored(new_position + glm::vec3(0.0f, 0.0f, 0.01f), new_size, color, is_screen_space, alignment);
-		sprite_draw.draw_colored(position, size, glm::vec3(0.0f), is_screen_space, alignment);
+		ui_manager.sprite_draw.draw_colored(new_position + glm::vec3(0.0f, 0.0f, 0.01f), new_size, color, is_screen_space, alignment);
+		ui_manager.sprite_draw.draw_colored(position, size, glm::vec3(0.0f), is_screen_space, alignment);
 	} else {
-		sprite_draw.draw_slider_billboard(
+		ui_manager.sprite_draw.draw_slider_billboard(
 				position,
 				0.0f,
 				size,
 				color,
 				(value - min) / (max - min),
 				slider_alignment);
-		sprite_draw.draw_slider_billboard(
+		ui_manager.sprite_draw.draw_slider_billboard(
 				position,
 				-0.01f,
 				size,
@@ -56,13 +56,13 @@ void UISlider::draw(RenderScene *scene) {
 	}
 
 	for (auto& child : children) {
-		child->draw(scene, position, size);
+		child->draw(position, size);
 	}
 }
 
-void UISlider::draw(RenderScene *scene, glm::vec3 parent_position, glm::vec2 parent_size) {
+void UISlider::draw(glm::vec3 parent_position, glm::vec2 parent_size) {
 	if (!display) { return; }
-	auto &sprite_draw = scene->sprite_draw;
+	auto &ui_manager = UIManager::get();
 	value = std::clamp(value, min, max);
 	glm::vec2 new_size = size;
 
@@ -93,14 +93,14 @@ void UISlider::draw(RenderScene *scene, glm::vec3 parent_position, glm::vec2 par
 
 	// alignment is none since we're drawing relatively to the parent location which is already added.
 	// THE WHITE BAR
-	sprite_draw.draw_colored(
+	ui_manager.sprite_draw.draw_colored(
 			new_position,
 			new_size,
 			color,
 			is_screen_space,
 			Alignment::NONE);
 	// THE BACKGROUND BAR
-	sprite_draw.draw_colored(
+	ui_manager.sprite_draw.draw_colored(
 			position + parent_position + glm::vec3(0.0f, 0.0f, 0.01f),
 			size,
 			glm::vec3(0.0f),
@@ -108,6 +108,6 @@ void UISlider::draw(RenderScene *scene, glm::vec3 parent_position, glm::vec2 par
 			Alignment::NONE);
 
 	for (auto& child : children) {
-		child->draw(scene, position + parent_position + glm::vec3(0.0f, 0.0f, 0.01f), size);
+		child->draw(position + parent_position + glm::vec3(0.0f, 0.0f, 0.01f), size);
 	}
 }
