@@ -1,8 +1,6 @@
 #include "debug_draw.h"
 
 #include "render/render_manager.h"
-#include <corecrt_math.h>
-#include <glm/geometric.hpp>
 
 const uint32_t MAX_VERTEX_COUNT = 100000;
 

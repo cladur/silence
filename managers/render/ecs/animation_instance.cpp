@@ -12,15 +12,17 @@ AnimationInstance::AnimationInstance(const char *path) {
 	animation_handle = render_manager.load_animation(path);
 }
 
-void AnimationInstance::serialize_json(nlohmann::json &j) {
-	// TODO good serialization
-	nlohmann::json::object_t obj;
-	obj["animation_handle"] = animation_handle.id;
-	j.push_back(nlohmann::json::object());
-	j.back()["animation_instance"] = obj;
+void AnimationInstance::serialize_json(nlohmann::json &serialized_scene) {
+	nlohmann::json::object_t serialized_component;
+	// RenderManager &render_manager = RenderManager::get();
+	// serialized_component["animation_name"] = render_manager.get_skinned_model_name(model_handle);
+	// serialized_component["material_type"] = material_type;
+	// serialized_scene.push_back(nlohmann::json::object());
+	// serialized_scene.back()["component_data"] = serialized_component;
+	// serialized_scene.back()["component_name"] = "SkinnedModelInstance";
+	serialized_scene.back()["component_data"] = serialized_component;
+	serialized_scene.back()["component_name"] = "SkinnedModelInstance";
 }
 
-void AnimationInstance::deserialize_json(nlohmann::json &j) {
-	nlohmann::json obj = Serializer::get_data("animation_instance", j);
-	animation_handle = static_cast<Handle<Animation>>(obj["animation_handle"]);
+void AnimationInstance::deserialize_json(nlohmann::json &serialized_component) {
 }
