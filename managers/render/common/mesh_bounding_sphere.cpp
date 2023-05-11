@@ -1,7 +1,7 @@
 #include "mesh_bounding_sphere.h"
-#include <camera/frustum.h>
-#include <components/transform_component.h>
-#include <render/render_scene.h>
+#include "components/transform_component.h"
+#include "frustum.h"
+#include "render/render_scene.h"
 
 AutoCVarInt cvar_draw_bounding_spheres(
 		"render.draw_bounding_spheres", "Draw bounding spheres", 0, CVarFlags::EditCheckbox);
@@ -15,8 +15,9 @@ bool MeshBoundingSphere::is_on_frustum(const Frustum frustum, Transform transfor
 	glm::vec3 glob_scale = transform.get_global_scale();
 	glm::vec3 glob_pos = transform.get_global_position();
 	float max_scale = std::max(glob_scale.x, std::max(glob_scale.y, glob_scale.z));
-
-	MeshBoundingSphere sphere(center + glob_pos, radius * max_scale);
+	glm::quat glob_orient = transform.get_global_orientation();
+	glm::vec3 new_center = glob_orient * center;
+	MeshBoundingSphere sphere(new_center + glob_pos, radius * max_scale);
 	if (cvar_draw_bounding_spheres.get()) {
 		scene.debug_draw.draw_sphere(sphere.center, sphere.radius, glm::vec3(1.0f, 0.0f, 0.0f));
 	}

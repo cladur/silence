@@ -15,6 +15,7 @@ uniform sampler2D ao_metallic_roughness_map;
 uniform sampler2D emissive_map;
 
 uniform bool has_ao_map;
+uniform bool has_normal_map;
 uniform bool has_emissive_map;
 
 uniform vec3 camPos;
@@ -49,6 +50,10 @@ void main()
     vec3 ao_metallic_roughness = texture(ao_metallic_roughness_map, TexCoords).rgb;
     float roughness = ao_metallic_roughness.g;
     float metallic = ao_metallic_roughness.b;
+    vec3 normal = Normal;
+    if (has_normal_map) {
+        normal = getNormalFromMap();
+    }
 
     float ao = 1.0;
     if (has_ao_map) {
@@ -56,7 +61,7 @@ void main()
     }
 
     gPosition = vec4(WorldPos, 1.0);
-    gNormal = vec4(getNormalFromMap(), 1.0);
+    gNormal = vec4(normal, 1.0);
     gAlbedo = vec4(albedo, 1.0);
     gAoRoughMetal = vec4(ao, roughness, metallic, 1.0);
 }

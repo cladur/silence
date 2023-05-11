@@ -59,7 +59,7 @@ public:
 	 */
 	FMOD::Studio::EventInstance *create_event_instance(const EventReference &event_ref);
 
-	FMOD::Studio::EventInstance *create_event_instance(const std::string event_name);
+	FMOD::Studio::EventInstance *create_event_instance(const std::string &event_name);
 
 	void play_one_shot_2d(const EventReference &event_ref);
 

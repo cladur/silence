@@ -13,7 +13,7 @@ uniform samplerCube prefilter_map;
 uniform sampler2D brdf_lut;
 
 // lights
-const int NR_LIGHTS = 4;
+const int NR_LIGHTS = 32;
 uniform vec3 lightPositions[NR_LIGHTS];
 uniform vec3 lightColors[NR_LIGHTS];
 
@@ -86,13 +86,16 @@ void main()
 
     // reflectance equation
     vec3 Lo = vec3(0.0);
-    for (int i = 0; i < NR_LIGHTS; ++i)
+    for (int i = 0; i < 4; ++i)
     {
         // calculate per-light radiance
         vec3 L = normalize(lightPositions[i] - WorldPos);
         vec3 H = normalize(V + L);
         float distance = length(lightPositions[i] - WorldPos);
-        float attenuation = 1.0 / (distance * distance);
+        // TODO: Bring back
+        // float attenuation = 1.0 / (distance * distance);
+
+        float attenuation = 1.0 / distance;
         vec3 radiance = lightColors[i] * attenuation;
 
         // Cook-Torrance BRDF

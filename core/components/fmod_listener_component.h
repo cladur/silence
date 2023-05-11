@@ -5,16 +5,16 @@ struct FmodListener {
 	int listener_id;
 	glm::vec3 prev_frame_position{};
 
-	void serialize_json(nlohmann::json &j) {
-		nlohmann::json::object_t obj;
-		obj["listener_id"] = listener_id;
-		j.push_back(nlohmann::json::object());
-		j.back()["fmod_listener"] = obj;
+	void serialize_json(nlohmann::json &serialized_scene) {
+		nlohmann::json::object_t serialized_component;
+		serialized_component["listener_id"] = listener_id;
+		serialized_scene.push_back(nlohmann::json::object());
+		serialized_scene.back()["component_data"] = serialized_component;
+		serialized_scene.back()["component_name"] = "FmodListener";
 	}
 
-	void deserialize_json(nlohmann::json &j) {
-		nlohmann::json obj = Serializer::get_data("fmod_listener", j);
-		listener_id = obj["listener_id"];
+	void deserialize_json(nlohmann::json &serialized_component) {
+		listener_id = serialized_component["listener_id"];
 	}
 };
 

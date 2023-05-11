@@ -1,7 +1,7 @@
 #ifndef SILENCE_MESH_H
 #define SILENCE_MESH_H
 
-#include "camera/frustum.h"
+#include "frustum.h"
 #include "mesh_bounding_sphere.h"
 #include "texture.h"
 #include <components/transform_component.h>
@@ -26,6 +26,7 @@ public:
 	MeshBoundingSphere fc_bounding_sphere;
 
 	bool has_ao_map = false;
+	bool has_normal_map = false;
 
 	void draw();
 	void setup_mesh();

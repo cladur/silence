@@ -59,8 +59,6 @@ void default_mappings() {
 	input_manager.add_key_to_action("toggle_gizmo_mode", InputKey::T);
 	input_manager.add_action("toggle_snapping");
 	input_manager.add_key_to_action("toggle_snapping", InputKey::Y);
-	input_manager.add_action("toggle_individual_origins");
-	input_manager.add_key_to_action("toggle_individual_origins", InputKey::U);
 
 	input_manager.add_action("clear_selection");
 	input_manager.add_key_to_action("clear_selection", InputKey::ESCAPE);
@@ -246,13 +244,9 @@ void Editor::custom_update(float dt) {
 			use_snapping = !use_snapping;
 		}
 
-		if (input_manager.is_action_just_pressed("toggle_individual_origins")) {
-			use_individual_origins = !use_individual_origins;
-		}
-
 		if (input_manager.is_action_just_pressed("clear_selection")) {
 			auto editor_scene = dynamic_cast<EditorScene *>(scenes[active_scene].get());
-			get_editor_scene(active_scene).clear_selection();
+			get_editor_scene(active_scene).selected_entity = 0;
 		}
 	}
 

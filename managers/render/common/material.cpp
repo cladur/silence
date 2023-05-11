@@ -3,13 +3,48 @@
 
 #include "display/display_manager.h"
 
-#include "camera/camera.h"
+#include "debug_camera/debug_camera.h"
 
 #include "render/common/material.h"
 #include "render_pass.h"
 
 #include "render/render_manager.h"
 #include "render/render_scene.h"
+#include <glm/gtc/type_ptr.hpp>
+
+void MaterialSkinnedUnlit::startup() {
+	shader.load_from_files(shader_path("skinned_unlit.vert"), shader_path("unlit.frag"));
+}
+
+void MaterialSkinnedUnlit::bind_resources(RenderScene &scene) {
+	shader.use();
+	shader.set_mat4("view", scene.view);
+	shader.set_mat4("projection", scene.projection);
+	shader.set_vec3("camPos", scene.camera_pos);
+	shader.set_int("albedo_map", 0);
+}
+
+void MaterialSkinnedUnlit::bind_instance_resources(SkinnedModelInstance &instance, Transform &transform) {
+	shader.set_mat4("model", transform.get_global_model_matrix());
+	//TODO: make this functionality in shader function
+	glBindBuffer(GL_UNIFORM_BUFFER, instance.skinning_buffer);
+	if (!instance.bone_matrices.empty()) {
+		glBufferSubData(
+				GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4) * instance.bone_matrices.size(), instance.bone_matrices.data());
+	}
+
+	GLuint binding_index = 1;
+	GLuint buffer_index = glGetUniformBlockIndex(shader.id, "SkinningBuffer");
+	glUniformBlockBinding(shader.id, buffer_index, binding_index);
+	glBindBufferBase(GL_UNIFORM_BUFFER, binding_index, instance.skinning_buffer);
+}
+
+void MaterialSkinnedUnlit::bind_mesh_resources(SkinnedMesh &mesh) {
+	if (mesh.textures_present[0]) {
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, mesh.textures[0].id);
+	}
+}
 
 void MaterialPBR::startup() {
 	shader.load_from_files(shader_path("pbr.vert"), shader_path("pbr.frag"));
@@ -45,15 +80,15 @@ void MaterialPBR::bind_resources(RenderScene &scene) {
 	// TODO: Use baked brdf lut instead (it's broken atm)
 	glBindTexture(GL_TEXTURE_2D, scene.skybox_pass.skybox.brdf_lut_texture);
 
-	shader.set_vec3("lightPositions[0]", glm::vec3(0.0f, 0.0f, 0.0f));
-	shader.set_vec3("lightPositions[1]", glm::vec3(0.0f, 0.0f, 0.0f));
-	shader.set_vec3("lightPositions[2]", glm::vec3(0.0f, 0.0f, 0.0f));
-	shader.set_vec3("lightPositions[3]", scene.camera_pos);
+	// shader.set_vec3("lightPositions[0]", glm::vec3(0.0f, 0.0f, 0.0f));
+	// shader.set_vec3("lightPositions[1]", glm::vec3(0.0f, 0.0f, 0.0f));
+	// shader.set_vec3("lightPositions[2]", glm::vec3(0.0f, 0.0f, 0.0f));
+	// shader.set_vec3("lightPositions[3]", scene.camera_pos);
 
-	shader.set_vec3("lightColors[0]", glm::vec3(0.0f, 0.0f, 0.0f));
-	shader.set_vec3("lightColors[1]", glm::vec3(0.0f, 0.0f, 0.0f));
-	shader.set_vec3("lightColors[2]", glm::vec3(0.0f, 0.0f, 0.0f));
-	shader.set_vec3("lightColors[3]", glm::vec3(1.0f, 1.0f, 1.0f));
+	// shader.set_vec3("lightColors[0]", glm::vec3(0.0f, 0.0f, 0.0f));
+	// shader.set_vec3("lightColors[1]", glm::vec3(0.0f, 0.0f, 0.0f));
+	// shader.set_vec3("lightColors[2]", glm::vec3(0.0f, 0.0f, 0.0f));
+	// shader.set_vec3("lightColors[3]", glm::vec3(1.0f, 1.0f, 1.0f));
 }
 
 void MaterialPBR::bind_instance_resources(ModelInstance &instance, Transform &transform) {
@@ -104,9 +139,14 @@ void MaterialGBuffer::bind_mesh_resources(Mesh &mesh) {
 	// We flip the bools here, to force the update of uniforms on the first mesh
 	static bool is_ao_map_set = !mesh.has_ao_map;
 	static bool is_emissive_map_set = !mesh.textures_present[3];
+	static bool is_normal_map_set = !mesh.textures_present[1];
 	if (is_ao_map_set != mesh.has_ao_map) {
 		shader.set_bool("has_ao_map", mesh.has_ao_map);
 		is_ao_map_set = mesh.has_ao_map;
+	}
+	if (is_normal_map_set != mesh.has_normal_map) {
+		shader.set_bool("has_normal_map", mesh.has_normal_map);
+		is_normal_map_set = mesh.has_normal_map;
 	}
 	if (is_emissive_map_set != mesh.textures_present[3]) {
 		shader.set_bool("has_emissive_map", mesh.textures_present[3]);

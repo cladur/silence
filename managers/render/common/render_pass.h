@@ -3,6 +3,7 @@
 
 #include "components/transform_component.h"
 #include "managers/render/ecs/model_instance.h"
+#include "managers/render/ecs/skinned_model_instance.h"
 #include "material.h"
 #include "model.h"
 #include "resource/resource_manager.h"
@@ -13,6 +14,28 @@ struct RenderScene;
 struct DrawCommand {
 	ModelInstance *model_instance;
 	Transform *transform;
+};
+
+struct SkinnedDrawCommand {
+	SkinnedModelInstance *model_instance;
+	Transform *transform;
+};
+
+class SkinnedPass {
+public:
+	std::vector<SkinnedDrawCommand> draw_commands;
+
+	virtual void startup() = 0;
+	virtual void draw(RenderScene &scene) = 0;
+};
+
+class SkinnedPassUnlit : public SkinnedPass {
+public:
+	std::vector<SkinnedDrawCommand> draw_commands;
+
+	MaterialSkinnedUnlit material;
+	void startup() override;
+	void draw(RenderScene &scene) override;
 };
 
 class RenderPass {

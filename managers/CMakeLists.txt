@@ -16,6 +16,7 @@ set(MANAGER_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(MANAGER_DIR)
 
 add_subdirectory(audio)
+# add_subdirectory(animation)
 add_subdirectory(display)
 add_subdirectory(ecs)
 add_subdirectory(scene)

@@ -3,11 +3,14 @@
 #include "components/collider_sphere.h"
 #include "components/collider_tag_component.h"
 #include "components/fmod_listener_component.h"
+#include "components/light_component.h"
 #include "components/rigidbody_component.h"
 #include "render/ecs/model_instance.h"
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <imgui_stdlib.h>
+
+#include "editor.h"
 
 #define SHOW_COMPONENT(type, func)                                                                                     \
 	if (world->has_component<type>(selected_entity)) {                                                                 \
@@ -34,12 +37,16 @@ void Inspector::show_components() {
 	SHOW_COMPONENT(Parent, show_parent);
 	SHOW_COMPONENT(Children, show_children);
 	SHOW_COMPONENT(ModelInstance, show_modelinstance);
+	SHOW_COMPONENT(SkinnedModelInstance, show_skinnedmodelinstance);
+	SHOW_COMPONENT(AnimationInstance, show_animationinstance);
 	SHOW_COMPONENT(FmodListener, show_fmodlistener);
+	SHOW_COMPONENT(Camera, show_camera);
 	SHOW_COMPONENT(ColliderTag, show_collidertag);
 	SHOW_COMPONENT(StaticTag, show_statictag);
 	SHOW_COMPONENT(ColliderSphere, show_collidersphere);
 	SHOW_COMPONENT(ColliderAABB, show_collideraabb);
 	SHOW_COMPONENT(ColliderOBB, show_colliderobb);
+	SHOW_COMPONENT(Light, show_light);
 
 	for (int i = 0; i < remove_component_queue.size(); i++) {
 		auto [entity, component_to_remove] = remove_component_queue.front();
@@ -121,14 +128,23 @@ void Inspector::show_gravity() {
 	}
 }
 void Inspector::show_parent() {
-	auto &parent = world->get_component<Parent>(selected_entity);
+	Entity parent = world->get_component<Parent>(selected_entity).parent;
 	if (ImGui::CollapsingHeader("Parent", tree_flags)) {
 		remove_component_popup<Parent>();
 		float available_width = ImGui::GetContentRegionAvail().x;
 		ImGui::BeginTable("Parent", 2);
 		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
 
-		std::string text_value = parent.parent != 0 ? std::to_string(parent.parent) : "None";
+		EditorScene &scene = Editor::get()->get_active_scene();
+
+		std::string text_value = "None";
+		if (parent != 0) {
+			if (world->has_component<Name>(parent)) {
+				text_value = world->get_component<Name>(parent).name;
+			} else {
+				text_value = std::to_string(parent);
+			}
+		}
 		show_text("Parent:", text_value.c_str());
 
 		ImGui::EndTable();
@@ -163,6 +179,76 @@ void Inspector::show_children() {
 		ImGui::EndTable();
 	}
 }
+
+void Inspector::show_skinnedmodelinstance() {
+	auto &modelinstance = world->get_component<SkinnedModelInstance>(selected_entity);
+	auto models = render_manager.get_skinned_models();
+	if (ImGui::CollapsingHeader("Skinned Model Instance", tree_flags)) {
+		remove_component_popup<ModelInstance>();
+		std::string name = render_manager.get_skinned_model(modelinstance.model_handle).name;
+		std::size_t last_slash_pos = name.find_last_of("/\\");
+
+		if (last_slash_pos != std::string::npos) {
+			name = name.substr(last_slash_pos + 1);
+			std::size_t dot_pos = name.find_last_of('.');
+			if (dot_pos != std::string::npos) {
+				name = name.substr(0, dot_pos);
+			}
+		}
+
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("Skinned Model Instance", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Model");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		if (ImGui::BeginCombo("##Skinned Model", name.c_str())) {
+			for (const auto &model : models) {
+				bool is_selected =
+						(modelinstance.model_handle.id == render_manager.get_skinned_model_handle(model.name).id);
+				std::string model_name = model.name;
+				std::size_t model_slash_pos = model_name.find_last_of("/\\");
+
+				if (model_slash_pos != std::string::npos) {
+					model_name = model_name.substr(model_slash_pos + 1);
+					std::size_t model_dot_pos = model_name.find_last_of('.');
+					if (model_dot_pos != std::string::npos) {
+						model_name = model_name.substr(0, model_dot_pos);
+					}
+				}
+				if (ImGui::Selectable(model_name.c_str(), is_selected)) {
+					Handle<SkinnedModel> new_handle = render_manager.get_skinned_model_handle(model.name);
+					modelinstance.model_handle = new_handle;
+				}
+				if (is_selected) {
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+			ImGui::EndCombo();
+		}
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Material");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		if (ImGui::BeginCombo("##Skinned Material", magic_enum::enum_name(modelinstance.material_type).data())) {
+			for (auto material : magic_enum::enum_values<MaterialType>()) {
+				bool is_selected = (modelinstance.material_type == material);
+				if (ImGui::Selectable(magic_enum::enum_name(material).data(), is_selected)) {
+					modelinstance.material_type = material;
+				}
+				if (is_selected) {
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+			ImGui::EndCombo();
+		}
+		ImGui::EndTable();
+	}
+}
+
 void Inspector::show_modelinstance() {
 	auto &modelinstance = world->get_component<ModelInstance>(selected_entity);
 	auto models = render_manager.get_models();
@@ -240,12 +326,67 @@ void Inspector::show_modelinstance() {
 		}
 	}
 }
+
+void Inspector::show_animationinstance() {
+	auto &animation_instance = world->get_component<AnimationInstance>(selected_entity);
+	auto models = render_manager.get_skinned_models();
+	if (ImGui::CollapsingHeader("Animation Instance", tree_flags)) {
+		remove_component_popup<ModelInstance>();
+		std::string name = render_manager.get_animation(animation_instance.animation_handle).name;
+		std::size_t last_slash_pos = name.find_last_of("/\\");
+
+		if (last_slash_pos != std::string::npos) {
+			name = name.substr(last_slash_pos + 1);
+			std::size_t dot_pos = name.find_last_of('.');
+			if (dot_pos != std::string::npos) {
+				name = name.substr(0, dot_pos);
+			}
+		}
+
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("Animation Instance", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Animation");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		if (ImGui::BeginCombo("##Animation", name.c_str())) {
+			for (const auto &model : models) {
+				bool is_selected =
+						(animation_instance.animation_handle.id == render_manager.get_animation_handle(model.name).id);
+
+				auto animation_handle = render_manager.get_animation_handle(model.name);
+				auto animation = render_manager.get_animation(animation_handle);
+				std::string animation_name = animation.name;
+				std::size_t animation_slash_pos = animation_name.find_last_of("/\\");
+				if (animation_slash_pos != std::string::npos) {
+					animation_name = animation_name.substr(animation_slash_pos + 1);
+					std::size_t animation_dot_pos = animation_name.find_last_of('.');
+					if (animation_dot_pos != std::string::npos) {
+						animation_name = animation_name.substr(0, animation_dot_pos);
+					}
+				}
+
+				if (ImGui::Selectable(animation_name.c_str(), is_selected)) {
+					animation_instance.animation_handle = animation_handle;
+				}
+				if (is_selected) {
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+			ImGui::EndCombo();
+		}
+		ImGui::EndTable();
+	}
+}
+
 void Inspector::show_fmodlistener() {
 	auto &fmodlistener = world->get_component<FmodListener>(selected_entity);
 	if (ImGui::CollapsingHeader("FmodListener", tree_flags)) {
 		remove_component_popup<FmodListener>();
 		float available_width = ImGui::GetContentRegionAvail().x;
-		ImGui::BeginTable("Transform", 2);
+		ImGui::BeginTable("FmodListener", 2);
 		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
 
 		show_text("Listener: ", fmodlistener.listener_id);
@@ -253,6 +394,21 @@ void Inspector::show_fmodlistener() {
 		ImGui::EndTable();
 	}
 }
+
+void Inspector::show_camera() {
+	auto &camera = world->get_component<Camera>(selected_entity);
+	if (ImGui::CollapsingHeader("Camera", tree_flags)) {
+		remove_component_popup<Camera>();
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("Transform", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+
+		show_float("Fov", camera.fov);
+
+		ImGui::EndTable();
+	}
+}
+
 void Inspector::show_collidertag() {
 	if (ImGui::CollapsingHeader("ColliderTag", tree_flags)) {
 		remove_component_popup<ColliderTag>();
@@ -293,6 +449,7 @@ void Inspector::show_collidersphere() {
 		ImGui::EndTable();
 	}
 }
+
 void Inspector::show_collideraabb() {
 	auto &collideraabb = world->get_component<ColliderAABB>(selected_entity);
 	if (ImGui::CollapsingHeader("ColliderAABB", tree_flags)) {
@@ -307,6 +464,7 @@ void Inspector::show_collideraabb() {
 		ImGui::EndTable();
 	}
 }
+
 void Inspector::show_colliderobb() {
 	auto &colliderobb = world->get_component<ColliderOBB>(selected_entity);
 	if (ImGui::CollapsingHeader("ColliderOBB", tree_flags)) {
@@ -323,7 +481,39 @@ void Inspector::show_colliderobb() {
 		ImGui::EndTable();
 	}
 }
-bool Inspector::show_vec3(const char *label, glm::vec3 &vec3, float speed, float reset_value) {
+void Inspector::show_light() {
+	auto &light = world->get_component<Light>(selected_entity);
+	if (ImGui::CollapsingHeader("Light", tree_flags)) {
+		remove_component_popup<Light>();
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("Light", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+
+		show_vec3("Color", light.color, 1.0f, 255.0f, 0.0f, 255.0f);
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Light type");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		if (ImGui::BeginCombo("##Light type", magic_enum::enum_name(light.type).data())) {
+			for (auto type : magic_enum::enum_values<LightType>()) {
+				bool is_selected = (light.type == type);
+				if (ImGui::Selectable(magic_enum::enum_name(type).data(), is_selected)) {
+					light.type = type;
+				}
+				if (is_selected) {
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+			ImGui::EndCombo();
+		}
+		ImGui::EndTable();
+	}
+}
+
+bool Inspector::show_vec3(
+		const char *label, glm::vec3 &vec3, float speed, float reset_value, float min_value, float max_value) {
 	bool changed = false;
 
 	ImGui::TableNextRow();
@@ -335,7 +525,7 @@ bool Inspector::show_vec3(const char *label, glm::vec3 &vec3, float speed, float
 	}
 	ImGui::TableSetColumnIndex(1);
 	ImGui::SetNextItemWidth(-FLT_MIN);
-	changed |= ImGui::DragFloat3(fmt::format("##{}", label).c_str(), &vec3.x, speed);
+	changed |= ImGui::DragFloat3(fmt::format("##{}", label).c_str(), &vec3.x, speed, min_value, max_value);
 	return changed;
 }
 
@@ -424,12 +614,16 @@ void Inspector::show_add_component() {
 			SHOW_ADD_COMPONENT(Parent);
 			SHOW_ADD_COMPONENT(Children);
 			SHOW_ADD_COMPONENT(ModelInstance);
+			SHOW_ADD_COMPONENT(SkinnedModelInstance);
+			SHOW_ADD_COMPONENT(AnimationInstance);
 			SHOW_ADD_COMPONENT(FmodListener);
+			SHOW_ADD_COMPONENT(Camera);
 			SHOW_ADD_COMPONENT(ColliderTag);
 			SHOW_ADD_COMPONENT(StaticTag);
 			SHOW_ADD_COMPONENT(ColliderSphere);
 			SHOW_ADD_COMPONENT(ColliderAABB);
 			SHOW_ADD_COMPONENT(ColliderOBB);
+			SHOW_ADD_COMPONENT(Light);
 
 			ImGui::EndPopup();
 		}

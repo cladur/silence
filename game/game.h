@@ -5,7 +5,7 @@
 
 class Game : public Engine {
 public:
-	bool controlling_camera = false;
+	bool in_debug_mode = false;
 
 	//MenuTest menu_test;
 

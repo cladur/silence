@@ -103,7 +103,9 @@ bool World::has_child(Entity parent, Entity child) {
 }
 
 bool World::reparent(Entity new_parent, Entity child, bool keep_transform) {
-	remove_child(get_component<Parent>(child).parent, child, keep_transform);
+	if (has_component<Parent>(child)) {
+		remove_child(get_component<Parent>(child).parent, child, keep_transform);
+	}
 
 	if (has_component<Transform>(new_parent) && has_component<Transform>(child)) {
 		auto &child_transform = get_component<Transform>(child);
@@ -128,18 +130,13 @@ void World::deserialize_entity_json(nlohmann::json &json, std::vector<Entity> &e
 	entities.push_back(serialized_entity);
 	SPDLOG_INFO("Entity {} created or loaded", serialized_entity);
 
-	std::string string_signature = json["signature"];
-	std::reverse(string_signature.begin(), string_signature.end());
-
 	serialization::IdToClassConstructor map = SceneManager::get_class_map();
 
-	for (int i = 0; i < string_signature.size(); i++) {
-		int component_active = string_signature[i] - '0';
-		if (component_active) {
-			auto component = map[i](json["components"]);
-
-			ComponentVisitor::visit(*this, serialized_entity, component);
-		}
+	for (auto &component : json["components"]) {
+		std::string component_name = component["component_name"];
+		int component_id = component_ids[component_name];
+		auto component_data = map[component_id](component["component_data"]);
+		ComponentVisitor::visit(*this, serialized_entity, component_data);
 	}
 }
 
