@@ -19,8 +19,7 @@ void AnimationSystem::update(World &world, float dt) {
 	for (Entity entity : entities) {
 		if (animation_map.find(entity) == animation_map.end()) {
 			animation_map[entity].model = &world.get_component<SkinnedModelInstance>(entity);
-			AnimationInstance &animation = world.get_component<AnimationInstance>(entity);
-			animation_map[entity].animation = &render_manager.get_animation(animation.animation_handle);
+			animation_map[entity].animation = &world.get_component<AnimationInstance>(entity);
 			animation_map[entity].current_time = 0.0f;
 			animation_map[entity].model->bone_matrices.reserve(MAX_BONE_COUNT);
 			for (int32_t i = 0; i < MAX_BONE_COUNT; ++i) {
@@ -34,11 +33,12 @@ void AnimationSystem::update(World &world, float dt) {
 
 void AnimationSystem::update_animation(AnimData &data, float dt) {
 	if (data.animation) {
-		data.current_time += static_cast<float>(data.animation->get_ticks_per_second()) * dt;
-
-		data.current_time = fmod(data.current_time, static_cast<float>(data.animation->get_duration()));
 		RenderManager &render_manager = RenderManager::get();
 		SkinnedModel &model = render_manager.get_skinned_model(data.model->model_handle);
+		Animation &animation = render_manager.get_animation(data.animation->animation_handle);
+		data.current_time += static_cast<float>(animation.get_ticks_per_second()) * dt;
+
+		data.current_time = fmod(data.current_time, static_cast<float>(animation.get_duration()));
 		calculate_bone_transform(data, model.root, glm::mat4(1.0f));
 	}
 }
@@ -46,11 +46,13 @@ void AnimationSystem::update_animation(AnimData &data, float dt) {
 void AnimationSystem::calculate_bone_transform(AnimData &data, const Bone &bone, const glm::mat4 &parent_transform) {
 	RenderManager &render_manager = RenderManager::get();
 	SkinnedModel &model = render_manager.get_skinned_model(data.model->model_handle);
+	Animation &animation = render_manager.get_animation(data.animation->animation_handle);
+
 	std::string node_name = bone.name;
 
 	glm::mat4 node_transform = glm::translate(glm::mat4(1.0f), bone.translation) * glm::toMat4(bone.rotation);
 
-	Channel *channel = data.animation->find_channel(node_name);
+	Channel *channel = animation.find_channel(node_name);
 
 	if (channel) {
 		channel->update(data.current_time);

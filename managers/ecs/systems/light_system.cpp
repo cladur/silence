@@ -39,9 +39,9 @@ void LightSystem::update(World &world, float dt) {
 					spdlog::warn("Too many point lights, max is 32");
 					break;
 				}
+				render_scene.debug_draw.draw_circle(position, direction, 0.5f, light_component.get_color());
 				camera_pos = render_scene.camera_pos;
 				direction = camera_pos - position;
-				render_scene.debug_draw.draw_circle(position, direction, 0.5f, light_component.get_color());
 				pbr_pass_shader.set_vec3(fmt::format("lightPositions[{}]", point_light_count), position);
 				pbr_pass_shader.set_vec3(
 						fmt::format("lightColors[{}]", point_light_count), light_component.get_color());
