@@ -12,7 +12,7 @@ void BSPSystem::startup(World &world) {
 	white_signature.set(world.get_component_type<ColliderTag>());
 	//white_signature.set(world.get_component_type<StaticTag>());
 	world.set_system_component_whitelist<BSPSystem>(white_signature);
-	
+
 	Signature black_signature;
 	black_signature.set(world.get_component_type<StaticTag>());
 	world.set_system_component_blacklist<BSPSystem>(black_signature);
@@ -25,7 +25,7 @@ void BSPSystem::update(World &world, float dt) {
 }
 
 void BSPSystem::resolve_collision(World &world, BSPNode *node, Entity entity, bool force) {
-	if (node->entities.empty() && node->back == nullptr && node->front == nullptr) {
+	if ((node == nullptr) || (node->entities.empty() && node->back == nullptr && node->front == nullptr)) {
 		return;
 	}
 	//Every node contains entities that intersects with it or if node is leaf
@@ -91,7 +91,6 @@ std::shared_ptr<BSPNode> BSPSystem::build_tree(World &world, std::vector<Entity>
 
 void BSPSystem::process_node(World &world, const std::set<Entity> &objects, BSPNode *node, int32_t depth) {
 	std::set<Entity> current, front, back;
-	SPDLOG_INFO("node called {}", objects.size());
 	if (depth == 0 || objects.size() <= 1) {
 		node->entities = objects;
 		node->front = nullptr;
@@ -100,9 +99,6 @@ void BSPSystem::process_node(World &world, const std::set<Entity> &objects, BSPN
 	}
 
 	node->plane = calculate_plane(world, objects);
-	SPDLOG_INFO("point {} {} {}", node->plane.point[0], node->plane.point[1], node->plane.point[2]);
-	SPDLOG_INFO("normal {} {} {}", node->plane.normal[0], node->plane.normal[1], node->plane.normal[2]);
-
 	for (const Entity entity : objects) {
 		Transform &t = world.get_component<Transform>(entity);
 		if (world.has_component<ColliderAABB>(entity)) {

@@ -6,6 +6,8 @@
 
 #include "editor.h"
 
+#include "ecs/systems/bsp_system.h"
+
 void handle_camera(DebugCamera &cam, float dt) {
 	InputManager &input_manager = InputManager::get();
 	float forward = input_manager.get_axis("move_backward", "move_forward");
@@ -26,10 +28,31 @@ void handle_camera(DebugCamera &cam, float dt) {
 
 EditorScene::EditorScene(SceneType type) {
 	this->type = type;
+	bsp_tree = BSPSystem::build_tree(world, entities, 10);
 }
 
 void EditorScene::update(float dt) {
 	Scene::update(dt);
+	bsp_tree = BSPSystem::build_tree(world, entities, 10);
+
+	BSPNode *node = bsp_tree.get();
+	std::vector<BSPNode> nodes;
+	while (node != nullptr) {
+		nodes.push_back(*node);
+		if (node->front != nullptr) {
+			node = node->front.get();
+		} else if (node->back != nullptr) {
+			node = node->back.get();
+		} else {
+			node = nullptr;
+		}
+	}
+
+	for (auto &node : nodes) {
+		SPDLOG_INFO("{}", glm::to_string(node.plane.normal));
+		get_render_scene().debug_draw.draw_box(
+				node.plane.point, node.plane.normal, glm::vec3(20.0f, 20.0f, 0.1f), glm::vec3(1.0f, 0.0f, 0.0f));
+	}
 
 	InputManager &input_manager = InputManager::get();
 	DisplayManager &display_manager = DisplayManager::get();
