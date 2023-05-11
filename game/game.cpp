@@ -329,7 +329,7 @@ void Game::custom_update(float dt) {
 		}
 	}
 
-	ui_update();
+	//ui_update();
 
 	// get imgui io
 	ImGuiIO &io = ImGui::GetIO();

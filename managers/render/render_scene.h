@@ -31,6 +31,7 @@ struct RenderScene {
 	PBRPass pbr_pass;
 	SkyboxPass skybox_pass;
 	TransparentPass transparent_pass;
+	AOPass ssao_pass;
 
 	Framebuffer render_framebuffer;
 	GBuffer g_buffer;

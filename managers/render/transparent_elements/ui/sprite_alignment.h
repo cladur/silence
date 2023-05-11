@@ -1,0 +1,19 @@
+#ifndef SPRITE_ALIGNMENT_H
+#define SPRITE_ALIGNMENT_H
+
+enum class Alignment {
+	TOP,
+	BOTTOM,
+	LEFT,
+	RIGHT,
+	CENTER,
+	TOP_LEFT,
+	TOP_RIGHT,
+	BOTTOM_LEFT,
+	BOTTOM_RIGHT,
+	NONE,
+};
+
+enum class SliderAlignment { LEFT_TO_RIGHT, RIGHT_TO_LEFT, TOP_TO_BOTTOM, BOTTOM_TO_TOP };
+
+#endif //SPRITE_ALIGNMENT_H

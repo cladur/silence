@@ -14,6 +14,11 @@ AutoCVarInt cvar_frustum_force_scene_camera("render.frustum.force_scene_camera",
 		CVarFlags::EditCheckbox);
 AutoCVarInt cvar_debug_camera_use("debug_camera.use", "Use debug camera", 1, CVarFlags::EditCheckbox);
 
+// SSAO Params
+AutoCVarInt cvar_pbr_ao("render.pbr_or_ao", "Switch between PBR and AO pass", 1, CVarFlags::EditCheckbox);
+AutoCVarFloat cvar_ssao_radius("render.ssao.radius", "SSAO radius", 0.5f);
+AutoCVarFloat cvar_ssao_bias("render.ssao.bias", "SSAO bias", 0.025f);
+
 void RenderScene::startup() {
 	g_buffer_pass.startup();
 	pbr_pass.startup();
@@ -21,6 +26,7 @@ void RenderScene::startup() {
 #ifdef WIN32
 	skinned_unlit_pass.startup();
 #endif
+	ssao_pass.startup();
 	default_pass = &pbr_pass;
 
 	// Size of the viewport doesn't matter here, it will be resized either way
@@ -80,7 +86,13 @@ void RenderScene::draw() {
 	render_framebuffer.bind();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	pbr_pass.draw(*this);
+	if (cvar_pbr_ao.get()) {
+		ssao_pass.material.radius = cvar_ssao_radius.get();
+		ssao_pass.material.bias = cvar_ssao_bias.get();
+		ssao_pass.draw(*this);
+	} else {
+		pbr_pass.draw(*this);
+	}
 
 	// 2.5. copy content of geometry's depth buffer to default framebuffer's depth buffer
 	// ----------------------------------------------------------------------------------

@@ -97,6 +97,81 @@ void MaterialPBR::bind_instance_resources(ModelInstance &instance, Transform &tr
 void MaterialPBR::bind_mesh_resources(Mesh &mesh) {
 }
 
+float our_lerp(float a, float b, float f)
+{
+    return a + f * (b - a);
+}
+
+void MaterialAO::startup() {
+	shader.load_from_files(shader_path("ssao.vert"), shader_path("ssao.frag"));
+
+	std::uniform_real_distribution<GLfloat> rand_float(0.0, 1.0);
+    std::default_random_engine gen;
+	std::vector<glm::vec3> noise_tex;
+
+	// ssao kernel
+	for (unsigned int i = 0; i < 64; ++i)
+    {
+        glm::vec3 sample(
+			rand_float(gen) * 2.0 - 1.0, 
+			rand_float(gen) * 2.0 - 1.0, 
+			rand_float(gen));
+        sample = glm::normalize(sample);
+        sample *= rand_float(gen);
+        float scale = float(i) / 64.0f;
+
+		scale = our_lerp(0.1f, 1.0f, scale * scale);
+        sample *= scale;
+        ssao_kernel.push_back(sample);
+    }
+
+	// noise texture
+	for (unsigned int i = 0; i < 16; i++)
+	{
+		glm::vec3 noise(
+			rand_float(gen), 
+			rand_float(gen), 
+			0.0f);
+		noise = glm::normalize(noise);
+		noise_tex.push_back(noise);
+	}
+
+	glGenTextures(1, &noise_texture_id);
+	glBindTexture(GL_TEXTURE_2D, noise_texture_id);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, 4, 4, 0, GL_RGB, GL_FLOAT, &noise_tex[0]);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+}
+
+void MaterialAO::bind_resources(RenderScene &scene) {
+	shader.use();
+	shader.set_int("gPosition", 0);
+	shader.set_int("gNormal", 1);
+	shader.set_int("texNoise", 2);
+	shader.set_mat4("projection", scene.projection);
+	for (unsigned int i = 0; i < 64; i++) {
+		shader.set_vec3("samples[" + std::to_string(i) + "]", ssao_kernel[i]);
+	}
+	shader.set_int("kernel_size", 64);
+	shader.set_float("radius", radius);
+	shader.set_float("bias", bias);
+	shader.set_float("noise_size", 4.0f);
+	shader.set_vec2("screen_dimensions", glm::vec2(scene.render_extent.x, scene.render_extent.y));
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.position_texture_id);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.normal_texture_id);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, noise_texture_id);
+}
+
+void MaterialAO::bind_instance_resources(ModelInstance &instance, Transform &transform) {
+}
+
+
 void MaterialGBuffer::startup() {
 	shader.load_from_files(shader_path("gbuffer.vert"), shader_path("gbuffer.frag"));
 }

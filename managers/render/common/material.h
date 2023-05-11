@@ -51,6 +51,18 @@ public:
 	void bind_mesh_resources(Mesh &mesh);
 };
 
+class MaterialAO : public Material {
+private:
+	unsigned int noise_texture_id;
+	std::vector<glm::vec3> ssao_kernel;
+public:
+	float radius = 0.5f;
+	float bias = 0.025f;
+	void startup() override;
+	void bind_resources(RenderScene &scene) override;
+	void bind_instance_resources(ModelInstance &instance, Transform &transform) override;
+};
+
 class MaterialSkybox : public Material {
 public:
 	void startup() override;

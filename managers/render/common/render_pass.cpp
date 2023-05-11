@@ -35,6 +35,16 @@ void PBRPass::draw(RenderScene &scene) {
 	utils::render_quad();
 }
 
+void AOPass::startup() {
+	material.startup();
+}
+
+void AOPass::draw(RenderScene &scene) {
+	RenderManager &render_manager = RenderManager::get();
+	material.bind_resources(scene);
+	utils::render_quad();
+}
+
 void SkyboxPass::startup() {
 	material.startup();
 	skybox.startup();

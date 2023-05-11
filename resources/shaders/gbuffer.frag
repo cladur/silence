@@ -5,7 +5,7 @@ layout (location = 2) out vec4 gAlbedo;
 layout (location = 3) out vec4 gAoRoughMetal;
 
 in vec2 TexCoords;
-in vec3 WorldPos;
+in vec3 ViewPos;
 in vec3 Normal;
 
 // material parameters
@@ -30,8 +30,8 @@ vec3 getNormalFromMap()
 {
     vec3 tangentNormal = texture(normal_map, TexCoords).xyz * 2.0 - 1.0;
 
-    vec3 Q1  = dFdx(WorldPos);
-    vec3 Q2  = dFdy(WorldPos);
+    vec3 Q1  = dFdx(ViewPos);
+    vec3 Q2  = dFdy(ViewPos);
     vec2 st1 = dFdx(TexCoords);
     vec2 st2 = dFdy(TexCoords);
 
@@ -60,7 +60,7 @@ void main()
         ao = ao_metallic_roughness.r;
     }
 
-    gPosition = vec4(WorldPos, 1.0);
+    gPosition = vec4(ViewPos, 1.0);
     gNormal = vec4(normal, 1.0);
     gAlbedo = vec4(albedo, 1.0);
     gAoRoughMetal = vec4(ao, roughness, metallic, 1.0);
