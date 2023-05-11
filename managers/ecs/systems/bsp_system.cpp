@@ -12,6 +12,10 @@ void BSPSystem::startup(World &world) {
 	white_signature.set(world.get_component_type<ColliderTag>());
 	//white_signature.set(world.get_component_type<StaticTag>());
 	world.set_system_component_whitelist<BSPSystem>(white_signature);
+
+	Signature black_signature;
+	black_signature.set(world.get_component_type<StaticTag>());
+	world.set_system_component_blacklist<BSPSystem>(black_signature);
 }
 
 void BSPSystem::update(World &world, float dt) {
@@ -21,9 +25,10 @@ void BSPSystem::update(World &world, float dt) {
 }
 
 void BSPSystem::resolve_collision(World &world, BSPNode *node, Entity entity, bool force) {
-	if (node == nullptr) {
+	if ((node == nullptr) || (node->entities.empty() && node->back == nullptr && node->front == nullptr)) {
 		return;
 	}
+	//Every node contains entities that intersects with it or if node is leaf
 	PhysicsManager::get().resolve_collision(world, entity, node->entities);
 
 	if (force) {
@@ -86,14 +91,14 @@ std::shared_ptr<BSPNode> BSPSystem::build_tree(World &world, std::vector<Entity>
 
 void BSPSystem::process_node(World &world, const std::set<Entity> &objects, BSPNode *node, int32_t depth) {
 	std::set<Entity> current, front, back;
-
-	if (depth == 0 || objects.empty()) {
-		node = nullptr;
+	if (depth == 0 || objects.size() <= 1) {
+		node->entities = objects;
+		node->front = nullptr;
+		node->back = nullptr;
 		return;
 	}
 
 	node->plane = calculate_plane(world, objects);
-
 	for (const Entity entity : objects) {
 		Transform &t = world.get_component<Transform>(entity);
 		if (world.has_component<ColliderAABB>(entity)) {
@@ -162,7 +167,7 @@ void BSPSystem::process_node(World &world, const std::set<Entity> &objects, BSPN
 Plane BSPSystem::calculate_plane(World &world, const std::set<Entity> &colliders) {
 	Plane plane{ glm::vec3(0.0f), glm::vec3(0.0f) };
 
-	if (colliders.empty()) {
+	if (colliders.size() <= 1) {
 		SPDLOG_WARN("Plane has no colliders to process");
 		return plane;
 	}
@@ -204,7 +209,7 @@ Plane BSPSystem::calculate_plane(World &world, const std::set<Entity> &colliders
 			c.center = t.get_position() + aabb.center * c.range;
 
 			const glm::vec3 direction = plane.point - c.center;
-			if (direction != glm::vec3(0.0f)) {
+			if (glm::dot(direction, direction) > 0.0f) {
 				const glm::vec3 direction_abs = glm::abs(direction);
 				glm::vec3 normal(0.0f);
 
@@ -221,7 +226,10 @@ Plane BSPSystem::calculate_plane(World &world, const std::set<Entity> &colliders
 						normal.z = direction.z < 0.0f ? -1.0f : 1.0f;
 					}
 				}
-				plane.normal += normal;
+				glm::vec3 test = plane.normal + normal;
+				if (glm::dot(test, test) > 0.0f) {
+					plane.normal = test;
+				}
 			}
 
 		} else if (world.has_component<ColliderSphere>(collider)) {
@@ -231,8 +239,11 @@ Plane BSPSystem::calculate_plane(World &world, const std::set<Entity> &colliders
 			c.center = t.get_position() + sphere.center * c.radius;
 
 			glm::vec3 direction = plane.point - c.center;
-			if (direction != glm::vec3(0.0f)) {
-				plane.normal += glm::normalize(direction);
+			if (glm::dot(direction, direction) > 0.0f) {
+				glm::vec3 test = plane.normal + glm::normalize(direction);
+				if (glm::dot(test, test) > 0.0f) {
+					plane.normal = test;
+				}
 			}
 
 		} else if (world.has_component<ColliderOBB>(collider)) {
@@ -256,8 +267,11 @@ Plane BSPSystem::calculate_plane(World &world, const std::set<Entity> &colliders
 				}
 			}
 
-			if (normal != glm::vec3(0.0f)) {
-				plane.normal += glm::normalize(normal);
+			if (glm::dot(direction, direction) > 0.0f) {
+				glm::vec3 test = plane.normal + glm::normalize(direction);
+				if (glm::dot(test, test) > 0.0f) {
+					plane.normal = test;
+				}
 			}
 		}
 	}
@@ -358,7 +372,7 @@ Side BSPSystem::process_collider(World &world, const Plane &plane, const Collide
 	glm::vec3 dir = plane.point - collider.center;
 
 	float dot = glm::dot(dir, plane.normal);
-	if (glm::dot(dir, dir) > collider.radius) {
+	if (glm::dot(dir, dir) > collider.radius * collider.radius) {
 		return Side::INTERSECT;
 	} else if (dot < 0.0f) {
 		return Side::FRONT;
