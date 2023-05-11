@@ -228,11 +228,12 @@ void Editor::display_entity(EditorScene &scene, Entity entity, const std::string
 		ImGui::EndDragDropTarget();
 	}
 
+	std::string popup_name = "EntityContextMenu" + std::to_string(entity);
 	if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
-		ImGui::OpenPopup("EntityContextMenu");
+		ImGui::OpenPopup(popup_name.c_str());
 	}
 
-	if (ImGui::BeginPopup("EntityContextMenu")) {
+	if (ImGui::BeginPopup(popup_name.c_str())) {
 		if (ImGui::MenuItem("Remove Entity")) {
 			scene.entity_deletion_queue.push(entity);
 		}
