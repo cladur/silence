@@ -5,12 +5,7 @@ in vec2 TexCoords;
 
 uniform sampler2D ssao_texture;
 uniform vec2 offset_step;
-
-// const float kernel[9] = float[](
-//     0.1, 0.1, 0.1,
-//     0.1, 0.2, 0.1,
-//     0.1, 0.1, 0.1
-// );
+uniform int should_blur;
 
 const float kernel[9] = float[](
     1.0, 1.0, 1.0,
@@ -31,11 +26,15 @@ void main()
         vec2(0, offset_step.y),
         vec2(offset_step.x, offset_step.y)
     );
-    vec3 result = vec3(0.0, 0.0, 0.0);
-    for(int i = 0; i < 9; i++)
-    {
-        result += texture(ssao_texture, TexCoords + offsets[i]).rgb * kernel[i];
+    if (should_blur == 0) {
+        FragColor = vec4(vec3(texture(ssao_texture, TexCoords).rgb), 1.0);
+    } else {
+        vec3 result = vec3(0.0, 0.0, 0.0);
+        for(int i = 0; i < 9; i++)
+        {
+            result += texture(ssao_texture, TexCoords + offsets[i]).rgb * kernel[i];
+        }
+        result /= 9.0;
+        FragColor = vec4(vec3(result), 1.0);
     }
-    result /= 9.0;
-    FragColor = vec4(vec3(result), 1.0);
 }

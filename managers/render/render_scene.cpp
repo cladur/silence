@@ -15,9 +15,10 @@ AutoCVarInt cvar_frustum_force_scene_camera("render.frustum.force_scene_camera",
 AutoCVarInt cvar_debug_camera_use("debug_camera.use", "Use debug camera", 1, CVarFlags::EditCheckbox);
 
 // SSAO Params
-AutoCVarInt cvar_pbr_ao("render.pbr_or_ao", "Switch between PBR and AO pass", 1, CVarFlags::EditCheckbox);
-AutoCVarFloat cvar_ssao_radius("render.ssao.radius", "SSAO radius", 0.5f);
-AutoCVarFloat cvar_ssao_bias("render.ssao.bias", "SSAO bias", 0.025f);
+AutoCVarInt cvar_pbr_ao("render.ssao_pbr_or_ao", "Switch between PBR and AO pass", 1, CVarFlags::EditCheckbox);
+AutoCVarFloat cvar_ssao_radius("render.ssao.radius", "SSAO radius", 0.240f);
+AutoCVarFloat cvar_ssao_bias("render.ssao.bias", "SSAO bias", 0.04f);
+AutoCVarInt cvar_ao_blur("render.ssao_blur", "Should SSAO be blurred", 1, CVarFlags::EditCheckbox);
 
 void RenderScene::startup() {
 	g_buffer_pass.startup();
@@ -95,6 +96,7 @@ void RenderScene::draw() {
 		ssao_pass.draw(*this);
 
 		render_framebuffer.bind();
+		ssao_blur_pass.material.should_blur = cvar_ao_blur.get();
 		ssao_blur_pass.draw(*this);
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, ssao_buffer.framebuffer_id);
 	} else {

@@ -126,7 +126,7 @@ void MaterialAO::startup() {
     }
 
 	// noise texture
-	for (unsigned int i = 0; i < 36; i++)
+	for (unsigned int i = 0; i < 16; i++)
 	{
 		glm::vec3 noise(
 			rand_float(gen), 
@@ -138,7 +138,7 @@ void MaterialAO::startup() {
 
 	glGenTextures(1, &noise_texture_id);
 	glBindTexture(GL_TEXTURE_2D, noise_texture_id);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, 6, 6, 0, GL_RGB, GL_FLOAT, &noise_tex[0]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, 4, 4, 0, GL_RGB, GL_FLOAT, &noise_tex[0]);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -158,7 +158,7 @@ void MaterialAO::bind_resources(RenderScene &scene) {
 	shader.set_int("kernel_size", 64);
 	shader.set_float("radius", radius);
 	shader.set_float("bias", bias);
-	shader.set_float("noise_size", 6.0f);
+	shader.set_float("noise_size", 4.0f);
 	shader.set_vec2("screen_dimensions", glm::vec2(scene.render_extent.x, scene.render_extent.y));
 
 	glActiveTexture(GL_TEXTURE0);
@@ -180,6 +180,7 @@ void MaterialAOBlur::bind_resources(RenderScene &scene) {
 	shader.use();
 	shader.set_int("ssao_texture", 0);
 	shader.set_vec2("offset_step", glm::vec2(1.0f / scene.render_extent.x, 1.0f / scene.render_extent.y));
+	shader.set_int("should_blur", should_blur);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, scene.ssao_buffer.ssao_texture_id);
 }
