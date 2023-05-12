@@ -4,8 +4,10 @@
 
 AnimationInstance::AnimationInstance() {
 	RenderManager &render_manager = RenderManager::get();
-	animation_handle = render_manager.load_animation("scorpion/scorpion_idle_ANIM_GLTF/00_walk.anim");
-	render_manager.load_animation("scorpion/scorpion_idle_ANIM_GLTF/00_idle.anim");
+	animation_handle = render_manager.load_animation("scorpion/scorpion_idle_ANIM_GLTF/scorpion_idle_00_walk.anim");
+	render_manager.load_animation("scorpion/scorpion_idle_ANIM_GLTF/scorpion_idle_00_idle.anim");
+	render_manager.load_animation("agent001/agent_idle_ANIM_GLTF/agent_idle_grab.anim");
+	render_manager.load_animation("agent001/agent_idle_ANIM_GLTF/agent_idle_00_idle.anim");
 }
 
 AnimationInstance::AnimationInstance(const char *path) {
