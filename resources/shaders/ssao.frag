@@ -1,5 +1,5 @@
 #version 330 core
-out vec4 FragColor;
+out float FragColor;
 
 in vec2 TexCoords;
 
@@ -49,5 +49,5 @@ void main()
     }
     occlusion = 1.0 - (occlusion / kernel_size);
     
-    FragColor = vec4(vec3(occlusion), 1.0f);
+    FragColor = occlusion;
 }

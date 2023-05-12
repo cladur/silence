@@ -16,5 +16,5 @@ void main() {
 	ViewPos = vec3(view * model * vec4(aPos, 1.0));
 	Normal = mat3(model) * aNormal;
 
-	gl_Position = projection * vec4(WorldPos, 1.0);
+	gl_Position = projection * vec4(ViewPos, 1.0);
 }
