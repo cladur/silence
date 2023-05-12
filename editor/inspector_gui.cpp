@@ -313,6 +313,12 @@ void Inspector::show_modelinstance() {
 			}
 			ImGui::EndCombo();
 		}
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("UV Scale");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		ImGui::Checkbox("##UV Scale", &modelinstance.scale_uv_with_transform);
 		ImGui::EndTable();
 
 		if (ImGui::BeginDragDropTarget()) {
@@ -354,8 +360,8 @@ void Inspector::show_animationinstance() {
 		ImGui::SetNextItemWidth(-FLT_MIN);
 		if (ImGui::BeginCombo("##Animation", name.c_str())) {
 			for (const auto &animation : animations) {
-				bool is_selected =
-						(animation_instance.animation_handle.id == render_manager.get_animation_handle(animation.name).id);
+				bool is_selected = (animation_instance.animation_handle.id ==
+						render_manager.get_animation_handle(animation.name).id);
 
 				auto animation_handle = render_manager.get_animation_handle(animation.name);
 				//auto animation = render_manager.get_animation(animation_handle);
