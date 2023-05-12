@@ -126,7 +126,7 @@ void MaterialAO::startup() {
     }
 
 	// noise texture
-	for (unsigned int i = 0; i < 16; i++)
+	for (unsigned int i = 0; i < 36; i++)
 	{
 		glm::vec3 noise(
 			rand_float(gen), 
@@ -138,7 +138,7 @@ void MaterialAO::startup() {
 
 	glGenTextures(1, &noise_texture_id);
 	glBindTexture(GL_TEXTURE_2D, noise_texture_id);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, 4, 4, 0, GL_RGB, GL_FLOAT, &noise_tex[0]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, 6, 6, 0, GL_RGB, GL_FLOAT, &noise_tex[0]);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -151,13 +151,14 @@ void MaterialAO::bind_resources(RenderScene &scene) {
 	shader.set_int("gNormal", 1);
 	shader.set_int("texNoise", 2);
 	shader.set_mat4("projection", scene.projection);
+	shader.set_mat4("view", scene.view);
 	for (unsigned int i = 0; i < 64; i++) {
 		shader.set_vec3("samples[" + std::to_string(i) + "]", ssao_kernel[i]);
 	}
 	shader.set_int("kernel_size", 64);
 	shader.set_float("radius", radius);
 	shader.set_float("bias", bias);
-	shader.set_float("noise_size", 4.0f);
+	shader.set_float("noise_size", 6.0f);
 	shader.set_vec2("screen_dimensions", glm::vec2(scene.render_extent.x, scene.render_extent.y));
 
 	glActiveTexture(GL_TEXTURE0);

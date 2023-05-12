@@ -6,10 +6,16 @@ in vec2 TexCoords;
 uniform sampler2D ssao_texture;
 uniform vec2 offset_step;
 
+// const float kernel[9] = float[](
+//     0.1, 0.1, 0.1,
+//     0.1, 0.2, 0.1,
+//     0.1, 0.1, 0.1
+// );
+
 const float kernel[9] = float[](
-    0.1, 0.1, 0.1,
-    0.1, 0.2, 0.1,
-    0.1, 0.1, 0.1
+    1.0, 1.0, 1.0,
+    1.0, 1.0, 1.0,
+    1.0, 1.0, 1.0
 );
 
 void main()
@@ -30,5 +36,6 @@ void main()
     {
         result += texture(ssao_texture, TexCoords + offsets[i]).rgb * kernel[i];
     }
+    result /= 9.0;
     FragColor = vec4(vec3(result), 1.0);
 }

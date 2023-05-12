@@ -8,6 +8,7 @@ uniform sampler2D gNormal;
 uniform sampler2D texNoise;
 
 uniform mat4 projection;
+uniform mat4 view;
 uniform vec3 samples[64];
 uniform int kernel_size;
 uniform float radius;
@@ -21,6 +22,7 @@ void main()
     // get input for SSAO algorithm
     vec3 fragPos = texture(gPosition, TexCoords).xyz;
     vec3 normal = normalize(texture(gNormal, TexCoords).rgb);
+    normal = mat3(view) * normal; // NEEDED AS NORMAL FROM GBUFFER IS NOT IN VIEW-SPACE
     vec3 randomVec = normalize(texture(texNoise, TexCoords * noise_scale).xyz);
     // create TBN change-of-basis matrix: from tangent-space to view-space
     vec3 tangent = normalize(randomVec - normal * dot(randomVec, normal));
@@ -50,5 +52,4 @@ void main()
     occlusion = 1.0 - (occlusion / kernel_size);
     
     ssao_texture = vec4(vec3(occlusion), 1.0);
-    //ssao_texture = occlusion;
 }
