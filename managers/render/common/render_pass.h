@@ -59,6 +59,13 @@ public:
 	void draw(RenderScene &scene) override;
 };
 
+class AOBlurPass : public RenderPass {
+public:
+	MaterialAOBlur material;
+	void startup() override;
+	void draw(RenderScene &scene) override;
+};
+
 
 class SkyboxPass : public RenderPass {
 public:

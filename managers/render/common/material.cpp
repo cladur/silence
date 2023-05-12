@@ -171,6 +171,21 @@ void MaterialAO::bind_resources(RenderScene &scene) {
 void MaterialAO::bind_instance_resources(ModelInstance &instance, Transform &transform) {
 }
 
+void MaterialAOBlur::startup() {
+	shader.load_from_files(shader_path("ssao.vert"), shader_path("ssao_blur.frag"));
+}
+
+void MaterialAOBlur::bind_resources(RenderScene &scene) {
+	shader.use();
+	shader.set_int("ssao_texture", 0);
+	shader.set_vec2("offset_step", glm::vec2(1.0f / scene.render_extent.x, 1.0f / scene.render_extent.y));
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, scene.ssao_buffer.ssao_texture_id);
+}
+
+void MaterialAOBlur::bind_instance_resources(ModelInstance &instance, Transform &transform) {
+}
+
 
 void MaterialGBuffer::startup() {
 	shader.load_from_files(shader_path("gbuffer.vert"), shader_path("gbuffer.frag"));

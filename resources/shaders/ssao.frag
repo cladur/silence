@@ -1,6 +1,6 @@
 #version 330 core
-out float FragColor;
-
+layout (location = 0) out vec4 ssao_texture;
+//out float ssao_texture;
 in vec2 TexCoords;
 
 uniform sampler2D gPosition;
@@ -49,5 +49,6 @@ void main()
     }
     occlusion = 1.0 - (occlusion / kernel_size);
     
-    FragColor = occlusion;
+    ssao_texture = vec4(vec3(occlusion), 1.0);
+    //ssao_texture = occlusion;
 }

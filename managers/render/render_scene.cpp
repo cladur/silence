@@ -27,12 +27,14 @@ void RenderScene::startup() {
 	skinned_unlit_pass.startup();
 #endif
 	ssao_pass.startup();
+	ssao_blur_pass.startup();
 	default_pass = &pbr_pass;
 
 	// Size of the viewport doesn't matter here, it will be resized either way
 	render_extent = glm::vec2(100, 100);
 	render_framebuffer.startup(render_extent.x, render_extent.y);
 	g_buffer.startup(render_extent.x, render_extent.y);
+	ssao_buffer.startup(render_extent.x, render_extent.y);
 
 	debug_draw.startup();
 	transparent_pass.startup();
@@ -87,16 +89,22 @@ void RenderScene::draw() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	if (cvar_pbr_ao.get()) {
+		ssao_buffer.bind();
 		ssao_pass.material.radius = cvar_ssao_radius.get();
 		ssao_pass.material.bias = cvar_ssao_bias.get();
 		ssao_pass.draw(*this);
+
+		render_framebuffer.bind();
+		ssao_blur_pass.draw(*this);
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, ssao_buffer.framebuffer_id);
 	} else {
 		pbr_pass.draw(*this);
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, g_buffer.framebuffer_id);
 	}
-
 	// 2.5. copy content of geometry's depth buffer to default framebuffer's depth buffer
 	// ----------------------------------------------------------------------------------
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, g_buffer.framebuffer_id);
+	//render_framebuffer.bind();
+	//glBindFramebuffer(GL_READ_FRAMEBUFFER, g_buffer.framebuffer_id);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, render_framebuffer.framebuffer_id); // write to default framebuffer
 	// blit to default framebuffer. Note that this may or may not work as the internal formats of both the FBO and
 	// default framebuffer have to match. the internal formats are implementation defined. This works on all of my
@@ -141,6 +149,7 @@ void RenderScene::draw() {
 void RenderScene::resize_framebuffer(uint32_t width, uint32_t height) {
 	render_framebuffer.resize(width, height);
 	g_buffer.resize(width, height);
+	ssao_buffer.resize(width, height);
 
 	render_extent = glm::vec2(width, height);
 }

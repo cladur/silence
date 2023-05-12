@@ -63,6 +63,16 @@ public:
 	void bind_instance_resources(ModelInstance &instance, Transform &transform) override;
 };
 
+class MaterialAOBlur : public Material {
+private:
+	std::vector<glm::vec2> offsets;
+	std::vector<float> gauss_kernel;
+public:
+	void startup() override;
+	void bind_resources(RenderScene &scene) override;
+	void bind_instance_resources(ModelInstance &instance, Transform &transform) override;
+};
+
 class MaterialSkybox : public Material {
 public:
 	void startup() override;
