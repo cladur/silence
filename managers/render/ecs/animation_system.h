@@ -22,7 +22,7 @@ public:
 
 	void update_animation(AnimData &data, float dt);
 
-	void calculate_bone_transform(AnimData &data, const Bone &bone, const glm::mat4 &parent_transform);
+	void calculate_bone_transform(AnimData &data);
 	std::unordered_map<Entity, AnimData> animation_map;
 };
 

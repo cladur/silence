@@ -64,7 +64,7 @@ assets::AssetFile assets::pack_animation(assets::AnimationInfo *info, std::vecto
 
 		memcpy(merged_buffer.data() + actual_offset, nodes[i].rotation_times.data(), info->sizes[i].rotation_times);
 		actual_offset += info->sizes[i].rotation_times;
-		// Once I've got a bug that appears in CaesiumMan.gltf, last value of rotation_times was wrong after load but
+		// I've got a bug that appears in some models, that last value of rotation_times was wrong after load but
 		// before save it was correct
 		//		float z = 0;
 		//		memcpy(&z, merged_buffer.data() + (actual_offset - 4), sizeof(float));
@@ -124,11 +124,14 @@ void assets::unpack_animation(
 		memcpy(nodes[i].rotation_times.data(), decompressed_buffer.data() + actual_offset,
 				info->sizes[i].rotation_times);
 		actual_offset += info->sizes[i].rotation_times;
-		// Once I've got a bug that appears in CaesiumMan.gltf, last value of rotation_times was wrong after load but
+		// I've got a bug that appears in some models, that last value of rotation_times was wrong after load but
 		// before save it was correct
-		//		float z = 0;
-		//		memcpy(&z, decompressed_buffer.data() + (actual_offset - 4), sizeof(float));
-		//		SPDLOG_INFO("{}", z);
+		float z = 0;
+		memcpy(&z, decompressed_buffer.data() + (actual_offset - 4), sizeof(float));
+		if (z != info->duration_seconds * 1000) {
+			nodes[i].rotation_times.pop_back();
+			nodes[i].rotation_times.push_back(info->duration_seconds * 1000);
+		}
 		//		for (auto &n : nodes[i].rotation_times) {
 		//			SPDLOG_INFO("{}", n);
 		//		}

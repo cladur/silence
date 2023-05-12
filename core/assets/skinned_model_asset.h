@@ -19,7 +19,6 @@ struct SkinnedModelInfo {
 	std::vector<int64_t> bone_parents;
 	std::vector<std::string> bone_names;
 	std::vector<std::string> joint_names;
-	std::vector<std::vector<int32_t>> bone_children;
 	int32_t root;
 
 	struct NodeMesh {
