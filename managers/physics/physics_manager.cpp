@@ -82,9 +82,9 @@ void PhysicsManager::resolve_collision_sphere(World &world, Entity e1, Entity e2
 	ColliderSphere c1;
 	ColliderSphere c2;
 	c1.radius = temp_c1.radius * t1.get_scale().x;
-	c1.center = t1.get_position() + temp_c1.center * c1.radius;
+	c1.center = t1.get_position() + temp_c1.center * t1.get_scale().x;
 	c2.radius = temp_c2.radius * t2.get_scale().x;
-	c2.center = t2.get_position() + temp_c2.center * c2.radius;
+	c2.center = t2.get_position() + temp_c2.center * t2.get_scale().x;
 
 	bool is_movable1 = !world.has_component<StaticTag>(e1);
 	bool is_movable2 = !world.has_component<StaticTag>(e2);
@@ -138,9 +138,9 @@ void PhysicsManager::resolve_collision_aabb(World &world, Entity e1, Entity e2) 
 	ColliderAABB c1;
 	ColliderAABB c2;
 	c1.range = temp_c1.range * t1.get_scale();
-	c1.center = t1.get_position() + temp_c1.center * c1.range;
+	c1.center = t1.get_position() + temp_c1.center * t1.get_scale();
 	c2.range = temp_c2.range * t2.get_scale();
-	c2.center = t2.get_position() + temp_c2.center * c2.range;
+	c2.center = t2.get_position() + temp_c2.center * t2.get_scale();
 
 	bool is_movable1 = !world.has_component<StaticTag>(e1);
 	bool is_movable2 = !world.has_component<StaticTag>(e2);
@@ -218,9 +218,9 @@ void PhysicsManager::resolve_aabb_sphere(World &world, Entity aabb, Entity spher
 	ColliderAABB c1;
 	ColliderSphere c2;
 	c1.range = temp_c1.range * t1.get_scale();
-	c1.center = t1.get_position() + temp_c1.center * c1.range;
+	c1.center = t1.get_position() + temp_c1.center * t1.get_scale();
 	c2.radius = temp_c2.radius * t2.get_scale().x;
-	c2.center = t2.get_position() + temp_c2.center * c2.radius;
+	c2.center = t2.get_position() + temp_c2.center * t2.get_scale().x;
 
 	bool is_movable1 = !world.has_component<StaticTag>(aabb);
 	bool is_movable2 = !world.has_component<StaticTag>(sphere);
@@ -304,13 +304,13 @@ void PhysicsManager::resolve_collision_obb(World &world, Entity e1, Entity e2) {
 
 	ColliderOBB c1{};
 	ColliderOBB c2{};
-	c1.set_orientation(t1.get_euler_rot());
+	c1.set_orientation(t1.orientation);
 	c1.range = temp_c1.range * t1.get_scale();
-	c1.center = t1.get_position() + c1.get_orientation_matrix() * (temp_c1.center * c1.range);
+	c1.center = t1.get_position() + c1.get_orientation_matrix() * (temp_c1.center * t1.get_scale());
 
-	c2.set_orientation(t2.get_euler_rot());
+	c2.set_orientation(t2.orientation);
 	c2.range = temp_c2.range * t2.get_scale();
-	c2.center = t2.get_position() + c2.get_orientation_matrix() * (temp_c2.center * c2.range);
+	c2.center = t2.get_position() + c2.get_orientation_matrix() * (temp_c2.center * t2.get_scale());
 
 	bool is_movable1 = !world.has_component<StaticTag>(e1);
 	bool is_movable2 = !world.has_component<StaticTag>(e2);
@@ -372,12 +372,12 @@ void PhysicsManager::resolve_obb_sphere(World &world, Entity obb, Entity sphere)
 
 	ColliderOBB c1{};
 	ColliderSphere c2{};
-	c1.set_orientation(t1.get_euler_rot());
+	c1.set_orientation(t1.orientation);
 	c1.range = temp_c1.range * t1.get_scale();
-	c1.center = t1.get_position() + c1.get_orientation_matrix() * (temp_c1.center * c1.range);
+	c1.center = t1.get_position() + c1.get_orientation_matrix() * (temp_c1.center * t1.get_scale());
 
 	c2.radius = temp_c2.radius * t2.get_scale().x;
-	c2.center = t2.get_position() + temp_c2.center * c2.radius;
+	c2.center = t2.get_position() + temp_c2.center * t2.get_scale().x;
 
 	bool is_movable1 = !world.has_component<StaticTag>(obb);
 	bool is_movable2 = !world.has_component<StaticTag>(sphere);
@@ -464,12 +464,12 @@ void PhysicsManager::resolve_obb_aabb(World &world, Entity obb, Entity aabb) {
 
 	ColliderOBB c1{};
 	ColliderAABB c2{};
-	c1.set_orientation(t1.get_euler_rot());
+	c1.set_orientation(t1.orientation);
 	c1.range = temp_c1.range * t1.get_scale();
-	c1.center = t1.get_position() + c1.get_orientation_matrix() * (temp_c1.center * c1.range);
+	c1.center = t1.get_position() + c1.get_orientation_matrix() * (temp_c1.center * t1.get_scale());
 
 	c2.range = temp_c2.range * t2.get_scale();
-	c2.center = t2.get_position() + temp_c2.center * c2.range;
+	c2.center = t2.get_position() + temp_c2.center * t2.get_scale();
 	bool is_movable1 = !world.has_component<StaticTag>(obb);
 	bool is_movable2 = !world.has_component<StaticTag>(aabb);
 
