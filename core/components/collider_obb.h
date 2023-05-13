@@ -64,6 +64,16 @@ struct ColliderOBB {
 		range = (max - min) * 0.5f;
 	}
 
+	// returns local min
+	glm::vec3 min() const {
+		return center - range;
+	}
+
+	// returns local max
+	glm::vec3 max() const {
+		return center + range;
+	}
+
 	glm::mat3 get_orientation_matrix() const {
 		return { orientation[0], orientation[1], glm::normalize(glm::cross(orientation[0], orientation[1])) };
 	}

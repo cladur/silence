@@ -8,7 +8,6 @@
 #include "render/render_manager.h"
 #include <unordered_map>
 
-#include "ecs/systems/bsp_system.h"
 #include "ecs/systems/collider_draw.h"
 #include "ecs/systems/collision_system.h"
 #include "ecs/systems/light_system.h"
@@ -56,7 +55,6 @@ Scene::Scene() {
 	world.register_system<AnimationSystem>();
 	world.register_system<FrustumDrawSystem>();
 	world.register_system<LightSystem>();
-	world.register_system<BSPSystem>();
 }
 
 void Scene::update(float dt) {
@@ -104,5 +102,5 @@ void Scene::load_from_file(const std::string &path) {
 	file.close();
 	SceneManager::load_scene_from_json_file(world, scene_json, "", entities);
 
-	bsp_tree = BSPSystem::build_tree(world, entities, 10);
+	bsp_tree = CollisionSystem::build_tree(world, entities, 10);
 }

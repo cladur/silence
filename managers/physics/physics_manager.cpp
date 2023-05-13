@@ -6,6 +6,9 @@ PhysicsManager &PhysicsManager::get() {
 	return instance;
 }
 
+// Most times we cannot compare float value to 0, than we epsilon
+AutoCVarFloat cvar_epsilon("physics.epsilon", "float error value", 0.000001f, CVarFlags::EditFloatDrag);
+
 void PhysicsManager::resolve_collision(World &world, Entity movable_object, const std::set<Entity> &static_entities) {
 	CollisionFlag first, second;
 	Entity e1 = movable_object;
@@ -199,7 +202,7 @@ glm::vec3 PhysicsManager::is_overlap(const ColliderAABB &a, const ColliderSphere
 	const float length = b.radius - distance;
 
 	if (distance < b.radius) {
-		if (glm::dot(direction, direction) < 0.001f) {
+		if (glm::dot(direction, direction) < cvar_epsilon.get()) {
 			return glm::vec3(0.0f, 1.0f, 0.0f) * length;
 		} else {
 			return glm::normalize(direction) * length;
@@ -230,7 +233,7 @@ void PhysicsManager::resolve_aabb_sphere(World &world, Entity aabb, Entity spher
 	}
 
 	glm::vec3 offset = is_overlap(c1, c2);
-	if (glm::dot(offset, offset) < 0.001f) {
+	if (glm::dot(offset, offset) < cvar_epsilon.get()) {
 		return;
 	}
 
@@ -272,7 +275,7 @@ glm::vec3 PhysicsManager::is_overlap(const ColliderOBB &a, const ColliderOBB &b)
 	float max_overlap = -std::numeric_limits<float>::max();
 	glm::vec3 separation(0.0f);
 	for (const glm::vec3 &axis : axes) {
-		if (glm::dot(axis, axis) < 0.001f) {
+		if (glm::dot(axis, axis) < cvar_epsilon.get()) {
 			continue;
 		}
 		const float overlap = fabs(glm::dot(distance, axis)) -
@@ -304,11 +307,15 @@ void PhysicsManager::resolve_collision_obb(World &world, Entity e1, Entity e2) {
 
 	ColliderOBB c1{};
 	ColliderOBB c2{};
-	c1.set_orientation(t1.orientation);
+	temp_c1.set_orientation(t1.orientation);
+	c1.orientation[0] = temp_c1.orientation[0];
+	c1.orientation[1] = temp_c1.orientation[1];
 	c1.range = temp_c1.range * t1.get_scale();
 	c1.center = t1.get_position() + c1.get_orientation_matrix() * (temp_c1.center * t1.get_scale());
 
-	c2.set_orientation(t2.orientation);
+	temp_c2.set_orientation(t2.orientation);
+	c2.orientation[0] = temp_c2.orientation[0];
+	c2.orientation[1] = temp_c2.orientation[1];
 	c2.range = temp_c2.range * t2.get_scale();
 	c2.center = t2.get_position() + c2.get_orientation_matrix() * (temp_c2.center * t2.get_scale());
 
@@ -320,7 +327,7 @@ void PhysicsManager::resolve_collision_obb(World &world, Entity e1, Entity e2) {
 	}
 
 	glm::vec3 offset = is_overlap(c1, c2);
-	if (glm::dot(offset, offset) < 0.001f) {
+	if (glm::dot(offset, offset) < cvar_epsilon.get()) {
 		return;
 	}
 
@@ -354,7 +361,7 @@ glm::vec3 PhysicsManager::is_overlap(const ColliderOBB &a, const ColliderSphere 
 	const float length = b.radius - distance;
 
 	if (distance < b.radius) {
-		if (glm::dot(direction, direction) < 0.001f) {
+		if (glm::dot(direction, direction) < cvar_epsilon.get()) {
 			return glm::vec3(0.0f, 1.0f, 0.0f) * length;
 		} else {
 			return glm::normalize(direction) * length;
@@ -372,7 +379,9 @@ void PhysicsManager::resolve_obb_sphere(World &world, Entity obb, Entity sphere)
 
 	ColliderOBB c1{};
 	ColliderSphere c2{};
-	c1.set_orientation(t1.orientation);
+	temp_c1.set_orientation(t1.orientation);
+	c1.orientation[0] = temp_c1.orientation[0];
+	c1.orientation[1] = temp_c1.orientation[1];
 	c1.range = temp_c1.range * t1.get_scale();
 	c1.center = t1.get_position() + c1.get_orientation_matrix() * (temp_c1.center * t1.get_scale());
 
@@ -388,7 +397,7 @@ void PhysicsManager::resolve_obb_sphere(World &world, Entity obb, Entity sphere)
 	}
 
 	glm::vec3 offset = is_overlap(c1, c2);
-	if (glm::dot(offset, offset) < 0.001f) {
+	if (glm::dot(offset, offset) < cvar_epsilon.get()) {
 		return;
 	}
 
@@ -431,7 +440,7 @@ glm::vec3 PhysicsManager::is_overlap(const ColliderOBB &a, const ColliderAABB &b
 	float max_overlap = -std::numeric_limits<float>::max();
 	glm::vec3 separation(0.0f);
 	for (const glm::vec3 &axis : axes) {
-		if (glm::dot(axis, axis) < 0.001f) {
+		if (glm::dot(axis, axis) < cvar_epsilon.get()) {
 			continue;
 		}
 		const float overlap = fabs(glm::dot(distance, axis)) -
@@ -464,7 +473,9 @@ void PhysicsManager::resolve_obb_aabb(World &world, Entity obb, Entity aabb) {
 
 	ColliderOBB c1{};
 	ColliderAABB c2{};
-	c1.set_orientation(t1.orientation);
+	temp_c1.set_orientation(t1.orientation);
+	c1.orientation[0] = temp_c1.orientation[0];
+	c1.orientation[1] = temp_c1.orientation[1];
 	c1.range = temp_c1.range * t1.get_scale();
 	c1.center = t1.get_position() + c1.get_orientation_matrix() * (temp_c1.center * t1.get_scale());
 
@@ -478,7 +489,7 @@ void PhysicsManager::resolve_obb_aabb(World &world, Entity obb, Entity aabb) {
 	}
 
 	glm::vec3 offset = is_overlap(c1, c2);
-	if (glm::dot(offset, offset) < 0.001f) {
+	if (glm::dot(offset, offset) < cvar_epsilon.get()) {
 		return;
 	}
 
@@ -506,5 +517,135 @@ bool PhysicsManager::is_collision_candidate(
 	if (distance_squared >= range_squared) {
 		return false;
 	}
+	return true;
+}
+
+bool PhysicsManager::intersect_ray_sphere(const Ray &ray, const ColliderSphere &sphere, HitInfo &result) {
+	glm::vec3 m = ray.origin - sphere.center;
+	float b = glm::dot(m, ray.direction);
+	float c = glm::dot(m, m) - sphere.radius * sphere.radius;
+	// Exit if r’s origin outside s (c > 0) and r pointing away from s (b > 0)
+	if (c > 0.0f && b > 0.0f) {
+		return false;
+	}
+	float discriminant = b * b - c;
+	// A negative discriminant corresponds to ray missing sphere
+	if (discriminant < 0.0f) {
+		return false;
+	}
+	// Ray now found to intersect sphere, compute smallest t value of intersection
+	float distance = -b - sqrt(discriminant);
+	// If t is negative, ray started inside sphere so clamp t to zero
+	if (distance < 0.0f) {
+		distance = 0.0f;
+	}
+	result.point = ray.origin + distance * ray.direction;
+	result.normal = -ray.direction;
+	return true;
+}
+
+bool PhysicsManager::is_ray_intersect_sphere(const Ray &ray, const ColliderSphere &sphere) {
+	glm::vec3 m = ray.origin - sphere.center;
+	float c = glm::dot(m, m) - sphere.radius * sphere.radius;
+	// If there is definitely at least one real root, there must be an intersection
+	if (c <= 0.0f) {
+		return true;
+	}
+	float b = glm::dot(m, ray.direction);
+	// Early exit if ray origin outside sphere and ray pointing away from sphere
+	if (b > 0.0f) {
+		return false;
+	}
+	float discriminant = b * b - c;
+	// A negative discriminant corresponds to ray missing sphere
+	if (discriminant < 0.0f) {
+		return false;
+	}
+	// Now ray must hit sphere
+	return true;
+}
+
+bool PhysicsManager::intersect_ray_aabb(const Ray &ray, const ColliderAABB &aabb, HitInfo &result) {
+	float tmin = -std::numeric_limits<float>::max(); // set to -FLT_MAX to get first hit on line
+	float tmax = std::numeric_limits<float>::max(); // set to max distance ray can travel (for segment)
+
+	glm::vec3 min = aabb.min();
+	glm::vec3 max = aabb.max();
+	// For all three slabs
+	for (int i = 0; i < 3; i++) {
+		if (abs(ray.direction[i]) < cvar_epsilon.get()) {
+			// Ray is parallel to slab. No hit if origin not within slab
+			if (ray.origin[i] < min[i] || ray.origin[i] > max[i]) {
+				return false;
+			}
+		} else {
+			// Compute intersection t value of ray with near and far plane of slab
+			float ood = 1.0f / ray.direction[i];
+			float t1 = (min[i] - ray.origin[i]) * ood;
+			float t2 = (max[i] - ray.origin[i]) * ood;
+			// Make t1 be intersection with near plane, t2 with far plane
+			if (t1 > t2) {
+				std::swap(t1, t2);
+			}
+			// Compute the intersection of slab intersection intervals
+			if (t1 > tmin) {
+				tmin = t1;
+			}
+			if (t2 > tmax) {
+				tmax = t2;
+			}
+			// Exit with no collision as soon as slab intersection becomes empty
+			if (tmin > tmax) {
+				return false;
+			}
+		}
+	}
+	// Ray intersects all 3 slabs. Return point (q) and intersection t value (tmin)
+	result.point = ray.origin + ray.direction * tmin;
+	result.normal = -ray.direction;
+	return true;
+}
+
+bool PhysicsManager::intersect_ray_obb(const Ray &ray, const ColliderOBB &obb, HitInfo &result) {
+	float tmin = -std::numeric_limits<float>::max(); // set to -FLT_MAX to get first hit on line
+	float tmax = std::numeric_limits<float>::max(); // set to max distance ray can travel (for segment)
+
+	glm::mat3 o = obb.get_orientation_matrix();
+	// transform ray from global space to obb space
+	Ray local_ray = { o * ray.origin, glm::normalize(o * ray.direction) };
+	glm::vec3 min = obb.min();
+	glm::vec3 max = obb.max();
+	// For all three slabs
+	for (int i = 0; i < 3; i++) {
+		if (abs(local_ray.direction[i]) < cvar_epsilon.get()) {
+			// Ray is parallel to slab. No hit if origin not within slab
+			if (local_ray.origin[i] < min[i] || local_ray.origin[i] > max[i]) {
+				return false;
+			}
+		} else {
+			// Compute intersection t value of ray with near and far plane of slab
+			float ood = 1.0f / local_ray.direction[i];
+			float t1 = (min[i] - local_ray.origin[i]) * ood;
+			float t2 = (max[i] - local_ray.origin[i]) * ood;
+			// Make t1 be intersection with near plane, t2 with far plane
+			if (t1 > t2) {
+				std::swap(t1, t2);
+			}
+			// Compute the intersection of slab intersection intervals
+			if (t1 > tmin) {
+				tmin = t1;
+			}
+			if (t2 > tmax) {
+				tmax = t2;
+			}
+			// Exit with no collision as soon as slab intersection becomes empty
+			if (tmin > tmax) {
+				return false;
+			}
+		}
+	}
+	// Ray intersects all 3 slabs. Return point (q) and intersection t value (tmin)
+	result.point = ray.origin + ray.direction * tmin;
+	result.normal = -ray.direction;
 	return true;
 }
