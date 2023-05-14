@@ -313,6 +313,12 @@ void Inspector::show_modelinstance() {
 			}
 			ImGui::EndCombo();
 		}
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("UV Scale");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		ImGui::Checkbox("##UV Scale", &modelinstance.scale_uv_with_transform);
 		ImGui::EndTable();
 
 		if (ImGui::BeginDragDropTarget()) {
@@ -330,6 +336,7 @@ void Inspector::show_modelinstance() {
 void Inspector::show_animationinstance() {
 	auto &animation_instance = world->get_component<AnimationInstance>(selected_entity);
 	auto models = render_manager.get_skinned_models();
+	auto animations = render_manager.get_animations();
 	if (ImGui::CollapsingHeader("Animation Instance", tree_flags)) {
 		remove_component_popup<ModelInstance>();
 		std::string name = render_manager.get_animation(animation_instance.animation_handle).name;
@@ -352,12 +359,12 @@ void Inspector::show_animationinstance() {
 		ImGui::TableSetColumnIndex(1);
 		ImGui::SetNextItemWidth(-FLT_MIN);
 		if (ImGui::BeginCombo("##Animation", name.c_str())) {
-			for (const auto &model : models) {
-				bool is_selected =
-						(animation_instance.animation_handle.id == render_manager.get_animation_handle(model.name).id);
+			for (const auto &animation : animations) {
+				bool is_selected = (animation_instance.animation_handle.id ==
+						render_manager.get_animation_handle(animation.name).id);
 
-				auto animation_handle = render_manager.get_animation_handle(model.name);
-				auto animation = render_manager.get_animation(animation_handle);
+				auto animation_handle = render_manager.get_animation_handle(animation.name);
+				//auto animation = render_manager.get_animation(animation_handle);
 				std::string animation_name = animation.name;
 				std::size_t animation_slash_pos = animation_name.find_last_of("/\\");
 				if (animation_slash_pos != std::string::npos) {

@@ -2,12 +2,13 @@
 #define SILENCE_ANIMATOR_H
 
 #include "ecs/systems/base_system.h"
+class AnimationInstance;
 class Animation;
 class SkinnedModelInstance;
 class Bone;
 
 struct AnimData {
-	Animation *animation;
+	AnimationInstance *animation;
 	SkinnedModelInstance *model;
 	float current_time;
 };
@@ -21,7 +22,7 @@ public:
 
 	void update_animation(AnimData &data, float dt);
 
-	void calculate_bone_transform(AnimData &data, const Bone &bone, const glm::mat4 &parent_transform);
+	void calculate_bone_transform(AnimData &data);
 	std::unordered_map<Entity, AnimData> animation_map;
 };
 

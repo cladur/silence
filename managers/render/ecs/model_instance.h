@@ -9,9 +9,11 @@ struct ModelInstance {
 	Handle<Model> model_handle;
 	MaterialType material_type = MaterialType::Default;
 	bool in_shadow_pass = true;
+	bool scale_uv_with_transform = true;
 
 	ModelInstance();
-	explicit ModelInstance(const char *path, MaterialType material_type = MaterialType::Default);
+	explicit ModelInstance(
+			const char *path, MaterialType material_type = MaterialType::Default, bool scale_uv_with_transform = true);
 
 	void serialize_json(nlohmann::json &j);
 	void deserialize_json(nlohmann::json &j);

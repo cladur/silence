@@ -19,7 +19,6 @@
 #include "render/ecs/render_system.h"
 #include "render/ecs/skinned_render_system.h"
 
-
 #define COLLISION_TEST_ENTITY 4
 
 Scene::Scene() {
@@ -57,9 +56,7 @@ Scene::Scene() {
 	world.register_system<AnimationSystem>();
 	world.register_system<FrustumDrawSystem>();
 	world.register_system<LightSystem>();
-
-	//todo uncomment if bspsystem is fixed
-	// world.register_system<BSPSystem>();
+	world.register_system<BSPSystem>();
 }
 
 void Scene::update(float dt) {
@@ -107,5 +104,5 @@ void Scene::load_from_file(const std::string &path) {
 	file.close();
 	SceneManager::load_scene_from_json_file(world, scene_json, "", entities);
 
-	bsp_tree = BSPSystem::build_tree(world, entities, 2);
+	bsp_tree = BSPSystem::build_tree(world, entities, 10);
 }

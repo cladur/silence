@@ -496,7 +496,7 @@ bool extract_gltf_skinned_meshes(
 	return true;
 }
 
-bool extract_gltf_animations(tg::Model &model, tg::Animation &animation, const fs::path &input,
+bool extract_gltf_animations(tg::Model &model, std::string model_name, tg::Animation &animation, const fs::path &input,
 		const fs::path &output_folder, const ConverterState &conv_state) {
 	assets::AnimationInfo animation_info;
 	size_t full_size = 0;
@@ -544,7 +544,7 @@ bool extract_gltf_animations(tg::Model &model, tg::Animation &animation, const f
 
 	animation_info.original_file = input.string();
 	animation_info.full_size = full_size;
-	std::string animation_name = animation.name;
+	std::string animation_name = model_name + "_" + animation.name;
 
 	AssetFile new_file = assets::pack_animation(&animation_info, nodes);
 
@@ -873,7 +873,6 @@ void extract_gltf_skinned_nodes(tinygltf::Model &model, const fs::path &input, c
 	bone_data.rotation.resize(model.nodes.size());
 	model_info.bone_names.resize(model.nodes.size());
 	model_info.bone_parents.resize(model.nodes.size());
-	model_info.bone_children.resize(model.nodes.size());
 	// -1 means that node is root
 	for (int32_t i = 0; i < model.nodes.size(); ++i) {
 		model_info.bone_parents[i] = -1;
@@ -916,7 +915,6 @@ void extract_gltf_skinned_nodes(tinygltf::Model &model, const fs::path &input, c
 		bone_data.translation[i] = translation;
 		bone_data.rotation[i] = rotation;
 		model_info.bone_names[i] = node_name;
-		model_info.bone_children[i] = model.nodes[i].children;
 	}
 	model_info.bone_rotation_buffer_size = bone_data.rotation.size() * sizeof(float) * 4;
 	model_info.bone_translation_buffer_size = bone_data.translation.size() * sizeof(float) * 3;
@@ -1231,7 +1229,7 @@ int main(int argc, char *argv[]) {
 
 				fs::create_directory(folder);
 
-				extract_gltf_animations(model, animation, p.path(), folder, conv_state);
+				extract_gltf_animations(model, p.path().stem().string(), animation, p.path(), folder, conv_state);
 			}
 		}
 	}
