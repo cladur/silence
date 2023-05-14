@@ -541,7 +541,7 @@ bool PhysicsManager::intersect_ray_sphere(const Ray &ray, const ColliderSphere &
 	}
 	result.distance = distance;
 	result.point = ray.origin + distance * ray.direction;
-	result.normal = -ray.direction;
+	result.normal = glm::normalize(result.point - sphere.center);
 	return true;
 }
 
@@ -551,6 +551,8 @@ bool PhysicsManager::intersect_ray_aabb(const Ray &ray, const ColliderAABB &aabb
 
 	const glm::vec3 &min = aabb.min();
 	const glm::vec3 &max = aabb.max();
+
+	glm::vec3 hit_axis(0.0f);
 
 	for (int i = 0; i < 3; i++) {
 		float ood = 1.0f / ray.direction[i];
@@ -565,10 +567,14 @@ bool PhysicsManager::intersect_ray_aabb(const Ray &ray, const ColliderAABB &aabb
 
 		if (t1 > nearest_distance) {
 			nearest_distance = t1;
+			hit_axis = glm::vec3(0.0f);
+			hit_axis[i] = -1.0f;
 		}
 
 		if (t2 < ray_range) {
 			ray_range = t2;
+			hit_axis = glm::vec3(0.0f);
+			hit_axis[i] = 1.0f;
 		}
 
 		if (ray_range < nearest_distance) {
@@ -578,7 +584,8 @@ bool PhysicsManager::intersect_ray_aabb(const Ray &ray, const ColliderAABB &aabb
 
 	result.distance = nearest_distance;
 	result.point = ray.origin + ray.direction * nearest_distance;
-	result.normal = -ray.direction;
+	result.normal = hit_axis;
+
 	return true;
 }
 
@@ -591,6 +598,8 @@ bool PhysicsManager::intersect_ray_obb(const Ray &ray, const ColliderOBB &obb, H
 
 	float nearest_distance = 0.0f;
 	float ray_range = std::numeric_limits<float>::max();
+
+	glm::vec3 hit_normal(0.0f);
 
 	for (int i = 0; i < 3; i++) {
 		float ood = 1.0f / local_ray.direction[i];
@@ -607,10 +616,12 @@ bool PhysicsManager::intersect_ray_obb(const Ray &ray, const ColliderOBB &obb, H
 
 		if (t1 > nearest_distance) {
 			nearest_distance = t1;
+			hit_normal[i] = -1.0f;
 		}
 
 		if (t2 < ray_range) {
 			ray_range = t2;
+			hit_normal[i] = 1.0f;
 		}
 
 		if (nearest_distance > ray_range) {
@@ -620,7 +631,11 @@ bool PhysicsManager::intersect_ray_obb(const Ray &ray, const ColliderOBB &obb, H
 
 	result.distance = nearest_distance;
 	result.point = ray.origin + ray.direction * nearest_distance;
-	result.normal = -ray.direction;
+
+	if (glm::dot(local_ray.direction, hit_normal) > 0.0f) {
+		hit_normal = -hit_normal;
+	}
+	result.normal = glm::normalize(obb.get_orientation_matrix() * hit_normal);
 
 	return true;
 }

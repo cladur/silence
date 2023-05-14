@@ -30,8 +30,8 @@ EditorScene::EditorScene(SceneType type) {
 	this->type = type;
 	InputManager &input_manager = InputManager::get();
 
-	input_manager.add_action("ray cast");
-	input_manager.add_key_to_action("ray cast", InputKey::MOUSE_LEFT);
+	input_manager.add_action("ray_cast");
+	input_manager.add_key_to_action("ray_cast", InputKey::MOUSE_LEFT);
 	// bsp_tree = BSPSystem::build_tree(world, entities, 10);
 }
 
@@ -83,7 +83,7 @@ void EditorScene::update(float dt) {
 		handle_camera(get_render_scene().debug_camera, dt);
 		display_manager.capture_mouse(true);
 
-		if (input_manager.is_action_pressed("ray cast")) {
+		if (input_manager.is_action_pressed("ray_cast")) {
 			Ray ray{};
 			ray.origin = get_render_scene().debug_camera.get_position();
 			ray.direction = glm::normalize(get_render_scene().debug_camera.get_front());

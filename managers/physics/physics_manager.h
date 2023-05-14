@@ -19,9 +19,9 @@ struct HitInfo {
 	glm::vec3 point;
 	glm::vec3 normal;
 	float distance;
-	Entity entity;
+	Entity entity = 0;
 
-	HitInfo() : point(0.0f), normal(0.0f), distance(std::numeric_limits<float>::max()), entity(0) {
+	HitInfo() : point(0.0f), normal(0.0f), distance(std::numeric_limits<float>::max()) {
 	}
 };
 

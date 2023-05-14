@@ -2079,18 +2079,11 @@
         "components": [
             {
                 "component_data": {
-                    "center": {
-                        "x": 0.0,
-                        "y": 1.0,
-                        "z": 0.0
-                    },
-                    "range": {
-                        "x": 0.4000000059604645,
-                        "y": 1.0,
-                        "z": 0.4000000059604645
-                    }
+                    "camera": 3,
+                    "camera_pivot": 47,
+                    "model": 6
                 },
-                "component_name": "ColliderAABB"
+                "component_name": "AgentData"
             },
             {
                 "component_data": {},
@@ -2108,11 +2101,14 @@
             },
             {
                 "component_data": {
-                    "camera": 3,
-                    "camera_pivot": 47,
-                    "model": 6
+                    "center": {
+                        "x": 0.0,
+                        "y": 0.5,
+                        "z": 0.0
+                    },
+                    "radius": 0.5
                 },
-                "component_name": "AgentData"
+                "component_name": "ColliderSphere"
             },
             {
                 "component_data": {
@@ -2143,7 +2139,7 @@
             }
         ],
         "entity": 46,
-        "signature": "00000000000000100101000000100011"
+        "signature": "00000000000000100011000000100011"
     },
     {
         "components": [
@@ -2215,6 +2211,10 @@
                 "component_name": "ColliderTag"
             },
             {
+                "component_data": {},
+                "component_name": "StaticTag"
+            },
+            {
                 "component_data": {
                     "parent": 49
                 },
@@ -2240,10 +2240,6 @@
                     }
                 },
                 "component_name": "Transform"
-            },
-            {
-                "component_data": {},
-                "component_name": "StaticTag"
             },
             {
                 "component_data": {
@@ -2322,6 +2318,10 @@
                 "component_name": "ColliderTag"
             },
             {
+                "component_data": {},
+                "component_name": "StaticTag"
+            },
+            {
                 "component_data": {
                     "parent": 49
                 },
@@ -2347,10 +2347,6 @@
                     }
                 },
                 "component_name": "Transform"
-            },
-            {
-                "component_data": {},
-                "component_name": "StaticTag"
             },
             {
                 "component_data": {
@@ -2384,6 +2380,10 @@
                 "component_name": "ColliderTag"
             },
             {
+                "component_data": {},
+                "component_name": "StaticTag"
+            },
+            {
                 "component_data": {
                     "parent": 49
                 },
@@ -2409,10 +2409,6 @@
                     }
                 },
                 "component_name": "Transform"
-            },
-            {
-                "component_data": {},
-                "component_name": "StaticTag"
             },
             {
                 "component_data": {
@@ -2458,6 +2454,10 @@
                 "component_name": "ColliderTag"
             },
             {
+                "component_data": {},
+                "component_name": "StaticTag"
+            },
+            {
                 "component_data": {
                     "parent": 49
                 },
@@ -2483,10 +2483,6 @@
                     }
                 },
                 "component_name": "Transform"
-            },
-            {
-                "component_data": {},
-                "component_name": "StaticTag"
             },
             {
                 "component_data": {

@@ -5,6 +5,9 @@
 #include "ecs/world.h"
 #include "engine/scene.h"
 
+#include "ecs/systems/collision_system.h"
+#include "physics/physics_manager.h"
+
 #include "input/input_manager.h"
 
 AutoCVarFloat cvar_agent_speed("agent.speed", "agent speed", 4.0f, CVarFlags::EditCheckbox);
@@ -28,6 +31,7 @@ void AgentSystem::update(World &world, float dt) {
 		auto &agent_data = world.get_component<AgentData>(entity);
 		auto &camera_pivot_tf = world.get_component<Transform>(agent_data.camera_pivot);
 		auto &model_tf = world.get_component<Transform>(agent_data.model);
+		auto &camera_tf = world.get_component<Transform>(agent_data.camera);
 
 		auto camera_forward = camera_pivot_tf.get_global_forward();
 		camera_forward.y = 0.0f;
@@ -50,10 +54,6 @@ void AgentSystem::update(World &world, float dt) {
 			transform.position -= camera_right * cvar_agent_speed.get() * dt;
 			transform.set_changed(true);
 		}
-		if (input_manager.is_action_pressed("move_down")) {
-			transform.position.y -= cvar_agent_speed.get() * dt;
-			transform.set_changed(true);
-		}
 
 		glm::vec2 mouse_delta = input_manager.get_mouse_delta();
 		camera_pivot_tf.add_euler_rot(glm::vec3(mouse_delta.y, 0.0f, 0.0f) * cvar_camera_sensitivity.get() * dt);
@@ -72,6 +72,33 @@ void AgentSystem::update(World &world, float dt) {
 			float angle = glm::acos(glm::dot(forward, direction)) * 0.3f;
 			glm::vec3 axis = glm::cross(forward, direction);
 			model_tf.add_global_euler_rot(axis * angle);
+		}
+
+		Ray ray{};
+		ray.origin = transform.get_global_position() + glm::vec3(0.0f, -0.01f, 0.0f);
+		ray.direction = glm::vec3(0.0f, -1.0f, 0.0f);
+		glm::vec3 end = ray.origin + ray.direction;
+		world.get_parent_scene()->get_render_scene().debug_draw.draw_arrow(ray.origin, end);
+		HitInfo info;
+		if (CollisionSystem::ray_cast(world, ray, info)) {
+			SPDLOG_INFO("distance {}", info.distance);
+
+			// If the agent is not on the ground, move him down
+			// If the agent is on 40 degree slope or more, move him down
+			bool is_on_too_steep_slope =
+					glm::dot(info.normal, glm::vec3(0.0f, 1.0f, 0.0f)) < glm::cos(glm::radians(40.0f));
+
+			if (is_on_too_steep_slope || info.distance > 0.1f) {
+				transform.position.y -= 8.0f * dt;
+				transform.set_changed(true);
+			}
+
+			// If the agent is close enough to the floor, snap him to it
+			float snap_length = 0.3f;
+			if (info.distance > 0.1f && info.distance < snap_length) {
+				transform.position.y = info.point.y + 0.001f;
+				transform.set_changed(true);
+			}
 		}
 
 		last_position = transform.position;

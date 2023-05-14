@@ -92,9 +92,8 @@ void Engine::update(float dt) {
 	custom_update(dt);
 
 	for (auto &scene : scenes) {
-		scene->update(dt);
-
 		scene->world.update(dt);
+		scene->update(dt);
 	}
 
 	AudioManager::get().update();

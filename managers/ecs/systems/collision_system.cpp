@@ -462,33 +462,33 @@ bool CollisionSystem::ray_cast(World &world, const Ray &ray, HitInfo &result) {
 			continue;
 		}
 		Transform &transform = world.get_component<Transform>(entity);
-		HitInfo temp;
-		temp.entity = entity;
+		HitInfo info;
+		info.entity = entity;
 		if (world.has_component<ColliderAABB>(entity)) {
 			ColliderAABB c = world.get_component<ColliderAABB>(entity);
 			c.center += transform.position;
 			c.range *= transform.scale;
-			if (physics_manager.intersect_ray_aabb(ray, c, temp)) {
+			if (physics_manager.intersect_ray_aabb(ray, c, info)) {
 				does_hit = true;
 			}
 		} else if (world.has_component<ColliderOBB>(entity)) {
 			ColliderOBB c = world.get_component<ColliderOBB>(entity);
 			c.center = transform.position + c.get_orientation_matrix() * (c.center * transform.get_scale());
 			c.range *= transform.scale;
-			if (physics_manager.intersect_ray_obb(ray, c, temp)) {
+			if (physics_manager.intersect_ray_obb(ray, c, info)) {
 				does_hit = true;
 			}
 		} else if (world.has_component<ColliderSphere>(entity)) {
 			ColliderSphere c = world.get_component<ColliderSphere>(entity);
 			c.center += transform.position;
 			c.radius *= transform.scale.x;
-			if (physics_manager.intersect_ray_sphere(ray, c, temp)) {
+			if (physics_manager.intersect_ray_sphere(ray, c, info)) {
 				does_hit = true;
 			}
 		}
 
-		if (temp.distance < result.distance) {
-			result = temp;
+		if (info.distance < result.distance) {
+			result = info;
 		}
 	}
 	return does_hit;
