@@ -11,13 +11,13 @@ void SkinnedPassUnlit::startup() {
 }
 
 void SkinnedPassUnlit::draw(RenderScene &scene) {
-	RenderManager &render_manager = RenderManager::get();
+	ResourceManager &resource_manager = ResourceManager::get();
 	material.bind_resources(scene);
 	for (auto &cmd : draw_commands) {
 		SkinnedModelInstance &instance = *cmd.model_instance;
 		Transform &transform = *cmd.transform;
 		material.bind_instance_resources(instance, transform);
-		SkinnedModel &model = render_manager.get_skinned_model(instance.model_handle);
+		SkinnedModel &model = resource_manager.get_skinned_model(instance.model_handle);
 		for (auto &mesh : model.meshes) {
 			material.bind_mesh_resources(mesh);
 			mesh.draw();

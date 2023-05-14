@@ -3,7 +3,12 @@
 #include "component_visitor.h"
 #include "components/children_component.h"
 #include "components/parent_component.h"
+#include "resource/resource_manager.h"
 #include "serialization.h"
+#include <spdlog/spdlog.h>
+
+#include <future>
+#include <vector>
 
 void World::startup() {
 	// Create pointers to each manager
@@ -141,9 +146,38 @@ void World::deserialize_entity_json(nlohmann::json &json, std::vector<Entity> &e
 }
 
 void World::deserialize_entities_json(nlohmann::json &json, std::vector<Entity> &entities) {
+	ResourceManager &resource_manager = ResourceManager::get();
+	std::set<std::string> assets_to_load;
+	for (auto &array_entity : json) {
+		for (auto &component : array_entity["components"]) {
+			std::string component_name = component["component_name"];
+			int component_id = component_ids[component_name];
+			if (component_id == component_ids["ModelInstance"]) {
+				std::string model_path = component["component_data"]["model_name"];
+				assets_to_load.insert(model_path);
+			}
+		}
+	}
+
+	std::vector<std::future<void>> futures = {};
+	futures.reserve(assets_to_load.size());
+	for (auto &asset : assets_to_load) {
+		futures.emplace_back(std::async(std::launch::deferred , [&resource_manager, &asset]{resource_manager.load_model(asset_path(asset).c_str());} ));
+	}
+    for (auto &f : futures) {
+		f.wait();
+	}
+
 	for (auto &array_entity : json) {
 		deserialize_entity_json(array_entity, entities);
 	}
+	// std::vector<std::future<void>> futures = {};
+    // for (auto &array_entity : json) {
+    //     futures.emplace_back(std::async(std::launch::async, [this, &array_entity, &entities]{deserialize_entity_json(array_entity, entities);} ));
+    // }
+    // for (auto &f : futures) {
+	// 	f.wait();
+	// }
 }
 Signature World::get_entity_signature(Entity entity) {
 	return entity_manager->get_signature(entity);
