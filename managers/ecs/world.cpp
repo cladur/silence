@@ -171,13 +171,6 @@ void World::deserialize_entities_json(nlohmann::json &json, std::vector<Entity> 
 	for (auto &array_entity : json) {
 		deserialize_entity_json(array_entity, entities);
 	}
-	// std::vector<std::future<void>> futures = {};
-    // for (auto &array_entity : json) {
-    //     futures.emplace_back(std::async(std::launch::async, [this, &array_entity, &entities]{deserialize_entity_json(array_entity, entities);} ));
-    // }
-    // for (auto &f : futures) {
-	// 	f.wait();
-	// }
 }
 Signature World::get_entity_signature(Entity entity) {
 	return entity_manager->get_signature(entity);
