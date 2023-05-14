@@ -289,6 +289,21 @@ void Editor::custom_update(float dt) {
 		if (!scene.entity_deletion_queue.empty()) {
 			Entity entity_to_remove = scene.entity_deletion_queue.front();
 			scene.entity_deletion_queue.pop();
+			// Deselect entity if it is selected
+			if (entity_to_remove == scene.selected_entity) {
+				scene.selected_entity = 0;
+			}
+			// Remove parent / child compontents if they're present
+			if (w.has_component<Parent>(entity_to_remove)) {
+				Entity parent = w.get_component<Parent>(entity_to_remove).parent;
+				w.remove_child(parent, entity_to_remove);
+			}
+			if (w.has_component<Children>(entity_to_remove)) {
+				auto children = w.get_component<Children>(entity_to_remove);
+				for (int i = 0; i < children.children_count; i++) {
+					w.remove_child(entity_to_remove, children.children[i]);
+				}
+			}
 			scene.entities.erase(
 					std::remove(scene.entities.begin(), scene.entities.end(), entity_to_remove), scene.entities.end());
 			w.destroy_entity(entity_to_remove);

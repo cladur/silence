@@ -3,6 +3,7 @@
 
 #include "ecs/world.h"
 #include "render/render_manager.h"
+#include "resource/resource_manager.h"
 #include <imgui.h>
 
 class Inspector {
@@ -10,7 +11,7 @@ private:
 	Entity selected_entity = 0;
 	ImGuiTreeNodeFlags tree_flags =
 			ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_SpanFullWidth;
-	RenderManager &render_manager = RenderManager::get();
+	ResourceManager &resource_manager = ResourceManager::get();
 
 	std::queue<std::pair<Entity, int>> remove_component_queue;
 
@@ -31,6 +32,7 @@ private:
 	void show_collideraabb();
 	void show_colliderobb();
 	void show_light();
+	void show_agent_data();
 	static bool show_vec3(const char *label, glm::vec3 &vec3, float speed = 0.1f, float reset_value = 0.0f,
 			float min_value = 100.0f, float max_value = 100.0f);
 	static bool show_float(const char *label, float &value, float speed = 0.1f);

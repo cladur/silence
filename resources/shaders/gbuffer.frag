@@ -20,15 +20,18 @@ uniform bool has_emissive_map;
 
 uniform vec3 camPos;
 
+uniform vec2 uv_scale;
+
 
 // ----------------------------------------------------------------------------
 // Easy trick to get tangent-normals to world-space to keep PBR code simplified.
 // Don't worry if you don't get what's going on; you generally want to do normal 
 // mapping the usual way for performance anyways; I do plan make a note of this 
 // technique somewhere later in the normal mapping tutorial.
-vec3 getNormalFromMap()
+vec3 getNormalFromMap(vec2 texutre_coords)
 {
-    vec3 tangentNormal = texture(normal_map, TexCoords).xyz * 2.0 - 1.0;
+    
+    vec3 tangentNormal = texture(normal_map, texutre_coords).xyz * 2.0 - 1.0;
 
     vec3 Q1  = dFdx(ViewPos);
     vec3 Q2  = dFdy(ViewPos);
@@ -46,13 +49,14 @@ vec3 getNormalFromMap()
 // ----------------------------------------------------------------------------
 void main()
 {
-    vec3 albedo = pow(texture(albedo_map, TexCoords).rgb, vec3(2.2));
-    vec3 ao_metallic_roughness = texture(ao_metallic_roughness_map, TexCoords).rgb;
+    vec2 texture_coords = vec2(TexCoords.x * uv_scale.x, TexCoords.y * uv_scale.y);
+    vec3 albedo = pow(texture(albedo_map, texture_coords).rgb, vec3(2.2));
+    vec3 ao_metallic_roughness = texture(ao_metallic_roughness_map, texture_coords).rgb;
     float roughness = ao_metallic_roughness.g;
     float metallic = ao_metallic_roughness.b;
     vec3 normal = Normal;
     if (has_normal_map) {
-        normal = getNormalFromMap();
+        normal = getNormalFromMap(texture_coords);
     }
 
     float ao = 1.0;

@@ -4,8 +4,7 @@
 #include <glm/gtx/quaternion.hpp>
 #include <utility>
 
-Channel::Channel(const assets::NodeAnimation &node, std::string bone_name, int32_t id) :
-		bone_name(std::move(bone_name)), id(id), local_transform(1.0f) {
+Channel::Channel(const assets::NodeAnimation &node, int32_t id) : id(id), local_transform(1.0f) {
 	positions.reserve(node.translations.size());
 	for (int32_t position_index = 0; position_index < node.translation_times.size(); ++position_index) {
 		glm::vec3 pos = { node.translations[position_index][0], node.translations[position_index][1],
@@ -107,16 +106,4 @@ glm::mat4 Channel::interpolate_rotation(float animation_time) {
 	glm::quat final_rotation = glm::slerp(rotations[p0_index].rotation, rotations[p1_index].rotation, scale_factor);
 	final_rotation = glm::normalize(final_rotation);
 	return glm::toMat4(final_rotation);
-}
-
-glm::mat4 Channel::get_local_transform() {
-	return local_transform;
-}
-
-std::string Channel::get_bone_name() const {
-	return bone_name;
-}
-
-int32_t Channel::get_bone_id() const {
-	return id;
 }

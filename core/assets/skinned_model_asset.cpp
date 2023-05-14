@@ -10,12 +10,6 @@ assets::SkinnedModelInfo assets::read_skinned_model_info(AssetFile *file) {
 	info.bone_parents = model_metadata["bone_parents"].get<std::vector<int64_t>>();
 	info.root = model_metadata["root"].get<int32_t>();
 
-	nlohmann::json children_list = model_metadata["bone_children"].get<std::vector<nlohmann::json>>();
-	info.bone_children.reserve(children_list.size());
-	for (auto &children : children_list) {
-		info.bone_children.emplace_back(children["children"].get<std::vector<int32_t>>());
-	}
-
 	info.bone_rotation_buffer_size = model_metadata["bone_rotation_buffer_size"];
 	info.bone_translation_buffer_size = model_metadata["bone_translation_buffer_size"];
 
@@ -43,13 +37,6 @@ assets::AssetFile assets::pack_model(const SkinnedModelInfo &info, BoneData &bon
 	model_metadata["joint_names"] = info.joint_names;
 	model_metadata["bone_parents"] = info.bone_parents;
 
-	std::vector<nlohmann::json> children_list;
-	for (auto &bone : info.bone_children) {
-		nlohmann::json children;
-		children["children"] = bone;
-		children_list.push_back(children);
-	}
-	model_metadata["bone_children"] = children_list;
 	model_metadata["root"] = info.root;
 
 	model_metadata["bone_rotation_buffer_size"] = info.bone_rotation_buffer_size;

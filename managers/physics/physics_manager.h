@@ -5,6 +5,39 @@ struct ColliderSphere;
 struct ColliderAABB;
 struct ColliderOBB;
 
+struct Ray {
+	glm::vec3 origin;
+	glm::vec3 direction;
+
+	Ray() = default;
+
+	Ray(const glm::vec3 &start, const glm::vec3 &end) : origin(start), direction(glm::normalize(start - end)) {
+	}
+};
+
+struct HitInfo {
+	glm::vec3 point;
+	glm::vec3 normal;
+	float distance;
+	Entity entity = 0;
+
+	HitInfo() : point(0.0f), normal(0.0f), distance(std::numeric_limits<float>::max()) {
+	}
+};
+
+enum class Side { FRONT, BACK, INTERSECT };
+
+struct Plane {
+	glm::vec3 point;
+	glm::vec3 normal;
+};
+
+struct BSPNode {
+	std::shared_ptr<BSPNode> back, front;
+	Plane plane;
+	std::set<Entity> entities;
+};
+
 enum class CollisionFlag : uint16_t {
 	NONE = 0b0000000000000000,
 	FIRST_SPHERE = 0b0000000000000001,
@@ -55,6 +88,13 @@ public:
 	void resolve_obb_aabb(World &world, Entity obb, Entity aabb);
 
 	bool is_collision_candidate(const glm::vec3 &p1, const glm::vec3 &r1, const glm::vec3 &p2, const glm::vec3 &r2);
+
+	// returns true, point and normal if ray intersect with sphere
+	bool intersect_ray_sphere(const Ray &ray, const ColliderSphere &sphere, HitInfo &result);
+	// returns true, point and normal if ray intersect with aabb
+	bool intersect_ray_aabb(const Ray &ray, const ColliderAABB &aabb, HitInfo &result);
+	// returns true, point and normal if ray intersect with obb
+	bool intersect_ray_obb(const Ray &ray, const ColliderOBB &obb, HitInfo &result);
 };
 
 #endif //SILENCE_PHYSICS_MANAGER_H

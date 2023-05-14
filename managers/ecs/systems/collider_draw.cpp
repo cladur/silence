@@ -1,5 +1,6 @@
 #include "collider_draw.h"
 #include "engine/scene.h"
+#include <glm/gtx/quaternion.hpp>
 
 AutoCVarInt cvar_collider_draw_system_enabled(
 		"debug_draw.collision.draw", "enable collider draw system", 0, CVarFlags::EditCheckbox);
@@ -19,26 +20,22 @@ void ColliderDrawSystem::update(World &world, float dt) {
 			auto col = world.get_component<ColliderAABB>(entity);
 			auto transform = world.get_component<Transform>(entity);
 			world.get_parent_scene()->get_render_scene().debug_draw.draw_box(transform.position + col.center,
-					glm::vec3(0.0f, 0.0f, 0.0f), col.range * 2.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+					glm::vec3(0.0f, 0.0f, 0.0f), col.range * 2.0f * transform.scale, glm::vec3(1.0f, 1.0f, 1.0f));
 		}
 
 		if (world.has_component<ColliderSphere>(entity)) {
 			auto col = world.get_component<ColliderSphere>(entity);
 			auto transform = world.get_component<Transform>(entity);
 			world.get_parent_scene()->get_render_scene().debug_draw.draw_sphere(
-					transform.position + col.center, col.radius, glm::vec3(1.0f, 1.0f, 1.0f));
+					transform.position + col.center, col.radius * transform.scale.x, glm::vec3(1.0f, 1.0f, 1.0f));
 		}
 
-		// todo implement this when obb colliders are fixed
-		//		if (world.has_component<ColliderOBB>(entity)) {
-		//			auto col = world.get_component<ColliderOBB>(entity);
-		//			auto transform = world.get_component<Transform>(entity);
-		//		    world.get_parent_scene()->get_render_scene().debug_draw.draw_box(
-		//					transform.position + col.center,
-		//					transform.orientation,
-		//					col.range * 2.0f,
-		//					glm::vec3(1.0f, 1.0f, 1.0f)
-		//					);
-		//		}
+		if (world.has_component<ColliderOBB>(entity)) {
+			auto col = world.get_component<ColliderOBB>(entity);
+			auto transform = world.get_component<Transform>(entity);
+			world.get_parent_scene()->get_render_scene().debug_draw.draw_box(
+					transform.position + col.get_orientation_matrix() * (col.center * transform.scale),
+					transform.orientation, col.range * 2.0f * transform.scale, glm::vec3(1.0f, 1.0f, 1.0f));
+		}
 	}
 }

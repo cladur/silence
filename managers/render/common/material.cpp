@@ -219,6 +219,8 @@ void MaterialGBuffer::bind_resources(RenderScene &scene) {
 
 void MaterialGBuffer::bind_instance_resources(ModelInstance &instance, Transform &transform) {
 	shader.set_mat4("model", transform.get_global_model_matrix());
+	glm::vec2 uv_scale = instance.scale_uv_with_transform ? transform.scale : glm::vec2(1.0f);
+	shader.set_vec2("uv_scale", uv_scale);
 }
 
 void MaterialGBuffer::bind_mesh_resources(Mesh &mesh) {

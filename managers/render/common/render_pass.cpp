@@ -3,6 +3,7 @@
 #include "render/common/framebuffer.h"
 #include "render/common/utils.h"
 #include "render/render_manager.h"
+#include "resource/resource_manager.h"
 #include <tracy/tracy.hpp>
 
 void SkinnedPassUnlit::startup() {
@@ -10,13 +11,13 @@ void SkinnedPassUnlit::startup() {
 }
 
 void SkinnedPassUnlit::draw(RenderScene &scene) {
-	RenderManager &render_manager = RenderManager::get();
+	ResourceManager &resource_manager = ResourceManager::get();
 	material.bind_resources(scene);
 	for (auto &cmd : draw_commands) {
 		SkinnedModelInstance &instance = *cmd.model_instance;
 		Transform &transform = *cmd.transform;
 		material.bind_instance_resources(instance, transform);
-		SkinnedModel &model = render_manager.get_skinned_model(instance.model_handle);
+		SkinnedModel &model = resource_manager.get_skinned_model(instance.model_handle);
 		for (auto &mesh : model.meshes) {
 			material.bind_mesh_resources(mesh);
 			mesh.draw();
@@ -30,7 +31,7 @@ void PBRPass::startup() {
 }
 
 void PBRPass::draw(RenderScene &scene) {
-	RenderManager &render_manager = RenderManager::get();
+	ResourceManager &resource_manager = ResourceManager::get();
 	material.bind_resources(scene);
 	utils::render_quad();
 }
@@ -107,13 +108,13 @@ void GBufferPass::startup() {
 }
 
 void GBufferPass::draw(RenderScene &scene) {
-	RenderManager &render_manager = RenderManager::get();
+	ResourceManager &resource_manager = ResourceManager::get();
 	material.bind_resources(scene);
 	for (auto &cmd : draw_commands) {
 		ModelInstance &instance = *cmd.model_instance;
 		Transform &transform = *cmd.transform;
 		material.bind_instance_resources(instance, transform);
-		Model &model = render_manager.get_model(instance.model_handle);
+		Model &model = resource_manager.get_model(instance.model_handle);
 		for (auto &mesh : model.meshes) {
 			if (mesh.fc_bounding_sphere.is_on_frustum(scene.frustum, transform, scene)) {
 				material.bind_mesh_resources(mesh);
