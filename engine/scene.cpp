@@ -8,7 +8,6 @@
 #include "render/render_manager.h"
 
 #include "ecs/systems/agent_system.h"
-#include "ecs/systems/bsp_system.h"
 #include "ecs/systems/collider_draw.h"
 #include "ecs/systems/collision_system.h"
 #include "ecs/systems/isolated_entities_system.h"
@@ -65,7 +64,6 @@ void Scene::register_game_systems() {
 	// Physics
 	world.register_system<PhysicsSystem>();
 	world.register_system<CollisionSystem>();
-	world.register_system<BSPSystem>();
 
 	// Agents
 	world.register_system<AgentSystem>();
@@ -116,5 +114,5 @@ void Scene::load_from_file(const std::string &path) {
 	file.close();
 	SceneManager::load_scene_from_json_file(world, scene_json, "", entities);
 
-	bsp_tree = BSPSystem::build_tree(world, entities, 10);
+	bsp_tree = CollisionSystem::build_tree(world, entities, 10);
 }

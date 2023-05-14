@@ -34,7 +34,7 @@ void ColliderDrawSystem::update(World &world, float dt) {
 			auto col = world.get_component<ColliderOBB>(entity);
 			auto transform = world.get_component<Transform>(entity);
 			world.get_parent_scene()->get_render_scene().debug_draw.draw_box(
-					transform.position + glm::toMat3(transform.orientation) * (col.center * transform.scale),
+					transform.position + col.get_orientation_matrix() * (col.center * transform.scale),
 					transform.orientation, col.range * 2.0f * transform.scale, glm::vec3(1.0f, 1.0f, 1.0f));
 		}
 	}

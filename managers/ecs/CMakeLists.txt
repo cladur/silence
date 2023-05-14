@@ -13,7 +13,6 @@ add_library(${ECS_MANAGER_NAME} STATIC
         systems/root_parent_system.cpp systems/root_parent_system.h
         component_visitor.h 
         systems/collision_system.cpp systems/collision_system.h 
-        systems/bsp_system.cpp systems/bsp_system.h 
         systems/collider_draw.cpp systems/collider_draw.h
         systems/light_system.cpp systems/light_system.h
         systems/agent_system.cpp systems/agent_system.h

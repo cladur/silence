@@ -10,9 +10,9 @@
                         "z": 0.0
                     },
                     "position": {
-                        "x": -3.698394298553467,
-                        "y": 0.6452628374099731,
-                        "z": -0.9687508344650269
+                        "x": 3.0,
+                        "y": 0.0,
+                        "z": -4.0
                     },
                     "scale": {
                         "x": 1.0,
@@ -25,7 +25,8 @@
             {
                 "component_data": {
                     "material_type": 0,
-                    "model_name": "woodenBox/woodenBox.mdl"
+                    "model_name": "woodenBox/woodenBox.mdl",
+                    "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
             },
@@ -67,9 +68,9 @@
                         "z": 0.0
                     },
                     "position": {
-                        "x": 0.94482421875,
-                        "y": -0.22534184157848358,
-                        "z": -1.060791015625
+                        "x": 3.0,
+                        "y": 0.0,
+                        "z": 4.0
                     },
                     "scale": {
                         "x": 1.0,
@@ -82,7 +83,8 @@
             {
                 "component_data": {
                     "material_type": 0,
-                    "model_name": "woodenBox/woodenBox.mdl"
+                    "model_name": "woodenBox/woodenBox.mdl",
+                    "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
             },
@@ -124,9 +126,9 @@
                         "z": 0.0
                     },
                     "position": {
-                        "x": -2.0712907314300537,
-                        "y": 2.9283130168914795,
-                        "z": 3.5788586139678955
+                        "x": -2.342514753341675,
+                        "y": -0.12457716464996338,
+                        "z": 4.254528045654297
                     },
                     "scale": {
                         "x": 1.0,
@@ -139,9 +141,18 @@
             {
                 "component_data": {
                     "material_type": 0,
-                    "model_name": "woodenBox/woodenBox.mdl"
+                    "model_name": "woodenBox/woodenBox.mdl",
+                    "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {},
+                "component_name": "StaticTag"
+            },
+            {
+                "component_data": {},
+                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -152,13 +163,13 @@
                     },
                     "orientation": {
                         "0": {
-                            "x": 0.0,
+                            "x": 1.0,
                             "y": 0.0,
                             "z": 0.0
                         },
                         "1": {
                             "x": 0.0,
-                            "y": 0.0,
+                            "y": 1.0,
                             "z": 0.0
                         }
                     },
@@ -169,14 +180,6 @@
                     }
                 },
                 "component_name": "ColliderOBB"
-            },
-            {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
-            {
-                "component_data": {},
-                "component_name": "ColliderTag"
             }
         ],
         "entity": 3,
@@ -186,6 +189,12 @@
         "components": [
             {
                 "component_data": {
+                    "name": "StaticSphere"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": 0.0,
@@ -193,14 +202,14 @@
                         "z": 0.0
                     },
                     "position": {
-                        "x": -0.44229835271835327,
-                        "y": 0.31909072399139404,
-                        "z": -3.2254514694213867
+                        "x": -4.049444198608398,
+                        "y": 0.5187571048736572,
+                        "z": -1.5809080600738525
                     },
                     "scale": {
-                        "x": 1.0,
-                        "y": 1.0,
-                        "z": 1.0
+                        "x": 2.0,
+                        "y": 2.0,
+                        "z": 2.0
                     }
                 },
                 "component_name": "Transform"
@@ -208,17 +217,10 @@
             {
                 "component_data": {
                     "material_type": 0,
-                    "model_name": "Agent/agent_idle.mdl"
+                    "model_name": "console/console.mdl",
+                    "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
-            {
-                "component_data": {},
-                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -230,10 +232,18 @@
                     "radius": 0.5
                 },
                 "component_name": "ColliderSphere"
+            },
+            {
+                "component_data": {},
+                "component_name": "StaticTag"
+            },
+            {
+                "component_data": {},
+                "component_name": "ColliderTag"
             }
         ],
         "entity": 4,
-        "signature": "00000000000000000011100001000010"
+        "signature": "00000000000000000011100001000011"
     },
     {
         "components": [
@@ -246,9 +256,9 @@
                         "z": 0.0
                     },
                     "position": {
-                        "x": 0.0,
-                        "y": 3.141615629196167,
-                        "z": 0.0
+                        "x": -4.898136138916016,
+                        "y": -0.3608636260032654,
+                        "z": -3.9146249294281006
                     },
                     "scale": {
                         "x": 1.0,
@@ -261,7 +271,8 @@
             {
                 "component_data": {
                     "material_type": 0,
-                    "model_name": "woodenBox/woodenBox.mdl"
+                    "model_name": "woodenBox/woodenBox.mdl",
+                    "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
             },
@@ -296,6 +307,12 @@
         "components": [
             {
                 "component_data": {
+                    "name": "OBB1"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 0.8563491106033325,
                         "x": 0.504828691482544,
@@ -303,9 +320,9 @@
                         "z": 0.04778740555047989
                     },
                     "position": {
-                        "x": -0.756960391998291,
-                        "y": 0.5365367531776428,
-                        "z": 3.665278673171997
+                        "x": -5.866420269012451,
+                        "y": -0.019276946783065796,
+                        "z": 7.939241886138916
                     },
                     "scale": {
                         "x": 3.4000000953674316,
@@ -317,16 +334,15 @@
             },
             {
                 "component_data": {
-                    "name": "OBB1"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "material_type": 0,
-                    "model_name": "console/console.mdl"
+                    "model_name": "console/console.mdl",
+                    "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {},
+                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -337,14 +353,14 @@
                     },
                     "orientation": {
                         "0": {
-                            "x": 0.0,
-                            "y": 0.0,
-                            "z": 0.0
+                            "x": 0.9763715267181396,
+                            "y": -0.016722194850444794,
+                            "z": 0.215450718998909
                         },
                         "1": {
-                            "x": 0.0,
-                            "y": 0.0,
-                            "z": 0.0
+                            "x": -0.18041300773620605,
+                            "y": 0.48572874069213867,
+                            "z": 0.8552887439727783
                         }
                     },
                     "range": {
@@ -354,10 +370,6 @@
                     }
                 },
                 "component_name": "ColliderOBB"
-            },
-            {
-                "component_data": {},
-                "component_name": "ColliderTag"
             }
         ],
         "entity": 6,
@@ -367,6 +379,12 @@
         "components": [
             {
                 "component_data": {
+                    "name": "OBB2"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": 0.0,
@@ -374,9 +392,9 @@
                         "z": 0.0
                     },
                     "position": {
-                        "x": -0.9890888929367065,
-                        "y": 0.06744909286499023,
-                        "z": 1.5294229984283447
+                        "x": -8.864334106445313,
+                        "y": 0.0414026640355587,
+                        "z": 9.31478214263916
                     },
                     "scale": {
                         "x": 1.0,
@@ -388,16 +406,15 @@
             },
             {
                 "component_data": {
-                    "name": "OBB2"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "material_type": 0,
-                    "model_name": "woodenBox/woodenBox.mdl"
+                    "model_name": "woodenBox/woodenBox.mdl",
+                    "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {},
+                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -408,13 +425,13 @@
                     },
                     "orientation": {
                         "0": {
-                            "x": 0.0,
+                            "x": 1.0,
                             "y": 0.0,
                             "z": 0.0
                         },
                         "1": {
                             "x": 0.0,
-                            "y": 0.0,
+                            "y": 1.0,
                             "z": 0.0
                         }
                     },
@@ -425,10 +442,6 @@
                     }
                 },
                 "component_name": "ColliderOBB"
-            },
-            {
-                "component_data": {},
-                "component_name": "ColliderTag"
             }
         ],
         "entity": 7,
@@ -438,6 +451,12 @@
         "components": [
             {
                 "component_data": {
+                    "name": "AABB"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": 0.0,
@@ -445,9 +464,9 @@
                         "z": 0.0
                     },
                     "position": {
-                        "x": -1.6000827550888062,
-                        "y": 0.7977360486984253,
-                        "z": 5.139138221740723
+                        "x": -8.72364616394043,
+                        "y": 0.24206343293190002,
+                        "z": 7.606961727142334
                     },
                     "scale": {
                         "x": 1.0,
@@ -459,14 +478,9 @@
             },
             {
                 "component_data": {
-                    "name": "AABB"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "material_type": 0,
-                    "model_name": "woodenBox/woodenBox.mdl"
+                    "model_name": "woodenBox/woodenBox.mdl",
+                    "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
             },
