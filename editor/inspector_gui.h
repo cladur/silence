@@ -3,6 +3,7 @@
 
 #include "ecs/world.h"
 #include "render/render_manager.h"
+#include "resource/resource_manager.h"
 #include <imgui.h>
 
 class Inspector {
@@ -10,7 +11,7 @@ private:
 	Entity selected_entity = 0;
 	ImGuiTreeNodeFlags tree_flags =
 			ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_SpanFullWidth;
-	RenderManager &render_manager = RenderManager::get();
+	ResourceManager &resource_manager = ResourceManager::get();
 
 	std::queue<std::pair<Entity, int>> remove_component_queue;
 

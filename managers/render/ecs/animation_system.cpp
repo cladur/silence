@@ -5,6 +5,7 @@
 #include "managers/render/common/animation.h"
 #include "managers/render/render_manager.h"
 #include "render/common/skinned_model.h"
+#include "resource/resource_manager.h"
 #include <glm/gtx/quaternion.hpp>
 
 void AnimationSystem::startup(World &world) {
@@ -28,8 +29,8 @@ void AnimationSystem::update(World &world, float dt) {
 
 void AnimationSystem::update_animation(AnimData &data, float dt) {
 	if (data.animation) {
-		RenderManager &render_manager = RenderManager::get();
-		Animation &animation = render_manager.get_animation(data.animation->animation_handle);
+		ResourceManager &resource_manager = ResourceManager::get();
+		Animation &animation = resource_manager.get_animation(data.animation->animation_handle);
 		data.current_time += static_cast<float>(animation.get_ticks_per_second()) * dt;
 
 		data.current_time = fmod(data.current_time, static_cast<float>(animation.get_duration()));
@@ -38,9 +39,9 @@ void AnimationSystem::update_animation(AnimData &data, float dt) {
 }
 
 void AnimationSystem::calculate_bone_transform(AnimData &data) {
-	RenderManager &render_manager = RenderManager::get();
-	SkinnedModel &model = render_manager.get_skinned_model(data.model->model_handle);
-	Animation &animation = render_manager.get_animation(data.animation->animation_handle);
+	ResourceManager &resource_manager = ResourceManager::get();
+	SkinnedModel &model = resource_manager.get_skinned_model(data.model->model_handle);
+	Animation &animation = resource_manager.get_animation(data.animation->animation_handle);
 
 	Rig &rig = model.rig;
 	std::vector<glm::mat4> global_matrices(rig.names.size());
