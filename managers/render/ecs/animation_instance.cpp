@@ -1,18 +1,19 @@
 #include "animation_instance.h"
 
 #include "render/render_manager.h"
+#include "resource/resource_manager.h"
 
 AnimationInstance::AnimationInstance() {
-	RenderManager &render_manager = RenderManager::get();
-	animation_handle = render_manager.load_animation("scorpion/scorpion_idle_ANIM_GLTF/scorpion_idle_00_walk.anim");
-	render_manager.load_animation("scorpion/scorpion_idle_ANIM_GLTF/scorpion_idle_00_idle.anim");
-	render_manager.load_animation("agent001/agent_idle_ANIM_GLTF/agent_idle_grab.anim");
-	render_manager.load_animation("agent001/agent_idle_ANIM_GLTF/agent_idle_00_idle.anim");
+	ResourceManager &resource_manager = ResourceManager::get();
+	animation_handle = resource_manager.load_animation("scorpion/scorpion_idle_ANIM_GLTF/scorpion_idle_00_walk.anim");
+	resource_manager.load_animation("scorpion/scorpion_idle_ANIM_GLTF/scorpion_idle_00_idle.anim");
+	resource_manager.load_animation("agent001/agent_idle_ANIM_GLTF/agent_idle_grab.anim");
+	resource_manager.load_animation("agent001/agent_idle_ANIM_GLTF/agent_idle_00_idle.anim");
 }
 
 AnimationInstance::AnimationInstance(const char *path) {
-	RenderManager &render_manager = RenderManager::get();
-	animation_handle = render_manager.load_animation(path);
+	ResourceManager &resource_manager = ResourceManager::get();
+	animation_handle = resource_manager.load_animation(path);
 }
 
 void AnimationInstance::serialize_json(nlohmann::json &serialized_scene) {
