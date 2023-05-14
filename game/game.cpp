@@ -333,12 +333,16 @@ void Game::custom_update(float dt) {
 
 	// get imgui io
 	ImGuiIO &io = ImGui::GetIO();
-	if (in_debug_mode && input_manager.is_action_pressed("control_camera") && io.WantCaptureMouse == false) {
-		display_manager.capture_mouse(true);
-		DebugCamera &cam = get_active_scene().get_render_scene().debug_camera;
-		handle_camera(cam, dt);
+	if (in_debug_mode) {
+		if (input_manager.is_action_pressed("control_camera") && io.WantCaptureMouse == false) {
+			display_manager.capture_mouse(true);
+			DebugCamera &cam = get_active_scene().get_render_scene().debug_camera;
+			handle_camera(cam, dt);
+		} else {
+			display_manager.capture_mouse(false);
+		}
 	} else {
-		display_manager.capture_mouse(false);
+		display_manager.capture_mouse(true);
 	}
 
 	// ImGui
