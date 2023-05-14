@@ -17,6 +17,7 @@ const int NR_LIGHTS = 32;
 uniform vec3 lightPositions[NR_LIGHTS];
 uniform vec3 lightColors[NR_LIGHTS];
 
+uniform mat4 view;
 uniform vec3 camPos;
 
 const float PI = 3.14159265359;
@@ -68,7 +69,13 @@ vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
 // ----------------------------------------------------------------------------
 void main()
 {
-    vec3 WorldPos = texture(gPosition, TexCoords).rgb;
+    vec3 ViewPos = texture(gPosition, TexCoords).rgb;
+
+    // Calculate WorldPos from ViewPos
+    vec4 clipPos = vec4(ViewPos, 1.0);
+    vec4 ndcPos = clipPos / clipPos.w;
+    vec3 WorldPos = (inverse(view) * ndcPos).xyz;
+
     vec3 albedo = texture(gAlbedo, TexCoords).rgb;
     vec3 ao_metallic_roughness = texture(gAoRoughMetal, TexCoords).rgb;
     float ao = ao_metallic_roughness.r;

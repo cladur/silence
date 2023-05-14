@@ -52,6 +52,7 @@ void MaterialPBR::startup() {
 
 void MaterialPBR::bind_resources(RenderScene &scene) {
 	shader.use();
+	shader.set_mat4("view", scene.view);
 	shader.set_vec3("camPos", scene.camera_pos);
 	shader.set_int("gPosition", 0);
 	shader.set_int("gNormal", 1);
@@ -97,41 +98,32 @@ void MaterialPBR::bind_instance_resources(ModelInstance &instance, Transform &tr
 void MaterialPBR::bind_mesh_resources(Mesh &mesh) {
 }
 
-float our_lerp(float a, float b, float f)
-{
-    return a + f * (b - a);
+float our_lerp(float a, float b, float f) {
+	return a + f * (b - a);
 }
 
 void MaterialAO::startup() {
 	shader.load_from_files(shader_path("ssao.vert"), shader_path("ssao.frag"));
 
 	std::uniform_real_distribution<GLfloat> rand_float(0.0, 1.0);
-    std::default_random_engine gen;
+	std::default_random_engine gen;
 	std::vector<glm::vec3> noise_tex;
 
 	// ssao kernel
-	for (unsigned int i = 0; i < 64; ++i)
-    {
-        glm::vec3 sample(
-			rand_float(gen) * 2.0 - 1.0, 
-			rand_float(gen) * 2.0 - 1.0, 
-			rand_float(gen));
-        sample = glm::normalize(sample);
-        sample *= rand_float(gen);
-        float scale = float(i) / 64.0f;
+	for (unsigned int i = 0; i < 64; ++i) {
+		glm::vec3 sample(rand_float(gen) * 2.0 - 1.0, rand_float(gen) * 2.0 - 1.0, rand_float(gen));
+		sample = glm::normalize(sample);
+		sample *= rand_float(gen);
+		float scale = float(i) / 64.0f;
 
 		scale = our_lerp(0.1f, 1.0f, scale * scale);
-        sample *= scale;
-        ssao_kernel.push_back(sample);
-    }
+		sample *= scale;
+		ssao_kernel.push_back(sample);
+	}
 
 	// noise texture
-	for (unsigned int i = 0; i < 16; i++)
-	{
-		glm::vec3 noise(
-			rand_float(gen), 
-			rand_float(gen), 
-			0.0f);
+	for (unsigned int i = 0; i < 16; i++) {
+		glm::vec3 noise(rand_float(gen), rand_float(gen), 0.0f);
 		noise = glm::normalize(noise);
 		noise_tex.push_back(noise);
 	}
@@ -187,7 +179,6 @@ void MaterialAOBlur::bind_resources(RenderScene &scene) {
 
 void MaterialAOBlur::bind_instance_resources(ModelInstance &instance, Transform &transform) {
 }
-
 
 void MaterialGBuffer::startup() {
 	shader.load_from_files(shader_path("gbuffer.vert"), shader_path("gbuffer.frag"));
