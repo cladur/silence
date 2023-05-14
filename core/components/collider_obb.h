@@ -1,6 +1,7 @@
 #ifndef SILENCE_COLLIDER_OBB_H
 #define SILENCE_COLLIDER_OBB_H
 
+#include <glm/gtx/quaternion.hpp>
 struct ColliderOBB {
 	glm::vec3 center;
 	glm::vec3 orientation[2];
@@ -71,11 +72,8 @@ struct ColliderOBB {
 		return glm::normalize(glm::cross(orientation[0], orientation[1]));
 	}
 
-	void set_orientation(const glm::vec3 &rotation) {
-		const glm::mat3 orientation_matrix =
-				glm::mat3(glm::rotate(glm::mat4(1.0f), glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f)) *
-						glm::rotate(glm::mat4(1.0f), glm::radians(rotation.x), glm::vec3(1.0f, 0.0f, 0.0f)) *
-						glm::rotate(glm::mat4(1.0f), glm::radians(rotation.z), glm::vec3(0.0f, 0.0f, 1.0f)));
+	void set_orientation(const glm::quat &rotation) {
+		const glm::mat3 orientation_matrix = glm::toMat3(rotation);
 		orientation[0] = glm::normalize(orientation_matrix[0]);
 		orientation[1] = glm::normalize(orientation_matrix[1]);
 	};
