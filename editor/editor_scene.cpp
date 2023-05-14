@@ -28,6 +28,10 @@ void handle_camera(DebugCamera &cam, float dt) {
 
 EditorScene::EditorScene(SceneType type) {
 	this->type = type;
+	InputManager &input_manager = InputManager::get();
+
+	input_manager.add_action("ray cast");
+	input_manager.add_key_to_action("ray cast", InputKey::MOUSE_LEFT);
 	// bsp_tree = BSPSystem::build_tree(world, entities, 10);
 }
 
@@ -78,6 +82,24 @@ void EditorScene::update(float dt) {
 		Editor::get()->controlling_camera = true;
 		handle_camera(get_render_scene().debug_camera, dt);
 		display_manager.capture_mouse(true);
+
+		if (input_manager.is_action_pressed("ray cast")) {
+			Ray ray{};
+			ray.origin = get_render_scene().debug_camera.get_position();
+			ray.direction = glm::normalize(get_render_scene().debug_camera.get_front());
+			glm::vec3 end = ray.origin + ray.direction * 1000.0f;
+			get_render_scene().debug_draw.draw_arrow(ray.origin, end);
+			HitInfo info;
+			if (CollisionSystem::ray_cast(world, ray, info)) {
+				SPDLOG_INFO("point {}", glm::to_string(info.point));
+				SPDLOG_INFO("normal {}", glm::to_string(info.normal));
+				SPDLOG_INFO("distance {}", info.distance);
+				SPDLOG_INFO("entity {}", info.entity);
+				if (world.has_component<Name>(info.entity)) {
+					SPDLOG_INFO("name {}", world.get_component<Name>(info.entity).name);
+				}
+			}
+		}
 	}
 
 	if (input_manager.is_action_just_released("control_camera")) {

@@ -539,113 +539,88 @@ bool PhysicsManager::intersect_ray_sphere(const Ray &ray, const ColliderSphere &
 	if (distance < 0.0f) {
 		distance = 0.0f;
 	}
+	result.distance = distance;
 	result.point = ray.origin + distance * ray.direction;
 	result.normal = -ray.direction;
 	return true;
 }
 
-bool PhysicsManager::is_ray_intersect_sphere(const Ray &ray, const ColliderSphere &sphere) {
-	glm::vec3 m = ray.origin - sphere.center;
-	float c = glm::dot(m, m) - sphere.radius * sphere.radius;
-	// If there is definitely at least one real root, there must be an intersection
-	if (c <= 0.0f) {
-		return true;
-	}
-	float b = glm::dot(m, ray.direction);
-	// Early exit if ray origin outside sphere and ray pointing away from sphere
-	if (b > 0.0f) {
-		return false;
-	}
-	float discriminant = b * b - c;
-	// A negative discriminant corresponds to ray missing sphere
-	if (discriminant < 0.0f) {
-		return false;
-	}
-	// Now ray must hit sphere
-	return true;
-}
-
 bool PhysicsManager::intersect_ray_aabb(const Ray &ray, const ColliderAABB &aabb, HitInfo &result) {
-	float tmin = -std::numeric_limits<float>::max(); // set to -FLT_MAX to get first hit on line
-	float tmax = std::numeric_limits<float>::max(); // set to max distance ray can travel (for segment)
+	float nearest_distance = 0.0f;
+	float ray_range = std::numeric_limits<float>::max();
 
-	glm::vec3 min = aabb.min();
-	glm::vec3 max = aabb.max();
-	// For all three slabs
+	const glm::vec3 &min = aabb.min();
+	const glm::vec3 &max = aabb.max();
+
 	for (int i = 0; i < 3; i++) {
-		if (abs(ray.direction[i]) < cvar_epsilon.get()) {
-			// Ray is parallel to slab. No hit if origin not within slab
-			if (ray.origin[i] < min[i] || ray.origin[i] > max[i]) {
-				return false;
-			}
-		} else {
-			// Compute intersection t value of ray with near and far plane of slab
-			float ood = 1.0f / ray.direction[i];
-			float t1 = (min[i] - ray.origin[i]) * ood;
-			float t2 = (max[i] - ray.origin[i]) * ood;
-			// Make t1 be intersection with near plane, t2 with far plane
-			if (t1 > t2) {
-				std::swap(t1, t2);
-			}
-			// Compute the intersection of slab intersection intervals
-			if (t1 > tmin) {
-				tmin = t1;
-			}
-			if (t2 > tmax) {
-				tmax = t2;
-			}
-			// Exit with no collision as soon as slab intersection becomes empty
-			if (tmin > tmax) {
-				return false;
-			}
+		float ood = 1.0f / ray.direction[i];
+		float t1 = (min[i] - ray.origin[i]) * ood;
+		float t2 = (max[i] - ray.origin[i]) * ood;
+		if (ray.direction[i] < cvar_epsilon.get()) {
+			std::swap(t1, t2);
+		}
+		if (t1 > t2) {
+			std::swap(t1, t2);
+		}
+
+		if (t1 > nearest_distance) {
+			nearest_distance = t1;
+		}
+
+		if (t2 < ray_range) {
+			ray_range = t2;
+		}
+
+		if (ray_range < nearest_distance) {
+			return false;
 		}
 	}
-	// Ray intersects all 3 slabs. Return point (q) and intersection t value (tmin)
-	result.point = ray.origin + ray.direction * tmin;
+
+	result.distance = nearest_distance;
+	result.point = ray.origin + ray.direction * nearest_distance;
 	result.normal = -ray.direction;
 	return true;
 }
 
 bool PhysicsManager::intersect_ray_obb(const Ray &ray, const ColliderOBB &obb, HitInfo &result) {
-	float tmin = -std::numeric_limits<float>::max(); // set to -FLT_MAX to get first hit on line
-	float tmax = std::numeric_limits<float>::max(); // set to max distance ray can travel (for segment)
+	glm::mat3 o = glm::inverse(obb.get_orientation_matrix());
 
-	glm::mat3 o = obb.get_orientation_matrix();
-	// transform ray from global space to obb space
-	Ray local_ray = { o * ray.origin, glm::normalize(o * ray.direction) };
-	glm::vec3 min = obb.min();
-	glm::vec3 max = obb.max();
-	// For all three slabs
+	Ray local_ray{};
+	local_ray.origin = o * (ray.origin - obb.center);
+	local_ray.direction = o * ray.direction;
+
+	float nearest_distance = 0.0f;
+	float ray_range = std::numeric_limits<float>::max();
+
 	for (int i = 0; i < 3; i++) {
-		if (abs(local_ray.direction[i]) < cvar_epsilon.get()) {
-			// Ray is parallel to slab. No hit if origin not within slab
-			if (local_ray.origin[i] < min[i] || local_ray.origin[i] > max[i]) {
-				return false;
-			}
-		} else {
-			// Compute intersection t value of ray with near and far plane of slab
-			float ood = 1.0f / local_ray.direction[i];
-			float t1 = (min[i] - local_ray.origin[i]) * ood;
-			float t2 = (max[i] - local_ray.origin[i]) * ood;
-			// Make t1 be intersection with near plane, t2 with far plane
-			if (t1 > t2) {
-				std::swap(t1, t2);
-			}
-			// Compute the intersection of slab intersection intervals
-			if (t1 > tmin) {
-				tmin = t1;
-			}
-			if (t2 > tmax) {
-				tmax = t2;
-			}
-			// Exit with no collision as soon as slab intersection becomes empty
-			if (tmin > tmax) {
-				return false;
-			}
+		float ood = 1.0f / local_ray.direction[i];
+		float t1 = (-obb.range[i] - local_ray.origin[i]) * ood;
+		float t2 = (obb.range[i] - local_ray.origin[i]) * ood;
+
+		if (ray.direction[i] < cvar_epsilon.get()) {
+			std::swap(t1, t2);
+		}
+
+		if (t1 > t2) {
+			std::swap(t1, t2);
+		}
+
+		if (t1 > nearest_distance) {
+			nearest_distance = t1;
+		}
+
+		if (t2 < ray_range) {
+			ray_range = t2;
+		}
+
+		if (nearest_distance > ray_range) {
+			return false;
 		}
 	}
-	// Ray intersects all 3 slabs. Return point (q) and intersection t value (tmin)
-	result.point = ray.origin + ray.direction * tmin;
+
+	result.distance = nearest_distance;
+	result.point = ray.origin + ray.direction * nearest_distance;
 	result.normal = -ray.direction;
+
 	return true;
 }

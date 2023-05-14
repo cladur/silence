@@ -5,6 +5,8 @@
 struct BSPNode;
 struct Plane;
 enum class Side;
+struct Ray;
+struct HitInfo;
 
 class CollisionSystem : public BaseSystem {
 public:
@@ -22,6 +24,8 @@ public:
 	static Side process_collider(const Plane &plane, const class ColliderOBB &collider);
 	static Side process_collider(const Plane &plane, const class ColliderSphere &collider);
 	static void log_tree(BSPNode *node);
+
+	static bool ray_cast(World &world, const Ray &ray, HitInfo &result);
 };
 
 #endif //SILENCE_COLLISION_SYSTEM_H

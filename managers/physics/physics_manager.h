@@ -9,6 +9,8 @@ struct Ray {
 	glm::vec3 origin;
 	glm::vec3 direction;
 
+	Ray() = default;
+
 	Ray(const glm::vec3 &start, const glm::vec3 &end) : origin(start), direction(glm::normalize(start - end)) {
 	}
 };
@@ -16,7 +18,11 @@ struct Ray {
 struct HitInfo {
 	glm::vec3 point;
 	glm::vec3 normal;
+	float distance;
 	Entity entity;
+
+	HitInfo() : point(0.0f), normal(0.0f), distance(std::numeric_limits<float>::max()), entity(0) {
+	}
 };
 
 enum class Side { FRONT, BACK, INTERSECT };
@@ -85,8 +91,6 @@ public:
 
 	// returns true, point and normal if ray intersect with sphere
 	bool intersect_ray_sphere(const Ray &ray, const ColliderSphere &sphere, HitInfo &result);
-	// returns true if ray intersect with sphere, faster than intersect_ray_sphere
-	bool is_ray_intersect_sphere(const Ray &ray, const ColliderSphere &sphere);
 	// returns true, point and normal if ray intersect with aabb
 	bool intersect_ray_aabb(const Ray &ray, const ColliderAABB &aabb, HitInfo &result);
 	// returns true, point and normal if ray intersect with obb
