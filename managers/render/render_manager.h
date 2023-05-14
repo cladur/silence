@@ -23,16 +23,6 @@
 
 class RenderManager {
 private:
-	std::unordered_map<std::string, Texture> textures;
-	std::vector<Model> models;
-	std::unordered_map<std::string, Handle<Model>> name_to_model;
-	std::vector<Animation> animations;
-	std::unordered_map<std::string, Handle<Animation>> name_to_animation;
-
-	// stuff to remove later
-	std::vector<SkinnedModel> skinned_models;
-	std::unordered_map<std::string, Handle<SkinnedModel>> name_to_skinned_model;
-
 public:
 	// Render scenes
 	std::vector<RenderScene> render_scenes;
