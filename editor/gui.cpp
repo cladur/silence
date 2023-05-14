@@ -241,7 +241,8 @@ void Editor::display_entity(EditorScene &scene, Entity entity, const std::string
 		ImGui::EndPopup();
 	}
 
-	if (ImGui::IsItemClicked()) {
+	ImGuiIO &io = ImGui::GetIO();
+	if (ImGui::IsItemHovered() && io.MouseReleased[0]) {
 		scene.selected_entity = entity;
 	}
 

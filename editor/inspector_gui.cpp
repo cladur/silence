@@ -1,4 +1,5 @@
 #include "inspector_gui.h"
+#include "components/agent_data_component.h"
 #include "components/collider_aabb.h"
 #include "components/collider_sphere.h"
 #include "components/collider_tag_component.h"
@@ -47,6 +48,7 @@ void Inspector::show_components() {
 	SHOW_COMPONENT(ColliderAABB, show_collideraabb);
 	SHOW_COMPONENT(ColliderOBB, show_colliderobb);
 	SHOW_COMPONENT(Light, show_light);
+	SHOW_COMPONENT(AgentData, show_agent_data);
 
 	for (int i = 0; i < remove_component_queue.size(); i++) {
 		auto [entity, component_to_remove] = remove_component_queue.front();
@@ -519,6 +521,60 @@ void Inspector::show_light() {
 	}
 }
 
+void Inspector::show_agent_data() {
+	auto &agent_data = world->get_component<AgentData>(selected_entity);
+	if (ImGui::CollapsingHeader("Agent Data", tree_flags)) {
+		remove_component_popup<AgentData>();
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("Agent Data", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Agent Model");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::InputInt("", (int *)&agent_data.model, 0, 0);
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
+				Entity payload_entity = *(Entity *)payload->Data;
+				agent_data.model = payload_entity;
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Camera Pivot");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::InputInt("", (int *)&agent_data.camera_pivot, 0, 0);
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
+				Entity payload_entity = *(Entity *)payload->Data;
+				agent_data.camera_pivot = payload_entity;
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Camera");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::InputInt("", (int *)&agent_data.camera, 0, 0);
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
+				Entity payload_entity = *(Entity *)payload->Data;
+				agent_data.camera = payload_entity;
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+		ImGui::EndTable();
+	}
+}
+
 bool Inspector::show_vec3(
 		const char *label, glm::vec3 &vec3, float speed, float reset_value, float min_value, float max_value) {
 	bool changed = false;
@@ -631,6 +687,7 @@ void Inspector::show_add_component() {
 			SHOW_ADD_COMPONENT(ColliderAABB);
 			SHOW_ADD_COMPONENT(ColliderOBB);
 			SHOW_ADD_COMPONENT(Light);
+			SHOW_ADD_COMPONENT(AgentData);
 
 			ImGui::EndPopup();
 		}

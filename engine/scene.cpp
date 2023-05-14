@@ -6,13 +6,14 @@
 #include "render/ecs/model_instance.h"
 #include "render/ecs/skinned_model_instance.h"
 #include "render/render_manager.h"
-#include <unordered_map>
 
+#include "ecs/systems/agent_system.h"
 #include "ecs/systems/collider_draw.h"
 #include "ecs/systems/collision_system.h"
+#include "ecs/systems/isolated_entities_system.h"
 #include "ecs/systems/light_system.h"
-#include "ecs/systems/parent_system.h"
 #include "ecs/systems/physics_system.h"
+#include "ecs/systems/root_parent_system.h"
 #include "render/ecs/animation_system.h"
 #include "render/ecs/frustum_draw_system.h"
 #include "render/ecs/render_system.h"
@@ -43,18 +44,29 @@ Scene::Scene() {
 	world.register_component<ColliderAABB>();
 	world.register_component<ColliderOBB>();
 	world.register_component<Light>();
+	world.register_component<AgentData>();
 
 	// Systems
 	// TODO: Set update order instead of using default value
-	world.register_system<PhysicsSystem>();
-	world.register_system<CollisionSystem>();
-	world.register_system<ParentSystem>();
 	world.register_system<RenderSystem>();
 	world.register_system<SkinnedRenderSystem>();
 	world.register_system<ColliderDrawSystem>();
 	world.register_system<AnimationSystem>();
 	world.register_system<FrustumDrawSystem>();
 	world.register_system<LightSystem>();
+
+	// Transform
+	world.register_system<IsolatedEntitiesSystem>();
+	world.register_system<RootParentSystem>();
+}
+
+void Scene::register_game_systems() {
+	// Physics
+	world.register_system<PhysicsSystem>();
+	world.register_system<CollisionSystem>();
+
+	// Agents
+	world.register_system<AgentSystem>();
 }
 
 void Scene::update(float dt) {
