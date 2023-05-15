@@ -67,7 +67,6 @@ public:
 	void draw(RenderScene &scene) override;
 };
 
-
 class SkyboxPass : public RenderPass {
 public:
 	MaterialSkybox material;
@@ -90,6 +89,13 @@ private:
 
 public:
 	MaterialTransparent material;
+	void startup() override;
+	void draw(RenderScene &scene) override;
+};
+
+class CombinationPass : public RenderPass {
+public:
+	MaterialCombination material;
 	void startup() override;
 	void draw(RenderScene &scene) override;
 };

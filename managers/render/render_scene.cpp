@@ -15,7 +15,7 @@ AutoCVarInt cvar_frustum_force_scene_camera("render.frustum.force_scene_camera",
 AutoCVarInt cvar_debug_camera_use("debug_camera.use", "Use debug camera", 1, CVarFlags::EditCheckbox);
 
 // SSAO Params
-AutoCVarInt cvar_pbr_ao("render.ssao_pbr_or_ao", "Switch between PBR and AO pass", 1, CVarFlags::EditCheckbox);
+AutoCVarInt cvar_ssao("render.ssao", "Use SSAO", 1, CVarFlags::EditCheckbox);
 AutoCVarFloat cvar_ssao_radius("render.ssao.radius", "SSAO radius", 0.240f);
 AutoCVarFloat cvar_ssao_bias("render.ssao.bias", "SSAO bias", 0.04f);
 AutoCVarInt cvar_ao_blur("render.ssao_blur", "Should SSAO be blurred", 1, CVarFlags::EditCheckbox);
@@ -29,6 +29,7 @@ void RenderScene::startup() {
 #endif
 	ssao_pass.startup();
 	ssao_blur_pass.startup();
+	combination_pass.startup();
 	default_pass = &pbr_pass;
 
 	// Size of the viewport doesn't matter here, it will be resized either way
@@ -36,6 +37,7 @@ void RenderScene::startup() {
 	render_framebuffer.startup(render_extent.x, render_extent.y);
 	g_buffer.startup(render_extent.x, render_extent.y);
 	ssao_buffer.startup(render_extent.x, render_extent.y);
+	pbr_buffer.startup(render_extent.x, render_extent.y);
 
 	debug_draw.startup();
 	transparent_pass.startup();
@@ -86,27 +88,29 @@ void RenderScene::draw() {
 	// unlit_pass.draw(*this);
 	g_buffer_pass.draw(*this);
 
-	render_framebuffer.bind();
+	pbr_buffer.bind();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	pbr_pass.draw(*this);
+
+	ssao_buffer.bind();
+	glad_glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	if (cvar_pbr_ao.get()) {
-		ssao_buffer.bind();
+	if (cvar_ssao.get()) {
 		ssao_pass.material.radius = cvar_ssao_radius.get();
 		ssao_pass.material.bias = cvar_ssao_bias.get();
 		ssao_pass.draw(*this);
-
-		render_framebuffer.bind();
-		ssao_blur_pass.material.should_blur = cvar_ao_blur.get();
-		ssao_blur_pass.draw(*this);
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, ssao_buffer.framebuffer_id);
-	} else {
-		pbr_pass.draw(*this);
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, g_buffer.framebuffer_id);
 	}
+
+	// render_framebuffer.bind();
+	// ssao_blur_pass.material.should_blur = cvar_ao_blur.get();
+	// ssao_blur_pass.draw(*this);
+	// glBindFramebuffer(GL_READ_FRAMEBUFFER, ssao_buffer.framebuffer_id);
+
 	// 2.5. copy content of geometry's depth buffer to default framebuffer's depth buffer
 	// ----------------------------------------------------------------------------------
-	//render_framebuffer.bind();
-	//glBindFramebuffer(GL_READ_FRAMEBUFFER, g_buffer.framebuffer_id);
+	render_framebuffer.bind();
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, g_buffer.framebuffer_id);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, render_framebuffer.framebuffer_id); // write to default framebuffer
 	// blit to default framebuffer. Note that this may or may not work as the internal formats of both the FBO and
 	// default framebuffer have to match. the internal formats are implementation defined. This works on all of my
@@ -115,6 +119,8 @@ void RenderScene::draw() {
 	glBlitFramebuffer(0, 0, render_extent.x, render_extent.y, 0, 0, render_extent.x, render_extent.y,
 			GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 	render_framebuffer.bind();
+
+	combination_pass.draw(*this);
 
 	debug_draw.projection = projection;
 	debug_draw.view = view;
@@ -152,6 +158,7 @@ void RenderScene::resize_framebuffer(uint32_t width, uint32_t height) {
 	render_framebuffer.resize(width, height);
 	g_buffer.resize(width, height);
 	ssao_buffer.resize(width, height);
+	pbr_buffer.resize(width, height);
 
 	render_extent = glm::vec2(width, height);
 }
@@ -162,21 +169,6 @@ void RenderScene::queue_draw(ModelInstance *model_instance, Transform *transform
 	draw_command.transform = transform;
 
 	g_buffer_pass.draw_commands.push_back(draw_command);
-
-	// switch (model_instance->material_type) {
-	// 	case MaterialType::Default: {
-	// 		g_buffer_pass.draw_commands.push_back(draw_command);
-	// 		break;
-	// 	}
-	// 	case MaterialType::PBR: {
-	// 		g_buffer_pass.draw_commands.push_back(draw_command);
-	// 		break;
-	// 	}
-	// 	default: {
-	// 		g_buffer_pass.draw_commands.push_back(draw_command);
-	// 		break;
-	// 	}
-	// }
 }
 
 void RenderScene::queue_skinned_draw(SkinnedModelInstance *model_instance, Transform *transform) {

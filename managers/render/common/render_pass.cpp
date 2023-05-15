@@ -178,3 +178,13 @@ void TransparentPass::draw(RenderScene &scene) {
 	screen_space_objects.clear();
 	scene.transparent_objects.clear();
 }
+
+void CombinationPass::startup() {
+	material.startup();
+}
+
+void CombinationPass::draw(RenderScene &scene) {
+	RenderManager &render_manager = RenderManager::get();
+	material.bind_resources(scene);
+	utils::render_quad();
+}

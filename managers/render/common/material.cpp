@@ -12,6 +12,8 @@
 #include "render/render_scene.h"
 #include <glm/gtc/type_ptr.hpp>
 
+AutoCVarInt cvar_use_ao("render.use_ao", "use ambient occlusion", 1, CVarFlags::EditCheckbox);
+
 void MaterialSkinnedUnlit::startup() {
 	shader.load_from_files(shader_path("skinned_unlit.vert"), shader_path("unlit.frag"));
 }
@@ -80,16 +82,6 @@ void MaterialPBR::bind_resources(RenderScene &scene) {
 	glActiveTexture(GL_TEXTURE7);
 	// TODO: Use baked brdf lut instead (it's broken atm)
 	glBindTexture(GL_TEXTURE_2D, scene.skybox_pass.skybox.brdf_lut_texture);
-
-	// shader.set_vec3("lightPositions[0]", glm::vec3(0.0f, 0.0f, 0.0f));
-	// shader.set_vec3("lightPositions[1]", glm::vec3(0.0f, 0.0f, 0.0f));
-	// shader.set_vec3("lightPositions[2]", glm::vec3(0.0f, 0.0f, 0.0f));
-	// shader.set_vec3("lightPositions[3]", scene.camera_pos);
-
-	// shader.set_vec3("lightColors[0]", glm::vec3(0.0f, 0.0f, 0.0f));
-	// shader.set_vec3("lightColors[1]", glm::vec3(0.0f, 0.0f, 0.0f));
-	// shader.set_vec3("lightColors[2]", glm::vec3(0.0f, 0.0f, 0.0f));
-	// shader.set_vec3("lightColors[3]", glm::vec3(1.0f, 1.0f, 1.0f));
 }
 
 void MaterialPBR::bind_instance_resources(ModelInstance &instance, Transform &transform) {
@@ -309,4 +301,33 @@ void MaterialTransparent::bind_object_resources(RenderScene &scene, TransparentO
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, t.id);
+}
+
+void MaterialCombination::startup() {
+	shader.load_from_files(shader_path("pbr.vert"), shader_path("combination.frag"));
+}
+
+void MaterialCombination::bind_resources(RenderScene &scene) {
+	shader.use();
+	shader.set_int("Albedo", 0);
+	shader.set_int("Diffuse", 1);
+	shader.set_int("Specular", 2);
+	shader.set_int("SSAO", 3);
+	shader.set_int("AoRoughMetal", 4);
+
+	shader.set_int("use_ao", cvar_use_ao.get());
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.albedo_texture_id);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, scene.pbr_buffer.diffuse_texture_id);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, scene.pbr_buffer.specular_texture_id);
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, scene.ssao_buffer.ssao_texture_id);
+	glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.ao_rough_metal_texture_id);
+}
+
+void MaterialCombination::bind_instance_resources(ModelInstance &instance, Transform &transform) {
 }

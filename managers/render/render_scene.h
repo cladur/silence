@@ -34,9 +34,11 @@ struct RenderScene {
 	TransparentPass transparent_pass;
 	AOPass ssao_pass;
 	AOBlurPass ssao_blur_pass;
+	CombinationPass combination_pass;
 
 	Framebuffer render_framebuffer;
 	GBuffer g_buffer;
+	PBRBuffer pbr_buffer;
 	SSAOBuffer ssao_buffer;
 	glm::vec2 render_extent;
 

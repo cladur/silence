@@ -81,8 +81,6 @@ void AgentSystem::update(World &world, float dt) {
 		world.get_parent_scene()->get_render_scene().debug_draw.draw_arrow(ray.origin, end);
 		HitInfo info;
 		if (CollisionSystem::ray_cast(world, ray, info)) {
-			SPDLOG_INFO("distance {}", info.distance);
-
 			// If the agent is not on the ground, move him down
 			// If the agent is on 40 degree slope or more, move him down
 			bool is_on_too_steep_slope =
