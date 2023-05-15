@@ -18,10 +18,7 @@ uniform bool has_ao_map;
 uniform bool has_normal_map;
 uniform bool has_emissive_map;
 
-uniform vec3 camPos;
-
 uniform vec2 uv_scale;
-
 
 // ----------------------------------------------------------------------------
 // Easy trick to get tangent-normals to world-space to keep PBR code simplified.
