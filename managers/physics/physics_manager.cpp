@@ -1,13 +1,26 @@
 #include "physics_manager.h"
 #include "ecs/world.h"
 
+// Most times we cannot compare float value to 0, than we epsilon
+AutoCVarFloat cvar_epsilon("physics.epsilon", "float error value", 0.000001f, CVarFlags::EditFloatDrag);
+AutoCVarFloat cvar_gravity_x("physics.gravity.x", "gravity value", 0.0f, CVarFlags::EditFloatDrag);
+AutoCVarFloat cvar_gravity_y("physics.gravity.y", "gravity value", -9.84f, CVarFlags::EditFloatDrag);
+AutoCVarFloat cvar_gravity_z("physics.gravity.z", "gravity value", 0.0f, CVarFlags::EditFloatDrag);
+
 PhysicsManager &PhysicsManager::get() {
 	static PhysicsManager instance;
 	return instance;
 }
 
-// Most times we cannot compare float value to 0, than we epsilon
-AutoCVarFloat cvar_epsilon("physics.epsilon", "float error value", 0.000001f, CVarFlags::EditFloatDrag);
+const glm::vec3 &PhysicsManager::get_gravity() {
+	gravity = glm::vec3(cvar_gravity_x.get(), cvar_gravity_y.get(), cvar_gravity_z.get());
+	return gravity;
+}
+
+const float &PhysicsManager::get_epsilon() {
+	epsilon = cvar_epsilon.get();
+	return epsilon;
+}
 
 void PhysicsManager::resolve_collision(World &world, Entity movable_object, const std::set<Entity> &static_entities) {
 	CollisionFlag first, second;
@@ -89,30 +102,16 @@ void PhysicsManager::resolve_collision_sphere(World &world, Entity e1, Entity e2
 	c2.radius = temp_c2.radius * t2.get_scale().x;
 	c2.center = t2.get_position() + temp_c2.center * t2.get_scale().x;
 
-	bool is_movable1 = !world.has_component<StaticTag>(e1);
-	bool is_movable2 = !world.has_component<StaticTag>(e2);
-
-	if (!(is_movable1 || is_movable2) ||
-			!is_collision_candidate(c1.center, glm::vec3(c1.radius), c2.center, glm::vec3(c2.radius)) ||
+	if (!is_collision_candidate(c1.center, glm::vec3(c1.radius), c2.center, glm::vec3(c2.radius)) ||
 			!is_overlap(c1, c2)) {
 		return;
 	}
 
 	const glm::vec3 direction = c2.center - c1.center;
 	const float distance = c1.radius + c2.radius - glm::length(direction);
-	const glm::vec3 offset = glm::normalize(direction) * distance;
+	const glm::vec3 offset = -glm::normalize(direction) * distance;
 
-	if (is_movable1 && is_movable2) {
-		// Value defining how fast the body will move other body
-		// 1 means that the bodies has same speed while pushing
-		const float slide_speed = 0.5f;
-		t1.add_position(-offset * slide_speed);
-		t2.add_position(offset * (1.0f - slide_speed));
-	} else if (is_movable1) {
-		t1.add_position(-offset);
-	} else {
-		t2.add_position(offset);
-	}
+	make_shift(world, e1, e2, offset);
 }
 
 bool PhysicsManager::is_overlap(const ColliderAABB &a, const ColliderAABB &b) {
@@ -133,6 +132,7 @@ bool PhysicsManager::is_overlap(const ColliderAABB &a, const ColliderAABB &b) {
 }
 
 void PhysicsManager::resolve_collision_aabb(World &world, Entity e1, Entity e2) {
+	//todo: replace calculate offset into proper is_overlap
 	ColliderAABB &temp_c1 = world.get_component<ColliderAABB>(e1);
 	ColliderAABB &temp_c2 = world.get_component<ColliderAABB>(e2);
 	Transform &t1 = world.get_component<Transform>(e1);
@@ -145,11 +145,7 @@ void PhysicsManager::resolve_collision_aabb(World &world, Entity e1, Entity e2) 
 	c2.range = temp_c2.range * t2.get_scale();
 	c2.center = t2.get_position() + temp_c2.center * t2.get_scale();
 
-	bool is_movable1 = !world.has_component<StaticTag>(e1);
-	bool is_movable2 = !world.has_component<StaticTag>(e2);
-
-	if (!(is_movable1 || is_movable2) || !is_collision_candidate(c1.center, c1.range, c2.center, c2.range) ||
-			!is_overlap(c1, c2)) {
+	if (!is_collision_candidate(c1.center, c1.range, c2.center, c2.range) || !is_overlap(c1, c2)) {
 		return;
 	}
 
@@ -176,17 +172,7 @@ void PhysicsManager::resolve_collision_aabb(World &world, Entity e1, Entity e2) 
 		offset.z *offset.z < offset.x *offset.x ? offset.x = 0.0f : offset.z = 0.0f;
 	}
 
-	if (is_movable1 && is_movable2) {
-		// Value defining how fast the body will move other body
-		// 1 means that the bodies has same speed while pushing
-		const float slide_speed = 0.5f;
-		t1.add_position(offset * slide_speed);
-		t2.add_position(-offset * (1.0f - slide_speed));
-	} else if (is_movable1) {
-		t1.add_position(offset);
-	} else {
-		t2.add_position(-offset);
-	}
+	make_shift(world, e1, e2, offset);
 }
 
 glm::vec3 PhysicsManager::is_overlap(const ColliderAABB &a, const ColliderSphere &b) {
@@ -225,10 +211,7 @@ void PhysicsManager::resolve_aabb_sphere(World &world, Entity aabb, Entity spher
 	c2.radius = temp_c2.radius * t2.get_scale().x;
 	c2.center = t2.get_position() + temp_c2.center * t2.get_scale().x;
 
-	bool is_movable1 = !world.has_component<StaticTag>(aabb);
-	bool is_movable2 = !world.has_component<StaticTag>(sphere);
-	if (!(is_movable1 || is_movable2) ||
-			!is_collision_candidate(c1.center, c1.range, c2.center, glm::vec3(c2.radius))) {
+	if (!is_collision_candidate(c1.center, c1.range, c2.center, glm::vec3(c2.radius))) {
 		return;
 	}
 
@@ -237,17 +220,7 @@ void PhysicsManager::resolve_aabb_sphere(World &world, Entity aabb, Entity spher
 		return;
 	}
 
-	if (is_movable1 && is_movable2) {
-		// Value defining how fast the body will move other body
-		// 1 means that the bodies has same speed while pushing
-		const float slide_speed = 0.5f;
-		t1.add_position(offset * slide_speed);
-		t2.add_position(-offset * (1.0f - slide_speed));
-	} else if (is_movable1) {
-		t1.add_position(offset);
-	} else {
-		t2.add_position(-offset);
-	}
+	make_shift(world, aabb, sphere, offset);
 }
 
 glm::vec3 PhysicsManager::is_overlap(const ColliderOBB &a, const ColliderOBB &b) {
@@ -319,10 +292,7 @@ void PhysicsManager::resolve_collision_obb(World &world, Entity e1, Entity e2) {
 	c2.range = temp_c2.range * t2.get_scale();
 	c2.center = t2.get_position() + c2.get_orientation_matrix() * (temp_c2.center * t2.get_scale());
 
-	bool is_movable1 = !world.has_component<StaticTag>(e1);
-	bool is_movable2 = !world.has_component<StaticTag>(e2);
-
-	if (!(is_movable1 || is_movable2) || !is_collision_candidate(c1.center, c1.range, c2.center, c2.range)) {
+	if (!is_collision_candidate(c1.center, c1.range, c2.center, c2.range)) {
 		return;
 	}
 
@@ -331,17 +301,7 @@ void PhysicsManager::resolve_collision_obb(World &world, Entity e1, Entity e2) {
 		return;
 	}
 
-	if (is_movable1 && is_movable2) {
-		// Value defining how fast the body will move other body
-		// 1 means that the bodies has same speed while pushing
-		const float slide_speed = 0.5f;
-		t1.add_position(offset * slide_speed);
-		t2.add_position(-offset * (1.0f - slide_speed));
-	} else if (is_movable1) {
-		t1.add_position(offset);
-	} else {
-		t2.add_position(-offset);
-	}
+	make_shift(world, e1, e2, offset);
 }
 
 glm::vec3 PhysicsManager::is_overlap(const ColliderOBB &a, const ColliderSphere &b) {
@@ -388,11 +348,7 @@ void PhysicsManager::resolve_obb_sphere(World &world, Entity obb, Entity sphere)
 	c2.radius = temp_c2.radius * t2.get_scale().x;
 	c2.center = t2.get_position() + temp_c2.center * t2.get_scale().x;
 
-	bool is_movable1 = !world.has_component<StaticTag>(obb);
-	bool is_movable2 = !world.has_component<StaticTag>(sphere);
-
-	if (!(is_movable1 || is_movable2) ||
-			!is_collision_candidate(c1.center, c1.range, c2.center, glm::vec3(c2.radius))) {
+	if (!is_collision_candidate(c1.center, c1.range, c2.center, glm::vec3(c2.radius))) {
 		return;
 	}
 
@@ -401,17 +357,7 @@ void PhysicsManager::resolve_obb_sphere(World &world, Entity obb, Entity sphere)
 		return;
 	}
 
-	if (is_movable1 && is_movable2) {
-		// Value defining how fast the body will move other body
-		// 1 means that the bodies has same speed while pushing
-		const float slide_speed = 0.5f;
-		t1.add_position(offset * slide_speed);
-		t2.add_position(-offset * (1.0f - slide_speed));
-	} else if (is_movable1) {
-		t1.add_position(offset);
-	} else {
-		t2.add_position(-offset);
-	}
+	make_shift(world, obb, sphere, offset);
 }
 
 glm::vec3 PhysicsManager::is_overlap(const ColliderOBB &a, const ColliderAABB &b) {
@@ -481,10 +427,8 @@ void PhysicsManager::resolve_obb_aabb(World &world, Entity obb, Entity aabb) {
 
 	c2.range = temp_c2.range * t2.get_scale();
 	c2.center = t2.get_position() + temp_c2.center * t2.get_scale();
-	bool is_movable1 = !world.has_component<StaticTag>(obb);
-	bool is_movable2 = !world.has_component<StaticTag>(aabb);
 
-	if (!(is_movable1 || is_movable2) || !is_collision_candidate(c1.center, c1.range, c2.center, c2.range)) {
+	if (!is_collision_candidate(c1.center, c1.range, c2.center, c2.range)) {
 		return;
 	}
 
@@ -493,17 +437,7 @@ void PhysicsManager::resolve_obb_aabb(World &world, Entity obb, Entity aabb) {
 		return;
 	}
 
-	if (is_movable1 && is_movable2) {
-		// Value defining how fast the body will move other body
-		// 1 means that the bodies has same speed while pushing
-		const float slide_speed = 0.5f;
-		t1.add_position(offset * slide_speed);
-		t2.add_position(-offset * (1.0f - slide_speed));
-	} else if (is_movable1) {
-		t1.add_position(offset);
-	} else {
-		t2.add_position(-offset);
-	}
+	make_shift(world, obb, aabb, offset);
 }
 
 bool PhysicsManager::is_collision_candidate(
@@ -518,6 +452,76 @@ bool PhysicsManager::is_collision_candidate(
 		return false;
 	}
 	return true;
+}
+
+void PhysicsManager::make_shift(World &world, Entity e1, Entity e2, const glm::vec3 &offset) {
+	bool is_movable1 = !world.has_component<StaticTag>(e1);
+	bool is_movable2 = !world.has_component<StaticTag>(e2);
+	Transform &t1 = world.get_component<Transform>(e1);
+	Transform &t2 = world.get_component<Transform>(e2);
+
+	if (world.has_component<RigidBody>(e1) && world.has_component<RigidBody>(e2)) {
+		RigidBody &b1 = world.get_component<RigidBody>(e1);
+		RigidBody &b2 = world.get_component<RigidBody>(e2);
+		physical_shift(t1, t2, b1, b2, is_movable1, is_movable2, offset);
+	} else if (world.has_component<RigidBody>(e1)) {
+		RigidBody &b1 = world.get_component<RigidBody>(e1);
+		RigidBody b2{};
+		physical_shift(t1, t2, b1, b2, is_movable1, is_movable2, offset);
+	} else if (world.has_component<RigidBody>(e2)) {
+		RigidBody b1{};
+		RigidBody &b2 = world.get_component<RigidBody>(e2);
+		physical_shift(t1, t2, b1, b2, is_movable1, is_movable2, offset);
+	} else {
+		non_physical_shift(t1, t2, is_movable1, is_movable2, offset);
+	}
+}
+
+void PhysicsManager::non_physical_shift(
+		Transform &t1, Transform &t2, bool is_movable1, bool is_movable2, const glm::vec3 &offset) {
+	if (is_movable1 && is_movable2) {
+		// Value defining how fast the body will move other body
+		// 1 means that the bodies has same speed while pushing
+		const float slide_speed = 0.5f;
+		t1.add_position(offset * slide_speed);
+		t2.add_position(-offset * (1.0f - slide_speed));
+	} else if (is_movable1) {
+		t1.add_position(offset);
+	} else {
+		t2.add_position(-offset);
+	}
+}
+void PhysicsManager::physical_shift(Transform &t1, Transform &t2, RigidBody &b1, RigidBody &b2, bool is_movable1,
+		bool is_movable2, const glm::vec3 &offset) {
+	glm::vec3 velocity_projection1;
+	glm::vec3 velocity_projection2;
+	glm::vec3 collision_normal1 = glm::normalize(offset);
+	glm::vec3 collision_normal2 = -collision_normal1;
+
+	if (is_movable1) {
+		float projection1 = glm::dot(b1.velocity, collision_normal1) / glm::dot(collision_normal1, collision_normal1);
+		velocity_projection1 = collision_normal1 * projection1;
+	}
+	if (is_movable2) {
+		float projection2 = glm::dot(b2.velocity, collision_normal2) / glm::dot(collision_normal2, collision_normal2);
+		velocity_projection2 = collision_normal2 * projection2;
+	}
+
+	if (is_movable1 && is_movable2) {
+		const float slide_speed = b1.mass / (b1.mass + b2.mass);
+		// Value defining how fast the body will move other body
+		// 1 means that the bodies has same speed while pushing
+		t1.add_position(offset * slide_speed);
+		t2.add_position(-offset * (1.0f - slide_speed));
+		b1.velocity -= velocity_projection1;
+		b2.velocity -= velocity_projection2;
+	} else if (is_movable1) {
+		t1.add_position(offset);
+		b1.velocity -= velocity_projection1;
+	} else {
+		t2.add_position(-offset);
+		b2.velocity -= velocity_projection2;
+	}
 }
 
 bool PhysicsManager::intersect_ray_sphere(const Ray &ray, const ColliderSphere &sphere, HitInfo &result) {
