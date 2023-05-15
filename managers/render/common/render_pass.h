@@ -53,6 +53,20 @@ public:
 	void draw(RenderScene &scene) override;
 };
 
+class AOPass : public RenderPass {
+public:
+	MaterialAO material;
+	void startup() override;
+	void draw(RenderScene &scene) override;
+};
+
+class AOBlurPass : public RenderPass {
+public:
+	MaterialAOBlur material;
+	void startup() override;
+	void draw(RenderScene &scene) override;
+};
+
 class SkyboxPass : public RenderPass {
 public:
 	MaterialSkybox material;
@@ -71,15 +85,17 @@ public:
 
 class TransparentPass : public RenderPass {
 private:
-	//  render data
-	// todo: create issue if this is appropriate
-	// i have decided this is better than having each transparent object have its own vao, vbo, ebo
-	// setting them up each time a sprite/text is created seems like worse idea than to just create them once
-	// and then just SubBufferData each time.
 	unsigned int vao, vbo, ebo;
 
 public:
 	MaterialTransparent material;
+	void startup() override;
+	void draw(RenderScene &scene) override;
+};
+
+class CombinationPass : public RenderPass {
+public:
+	MaterialCombination material;
 	void startup() override;
 	void draw(RenderScene &scene) override;
 };
