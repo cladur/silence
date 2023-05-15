@@ -31,9 +31,6 @@
                 "index" : 0,
                 "scale" : 0.10000000149011612
             },
-            "occlusionTexture" : {
-                "index" : 1
-            },
             "pbrMetallicRoughness" : {
                 "baseColorTexture" : {
                     "index" : 2
