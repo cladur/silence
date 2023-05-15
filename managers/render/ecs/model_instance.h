@@ -9,7 +9,7 @@ struct ModelInstance {
 	Handle<Model> model_handle;
 	MaterialType material_type = MaterialType::Default;
 	bool in_shadow_pass = true;
-	bool scale_uv_with_transform = true;
+	bool scale_uv_with_transform = false;
 
 	ModelInstance();
 	explicit ModelInstance(
