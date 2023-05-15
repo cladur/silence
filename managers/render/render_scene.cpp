@@ -16,7 +16,7 @@ AutoCVarInt cvar_debug_camera_use("debug_camera.use", "Use debug camera", 1, CVa
 
 // SSAO Params
 AutoCVarInt cvar_ssao("render.ssao", "Use SSAO", 1, CVarFlags::EditCheckbox);
-AutoCVarFloat cvar_ssao_radius("render.ssao.radius", "SSAO radius", 0.240f);
+AutoCVarFloat cvar_ssao_radius("render.ssao.radius", "SSAO radius", 0.5f);
 AutoCVarFloat cvar_ssao_bias("render.ssao.bias", "SSAO bias", 0.04f);
 AutoCVarInt cvar_ao_blur("render.ssao_blur", "Should SSAO be blurred", 1, CVarFlags::EditCheckbox);
 
