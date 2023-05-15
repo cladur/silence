@@ -134,8 +134,8 @@ void RenderScene::draw() {
 		if (i == 0) {
 			color = glm::vec4(0.75, 0.75, 0.75, 1);
 		}
-		debug_draw.draw_line(glm::vec3(i, 0, -10), glm::vec3(i, 0, 10), color);
-		debug_draw.draw_line(glm::vec3(-10, 0, i), glm::vec3(10, 0, i), color);
+		//debug_draw.draw_line(glm::vec3(i, 0, -10), glm::vec3(i, 0, 10), color);
+		//debug_draw.draw_line(glm::vec3(-10, 0, i), glm::vec3(10, 0, i), color);
 	}
 
 	debug_draw.draw();
@@ -143,7 +143,7 @@ void RenderScene::draw() {
 	skinned_unlit_pass.draw(*this);
 #endif
 
-	if (draw_skybox) {
+	if (true) {
 		glDepthFunc(GL_LEQUAL);
 		skybox_pass.draw(*this);
 		glDepthFunc(GL_LESS);

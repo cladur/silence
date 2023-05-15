@@ -41,6 +41,7 @@ public:
 	Handle<Animation> load_animation(const char *path);
 	Animation &get_animation(Handle<Animation> handle);
 	Handle<Animation> get_animation_handle(std::string name);
+	std::string get_animation_name(Handle<Animation> handle);
 	std::vector<Animation> &get_animations();
 
 	// stuff to remove later
