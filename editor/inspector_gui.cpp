@@ -34,7 +34,6 @@ void Inspector::show_components() {
 	SHOW_COMPONENT(Name, show_name);
 	SHOW_COMPONENT(Transform, show_transform);
 	SHOW_COMPONENT(RigidBody, show_rigidbody);
-	SHOW_COMPONENT(Gravity, show_gravity);
 	SHOW_COMPONENT(Parent, show_parent);
 	SHOW_COMPONENT(Children, show_children);
 	SHOW_COMPONENT(ModelInstance, show_modelinstance);
@@ -112,23 +111,12 @@ void Inspector::show_rigidbody() {
 
 		show_vec3("Velocity", rigidbody.velocity);
 		show_vec3("Acceleration", rigidbody.acceleration);
+		show_float("mass", rigidbody.mass);
 
 		ImGui::EndTable();
 	}
 }
-void Inspector::show_gravity() {
-	auto &gravity = world->get_component<Gravity>(selected_entity);
-	if (ImGui::CollapsingHeader("Gravity", tree_flags)) {
-		remove_component_popup<Gravity>();
-		float available_width = ImGui::GetContentRegionAvail().x;
-		ImGui::BeginTable("Transform", 2);
-		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
 
-		show_vec3("Gravity", gravity.force);
-
-		ImGui::EndTable();
-	}
-}
 void Inspector::show_parent() {
 	Entity parent = world->get_component<Parent>(selected_entity).parent;
 	if (ImGui::CollapsingHeader("Parent", tree_flags)) {
@@ -673,7 +661,6 @@ void Inspector::show_add_component() {
 			SHOW_ADD_COMPONENT(Name);
 			SHOW_ADD_COMPONENT(Transform);
 			SHOW_ADD_COMPONENT(RigidBody);
-			SHOW_ADD_COMPONENT(Gravity);
 			SHOW_ADD_COMPONENT(Parent);
 			SHOW_ADD_COMPONENT(Children);
 			SHOW_ADD_COMPONENT(ModelInstance);

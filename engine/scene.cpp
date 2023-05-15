@@ -30,7 +30,6 @@ Scene::Scene() {
 	world.register_component<Name>();
 	world.register_component<Transform>();
 	world.register_component<RigidBody>();
-	world.register_component<Gravity>();
 	world.register_component<Parent>();
 	world.register_component<Children>();
 	world.register_component<ModelInstance>();

@@ -50,6 +50,7 @@ void RenderScene::startup() {
 }
 
 void RenderScene::draw() {
+	glDepthMask(GL_TRUE);
 	g_buffer.bind();
 	glViewport(0, 0, (int)render_extent.x, (int)render_extent.y);
 
@@ -120,11 +121,13 @@ void RenderScene::draw() {
 			GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 	render_framebuffer.bind();
 
+	glDepthMask(GL_FALSE);
 	combination_pass.draw(*this);
 
 	debug_draw.projection = projection;
 	debug_draw.view = view;
 
+	glDepthMask(GL_TRUE);
 	// Draw grid
 	for (int i = -10; i <= 10; i++) {
 		glm::vec4 color = glm::vec4(0.5, 0.5, 0.5, 1);

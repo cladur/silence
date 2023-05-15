@@ -8,11 +8,6 @@ struct ColliderOBB;
 struct Ray {
 	glm::vec3 origin;
 	glm::vec3 direction;
-
-	Ray() = default;
-
-	Ray(const glm::vec3 &start, const glm::vec3 &end) : origin(start), direction(glm::normalize(start - end)) {
-	}
 };
 
 struct HitInfo {
@@ -62,10 +57,15 @@ static CollisionFlag operator|(const CollisionFlag first, const CollisionFlag se
 }
 
 class World;
+struct Transform;
+struct RigidBody;
 
 class PhysicsManager {
 public:
 	static PhysicsManager &get();
+
+	const glm::vec3 &get_gravity();
+	const float &get_epsilon();
 
 	void resolve_collision(World &world, Entity movable_object, const std::set<Entity> &static_entities);
 
@@ -88,6 +88,10 @@ public:
 	void resolve_obb_aabb(World &world, Entity obb, Entity aabb);
 
 	bool is_collision_candidate(const glm::vec3 &p1, const glm::vec3 &r1, const glm::vec3 &p2, const glm::vec3 &r2);
+	void make_shift(World &world, Entity e1, Entity e2, const glm::vec3 &offset);
+	void non_physical_shift(Transform &t1, Transform &t2, bool is_movable1, bool is_movable2, const glm::vec3 &offset);
+	void physical_shift(Transform &t1, Transform &t2, RigidBody &b1, RigidBody &b2, bool is_movable1, bool is_movable2,
+			const glm::vec3 &offset);
 
 	// returns true, point and normal if ray intersect with sphere
 	bool intersect_ray_sphere(const Ray &ray, const ColliderSphere &sphere, HitInfo &result);
@@ -95,6 +99,10 @@ public:
 	bool intersect_ray_aabb(const Ray &ray, const ColliderAABB &aabb, HitInfo &result);
 	// returns true, point and normal if ray intersect with obb
 	bool intersect_ray_obb(const Ray &ray, const ColliderOBB &obb, HitInfo &result);
+
+private:
+	glm::vec3 gravity;
+	float epsilon;
 };
 
 #endif //SILENCE_PHYSICS_MANAGER_H
