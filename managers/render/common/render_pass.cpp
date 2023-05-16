@@ -6,23 +6,11 @@
 #include "resource/resource_manager.h"
 #include <tracy/tracy.hpp>
 
-AutoCVarFloat cvar_blur_radius(
-		"render.blur_radius",
-		"blur radius",
-		0.001f,
-		CVarFlags::EditFloatDrag);
+AutoCVarFloat cvar_blur_radius("render.blur_radius", "blur radius", 0.001f, CVarFlags::EditFloatDrag);
+AutoCVarInt cvar_use_bloom("render.use_bloom", "use bloom", 1, CVarFlags::EditCheckbox);
+AutoCVarFloat cvar_bloom_strength("render.bloom_strength", "bloom strength", 0.04f, CVarFlags::EditFloatDrag);
 
-AutoCVarInt cvar_use_bloom(
-		"render.use_bloom",
-		"use bloom",
-		1,
-		CVarFlags::EditCheckbox);
-
-AutoCVarFloat cvar_bloom_strength(
-		"render.bloom_strength",
-		"bloom strength",
-		0.04f,
-		CVarFlags::EditFloatDrag);
+AutoCVarFloat cvar_gamma("render.gamma", "gamma", 2.2f, CVarFlags::EditFloatDrag);
 
 
 void SkinnedPassUnlit::startup() {
@@ -266,5 +254,6 @@ void BloomPass::draw(RenderScene &scene) {
 	glBindTexture(GL_TEXTURE_2D, mips[0].texture_id);
 	material.shader.set_int("use_bloom", cvar_use_bloom.get());
 	material.shader.set_float("bloom_strength", cvar_bloom_strength.get());
+	material.shader.set_float("gamma", cvar_gamma.get());
 	utils::render_quad();
 }

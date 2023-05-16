@@ -33,11 +33,6 @@ void main()
     vec3 color = (albedo * diffuse + specular) * final_ao;
     // color = specular;
 
-    // HDR tonemapping
-    color = color / (color + vec3(1.0));
-    // gamma correct
-    color = pow(color, vec3(1.0/2.2));
-
     if (use_fog == 1) {
         vec4 view_pos = texture(ViewPos, TexCoords);
         float distance = distance(vec3(0.0, 0.0, 0.0), view_pos.xyz);
