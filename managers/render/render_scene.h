@@ -35,11 +35,14 @@ struct RenderScene {
 	AOPass ssao_pass;
 	AOBlurPass ssao_blur_pass;
 	CombinationPass combination_pass;
+	BloomPass bloom_pass;
 
 	Framebuffer render_framebuffer;
 	GBuffer g_buffer;
 	PBRBuffer pbr_buffer;
 	SSAOBuffer ssao_buffer;
+	CombinationBuffer combination_buffer;
+	BloomBuffer bloom_buffer;
 	glm::vec2 render_extent;
 
 	DebugDraw debug_draw;

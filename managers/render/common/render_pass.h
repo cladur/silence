@@ -100,4 +100,11 @@ public:
 	void draw(RenderScene &scene) override;
 };
 
+class BloomPass : public RenderPass {
+public:
+	MaterialBloom material;
+	void startup() override;
+	void draw(RenderScene &scene) override;
+};
+
 #endif // SILENCE_RENDER_PASS_H

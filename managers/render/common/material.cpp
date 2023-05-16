@@ -15,7 +15,7 @@
 AutoCVarInt cvar_use_ao("render.use_ao", "use ambient occlusion", 1, CVarFlags::EditCheckbox);
 AutoCVarInt cvar_use_fog("render.use_fog", "use simple linear fog", 1, CVarFlags::EditCheckbox);
 AutoCVarFloat cvar_fog_min("render.fog_min", "fog min distance", 20.0f, CVarFlags::EditFloatDrag);
-AutoCVarFloat cvar_fog_max("render.fog_max", "fog max distance", 100.0f, CVarFlags::EditFloatDrag);
+AutoCVarFloat cvar_fog_max("render.fog_max", "fog max distance", 300.0f, CVarFlags::EditFloatDrag);
 
 
 void MaterialSkinnedUnlit::startup() {
@@ -341,4 +341,16 @@ void MaterialCombination::bind_resources(RenderScene &scene) {
 }
 
 void MaterialCombination::bind_instance_resources(ModelInstance &instance, Transform &transform) {
+}
+
+void MaterialBloom::startup() {
+	shader.load_from_files(shader_path("bloom.vert"), shader_path("bloom_combine.frag"));
+	downsample.load_from_files(shader_path("bloom.vert"), shader_path("downsample.frag"));
+	bloom.load_from_files(shader_path("bloom.vert"), shader_path("upsample.frag"));
+}
+
+void MaterialBloom::bind_resources(RenderScene &scene) {
+}
+
+void MaterialBloom::bind_instance_resources(ModelInstance &instance, Transform &transform) {
 }
