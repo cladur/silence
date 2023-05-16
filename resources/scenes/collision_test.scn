@@ -35,7 +35,9 @@
                 "component_name": "StaticTag"
             },
             {
-                "component_data": {},
+                "component_data": {
+                    "layer_name": "default"
+                },
                 "component_name": "ColliderTag"
             },
             {
@@ -93,7 +95,9 @@
                 "component_name": "StaticTag"
             },
             {
-                "component_data": {},
+                "component_data": {
+                    "layer_name": "default"
+                },
                 "component_name": "ColliderTag"
             },
             {
@@ -147,14 +151,6 @@
                 "component_name": "Transform"
             },
             {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
-            {
-                "component_data": {},
-                "component_name": "ColliderTag"
-            },
-            {
                 "component_data": {
                     "center": {
                         "x": 0.0,
@@ -180,6 +176,16 @@
                     }
                 },
                 "component_name": "ColliderOBB"
+            },
+            {
+                "component_data": {},
+                "component_name": "StaticTag"
+            },
+            {
+                "component_data": {
+                    "layer_name": "default"
+                },
+                "component_name": "ColliderTag"
             }
         ],
         "entity": 3,
@@ -227,7 +233,9 @@
                 "component_name": "StaticTag"
             },
             {
-                "component_data": {},
+                "component_data": {
+                    "layer_name": "default"
+                },
                 "component_name": "ColliderTag"
             },
             {
@@ -281,7 +289,9 @@
                 "component_name": "StaticTag"
             },
             {
-                "component_data": {},
+                "component_data": {
+                    "layer_name": "default"
+                },
                 "component_name": "ColliderTag"
             },
             {
@@ -341,10 +351,6 @@
                 "component_name": "Transform"
             },
             {
-                "component_data": {},
-                "component_name": "ColliderTag"
-            },
-            {
                 "component_data": {
                     "center": {
                         "x": 0.0,
@@ -370,6 +376,12 @@
                     }
                 },
                 "component_name": "ColliderOBB"
+            },
+            {
+                "component_data": {
+                    "layer_name": "default"
+                },
+                "component_name": "ColliderTag"
             }
         ],
         "entity": 6,
@@ -413,10 +425,6 @@
                 "component_name": "Transform"
             },
             {
-                "component_data": {},
-                "component_name": "ColliderTag"
-            },
-            {
                 "component_data": {
                     "center": {
                         "x": 0.0,
@@ -442,6 +450,12 @@
                     }
                 },
                 "component_name": "ColliderOBB"
+            },
+            {
+                "component_data": {
+                    "layer_name": "default"
+                },
+                "component_name": "ColliderTag"
             }
         ],
         "entity": 7,
@@ -485,7 +499,9 @@
                 "component_name": "Transform"
             },
             {
-                "component_data": {},
+                "component_data": {
+                    "layer_name": "default"
+                },
                 "component_name": "ColliderTag"
             },
             {
@@ -549,7 +565,9 @@
                 "component_name": "StaticTag"
             },
             {
-                "component_data": {},
+                "component_data": {
+                    "layer_name": "default"
+                },
                 "component_name": "ColliderTag"
             },
             {

@@ -6,6 +6,7 @@
 #include "components/fmod_listener_component.h"
 #include "components/light_component.h"
 #include "components/rigidbody_component.h"
+#include "physics/physics_manager.h"
 #include "render/ecs/model_instance.h"
 #include <imgui.h>
 #include <imgui_internal.h>
@@ -409,11 +410,30 @@ void Inspector::show_camera() {
 void Inspector::show_collidertag() {
 	if (ImGui::CollapsingHeader("ColliderTag", tree_flags)) {
 		remove_component_popup<ColliderTag>();
+		PhysicsManager &physics_manager = PhysicsManager::get();
+		auto &tag = world->get_component<ColliderTag>(selected_entity);
+		const auto &map = physics_manager.get_layers_map();
 		float available_width = ImGui::GetContentRegionAvail().x;
-		ImGui::BeginTable("Transform", 2);
+		ImGui::BeginTable("Collider Tag", 2);
 		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Layer");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		if (ImGui::BeginCombo("##Layer", tag.layer_name.c_str())) {
+			for (const auto &pair : map) {
+				bool is_selected = tag.layer_name == pair.first;
 
-		show_text("Collider Tag", "Yes");
+				if (ImGui::Selectable(pair.first.c_str(), is_selected)) {
+					tag.layer_name = pair.first;
+				}
+				if (is_selected) {
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+			ImGui::EndCombo();
+		}
 
 		ImGui::EndTable();
 	}
@@ -478,6 +498,7 @@ void Inspector::show_colliderobb() {
 		ImGui::EndTable();
 	}
 }
+
 void Inspector::show_light() {
 	auto &light = world->get_component<Light>(selected_entity);
 	if (ImGui::CollapsingHeader("Light", tree_flags)) {

@@ -16,6 +16,9 @@ void CollisionSystem::startup(World &world) {
 	Signature black_signature;
 	black_signature.set(world.get_component_type<StaticTag>());
 	world.set_system_component_blacklist<CollisionSystem>(black_signature);
+
+	PhysicsManager &physics_manager = PhysicsManager::get();
+	physics_manager.add_collision_layer("default");
 }
 
 void CollisionSystem::update(World &world, float dt) {
@@ -461,6 +464,54 @@ bool CollisionSystem::ray_cast(World &world, const Ray &ray, HitInfo &result) {
 		if (!world.has_component<ColliderTag>(entity) || !world.has_component<Transform>(entity)) {
 			continue;
 		}
+		Transform &transform = world.get_component<Transform>(entity);
+		HitInfo info;
+		info.entity = entity;
+		if (world.has_component<ColliderAABB>(entity)) {
+			ColliderAABB c = world.get_component<ColliderAABB>(entity);
+			c.center += transform.position;
+			c.range *= transform.scale;
+			if (physics_manager.intersect_ray_aabb(ray, c, info)) {
+				does_hit = true;
+			}
+		} else if (world.has_component<ColliderOBB>(entity)) {
+			ColliderOBB c = world.get_component<ColliderOBB>(entity);
+			c.center = transform.position + c.get_orientation_matrix() * (c.center * transform.get_scale());
+			c.range *= transform.scale;
+			if (physics_manager.intersect_ray_obb(ray, c, info)) {
+				does_hit = true;
+			}
+		} else if (world.has_component<ColliderSphere>(entity)) {
+			ColliderSphere c = world.get_component<ColliderSphere>(entity);
+			c.center += transform.position;
+			c.radius *= transform.scale.x;
+			if (physics_manager.intersect_ray_sphere(ray, c, info)) {
+				does_hit = true;
+			}
+		}
+
+		if (info.distance < result.distance) {
+			result = info;
+		}
+	}
+	return does_hit;
+}
+
+bool CollisionSystem::ray_cast(World &world, const Ray &ray, const std::string &layer_name, HitInfo &result) {
+	auto physics_manager = PhysicsManager::get();
+	std::vector<Entity> entities = world.get_parent_scene()->entities;
+
+	bool does_hit = false;
+	for (auto entity : entities) {
+		if (!world.has_component<ColliderTag>(entity) || !world.has_component<Transform>(entity)) {
+			continue;
+		}
+
+		ColliderTag &tag = world.get_component<ColliderTag>(entity);
+		if (!physics_manager.are_layers_collide(layer_name, tag.layer_name)) {
+			continue;
+		}
+
 		Transform &transform = world.get_component<Transform>(entity);
 		HitInfo info;
 		info.entity = entity;

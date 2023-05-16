@@ -2,6 +2,7 @@
 #include "editor.h"
 #include "editor/editor_scene.h"
 #include "input/input_manager.h"
+#include "physics/physics_manager.h"
 #include "scene/scene_manager.h"
 
 #include "inspector_gui.h"
@@ -784,6 +785,101 @@ void Editor::imgui_settings() {
 
 	ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
 			ImGui::GetIO().Framerate);
+
+	ImGui::End();
+}
+
+void Editor::imgui_layers_settings() {
+	ImGui::Begin("Layers");
+
+	float available_width = ImGui::GetContentRegionAvail().x;
+	bool open_popup = false;
+	ImGui::BeginTable("table1", 2, ImGuiTableFlags_SizingFixedFit);
+	ImGui::TableSetupColumn("Column 1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.5f);
+	ImGui::TableSetupColumn("Column 2", ImGuiTableColumnFlags_WidthFixed, available_width * 0.5f);
+
+	PhysicsManager &physics_manager = PhysicsManager::get();
+	const auto &map = physics_manager.get_layers_map();
+	// Add table contents here
+	ImGui::TableNextRow();
+	ImGui::TableSetColumnIndex(0);
+	ImGui::Text("Layer");
+	ImGui::TableSetColumnIndex(1);
+	ImGui::SetNextItemWidth(-FLT_MIN);
+	if (ImGui::BeginCombo("##Layer", selected_layer.c_str())) {
+		for (const auto &pair : map) {
+			bool is_selected = selected_layer == pair.first;
+
+			if (ImGui::Selectable(pair.first.c_str(), is_selected)) {
+				selected_layer = pair.first;
+			}
+			if (is_selected) {
+				ImGui::SetItemDefaultFocus();
+			}
+		}
+		ImGui::EndCombo();
+	}
+	ImGui::TableNextRow();
+	ImGui::TableSetColumnIndex(0);
+	if (ImGui::Button("Remove Layer", ImVec2(ImGui::GetContentRegionAvail().x, 0))) {
+		physics_manager.remove_collision_layer(selected_layer);
+		selected_layer = "default";
+	}
+	ImGui::TableSetColumnIndex(1);
+	if (ImGui::Button("Add Layer", ImVec2(ImGui::GetContentRegionAvail().x, 0))) {
+		open_popup = true;
+	}
+
+	static bool are_collide = false;
+	for (auto &pair : map) {
+		if (pair.first == selected_layer) {
+			continue;
+		}
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("%s", pair.first.c_str());
+		ImGui::TableSetColumnIndex(1);
+		are_collide = physics_manager.are_layers_collide(selected_layer, pair.first);
+
+		bool temp = are_collide;
+		ImGui::Checkbox(("##Checkbox_" + pair.first).c_str(), &are_collide);
+
+		if (are_collide != temp) {
+			if (are_collide) {
+				physics_manager.set_layers_collision(selected_layer, pair.first);
+			} else {
+				physics_manager.set_layers_no_collision(selected_layer, pair.first);
+			}
+		}
+	}
+
+	ImGui::EndTable();
+
+	if (open_popup) {
+		ImGui::OpenPopup("add_layer_popup");
+		ImGui::SetNextWindowFocus();
+	}
+
+	ImGui::SetNextWindowSize(ImVec2(200, 0));
+	ImGui::SetNextWindowContentSize(ImVec2(100, 0));
+	if (ImGui::IsPopupOpen("add_layer_popup")) {
+		if (ImGui::BeginPopup("add_layer_popup")) {
+			// We only want to set the focus once, at the beginning
+			if (open_popup) {
+				ImGui::SetKeyboardFocusHere();
+			}
+			static std::string layer_name;
+			ImGui::Text("Enter layer name:");
+			ImGui::InputText("##layer_name", &layer_name);
+
+			if (ImGui::Button("Add")) {
+				physics_manager.add_collision_layer(layer_name);
+			}
+
+			ImGui::EndPopup();
+		}
+	}
+	ImGui::SetNextWindowContentSize(ImVec2());
 
 	ImGui::End();
 }

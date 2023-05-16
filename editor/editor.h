@@ -18,6 +18,9 @@ public:
 	bool controlling_camera = false;
 	bool viewport_hovered = false;
 
+	// Collision Layers
+	std::string selected_layer = "default";
+
 	// Drag and drop
 	std::string drag_and_drop_path;
 
@@ -63,6 +66,7 @@ public:
 	void display_folder(const std::string &path);
 	void imgui_content_browser();
 	void imgui_settings();
+	void imgui_layers_settings();
 };
 
 #endif //SILENCE_EDITOR_H

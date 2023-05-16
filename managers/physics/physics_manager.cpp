@@ -94,6 +94,11 @@ void PhysicsManager::resolve_collision_sphere(World &world, Entity e1, Entity e2
 	ColliderSphere &temp_c2 = world.get_component<ColliderSphere>(e2);
 	Transform &t1 = world.get_component<Transform>(e1);
 	Transform &t2 = world.get_component<Transform>(e2);
+	ColliderTag &tag1 = world.get_component<ColliderTag>(e1);
+	ColliderTag &tag2 = world.get_component<ColliderTag>(e2);
+	if (!are_layers_collide(tag1.layer_name, tag2.layer_name)) {
+		return;
+	}
 
 	ColliderSphere c1;
 	ColliderSphere c2;
@@ -137,6 +142,11 @@ void PhysicsManager::resolve_collision_aabb(World &world, Entity e1, Entity e2) 
 	ColliderAABB &temp_c2 = world.get_component<ColliderAABB>(e2);
 	Transform &t1 = world.get_component<Transform>(e1);
 	Transform &t2 = world.get_component<Transform>(e2);
+	ColliderTag &tag1 = world.get_component<ColliderTag>(e1);
+	ColliderTag &tag2 = world.get_component<ColliderTag>(e2);
+	if (!are_layers_collide(tag1.layer_name, tag2.layer_name)) {
+		return;
+	}
 
 	ColliderAABB c1;
 	ColliderAABB c2;
@@ -203,6 +213,11 @@ void PhysicsManager::resolve_aabb_sphere(World &world, Entity aabb, Entity spher
 	ColliderSphere &temp_c2 = world.get_component<ColliderSphere>(sphere);
 	Transform &t1 = world.get_component<Transform>(aabb);
 	Transform &t2 = world.get_component<Transform>(sphere);
+	ColliderTag &tag1 = world.get_component<ColliderTag>(aabb);
+	ColliderTag &tag2 = world.get_component<ColliderTag>(sphere);
+	if (!are_layers_collide(tag1.layer_name, tag2.layer_name)) {
+		return;
+	}
 
 	ColliderAABB c1;
 	ColliderSphere c2;
@@ -277,6 +292,11 @@ void PhysicsManager::resolve_collision_obb(World &world, Entity e1, Entity e2) {
 	ColliderOBB &temp_c2 = world.get_component<ColliderOBB>(e2);
 	Transform &t1 = world.get_component<Transform>(e1);
 	Transform &t2 = world.get_component<Transform>(e2);
+	ColliderTag &tag1 = world.get_component<ColliderTag>(e1);
+	ColliderTag &tag2 = world.get_component<ColliderTag>(e2);
+	if (!are_layers_collide(tag1.layer_name, tag2.layer_name)) {
+		return;
+	}
 
 	ColliderOBB c1{};
 	ColliderOBB c2{};
@@ -336,6 +356,11 @@ void PhysicsManager::resolve_obb_sphere(World &world, Entity obb, Entity sphere)
 	ColliderSphere &temp_c2 = world.get_component<ColliderSphere>(sphere);
 	Transform &t1 = world.get_component<Transform>(obb);
 	Transform &t2 = world.get_component<Transform>(sphere);
+	ColliderTag &tag1 = world.get_component<ColliderTag>(obb);
+	ColliderTag &tag2 = world.get_component<ColliderTag>(sphere);
+	if (!are_layers_collide(tag1.layer_name, tag2.layer_name)) {
+		return;
+	}
 
 	ColliderOBB c1{};
 	ColliderSphere c2{};
@@ -416,6 +441,11 @@ void PhysicsManager::resolve_obb_aabb(World &world, Entity obb, Entity aabb) {
 	ColliderAABB &temp_c2 = world.get_component<ColliderAABB>(aabb);
 	Transform &t1 = world.get_component<Transform>(obb);
 	Transform &t2 = world.get_component<Transform>(aabb);
+	ColliderTag &tag1 = world.get_component<ColliderTag>(obb);
+	ColliderTag &tag2 = world.get_component<ColliderTag>(aabb);
+	if (!are_layers_collide(tag1.layer_name, tag2.layer_name)) {
+		return;
+	}
 
 	ColliderOBB c1{};
 	ColliderAABB c2{};
@@ -642,4 +672,88 @@ bool PhysicsManager::intersect_ray_obb(const Ray &ray, const ColliderOBB &obb, H
 	result.normal = glm::normalize(obb.get_orientation_matrix() * hit_normal);
 
 	return true;
+}
+
+void PhysicsManager::add_collision_layer(const std::string &layer_name) {
+	if (layers_map.find(layer_name) == layers_map.end()) {
+		layers_map[layer_name] = std::unordered_set<std::string>();
+		return;
+	}
+	SPDLOG_INFO("Layer {} is already exist.", layer_name);
+}
+
+void PhysicsManager::remove_collision_layer(const std::string &layer_name) {
+	layers_map.erase(layer_name);
+	for (auto &pair : layers_map) {
+		pair.second.erase(layer_name);
+	}
+}
+
+void PhysicsManager::set_layers_no_collision(const std::string &layer1, const std::string &layer2) {
+	if (layer1 == layer2) {
+		SPDLOG_WARN("Layers have equal name");
+		return;
+	}
+
+	const auto &it1 = layers_map.find(layer1);
+	const auto &it2 = layers_map.find(layer2);
+	if (it1 == layers_map.end()) {
+		SPDLOG_WARN("Layer name not found: {}", layer1);
+		return;
+	}
+	if (it2 == layers_map.end()) {
+		SPDLOG_WARN("Layer name not found: {}", layer2);
+		return;
+	}
+	it1->second.insert(layer2);
+	it2->second.insert(layer1);
+}
+
+void PhysicsManager::set_layers_collision(const std::string &layer1, const std::string &layer2) {
+	if (layer1 == layer2) {
+		SPDLOG_WARN("Layers have equal name");
+		return;
+	}
+
+	const auto &it1 = layers_map.find(layer1);
+	const auto &it2 = layers_map.find(layer2);
+	if (it1 == layers_map.end()) {
+		SPDLOG_WARN("Layer name not found: {}", layer1);
+		return;
+	}
+	if (it2 == layers_map.end()) {
+		SPDLOG_WARN("Layer name not found: {}", layer2);
+		return;
+	}
+	it1->second.erase(layer2);
+	it2->second.erase(layer1);
+}
+
+bool PhysicsManager::are_layers_collide(const std::string &layer1, const std::string &layer2) {
+	if (layer1 == layer2) {
+		return true;
+	}
+
+	const auto &it1 = layers_map.find(layer1);
+	//  I don't think that we need to check this
+	//	if (it1 == layers_map.end()) {
+	//		SPDLOG_WARN("Layer name not found: {}", layer1);
+	//		return false;
+	//	}
+	//
+	//	const auto &it2 = layers_map.find(layer2);
+	//	if (it2 == layers_map.end()) {
+	//		SPDLOG_WARN("Layer name not found: {}", layer2);
+	//		return false;
+	//	}
+
+	if (it1->second.count(layer2) == 1) {
+		return false;
+	}
+
+	return true;
+}
+
+const std::unordered_map<std::string, std::unordered_set<std::string>> &PhysicsManager::get_layers_map() {
+	return layers_map;
 }
