@@ -342,3 +342,15 @@ void MaterialCombination::bind_resources(RenderScene &scene) {
 
 void MaterialCombination::bind_instance_resources(ModelInstance &instance, Transform &transform) {
 }
+
+void MaterialBloom::startup() {
+	shader.load_from_files(shader_path("bloom.vert"), shader_path("bloom_combine.frag"));
+	downsample.load_from_files(shader_path("bloom.vert"), shader_path("downsample.frag"));
+	bloom.load_from_files(shader_path("bloom.vert"), shader_path("upsample.frag"));
+}
+
+void MaterialBloom::bind_resources(RenderScene &scene) {
+}
+
+void MaterialBloom::bind_instance_resources(ModelInstance &instance, Transform &transform) {
+}

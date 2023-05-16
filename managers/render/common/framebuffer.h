@@ -50,4 +50,35 @@ public:
 	void resize(uint32_t width, uint32_t height);
 };
 
+class CombinationBuffer {
+public:
+	uint32_t framebuffer_id;
+	uint32_t texture_id;
+	uint32_t rbo_id;
+
+	void startup(uint32_t width, uint32_t height);
+	void bind();
+	void resize(uint32_t width, uint32_t height);
+};
+
+struct BloomMip
+{
+	glm::vec2 size;
+	glm::ivec2 int_size;
+	unsigned int texture_id;
+};
+
+class BloomBuffer {
+public:
+	uint32_t framebuffer_id;
+	uint32_t bloom_texture_id;
+	uint32_t rbo_id;
+
+	std::vector<BloomMip> mips;
+
+	void startup(uint32_t width, uint32_t height, int mip_count);
+	void bind();
+	void resize(uint32_t width, uint32_t height);
+};
+
 #endif // SILENCE_FRAMEBUFFER_H

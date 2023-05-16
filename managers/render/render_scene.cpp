@@ -31,6 +31,7 @@ void RenderScene::startup() {
 	ssao_blur_pass.startup();
 	combination_pass.startup();
 	default_pass = &pbr_pass;
+	bloom_pass.startup();
 
 	// Size of the viewport doesn't matter here, it will be resized either way
 	render_extent = glm::vec2(100, 100);
@@ -38,6 +39,8 @@ void RenderScene::startup() {
 	g_buffer.startup(render_extent.x, render_extent.y);
 	ssao_buffer.startup(render_extent.x, render_extent.y);
 	pbr_buffer.startup(render_extent.x, render_extent.y);
+	bloom_buffer.startup(render_extent.x, render_extent.y, 5);
+	combination_buffer.startup(render_extent.x, render_extent.y);
 
 	debug_draw.startup();
 	transparent_pass.startup();
@@ -119,10 +122,14 @@ void RenderScene::draw() {
 	// somehow see to match the default framebuffer's internal format with the FBO's internal format).
 	glBlitFramebuffer(0, 0, render_extent.x, render_extent.y, 0, 0, render_extent.x, render_extent.y,
 			GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-	render_framebuffer.bind();
+	combination_buffer.bind();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glDepthMask(GL_FALSE);
-	combination_pass.draw(*this);
+	combination_pass.draw(*this); // CHECKED, this draws properly
+
+	bloom_buffer.bind();
+	bloom_pass.draw(*this);
 
 	debug_draw.projection = projection;
 	debug_draw.view = view;
@@ -162,6 +169,8 @@ void RenderScene::resize_framebuffer(uint32_t width, uint32_t height) {
 	g_buffer.resize(width, height);
 	ssao_buffer.resize(width, height);
 	pbr_buffer.resize(width, height);
+	bloom_buffer.resize(width, height);
+	combination_buffer.resize(width, height);
 
 	render_extent = glm::vec2(width, height);
 }

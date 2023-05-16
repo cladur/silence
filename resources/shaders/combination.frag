@@ -32,7 +32,7 @@ void main()
 
     vec3 color = (albedo * diffuse + specular) * final_ao;
     // color = specular;
-    
+
     // HDR tonemapping
     color = color / (color + vec3(1.0));
     // gamma correct
