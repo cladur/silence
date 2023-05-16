@@ -100,6 +100,15 @@ Handle<Animation> ResourceManager::get_animation_handle(std::string name) {
 	return name_to_animation[name];
 }
 
+std::string ResourceManager::get_animation_name(Handle<Animation> handle) {
+	for (auto &pair : name_to_animation) {
+		if (pair.second.id == handle.id) {
+			return pair.first;
+		}
+	}
+	return "";
+}
+
 std::vector<Animation> &ResourceManager::get_animations() {
 	return animations;
 }
