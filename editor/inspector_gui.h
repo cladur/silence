@@ -18,7 +18,6 @@ private:
 	void show_name();
 	void show_transform();
 	void show_rigidbody();
-	void show_gravity();
 	void show_parent();
 	void show_children();
 	void show_skinnedmodelinstance();

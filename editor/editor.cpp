@@ -265,6 +265,8 @@ void Editor::custom_update(float dt) {
 	imgui_menu_bar();
 	imgui_content_browser();
 	imgui_settings();
+
+	//	imgui_layers_settings();
 	if (!scenes.empty()) {
 		auto &scene = get_editor_scene(active_scene);
 		inspector.world = &scene.world;
