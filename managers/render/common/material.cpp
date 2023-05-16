@@ -13,6 +13,10 @@
 #include <glm/gtc/type_ptr.hpp>
 
 AutoCVarInt cvar_use_ao("render.use_ao", "use ambient occlusion", 1, CVarFlags::EditCheckbox);
+AutoCVarInt cvar_use_fog("render.use_fog", "use simple linear fog", 1, CVarFlags::EditCheckbox);
+AutoCVarFloat cvar_fog_min("render.fog_min", "fog min distance", 0.1f, CVarFlags::EditFloatDrag);
+AutoCVarFloat cvar_fog_max("render.fog_max", "fog max distance", 50.0f, CVarFlags::EditFloatDrag);
+
 
 void MaterialSkinnedUnlit::startup() {
 	shader.load_from_files(shader_path("skinned_unlit.vert"), shader_path("unlit.frag"));
@@ -314,8 +318,13 @@ void MaterialCombination::bind_resources(RenderScene &scene) {
 	shader.set_int("Specular", 2);
 	shader.set_int("SSAO", 3);
 	shader.set_int("AoRoughMetal", 4);
+	shader.set_int("ViewPos", 5);
 
 	shader.set_int("use_ao", cvar_use_ao.get());
+
+	shader.set_int("use_fog", cvar_use_fog.get());
+	shader.set_float("fog_min", cvar_fog_min.get());
+	shader.set_float("fog_max", cvar_fog_max.get());
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.albedo_texture_id);
@@ -327,6 +336,8 @@ void MaterialCombination::bind_resources(RenderScene &scene) {
 	glBindTexture(GL_TEXTURE_2D, scene.ssao_buffer.ssao_texture_id);
 	glActiveTexture(GL_TEXTURE4);
 	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.ao_rough_metal_texture_id);
+	glActiveTexture(GL_TEXTURE5);
+	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.position_texture_id);
 }
 
 void MaterialCombination::bind_instance_resources(ModelInstance &instance, Transform &transform) {
