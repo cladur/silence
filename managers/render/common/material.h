@@ -51,6 +51,31 @@ public:
 	void bind_mesh_resources(Mesh &mesh);
 };
 
+class MaterialAO : public Material {
+private:
+	unsigned int noise_texture_id;
+	std::vector<glm::vec3> ssao_kernel;
+
+public:
+	float radius = 0.4f;
+	float bias = 0.04f;
+	void startup() override;
+	void bind_resources(RenderScene &scene) override;
+	void bind_instance_resources(ModelInstance &instance, Transform &transform) override;
+};
+
+class MaterialAOBlur : public Material {
+private:
+	std::vector<glm::vec2> offsets;
+	std::vector<float> gauss_kernel;
+
+public:
+	int should_blur = 1;
+	void startup() override;
+	void bind_resources(RenderScene &scene) override;
+	void bind_instance_resources(ModelInstance &instance, Transform &transform) override;
+};
+
 class MaterialSkybox : public Material {
 public:
 	void startup() override;
@@ -72,6 +97,13 @@ public:
 	void bind_resources(RenderScene &scene) override;
 	void bind_instance_resources(ModelInstance &instance, Transform &transform) override;
 	void bind_mesh_resources(Mesh &mesh);
+};
+
+class MaterialCombination : public Material {
+public:
+	void startup() override;
+	void bind_resources(RenderScene &scene) override;
+	void bind_instance_resources(ModelInstance &instance, Transform &transform) override;
 };
 
 #endif // SILENCE_MATERIAL_H

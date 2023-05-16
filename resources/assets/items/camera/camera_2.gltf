@@ -30,9 +30,6 @@
             "normalTexture" : {
                 "index" : 0
             },
-            "occlusionTexture" : {
-                "index" : 1
-            },
             "pbrMetallicRoughness" : {
                 "baseColorTexture" : {
                     "index" : 2

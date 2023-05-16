@@ -12,6 +12,12 @@
 #include "render/render_scene.h"
 #include <glm/gtc/type_ptr.hpp>
 
+AutoCVarInt cvar_use_ao("render.use_ao", "use ambient occlusion", 1, CVarFlags::EditCheckbox);
+AutoCVarInt cvar_use_fog("render.use_fog", "use simple linear fog", 1, CVarFlags::EditCheckbox);
+AutoCVarFloat cvar_fog_min("render.fog_min", "fog min distance", 20.0f, CVarFlags::EditFloatDrag);
+AutoCVarFloat cvar_fog_max("render.fog_max", "fog max distance", 100.0f, CVarFlags::EditFloatDrag);
+
+
 void MaterialSkinnedUnlit::startup() {
 	shader.load_from_files(shader_path("skinned_unlit.vert"), shader_path("unlit.frag"));
 }
@@ -52,6 +58,7 @@ void MaterialPBR::startup() {
 
 void MaterialPBR::bind_resources(RenderScene &scene) {
 	shader.use();
+	shader.set_mat4("view", scene.view);
 	shader.set_vec3("camPos", scene.camera_pos);
 	shader.set_int("gPosition", 0);
 	shader.set_int("gNormal", 1);
@@ -79,22 +86,94 @@ void MaterialPBR::bind_resources(RenderScene &scene) {
 	glActiveTexture(GL_TEXTURE7);
 	// TODO: Use baked brdf lut instead (it's broken atm)
 	glBindTexture(GL_TEXTURE_2D, scene.skybox_pass.skybox.brdf_lut_texture);
-
-	// shader.set_vec3("lightPositions[0]", glm::vec3(0.0f, 0.0f, 0.0f));
-	// shader.set_vec3("lightPositions[1]", glm::vec3(0.0f, 0.0f, 0.0f));
-	// shader.set_vec3("lightPositions[2]", glm::vec3(0.0f, 0.0f, 0.0f));
-	// shader.set_vec3("lightPositions[3]", scene.camera_pos);
-
-	// shader.set_vec3("lightColors[0]", glm::vec3(0.0f, 0.0f, 0.0f));
-	// shader.set_vec3("lightColors[1]", glm::vec3(0.0f, 0.0f, 0.0f));
-	// shader.set_vec3("lightColors[2]", glm::vec3(0.0f, 0.0f, 0.0f));
-	// shader.set_vec3("lightColors[3]", glm::vec3(1.0f, 1.0f, 1.0f));
 }
 
 void MaterialPBR::bind_instance_resources(ModelInstance &instance, Transform &transform) {
 }
 
 void MaterialPBR::bind_mesh_resources(Mesh &mesh) {
+}
+
+float our_lerp(float a, float b, float f) {
+	return a + f * (b - a);
+}
+
+void MaterialAO::startup() {
+	shader.load_from_files(shader_path("ssao.vert"), shader_path("ssao.frag"));
+
+	std::uniform_real_distribution<GLfloat> rand_float(0.0, 1.0);
+	std::default_random_engine gen;
+	std::vector<glm::vec3> noise_tex;
+
+	// ssao kernel
+	for (unsigned int i = 0; i < 64; ++i) {
+		glm::vec3 sample(rand_float(gen) * 2.0 - 1.0, rand_float(gen) * 2.0 - 1.0, rand_float(gen));
+		sample = glm::normalize(sample);
+		sample *= rand_float(gen);
+		float scale = float(i) / 64.0f;
+
+		scale = our_lerp(0.1f, 1.0f, scale * scale);
+		sample *= scale;
+		ssao_kernel.push_back(sample);
+	}
+
+	// noise texture
+	for (unsigned int i = 0; i < 16; i++) {
+		glm::vec3 noise(rand_float(gen), rand_float(gen), 0.0f);
+		noise = glm::normalize(noise);
+		noise_tex.push_back(noise);
+	}
+
+	glGenTextures(1, &noise_texture_id);
+	glBindTexture(GL_TEXTURE_2D, noise_texture_id);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, 4, 4, 0, GL_RGB, GL_FLOAT, &noise_tex[0]);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+}
+
+void MaterialAO::bind_resources(RenderScene &scene) {
+	shader.use();
+	shader.set_int("gPosition", 0);
+	shader.set_int("gNormal", 1);
+	shader.set_int("texNoise", 2);
+	shader.set_mat4("projection", scene.projection);
+	shader.set_mat4("view", scene.view);
+	for (unsigned int i = 0; i < 64; i++) {
+		shader.set_vec3("samples[" + std::to_string(i) + "]", ssao_kernel[i]);
+	}
+	shader.set_int("kernel_size", 64);
+	shader.set_float("radius", radius);
+	shader.set_float("bias", bias);
+	shader.set_float("noise_size", 4.0f);
+	shader.set_vec2("screen_dimensions", glm::vec2(scene.render_extent.x, scene.render_extent.y));
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.position_texture_id);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.normal_texture_id);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, noise_texture_id);
+}
+
+void MaterialAO::bind_instance_resources(ModelInstance &instance, Transform &transform) {
+}
+
+void MaterialAOBlur::startup() {
+	shader.load_from_files(shader_path("ssao.vert"), shader_path("ssao_blur.frag"));
+}
+
+void MaterialAOBlur::bind_resources(RenderScene &scene) {
+	shader.use();
+	shader.set_int("ssao_texture", 0);
+	shader.set_vec2("offset_step", glm::vec2(1.0f / scene.render_extent.x, 1.0f / scene.render_extent.y));
+	shader.set_int("should_blur", should_blur);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, scene.ssao_buffer.ssao_texture_id);
+}
+
+void MaterialAOBlur::bind_instance_resources(ModelInstance &instance, Transform &transform) {
 }
 
 void MaterialGBuffer::startup() {
@@ -127,6 +206,8 @@ void MaterialGBuffer::bind_resources(RenderScene &scene) {
 
 void MaterialGBuffer::bind_instance_resources(ModelInstance &instance, Transform &transform) {
 	shader.set_mat4("model", transform.get_global_model_matrix());
+	glm::vec2 uv_scale = instance.scale_uv_with_transform ? transform.scale : glm::vec2(1.0f);
+	shader.set_vec2("uv_scale", uv_scale);
 }
 
 void MaterialGBuffer::bind_mesh_resources(Mesh &mesh) {
@@ -224,4 +305,40 @@ void MaterialTransparent::bind_object_resources(RenderScene &scene, TransparentO
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, t.id);
+}
+
+void MaterialCombination::startup() {
+	shader.load_from_files(shader_path("pbr.vert"), shader_path("combination.frag"));
+}
+
+void MaterialCombination::bind_resources(RenderScene &scene) {
+	shader.use();
+	shader.set_int("Albedo", 0);
+	shader.set_int("Diffuse", 1);
+	shader.set_int("Specular", 2);
+	shader.set_int("SSAO", 3);
+	shader.set_int("AoRoughMetal", 4);
+	shader.set_int("ViewPos", 5);
+
+	shader.set_int("use_ao", cvar_use_ao.get());
+
+	shader.set_int("use_fog", cvar_use_fog.get());
+	shader.set_float("fog_min", cvar_fog_min.get());
+	shader.set_float("fog_max", cvar_fog_max.get());
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.albedo_texture_id);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, scene.pbr_buffer.diffuse_texture_id);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, scene.pbr_buffer.specular_texture_id);
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, scene.ssao_buffer.ssao_texture_id);
+	glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.ao_rough_metal_texture_id);
+	glActiveTexture(GL_TEXTURE5);
+	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.position_texture_id);
+}
+
+void MaterialCombination::bind_instance_resources(ModelInstance &instance, Transform &transform) {
 }

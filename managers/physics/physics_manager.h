@@ -5,6 +5,34 @@ struct ColliderSphere;
 struct ColliderAABB;
 struct ColliderOBB;
 
+struct Ray {
+	glm::vec3 origin;
+	glm::vec3 direction;
+};
+
+struct HitInfo {
+	glm::vec3 point;
+	glm::vec3 normal;
+	float distance;
+	Entity entity = 0;
+
+	HitInfo() : point(0.0f), normal(0.0f), distance(std::numeric_limits<float>::max()) {
+	}
+};
+
+enum class Side { FRONT, BACK, INTERSECT };
+
+struct Plane {
+	glm::vec3 point;
+	glm::vec3 normal;
+};
+
+struct BSPNode {
+	std::shared_ptr<BSPNode> back, front;
+	Plane plane;
+	std::set<Entity> entities;
+};
+
 enum class CollisionFlag : uint16_t {
 	NONE = 0b0000000000000000,
 	FIRST_SPHERE = 0b0000000000000001,
@@ -29,10 +57,15 @@ static CollisionFlag operator|(const CollisionFlag first, const CollisionFlag se
 }
 
 class World;
+struct Transform;
+struct RigidBody;
 
 class PhysicsManager {
 public:
 	static PhysicsManager &get();
+
+	const glm::vec3 &get_gravity();
+	const float &get_epsilon();
 
 	void resolve_collision(World &world, Entity movable_object, const std::set<Entity> &static_entities);
 
@@ -55,6 +88,21 @@ public:
 	void resolve_obb_aabb(World &world, Entity obb, Entity aabb);
 
 	bool is_collision_candidate(const glm::vec3 &p1, const glm::vec3 &r1, const glm::vec3 &p2, const glm::vec3 &r2);
+	void make_shift(World &world, Entity e1, Entity e2, const glm::vec3 &offset);
+	void non_physical_shift(Transform &t1, Transform &t2, bool is_movable1, bool is_movable2, const glm::vec3 &offset);
+	void physical_shift(Transform &t1, Transform &t2, RigidBody &b1, RigidBody &b2, bool is_movable1, bool is_movable2,
+			const glm::vec3 &offset);
+
+	// returns true, point and normal if ray intersect with sphere
+	bool intersect_ray_sphere(const Ray &ray, const ColliderSphere &sphere, HitInfo &result);
+	// returns true, point and normal if ray intersect with aabb
+	bool intersect_ray_aabb(const Ray &ray, const ColliderAABB &aabb, HitInfo &result);
+	// returns true, point and normal if ray intersect with obb
+	bool intersect_ray_obb(const Ray &ray, const ColliderOBB &obb, HitInfo &result);
+
+private:
+	glm::vec3 gravity;
+	float epsilon;
 };
 
 #endif //SILENCE_PHYSICS_MANAGER_H

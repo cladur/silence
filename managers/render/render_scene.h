@@ -5,6 +5,7 @@
 #include "common/render_pass.h"
 #include "components/camera_component.h"
 #include "debug/debug_draw.h"
+#include "render/common/framebuffer.h"
 #include "render/common/render_pass.h"
 #include "render/transparent_elements/ui/sprite_draw.h"
 #include "transparent_elements/text/text_draw.h"
@@ -31,9 +32,14 @@ struct RenderScene {
 	PBRPass pbr_pass;
 	SkyboxPass skybox_pass;
 	TransparentPass transparent_pass;
+	AOPass ssao_pass;
+	AOBlurPass ssao_blur_pass;
+	CombinationPass combination_pass;
 
 	Framebuffer render_framebuffer;
 	GBuffer g_buffer;
+	PBRBuffer pbr_buffer;
+	SSAOBuffer ssao_buffer;
 	glm::vec2 render_extent;
 
 	DebugDraw debug_draw;

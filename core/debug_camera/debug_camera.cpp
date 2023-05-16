@@ -4,7 +4,7 @@
 
 AutoCVarFloat cvar_camera_speed("debug_camera.speed", "Debug Camera Speed", 5, CVarFlags::EditFloatDrag);
 AutoCVarFloat cvar_camera_fov("debug_camera.fov", "Debug Fov", 70, CVarFlags::EditFloatDrag);
-AutoCVarFloat cvar_camera_sensitivity(
+AutoCVarFloat cvar_debug_camera_sensitivity(
 		"debug_camera.sensitivity", "Debug Camera Sensitivity", 16, CVarFlags::EditFloatDrag);
 
 DebugCamera::DebugCamera(glm::vec3 position, glm::vec3 up, float near, float far, float yaw, float pitch) :
@@ -35,8 +35,8 @@ void DebugCamera::move_up(float dt) {
 }
 
 void DebugCamera::rotate(float x_offset, float y_offset) {
-	x_offset *= cvar_camera_sensitivity.get();
-	y_offset *= cvar_camera_sensitivity.get();
+	x_offset *= cvar_debug_camera_sensitivity.get();
+	y_offset *= cvar_debug_camera_sensitivity.get();
 
 	yaw += x_offset;
 	pitch -= y_offset;

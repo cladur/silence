@@ -21,6 +21,7 @@ struct Scene {
 	std::shared_ptr<BSPNode> bsp_tree;
 
 	Scene();
+	void register_game_systems();
 	virtual void update(float dt);
 	[[nodiscard]] RenderScene &get_render_scene() const;
 

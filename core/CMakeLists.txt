@@ -8,7 +8,6 @@ add_library(${COMMON_LIB_NAME} INTERFACE
 add_library(${CORE_LIB_NAME} STATIC
         components/transform_component.h
         components/rigidbody_component.h
-        components/gravity_component.h
         components/parent_component.h
         components/children_component.h
         components/fmod_listener_component.h

@@ -8,14 +8,6 @@ struct Rig {
 	std::vector<glm::quat> rotations;
 	std::vector<std::string> names;
 	std::vector<int64_t> parents;
-	std::vector<std::vector<int32_t>> children;
-};
-
-struct Bone {
-	glm::vec3 translation;
-	glm::quat rotation;
-	std::string name;
-	std::vector<Bone> children;
 };
 
 struct Joint {
@@ -29,15 +21,16 @@ public:
 	void load_from_asset(const char *path);
 
 	std::string name;
-	Bone root;
+	Rig rig;
 
 	std::vector<SkinnedMesh> meshes;
 	std::unordered_map<std::string, Joint> joint_map;
 
 private:
-	void process_bone(int32_t bone_index, Bone &bone);
+	Rig sort_rig_bones();
+	std::vector<std::pair<std::vector<int32_t>, int32_t>> sort_children(int32_t parent, int32_t level);
+	void update_parent_indices(Rig &result);
 
-	Rig rig;
 	// model data
 	std::string directory;
 };

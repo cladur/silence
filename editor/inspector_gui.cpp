@@ -1,4 +1,5 @@
 #include "inspector_gui.h"
+#include "components/agent_data_component.h"
 #include "components/collider_aabb.h"
 #include "components/collider_sphere.h"
 #include "components/collider_tag_component.h"
@@ -33,7 +34,6 @@ void Inspector::show_components() {
 	SHOW_COMPONENT(Name, show_name);
 	SHOW_COMPONENT(Transform, show_transform);
 	SHOW_COMPONENT(RigidBody, show_rigidbody);
-	SHOW_COMPONENT(Gravity, show_gravity);
 	SHOW_COMPONENT(Parent, show_parent);
 	SHOW_COMPONENT(Children, show_children);
 	SHOW_COMPONENT(ModelInstance, show_modelinstance);
@@ -47,6 +47,7 @@ void Inspector::show_components() {
 	SHOW_COMPONENT(ColliderAABB, show_collideraabb);
 	SHOW_COMPONENT(ColliderOBB, show_colliderobb);
 	SHOW_COMPONENT(Light, show_light);
+	SHOW_COMPONENT(AgentData, show_agent_data);
 
 	for (int i = 0; i < remove_component_queue.size(); i++) {
 		auto [entity, component_to_remove] = remove_component_queue.front();
@@ -110,23 +111,12 @@ void Inspector::show_rigidbody() {
 
 		show_vec3("Velocity", rigidbody.velocity);
 		show_vec3("Acceleration", rigidbody.acceleration);
+		show_float("mass", rigidbody.mass);
 
 		ImGui::EndTable();
 	}
 }
-void Inspector::show_gravity() {
-	auto &gravity = world->get_component<Gravity>(selected_entity);
-	if (ImGui::CollapsingHeader("Gravity", tree_flags)) {
-		remove_component_popup<Gravity>();
-		float available_width = ImGui::GetContentRegionAvail().x;
-		ImGui::BeginTable("Transform", 2);
-		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
 
-		show_vec3("Gravity", gravity.force);
-
-		ImGui::EndTable();
-	}
-}
 void Inspector::show_parent() {
 	Entity parent = world->get_component<Parent>(selected_entity).parent;
 	if (ImGui::CollapsingHeader("Parent", tree_flags)) {
@@ -182,10 +172,10 @@ void Inspector::show_children() {
 
 void Inspector::show_skinnedmodelinstance() {
 	auto &modelinstance = world->get_component<SkinnedModelInstance>(selected_entity);
-	auto models = render_manager.get_skinned_models();
+	auto models = resource_manager.get_skinned_models();
 	if (ImGui::CollapsingHeader("Skinned Model Instance", tree_flags)) {
 		remove_component_popup<ModelInstance>();
-		std::string name = render_manager.get_skinned_model(modelinstance.model_handle).name;
+		std::string name = resource_manager.get_skinned_model(modelinstance.model_handle).name;
 		std::size_t last_slash_pos = name.find_last_of("/\\");
 
 		if (last_slash_pos != std::string::npos) {
@@ -207,7 +197,7 @@ void Inspector::show_skinnedmodelinstance() {
 		if (ImGui::BeginCombo("##Skinned Model", name.c_str())) {
 			for (const auto &model : models) {
 				bool is_selected =
-						(modelinstance.model_handle.id == render_manager.get_skinned_model_handle(model.name).id);
+						(modelinstance.model_handle.id == resource_manager.get_skinned_model_handle(model.name).id);
 				std::string model_name = model.name;
 				std::size_t model_slash_pos = model_name.find_last_of("/\\");
 
@@ -219,7 +209,7 @@ void Inspector::show_skinnedmodelinstance() {
 					}
 				}
 				if (ImGui::Selectable(model_name.c_str(), is_selected)) {
-					Handle<SkinnedModel> new_handle = render_manager.get_skinned_model_handle(model.name);
+					Handle<SkinnedModel> new_handle = resource_manager.get_skinned_model_handle(model.name);
 					modelinstance.model_handle = new_handle;
 				}
 				if (is_selected) {
@@ -251,10 +241,10 @@ void Inspector::show_skinnedmodelinstance() {
 
 void Inspector::show_modelinstance() {
 	auto &modelinstance = world->get_component<ModelInstance>(selected_entity);
-	auto models = render_manager.get_models();
+	auto models = resource_manager.get_models();
 	if (ImGui::CollapsingHeader("Model Instance", tree_flags)) {
 		remove_component_popup<ModelInstance>();
-		std::string name = render_manager.get_model(modelinstance.model_handle).name;
+		std::string name = resource_manager.get_model(modelinstance.model_handle).name;
 		std::size_t last_slash_pos = name.find_last_of("/\\");
 
 		if (last_slash_pos != std::string::npos) {
@@ -275,7 +265,7 @@ void Inspector::show_modelinstance() {
 		ImGui::SetNextItemWidth(-FLT_MIN);
 		if (ImGui::BeginCombo("##Model", name.c_str())) {
 			for (const auto &model : models) {
-				bool is_selected = (modelinstance.model_handle.id == render_manager.get_model_handle(model.name).id);
+				bool is_selected = (modelinstance.model_handle.id == resource_manager.get_model_handle(model.name).id);
 				std::string model_name = model.name;
 				std::size_t model_slash_pos = model_name.find_last_of("/\\");
 
@@ -287,7 +277,7 @@ void Inspector::show_modelinstance() {
 					}
 				}
 				if (ImGui::Selectable(model_name.c_str(), is_selected)) {
-					Handle<Model> new_handle = render_manager.get_model_handle(model.name);
+					Handle<Model> new_handle = resource_manager.get_model_handle(model.name);
 					modelinstance.model_handle = new_handle;
 				}
 				if (is_selected) {
@@ -313,13 +303,19 @@ void Inspector::show_modelinstance() {
 			}
 			ImGui::EndCombo();
 		}
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("UV Scale");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		ImGui::Checkbox("##UV Scale", &modelinstance.scale_uv_with_transform);
 		ImGui::EndTable();
 
 		if (ImGui::BeginDragDropTarget()) {
 			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_MODEL_PATH")) {
 				const std::string payload_n = *(const std::string *)payload->Data;
-				render_manager.load_model(payload_n.c_str());
-				modelinstance.model_handle = render_manager.get_model_handle(payload_n);
+				resource_manager.load_model(payload_n.c_str());
+				modelinstance.model_handle = resource_manager.get_model_handle(payload_n);
 			}
 
 			ImGui::EndDragDropTarget();
@@ -329,11 +325,11 @@ void Inspector::show_modelinstance() {
 
 void Inspector::show_animationinstance() {
 	auto &animation_instance = world->get_component<AnimationInstance>(selected_entity);
-	auto models = render_manager.get_skinned_models();
-	auto animations = render_manager.get_animations();
+	auto models = resource_manager.get_skinned_models();
+	auto animations = resource_manager.get_animations();
 	if (ImGui::CollapsingHeader("Animation Instance", tree_flags)) {
 		remove_component_popup<ModelInstance>();
-		std::string name = render_manager.get_animation(animation_instance.animation_handle).name;
+		std::string name = resource_manager.get_animation(animation_instance.animation_handle).name;
 		std::size_t last_slash_pos = name.find_last_of("/\\");
 
 		if (last_slash_pos != std::string::npos) {
@@ -354,10 +350,10 @@ void Inspector::show_animationinstance() {
 		ImGui::SetNextItemWidth(-FLT_MIN);
 		if (ImGui::BeginCombo("##Animation", name.c_str())) {
 			for (const auto &animation : animations) {
-				bool is_selected =
-						(animation_instance.animation_handle.id == render_manager.get_animation_handle(animation.name).id);
+				bool is_selected = (animation_instance.animation_handle.id ==
+						resource_manager.get_animation_handle(animation.name).id);
 
-				auto animation_handle = render_manager.get_animation_handle(animation.name);
+				auto animation_handle = resource_manager.get_animation_handle(animation.name);
 				//auto animation = render_manager.get_animation(animation_handle);
 				std::string animation_name = animation.name;
 				std::size_t animation_slash_pos = animation_name.find_last_of("/\\");
@@ -513,6 +509,60 @@ void Inspector::show_light() {
 	}
 }
 
+void Inspector::show_agent_data() {
+	auto &agent_data = world->get_component<AgentData>(selected_entity);
+	if (ImGui::CollapsingHeader("Agent Data", tree_flags)) {
+		remove_component_popup<AgentData>();
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("Agent Data", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Agent Model");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::InputInt("", (int *)&agent_data.model, 0, 0);
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
+				Entity payload_entity = *(Entity *)payload->Data;
+				agent_data.model = payload_entity;
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Camera Pivot");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::InputInt("", (int *)&agent_data.camera_pivot, 0, 0);
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
+				Entity payload_entity = *(Entity *)payload->Data;
+				agent_data.camera_pivot = payload_entity;
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Camera");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::InputInt("", (int *)&agent_data.camera, 0, 0);
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
+				Entity payload_entity = *(Entity *)payload->Data;
+				agent_data.camera = payload_entity;
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+		ImGui::EndTable();
+	}
+}
+
 bool Inspector::show_vec3(
 		const char *label, glm::vec3 &vec3, float speed, float reset_value, float min_value, float max_value) {
 	bool changed = false;
@@ -611,7 +661,6 @@ void Inspector::show_add_component() {
 			SHOW_ADD_COMPONENT(Name);
 			SHOW_ADD_COMPONENT(Transform);
 			SHOW_ADD_COMPONENT(RigidBody);
-			SHOW_ADD_COMPONENT(Gravity);
 			SHOW_ADD_COMPONENT(Parent);
 			SHOW_ADD_COMPONENT(Children);
 			SHOW_ADD_COMPONENT(ModelInstance);
@@ -625,6 +674,7 @@ void Inspector::show_add_component() {
 			SHOW_ADD_COMPONENT(ColliderAABB);
 			SHOW_ADD_COMPONENT(ColliderOBB);
 			SHOW_ADD_COMPONENT(Light);
+			SHOW_ADD_COMPONENT(AgentData);
 
 			ImGui::EndPopup();
 		}

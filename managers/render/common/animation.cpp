@@ -20,7 +20,7 @@ void Animation::load_from_asset(const char *path) {
 
 	channels.reserve(nodes.size());
 	for (int32_t i = 0; i < nodes.size(); ++i) {
-		channels.emplace_back(nodes[i], info.node_names[i], i);
+		channels.insert(std::make_pair(info.node_names[i], Channel(nodes[i], i)));
 	}
 
 	ticks_per_second = 1000;
@@ -33,15 +33,4 @@ int32_t Animation::get_ticks_per_second() const {
 
 float Animation::get_duration() const {
 	return duration_ms;
-}
-
-Channel *Animation::find_channel(const std::string &bone_name) {
-	auto iterator = std::find_if(channels.begin(), channels.end(),
-			[&](const Channel &channel) { return channel.get_bone_name() == bone_name; });
-
-	if (iterator == channels.end()) {
-		return nullptr;
-	} else {
-		return &(*iterator);
-	}
 }

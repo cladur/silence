@@ -1,5 +1,7 @@
 #version 330 core
-out vec4 FragColor;
+layout (location = 0) out vec4 Diffuse;
+layout (location = 1) out vec4 Specular;
+
 in vec2 TexCoords;
 
 // material parameters
@@ -17,6 +19,7 @@ const int NR_LIGHTS = 32;
 uniform vec3 lightPositions[NR_LIGHTS];
 uniform vec3 lightColors[NR_LIGHTS];
 
+uniform mat4 view;
 uniform vec3 camPos;
 
 const float PI = 3.14159265359;
@@ -68,7 +71,13 @@ vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
 // ----------------------------------------------------------------------------
 void main()
 {
-    vec3 WorldPos = texture(gPosition, TexCoords).rgb;
+    vec3 ViewPos = texture(gPosition, TexCoords).rgb;
+
+    // Calculate WorldPos from ViewPos
+    vec4 clipPos = vec4(ViewPos, 1.0);
+    vec4 ndcPos = clipPos / clipPos.w;
+    vec3 WorldPos = (inverse(view) * ndcPos).xyz;
+
     vec3 albedo = texture(gAlbedo, TexCoords).rgb;
     vec3 ao_metallic_roughness = texture(gAoRoughMetal, TexCoords).rgb;
     float ao = ao_metallic_roughness.r;
@@ -85,8 +94,9 @@ void main()
     F0 = mix(F0, albedo, metallic);
 
     // reflectance equation
-    vec3 Lo = vec3(0.0);
-    for (int i = 0; i < 4; ++i)
+    vec3 diffuse_light = vec3(0.0);
+    vec3 specular_light = vec3(0.0);
+    for (int i = 0; i < 5; ++i)
     {
         // calculate per-light radiance
         vec3 L = normalize(lightPositions[i] - WorldPos);
@@ -122,7 +132,8 @@ void main()
         float NdotL = max(dot(N, L), 0.0);
 
         // add to outgoing radiance Lo
-        Lo += (kD * albedo / PI + specular) * radiance * NdotL;// note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
+        diffuse_light += (kD * albedo / PI) * radiance * NdotL;
+        specular_light += (specular * radiance * NdotL);
     }
 
     // ambient lighting
@@ -141,14 +152,10 @@ void main()
     vec2 brdf  = texture(brdf_lut, vec2(max(dot(N, V), 0.0), roughness)).rg;
     vec3 specular = prefilteredColor * (F * brdf.x + brdf.y);
 
-    vec3 ambient = (kD * diffuse + specular) * ao;
+    // vec3 ambient = (kD * diffuse + specular) * ao;
 
-    vec3 color = ambient + Lo;
+    // vec3 color = ambient + Lo;
 
-    // HDR tonemapping
-    color = color / (color + vec3(1.0));
-    // gamma correct
-    color = pow(color, vec3(1.0/2.2));
-
-    FragColor = vec4(color, 1.0);
+    Diffuse = vec4(kD * irradiance + diffuse_light, 0.0);
+    Specular = vec4(specular + specular_light, 0.0);
 }

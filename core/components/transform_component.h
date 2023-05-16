@@ -4,6 +4,7 @@
 #include "types.h"
 #include <spdlog/spdlog.h>
 #include <glm/ext/matrix_transform.hpp>
+#include <glm/geometric.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
 
@@ -97,6 +98,16 @@ public:
 		return glm::normalize(glm::vec3(global_model_matrix[0]));
 	}
 
+	[[nodiscard]] glm::vec3 get_forward() const {
+		return glm::normalize(glm::vec3(local_model_matrix[2]));
+	}
+	[[nodiscard]] glm::vec3 get_up() const {
+		return glm::normalize(glm::vec3(local_model_matrix[1]));
+	}
+	[[nodiscard]] glm::vec3 get_right() const {
+		return glm::normalize(glm::vec3(local_model_matrix[0]));
+	}
+
 	[[nodiscard]] glm::mat4 get_local_model_matrix() const {
 		return local_model_matrix;
 	}
@@ -149,19 +160,52 @@ public:
 		this->changed = true;
 	}
 	void set_euler_rot(glm::vec3 new_euler_rot) {
-		this->orientation = glm::quat(new_euler_rot);
+		this->orientation = glm::normalize(glm::quat(new_euler_rot));
 		this->changed = true;
 	}
 	void add_euler_rot(glm::vec3 add_euler_rot) {
-		this->orientation *= glm::quat(add_euler_rot);
+		// Convert the Euler angles to quaternions
+		glm::quat yaw = glm::angleAxis(add_euler_rot.y, get_up());
+		glm::quat pitch = glm::angleAxis(add_euler_rot.x, get_right());
+		glm::quat roll = glm::angleAxis(add_euler_rot.z, get_forward());
+
+		// Combine the rotations in the right-handed order
+		glm::quat delta_rotation = yaw * pitch * roll;
+
+		// Apply the rotation to the orientation
+		this->orientation = delta_rotation * this->orientation;
+
+		// Normalize the quaternion to prevent accumulation of rounding errors
+		this->orientation = glm::normalize(this->orientation);
+
 		this->changed = true;
 	}
+
+	void add_global_euler_rot(glm::vec3 add_euler_rot) {
+		// Convert the Euler angles to quaternions
+		glm::quat yaw = glm::angleAxis(add_euler_rot.y, glm::vec3(0.0f, 1.0f, 0.0f));
+		glm::quat pitch = glm::angleAxis(add_euler_rot.x, glm::vec3(1.0f, 0.0f, 0.0f));
+		glm::quat roll = glm::angleAxis(add_euler_rot.z, glm::vec3(0.0f, 0.0f, 1.0f));
+
+		// Combine the rotations in the right-handed order
+		glm::quat delta_rotation = yaw * pitch * roll;
+
+		// Apply the rotation to the orientation
+		this->orientation = delta_rotation * this->orientation;
+
+		// Normalize the quaternion to prevent accumulation of rounding errors
+		this->orientation = glm::normalize(this->orientation);
+
+		this->changed = true;
+	}
+
 	void set_orientation(glm::quat new_orientation) {
-		this->orientation = new_orientation;
+		this->orientation = glm::normalize(new_orientation);
 		this->changed = true;
 	}
 	void add_orientation(glm::quat add_orientation) {
 		this->orientation *= add_orientation;
+		this->orientation = glm::normalize(this->orientation);
 		this->changed = true;
 	}
 	void set_scale(glm::vec3 new_scale) {
@@ -172,7 +216,6 @@ public:
 		changed_this_frame = changed_this_frame;
 	}
 	glm::mat4 get_global_model_matrix() {
-		//update_global_model_matrix();
 		return this->global_model_matrix;
 	}
 
