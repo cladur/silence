@@ -25,7 +25,7 @@ void main()
     float ssao = texture(SSAO, TexCoords).r;
     float ao = texture(AoRoughMetal, TexCoords).r;
 
-    float final_ao = 1.0 - min((1.0 - ssao) + (1.0 - ao), 1.0);
+    float final_ao = min(ssao, ao);
     if (!use_ao) {
         final_ao = 1.0;
     }

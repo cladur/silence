@@ -15,7 +15,7 @@
 AutoCVarInt cvar_use_ao("render.use_ao", "use ambient occlusion", 1, CVarFlags::EditCheckbox);
 AutoCVarInt cvar_use_fog("render.use_fog", "use simple linear fog", 1, CVarFlags::EditCheckbox);
 AutoCVarFloat cvar_fog_min("render.fog_min", "fog min distance", 20.0f, CVarFlags::EditFloatDrag);
-AutoCVarFloat cvar_fog_max("render.fog_max", "fog max distance", 100.0f, CVarFlags::EditFloatDrag);
+AutoCVarFloat cvar_fog_max("render.fog_max", "fog max distance", 300.0f, CVarFlags::EditFloatDrag);
 
 
 void MaterialSkinnedUnlit::startup() {
