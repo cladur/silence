@@ -101,8 +101,9 @@ void SkinnedMesh::load_from_asset(const char *path) {
 	for (size_t i = 0; i < indices.size(); i++) {
 		indices[i] = unpacked_indices[i];
 	}
-
+	//	static int index = 0;
 	//	for (auto &s : vertices) {
+	//		SPDLOG_INFO("vertex {}", index++);
 	//		SPDLOG_INFO("w {} {} {} {}", s.weight[0], s.weight[1], s.weight[2], s.weight[3]);
 	//		SPDLOG_INFO("i {} {} {} {}", s.joint_id[0], s.joint_id[1], s.joint_id[2], s.joint_id[3]);
 	//	}
