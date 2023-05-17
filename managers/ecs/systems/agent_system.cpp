@@ -70,13 +70,11 @@ void AgentSystem::update(World &world, float dt) {
 		}
 		glm::normalize(acc_direction);
 		glm::vec3 velocity = move_ground(acc_direction, previous_velocity, dt);
-		if(glm::length(velocity) > 0.0001f) {
-			//animation_instance.animation_handle = ResourceManager::get().get_animation_handle("agent_walk");
-
-			//SPDLOG_INFO("{}",ResourceManager::get().get_animation_name(animation_instance.animation_handle));
+		if(glm::length(velocity) > 0.001f) {
+			animation_instance.animation_handle = ResourceManager::get().get_animation_handle("agent/agent_ANIM_GLTF/agent_walk.anim");
 		}
 		else {
-			//animation_instance.animation_handle = ResourceManager::get().get_animation_handle("agent_idle");
+			animation_instance.animation_handle = ResourceManager::get().get_animation_handle("agent/agent_ANIM_GLTF/agent_idle.anim");
 		}
 		//SPDLOG_INFO("vel_x: {}, vel_y: {}, vel_z: {} ", velocity.x, velocity.y, velocity.z);
 		transform.position.x += velocity.x;
