@@ -8,6 +8,8 @@
 class AnimationInstance {
 public:
 	Handle<Animation> animation_handle;
+	float current_time = 0.0f;
+	bool is_looping = true;
 
 	AnimationInstance();
 	explicit AnimationInstance(const char *path);

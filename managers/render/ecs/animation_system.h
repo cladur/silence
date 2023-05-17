@@ -5,12 +5,10 @@
 class AnimationInstance;
 class Animation;
 class SkinnedModelInstance;
-class Bone;
 
 struct AnimData {
 	AnimationInstance *animation;
 	SkinnedModelInstance *model;
-	float current_time;
 };
 
 class AnimationSystem : public BaseSystem {
