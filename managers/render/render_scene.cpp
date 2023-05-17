@@ -6,7 +6,7 @@
 #include "render_manager.h"
 #include <glad/glad.h>
 
-AutoCVarFloat cvar_draw_distance_near("render.draw_distance.near", "Near distance cull", 0.1);
+AutoCVarFloat cvar_draw_distance_near("render.draw_distance.near", "Near distance cull", 0.001f);
 AutoCVarFloat cvar_draw_distance_far("render.draw_distance.far", "Far distance cull", 5000);
 AutoCVarInt cvar_frustum_freeze("render.frustum.freeze", "Freeze frustum", 0, CVarFlags::EditCheckbox);
 AutoCVarInt cvar_frustum_force_scene_camera("render.frustum.force_scene_camera",
