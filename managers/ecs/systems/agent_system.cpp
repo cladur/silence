@@ -76,10 +76,8 @@ void AgentSystem::update(World &world, float dt) {
 		else {
 			animation_instance.animation_handle = ResourceManager::get().get_animation_handle("agent/agent_ANIM_GLTF/agent_idle.anim");
 		}
-		//SPDLOG_INFO("vel_x: {}, vel_y: {}, vel_z: {} ", velocity.x, velocity.y, velocity.z);
-		transform.position.x += velocity.x;
-		transform.position.z += velocity.z;
-		transform.set_changed(true);
+		
+		transform.add_position(glm::vec3(velocity.x,0.0,velocity.z));
 
 		glm::vec2 mouse_delta = input_manager.get_mouse_delta();
 		camera_pivot_tf.add_euler_rot(glm::vec3(mouse_delta.y, 0.0f, 0.0f) * cvar_camera_sensitivity.get() * dt);
