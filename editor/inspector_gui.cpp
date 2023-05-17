@@ -602,6 +602,7 @@ void Inspector::show_enemy_path() {
 		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
 
 		int i = 0;
+		show_float("Speed", enemy_path.speed);
 		for (auto &node : enemy_path.path) {
 			std::string label = fmt::format("Node {}", i++);
 			show_vec3(label.c_str(), node);

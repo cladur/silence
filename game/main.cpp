@@ -13,7 +13,7 @@ int main() {
 
 	game.create_scene("Main");
 	game.scenes[0]->register_game_systems();
-	game.scenes[0]->load_from_file("resources/scenes/level_0.scn");
+	game.scenes[0]->load_from_file("resources/scenes/enemy_test.scn");
 	game.set_active_scene("Main");
 
 	game.run();
