@@ -10,6 +10,8 @@
 #include "ecs/systems/agent_system.h"
 #include "ecs/systems/collider_draw.h"
 #include "ecs/systems/collision_system.h"
+#include "ecs/systems/enemy_path_draw_system.h"
+#include "ecs/systems/enemy_pathing.h"
 #include "ecs/systems/isolated_entities_system.h"
 #include "ecs/systems/light_system.h"
 #include "ecs/systems/physics_system.h"
@@ -44,6 +46,7 @@ Scene::Scene() {
 	world.register_component<ColliderOBB>();
 	world.register_component<Light>();
 	world.register_component<AgentData>();
+	world.register_component<EnemyPath>();
 
 	// Systems
 	// TODO: Set update order instead of using default value
@@ -53,6 +56,7 @@ Scene::Scene() {
 	world.register_system<AnimationSystem>();
 	world.register_system<FrustumDrawSystem>();
 	world.register_system<LightSystem>();
+	world.register_system<EnemyPathDraw>();
 
 	// Transform
 	world.register_system<IsolatedEntitiesSystem>();
@@ -66,6 +70,7 @@ void Scene::register_game_systems() {
 
 	// Agents
 	world.register_system<AgentSystem>();
+	world.register_system<EnemyPathing>();
 }
 
 void Scene::update(float dt) {
