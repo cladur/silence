@@ -9,10 +9,22 @@
 #include "physics/physics_manager.h"
 
 #include "input/input_manager.h"
+#include "resource/resource_manager.h"
+#include <spdlog/spdlog.h>
+#include <glm/fwd.hpp>
+#include <glm/geometric.hpp>
 
-AutoCVarFloat cvar_agent_speed("agent.speed", "agent speed", 4.0f, CVarFlags::EditCheckbox);
+AutoCVarFloat cvar_agent_acc_ground("agent.acc_ground", "acceleration on ground ", 0.4f, CVarFlags::EditCheckbox);
+
+AutoCVarFloat cvar_agent_max_vel_ground("agent.max_vel_ground", "maximum velocity on ground ", 2.0f, CVarFlags::EditCheckbox);
+
+AutoCVarFloat cvar_friction_ground(
+		"agent.friction_ground", "friction on ground", 8.0f, CVarFlags::EditCheckbox);
+
 AutoCVarFloat cvar_camera_sensitivity(
 		"settings.camera_sensitivity", "camera sensitivity", 0.1f, CVarFlags::EditCheckbox);
+
+	
 
 void AgentSystem::startup(World &world) {
 	Signature blacklist;
@@ -22,6 +34,8 @@ void AgentSystem::startup(World &world) {
 	whitelist.set(world.get_component_type<AgentData>());
 
 	world.set_system_component_whitelist<AgentSystem>(whitelist);
+
+	previous_velocity = {0,0,0};
 }
 
 void AgentSystem::update(World &world, float dt) {
@@ -32,28 +46,42 @@ void AgentSystem::update(World &world, float dt) {
 		auto &camera_pivot_tf = world.get_component<Transform>(agent_data.camera_pivot);
 		auto &model_tf = world.get_component<Transform>(agent_data.model);
 		auto &camera_tf = world.get_component<Transform>(agent_data.camera);
+		auto &animation_instance = world.get_component<AnimationInstance>(agent_data.model);
+
+		
 
 		auto camera_forward = camera_pivot_tf.get_global_forward();
 		camera_forward.y = 0.0f;
 		camera_forward = glm::normalize(camera_forward);
 		auto camera_right = camera_pivot_tf.get_global_right();
 
+		glm::vec3 acc_direction = {0,0,0};
 		if (input_manager.is_action_pressed("move_forward")) {
-			transform.position += camera_forward * cvar_agent_speed.get() * dt;
-			transform.set_changed(true);
+			acc_direction += camera_forward;
 		}
 		if (input_manager.is_action_pressed("move_backward")) {
-			transform.position -= camera_forward * cvar_agent_speed.get() * dt;
-			transform.set_changed(true);
+			acc_direction -= camera_forward;
 		}
 		if (input_manager.is_action_pressed("move_left")) {
-			transform.position += camera_right * cvar_agent_speed.get() * dt;
-			transform.set_changed(true);
+			acc_direction += camera_right;
 		}
 		if (input_manager.is_action_pressed("move_right")) {
-			transform.position -= camera_right * cvar_agent_speed.get() * dt;
-			transform.set_changed(true);
+			acc_direction -= camera_right;
 		}
+		glm::normalize(acc_direction);
+		glm::vec3 velocity = move_ground(acc_direction, previous_velocity, dt);
+		if(glm::length(velocity) > 0.0001f) {
+			//animation_instance.animation_handle = ResourceManager::get().get_animation_handle("agent_walk");
+
+			//SPDLOG_INFO("{}",ResourceManager::get().get_animation_name(animation_instance.animation_handle));
+		}
+		else {
+			//animation_instance.animation_handle = ResourceManager::get().get_animation_handle("agent_idle");
+		}
+		//SPDLOG_INFO("vel_x: {}, vel_y: {}, vel_z: {} ", velocity.x, velocity.y, velocity.z);
+		transform.position.x += velocity.x;
+		transform.position.z += velocity.z;
+		transform.set_changed(true);
 
 		glm::vec2 mouse_delta = input_manager.get_mouse_delta();
 		camera_pivot_tf.add_euler_rot(glm::vec3(mouse_delta.y, 0.0f, 0.0f) * cvar_camera_sensitivity.get() * dt);
@@ -100,5 +128,28 @@ void AgentSystem::update(World &world, float dt) {
 		}
 
 		last_position = transform.position;
+		previous_velocity = velocity;
 	}
+}
+
+glm::vec3 AgentSystem::accelerate(glm::vec3 accel_dir, glm::vec3 prev_velocity, float acceleration, float max_velocity, float dt) {
+	float proj_vel = glm::dot(prev_velocity, accel_dir);
+    float accel_vel = acceleration * dt; 
+
+    if(proj_vel + accel_vel > max_velocity) {
+        accel_vel = max_velocity - proj_vel;
+	}
+	
+    return prev_velocity + accel_dir * accel_vel;
+}
+
+glm::vec3 AgentSystem::move_ground(glm::vec3 accel_dir, glm::vec3 pre_velocity, float dt) {
+    float speed = glm::length(pre_velocity);
+    if (speed != 0) 
+    {
+        float drop = speed * cvar_friction_ground.get() * dt;
+        pre_velocity *= glm::max(speed - drop, 0.0f) / speed; 
+    }
+
+    return accelerate(accel_dir, pre_velocity, cvar_agent_acc_ground.get(), cvar_agent_max_vel_ground.get(),dt);
 }
