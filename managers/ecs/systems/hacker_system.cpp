@@ -19,10 +19,39 @@ AutoCVarFloat cvar_hacker_acc_ground("hacker.acc_ground", "acceleration on groun
 AutoCVarFloat cvar_hacker_max_vel_ground(
 		"hacker.max_vel_ground", "maximum velocity on ground ", 2.0f, CVarFlags::EditCheckbox);
 
-AutoCVarFloat cvar_hacker_friction_ground("hacker.friction_ground", "friction on ground", 8.0f, CVarFlags::EditCheckbox);
+AutoCVarFloat cvar_hacker_friction_ground(
+		"hacker.friction_ground", "friction on ground", 8.0f, CVarFlags::EditCheckbox);
 
 AutoCVarFloat cvar_hacker_camera_sensitivity(
 		"settings.hacker_camera_sensitivity", "camera sensitivity", 0.1f, CVarFlags::EditCheckbox);
+
+bool shoot_raycast(Transform &transform, World &world, float dt, glm::vec3 direction = glm::vec3(0.0f, 0.0f, -1.0f)) {
+	Ray ray;
+	ray.origin = transform.get_global_position() + glm::vec3(0.0f, 0.0f, -1.0f);
+	ray.direction = direction;
+	glm::vec3 end = ray.origin + direction * 100.0f;
+	world.get_parent_scene()->get_render_scene().debug_draw.draw_arrow(ray.origin, end, glm::vec3(1.0f, 0.0f, 0.0f));
+	HitInfo info;
+	bool hit = CollisionSystem::ray_cast(world, ray, info);
+
+	if (hit) {
+		if (info.entity != 0) {
+			if (world.has_component<Transform>(info.entity)) {
+				std::string name;
+				if (world.has_component<Name>(info.entity)) {
+					name = world.get_component<Name>(info.entity).name;
+					SPDLOG_ERROR("HIT: {}", name);
+				} else {
+					SPDLOG_ERROR("HIT: {}", info.entity);
+				}
+				return true;
+			}
+		}
+	} else {
+		SPDLOG_ERROR("NO HIT");
+		return false;
+	}
+}
 
 void HackerSystem::startup(World &world) {
 	Signature blacklist;
@@ -49,6 +78,7 @@ void HackerSystem::update(World &world, float dt) {
 		auto &dd = world.get_parent_scene()->get_render_scene().debug_draw;
 
 		auto camera_forward = camera_pivot_tf.get_global_forward();
+		glm::vec3 real_camera_forward = camera_forward;
 
 		camera_forward.y = 0.0f;
 		camera_forward = glm::normalize(camera_forward);
@@ -66,6 +96,9 @@ void HackerSystem::update(World &world, float dt) {
 		}
 		if (input_manager.is_action_pressed("move_right")) {
 			acc_direction -= camera_right;
+		}
+		if (input_manager.is_action_just_pressed("mouse_left")) {
+			shoot_raycast(camera_pivot_tf, world, dt, real_camera_forward);
 		}
 		glm::normalize(acc_direction);
 		glm::vec3 velocity = move_ground(acc_direction, previous_velocity, dt);
