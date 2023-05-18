@@ -307,3 +307,42 @@ void BloomBuffer::resize(uint32_t width, uint32_t height) {
 	}
 }
 
+void SkyboxBuffer::startup(uint32_t width, uint32_t height) {
+	glGenFramebuffers(1, &framebuffer_id);
+	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer_id);
+
+	// generate texture
+	glGenTextures(1, &texture_id);
+	glBindTexture(GL_TEXTURE_2D, texture_id);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture_id, 0);
+
+	glDrawBuffer(GL_COLOR_ATTACHMENT0);
+
+	glGenRenderbuffers(1, &rbo_id);
+	glBindRenderbuffer(GL_RENDERBUFFER, rbo_id);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo_id);
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+		SPDLOG_ERROR("ERROR::FRAMEBUFFER:: Framebuffer is not complete!");
+	}
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void SkyboxBuffer::bind() {
+	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer_id);
+}
+
+void SkyboxBuffer::resize(uint32_t width, uint32_t height) {
+	glBindTexture(GL_TEXTURE_2D, texture_id);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
+
+	glBindRenderbuffer(GL_RENDERBUFFER, rbo_id);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+}

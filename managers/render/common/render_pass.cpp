@@ -70,7 +70,6 @@ void SkyboxPass::startup() {
 }
 
 void SkyboxPass::draw(RenderScene &scene) {
-	RenderManager &render_manager = RenderManager::get();
 	material.bind_resources(scene);
 	skybox.draw();
 }
