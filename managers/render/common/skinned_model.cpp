@@ -3,7 +3,6 @@
 #include "assets/material_asset.h"
 #include "assets/skinned_model_asset.h"
 
-
 void SkinnedModel::load_from_asset(const char *path) {
 	name = path;
 
@@ -43,9 +42,10 @@ void SkinnedModel::load_from_asset(const char *path) {
 			info.joint_id_buffer_size);
 
 	for (int32_t i = 0; i < info.joint_names.size(); ++i) {
-		joint_map[info.joint_names[i]].rotation = joint_rotations[i];
-		joint_map[info.joint_names[i]].translation = joint_translations[i];
-		joint_map[info.joint_names[i]].id = joint_ids[i];
+		const std::string &key = info.joint_names[i];
+		joint_map[key].rotation = joint_rotations[i];
+		joint_map[key].translation = joint_translations[i];
+		joint_map[key].id = joint_ids[i];
 	}
 
 	std::vector<SkinnedMesh> model_renderables;

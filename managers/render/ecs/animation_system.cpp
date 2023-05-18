@@ -20,7 +20,6 @@ void AnimationSystem::update(World &world, float dt) {
 		if (animation_map.find(entity) == animation_map.end()) {
 			animation_map[entity].model = &world.get_component<SkinnedModelInstance>(entity);
 			animation_map[entity].animation = &world.get_component<AnimationInstance>(entity);
-			animation_map[entity].current_time = 0.0f;
 			animation_map[entity].model->bone_matrices = std::vector<glm::mat4>(MAX_BONE_COUNT, glm::mat4(1.0f));
 		}
 		update_animation(animation_map[entity], dt);
@@ -31,10 +30,13 @@ void AnimationSystem::update_animation(AnimData &data, float dt) {
 	if (data.animation) {
 		ResourceManager &resource_manager = ResourceManager::get();
 		Animation &animation = resource_manager.get_animation(data.animation->animation_handle);
-		data.current_time += static_cast<float>(animation.get_ticks_per_second()) * dt;
+		float &current_time = data.animation->current_time;
+		current_time += static_cast<float>(animation.get_ticks_per_second()) * dt;
 
-		data.current_time = fmod(data.current_time, static_cast<float>(animation.get_duration()));
-		calculate_bone_transform(data);
+		if (current_time < animation.get_duration() || data.animation->is_looping) {
+			current_time = fmod(current_time, static_cast<float>(animation.get_duration()));
+			calculate_bone_transform(data);
+		}
 	}
 }
 
@@ -50,11 +52,11 @@ void AnimationSystem::calculate_bone_transform(AnimData &data) {
 		std::string node_name = rig.names[i];
 		glm::mat4 node_transform = glm::translate(glm::mat4(1.0f), rig.positions[i]) * glm::toMat4(rig.rotations[i]);
 
-		auto it = animation.channels.find(node_name);
+		const auto &it = animation.channels.find(node_name);
 		if (it != animation.channels.end()) {
 			Channel &channel = it->second;
 
-			channel.update(data.current_time);
+			channel.update(data.animation->current_time);
 			node_transform = channel.local_transform;
 		}
 
@@ -65,11 +67,14 @@ void AnimationSystem::calculate_bone_transform(AnimData &data) {
 			global_matrices[i] = node_transform;
 		}
 
-		int32_t joint = model.joint_map[node_name].id;
+		const auto &joint = model.joint_map.find(node_name);
+		if (joint != model.joint_map.end()) {
+			int32_t index = joint->second.id;
 
-		glm::mat4 offset = glm::translate(glm::mat4(1.0f), model.joint_map[node_name].translation) *
-				glm::toMat4(model.joint_map[node_name].rotation);
+			glm::mat4 offset =
+					glm::translate(glm::mat4(1.0f), joint->second.translation) * glm::toMat4(joint->second.rotation);
 
-		data.model->bone_matrices[joint] = global_matrices[i] * offset;
+			data.model->bone_matrices[index] = global_matrices[i] * offset;
+		}
 	}
 }

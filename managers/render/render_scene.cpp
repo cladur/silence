@@ -6,7 +6,7 @@
 #include "render_manager.h"
 #include <glad/glad.h>
 
-AutoCVarFloat cvar_draw_distance_near("render.draw_distance.near", "Near distance cull", 0.1);
+AutoCVarFloat cvar_draw_distance_near("render.draw_distance.near", "Near distance cull", 0.001f);
 AutoCVarFloat cvar_draw_distance_far("render.draw_distance.far", "Far distance cull", 5000);
 AutoCVarInt cvar_frustum_freeze("render.frustum.freeze", "Freeze frustum", 0, CVarFlags::EditCheckbox);
 AutoCVarInt cvar_frustum_force_scene_camera("render.frustum.force_scene_camera",
@@ -41,6 +41,7 @@ void RenderScene::startup() {
 	pbr_buffer.startup(render_extent.x, render_extent.y);
 	bloom_buffer.startup(render_extent.x, render_extent.y, 5);
 	combination_buffer.startup(render_extent.x, render_extent.y);
+	skybox_buffer.startup(render_extent.x, render_extent.y);
 
 	debug_draw.startup();
 	transparent_pass.startup();
@@ -122,11 +123,19 @@ void RenderScene::draw() {
 	// somehow see to match the default framebuffer's internal format with the FBO's internal format).
 	glBlitFramebuffer(0, 0, render_extent.x, render_extent.y, 0, 0, render_extent.x, render_extent.y,
 			GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+
+	skybox_buffer.bind();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glDepthFunc(GL_LEQUAL);
+	skybox_pass.draw(*this);
+	glDepthFunc(GL_LESS);
+
 	combination_buffer.bind();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glDepthMask(GL_FALSE);
-	combination_pass.draw(*this); // CHECKED, this draws properly
+
+	combination_pass.draw(*this);
 
 	bloom_buffer.bind();
 	bloom_pass.draw(*this);
@@ -150,12 +159,6 @@ void RenderScene::draw() {
 	skinned_unlit_pass.draw(*this);
 #endif
 
-	if (true) {
-		glDepthFunc(GL_LEQUAL);
-		skybox_pass.draw(*this);
-		glDepthFunc(GL_LESS);
-	}
-
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	// ui needs to go last, later to be a different render target
@@ -171,6 +174,7 @@ void RenderScene::resize_framebuffer(uint32_t width, uint32_t height) {
 	pbr_buffer.resize(width, height);
 	bloom_buffer.resize(width, height);
 	combination_buffer.resize(width, height);
+	skybox_buffer.resize(width, height);
 
 	render_extent = glm::vec2(width, height);
 }

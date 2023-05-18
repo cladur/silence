@@ -176,7 +176,7 @@ void Inspector::show_skinnedmodelinstance() {
 	auto &modelinstance = world->get_component<SkinnedModelInstance>(selected_entity);
 	auto models = resource_manager.get_skinned_models();
 	if (ImGui::CollapsingHeader("Skinned Model Instance", tree_flags)) {
-		remove_component_popup<ModelInstance>();
+		remove_component_popup<SkinnedModelInstance>();
 		std::string name = resource_manager.get_skinned_model(modelinstance.model_handle).name;
 		std::size_t last_slash_pos = name.find_last_of("/\\");
 
@@ -330,7 +330,7 @@ void Inspector::show_animationinstance() {
 	auto models = resource_manager.get_skinned_models();
 	auto animations = resource_manager.get_animations();
 	if (ImGui::CollapsingHeader("Animation Instance", tree_flags)) {
-		remove_component_popup<ModelInstance>();
+		remove_component_popup<AnimationInstance>();
 		std::string name = resource_manager.get_animation(animation_instance.animation_handle).name;
 		std::size_t last_slash_pos = name.find_last_of("/\\");
 
@@ -356,7 +356,6 @@ void Inspector::show_animationinstance() {
 						resource_manager.get_animation_handle(animation.name).id);
 
 				auto animation_handle = resource_manager.get_animation_handle(animation.name);
-				//auto animation = render_manager.get_animation(animation_handle);
 				std::string animation_name = animation.name;
 				std::size_t animation_slash_pos = animation_name.find_last_of("/\\");
 				if (animation_slash_pos != std::string::npos) {
@@ -369,6 +368,7 @@ void Inspector::show_animationinstance() {
 
 				if (ImGui::Selectable(animation_name.c_str(), is_selected)) {
 					animation_instance.animation_handle = animation_handle;
+					animation_instance.current_time = 0.0f;
 				}
 				if (is_selected) {
 					ImGui::SetItemDefaultFocus();
@@ -376,6 +376,14 @@ void Inspector::show_animationinstance() {
 			}
 			ImGui::EndCombo();
 		}
+		ImGui::TableNextRow();
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Is looping");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		ImGui::Checkbox("##Is looping", &animation_instance.is_looping);
+
 		ImGui::EndTable();
 	}
 }
