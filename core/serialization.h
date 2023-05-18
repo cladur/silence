@@ -16,7 +16,7 @@
 #include "components/static_tag_component.h"
 #include "components/transform_component.h"
 
-#include "managers/render/ecs/animation_instance.h"
+#include "managers/animation/ecs/animation_instance.h"
 #include "managers/render/ecs/model_instance.h"
 #include "managers/render/ecs/skinned_model_instance.h"
 

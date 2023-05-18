@@ -5,23 +5,12 @@
 class AnimationInstance;
 class Animation;
 class SkinnedModelInstance;
-
-struct AnimData {
-	AnimationInstance *animation;
-	SkinnedModelInstance *model;
-};
+struct Pose;
 
 class AnimationSystem : public BaseSystem {
 public:
 	void startup(World &world) override;
 	void update(World &world, float dt) override;
-
-	const int32_t MAX_BONE_COUNT = 512;
-
-	void update_animation(AnimData &data, float dt);
-
-	void calculate_bone_transform(AnimData &data);
-	std::unordered_map<Entity, AnimData> animation_map;
 };
 
 #endif //SILENCE_ANIMATOR_H

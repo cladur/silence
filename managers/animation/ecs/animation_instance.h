@@ -1,7 +1,7 @@
 #ifndef SILENCE_ANIMATION_INSTANCE_H
 #define SILENCE_ANIMATION_INSTANCE_H
 
-#include "model_instance.h"
+#include "managers/render/ecs/model_instance.h"
 #include "render/common/animation.h"
 #include "render/common/material.h"
 

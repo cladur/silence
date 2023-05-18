@@ -1,30 +1,33 @@
 #include "skinned_model_instance.h"
 
+#include "animation/animation_manager.h"
 #include "render/render_manager.h"
 #include "resource/resource_manager.h"
 
 SkinnedModelInstance::SkinnedModelInstance() {
 	ResourceManager &resource_manager = ResourceManager::get();
+	AnimationManager &animation_manager = AnimationManager::get();
 	model_handle = resource_manager.load_skinned_model(asset_path("scorpion/scorpion_idle.skinmdl").c_str());
 	resource_manager.load_skinned_model(asset_path("agent/agent.skinmdl").c_str());
 	material_type = MaterialType::Default;
 
 	glGenBuffers(1, &skinning_buffer);
 	glBindBuffer(GL_UNIFORM_BUFFER, skinning_buffer);
-	std::vector<glm::mat4> m(512, glm::mat4(1.0f));
-	glBufferData(GL_UNIFORM_BUFFER, sizeof(glm::mat4) * 512, m.data(), GL_DYNAMIC_DRAW);
+	std::vector<glm::mat4> m(animation_manager.MAX_BONE_COUNT, glm::mat4(1.0f));
+	glBufferData(GL_UNIFORM_BUFFER, sizeof(glm::mat4) * animation_manager.MAX_BONE_COUNT, m.data(), GL_DYNAMIC_DRAW);
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
 SkinnedModelInstance::SkinnedModelInstance(const char *path, MaterialType material_type) {
 	ResourceManager &resource_manager = ResourceManager::get();
-	model_handle = resource_manager.load_skinned_model(path);
+	AnimationManager &animation_manager = AnimationManager::get();
+	model_handle = resource_manager.load_skinned_model(asset_path(path).c_str());
 	this->material_type = material_type;
 
 	glGenBuffers(1, &skinning_buffer);
 	glBindBuffer(GL_UNIFORM_BUFFER, skinning_buffer);
-	std::vector<glm::mat4> m(512, glm::mat4(1.0f));
-	glBufferData(GL_UNIFORM_BUFFER, sizeof(glm::mat4) * 512, m.data(), GL_DYNAMIC_DRAW);
+	std::vector<glm::mat4> m(animation_manager.MAX_BONE_COUNT, glm::mat4(1.0f));
+	glBufferData(GL_UNIFORM_BUFFER, sizeof(glm::mat4) * animation_manager.MAX_BONE_COUNT, m.data(), GL_DYNAMIC_DRAW);
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
