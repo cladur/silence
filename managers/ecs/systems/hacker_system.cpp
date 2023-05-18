@@ -29,10 +29,11 @@ bool shoot_raycast(Transform &transform, World &world, float dt, glm::vec3 direc
 	Ray ray;
 	ray.origin = transform.get_global_position() + glm::vec3(0.0f, 0.0f, -1.0f);
 	ray.direction = direction;
+	ray.layer_name = "hacker";
 	glm::vec3 end = ray.origin + direction * 100.0f;
 	world.get_parent_scene()->get_render_scene().debug_draw.draw_arrow(ray.origin, end, glm::vec3(1.0f, 0.0f, 0.0f));
 	HitInfo info;
-	bool hit = CollisionSystem::ray_cast(world, ray, info);
+	bool hit = CollisionSystem::ray_cast_layer(world, ray, info);
 
 	if (hit) {
 		if (info.entity != 0) {
@@ -83,6 +84,11 @@ void HackerSystem::update(World &world, float dt) {
 		camera_forward.y = 0.0f;
 		camera_forward = glm::normalize(camera_forward);
 		auto camera_right = camera_pivot_tf.get_global_right();
+
+		world.get_parent_scene()->get_render_scene().debug_draw.draw_arrow(
+				camera_pivot_tf.get_global_position() + glm::vec3(0.0f, 0.0f, -1.0f),
+				camera_pivot_tf.get_global_position() + glm::vec3(0.0f, 0.0f, -1.0f) + real_camera_forward * 100.0f,
+				glm::vec3(1.0f, 0.0f, 0.0f));
 
 		glm::vec3 acc_direction = { 0, 0, 0 };
 		if (input_manager.is_action_pressed("move_forward")) {

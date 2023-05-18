@@ -12,6 +12,7 @@ struct ColliderTag;
 struct Ray {
 	glm::vec3 origin;
 	glm::vec3 direction;
+	std::string layer_name = "default";
 };
 
 struct HitInfo {

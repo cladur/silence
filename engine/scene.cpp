@@ -2,17 +2,18 @@
 #include "display/display_manager.h"
 #include "ecs/world.h"
 #include "editor/editor.h"
+#include "physics/physics_manager.h"
 #include "render/ecs/animation_instance.h"
 #include "render/ecs/model_instance.h"
 #include "render/ecs/skinned_model_instance.h"
 #include "render/render_manager.h"
 
 #include "ecs/systems/agent_system.h"
-#include "ecs/systems/hacker_system.h"
 #include "ecs/systems/collider_draw.h"
 #include "ecs/systems/collision_system.h"
 #include "ecs/systems/enemy_path_draw_system.h"
 #include "ecs/systems/enemy_pathing.h"
+#include "ecs/systems/hacker_system.h"
 #include "ecs/systems/isolated_entities_system.h"
 #include "ecs/systems/light_system.h"
 #include "ecs/systems/physics_system.h"
@@ -63,6 +64,11 @@ Scene::Scene() {
 	// Transform
 	world.register_system<IsolatedEntitiesSystem>();
 	world.register_system<RootParentSystem>();
+
+	auto &physics_manager = PhysicsManager::get();
+	physics_manager.add_collision_layer("default");
+	physics_manager.add_collision_layer("hacker");
+	physics_manager.set_layers_no_collision("default", "hacker");
 }
 
 void Scene::register_game_systems() {

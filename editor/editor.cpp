@@ -3,6 +3,7 @@
 #include "display/display_manager.h"
 #include "editor/editor_scene.h"
 #include "input/input_manager.h"
+#include "physics/physics_manager.h"
 #include "render/render_manager.h"
 
 #include "ecs/world.h"
@@ -211,6 +212,7 @@ void Editor::startup() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
 	stbi_image_free(pixels);
+	SPDLOG_WARN("Editor started up");
 }
 
 void Editor::shutdown() {
@@ -266,7 +268,7 @@ void Editor::custom_update(float dt) {
 	imgui_content_browser();
 	imgui_settings();
 
-	//	imgui_layers_settings();
+	//imgui_layers_settings();
 	if (!scenes.empty()) {
 		auto &scene = get_editor_scene(active_scene);
 		inspector.world = &scene.world;
