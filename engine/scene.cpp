@@ -8,6 +8,7 @@
 #include "render/render_manager.h"
 
 #include "ecs/systems/agent_system.h"
+#include "ecs/systems/hacker_system.h"
 #include "ecs/systems/collider_draw.h"
 #include "ecs/systems/collision_system.h"
 #include "ecs/systems/enemy_path_draw_system.h"
@@ -46,6 +47,7 @@ Scene::Scene() {
 	world.register_component<ColliderOBB>();
 	world.register_component<Light>();
 	world.register_component<AgentData>();
+	world.register_component<HackerData>();
 	world.register_component<EnemyPath>();
 
 	// Systems
