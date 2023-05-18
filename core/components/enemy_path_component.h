@@ -3,7 +3,7 @@
 
 struct EnemyPath {
 	std::vector<glm::vec3> path;
-	unsigned int next_position = 0;
+	int next_position = 0;
 	float speed = 1.0f;
 	float rotation_speed = 1.0f;
 	glm::vec3 rotation_start = glm::vec3(0.0f);

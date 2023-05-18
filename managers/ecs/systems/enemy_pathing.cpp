@@ -23,7 +23,8 @@ void EnemyPathing::update(World &world, float dt) {
 
 		glm::vec3 current_position = transform.position;
 		glm::vec3 target_position = enemy_path.path[enemy_path.next_position];
-		enemy_path.prev_position = enemy_path.path[(enemy_path.next_position - 1) % enemy_path.path.size()];
+		int idx = ((enemy_path.next_position - 1) % (int)enemy_path.path.size() == -1) ? enemy_path.path.size() - 1 : (enemy_path.next_position - 1) % enemy_path.path.size();
+		enemy_path.prev_position = enemy_path.path[idx];
 
 		auto &dd = world.get_parent_scene()->get_render_scene().debug_draw;
 
@@ -32,20 +33,24 @@ void EnemyPathing::update(World &world, float dt) {
 		} else {
 			enemy_path.next_position = (enemy_path.next_position + 1) % enemy_path.path.size();
 		}
-		// this huge if just means "when near a node on either side"
+
+		// this huge if just means "when near a node on either side" start rotating
 		if (glm::distance(current_position, target_position) < (glm::distance(enemy_path.prev_position, target_position)) * 0.1f
 				|| glm::distance(current_position, enemy_path.prev_position) < (glm::distance(enemy_path.prev_position, target_position)) * 0.1f) {
-			SPDLOG_INFO("near node");
 			if (!enemy_path.is_rotating) {
 				enemy_path.first_rotation_frame = true;
 			}
 			enemy_path.is_rotating = true;
 		}
-		if (glm::dot(glm::normalize(target_position - transform.position), glm::normalize(transform.get_global_forward())) > 0.999f) {
-			enemy_path.is_rotating = false;
-		}
+
+		// smoothly rotate the entity to face the next node
 		if (enemy_path.is_rotating) {
 			look_at(enemy_path, transform, target_position, dt, dd);
+		}
+
+		// if the entity is facing the next node, stop rotating
+		if (glm::dot(glm::normalize(target_position - transform.position), glm::normalize(transform.get_global_forward())) > 0.99f) {
+			enemy_path.is_rotating = false;
 		}
 
 		dd.draw_line(current_position, current_position + glm::normalize(transform.get_global_forward()), glm::vec3(0.0f, 0.0f, 1.0f));
@@ -55,7 +60,6 @@ void EnemyPathing::update(World &world, float dt) {
 
 void look_at(EnemyPath &path, Transform &t, glm::vec3 &target, float &dt, DebugDraw &dd) {
 	if (path.first_rotation_frame) {
-		SPDLOG_INFO("calculating rotation");
 		auto current_no_y = glm::vec3(t.position.x, 0.0f, t.position.z);
 		auto target_no_y = glm::vec3(target.x, 0.0f, target.z);
 
