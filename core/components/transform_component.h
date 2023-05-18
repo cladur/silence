@@ -99,7 +99,8 @@ public:
 	}
 
 	[[nodiscard]] glm::vec3 get_forward() const {
-		return glm::normalize(glm::vec3(local_model_matrix[2]));
+		//return glm::normalize(glm::vec3(local_model_matrix[2]));
+		return orientation * glm::vec3(0.0f, 0.0f, 1.0f);
 	}
 	[[nodiscard]] glm::vec3 get_up() const {
 		return glm::normalize(glm::vec3(local_model_matrix[1]));

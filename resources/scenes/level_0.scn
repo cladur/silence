@@ -191,20 +191,20 @@
             {
                 "component_data": {
                     "orientation": {
-                        "w": 0.9997175335884094,
+                        "w": 0.6371151208877563,
                         "x": 0.0,
-                        "y": 0.023765597492456436,
+                        "y": 0.7707686424255371,
                         "z": 0.0
                     },
                     "position": {
-                        "x": -2.1068503856658936,
-                        "y": 0.999755859375,
-                        "z": 13.183966636657715
+                        "x": -13.192577362060547,
+                        "y": -0.000244140625,
+                        "z": 13.075940132141113
                     },
                     "scale": {
-                        "x": 0.9999998807907104,
+                        "x": 0.9999970197677612,
                         "y": 1.0,
-                        "z": 0.9999998807907104
+                        "z": 0.9999970197677612
                     }
                 },
                 "component_name": "Transform"
@@ -220,10 +220,53 @@
                     "animation_name": "agent/agent_ANIM_GLTF/agent_walk.anim"
                 },
                 "component_name": "AnimationInstance"
+            },
+            {
+                "component_data": {
+                    "path_0_x": -12.418999671936035,
+                    "path_0_y": 0.0,
+                    "path_0_z": 13.034727096557617,
+                    "path_10_x": -13.819000244140625,
+                    "path_10_y": 0.0,
+                    "path_10_z": 10.53499984741211,
+                    "path_11_x": -13.619000434875488,
+                    "path_11_y": 0.0,
+                    "path_11_z": 12.234999656677246,
+                    "path_1_x": -9.418999671936035,
+                    "path_1_y": 0.0,
+                    "path_1_z": 13.034727096557617,
+                    "path_2_x": -8.519000053405762,
+                    "path_2_y": 0.0,
+                    "path_2_z": 12.4350004196167,
+                    "path_3_x": -7.818999767303467,
+                    "path_3_y": 0.0,
+                    "path_3_z": 11.335000038146973,
+                    "path_4_x": -7.718999862670898,
+                    "path_4_y": 0.0,
+                    "path_4_z": 6.434999942779541,
+                    "path_5_x": -8.319000244140625,
+                    "path_5_y": 0.0,
+                    "path_5_z": 5.434999942779541,
+                    "path_6_x": -9.519000053405762,
+                    "path_6_y": 0.0,
+                    "path_6_z": 4.434999942779541,
+                    "path_7_x": -11.218999862670898,
+                    "path_7_y": 0.0,
+                    "path_7_z": 3.934999942779541,
+                    "path_8_x": -12.119000434875488,
+                    "path_8_y": 0.0,
+                    "path_8_z": 4.434999942779541,
+                    "path_9_x": -12.718999862670898,
+                    "path_9_y": 0.0,
+                    "path_9_z": 5.534999847412109,
+                    "rotation_speed": 6.0,
+                    "speed": 1.6
+                },
+                "component_name": "EnemyPath"
             }
         ],
         "entity": 5,
-        "signature": "00000000000000000000000011000011"
+        "signature": "00000000000000100000000011000011"
     },
     {
         "components": [
@@ -2206,6 +2249,27 @@
         "components": [
             {
                 "component_data": {
+                    "center": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "range": {
+                        "x": 40.0,
+                        "y": 1.0,
+                        "z": 40.0
+                    }
+                },
+                "component_name": "ColliderAABB"
+            },
+            {
+                "component_data": {
+                    "name": "Floor"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": 0.0,
@@ -2246,21 +2310,6 @@
                     "layer_name": "default"
                 },
                 "component_name": "ColliderTag"
-            },
-            {
-                "component_data": {
-                    "center": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    "range": {
-                        "x": 40.0,
-                        "y": 1.0,
-                        "z": 40.0
-                    }
-                },
-                "component_name": "ColliderAABB"
             }
         ],
         "entity": 48,
@@ -2315,6 +2364,27 @@
         "components": [
             {
                 "component_data": {
+                    "center": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "range": {
+                        "x": 25.0,
+                        "y": 6.0,
+                        "z": 1.0
+                    }
+                },
+                "component_name": "ColliderAABB"
+            },
+            {
+                "component_data": {
+                    "name": "Left Wall"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 0.9999999403953552,
                         "x": 0.0,
@@ -2355,7 +2425,13 @@
                     "layer_name": "default"
                 },
                 "component_name": "ColliderTag"
-            },
+            }
+        ],
+        "entity": 50,
+        "signature": "00000000000000000010110000001011"
+    },
+    {
+        "components": [
             {
                 "component_data": {
                     "center": {
@@ -2364,19 +2440,13 @@
                         "z": 0.0
                     },
                     "range": {
-                        "x": 25.0,
+                        "x": 1.0,
                         "y": 6.0,
-                        "z": 1.0
+                        "z": 12.0
                     }
                 },
                 "component_name": "ColliderAABB"
-            }
-        ],
-        "entity": 50,
-        "signature": "00000000000000000010110000001011"
-    },
-    {
-        "components": [
+            },
             {
                 "component_data": {
                     "orientation": {
@@ -2419,21 +2489,6 @@
                     "layer_name": "default"
                 },
                 "component_name": "ColliderTag"
-            },
-            {
-                "component_data": {
-                    "center": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    "range": {
-                        "x": 1.0,
-                        "y": 6.0,
-                        "z": 12.0
-                    }
-                },
-                "component_name": "ColliderAABB"
             }
         ],
         "entity": 51,
@@ -2535,6 +2590,21 @@
             },
             {
                 "component_data": {
+                    "center": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "range": {
+                        "x": 0.5,
+                        "y": 0.5,
+                        "z": 0.5
+                    }
+                },
+                "component_name": "ColliderAABB"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 0.6533471941947937,
                         "x": -0.6531223058700562,
@@ -2567,21 +2637,6 @@
                     "layer_name": "default"
                 },
                 "component_name": "ColliderTag"
-            },
-            {
-                "component_data": {
-                    "center": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    "range": {
-                        "x": 0.5,
-                        "y": 0.5,
-                        "z": 0.5
-                    }
-                },
-                "component_name": "ColliderAABB"
             }
         ],
         "entity": 53,

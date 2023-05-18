@@ -8,6 +8,7 @@
 #include "components/collider_obb.h"
 #include "components/collider_sphere.h"
 #include "components/collider_tag_component.h"
+#include "components/enemy_path_component.h"
 #include "components/fmod_listener_component.h"
 #include "components/light_component.h"
 #include "components/name_component.h"
@@ -33,7 +34,7 @@ concept Deserializable = requires(T t, nlohmann::json &j) {
 };
 
 typedef std::variant<Children, Parent, Transform, RigidBody, FmodListener, Camera, ModelInstance, AnimationInstance,
-		SkinnedModelInstance, Name, ColliderTag, StaticTag, ColliderSphere, ColliderAABB, ColliderOBB, Light, AgentData>
+		SkinnedModelInstance, Name, ColliderTag, StaticTag, ColliderSphere, ColliderAABB, ColliderOBB, Light, AgentData, EnemyPath>
 		variant_type;
 
 template <typename T>
