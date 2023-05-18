@@ -593,7 +593,19 @@ void Inspector::show_enemy_path() {
 		}
 		if (ImGui::BeginPopup("EnemyPathContextMenu")) {
 			if (ImGui::MenuItem("Add Node")) {
-				enemy_path.path.emplace_back(0.0f);
+				if (enemy_path.path.empty()) {
+					// if this is the first node, add it in place of transform
+					auto &transform = world->get_component<Transform>(selected_entity);
+					enemy_path.path.emplace_back(transform.position);
+				} else {
+					// otherwise, add it in place of the last node
+					enemy_path.path.emplace_back(enemy_path.path.back());
+				}
+			}
+			if (ImGui::MenuItem("Remove Node")) {
+				if (!enemy_path.path.empty()) {
+					enemy_path.path.pop_back();
+				}
 			}
 			ImGui::EndPopup();
 		}
