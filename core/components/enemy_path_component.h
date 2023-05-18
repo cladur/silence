@@ -4,13 +4,19 @@
 struct EnemyPath {
 	std::vector<glm::vec3> path;
 	unsigned int next_position = 0;
+	bool is_looking_at_target = false;
 	float speed = 1.0f;
+	float rotation_speed = 1.0f;
+	float rotation_transition = 0.0f;
+	glm::vec3 rotation_start = glm::vec3(0.0f);
+	glm::vec3 rotation_end = glm::vec3(0.0f);
 
 	void serialize_json(nlohmann::json &serialized_scene) {
 		nlohmann::json::object_t serialized_component;
 		serialized_scene.push_back(nlohmann::json::object());
 
 		serialized_component["speed"] = speed;
+		serialized_component["rotation_speed"] = rotation_speed;
 
 		int i = 0;
 		for (auto &pos : path) {
@@ -29,6 +35,7 @@ struct EnemyPath {
 	void deserialize_json(nlohmann::json &serialized_component) {
 		int i = 0;
 		speed = serialized_component["speed"];
+		rotation_speed = serialized_component["rotation_speed"];
 		while (true) {
 			std::string pos_x = "path_" + std::to_string(i) + "_x";
 			std::string pos_y = "path_" + std::to_string(i) + "_y";

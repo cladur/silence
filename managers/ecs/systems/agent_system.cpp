@@ -33,7 +33,10 @@ void AgentSystem::update(World &world, float dt) {
 		auto &model_tf = world.get_component<Transform>(agent_data.model);
 		auto &camera_tf = world.get_component<Transform>(agent_data.camera);
 
+		auto &dd = world.get_parent_scene()->get_render_scene().debug_draw;
+
 		auto camera_forward = camera_pivot_tf.get_global_forward();
+
 		camera_forward.y = 0.0f;
 		camera_forward = glm::normalize(camera_forward);
 		auto camera_right = camera_pivot_tf.get_global_right();
