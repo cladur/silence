@@ -49,6 +49,7 @@ void Inspector::show_components() {
 	SHOW_COMPONENT(ColliderOBB, show_colliderobb);
 	SHOW_COMPONENT(Light, show_light);
 	SHOW_COMPONENT(AgentData, show_agent_data);
+	SHOW_COMPONENT(HackerData, show_hacker_data);
 	SHOW_COMPONENT(EnemyPath, show_enemy_path);
 
 	for (int i = 0; i < remove_component_queue.size(); i++) {
@@ -539,6 +540,60 @@ void Inspector::show_light() {
 	}
 }
 
+void Inspector::show_hacker_data() {
+	auto &hacker_data = world->get_component<HackerData>(selected_entity);
+	if (ImGui::CollapsingHeader("Hacker Data", tree_flags)) {
+		remove_component_popup<HackerData>();
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("Hacker Data", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Hacker Model");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::InputInt("", (int *)&hacker_data.model, 0, 0);
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
+				Entity payload_entity = *(Entity *)payload->Data;
+				hacker_data.model = payload_entity;
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Camera Pivot");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::InputInt("", (int *)&hacker_data.camera_pivot, 0, 0);
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
+				Entity payload_entity = *(Entity *)payload->Data;
+				hacker_data.camera_pivot = payload_entity;
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Camera");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::InputInt("", (int *)&hacker_data.camera, 0, 0);
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
+				Entity payload_entity = *(Entity *)payload->Data;
+				hacker_data.camera = payload_entity;
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+		ImGui::EndTable();
+	}
+}
+
 void Inspector::show_agent_data() {
 	auto &agent_data = world->get_component<AgentData>(selected_entity);
 	if (ImGui::CollapsingHeader("Agent Data", tree_flags)) {
@@ -753,6 +808,7 @@ void Inspector::show_add_component() {
 			SHOW_ADD_COMPONENT(ColliderOBB);
 			SHOW_ADD_COMPONENT(Light);
 			SHOW_ADD_COMPONENT(AgentData);
+			SHOW_ADD_COMPONENT(HackerData);
 			SHOW_ADD_COMPONENT(EnemyPath);
 
 			ImGui::EndPopup();

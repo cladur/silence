@@ -72,6 +72,7 @@ void Scene::register_game_systems() {
 
 	// Agents
 	world.register_system<AgentSystem>();
+	world.register_system<HackerSystem>();
 	world.register_system<EnemyPathing>();
 }
 

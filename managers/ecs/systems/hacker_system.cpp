@@ -19,10 +19,10 @@ AutoCVarFloat cvar_hacker_acc_ground("hacker.acc_ground", "acceleration on groun
 AutoCVarFloat cvar_hacker_max_vel_ground(
 		"hacker.max_vel_ground", "maximum velocity on ground ", 2.0f, CVarFlags::EditCheckbox);
 
-AutoCVarFloat cvar_friction_ground("hacker.friction_ground", "friction on ground", 8.0f, CVarFlags::EditCheckbox);
+AutoCVarFloat cvar_hacker_friction_ground("hacker.friction_ground", "friction on ground", 8.0f, CVarFlags::EditCheckbox);
 
-AutoCVarFloat cvar_camera_sensitivity(
-		"settings.camera_sensitivity", "camera sensitivity", 0.1f, CVarFlags::EditCheckbox);
+AutoCVarFloat cvar_hacker_camera_sensitivity(
+		"settings.hacker_camera_sensitivity", "camera sensitivity", 0.1f, CVarFlags::EditCheckbox);
 
 void HackerSystem::startup(World &world) {
 	Signature blacklist;
@@ -80,9 +80,9 @@ void HackerSystem::update(World &world, float dt) {
 		transform.add_position(glm::vec3(velocity.x, 0.0, velocity.z));
 
 		glm::vec2 mouse_delta = input_manager.get_mouse_delta();
-		camera_pivot_tf.add_euler_rot(glm::vec3(mouse_delta.y, 0.0f, 0.0f) * cvar_camera_sensitivity.get() * dt);
+		camera_pivot_tf.add_euler_rot(glm::vec3(mouse_delta.y, 0.0f, 0.0f) * cvar_hacker_camera_sensitivity.get() * dt);
 		camera_pivot_tf.add_global_euler_rot(
-				glm::vec3(0.0f, -mouse_delta.x, 0.0f) * cvar_camera_sensitivity.get() * dt);
+				glm::vec3(0.0f, -mouse_delta.x, 0.0f) * cvar_hacker_camera_sensitivity.get() * dt);
 
 		static glm::vec3 last_position = transform.position;
 
@@ -143,7 +143,7 @@ glm::vec3 HackerSystem::accelerate(
 glm::vec3 HackerSystem::move_ground(glm::vec3 accel_dir, glm::vec3 pre_velocity, float dt) {
 	float speed = glm::length(pre_velocity);
 	if (speed != 0) {
-		float drop = speed * cvar_friction_ground.get() * dt;
+		float drop = speed * cvar_hacker_friction_ground.get() * dt;
 		pre_velocity *= glm::max(speed - drop, 0.0f) / speed;
 	}
 
