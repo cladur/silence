@@ -5,8 +5,6 @@
 #include "render/common/skinned_model.h"
 #include "render/render_manager.h"
 #include "resource/resource_manager.h"
-#include <glm/gtc/quaternion.hpp>
-#include <glm/gtx/matrix_interpolation.hpp>
 #include <glm/gtx/quaternion.hpp>
 
 AutoCVarFloat cvar_alpha("animation.alpha", "animation alpha value", 0.5f, CVarFlags::EditFloatDrag);
@@ -16,7 +14,7 @@ AnimationManager &AnimationManager::get() {
 	return instance;
 }
 
-void AnimationManager::update_animation(AnimData &data, float dt) {
+void AnimationManager::update_pose(AnimData &data, float dt) {
 	if (!data.animation) { // todo: this check is not work properly i think, check it
 		SPDLOG_WARN("Data animation is not set.");
 		assert(false);
@@ -29,10 +27,47 @@ void AnimationManager::update_animation(AnimData &data, float dt) {
 
 	if (current_time < animation.get_duration() || data.animation->is_looping) {
 		current_time = fmod(current_time, static_cast<float>(animation.get_duration()));
-		if (!data.has_changed) {
-			calculate_pose(data, data.model->current_pose);
-		} else {
+		animation.sample(data, data.model->current_pose);
+		if (data.has_changed) {
+			Animation &next_animation = resource_manager.get_animation(data.animation->next_animation);
+			Pose next_pose;
+			current_time = 0.0f;
+			next_animation.sample(data, next_pose);
+			blend_poses(data.model->current_pose, next_pose, data.model->current_pose, cvar_alpha.get());
 			data.has_changed = false;
+			data.animation->animation_handle = data.animation->next_animation;
+		}
+		local_to_model(data);
+	}
+}
+
+void AnimationManager::local_to_model(AnimData &data) {
+	ResourceManager &resource_manager = ResourceManager::get();
+	SkinnedModel &model = resource_manager.get_skinned_model(data.model->model_handle);
+
+	Rig &rig = model.rig;
+
+	std::vector<Xform> &pose_matrices = data.model->current_pose.xfroms;
+	std::vector<glm::mat4> global_matrices(pose_matrices.size());
+
+	for (int32_t i = 0; i < model.rig.names.size(); ++i) {
+		std::string &node_name = rig.names[i];
+
+		int32_t parent_index = rig.parents[i];
+		if (parent_index != -1) {
+			global_matrices[i] = global_matrices[parent_index] * glm::mat4(pose_matrices[i]);
+		} else {
+			global_matrices[i] = glm::mat4(pose_matrices[i]);
+		}
+
+		const auto &joint = model.joint_map.find(node_name);
+		if (joint != model.joint_map.end()) {
+			int32_t index = joint->second.id;
+
+			glm::mat4 offset =
+					glm::translate(glm::mat4(1.0f), joint->second.translation) * glm::toMat4(joint->second.rotation);
+
+			data.model->bone_matrices[index] = global_matrices[i] * offset;
 		}
 	}
 }
@@ -47,100 +82,23 @@ void AnimationManager::change_animation(Entity entity, const std::string &new_an
 	ResourceManager &resource_manager = ResourceManager::get();
 
 	AnimData &entity_data = item->second;
-
-	AnimData temp_data;
-	AnimationInstance animation(new_animation_name.c_str());
-	temp_data.animation = &animation;
-	SkinnedModelInstance model = *entity_data.model;
-	temp_data.model = &model;
-
-	Pose p;
-	p.matrices = std::vector<glm::mat4>(512, glm::mat4(1.0f));
-	calculate_pose(temp_data, temp_data.model->current_pose);
-	blend_poses(entity_data.model->current_pose, temp_data.model->current_pose, p, cvar_alpha.get());
-	//	for (int i = 0; i < 512; ++i) {
-	//		SPDLOG_INFO("temp {}", glm::to_string(temp_data.model->current_pose.matrices[i]));
-	//		SPDLOG_INFO("entity {}", glm::to_string(entity_data.model->current_pose.matrices[i]));
-	//		SPDLOG_INFO("result {}", glm::to_string(p.matrices[i]));
-	//	}
-
-	entity_data.model->current_pose = p;
-	entity_data.animation->animation_handle = temp_data.animation->animation_handle;
+	entity_data.animation->next_animation = resource_manager.get_animation_handle(new_animation_name);
 	entity_data.has_changed = true;
 }
 
-void AnimationManager::calculate_pose(AnimData &data, Pose &result_pose) {
-	ResourceManager &resource_manager = ResourceManager::get();
-	SkinnedModel &model = resource_manager.get_skinned_model(data.model->model_handle);
-	Animation &animation = resource_manager.get_animation(data.animation->animation_handle);
-
-	if (result_pose.matrices.size() < MAX_BONE_COUNT) {
-		SPDLOG_WARN("Result pose has not been initialized with {} matrices.", MAX_BONE_COUNT);
-		assert(false);
-		return;
-	}
-	Rig &rig = model.rig;
-	std::vector<glm::mat4> global_matrices(rig.names.size());
-
-	for (int32_t i = 0; i < model.rig.names.size(); ++i) {
-		std::string node_name = rig.names[i];
-		glm::mat4 node_transform = glm::translate(glm::mat4(1.0f), rig.positions[i]) * glm::toMat4(rig.rotations[i]);
-
-		const auto &it = animation.channels.find(node_name);
-		if (it != animation.channels.end()) {
-			Channel &channel = it->second;
-
-			channel.update(data.animation->current_time);
-			node_transform = channel.local_transform;
-		}
-
-		int32_t parent_index = rig.parents[i];
-		if (parent_index != -1) {
-			global_matrices[i] = global_matrices[parent_index] * node_transform;
-		} else {
-			global_matrices[i] = node_transform;
-		}
-
-		const auto &joint = model.joint_map.find(node_name);
-		if (joint != model.joint_map.end()) {
-			int32_t index = joint->second.id;
-
-			glm::mat4 offset =
-					glm::translate(glm::mat4(1.0f), joint->second.translation) * glm::toMat4(joint->second.rotation);
-
-			result_pose.matrices[index] = global_matrices[i] * offset;
-		}
-	}
-}
-
 void AnimationManager::blend_poses(const Pose &pose1, const Pose &pose2, Pose &result_pose, float alpha) {
-	if (result_pose.matrices.size() < MAX_BONE_COUNT) {
-		SPDLOG_WARN("Result pose has not been initialized with {} matrices.", MAX_BONE_COUNT);
+	if (pose1.xfroms.size() != pose2.xfroms.size() || pose1.xfroms.size() != result_pose.xfroms.size()) {
+		SPDLOG_WARN("Poses have not equal xfroms count");
 		assert(false);
 		return;
 	}
 
-	if (pose1.matrices.size() != pose2.matrices.size()) {
-		SPDLOG_WARN("Poses have not equal matrices count");
-		assert(false);
-		return;
-	}
-
-	for (int32_t i = 0; i < pose1.matrices.size(); ++i) {
-		slerp(pose1.matrices[i], pose2.matrices[i], result_pose.matrices[i], alpha);
+	for (int32_t i = 0; i < result_pose.xfroms.size(); ++i) {
+		slerp(pose1.xfroms[i], pose2.xfroms[i], result_pose.xfroms[i], alpha);
 	}
 }
 
-void AnimationManager::slerp(const glm::mat4 &m1, const glm::mat4 &m2, glm::mat4 &result, float alpha) {
-	const glm::quat &rot1 = glm::toQuat(m1);
-	const glm::quat &rot2 = glm::toQuat(m2);
-
-	const glm::quat &result_rot = glm::normalize(glm::slerp(rot1, rot2, alpha));
-
-	const glm::vec3 &pos1 = m1[3];
-	const glm::vec3 &pos2 = m2[3];
-
-	const glm::vec3 &result_pos = glm::lerp(pos1, pos2, alpha);
-
-	result = glm::translate(glm::mat4(1.0f), result_pos) * glm::mat4_cast(result_rot);
+void AnimationManager::slerp(const Xform &m1, const Xform &m2, Xform &result, float alpha) {
+	result.rotation = glm::normalize(glm::slerp(m1.rotation, m2.rotation, alpha));
+	result.translation = glm::mix(m1.translation, m2.translation, alpha);
 }

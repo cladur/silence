@@ -33,9 +33,9 @@ void MaterialSkinnedUnlit::bind_instance_resources(SkinnedModelInstance &instanc
 	shader.set_mat4("model", transform.get_global_model_matrix());
 	//TODO: make this functionality in shader function
 	glBindBuffer(GL_UNIFORM_BUFFER, instance.skinning_buffer);
-	if (!instance.current_pose.matrices.empty()) {
-		glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4) * instance.current_pose.matrices.size(),
-				instance.current_pose.matrices.data());
+	if (!instance.bone_matrices.empty()) {
+		glBufferSubData(
+				GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4) * instance.bone_matrices.size(), instance.bone_matrices.data());
 	}
 
 	GLuint binding_index = 1;

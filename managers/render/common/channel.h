@@ -1,23 +1,22 @@
 #ifndef SILENCE_BONE_H
 #define SILENCE_BONE_H
 
+#include "animation/pose.h"
 #include "assets/animation_asset.h"
 
 struct KeyPosition {
-	//	uint16_t position[3];
 	glm::vec3 position;
 	float time_stamp;
 };
 
 struct KeyRotation {
-	//	uint16_t rotation[3];
 	glm::quat rotation;
 	float time_stamp;
 };
 
 class Channel {
 public:
-	Channel(const assets::NodeAnimation &node, int32_t id);
+	Channel(const assets::NodeAnimation &node);
 
 	void update(float animation_time);
 
@@ -26,14 +25,13 @@ public:
 
 	std::vector<KeyPosition> positions;
 	std::vector<KeyRotation> rotations;
-	glm::mat4 local_transform;
-	int32_t id;
+	Xform local_transform;
 
 private:
 	float get_scale_factor(float last_time_stamp, float next_time_stamp, float animation_time);
 
-	glm::mat4 interpolate_position(float animation_time);
-	glm::mat4 interpolate_rotation(float animation_time);
+	void interpolate_position(float animation_time, glm::vec3 &result);
+	void interpolate_rotation(float animation_time, glm::quat &result);
 };
 
 #endif //SILENCE_BONE_H

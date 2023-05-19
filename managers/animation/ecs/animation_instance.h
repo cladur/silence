@@ -8,6 +8,7 @@
 class AnimationInstance {
 public:
 	Handle<Animation> animation_handle;
+	Handle<Animation> next_animation;
 	float current_time = 0.0f;
 	bool is_looping = true;
 

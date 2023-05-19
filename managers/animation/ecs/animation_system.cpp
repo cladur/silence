@@ -17,9 +17,9 @@ void AnimationSystem::update(World &world, float dt) {
 		if (animation_map.find(entity) == animation_map.end()) {
 			animation_map[entity].model = &world.get_component<SkinnedModelInstance>(entity);
 			animation_map[entity].animation = &world.get_component<AnimationInstance>(entity);
-			animation_map[entity].model->current_pose.matrices =
+			animation_map[entity].model->bone_matrices =
 					std::vector<glm::mat4>(animation_manager.MAX_BONE_COUNT, glm::mat4(1.0f));
 		}
-		animation_manager.update_animation(animation_map[entity], dt);
+		animation_manager.update_pose(animation_map[entity], dt);
 	}
 }
