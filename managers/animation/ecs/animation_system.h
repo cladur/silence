@@ -5,7 +5,6 @@
 class AnimationInstance;
 class Animation;
 class SkinnedModelInstance;
-struct Pose;
 
 class AnimationSystem : public BaseSystem {
 public:

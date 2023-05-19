@@ -10,7 +10,6 @@ public:
 	Handle<SkinnedModel> model_handle;
 	MaterialType material_type = MaterialType::Default;
 	std::vector<glm::mat4> bone_matrices;
-	Pose current_pose;
 	GLuint skinning_buffer;
 	bool in_shadow_pass = true;
 

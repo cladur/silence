@@ -15,7 +15,7 @@ AnimationManager &AnimationManager::get() {
 }
 
 void AnimationManager::update_pose(AnimData &data, float dt) {
-	if (!data.animation) { // todo: this check is not work properly i think, check it
+	if (!data.animation) {
 		SPDLOG_WARN("Data animation is not set.");
 		assert(false);
 		return;
@@ -27,13 +27,13 @@ void AnimationManager::update_pose(AnimData &data, float dt) {
 
 	if (current_time < animation.get_duration() || data.animation->is_looping) {
 		current_time = fmod(current_time, static_cast<float>(animation.get_duration()));
-		animation.sample(data, data.model->current_pose);
+		animation.sample(data, data.current_pose);
 		if (data.has_changed) {
 			Animation &next_animation = resource_manager.get_animation(data.animation->next_animation);
 			Pose next_pose;
 			current_time = 0.0f;
 			next_animation.sample(data, next_pose);
-			blend_poses(data.model->current_pose, next_pose, data.model->current_pose, cvar_alpha.get());
+			blend_poses(data.current_pose, next_pose, data.current_pose, cvar_alpha.get());
 			data.has_changed = false;
 			data.animation->animation_handle = data.animation->next_animation;
 		}
@@ -47,7 +47,7 @@ void AnimationManager::local_to_model(AnimData &data) {
 
 	Rig &rig = model.rig;
 
-	std::vector<Xform> &pose_matrices = data.model->current_pose.xfroms;
+	std::vector<Xform> &pose_matrices = data.current_pose.xfroms;
 	std::vector<glm::mat4> global_matrices(pose_matrices.size());
 
 	for (int32_t i = 0; i < model.rig.names.size(); ++i) {

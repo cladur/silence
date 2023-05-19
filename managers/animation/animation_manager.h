@@ -1,15 +1,16 @@
 #ifndef SILENCE_ANIMATION_MANAGER_H
 #define SILENCE_ANIMATION_MANAGER_H
 
+#include "pose.h"
 class AnimationInstance;
 class Animation;
 class SkinnedModelInstance;
-struct Pose;
 struct Xform;
 
 struct AnimData {
 	AnimationInstance *animation;
 	SkinnedModelInstance *model;
+	Pose current_pose;
 	bool has_changed = false;
 };
 
