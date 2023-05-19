@@ -23,6 +23,7 @@ public:
 	std::array<bool, 4> textures_present;
 
 	bool has_ao_map = false;
+	bool has_normal_map = false;
 
 	void draw();
 	void setup_mesh();

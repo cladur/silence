@@ -37,7 +37,7 @@ void Shader::load_from_files(
 			geometry_code = g_shader_stream.str();
 		}
 	} catch (std::ifstream::failure e) {
-		SPDLOG_ERROR("SHADER::FILE_NOT_SUCCESFULLY_READ");
+		SPDLOG_ERROR("SHADER::FILE_NOT_SUCCESFULLY_READ {}, {} or {}", vertex_path, fragment_path, geometry_path);
 	}
 	const char *v_shader_code = vertex_code.c_str();
 	const char *f_shader_code = fragment_code.c_str();
