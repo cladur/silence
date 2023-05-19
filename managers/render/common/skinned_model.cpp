@@ -88,6 +88,7 @@ void SkinnedModel::load_from_asset(const char *path) {
 			normal.load_from_asset(asset_path(material.textures["normals"]));
 			mesh.textures[1] = normal;
 			mesh.textures_present[1] = true;
+			mesh.has_normal_map = true;
 		}
 
 		// METALLIC ROUGHNESS

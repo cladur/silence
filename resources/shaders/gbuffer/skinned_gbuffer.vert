@@ -6,7 +6,7 @@ layout(location = 3) in vec4 aWeights;
 layout(location = 4) in ivec4 aBoneIds;
 
 out vec2 TexCoords;
-out vec3 WorldPos;
+out vec3 ViewPos;
 out vec3 Normal;
 
 uniform mat4 projection;
@@ -37,8 +37,8 @@ void main() {
 	}
 
 	TexCoords = aTexCoords;
-	WorldPos = vec3(model * skinned_pos);
+	ViewPos = vec3(view * model * skinned_pos);
 	Normal = vec3(model * skinned_norm);
 
-	gl_Position = projection * view * vec4(WorldPos, 1.0);
+	gl_Position = projection * vec4(ViewPos, 1.0);
 }

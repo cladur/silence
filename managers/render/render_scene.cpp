@@ -24,9 +24,6 @@ void RenderScene::startup() {
 	g_buffer_pass.startup();
 	pbr_pass.startup();
 	skybox_pass.startup();
-#ifdef WIN32
-	skinned_unlit_pass.startup();
-#endif
 	ssao_pass.startup();
 	ssao_blur_pass.startup();
 	combination_pass.startup();
@@ -155,9 +152,9 @@ void RenderScene::draw() {
 	}
 
 	debug_draw.draw();
-#ifdef WIN32
-	skinned_unlit_pass.draw(*this);
-#endif
+// #ifdef WIN32
+// 	skinned_unlit_pass.draw(*this);
+// #endif
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -193,6 +190,6 @@ void RenderScene::queue_skinned_draw(SkinnedModelInstance *model_instance, Trans
 	draw_command.transform = transform;
 
 #ifdef WIN32
-	skinned_unlit_pass.draw_commands.push_back(draw_command);
+	g_buffer_pass.skinned_draw_commands.push_back(draw_command);
 #endif
 }

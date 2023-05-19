@@ -25,9 +25,6 @@ struct RenderScene {
 	float aspect_ratio;
 
 	RenderPass *default_pass;
-#ifdef WIN32
-	SkinnedPassUnlit skinned_unlit_pass;
-#endif
 	GBufferPass g_buffer_pass;
 	PBRPass pbr_pass;
 	SkyboxPass skybox_pass;

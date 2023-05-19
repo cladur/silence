@@ -129,6 +129,21 @@ void GBufferPass::draw(RenderScene &scene) {
 		}
 	}
 	draw_commands.clear();
+
+#ifdef WIN32
+	material.bind_skinned_resources(scene);
+	for (auto &cmd : skinned_draw_commands) {
+		SkinnedModelInstance &instance = *cmd.model_instance;
+		Transform &transform = *cmd.transform;
+		material.bind_instance_resources(instance, transform);
+		SkinnedModel &model = resource_manager.get_skinned_model(instance.model_handle);
+		for (auto &mesh : model.meshes) {
+			material.bind_mesh_resources(mesh);
+			mesh.draw();
+		}
+	}
+	skinned_draw_commands.clear();
+#endif
 }
 
 void TransparentPass::draw(RenderScene &scene) {
