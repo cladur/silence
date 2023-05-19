@@ -9,6 +9,14 @@
             },
             {
                 "component_data": {
+                    "material_type": 0,
+                    "model_name": "items/wooden_box/wooden_box.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 0.9996086359024048,
                         "x": 0.0,
@@ -33,14 +41,6 @@
                     "parent": 25
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "material_type": 0,
-                    "model_name": "items/wooden_box/wooden_box.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
             },
             {
                 "component_data": {
@@ -77,6 +77,14 @@
             },
             {
                 "component_data": {
+                    "material_type": 0,
+                    "model_name": "items/planes/asfalt.mdl",
+                    "scale_uv_with_transform": true
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": 0.0,
@@ -95,14 +103,6 @@
                     }
                 },
                 "component_name": "Transform"
-            },
-            {
-                "component_data": {
-                    "material_type": 0,
-                    "model_name": "items/planes/asfalt.mdl",
-                    "scale_uv_with_transform": true
-                },
-                "component_name": "ModelInstance"
             }
         ],
         "entity": 2,
@@ -163,6 +163,14 @@
             },
             {
                 "component_data": {
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": 0.0,
@@ -187,14 +195,6 @@
                     "parent": 15
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "material_type": 0,
-                    "model_name": "placeholders/cube_1x1x1.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
             }
         ],
         "entity": 4,
@@ -210,9 +210,10 @@
             },
             {
                 "component_data": {
-                    "animation_name": "agent/agent_ANIM_GLTF/agent_walk.anim"
+                    "material_type": 0,
+                    "model_name": "agent/agent.skinmdl"
                 },
-                "component_name": "AnimationInstance"
+                "component_name": "SkinnedModelInstance"
             },
             {
                 "component_data": {
@@ -237,10 +238,9 @@
             },
             {
                 "component_data": {
-                    "material_type": 0,
-                    "model_name": "agent/agent.skinmdl"
+                    "animation_name": "agent/agent_ANIM_GLTF/agent_walk.anim"
                 },
-                "component_name": "SkinnedModelInstance"
+                "component_name": "AnimationInstance"
             },
             {
                 "component_data": {
@@ -299,9 +299,10 @@
             },
             {
                 "component_data": {
-                    "animation_name": "scorpion/scorpion_idle_ANIM_GLTF/scorpion_idle_00_idle.anim"
+                    "material_type": 0,
+                    "model_name": "scorpion/scorpion_idle.skinmdl"
                 },
-                "component_name": "AnimationInstance"
+                "component_name": "SkinnedModelInstance"
             },
             {
                 "component_data": {
@@ -326,16 +327,15 @@
             },
             {
                 "component_data": {
-                    "parent": 46
+                    "animation_name": "scorpion/scorpion_idle_ANIM_GLTF/scorpion_idle_00_idle.anim"
                 },
-                "component_name": "Parent"
+                "component_name": "AnimationInstance"
             },
             {
                 "component_data": {
-                    "material_type": 0,
-                    "model_name": "scorpion/scorpion_idle.skinmdl"
+                    "parent": 46
                 },
-                "component_name": "SkinnedModelInstance"
+                "component_name": "Parent"
             }
         ],
         "entity": 6,
@@ -396,6 +396,14 @@
             },
             {
                 "component_data": {
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": 0.0,
@@ -420,14 +428,6 @@
                     "parent": 7
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "material_type": 0,
-                    "model_name": "placeholders/cube_1x1x1.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
             }
         ],
         "entity": 8,
@@ -440,6 +440,14 @@
                     "name": "Cube 1x1"
                 },
                 "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
             },
             {
                 "component_data": {
@@ -467,14 +475,6 @@
                     "parent": 7
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "material_type": 0,
-                    "model_name": "placeholders/cube_1x1x1.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
             }
         ],
         "entity": 9,
@@ -487,6 +487,14 @@
                     "name": "Cube 1x1"
                 },
                 "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
             },
             {
                 "component_data": {
@@ -514,14 +522,6 @@
                     "parent": 7
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "material_type": 0,
-                    "model_name": "placeholders/cube_1x1x1.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
             }
         ],
         "entity": 10,
@@ -534,6 +534,14 @@
                     "name": "Cube 1x1"
                 },
                 "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
             },
             {
                 "component_data": {
@@ -561,14 +569,6 @@
                     "parent": 7
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "material_type": 0,
-                    "model_name": "placeholders/cube_1x1x1.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
             }
         ],
         "entity": 11,
@@ -627,6 +627,14 @@
             },
             {
                 "component_data": {
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": 0.0,
@@ -651,14 +659,6 @@
                     "parent": 12
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "material_type": 0,
-                    "model_name": "placeholders/cube_1x1x1.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
             }
         ],
         "entity": 13,
@@ -671,6 +671,14 @@
                     "name": "Cube 1x1"
                 },
                 "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
             },
             {
                 "component_data": {
@@ -698,14 +706,6 @@
                     "parent": 12
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "material_type": 0,
-                    "model_name": "placeholders/cube_1x1x1.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
             }
         ],
         "entity": 14,
@@ -771,6 +771,14 @@
             },
             {
                 "component_data": {
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": 0.0,
@@ -795,14 +803,6 @@
                     "parent": 15
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "material_type": 0,
-                    "model_name": "placeholders/cube_1x1x1.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
             }
         ],
         "entity": 16,
@@ -815,6 +815,14 @@
                     "name": "Cube 1x1"
                 },
                 "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
             },
             {
                 "component_data": {
@@ -842,14 +850,6 @@
                     "parent": 15
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "material_type": 0,
-                    "model_name": "placeholders/cube_1x1x1.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
             }
         ],
         "entity": 17,
@@ -862,6 +862,14 @@
                     "name": "Cube 1x1"
                 },
                 "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
             },
             {
                 "component_data": {
@@ -889,14 +897,6 @@
                     "parent": 15
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "material_type": 0,
-                    "model_name": "placeholders/cube_1x1x1.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
             }
         ],
         "entity": 18,
@@ -909,6 +909,14 @@
                     "name": "Cover"
                 },
                 "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
             },
             {
                 "component_data": {
@@ -936,14 +944,6 @@
                     "parent": 15
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "material_type": 0,
-                    "model_name": "placeholders/cube_1x1x1.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
             }
         ],
         "entity": 19,
@@ -956,6 +956,14 @@
                     "name": "Cube 1x1"
                 },
                 "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
             },
             {
                 "component_data": {
@@ -983,14 +991,6 @@
                     "parent": 15
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "material_type": 0,
-                    "model_name": "placeholders/cube_1x1x1.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
             }
         ],
         "entity": 20,
@@ -1003,6 +1003,14 @@
                     "name": "Cube 1x1"
                 },
                 "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
             },
             {
                 "component_data": {
@@ -1030,14 +1038,6 @@
                     "parent": 15
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "material_type": 0,
-                    "model_name": "placeholders/cube_1x1x1.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
             }
         ],
         "entity": 21,
@@ -1097,6 +1097,14 @@
             },
             {
                 "component_data": {
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 0.9956544041633606,
                         "x": 0.0,
@@ -1121,14 +1129,6 @@
                     "parent": 25
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "material_type": 0,
-                    "model_name": "placeholders/cube_1x1x1.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
             }
         ],
         "entity": 23,
@@ -1141,6 +1141,14 @@
                     "name": "Cube 1x1"
                 },
                 "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
             },
             {
                 "component_data": {
@@ -1168,14 +1176,6 @@
                     "parent": 25
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "material_type": 0,
-                    "model_name": "placeholders/cube_1x1x1.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
             }
         ],
         "entity": 24,
@@ -1280,6 +1280,14 @@
             },
             {
                 "component_data": {
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 0.9659258127212524,
                         "x": 0.0,
@@ -1304,14 +1312,6 @@
                     "parent": 26
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "material_type": 0,
-                    "model_name": "placeholders/cube_1x1x1.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
             }
         ],
         "entity": 27,
@@ -1324,6 +1324,14 @@
                     "name": "Cube 1x1"
                 },
                 "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
             },
             {
                 "component_data": {
@@ -1351,14 +1359,6 @@
                     "parent": 26
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "material_type": 0,
-                    "model_name": "placeholders/cube_1x1x1.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
             }
         ],
         "entity": 28,
@@ -1371,6 +1371,14 @@
                     "name": "Cube 1x1"
                 },
                 "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
             },
             {
                 "component_data": {
@@ -1398,14 +1406,6 @@
                     "parent": 26
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "material_type": 0,
-                    "model_name": "placeholders/cube_1x1x1.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
             }
         ],
         "entity": 29,
@@ -1418,6 +1418,14 @@
                     "name": "Electric Box"
                 },
                 "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "material_type": 0,
+                    "model_name": "items/electric_box_2/electric_box_2.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
             },
             {
                 "component_data": {
@@ -1445,14 +1453,6 @@
                     "parent": 25
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "material_type": 0,
-                    "model_name": "items/electric_box_2/electric_box_2.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
             }
         ],
         "entity": 30,
@@ -1465,6 +1465,14 @@
                     "name": "Cardboard Box"
                 },
                 "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "material_type": 0,
+                    "model_name": "items/cardboard_box/cardboard_box.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
             },
             {
                 "component_data": {
@@ -1492,14 +1500,6 @@
                     "parent": 15
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "material_type": 0,
-                    "model_name": "items/cardboard_box/cardboard_box.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
             }
         ],
         "entity": 31,
@@ -1561,6 +1561,14 @@
             },
             {
                 "component_data": {
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": 0.0,
@@ -1585,14 +1593,6 @@
                     "parent": 32
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "material_type": 0,
-                    "model_name": "placeholders/cube_1x1x1.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
             }
         ],
         "entity": 33,
@@ -1605,6 +1605,14 @@
                     "name": "Left"
                 },
                 "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
             },
             {
                 "component_data": {
@@ -1632,14 +1640,6 @@
                     "parent": 32
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "material_type": 0,
-                    "model_name": "placeholders/cube_1x1x1.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
             }
         ],
         "entity": 34,
@@ -1652,6 +1652,14 @@
                     "name": "Right"
                 },
                 "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
             },
             {
                 "component_data": {
@@ -1679,14 +1687,6 @@
                     "parent": 32
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "material_type": 0,
-                    "model_name": "placeholders/cube_1x1x1.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
             }
         ],
         "entity": 35,
@@ -1699,6 +1699,14 @@
                     "name": "Right 2"
                 },
                 "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
             },
             {
                 "component_data": {
@@ -1726,14 +1734,6 @@
                     "parent": 32
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "material_type": 0,
-                    "model_name": "placeholders/cube_1x1x1.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
             }
         ],
         "entity": 36,
@@ -1746,6 +1746,14 @@
                     "name": "Cube 1x1"
                 },
                 "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
             },
             {
                 "component_data": {
@@ -1773,14 +1781,6 @@
                     "parent": 22
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "material_type": 0,
-                    "model_name": "placeholders/cube_1x1x1.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
             }
         ],
         "entity": 37,
@@ -1793,6 +1793,14 @@
                     "name": "Cube 1x1"
                 },
                 "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
             },
             {
                 "component_data": {
@@ -1820,14 +1828,6 @@
                     "parent": 22
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "material_type": 0,
-                    "model_name": "placeholders/cube_1x1x1.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
             }
         ],
         "entity": 38,
@@ -1840,6 +1840,14 @@
                     "name": "Cube 1x1"
                 },
                 "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
             },
             {
                 "component_data": {
@@ -1867,14 +1875,6 @@
                     "parent": 22
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "material_type": 0,
-                    "model_name": "placeholders/cube_1x1x1.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
             }
         ],
         "entity": 39,
@@ -1887,6 +1887,14 @@
                     "name": "Front"
                 },
                 "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
             },
             {
                 "component_data": {
@@ -1914,14 +1922,6 @@
                     "parent": 32
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "material_type": 0,
-                    "model_name": "placeholders/cube_1x1x1.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
             }
         ],
         "entity": 40,
@@ -2113,6 +2113,14 @@
             },
             {
                 "component_data": {
+                    "material_type": 0,
+                    "model_name": "items/electric_box/electric_box.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": -0.5,
                         "x": 0.5000000596046448,
@@ -2137,14 +2145,6 @@
                     "parent": 15
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "material_type": 0,
-                    "model_name": "items/electric_box/electric_box.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
             }
         ],
         "entity": 45,
@@ -2168,7 +2168,7 @@
                     },
                     "position": {
                         "x": 0.0,
-                        "y": 0.0,
+                        "y": 0.19141218066215515,
                         "z": 4.0
                     },
                     "scale": {
@@ -2249,18 +2249,18 @@
             },
             {
                 "component_data": {
-                    "parent": 46
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "children": [
                         3
                     ],
                     "children_count": 1
                 },
                 "component_name": "Children"
+            },
+            {
+                "component_data": {
+                    "parent": 46
+                },
+                "component_name": "Parent"
             }
         ],
         "entity": 47,
@@ -2583,19 +2583,11 @@
         "components": [
             {
                 "component_data": {
-                    "acceleration": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    "mass": 1.0,
-                    "velocity": {
-                        "x": 0.0,
-                        "y": -1109.437744140625,
-                        "z": 0.0
-                    }
+                    "material_type": 0,
+                    "model_name": "items/planes/paint.mdl",
+                    "scale_uv_with_transform": true
                 },
-                "component_name": "RigidBody"
+                "component_name": "ModelInstance"
             },
             {
                 "component_data": {
@@ -2620,11 +2612,19 @@
             },
             {
                 "component_data": {
-                    "material_type": 0,
-                    "model_name": "items/planes/paint.mdl",
-                    "scale_uv_with_transform": true
+                    "acceleration": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "mass": 1.0,
+                    "velocity": {
+                        "x": 0.0,
+                        "y": -1109.437744140625,
+                        "z": 0.0
+                    }
                 },
-                "component_name": "ModelInstance"
+                "component_name": "RigidBody"
             },
             {
                 "component_data": {

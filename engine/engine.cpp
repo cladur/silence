@@ -53,12 +53,7 @@ void Engine::run() {
 
 		auto stop_time = std::chrono::high_resolution_clock::now();
 
-		// TODO: This is a hack to make sure we don't go over the target frame time.
-		// We need to make calculate dt properly and make target frame time changeable.
-		while (std::chrono::duration<float, std::chrono::seconds::period>(stop_time - start_time).count() <
-				target_frame_time) {
-			stop_time = std::chrono::high_resolution_clock::now();
-		}
+		dt = std::chrono::duration<float, std::chrono::seconds::period>(stop_time - start_time).count();
 
 		FrameMark;
 	}

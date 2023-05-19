@@ -62,8 +62,8 @@ Scene::Scene() {
 	world.register_system<EnemyPathDraw>();
 
 	// Transform
-	world.register_system<IsolatedEntitiesSystem>();
-	world.register_system<RootParentSystem>();
+	world.register_system<IsolatedEntitiesSystem>(EcsOnLoad);
+	world.register_system<RootParentSystem>(EcsOnLoad);
 
 	auto &physics_manager = PhysicsManager::get();
 	physics_manager.add_collision_layer("default");
@@ -73,13 +73,13 @@ Scene::Scene() {
 
 void Scene::register_game_systems() {
 	// Physics
-	world.register_system<PhysicsSystem>();
-	world.register_system<CollisionSystem>();
+	world.register_system<PhysicsSystem>(EcsOnUpdate);
+	world.register_system<CollisionSystem>(EcsOnUpdate);
 
 	// Agents
-	world.register_system<AgentSystem>();
-	world.register_system<HackerSystem>();
-	world.register_system<EnemyPathing>();
+	world.register_system<AgentSystem>(EcsOnUpdate);
+	world.register_system<HackerSystem>(EcsOnUpdate);
+	world.register_system<EnemyPathing>(EcsOnUpdate);
 }
 
 void Scene::update(float dt) {
@@ -126,6 +126,4 @@ void Scene::load_from_file(const std::string &path) {
 	nlohmann::json scene_json = nlohmann::json::parse(file);
 	file.close();
 	SceneManager::load_scene_from_json_file(world, scene_json, "", entities);
-
-	bsp_tree = CollisionSystem::build_tree(world, entities, 10);
 }

@@ -1,5 +1,6 @@
 #include "collision_system.h"
 #include <physics/physics_manager.h>
+#include <spdlog/spdlog.h>
 
 #include "components/collider_aabb.h"
 #include "components/collider_sphere.h"
@@ -18,11 +19,18 @@ void CollisionSystem::startup(World &world) {
 	world.set_system_component_blacklist<CollisionSystem>(black_signature);
 
 	PhysicsManager &physics_manager = PhysicsManager::get();
+
 	physics_manager.add_collision_layer("default");
 }
 
 void CollisionSystem::update(World &world, float dt) {
 	ZoneScopedN("CollisionSystem::update");
+
+	static bool first = true;
+	if (first) {
+		first = false;
+		world.get_parent_scene()->bsp_tree = CollisionSystem::build_tree(world, world.get_parent_scene()->entities, 10);
+	}
 
 	resolve_collision_dynamic(world);
 
@@ -33,6 +41,7 @@ void CollisionSystem::update(World &world, float dt) {
 }
 
 void CollisionSystem::resolve_collision_dynamic(World &world) {
+	ZoneScopedN("CollisionSystem::update::resolve_collision_dynamic");
 	auto physics_manager = PhysicsManager::get();
 
 	CollisionFlag first, second;
@@ -96,6 +105,7 @@ void CollisionSystem::resolve_collision_dynamic(World &world) {
 }
 
 void CollisionSystem::resolve_bsp_collision(World &world, BSPNode *node, Entity entity, bool force) {
+	ZoneScopedN("CollisionSystem::update::resolve_bsp_collision");
 	if ((node == nullptr) || (node->entities.empty() && node->back == nullptr && node->front == nullptr)) {
 		return;
 	}
@@ -476,7 +486,8 @@ bool CollisionSystem::ray_cast(World &world, const Ray &ray, HitInfo &result) {
 			}
 		} else if (world.has_component<ColliderOBB>(entity)) {
 			ColliderOBB c = world.get_component<ColliderOBB>(entity);
-			c.center = transform.get_global_position() + c.get_orientation_matrix() * (c.center * transform.get_global_scale());
+			c.center = transform.get_global_position() +
+					c.get_orientation_matrix() * (c.center * transform.get_global_scale());
 			c.range *= transform.get_global_scale();
 			if (physics_manager.intersect_ray_obb(ray, c, info)) {
 				does_hit = true;
@@ -524,7 +535,8 @@ bool CollisionSystem::ray_cast_layer(World &world, const Ray &ray, HitInfo &resu
 			}
 		} else if (world.has_component<ColliderOBB>(entity)) {
 			ColliderOBB c = world.get_component<ColliderOBB>(entity);
-			c.center = transform.get_global_position() + c.get_orientation_matrix() * (c.center * transform.get_global_scale());
+			c.center = transform.get_global_position() +
+					c.get_orientation_matrix() * (c.center * transform.get_global_scale());
 			c.range *= transform.get_global_scale();
 			if (physics_manager.intersect_ray_obb(ray, c, info)) {
 				does_hit = true;

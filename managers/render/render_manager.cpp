@@ -67,6 +67,7 @@ uint32_t RenderManager::create_render_scene() {
 }
 
 void RenderManager::draw() {
+	ZoneScopedNC("RenderManager::draw", tracy::Color::BlueViolet);
 	DisplayManager &display_manager = DisplayManager::get();
 	glm::vec2 window_extent = display_manager.get_framebuffer_size();
 

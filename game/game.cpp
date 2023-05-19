@@ -349,7 +349,7 @@ void Game::custom_update(float dt) {
 	if (in_debug_mode) {
 		ImGui::Begin("Debug Menu");
 		ImGui::Text("Press ESC to get back to the game");
-		ImGui::Text(fmt::format("FPS: {}", 1.0f / dt).c_str());
+		ImGui::Text("%f FPS (%.2f ms)", 1.0f / dt, 1000.0f * dt);
 		ImGui::End();
 	}
 }
