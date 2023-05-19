@@ -318,6 +318,7 @@ void MaterialCombination::bind_resources(RenderScene &scene) {
 	shader.set_int("SSAO", 3);
 	shader.set_int("AoRoughMetal", 4);
 	shader.set_int("ViewPos", 5);
+	shader.set_int("Skybox", 6);
 
 	shader.set_int("use_ao", cvar_use_ao.get());
 
@@ -337,6 +338,8 @@ void MaterialCombination::bind_resources(RenderScene &scene) {
 	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.ao_rough_metal_texture_id);
 	glActiveTexture(GL_TEXTURE5);
 	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.position_texture_id);
+	glActiveTexture(GL_TEXTURE6);
+	glBindTexture(GL_TEXTURE_2D, scene.skybox_buffer.texture_id);
 }
 
 void MaterialCombination::bind_instance_resources(ModelInstance &instance, Transform &transform) {

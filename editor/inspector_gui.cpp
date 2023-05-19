@@ -49,6 +49,7 @@ void Inspector::show_components() {
 	SHOW_COMPONENT(ColliderOBB, show_colliderobb);
 	SHOW_COMPONENT(Light, show_light);
 	SHOW_COMPONENT(AgentData, show_agent_data);
+	SHOW_COMPONENT(EnemyPath, show_enemy_path);
 
 	for (int i = 0; i < remove_component_queue.size(); i++) {
 		auto [entity, component_to_remove] = remove_component_queue.front();
@@ -592,6 +593,45 @@ void Inspector::show_agent_data() {
 	}
 }
 
+void Inspector::show_enemy_path() {
+	auto &enemy_path = world->get_component<EnemyPath>(selected_entity);
+	if (ImGui::CollapsingHeader("Enemy Path", tree_flags)) {
+		if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+			ImGui::OpenPopup("EnemyPathContextMenu");
+		}
+		if (ImGui::BeginPopup("EnemyPathContextMenu")) {
+			if (ImGui::MenuItem("Add Node")) {
+				if (enemy_path.path.empty()) {
+					// if this is the first node, add it in place of transform
+					auto &transform = world->get_component<Transform>(selected_entity);
+					enemy_path.path.emplace_back(transform.position);
+				} else {
+					// otherwise, add it in place of the last node
+					enemy_path.path.emplace_back(enemy_path.path.back());
+				}
+			}
+			if (ImGui::MenuItem("Remove Node")) {
+				if (!enemy_path.path.empty()) {
+					enemy_path.path.pop_back();
+				}
+			}
+			ImGui::EndPopup();
+		}
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("Enemy Path", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+
+		int i = 0;
+		show_float("Speed", enemy_path.speed);
+		show_float("Rot Speed", enemy_path.rotation_speed);
+		for (auto &node : enemy_path.path) {
+			std::string label = fmt::format("Node {}", i++);
+			show_vec3(label.c_str(), node);
+		}
+		ImGui::EndTable();
+	}
+}
+
 bool Inspector::show_vec3(
 		const char *label, glm::vec3 &vec3, float speed, float reset_value, float min_value, float max_value) {
 	bool changed = false;
@@ -643,6 +683,15 @@ void Inspector::show_text(const char *label, int value) {
 	std::string value_str = std::to_string(value);
 
 	Inspector::show_text(label, value_str.c_str());
+}
+
+void Inspector::show_vector_vec3(const char *label, std::vector<glm::vec3> &vec3) {
+	ImGui::TableNextRow();
+	ImGui::TableSetColumnIndex(0);
+	ImGui::Text("%s", label);
+	ImGui::TableSetColumnIndex(1);
+	ImGui::SetNextItemWidth(-FLT_MIN);
+	ImGui::Text("%d", vec3.size());
 }
 
 void Inspector::show_add_component() {
@@ -704,6 +753,7 @@ void Inspector::show_add_component() {
 			SHOW_ADD_COMPONENT(ColliderOBB);
 			SHOW_ADD_COMPONENT(Light);
 			SHOW_ADD_COMPONENT(AgentData);
+			SHOW_ADD_COMPONENT(EnemyPath);
 
 			ImGui::EndPopup();
 		}
