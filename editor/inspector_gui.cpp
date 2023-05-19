@@ -691,7 +691,7 @@ void Inspector::show_vector_vec3(const char *label, std::vector<glm::vec3> &vec3
 	ImGui::Text("%s", label);
 	ImGui::TableSetColumnIndex(1);
 	ImGui::SetNextItemWidth(-FLT_MIN);
-	ImGui::Text("%d", vec3.size());
+	ImGui::Text("%zu", vec3.size());
 }
 
 void Inspector::show_add_component() {
