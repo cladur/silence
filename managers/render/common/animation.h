@@ -1,8 +1,10 @@
 #ifndef SILENCE_ANIMATION_H
 #define SILENCE_ANIMATION_H
 
+#include "animation/pose.h"
 #include "channel.h"
 class SkinnedModel;
+struct AnimData;
 
 class Animation {
 public:
@@ -13,6 +15,7 @@ public:
 	float get_duration() const;
 	std::string name;
 
+	void sample(AnimData &data, Pose &result);
 	std::unordered_map<std::string, Channel> channels;
 
 private:

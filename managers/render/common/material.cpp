@@ -19,7 +19,6 @@ AutoCVarInt cvar_use_fog("render.use_fog", "use simple linear fog", 1, CVarFlags
 AutoCVarFloat cvar_fog_min("render.fog_min", "fog min distance", 20.0f, CVarFlags::EditFloatDrag);
 AutoCVarFloat cvar_fog_max("render.fog_max", "fog max distance", 300.0f, CVarFlags::EditFloatDrag);
 
-
 void MaterialSkinnedUnlit::startup() {
 	shader.load_from_files(shader_path("skinned_unlit.vert"), shader_path("unlit.frag"));
 }

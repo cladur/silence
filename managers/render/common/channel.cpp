@@ -4,7 +4,7 @@
 #include <glm/gtx/quaternion.hpp>
 #include <utility>
 
-Channel::Channel(const assets::NodeAnimation &node, int32_t id) : id(id), local_transform(1.0f) {
+Channel::Channel(const assets::NodeAnimation &node) : local_transform(glm::vec3(1.0f), glm::quat()) {
 	positions.reserve(node.translations.size());
 	for (int32_t position_index = 0; position_index < node.translation_times.size(); ++position_index) {
 		glm::vec3 pos = { node.translations[position_index][0], node.translations[position_index][1],
@@ -46,9 +46,8 @@ Channel::Channel(const assets::NodeAnimation &node, int32_t id) : id(id), local_
 }
 
 void Channel::update(float animation_time) {
-	glm::mat4 translation = interpolate_position(animation_time);
-	glm::mat4 rotation = interpolate_rotation(animation_time);
-	local_transform = translation * rotation;
+	interpolate_position(animation_time, local_transform.translation);
+	interpolate_rotation(animation_time, local_transform.rotation);
 }
 
 float Channel::get_scale_factor(float last_time_stamp, float next_time_stamp, float animation_time) {
@@ -80,30 +79,26 @@ int32_t Channel::get_rotation_index(float animation_time) {
 	return 0;
 }
 
-glm::mat4 Channel::interpolate_position(float animation_time) {
+void Channel::interpolate_position(float animation_time, glm::vec3 &result) {
 	if (positions.size() == 1) {
-		return glm::translate(glm::mat4(1.0f), positions[0].position);
+		result = positions[0].position;
 	}
 
 	int32_t p0_index = get_position_index(animation_time);
 	int32_t p1_index = p0_index + 1;
 	float scale_factor =
 			get_scale_factor(positions[p0_index].time_stamp, positions[p1_index].time_stamp, animation_time);
-	glm::vec3 final_position = glm::mix(positions[p0_index].position, positions[p1_index].position, scale_factor);
-	return glm::translate(glm::mat4(1.0f), final_position);
+	result = glm::mix(positions[p0_index].position, positions[p1_index].position, scale_factor);
 }
 
-glm::mat4 Channel::interpolate_rotation(float animation_time) {
+void Channel::interpolate_rotation(float animation_time, glm::quat &result) {
 	if (rotations.size() == 1) {
-		glm::quat rotation = glm::normalize(rotations[0].rotation);
-		return glm::toMat4(rotation);
+		result = glm::normalize(rotations[0].rotation);
 	}
 
 	int32_t p0_index = get_rotation_index(animation_time);
 	int32_t p1_index = p0_index + 1;
 	float scale_factor =
 			get_scale_factor(rotations[p0_index].time_stamp, rotations[p1_index].time_stamp, animation_time);
-	glm::quat final_rotation = glm::slerp(rotations[p0_index].rotation, rotations[p1_index].rotation, scale_factor);
-	final_rotation = glm::normalize(final_rotation);
-	return glm::toMat4(final_rotation);
+	result = glm::normalize(glm::slerp(rotations[p0_index].rotation, rotations[p1_index].rotation, scale_factor));
 }
