@@ -102,10 +102,10 @@ void PhysicsManager::resolve_collision_sphere(World &world, Entity e1, Entity e2
 
 	ColliderSphere c1;
 	ColliderSphere c2;
-	c1.radius = temp_c1.radius * t1.get_scale().x;
-	c1.center = t1.get_position() + temp_c1.center * t1.get_scale().x;
-	c2.radius = temp_c2.radius * t2.get_scale().x;
-	c2.center = t2.get_position() + temp_c2.center * t2.get_scale().x;
+	c1.radius = temp_c1.radius * t1.get_global_scale().x;
+	c1.center = t1.get_global_position() + temp_c1.center * t1.get_global_scale().x;
+	c2.radius = temp_c2.radius * t2.get_global_scale().x;
+	c2.center = t2.get_global_position() + temp_c2.center * t2.get_global_scale().x;
 
 	if (!is_collision_candidate(c1.center, glm::vec3(c1.radius), c2.center, glm::vec3(c2.radius)) ||
 			!is_overlap(c1, c2)) {
@@ -150,10 +150,10 @@ void PhysicsManager::resolve_collision_aabb(World &world, Entity e1, Entity e2) 
 
 	ColliderAABB c1;
 	ColliderAABB c2;
-	c1.range = temp_c1.range * t1.get_scale();
-	c1.center = t1.get_position() + temp_c1.center * t1.get_scale();
-	c2.range = temp_c2.range * t2.get_scale();
-	c2.center = t2.get_position() + temp_c2.center * t2.get_scale();
+	c1.range = temp_c1.range * t1.get_global_scale();
+	c1.center = t1.get_global_position() + temp_c1.center * t1.get_global_scale();
+	c2.range = temp_c2.range * t2.get_global_scale();
+	c2.center = t2.get_global_position() + temp_c2.center * t2.get_global_scale();
 
 	if (!is_collision_candidate(c1.center, c1.range, c2.center, c2.range) || !is_overlap(c1, c2)) {
 		return;
@@ -221,10 +221,10 @@ void PhysicsManager::resolve_aabb_sphere(World &world, Entity aabb, Entity spher
 
 	ColliderAABB c1;
 	ColliderSphere c2;
-	c1.range = temp_c1.range * t1.get_scale();
-	c1.center = t1.get_position() + temp_c1.center * t1.get_scale();
-	c2.radius = temp_c2.radius * t2.get_scale().x;
-	c2.center = t2.get_position() + temp_c2.center * t2.get_scale().x;
+	c1.range = temp_c1.range * t1.get_global_scale();
+	c1.center = t1.get_global_position() + temp_c1.center * t1.get_global_scale();
+	c2.radius = temp_c2.radius * t2.get_global_scale().x;
+	c2.center = t2.get_global_position() + temp_c2.center * t2.get_global_scale().x;
 
 	if (!is_collision_candidate(c1.center, c1.range, c2.center, glm::vec3(c2.radius))) {
 		return;
@@ -300,17 +300,17 @@ void PhysicsManager::resolve_collision_obb(World &world, Entity e1, Entity e2) {
 
 	ColliderOBB c1{};
 	ColliderOBB c2{};
-	temp_c1.set_orientation(t1.orientation);
+	temp_c1.set_orientation(t1.get_global_orientation());
 	c1.orientation[0] = temp_c1.orientation[0];
 	c1.orientation[1] = temp_c1.orientation[1];
-	c1.range = temp_c1.range * t1.get_scale();
-	c1.center = t1.get_position() + c1.get_orientation_matrix() * (temp_c1.center * t1.get_scale());
+	c1.range = temp_c1.range * t1.get_global_scale();
+	c1.center = t1.get_global_position() + c1.get_orientation_matrix() * (temp_c1.center * t1.get_global_scale());
 
-	temp_c2.set_orientation(t2.orientation);
+	temp_c2.set_orientation(t2.get_global_orientation());
 	c2.orientation[0] = temp_c2.orientation[0];
 	c2.orientation[1] = temp_c2.orientation[1];
-	c2.range = temp_c2.range * t2.get_scale();
-	c2.center = t2.get_position() + c2.get_orientation_matrix() * (temp_c2.center * t2.get_scale());
+	c2.range = temp_c2.range * t2.get_global_scale();
+	c2.center = t2.get_global_position() + c2.get_orientation_matrix() * (temp_c2.center * t2.get_global_scale());
 
 	if (!is_collision_candidate(c1.center, c1.range, c2.center, c2.range)) {
 		return;
@@ -364,14 +364,14 @@ void PhysicsManager::resolve_obb_sphere(World &world, Entity obb, Entity sphere)
 
 	ColliderOBB c1{};
 	ColliderSphere c2{};
-	temp_c1.set_orientation(t1.orientation);
+	temp_c1.set_orientation(t1.get_global_orientation());
 	c1.orientation[0] = temp_c1.orientation[0];
 	c1.orientation[1] = temp_c1.orientation[1];
-	c1.range = temp_c1.range * t1.get_scale();
-	c1.center = t1.get_position() + c1.get_orientation_matrix() * (temp_c1.center * t1.get_scale());
+	c1.range = temp_c1.range * t1.get_global_scale();
+	c1.center = t1.get_global_position() + c1.get_orientation_matrix() * (temp_c1.center * t1.get_global_scale());
 
-	c2.radius = temp_c2.radius * t2.get_scale().x;
-	c2.center = t2.get_position() + temp_c2.center * t2.get_scale().x;
+	c2.radius = temp_c2.radius * t2.get_global_scale().x;
+	c2.center = t2.get_global_position() + temp_c2.center * t2.get_global_scale().x;
 
 	if (!is_collision_candidate(c1.center, c1.range, c2.center, glm::vec3(c2.radius))) {
 		return;
@@ -449,14 +449,14 @@ void PhysicsManager::resolve_obb_aabb(World &world, Entity obb, Entity aabb) {
 
 	ColliderOBB c1{};
 	ColliderAABB c2{};
-	temp_c1.set_orientation(t1.orientation);
+	temp_c1.set_orientation(t1.get_global_orientation());
 	c1.orientation[0] = temp_c1.orientation[0];
 	c1.orientation[1] = temp_c1.orientation[1];
-	c1.range = temp_c1.range * t1.get_scale();
-	c1.center = t1.get_position() + c1.get_orientation_matrix() * (temp_c1.center * t1.get_scale());
+	c1.range = temp_c1.range * t1.get_global_scale();
+	c1.center = t1.get_global_position() + c1.get_orientation_matrix() * (temp_c1.center * t1.get_global_scale());
 
-	c2.range = temp_c2.range * t2.get_scale();
-	c2.center = t2.get_position() + temp_c2.center * t2.get_scale();
+	c2.range = temp_c2.range * t2.get_global_scale();
+	c2.center = t2.get_global_position() + temp_c2.center * t2.get_global_scale();
 
 	if (!is_collision_candidate(c1.center, c1.range, c2.center, c2.range)) {
 		return;

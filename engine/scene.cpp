@@ -1,7 +1,9 @@
 #include "scene.h"
 #include "display/display_manager.h"
+#include "ecs/systems/interactable_system.h"
 #include "ecs/world.h"
 #include "editor/editor.h"
+#include "physics/physics_manager.h"
 #include "managers/animation/ecs/animation_instance.h"
 #include "render/ecs/model_instance.h"
 #include "render/ecs/skinned_model_instance.h"
@@ -12,6 +14,7 @@
 #include "ecs/systems/collision_system.h"
 #include "ecs/systems/enemy_path_draw_system.h"
 #include "ecs/systems/enemy_pathing.h"
+#include "ecs/systems/hacker_system.h"
 #include "ecs/systems/isolated_entities_system.h"
 #include "ecs/systems/light_system.h"
 #include "ecs/systems/physics_system.h"
@@ -46,7 +49,9 @@ Scene::Scene() {
 	world.register_component<ColliderOBB>();
 	world.register_component<Light>();
 	world.register_component<AgentData>();
+	world.register_component<HackerData>();
 	world.register_component<EnemyPath>();
+	world.register_component<Interactable>();
 
 	// Systems
 	// TODO: Set update order instead of using default value
@@ -59,18 +64,25 @@ Scene::Scene() {
 	world.register_system<EnemyPathDraw>();
 
 	// Transform
-	world.register_system<IsolatedEntitiesSystem>();
-	world.register_system<RootParentSystem>();
+	world.register_system<IsolatedEntitiesSystem>(EcsOnLoad);
+	world.register_system<RootParentSystem>(EcsOnLoad);
+
+	auto &physics_manager = PhysicsManager::get();
+	physics_manager.add_collision_layer("default");
+	physics_manager.add_collision_layer("hacker");
+	physics_manager.set_layers_no_collision("default", "hacker");
 }
 
 void Scene::register_game_systems() {
 	// Physics
-	world.register_system<PhysicsSystem>();
-	world.register_system<CollisionSystem>();
+	world.register_system<PhysicsSystem>(EcsOnUpdate);
+	world.register_system<CollisionSystem>(EcsOnUpdate);
 
 	// Agents
-	world.register_system<AgentSystem>();
-	world.register_system<EnemyPathing>();
+	world.register_system<AgentSystem>(EcsOnUpdate);
+	world.register_system<HackerSystem>(EcsOnUpdate);
+	world.register_system<EnemyPathing>(EcsOnUpdate);
+	world.register_system<InteractableSystem>(EcsOnUpdate);
 }
 
 void Scene::update(float dt) {
@@ -117,6 +129,4 @@ void Scene::load_from_file(const std::string &path) {
 	nlohmann::json scene_json = nlohmann::json::parse(file);
 	file.close();
 	SceneManager::load_scene_from_json_file(world, scene_json, "", entities);
-
-	bsp_tree = CollisionSystem::build_tree(world, entities, 10);
 }

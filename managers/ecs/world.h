@@ -7,6 +7,7 @@
 #include "serialization.h"
 #include "system_manager.h"
 #include <memory>
+#include <type_traits>
 
 enum UpdateOrder {
 	EcsOnLoad,

@@ -266,6 +266,9 @@ void input_setup() {
 
 	input_manager.add_action("mouse_left");
 	input_manager.add_key_to_action("mouse_left", InputKey::MOUSE_LEFT);
+
+	input_manager.add_action("mouse_right");
+	input_manager.add_key_to_action("mouse_right", InputKey::MOUSE_RIGHT);
 }
 
 void handle_camera(DebugCamera &cam, float dt) {
@@ -349,6 +352,7 @@ void Game::custom_update(float dt) {
 	if (in_debug_mode) {
 		ImGui::Begin("Debug Menu");
 		ImGui::Text("Press ESC to get back to the game");
+		ImGui::Text("%f FPS (%.2f ms)", 1.0f / dt, 1000.0f * dt);
 		ImGui::End();
 	}
 }

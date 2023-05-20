@@ -4,6 +4,7 @@
 #include "components/collider_sphere.h"
 #include "components/collider_tag_component.h"
 #include "components/fmod_listener_component.h"
+#include "components/interactable_component.h"
 #include "components/light_component.h"
 #include "components/rigidbody_component.h"
 #include "physics/physics_manager.h"
@@ -49,7 +50,9 @@ void Inspector::show_components() {
 	SHOW_COMPONENT(ColliderOBB, show_colliderobb);
 	SHOW_COMPONENT(Light, show_light);
 	SHOW_COMPONENT(AgentData, show_agent_data);
+	SHOW_COMPONENT(HackerData, show_hacker_data);
 	SHOW_COMPONENT(EnemyPath, show_enemy_path);
+	SHOW_COMPONENT(Interactable, show_interactable);
 
 	for (int i = 0; i < remove_component_queue.size(); i++) {
 		auto [entity, component_to_remove] = remove_component_queue.front();
@@ -539,6 +542,74 @@ void Inspector::show_light() {
 	}
 }
 
+void Inspector::show_hacker_data() {
+	auto &hacker_data = world->get_component<HackerData>(selected_entity);
+	if (ImGui::CollapsingHeader("Hacker Data", tree_flags)) {
+		remove_component_popup<HackerData>();
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("Hacker Data", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Hacker Model");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::InputInt("", (int *)&hacker_data.model, 0, 0);
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
+				Entity payload_entity = *(Entity *)payload->Data;
+				hacker_data.model = payload_entity;
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Camera Pivot");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::InputInt("", (int *)&hacker_data.camera_pivot, 0, 0);
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
+				Entity payload_entity = *(Entity *)payload->Data;
+				hacker_data.camera_pivot = payload_entity;
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Scorpion camera transform");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::InputInt("", (int *)&hacker_data.scorpion_camera_transform, 0, 0);
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
+				Entity payload_entity = *(Entity *)payload->Data;
+				hacker_data.scorpion_camera_transform = payload_entity;
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Camera");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::InputInt("", (int *)&hacker_data.camera, 0, 0);
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
+				Entity payload_entity = *(Entity *)payload->Data;
+				hacker_data.camera = payload_entity;
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+		ImGui::EndTable();
+	}
+}
+
 void Inspector::show_agent_data() {
 	auto &agent_data = world->get_component<AgentData>(selected_entity);
 	if (ImGui::CollapsingHeader("Agent Data", tree_flags)) {
@@ -628,6 +699,54 @@ void Inspector::show_enemy_path() {
 			std::string label = fmt::format("Node {}", i++);
 			show_vec3(label.c_str(), node);
 		}
+		ImGui::EndTable();
+	}
+}
+
+void Inspector::show_interactable() {
+	auto &interactable = world->get_component<Interactable>(selected_entity);
+	if (ImGui::CollapsingHeader("Interactable", tree_flags)) {
+		remove_component_popup<Interactable>();
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("Interactable", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Interaction type");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		if (ImGui::BeginCombo("##Interaction type", magic_enum::enum_name(interactable.type).data())) {
+			for (auto type : magic_enum::enum_values<InteractionType>()) {
+				bool is_selected = (interactable.type == type);
+				if (ImGui::Selectable(magic_enum::enum_name(type).data(), is_selected)) {
+					interactable.type = type;
+				}
+				if (is_selected) {
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+			ImGui::EndCombo();
+		}
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Interaction");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		if (ImGui::BeginCombo("##Interaction", magic_enum::enum_name(interactable.interaction).data())) {
+			for (auto type : magic_enum::enum_values<Interaction>()) {
+				bool is_selected = (interactable.interaction == type);
+				if (ImGui::Selectable(magic_enum::enum_name(type).data(), is_selected)) {
+					interactable.interaction = type;
+				}
+				if (is_selected) {
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+			ImGui::EndCombo();
+		}
+
 		ImGui::EndTable();
 	}
 }
@@ -753,7 +872,9 @@ void Inspector::show_add_component() {
 			SHOW_ADD_COMPONENT(ColliderOBB);
 			SHOW_ADD_COMPONENT(Light);
 			SHOW_ADD_COMPONENT(AgentData);
+			SHOW_ADD_COMPONENT(HackerData);
 			SHOW_ADD_COMPONENT(EnemyPath);
+			SHOW_ADD_COMPONENT(Interactable);
 
 			ImGui::EndPopup();
 		}
