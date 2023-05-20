@@ -238,6 +238,9 @@ void input_setup() {
 	input_manager.add_key_to_action("move_down", InputKey::GAMEPAD_BUTTON_B);
 	input_manager.add_action("move_faster");
 	input_manager.add_key_to_action("move_faster", InputKey::LEFT_SHIFT);
+	input_manager.add_action("agent_interact");
+	input_manager.add_key_to_action("agent_interact", InputKey::E);
+	input_manager.add_key_to_action("agent_interact", InputKey::GAMEPAD_BUTTON_A);
 
 	input_manager.add_action("control_camera");
 	input_manager.add_key_to_action("control_camera", InputKey::MOUSE_RIGHT);
