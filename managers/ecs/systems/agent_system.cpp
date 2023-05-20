@@ -10,12 +10,16 @@
 
 #include "input/input_manager.h"
 #include "resource/resource_manager.h"
+#include <spdlog/spdlog.h>
 #include <glm/geometric.hpp>
 
-AutoCVarFloat cvar_agent_acc_ground("agent.acc_ground", "acceleration on ground ", 0.4f, CVarFlags::EditCheckbox);
+AutoCVarFloat cvar_agent_interaction_range(
+		"agent.interaction_range", "range of interaction", 1.5f, CVarFlags::EditCheckbox);
+
+AutoCVarFloat cvar_agent_acc_ground("agent.acc_ground", "acceleration on ground", 0.4f, CVarFlags::EditCheckbox);
 
 AutoCVarFloat cvar_agent_max_vel_ground(
-		"agent.max_vel_ground", "maximum velocity on ground ", 2.0f, CVarFlags::EditCheckbox);
+		"agent.max_vel_ground", "maximum velocity on ground", 2.0f, CVarFlags::EditCheckbox);
 
 AutoCVarFloat cvar_friction_ground("agent.friction_ground", "friction on ground", 8.0f, CVarFlags::EditCheckbox);
 
@@ -86,15 +90,17 @@ void AgentSystem::update(World &world, float dt) {
 		glm::normalize(acc_direction);
 		glm::vec3 velocity = move_ground(acc_direction, previous_velocity, dt);
 		// Use dot instead of length when u want to check 0 value, to avoid calculating square root
-		if (glm::dot(velocity, velocity) > physics_manager.get_epsilon() && !is_killing) {
-			if (animation_instance.animation_handle.id !=
-					resource_manager.get_animation_handle("agent/agent_ANIM_GLTF/agent_walk.anim").id) {
-				animation_manager.change_animation(agent_data.model, "agent/agent_ANIM_GLTF/agent_walk.anim");
-			}
-		} else if (!is_killing) {
-			if (animation_instance.animation_handle.id !=
-					resource_manager.get_animation_handle("agent/agent_ANIM_GLTF/agent_idle.anim").id) {
-				animation_manager.change_animation(agent_data.model, "agent/agent_ANIM_GLTF/agent_idle.anim");
+		if (animation_timer <= 0.0f) {
+			if (glm::dot(velocity, velocity) > physics_manager.get_epsilon()) {
+				if (animation_instance.animation_handle.id !=
+						resource_manager.get_animation_handle("agent/agent_ANIM_GLTF/agent_walk.anim").id) {
+					animation_manager.change_animation(agent_data.model, "agent/agent_ANIM_GLTF/agent_walk.anim");
+				}
+			} else {
+				if (animation_instance.animation_handle.id !=
+						resource_manager.get_animation_handle("agent/agent_ANIM_GLTF/agent_idle.anim").id) {
+					animation_manager.change_animation(agent_data.model, "agent/agent_ANIM_GLTF/agent_idle.anim");
+				}
 			}
 		}
 
@@ -144,6 +150,40 @@ void AgentSystem::update(World &world, float dt) {
 			}
 		}
 
+		if (input_manager.is_action_just_pressed("agent_interact")) {
+			Ray ray{};
+			ray.origin = transform.get_global_position() + glm::vec3(0.0f, 1.0f, 0.0f);
+			ray.direction = model_tf.get_global_forward();
+			ray.ignore_list.emplace_back(entity);
+			ray.layer_name = "agent";
+			glm::vec3 end = ray.origin + ray.direction;
+			world.get_parent_scene()->get_render_scene().debug_draw.draw_arrow(ray.origin, end, { 1.0f, 0.0f, 0.0f });
+			HitInfo info;
+			if (CollisionSystem::ray_cast_layer(world, ray, info)) {
+				//TODO: remove log
+				// auto hit_name = world.get_component<Name>(info.entity);
+				// SPDLOG_INFO(hit_name.name);
+				auto &target_transform = world.get_component<Transform>(info.entity);
+				if (info.distance < cvar_agent_interaction_range.get()) {
+					if (world.has_component<Interactable>(info.entity)) {
+						auto &interactable = world.get_component<Interactable>(info.entity);
+						if ((interactable.type == InteractionType::Agent) && interactable.can_interact) {
+							interactable.triggered = true;
+							auto animation_handle = resource_manager.get_animation_handle(
+									"agent/agent_ANIM_GLTF/agent_interaction.anim");
+							if (animation_instance.animation_handle.id != animation_handle.id) {
+								animation_timer = resource_manager.get_animation(animation_handle).get_duration();
+								animation_manager.change_animation(
+										agent_data.model, "agent/agent_ANIM_GLTF/agent_interaction.anim");
+							}
+						}
+					}
+				}
+			}
+		}
+		if (animation_timer > 0) {
+			animation_timer -= (dt * 1000);
+		}
 		last_position = transform.position;
 		previous_velocity = velocity;
 	}
