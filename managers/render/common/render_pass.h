@@ -78,6 +78,7 @@ public:
 
 class GBufferPass : public RenderPass {
 public:
+	std::vector<SkinnedDrawCommand> skinned_draw_commands;
 	MaterialGBuffer material;
 	void startup() override;
 	void draw(RenderScene &scene) override;

@@ -18,4 +18,5 @@ target_link_libraries(${ENGINE_NAME} PUBLIC
         silence_render_manager
         silence_resource_manager
         silence_physics_manager
+        silence_animation_manager
         )

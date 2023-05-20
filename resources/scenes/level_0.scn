@@ -3,6 +3,12 @@
         "components": [
             {
                 "component_data": {
+                    "name": "Skrzyneczka"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 0.9996086359024048,
                         "x": 0.0,
@@ -21,12 +27,6 @@
                     }
                 },
                 "component_name": "Transform"
-            },
-            {
-                "component_data": {
-                    "name": "Skrzyneczka"
-                },
-                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -50,6 +50,12 @@
         "components": [
             {
                 "component_data": {
+                    "name": "Floor"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": 0.0,
@@ -71,12 +77,6 @@
             },
             {
                 "component_data": {
-                    "name": "Floor"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "material_type": 0,
                     "model_name": "items/planes/asfalt.mdl",
                     "scale_uv_with_transform": true
@@ -89,6 +89,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "name": "Camera"
+                },
+                "component_name": "Name"
+            },
             {
                 "component_data": {
                     "orientation": {
@@ -112,12 +118,6 @@
             },
             {
                 "component_data": {
-                    "name": "Camera"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "parent": 47
                 },
                 "component_name": "Parent"
@@ -134,6 +134,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "name": "Box"
+                },
+                "component_name": "Name"
+            },
             {
                 "component_data": {
                     "orientation": {
@@ -157,12 +163,6 @@
             },
             {
                 "component_data": {
-                    "name": "Box"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "parent": 15
                 },
                 "component_name": "Parent"
@@ -183,10 +183,9 @@
         "components": [
             {
                 "component_data": {
-                    "material_type": 0,
-                    "model_name": "agent/agent.skinmdl"
+                    "name": "Scorpio"
                 },
-                "component_name": "SkinnedModelInstance"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -211,15 +210,16 @@
             },
             {
                 "component_data": {
-                    "name": "Scorpio"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "animation_name": "agent/agent_ANIM_GLTF/agent_walk.anim"
                 },
                 "component_name": "AnimationInstance"
+            },
+            {
+                "component_data": {
+                    "material_type": 0,
+                    "model_name": "agent/agent.skinmdl"
+                },
+                "component_name": "SkinnedModelInstance"
             },
             {
                 "component_data": {
@@ -260,7 +260,7 @@
                     "path_9_y": 0.0,
                     "path_9_z": 5.534999847412109,
                     "rotation_speed": 6.0,
-                    "speed": 1.6
+                    "speed": 1.600000023841858
                 },
                 "component_name": "EnemyPath"
             }
@@ -272,10 +272,9 @@
         "components": [
             {
                 "component_data": {
-                    "material_type": 0,
-                    "model_name": "agent/agent.skinmdl"
+                    "name": "Agent"
                 },
-                "component_name": "SkinnedModelInstance"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -300,21 +299,22 @@
             },
             {
                 "component_data": {
-                    "name": "Agent"
+                    "parent": 46
                 },
-                "component_name": "Name"
+                "component_name": "Parent"
             },
             {
                 "component_data": {
-                    "animation_name": "scorpion/scorpion_idle_ANIM_GLTF/scorpion_idle_00_idle.anim"
+                    "animation_name": "agent/agent_ANIM_GLTF/agent_idle.anim"
                 },
                 "component_name": "AnimationInstance"
             },
             {
                 "component_data": {
-                    "parent": 46
+                    "material_type": 0,
+                    "model_name": "agent/agent.skinmdl"
                 },
-                "component_name": "Parent"
+                "component_name": "SkinnedModelInstance"
             }
         ],
         "entity": 6,
@@ -324,15 +324,9 @@
         "components": [
             {
                 "component_data": {
-                    "children": [
-                        10,
-                        9,
-                        8,
-                        11
-                    ],
-                    "children_count": 4
+                    "name": "Start"
                 },
-                "component_name": "Children"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -357,9 +351,15 @@
             },
             {
                 "component_data": {
-                    "name": "Start"
+                    "children": [
+                        10,
+                        9,
+                        8,
+                        11
+                    ],
+                    "children_count": 4
                 },
-                "component_name": "Name"
+                "component_name": "Children"
             }
         ],
         "entity": 7,
@@ -367,6 +367,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "name": "Cube 1x1"
+                },
+                "component_name": "Name"
+            },
             {
                 "component_data": {
                     "orientation": {
@@ -390,12 +396,6 @@
             },
             {
                 "component_data": {
-                    "name": "Cube 1x1"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "parent": 7
                 },
                 "component_name": "Parent"
@@ -414,6 +414,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "name": "Cube 1x1"
+                },
+                "component_name": "Name"
+            },
             {
                 "component_data": {
                     "orientation": {
@@ -437,12 +443,6 @@
             },
             {
                 "component_data": {
-                    "name": "Cube 1x1"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "parent": 7
                 },
                 "component_name": "Parent"
@@ -461,6 +461,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "name": "Cube 1x1"
+                },
+                "component_name": "Name"
+            },
             {
                 "component_data": {
                     "orientation": {
@@ -484,12 +490,6 @@
             },
             {
                 "component_data": {
-                    "name": "Cube 1x1"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "parent": 7
                 },
                 "component_name": "Parent"
@@ -508,6 +508,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "name": "Cube 1x1"
+                },
+                "component_name": "Name"
+            },
             {
                 "component_data": {
                     "orientation": {
@@ -531,12 +537,6 @@
             },
             {
                 "component_data": {
-                    "name": "Cube 1x1"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "parent": 7
                 },
                 "component_name": "Parent"
@@ -557,13 +557,9 @@
         "components": [
             {
                 "component_data": {
-                    "children": [
-                        13,
-                        14
-                    ],
-                    "children_count": 2
+                    "name": "First Cover"
                 },
-                "component_name": "Children"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -588,9 +584,13 @@
             },
             {
                 "component_data": {
-                    "name": "First Cover"
+                    "children": [
+                        13,
+                        14
+                    ],
+                    "children_count": 2
                 },
-                "component_name": "Name"
+                "component_name": "Children"
             }
         ],
         "entity": 12,
@@ -598,6 +598,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "name": "Cube 1x1"
+                },
+                "component_name": "Name"
+            },
             {
                 "component_data": {
                     "orientation": {
@@ -621,12 +627,6 @@
             },
             {
                 "component_data": {
-                    "name": "Cube 1x1"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "parent": 12
                 },
                 "component_name": "Parent"
@@ -645,6 +645,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "name": "Cube 1x1"
+                },
+                "component_name": "Name"
+            },
             {
                 "component_data": {
                     "orientation": {
@@ -668,12 +674,6 @@
             },
             {
                 "component_data": {
-                    "name": "Cube 1x1"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "parent": 12
                 },
                 "component_name": "Parent"
@@ -694,20 +694,9 @@
         "components": [
             {
                 "component_data": {
-                    "children": [
-                        4,
-                        16,
-                        17,
-                        18,
-                        19,
-                        21,
-                        20,
-                        31,
-                        45
-                    ],
-                    "children_count": 9
+                    "name": "Island On Left"
                 },
-                "component_name": "Children"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -732,9 +721,20 @@
             },
             {
                 "component_data": {
-                    "name": "Island On Left"
+                    "children": [
+                        4,
+                        16,
+                        17,
+                        18,
+                        19,
+                        21,
+                        20,
+                        31,
+                        45
+                    ],
+                    "children_count": 9
                 },
-                "component_name": "Name"
+                "component_name": "Children"
             }
         ],
         "entity": 15,
@@ -742,6 +742,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "name": "Cube 1x1"
+                },
+                "component_name": "Name"
+            },
             {
                 "component_data": {
                     "orientation": {
@@ -765,12 +771,6 @@
             },
             {
                 "component_data": {
-                    "name": "Cube 1x1"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "parent": 15
                 },
                 "component_name": "Parent"
@@ -789,6 +789,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "name": "Cube 1x1"
+                },
+                "component_name": "Name"
+            },
             {
                 "component_data": {
                     "orientation": {
@@ -812,12 +818,6 @@
             },
             {
                 "component_data": {
-                    "name": "Cube 1x1"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "parent": 15
                 },
                 "component_name": "Parent"
@@ -836,6 +836,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "name": "Cube 1x1"
+                },
+                "component_name": "Name"
+            },
             {
                 "component_data": {
                     "orientation": {
@@ -859,12 +865,6 @@
             },
             {
                 "component_data": {
-                    "name": "Cube 1x1"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "parent": 15
                 },
                 "component_name": "Parent"
@@ -883,6 +883,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "name": "Cover"
+                },
+                "component_name": "Name"
+            },
             {
                 "component_data": {
                     "orientation": {
@@ -906,12 +912,6 @@
             },
             {
                 "component_data": {
-                    "name": "Cover"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "parent": 15
                 },
                 "component_name": "Parent"
@@ -930,6 +930,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "name": "Cube 1x1"
+                },
+                "component_name": "Name"
+            },
             {
                 "component_data": {
                     "orientation": {
@@ -953,12 +959,6 @@
             },
             {
                 "component_data": {
-                    "name": "Cube 1x1"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "parent": 15
                 },
                 "component_name": "Parent"
@@ -977,6 +977,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "name": "Cube 1x1"
+                },
+                "component_name": "Name"
+            },
             {
                 "component_data": {
                     "orientation": {
@@ -1000,12 +1006,6 @@
             },
             {
                 "component_data": {
-                    "name": "Cube 1x1"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "parent": 15
                 },
                 "component_name": "Parent"
@@ -1026,14 +1026,9 @@
         "components": [
             {
                 "component_data": {
-                    "children": [
-                        39,
-                        38,
-                        37
-                    ],
-                    "children_count": 3
+                    "name": "End"
                 },
-                "component_name": "Children"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -1058,9 +1053,14 @@
             },
             {
                 "component_data": {
-                    "name": "End"
+                    "children": [
+                        39,
+                        38,
+                        37
+                    ],
+                    "children_count": 3
                 },
-                "component_name": "Name"
+                "component_name": "Children"
             }
         ],
         "entity": 22,
@@ -1068,6 +1068,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "name": "Cube 1x1"
+                },
+                "component_name": "Name"
+            },
             {
                 "component_data": {
                     "orientation": {
@@ -1091,12 +1097,6 @@
             },
             {
                 "component_data": {
-                    "name": "Cube 1x1"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "parent": 25
                 },
                 "component_name": "Parent"
@@ -1115,6 +1115,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "name": "Cube 1x1"
+                },
+                "component_name": "Name"
+            },
             {
                 "component_data": {
                     "orientation": {
@@ -1138,12 +1144,6 @@
             },
             {
                 "component_data": {
-                    "name": "Cube 1x1"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "parent": 25
                 },
                 "component_name": "Parent"
@@ -1164,15 +1164,9 @@
         "components": [
             {
                 "component_data": {
-                    "children": [
-                        24,
-                        23,
-                        1,
-                        30
-                    ],
-                    "children_count": 4
+                    "name": "Cover to the Right"
                 },
-                "component_name": "Children"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -1197,9 +1191,15 @@
             },
             {
                 "component_data": {
-                    "name": "Cover to the Right"
+                    "children": [
+                        24,
+                        23,
+                        1,
+                        30
+                    ],
+                    "children_count": 4
                 },
-                "component_name": "Name"
+                "component_name": "Children"
             }
         ],
         "entity": 25,
@@ -1209,14 +1209,9 @@
         "components": [
             {
                 "component_data": {
-                    "children": [
-                        27,
-                        29,
-                        28
-                    ],
-                    "children_count": 3
+                    "name": "Cover Middle"
                 },
-                "component_name": "Children"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -1241,9 +1236,14 @@
             },
             {
                 "component_data": {
-                    "name": "Cover Middle"
+                    "children": [
+                        27,
+                        29,
+                        28
+                    ],
+                    "children_count": 3
                 },
-                "component_name": "Name"
+                "component_name": "Children"
             }
         ],
         "entity": 26,
@@ -1251,6 +1251,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "name": "Cube 1x1"
+                },
+                "component_name": "Name"
+            },
             {
                 "component_data": {
                     "orientation": {
@@ -1274,12 +1280,6 @@
             },
             {
                 "component_data": {
-                    "name": "Cube 1x1"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "parent": 26
                 },
                 "component_name": "Parent"
@@ -1298,6 +1298,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "name": "Cube 1x1"
+                },
+                "component_name": "Name"
+            },
             {
                 "component_data": {
                     "orientation": {
@@ -1321,12 +1327,6 @@
             },
             {
                 "component_data": {
-                    "name": "Cube 1x1"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "parent": 26
                 },
                 "component_name": "Parent"
@@ -1345,6 +1345,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "name": "Cube 1x1"
+                },
+                "component_name": "Name"
+            },
             {
                 "component_data": {
                     "orientation": {
@@ -1368,12 +1374,6 @@
             },
             {
                 "component_data": {
-                    "name": "Cube 1x1"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "parent": 26
                 },
                 "component_name": "Parent"
@@ -1392,6 +1392,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "name": "Electric Box"
+                },
+                "component_name": "Name"
+            },
             {
                 "component_data": {
                     "orientation": {
@@ -1415,12 +1421,6 @@
             },
             {
                 "component_data": {
-                    "name": "Electric Box"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "parent": 25
                 },
                 "component_name": "Parent"
@@ -1439,6 +1439,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "name": "Cardboard Box"
+                },
+                "component_name": "Name"
+            },
             {
                 "component_data": {
                     "orientation": {
@@ -1462,12 +1468,6 @@
             },
             {
                 "component_data": {
-                    "name": "Cardboard Box"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "parent": 15
                 },
                 "component_name": "Parent"
@@ -1488,16 +1488,9 @@
         "components": [
             {
                 "component_data": {
-                    "children": [
-                        33,
-                        34,
-                        35,
-                        36,
-                        40
-                    ],
-                    "children_count": 5
+                    "name": "Walls"
                 },
-                "component_name": "Children"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -1522,9 +1515,16 @@
             },
             {
                 "component_data": {
-                    "name": "Walls"
+                    "children": [
+                        33,
+                        34,
+                        35,
+                        36,
+                        40
+                    ],
+                    "children_count": 5
                 },
-                "component_name": "Name"
+                "component_name": "Children"
             }
         ],
         "entity": 32,
@@ -1532,6 +1532,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "name": "Back"
+                },
+                "component_name": "Name"
+            },
             {
                 "component_data": {
                     "orientation": {
@@ -1555,12 +1561,6 @@
             },
             {
                 "component_data": {
-                    "name": "Back"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "parent": 32
                 },
                 "component_name": "Parent"
@@ -1579,6 +1579,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "name": "Left"
+                },
+                "component_name": "Name"
+            },
             {
                 "component_data": {
                     "orientation": {
@@ -1602,12 +1608,6 @@
             },
             {
                 "component_data": {
-                    "name": "Left"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "parent": 32
                 },
                 "component_name": "Parent"
@@ -1626,6 +1626,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "name": "Right"
+                },
+                "component_name": "Name"
+            },
             {
                 "component_data": {
                     "orientation": {
@@ -1649,12 +1655,6 @@
             },
             {
                 "component_data": {
-                    "name": "Right"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "parent": 32
                 },
                 "component_name": "Parent"
@@ -1673,6 +1673,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "name": "Right 2"
+                },
+                "component_name": "Name"
+            },
             {
                 "component_data": {
                     "orientation": {
@@ -1696,12 +1702,6 @@
             },
             {
                 "component_data": {
-                    "name": "Right 2"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "parent": 32
                 },
                 "component_name": "Parent"
@@ -1720,6 +1720,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "name": "Cube 1x1"
+                },
+                "component_name": "Name"
+            },
             {
                 "component_data": {
                     "orientation": {
@@ -1743,12 +1749,6 @@
             },
             {
                 "component_data": {
-                    "name": "Cube 1x1"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "parent": 22
                 },
                 "component_name": "Parent"
@@ -1767,6 +1767,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "name": "Cube 1x1"
+                },
+                "component_name": "Name"
+            },
             {
                 "component_data": {
                     "orientation": {
@@ -1790,12 +1796,6 @@
             },
             {
                 "component_data": {
-                    "name": "Cube 1x1"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "parent": 22
                 },
                 "component_name": "Parent"
@@ -1814,6 +1814,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "name": "Cube 1x1"
+                },
+                "component_name": "Name"
+            },
             {
                 "component_data": {
                     "orientation": {
@@ -1837,12 +1843,6 @@
             },
             {
                 "component_data": {
-                    "name": "Cube 1x1"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "parent": 22
                 },
                 "component_name": "Parent"
@@ -1863,6 +1863,12 @@
         "components": [
             {
                 "component_data": {
+                    "name": "Front"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 0.7731224894523621,
                         "x": 0.0,
@@ -1881,12 +1887,6 @@
                     }
                 },
                 "component_name": "Transform"
-            },
-            {
-                "component_data": {
-                    "name": "Front"
-                },
-                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -1954,14 +1954,9 @@
         "components": [
             {
                 "component_data": {
-                    "children": [
-                        41,
-                        43,
-                        44
-                    ],
-                    "children_count": 3
+                    "name": "Lights"
                 },
-                "component_name": "Children"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -1986,9 +1981,14 @@
             },
             {
                 "component_data": {
-                    "name": "Lights"
+                    "children": [
+                        41,
+                        43,
+                        44
+                    ],
+                    "children_count": 3
                 },
-                "component_name": "Name"
+                "component_name": "Children"
             }
         ],
         "entity": 42,
@@ -2086,6 +2086,12 @@
         "components": [
             {
                 "component_data": {
+                    "name": "Electric Box"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": -0.5,
                         "x": 0.5000000596046448,
@@ -2104,12 +2110,6 @@
                     }
                 },
                 "component_name": "Transform"
-            },
-            {
-                "component_data": {
-                    "name": "Electric Box"
-                },
-                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -2133,13 +2133,9 @@
         "components": [
             {
                 "component_data": {
-                    "children": [
-                        6,
-                        47
-                    ],
-                    "children_count": 2
+                    "name": "PlayerController"
                 },
-                "component_name": "Children"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -2164,9 +2160,21 @@
             },
             {
                 "component_data": {
-                    "name": "PlayerController"
+                    "children": [
+                        6,
+                        47
+                    ],
+                    "children_count": 2
                 },
-                "component_name": "Name"
+                "component_name": "Children"
+            },
+            {
+                "component_data": {
+                    "camera": 3,
+                    "camera_pivot": 47,
+                    "model": 6
+                },
+                "component_name": "AgentData"
             },
             {
                 "component_data": {
@@ -2184,14 +2192,6 @@
                     "radius": 0.5
                 },
                 "component_name": "ColliderSphere"
-            },
-            {
-                "component_data": {
-                    "camera": 3,
-                    "camera_pivot": 47,
-                    "model": 6
-                },
-                "component_name": "AgentData"
             }
         ],
         "entity": 46,
@@ -2201,12 +2201,9 @@
         "components": [
             {
                 "component_data": {
-                    "children": [
-                        3
-                    ],
-                    "children_count": 1
+                    "name": "CameraPivot"
                 },
-                "component_name": "Children"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -2231,15 +2228,18 @@
             },
             {
                 "component_data": {
-                    "name": "CameraPivot"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "parent": 46
                 },
                 "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "children": [
+                        3
+                    ],
+                    "children_count": 1
+                },
+                "component_name": "Children"
             }
         ],
         "entity": 47,
@@ -2247,21 +2247,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "center": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    "range": {
-                        "x": 40.0,
-                        "y": 1.0,
-                        "z": 40.0
-                    }
-                },
-                "component_name": "ColliderAABB"
-            },
             {
                 "component_data": {
                     "name": "Floor"
@@ -2291,12 +2276,6 @@
             },
             {
                 "component_data": {
-                    "name": "Floor"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "parent": 49
                 },
                 "component_name": "Parent"
@@ -2310,6 +2289,21 @@
                     "layer_name": "default"
                 },
                 "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {
+                    "center": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "range": {
+                        "x": 40.0,
+                        "y": 1.0,
+                        "z": 40.0
+                    }
+                },
+                "component_name": "ColliderAABB"
             }
         ],
         "entity": 48,
@@ -2319,15 +2313,9 @@
         "components": [
             {
                 "component_data": {
-                    "children": [
-                        48,
-                        50,
-                        51,
-                        52
-                    ],
-                    "children_count": 4
+                    "name": "Colliders"
                 },
-                "component_name": "Children"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -2352,9 +2340,15 @@
             },
             {
                 "component_data": {
-                    "name": "Colliders"
+                    "children": [
+                        48,
+                        50,
+                        51,
+                        52
+                    ],
+                    "children_count": 4
                 },
-                "component_name": "Name"
+                "component_name": "Children"
             }
         ],
         "entity": 49,
@@ -2362,21 +2356,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "center": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    "range": {
-                        "x": 25.0,
-                        "y": 6.0,
-                        "z": 1.0
-                    }
-                },
-                "component_name": "ColliderAABB"
-            },
             {
                 "component_data": {
                     "name": "Left Wall"
@@ -2406,12 +2385,6 @@
             },
             {
                 "component_data": {
-                    "name": "Left Wall"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "parent": 49
                 },
                 "component_name": "Parent"
@@ -2425,6 +2398,21 @@
                     "layer_name": "default"
                 },
                 "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {
+                    "center": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "range": {
+                        "x": 25.0,
+                        "y": 6.0,
+                        "z": 1.0
+                    }
+                },
+                "component_name": "ColliderAABB"
             }
         ],
         "entity": 50,
@@ -2434,18 +2422,9 @@
         "components": [
             {
                 "component_data": {
-                    "center": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    "range": {
-                        "x": 1.0,
-                        "y": 6.0,
-                        "z": 12.0
-                    }
+                    "name": "Back Wall"
                 },
-                "component_name": "ColliderAABB"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -2470,12 +2449,6 @@
             },
             {
                 "component_data": {
-                    "name": "Back Wall"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "parent": 49
                 },
                 "component_name": "Parent"
@@ -2489,6 +2462,21 @@
                     "layer_name": "default"
                 },
                 "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {
+                    "center": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "range": {
+                        "x": 1.0,
+                        "y": 6.0,
+                        "z": 12.0
+                    }
+                },
+                "component_name": "ColliderAABB"
             }
         ],
         "entity": 51,
@@ -2496,6 +2484,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "name": "Pochylnia"
+                },
+                "component_name": "Name"
+            },
             {
                 "component_data": {
                     "orientation": {
@@ -2516,12 +2510,6 @@
                     }
                 },
                 "component_name": "Transform"
-            },
-            {
-                "component_data": {
-                    "name": "Pochylnia"
-                },
-                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -2574,37 +2562,6 @@
         "components": [
             {
                 "component_data": {
-                    "acceleration": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    "mass": 1.0,
-                    "velocity": {
-                        "x": 0.0,
-                        "y": -1109.437744140625,
-                        "z": 0.0
-                    }
-                },
-                "component_name": "RigidBody"
-            },
-            {
-                "component_data": {
-                    "center": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    "range": {
-                        "x": 0.5,
-                        "y": 0.5,
-                        "z": 0.5
-                    }
-                },
-                "component_name": "ColliderAABB"
-            },
-            {
-                "component_data": {
                     "orientation": {
                         "w": 0.6533471941947937,
                         "x": -0.6531223058700562,
@@ -2626,6 +2583,22 @@
             },
             {
                 "component_data": {
+                    "acceleration": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "mass": 1.0,
+                    "velocity": {
+                        "x": 0.0,
+                        "y": -1109.437744140625,
+                        "z": 0.0
+                    }
+                },
+                "component_name": "RigidBody"
+            },
+            {
+                "component_data": {
                     "material_type": 0,
                     "model_name": "items/planes/paint.mdl",
                     "scale_uv_with_transform": true
@@ -2637,6 +2610,21 @@
                     "layer_name": "default"
                 },
                 "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {
+                    "center": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "range": {
+                        "x": 0.5,
+                        "y": 0.5,
+                        "z": 0.5
+                    }
+                },
+                "component_name": "ColliderAABB"
             }
         ],
         "entity": 53,

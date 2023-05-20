@@ -92,11 +92,15 @@ public:
 };
 
 class MaterialGBuffer : public Material {
+	Shader skinned_shader;
 public:
 	void startup() override;
 	void bind_resources(RenderScene &scene) override;
+	void bind_skinned_resources(RenderScene &scene);
 	void bind_instance_resources(ModelInstance &instance, Transform &transform) override;
 	void bind_mesh_resources(Mesh &mesh);
+	void bind_instance_resources(SkinnedModelInstance &instance, Transform &transform);
+	void bind_mesh_resources(SkinnedMesh &mesh);
 };
 
 class MaterialCombination : public Material {
