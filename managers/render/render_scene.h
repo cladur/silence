@@ -19,8 +19,10 @@ struct RenderScene {
 	glm::vec3 camera_pos;
 
 	DebugCamera debug_camera;
-	Transform camera_transform;
-	Camera camera_params;
+	Transform left_camera_transform;
+	Camera left_camera_params;
+	Transform right_camera_transform;
+	Camera right_camera_params;
 	Frustum frustum;
 	float aspect_ratio;
 

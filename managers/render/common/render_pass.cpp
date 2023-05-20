@@ -128,7 +128,6 @@ void GBufferPass::draw(RenderScene &scene) {
 			}
 		}
 	}
-	draw_commands.clear();
 
 #ifdef WIN32
 	material.bind_skinned_resources(scene);
@@ -142,7 +141,6 @@ void GBufferPass::draw(RenderScene &scene) {
 			mesh.draw();
 		}
 	}
-	skinned_draw_commands.clear();
 #endif
 }
 

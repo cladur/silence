@@ -3,8 +3,8 @@
 #include "ecs/systems/interactable_system.h"
 #include "ecs/world.h"
 #include "editor/editor.h"
-#include "physics/physics_manager.h"
 #include "managers/animation/ecs/animation_instance.h"
+#include "physics/physics_manager.h"
 #include "render/ecs/model_instance.h"
 #include "render/ecs/skinned_model_instance.h"
 #include "render/render_manager.h"
@@ -90,8 +90,13 @@ void Scene::update(float dt) {
 		if (world.has_component<Camera>(entity) && world.has_component<Transform>(entity)) {
 			auto &camera = world.get_component<Camera>(entity);
 			auto &transform = world.get_component<Transform>(entity);
-			get_render_scene().camera_params = camera;
-			get_render_scene().camera_transform = transform;
+			if (camera.right_side) {
+				get_render_scene().right_camera_params = camera;
+				get_render_scene().right_camera_transform = transform;
+			} else {
+				get_render_scene().left_camera_params = camera;
+				get_render_scene().left_camera_transform = transform;
+			}
 		}
 	}
 }

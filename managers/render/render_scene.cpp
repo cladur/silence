@@ -1,6 +1,7 @@
 #include "render_scene.h"
 
 #include "cvars/cvars.h"
+#include "display/display_manager.h"
 #include "game/menu_test.h"
 #include "render/transparent_elements/ui_manager.h"
 #include "render_manager.h"
@@ -20,7 +21,7 @@ AutoCVarFloat cvar_ssao_radius("render.ssao.radius", "SSAO radius", 0.5f);
 AutoCVarFloat cvar_ssao_bias("render.ssao.bias", "SSAO bias", 0.04f);
 AutoCVarInt cvar_ao_blur("render.ssao_blur", "Should SSAO be blurred", 1, CVarFlags::EditCheckbox);
 
-AutoCVarInt cvar_splitscreen("render.splitscreen", "Splitscreen", 1, CVarFlags::EditCheckbox);
+AutoCVarInt cvar_splitscreen("render.splitscreen", "Splitscreen", 0, CVarFlags::EditCheckbox);
 
 void RenderScene::startup() {
 	g_buffer_pass.startup();
@@ -64,6 +65,9 @@ void RenderScene::draw_viewport(bool right_side) {
 
 	aspect_ratio = render_extent.x / render_extent.y;
 
+	Camera &camera_params = right_side ? right_camera_params : left_camera_params;
+	Transform &camera_transform = right_side ? right_camera_transform : left_camera_transform;
+
 	if (!cvar_frustum_freeze.get()) {
 		if (cvar_debug_camera_use.get() && !cvar_frustum_force_scene_camera.get()) {
 			frustum.create_frustum_from_camera(debug_camera, aspect_ratio);
@@ -90,7 +94,6 @@ void RenderScene::draw_viewport(bool right_side) {
 	// Enable depth testing
 	glEnable(GL_DEPTH_TEST);
 
-	// unlit_pass.draw(*this);
 	g_buffer_pass.draw(*this);
 
 	pbr_buffer.bind();
@@ -155,9 +158,6 @@ void RenderScene::draw_viewport(bool right_side) {
 	}
 
 	debug_draw.draw();
-// #ifdef WIN32
-// 	skinned_unlit_pass.draw(*this);
-// #endif
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -168,6 +168,13 @@ void RenderScene::draw_viewport(bool right_side) {
 }
 
 void RenderScene::draw() {
+	static bool was_splitscreen = cvar_splitscreen.get();
+	if (was_splitscreen != cvar_splitscreen.get()) {
+		was_splitscreen = cvar_splitscreen.get();
+		glm::vec2 window_extent = DisplayManager::get().get_framebuffer_size();
+		resize_framebuffer(window_extent.x, window_extent.y);
+	}
+
 	if (cvar_splitscreen.get()) {
 		draw_viewport(false);
 
@@ -175,24 +182,32 @@ void RenderScene::draw() {
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, final_framebuffer.framebuffer_id);
 		glBlitFramebuffer(0, 0, render_extent.x, render_extent.y, 0, 0, render_extent.x, render_extent.y,
 				GL_COLOR_BUFFER_BIT, GL_NEAREST);
-		
-		glBlitFramebuffer(render_extent.x, 0, render_extent.x, render_extent.y, render_extent.x, 0, render_extent.x, render_extent.y,
-				GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
-		// draw_viewport(true);
+		draw_viewport(true);
 
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, render_framebuffer.framebuffer_id);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, final_framebuffer.framebuffer_id);
-		glBlitFramebuffer(render_extent.x, 0, render_extent.x, render_extent.y, render_extent.x, 0, render_extent.x, render_extent.y,
-				GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		glBlitFramebuffer(0, 0, render_extent.x, render_extent.y, render_extent.x, 0, 2 * render_extent.x,
+				render_extent.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 	} else {
 		draw_viewport();
+
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, render_framebuffer.framebuffer_id);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, final_framebuffer.framebuffer_id);
+		glBlitFramebuffer(0, 0, render_extent.x, render_extent.y, 0, 0, render_extent.x, render_extent.y,
+				GL_COLOR_BUFFER_BIT, GL_NEAREST);
 	}
+
+	draw_commands.clear();
+#ifdef WIN32
+	skinned_draw_commands.clear();
+#endif
+	debug_draw.vertices.clear();
 }
 
 void RenderScene::resize_framebuffer(uint32_t width, uint32_t height) {
 	final_framebuffer.resize(width, height);
-	
+
 	if (cvar_splitscreen.get()) {
 		width /= 2;
 	}

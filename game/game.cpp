@@ -328,7 +328,7 @@ void Game::custom_update(float dt) {
 
 		if (in_debug_mode) {
 			DebugCamera &cam = get_active_scene().get_render_scene().debug_camera;
-			cam.set_transform(get_active_scene().get_render_scene().camera_transform);
+			cam.set_transform(get_active_scene().get_render_scene().left_camera_transform);
 		}
 	}
 
