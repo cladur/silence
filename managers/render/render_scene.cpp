@@ -1,6 +1,7 @@
 #include "render_scene.h"
 
 #include "cvars/cvars.h"
+#include "display/display_manager.h"
 #include "game/menu_test.h"
 #include "render/transparent_elements/ui_manager.h"
 #include "render_manager.h"
@@ -20,6 +21,8 @@ AutoCVarFloat cvar_ssao_radius("render.ssao.radius", "SSAO radius", 0.5f);
 AutoCVarFloat cvar_ssao_bias("render.ssao.bias", "SSAO bias", 0.04f);
 AutoCVarInt cvar_ao_blur("render.ssao_blur", "Should SSAO be blurred", 1, CVarFlags::EditCheckbox);
 
+AutoCVarInt cvar_splitscreen("render.splitscreen", "Splitscreen", 0, CVarFlags::EditCheckbox);
+
 void RenderScene::startup() {
 	g_buffer_pass.startup();
 	pbr_pass.startup();
@@ -32,6 +35,7 @@ void RenderScene::startup() {
 
 	// Size of the viewport doesn't matter here, it will be resized either way
 	render_extent = glm::vec2(100, 100);
+	final_framebuffer.startup(render_extent.x, render_extent.y);
 	render_framebuffer.startup(render_extent.x, render_extent.y);
 	g_buffer.startup(render_extent.x, render_extent.y);
 	ssao_buffer.startup(render_extent.x, render_extent.y);
@@ -50,7 +54,7 @@ void RenderScene::startup() {
 	UIManager::get().set_render_scene(this);
 }
 
-void RenderScene::draw() {
+void RenderScene::draw_viewport(bool right_side) {
 	glDepthMask(GL_TRUE);
 	g_buffer.bind();
 	glViewport(0, 0, (int)render_extent.x, (int)render_extent.y);
@@ -60,6 +64,9 @@ void RenderScene::draw() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	aspect_ratio = render_extent.x / render_extent.y;
+
+	Camera &camera_params = right_side ? right_camera_params : left_camera_params;
+	Transform &camera_transform = right_side ? right_camera_transform : left_camera_transform;
 
 	if (!cvar_frustum_freeze.get()) {
 		if (cvar_debug_camera_use.get() && !cvar_frustum_force_scene_camera.get()) {
@@ -87,7 +94,6 @@ void RenderScene::draw() {
 	// Enable depth testing
 	glEnable(GL_DEPTH_TEST);
 
-	// unlit_pass.draw(*this);
 	g_buffer_pass.draw(*this);
 
 	pbr_buffer.bind();
@@ -152,9 +158,6 @@ void RenderScene::draw() {
 	}
 
 	debug_draw.draw();
-// #ifdef WIN32
-// 	skinned_unlit_pass.draw(*this);
-// #endif
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -164,7 +167,54 @@ void RenderScene::draw() {
 	glDisable(GL_BLEND);
 }
 
+void RenderScene::draw() {
+	static bool was_splitscreen = cvar_splitscreen.get();
+	static bool was_debug_camera = cvar_debug_camera_use.get();
+	if (was_splitscreen != cvar_splitscreen.get() || was_debug_camera != cvar_debug_camera_use.get()) {
+		was_splitscreen = cvar_splitscreen.get();
+		was_debug_camera = cvar_debug_camera_use.get();
+		glm::vec2 window_extent = DisplayManager::get().get_framebuffer_size();
+		resize_framebuffer(window_extent.x, window_extent.y);
+	}
+
+	if (cvar_splitscreen.get() && !cvar_debug_camera_use.get()) {
+		draw_viewport(false);
+
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, render_framebuffer.framebuffer_id);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, final_framebuffer.framebuffer_id);
+		glBlitFramebuffer(0, 0, render_extent.x, render_extent.y, 0, 0, render_extent.x, render_extent.y,
+				GL_COLOR_BUFFER_BIT, GL_NEAREST);
+
+		draw_viewport(true);
+
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, render_framebuffer.framebuffer_id);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, final_framebuffer.framebuffer_id);
+		glBlitFramebuffer(0, 0, render_extent.x, render_extent.y, render_extent.x, 0, 2 * render_extent.x,
+				render_extent.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+	} else {
+		bool right_side = !*CVarSystem::get()->get_int_cvar("game.controlling_agent");
+		draw_viewport(right_side);
+
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, render_framebuffer.framebuffer_id);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, final_framebuffer.framebuffer_id);
+		glBlitFramebuffer(0, 0, render_extent.x, render_extent.y, 0, 0, render_extent.x, render_extent.y,
+				GL_COLOR_BUFFER_BIT, GL_NEAREST);
+	}
+
+	draw_commands.clear();
+#ifdef WIN32
+	skinned_draw_commands.clear();
+#endif
+	debug_draw.vertices.clear();
+}
+
 void RenderScene::resize_framebuffer(uint32_t width, uint32_t height) {
+	final_framebuffer.resize(width, height);
+
+	if (cvar_splitscreen.get() && !cvar_debug_camera_use.get()) {
+		width /= 2;
+	}
+
 	render_framebuffer.resize(width, height);
 	g_buffer.resize(width, height);
 	ssao_buffer.resize(width, height);
@@ -181,7 +231,7 @@ void RenderScene::queue_draw(ModelInstance *model_instance, Transform *transform
 	draw_command.model_instance = model_instance;
 	draw_command.transform = transform;
 
-	g_buffer_pass.draw_commands.push_back(draw_command);
+	draw_commands.push_back(draw_command);
 }
 
 void RenderScene::queue_skinned_draw(SkinnedModelInstance *model_instance, Transform *transform) {
@@ -190,6 +240,6 @@ void RenderScene::queue_skinned_draw(SkinnedModelInstance *model_instance, Trans
 	draw_command.transform = transform;
 
 #ifdef WIN32
-	g_buffer_pass.skinned_draw_commands.push_back(draw_command);
+	skinned_draw_commands.push_back(draw_command);
 #endif
 }

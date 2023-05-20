@@ -29,19 +29,8 @@ public:
 	virtual void draw(RenderScene &scene) = 0;
 };
 
-class SkinnedPassUnlit : public SkinnedPass {
-public:
-	std::vector<SkinnedDrawCommand> draw_commands;
-
-	MaterialSkinnedUnlit material;
-	void startup() override;
-	void draw(RenderScene &scene) override;
-};
-
 class RenderPass {
 public:
-	std::vector<DrawCommand> draw_commands;
-
 	virtual void startup() = 0;
 	virtual void draw(RenderScene &scene) = 0;
 };
@@ -78,7 +67,6 @@ public:
 
 class GBufferPass : public RenderPass {
 public:
-	std::vector<SkinnedDrawCommand> skinned_draw_commands;
 	MaterialGBuffer material;
 	void startup() override;
 	void draw(RenderScene &scene) override;

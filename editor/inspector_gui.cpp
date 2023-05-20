@@ -493,6 +493,13 @@ void Inspector::show_camera() {
 
 		show_float("Fov", camera.fov);
 
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Right Side");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		ImGui::Checkbox("##Right Side", &camera.right_side);
+
 		ImGui::EndTable();
 	}
 }

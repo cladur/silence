@@ -26,6 +26,9 @@ AutoCVarFloat cvar_hacker_friction_ground(
 AutoCVarFloat cvar_hacker_camera_sensitivity(
 		"settings.hacker_camera_sensitivity", "camera sensitivity", 0.1f, CVarFlags::EditCheckbox);
 
+AutoCVarInt cvar_hacker_on_keyboard(
+		"settings.hacker_on_keyboard", "Control hacker with keyboard + mouse", 0, CVarFlags::EditCheckbox);
+
 bool HackerSystem::shoot_raycast(
 		Transform &transform, World &world, HackerData &hacker_data, float dt, glm::vec3 direction) {
 	Ray ray;
@@ -34,7 +37,7 @@ bool HackerSystem::shoot_raycast(
 	ray.layer_name = "hacker";
 	ray.ignore_list.emplace_back(current_camera_entity);
 	glm::vec3 end = ray.origin + direction * 100.0f;
-	world.get_parent_scene()->get_render_scene().debug_draw.draw_arrow(ray.origin, end, glm::vec3(1.0f, 0.0f, 0.0f));
+	// world.get_parent_scene()->get_render_scene().debug_draw.draw_arrow(ray.origin, end, glm::vec3(1.0f, 0.0f, 0.0f));
 	HitInfo info;
 	bool hit = CollisionSystem::ray_cast_layer(world, ray, info);
 
@@ -140,31 +143,36 @@ void HackerSystem::update(World &world, float dt) {
 		camera_forward = glm::normalize(camera_forward);
 		auto camera_right = camera_pivot_tf.get_global_right();
 
-		if (!is_on_camera) {
-			world.get_parent_scene()->get_render_scene().debug_draw.draw_arrow(
-					camera_tf.get_global_position() + glm::vec3(0.0f, 0.0f, -1.0f),
-					camera_tf.get_global_position() + glm::vec3(0.0f, 0.0f, -1.0f) + real_camera_forward * 100.0f,
-					glm::vec3(1.0f, 0.0f, 0.0f));
-		} else {
-			world.get_parent_scene()->get_render_scene().debug_draw.draw_arrow(
-					camera_tf.get_global_position() + glm::vec3(0.0f, 0.0f, -1.0f),
-					camera_tf.get_global_position() + glm::vec3(0.0f, 0.0f, 1.0f) - real_camera_forward * 100.0f,
-					glm::vec3(1.0f, 0.0f, 0.0f));
-		}
+		// if (!is_on_camera) {
+		// 	world.get_parent_scene()->get_render_scene().debug_draw.draw_arrow(
+		// 			camera_tf.get_global_position() + glm::vec3(0.0f, 0.0f, -1.0f),
+		// 			camera_tf.get_global_position() + glm::vec3(0.0f, 0.0f, -1.0f) + real_camera_forward * 100.0f,
+		// 			glm::vec3(1.0f, 0.0f, 0.0f));
+		// } else {
+		// 	world.get_parent_scene()->get_render_scene().debug_draw.draw_arrow(
+		// 			camera_tf.get_global_position() + glm::vec3(0.0f, 0.0f, -1.0f),
+		// 			camera_tf.get_global_position() + glm::vec3(0.0f, 0.0f, 1.0f) - real_camera_forward * 100.0f,
+		// 			glm::vec3(1.0f, 0.0f, 0.0f));
+		// }
 
 		glm::vec3 acc_direction = { 0, 0, 0 };
-		if (input_manager.is_action_pressed("move_forward")) {
+		if (input_manager.is_action_pressed("hacker_move_forward")) {
 			acc_direction += camera_forward;
 		}
-		if (input_manager.is_action_pressed("move_backward")) {
+		if (input_manager.is_action_pressed("hacker_move_backward")) {
 			acc_direction -= camera_forward;
 		}
-		if (input_manager.is_action_pressed("move_left")) {
+		if (input_manager.is_action_pressed("hacker_move_left")) {
 			acc_direction += camera_right;
 		}
-		if (input_manager.is_action_pressed("move_right")) {
+		if (input_manager.is_action_pressed("hacker_move_right")) {
 			acc_direction -= camera_right;
 		}
+
+		if (*CVarSystem::get()->get_int_cvar("debug_camera.use")) {
+			acc_direction = glm::vec3(0.0f);
+		}
+
 		if (input_manager.is_action_just_pressed("mouse_left")) {
 			if (!is_on_camera) {
 				shoot_raycast(camera_tf, world, hacker_data, dt, real_camera_forward);
@@ -195,7 +203,21 @@ void HackerSystem::update(World &world, float dt) {
 
 		transform.add_position(glm::vec3(velocity.x, 0.0, velocity.z));
 
-		glm::vec2 mouse_delta = input_manager.get_mouse_delta();
+		glm::vec2 mouse_delta = glm::vec2(0.0f);
+		mouse_delta.x = input_manager.get_axis("hacker_look_left", "hacker_look_right");
+		mouse_delta.y = input_manager.get_axis("hacker_look_up", "hacker_look_down");
+		mouse_delta *= 20.0;
+
+		if (!*CVarSystem::get()->get_int_cvar("game.controlling_agent")) {
+			if (glm::length2(mouse_delta) < glm::length2(input_manager.get_mouse_delta())) {
+				mouse_delta = input_manager.get_mouse_delta();
+			}
+		}
+
+		if (*CVarSystem::get()->get_int_cvar("debug_camera.use")) {
+			mouse_delta = glm::vec2(0.0f);
+		}
+
 		if (!is_on_camera) {
 			camera_pivot_tf.add_euler_rot(
 					glm::vec3(mouse_delta.y, 0.0f, 0.0f) * cvar_hacker_camera_sensitivity.get() * dt);
@@ -225,7 +247,7 @@ void HackerSystem::update(World &world, float dt) {
 		ray.origin = transform.get_global_position() + glm::vec3(0.0f, -0.01f, 0.0f);
 		ray.direction = glm::vec3(0.0f, -1.0f, 0.0f);
 		glm::vec3 end = ray.origin + ray.direction;
-		world.get_parent_scene()->get_render_scene().debug_draw.draw_arrow(ray.origin, end);
+		// world.get_parent_scene()->get_render_scene().debug_draw.draw_arrow(ray.origin, end);
 		HitInfo info;
 		if (CollisionSystem::ray_cast(world, ray, info)) {
 			// If the hacker is not on the ground, move him down
