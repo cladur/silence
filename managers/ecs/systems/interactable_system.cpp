@@ -28,5 +28,5 @@ void InteractableSystem::update(World &world, float dt) {
 
 void InteractableSystem::no_interaction(World &world, Interactable &interactable, Entity entity) {
 	SPDLOG_WARN("No interaction set for entity {}, turning off interactions on this object", entity);
-	interactable.can_interact = false;
+	//interactable.can_interact = false;
 }

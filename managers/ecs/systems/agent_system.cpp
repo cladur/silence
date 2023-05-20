@@ -48,8 +48,6 @@ void AgentSystem::update(World &world, float dt) {
 		auto &camera_tf = world.get_component<Transform>(agent_data.camera);
 		auto &animation_instance = world.get_component<AnimationInstance>(agent_data.model);
 
-		
-
 		auto &dd = world.get_parent_scene()->get_render_scene().debug_draw;
 
 		auto camera_forward = camera_pivot_tf.get_global_forward();
@@ -74,20 +72,19 @@ void AgentSystem::update(World &world, float dt) {
 		glm::normalize(acc_direction);
 		glm::vec3 velocity = move_ground(acc_direction, previous_velocity, dt);
 		// Use dot instead of length when u want to check 0 value, to avoid calculating square root
-		if (glm::dot(velocity, velocity) > physics_manager.get_epsilon()) {
-			if (animation_instance.animation_handle.id !=
-					resource_manager.get_animation_handle("agent/agent_ANIM_GLTF/agent_walk.anim").id) {
-				animation_manager.change_animation(agent_data.model, "agent/agent_ANIM_GLTF/agent_walk.anim");
+		if (animation_timer <= 0.0f) {
+			if (glm::dot(velocity, velocity) > physics_manager.get_epsilon()) {
+				if (animation_instance.animation_handle.id !=
+						resource_manager.get_animation_handle("agent/agent_ANIM_GLTF/agent_walk.anim").id) {
+					animation_manager.change_animation(agent_data.model, "agent/agent_ANIM_GLTF/agent_walk.anim");
+				}
+			} else {
+				if (animation_instance.animation_handle.id !=
+						resource_manager.get_animation_handle("agent/agent_ANIM_GLTF/agent_idle.anim").id) {
+					SPDLOG_INFO("IDLE");
+					animation_manager.change_animation(agent_data.model, "agent/agent_ANIM_GLTF/agent_idle.anim");
+				}
 			}
-			//			animation_instance.animation_handle =
-			//					resource_manager.get_animation_handle("agent/agent_ANIM_GLTF/agent_walk.anim");
-		} else {
-			if (animation_instance.animation_handle.id !=
-					resource_manager.get_animation_handle("agent/agent_ANIM_GLTF/agent_idle.anim").id) {
-				animation_manager.change_animation(agent_data.model, "agent/agent_ANIM_GLTF/agent_idle.anim");
-			}
-			//			animation_instance.animation_handle =
-			//					resource_manager.get_animation_handle("agent/agent_ANIM_GLTF/agent_idle.anim");
 		}
 
 		transform.add_position(glm::vec3(velocity.x, 0.0, velocity.z));
@@ -136,29 +133,38 @@ void AgentSystem::update(World &world, float dt) {
 			}
 		}
 
-		if(input_manager.is_action_just_pressed("agent_interact")) {
+		if (input_manager.is_action_just_pressed("agent_interact")) {
 			Ray ray{};
 			ray.origin = transform.get_global_position() + glm::vec3(0.0f, 1.0f, 0.0f);
 			ray.direction = model_tf.get_global_forward();
+			ray.ignore_list.emplace_back(entity);
+			ray.layer_name = "agent";
 			glm::vec3 end = ray.origin + ray.direction;
-			world.get_parent_scene()->get_render_scene().debug_draw.draw_arrow(ray.origin, end, {1.0f , 0.0f, 0.0f});
+			world.get_parent_scene()->get_render_scene().debug_draw.draw_arrow(ray.origin, end, { 1.0f, 0.0f, 0.0f });
 			HitInfo info;
-			//TODO: replace ray_cast with ray_cast_layer
-			if (CollisionSystem::ray_cast(world, ray, info)) {
+			if (CollisionSystem::ray_cast_layer(world, ray, info)) {
 				//TODO: remove log
-				auto hit_name = world.get_component<Name>(info.entity);
-				SPDLOG_INFO(hit_name.name);
+				// auto hit_name = world.get_component<Name>(info.entity);
+				// SPDLOG_INFO(hit_name.name);
 
-				if(auto interactable = world.has_component<Interactable>(info.entity)) {
-					if (animation_instance.animation_handle.id != resource_manager.get_animation_handle("agent/agent_ANIM_GLTF/agent_interaction.anim").id) {
-				animation_manager.change_animation(agent_data.model, "agent/agent_ANIM_GLTF/agent_interaction.anim");
-			}
+				if (world.has_component<Interactable>(info.entity)) {
+					auto &interactable = world.get_component<Interactable>(info.entity);
+					if ((interactable.type == InteractionType::Agent) && interactable.can_interact) {
+						interactable.triggered = true;
+						auto animation_handle =
+								resource_manager.get_animation_handle("agent/agent_ANIM_GLTF/agent_interaction.anim");
+						if (animation_instance.animation_handle.id != animation_handle.id) {
+							animation_timer = resource_manager.get_animation(animation_handle).get_duration();
+							animation_manager.change_animation(
+									agent_data.model, "agent/agent_ANIM_GLTF/agent_interaction.anim");
+						}
+					}
 				};
-
-			 }
-
+			}
 		}
-
+		if (animation_timer > 0) {
+			animation_timer -= (dt * 1000);
+		}
 		last_position = transform.position;
 		previous_velocity = velocity;
 	}
