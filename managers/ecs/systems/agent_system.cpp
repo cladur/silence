@@ -60,19 +60,24 @@ void AgentSystem::update(World &world, float dt) {
 		auto camera_right = camera_pivot_tf.get_global_right();
 
 		glm::vec3 acc_direction = { 0, 0, 0 };
-		if (input_manager.is_action_pressed("move_forward")) {
+		if (input_manager.is_action_pressed("agent_move_forward")) {
 			acc_direction += camera_forward;
 		}
-		if (input_manager.is_action_pressed("move_backward")) {
+		if (input_manager.is_action_pressed("agent_move_backward")) {
 			acc_direction -= camera_forward;
 		}
-		if (input_manager.is_action_pressed("move_left")) {
+		if (input_manager.is_action_pressed("agent_move_left")) {
 			acc_direction += camera_right;
 		}
-		if (input_manager.is_action_pressed("move_right")) {
+		if (input_manager.is_action_pressed("agent_move_right")) {
 			acc_direction -= camera_right;
 		}
 		glm::normalize(acc_direction);
+
+		if (*CVarSystem::get()->get_int_cvar("debug_camera.use")) {
+			acc_direction = glm::vec3(0.0f, 0.0f, 0.0f);
+		}
+
 		glm::vec3 velocity = move_ground(acc_direction, previous_velocity, dt);
 		// Use dot instead of length when u want to check 0 value, to avoid calculating square root
 		if (animation_timer <= 0.0f) {
@@ -91,11 +96,13 @@ void AgentSystem::update(World &world, float dt) {
 
 		transform.add_position(glm::vec3(velocity.x, 0.0, velocity.z));
 
-		glm::vec2 mouse_delta = input_manager.get_mouse_delta();
-		camera_pivot_tf.add_euler_rot(glm::vec3(mouse_delta.y, 0.0f, 0.0f) * cvar_camera_sensitivity.get() * dt);
-		camera_pivot_tf.add_global_euler_rot(
-				glm::vec3(0.0f, -mouse_delta.x, 0.0f) * cvar_camera_sensitivity.get() * dt);
-
+		if (*CVarSystem::get()->get_int_cvar("game.controlling_agent") &&
+				!*CVarSystem::get()->get_int_cvar("debug_camera.use")) {
+			glm::vec2 mouse_delta = input_manager.get_mouse_delta();
+			camera_pivot_tf.add_euler_rot(glm::vec3(mouse_delta.y, 0.0f, 0.0f) * cvar_camera_sensitivity.get() * dt);
+			camera_pivot_tf.add_global_euler_rot(
+					glm::vec3(0.0f, -mouse_delta.x, 0.0f) * cvar_camera_sensitivity.get() * dt);
+		}
 		static glm::vec3 last_position = transform.position;
 
 		// Lerp model_tf towards movement direction

@@ -16,7 +16,7 @@ bool InputManager::is_action_valid(const std::string &action_name) {
 
 	auto action = actions[action_name];
 	if (action.keys.empty()) {
-		SPDLOG_WARN("Action {} has no keys assigned to it", action_name);
+		// SPDLOG_WARN("Action {} has no keys assigned to it", action_name);
 		return false;
 	}
 	return true;
@@ -31,6 +31,19 @@ inline void InputManager::poll_stick_axis(
 	} else {
 		key_state[positive_key] = 0.0f;
 		key_state[negative_key] = -value;
+	}
+
+	float deadzone = 0.25f;
+	if (key_state[positive_key] > deadzone) {
+		key_state[positive_key] = (key_state[positive_key] - deadzone) / (1.0f - deadzone);
+	} else {
+		key_state[positive_key] = 0.0f;
+	}
+
+	if (key_state[negative_key] > deadzone) {
+		key_state[negative_key] = (key_state[negative_key] - deadzone) / (1.0f - deadzone);
+	} else {
+		key_state[negative_key] = 0.0f;
 	}
 }
 

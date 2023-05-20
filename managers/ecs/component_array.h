@@ -48,7 +48,11 @@ public:
 	}
 
 	T &get_data(Entity entity) {
-		assert(entityToIndexMap.find(entity) != entityToIndexMap.end() && "Component does not exist");
+		if (entityToIndexMap.find(entity) == entityToIndexMap.end()) {
+			std::string component_name = typeid(T).name();
+			SPDLOG_ERROR("Component '{}' does not exist on entity: {}", component_name, entity);
+			assert(false);
+		}
 
 		// Return a reference to the entity's component
 		return componentArray[entityToIndexMap[entity]];
