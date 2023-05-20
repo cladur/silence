@@ -12,27 +12,6 @@ AutoCVarFloat cvar_bloom_strength("render.bloom_strength", "bloom strength", 0.0
 
 AutoCVarFloat cvar_gamma("render.gamma", "gamma", 2.2f, CVarFlags::EditFloatDrag);
 
-
-void SkinnedPassUnlit::startup() {
-	material.startup();
-}
-
-void SkinnedPassUnlit::draw(RenderScene &scene) {
-	ResourceManager &resource_manager = ResourceManager::get();
-	material.bind_resources(scene);
-	for (auto &cmd : draw_commands) {
-		SkinnedModelInstance &instance = *cmd.model_instance;
-		Transform &transform = *cmd.transform;
-		material.bind_instance_resources(instance, transform);
-		SkinnedModel &model = resource_manager.get_skinned_model(instance.model_handle);
-		for (auto &mesh : model.meshes) {
-			material.bind_mesh_resources(mesh);
-			mesh.draw();
-		}
-	}
-	draw_commands.clear();
-}
-
 void PBRPass::startup() {
 	material.startup();
 }
@@ -116,7 +95,7 @@ void GBufferPass::startup() {
 void GBufferPass::draw(RenderScene &scene) {
 	ResourceManager &resource_manager = ResourceManager::get();
 	material.bind_resources(scene);
-	for (auto &cmd : draw_commands) {
+	for (auto &cmd : scene.draw_commands) {
 		ModelInstance &instance = *cmd.model_instance;
 		Transform &transform = *cmd.transform;
 		material.bind_instance_resources(instance, transform);
@@ -131,7 +110,7 @@ void GBufferPass::draw(RenderScene &scene) {
 
 #ifdef WIN32
 	material.bind_skinned_resources(scene);
-	for (auto &cmd : skinned_draw_commands) {
+	for (auto &cmd : scene.skinned_draw_commands) {
 		SkinnedModelInstance &instance = *cmd.model_instance;
 		Transform &transform = *cmd.transform;
 		material.bind_instance_resources(instance, transform);
@@ -221,10 +200,9 @@ void BloomPass::draw(RenderScene &scene) {
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, scene.combination_buffer.texture_id);
 
-	for (auto & mip : mips) {
+	for (auto &mip : mips) {
 		glViewport(0, 0, mip.size.x, mip.size.y);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-				GL_TEXTURE_2D, mip.texture_id, 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mip.texture_id, 0);
 		utils::render_quad();
 
 		material.downsample.set_vec2("srcResolution", mip.size);
@@ -247,8 +225,7 @@ void BloomPass::draw(RenderScene &scene) {
 		glBindTexture(GL_TEXTURE_2D, mip.texture_id);
 
 		glViewport(0, 0, next_mip.size.x, next_mip.size.y);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-				GL_TEXTURE_2D, next_mip.texture_id, 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, next_mip.texture_id, 0);
 		utils::render_quad();
 	}
 	glDisable(GL_BLEND);

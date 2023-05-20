@@ -51,6 +51,7 @@ struct RenderScene {
 	std::vector<TransparentObject> transparent_objects;
 
 	std::vector<DrawCommand> draw_commands;
+	std::vector<SkinnedDrawCommand> skinned_draw_commands;
 
 	bool draw_skybox = false;
 

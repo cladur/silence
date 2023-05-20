@@ -228,7 +228,7 @@ void RenderScene::queue_draw(ModelInstance *model_instance, Transform *transform
 	draw_command.model_instance = model_instance;
 	draw_command.transform = transform;
 
-	g_buffer_pass.draw_commands.push_back(draw_command);
+	draw_commands.push_back(draw_command);
 }
 
 void RenderScene::queue_skinned_draw(SkinnedModelInstance *model_instance, Transform *transform) {
@@ -237,6 +237,6 @@ void RenderScene::queue_skinned_draw(SkinnedModelInstance *model_instance, Trans
 	draw_command.transform = transform;
 
 #ifdef WIN32
-	g_buffer_pass.skinned_draw_commands.push_back(draw_command);
+	skinned_draw_commands.push_back(draw_command);
 #endif
 }
