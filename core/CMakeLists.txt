@@ -37,6 +37,7 @@ add_library(${CORE_LIB_NAME} STATIC
         components/collider_sphere.h
         components/collider_obb.h
         components/enemy_path_component.h
+        components/interactable_component.h
         cvars/cvars.cpp
         cvars/cvars.h)
 

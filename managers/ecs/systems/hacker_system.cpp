@@ -1,5 +1,6 @@
 #include "hacker_system.h"
 #include "components/hacker_data_component.h"
+#include "components/interactable_component.h"
 #include "components/light_component.h"
 #include "components/transform_component.h"
 #include "ecs/world.h"
@@ -36,15 +37,22 @@ bool shoot_raycast(Transform &transform, World &world, float dt, glm::vec3 direc
 	bool hit = CollisionSystem::ray_cast_layer(world, ray, info);
 
 	if (hit) {
+		Entity hit_entity = info.entity;
 		if (info.entity != 0) {
-			if (world.has_component<Transform>(info.entity)) {
-				std::string name;
-				if (world.has_component<Name>(info.entity)) {
-					name = world.get_component<Name>(info.entity).name;
-					SPDLOG_ERROR("HIT: {}", name);
-				} else {
-					SPDLOG_ERROR("HIT: {}", info.entity);
+			if (world.has_component<Interactable>(hit_entity)) {
+				auto &interactable = world.get_component<Interactable>(hit_entity);
+
+				if (!(interactable.type == InteractionType::Hacker)) {
+					SPDLOG_WARN("Entity {} is not a hacker interactable", hit_entity);
+					return false;
 				}
+
+				if (!interactable.can_interact) {
+					SPDLOG_WARN("Entity {} cannot be interacted with", hit_entity);
+					return false;
+				}
+
+				interactable.triggered = true;
 				return true;
 			}
 		}

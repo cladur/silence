@@ -74,6 +74,7 @@ void CollisionSystem::resolve_collision_dynamic(World &world) {
 			switch (first | second) {
 				case CollisionFlag::SPHERE_SPHERE:
 					physics_manager.resolve_collision_sphere(world, e1, e2);
+
 					break;
 				case CollisionFlag::AABB_AABB:
 					physics_manager.resolve_collision_aabb(world, e1, e2);

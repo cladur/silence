@@ -4,6 +4,7 @@
 #include "components/collider_sphere.h"
 #include "components/collider_tag_component.h"
 #include "components/fmod_listener_component.h"
+#include "components/interactable_component.h"
 #include "components/light_component.h"
 #include "components/rigidbody_component.h"
 #include "physics/physics_manager.h"
@@ -51,6 +52,7 @@ void Inspector::show_components() {
 	SHOW_COMPONENT(AgentData, show_agent_data);
 	SHOW_COMPONENT(HackerData, show_hacker_data);
 	SHOW_COMPONENT(EnemyPath, show_enemy_path);
+	SHOW_COMPONENT(Interactable, show_interactable);
 
 	for (int i = 0; i < remove_component_queue.size(); i++) {
 		auto [entity, component_to_remove] = remove_component_queue.front();
@@ -687,6 +689,54 @@ void Inspector::show_enemy_path() {
 	}
 }
 
+void Inspector::show_interactable() {
+	auto &interactable = world->get_component<Interactable>(selected_entity);
+	if (ImGui::CollapsingHeader("Interactable", tree_flags)) {
+		remove_component_popup<Interactable>();
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("Interactable", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Interaction type");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		if (ImGui::BeginCombo("##Interaction type", magic_enum::enum_name(interactable.type).data())) {
+			for (auto type : magic_enum::enum_values<InteractionType>()) {
+				bool is_selected = (interactable.type == type);
+				if (ImGui::Selectable(magic_enum::enum_name(type).data(), is_selected)) {
+					interactable.type = type;
+				}
+				if (is_selected) {
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+			ImGui::EndCombo();
+		}
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Interaction");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		if (ImGui::BeginCombo("##Interaction", magic_enum::enum_name(interactable.interaction).data())) {
+			for (auto type : magic_enum::enum_values<Interaction>()) {
+				bool is_selected = (interactable.interaction == type);
+				if (ImGui::Selectable(magic_enum::enum_name(type).data(), is_selected)) {
+					interactable.interaction = type;
+				}
+				if (is_selected) {
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+			ImGui::EndCombo();
+		}
+
+		ImGui::EndTable();
+	}
+}
+
 bool Inspector::show_vec3(
 		const char *label, glm::vec3 &vec3, float speed, float reset_value, float min_value, float max_value) {
 	bool changed = false;
@@ -810,6 +860,7 @@ void Inspector::show_add_component() {
 			SHOW_ADD_COMPONENT(AgentData);
 			SHOW_ADD_COMPONENT(HackerData);
 			SHOW_ADD_COMPONENT(EnemyPath);
+			SHOW_ADD_COMPONENT(Interactable);
 
 			ImGui::EndPopup();
 		}

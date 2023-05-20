@@ -1,5 +1,6 @@
 #include "scene.h"
 #include "display/display_manager.h"
+#include "ecs/systems/interactable_system.h"
 #include "ecs/world.h"
 #include "editor/editor.h"
 #include "physics/physics_manager.h"
@@ -50,6 +51,7 @@ Scene::Scene() {
 	world.register_component<AgentData>();
 	world.register_component<HackerData>();
 	world.register_component<EnemyPath>();
+	world.register_component<Interactable>();
 
 	// Systems
 	// TODO: Set update order instead of using default value
@@ -80,6 +82,7 @@ void Scene::register_game_systems() {
 	world.register_system<AgentSystem>(EcsOnUpdate);
 	world.register_system<HackerSystem>(EcsOnUpdate);
 	world.register_system<EnemyPathing>(EcsOnUpdate);
+	world.register_system<InteractableSystem>(EcsOnUpdate);
 }
 
 void Scene::update(float dt) {
