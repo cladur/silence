@@ -72,21 +72,6 @@ void AgentSystem::update(World &world, float dt) {
 		if (input_manager.is_action_pressed("move_right")) {
 			acc_direction -= camera_right;
 		}
-
-		static bool is_killing = false;
-		{ // Temporary stuff
-			if (input_manager.is_action_pressed("mouse_left")) {
-				if (animation_instance.animation_handle.id !=
-						resource_manager.get_animation_handle("agent/agent_ANIM_GLTF/agent_grab_and_stab.anim").id) {
-					animation_manager.change_animation(
-							agent_data.model, "agent/agent_ANIM_GLTF/agent_grab_and_stab.anim");
-				}
-				is_killing = true;
-			}
-			if (input_manager.is_action_pressed("mouse_right")) {
-				is_killing = false;
-			}
-		}
 		glm::normalize(acc_direction);
 		glm::vec3 velocity = move_ground(acc_direction, previous_velocity, dt);
 		// Use dot instead of length when u want to check 0 value, to avoid calculating square root
