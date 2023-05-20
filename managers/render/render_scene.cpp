@@ -20,6 +20,8 @@ AutoCVarFloat cvar_ssao_radius("render.ssao.radius", "SSAO radius", 0.5f);
 AutoCVarFloat cvar_ssao_bias("render.ssao.bias", "SSAO bias", 0.04f);
 AutoCVarInt cvar_ao_blur("render.ssao_blur", "Should SSAO be blurred", 1, CVarFlags::EditCheckbox);
 
+AutoCVarInt cvar_splitscreen("render.splitscreen", "Splitscreen", 1, CVarFlags::EditCheckbox);
+
 void RenderScene::startup() {
 	g_buffer_pass.startup();
 	pbr_pass.startup();
@@ -32,6 +34,7 @@ void RenderScene::startup() {
 
 	// Size of the viewport doesn't matter here, it will be resized either way
 	render_extent = glm::vec2(100, 100);
+	final_framebuffer.startup(render_extent.x, render_extent.y);
 	render_framebuffer.startup(render_extent.x, render_extent.y);
 	g_buffer.startup(render_extent.x, render_extent.y);
 	ssao_buffer.startup(render_extent.x, render_extent.y);
@@ -50,7 +53,7 @@ void RenderScene::startup() {
 	UIManager::get().set_render_scene(this);
 }
 
-void RenderScene::draw() {
+void RenderScene::draw_viewport(bool right_side) {
 	glDepthMask(GL_TRUE);
 	g_buffer.bind();
 	glViewport(0, 0, (int)render_extent.x, (int)render_extent.y);
@@ -164,7 +167,36 @@ void RenderScene::draw() {
 	glDisable(GL_BLEND);
 }
 
+void RenderScene::draw() {
+	if (cvar_splitscreen.get()) {
+		draw_viewport(false);
+
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, render_framebuffer.framebuffer_id);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, final_framebuffer.framebuffer_id);
+		glBlitFramebuffer(0, 0, render_extent.x, render_extent.y, 0, 0, render_extent.x, render_extent.y,
+				GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		
+		glBlitFramebuffer(render_extent.x, 0, render_extent.x, render_extent.y, render_extent.x, 0, render_extent.x, render_extent.y,
+				GL_COLOR_BUFFER_BIT, GL_NEAREST);
+
+		// draw_viewport(true);
+
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, render_framebuffer.framebuffer_id);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, final_framebuffer.framebuffer_id);
+		glBlitFramebuffer(render_extent.x, 0, render_extent.x, render_extent.y, render_extent.x, 0, render_extent.x, render_extent.y,
+				GL_COLOR_BUFFER_BIT, GL_NEAREST);
+	} else {
+		draw_viewport();
+	}
+}
+
 void RenderScene::resize_framebuffer(uint32_t width, uint32_t height) {
+	final_framebuffer.resize(width, height);
+	
+	if (cvar_splitscreen.get()) {
+		width /= 2;
+	}
+
 	render_framebuffer.resize(width, height);
 	g_buffer.resize(width, height);
 	ssao_buffer.resize(width, height);

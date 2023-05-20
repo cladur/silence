@@ -35,6 +35,7 @@ struct RenderScene {
 	BloomPass bloom_pass;
 
 	Framebuffer render_framebuffer;
+	Framebuffer final_framebuffer;
 	GBuffer g_buffer;
 	PBRBuffer pbr_buffer;
 	SSAOBuffer ssao_buffer;
@@ -52,6 +53,7 @@ struct RenderScene {
 	bool draw_skybox = false;
 
 	void startup();
+	void draw_viewport(bool right_side = false);
 	void draw();
 	void resize_framebuffer(uint32_t width, uint32_t height);
 
