@@ -10,6 +10,7 @@ AnimationInstance::AnimationInstance() {
 	resource_manager.load_animation("agent/agent_ANIM_GLTF/agent_crouch.anim");
 	resource_manager.load_animation("agent/agent_ANIM_GLTF/agent_walk.anim");
 	resource_manager.load_animation("agent/agent_ANIM_GLTF/agent_idle.anim");
+	resource_manager.load_animation("agent/agent_ANIM_GLTF/agent_grab_and_stab.anim");
 }
 
 AnimationInstance::AnimationInstance(const char *path) {

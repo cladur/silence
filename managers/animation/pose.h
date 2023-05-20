@@ -7,8 +7,13 @@ struct Xform {
 	glm::vec3 translation;
 	glm::quat rotation;
 
-	glm::mat4 operator*(const Xform &other) const {
-		return glm::mat4(*this) * glm::mat4(other);
+	Xform operator*(const Xform &other) const {
+		return Xform{ translation + rotation * other.translation, rotation * other.rotation };
+	}
+
+	void operator*=(const Xform &other) {
+		translation += rotation * other.translation;
+		rotation *= other.rotation;
 	}
 
 	explicit operator glm::mat4() const {
@@ -17,7 +22,7 @@ struct Xform {
 };
 
 struct Pose {
-	std::vector<Xform> xfroms;
+	std::vector<Xform> xforms;
 };
 
 #endif //SILENCE_POSE_H

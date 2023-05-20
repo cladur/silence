@@ -5,6 +5,7 @@
 #include "ecs/world.h"
 #include "engine/scene.h"
 
+#include "animation/animation_manager.h"
 #include "ecs/systems/collision_system.h"
 #include "physics/physics_manager.h"
 
@@ -107,6 +108,10 @@ void HackerSystem::startup(World &world) {
 
 void HackerSystem::update(World &world, float dt) {
 	InputManager &input_manager = InputManager::get();
+	;
+	AnimationManager &animation_manager = AnimationManager::get();
+	ResourceManager &resource_manager = ResourceManager::get();
+	PhysicsManager &physics_manager = PhysicsManager::get();
 	for (const Entity entity : entities) {
 		auto &transform = world.get_component<Transform>(entity);
 		auto &hacker_data = world.get_component<HackerData>(entity);
@@ -172,12 +177,20 @@ void HackerSystem::update(World &world, float dt) {
 		}
 		glm::normalize(acc_direction);
 		glm::vec3 velocity = move_ground(acc_direction, previous_velocity, dt);
-		if (glm::length(velocity) > 0.001f) {
-			animation_instance.animation_handle = ResourceManager::get().get_animation_handle(
-					"scorpion/scorpion_idle_ANIM_GLTF/scorpion_idle_00_walk.anim");
+		if (glm::dot(velocity, velocity) > physics_manager.get_epsilon()) {
+			if (animation_instance.animation_handle.id !=
+					resource_manager.get_animation_handle("scorpion/scorpion_idle_ANIM_GLTF/scorpion_idle_00_walk.anim")
+							.id) {
+				animation_manager.change_animation(
+						hacker_data.model, "scorpion/scorpion_idle_ANIM_GLTF/scorpion_idle_00_walk.anim");
+			}
 		} else {
-			animation_instance.animation_handle = ResourceManager::get().get_animation_handle(
-					"scorpion/scorpion_idle_ANIM_GLTF/scorpion_idle_00_idle.anim");
+			if (animation_instance.animation_handle.id !=
+					resource_manager.get_animation_handle("scorpion/scorpion_idle_ANIM_GLTF/scorpion_idle_00_idle.anim")
+							.id) {
+				animation_manager.change_animation(
+						hacker_data.model, "scorpion/scorpion_idle_ANIM_GLTF/scorpion_idle_00_idle.anim");
+			}
 		}
 
 		transform.add_position(glm::vec3(velocity.x, 0.0, velocity.z));

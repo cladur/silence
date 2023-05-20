@@ -152,19 +152,19 @@ public:
 		this->changed = changed;
 	}
 
-	void set_position(glm::vec3 new_position) {
+	void set_position(const glm::vec3 &new_position) {
 		this->position = new_position;
 		this->changed = true;
 	}
-	void add_position(glm::vec3 add_position) {
+	void add_position(const glm::vec3 &add_position) {
 		this->position += add_position;
 		this->changed = true;
 	}
-	void set_euler_rot(glm::vec3 new_euler_rot) {
+	void set_euler_rot(const glm::vec3 &new_euler_rot) {
 		this->orientation = glm::normalize(glm::quat(new_euler_rot));
 		this->changed = true;
 	}
-	void add_euler_rot(glm::vec3 add_euler_rot) {
+	void add_euler_rot(const glm::vec3 &add_euler_rot) {
 		// Convert the Euler angles to quaternions
 		glm::quat yaw = glm::angleAxis(add_euler_rot.y, get_up());
 		glm::quat pitch = glm::angleAxis(add_euler_rot.x, get_right());
@@ -182,7 +182,7 @@ public:
 		this->changed = true;
 	}
 
-	void add_global_euler_rot(glm::vec3 add_euler_rot) {
+	void add_global_euler_rot(const glm::vec3 &add_euler_rot) {
 		// Convert the Euler angles to quaternions
 		glm::quat yaw = glm::angleAxis(add_euler_rot.y, glm::vec3(0.0f, 1.0f, 0.0f));
 		glm::quat pitch = glm::angleAxis(add_euler_rot.x, glm::vec3(1.0f, 0.0f, 0.0f));
@@ -200,16 +200,16 @@ public:
 		this->changed = true;
 	}
 
-	void set_orientation(glm::quat new_orientation) {
+	void set_orientation(const glm::quat &new_orientation) {
 		this->orientation = glm::normalize(new_orientation);
 		this->changed = true;
 	}
-	void add_orientation(glm::quat add_orientation) {
+	void add_orientation(const glm::quat &add_orientation) {
 		this->orientation *= add_orientation;
 		this->orientation = glm::normalize(this->orientation);
 		this->changed = true;
 	}
-	void set_scale(glm::vec3 new_scale) {
+	void set_scale(const glm::vec3 &new_scale) {
 		this->scale = new_scale;
 		this->changed = true;
 	}
@@ -229,7 +229,7 @@ public:
 		return this->local_model_matrix;
 	}
 
-	void update_global_model_matrix(glm::mat4 parent_model) {
+	void update_global_model_matrix(const glm::mat4 &parent_model) {
 		update_changed_this_frame();
 		this->global_model_matrix = parent_model * get_local_model_matrix();
 	}

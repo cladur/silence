@@ -23,21 +23,22 @@ void AnimationManager::update_pose(AnimData &data, float dt) {
 	ResourceManager &resource_manager = ResourceManager::get();
 	Animation &animation = resource_manager.get_animation(data.animation->animation_handle);
 	float &current_time = data.animation->current_time;
-	current_time += static_cast<float>(animation.get_ticks_per_second()) * dt;
+	current_time += data.animation->ticks_per_second * dt;
 
 	if (current_time < animation.get_duration() || data.animation->is_looping) {
-		current_time = fmod(current_time, static_cast<float>(animation.get_duration()));
-		animation.sample(data, data.current_pose);
+		current_time = fmod(current_time, animation.get_duration());
+		animation.sample(data, data.local_pose);
 		if (data.has_changed) {
 			Animation &next_animation = resource_manager.get_animation(data.animation->next_animation);
 			Pose next_pose;
 			current_time = 0.0f;
 			next_animation.sample(data, next_pose);
-			blend_poses(data.current_pose, next_pose, data.current_pose, cvar_alpha.get());
+			blend_poses(data.local_pose, next_pose, data.local_pose, cvar_alpha.get());
 			data.has_changed = false;
 			data.animation->animation_handle = data.animation->next_animation;
 		}
 		local_to_model(data);
+		model_to_final(data);
 	}
 }
 
@@ -47,27 +48,35 @@ void AnimationManager::local_to_model(AnimData &data) {
 
 	Rig &rig = model.rig;
 
-	std::vector<Xform> &pose_matrices = data.current_pose.xfroms;
-	std::vector<glm::mat4> global_matrices(pose_matrices.size());
+	std::vector<Xform> &local_matrices = data.local_pose.xforms;
+	data.model_pose.xforms.resize(data.local_pose.xforms.size());
+	std::vector<Xform> &global_matrices = data.model_pose.xforms;
 
-	for (int32_t i = 0; i < model.rig.names.size(); ++i) {
-		std::string &node_name = rig.names[i];
-
+	for (int32_t i = 0; i < local_matrices.size(); ++i) {
 		int32_t parent_index = rig.parents[i];
 		if (parent_index != -1) {
-			global_matrices[i] = global_matrices[parent_index] * glm::mat4(pose_matrices[i]);
+			global_matrices[i] = global_matrices[parent_index] * local_matrices[i];
 		} else {
-			global_matrices[i] = glm::mat4(pose_matrices[i]);
+			global_matrices[i] = local_matrices[i];
 		}
+	}
+}
 
-		const auto &joint = model.joint_map.find(node_name);
+void AnimationManager::model_to_final(AnimData &data) {
+	ResourceManager &resource_manager = ResourceManager::get();
+	SkinnedModel &model = resource_manager.get_skinned_model(data.model->model_handle);
+
+	Rig &rig = model.rig;
+
+	std::vector<Xform> &global_matrices = data.model_pose.xforms;
+
+	for (int32_t i = 0; i < global_matrices.size(); ++i) {
+		const auto &joint = model.joint_map.find(rig.names[i]);
 		if (joint != model.joint_map.end()) {
 			int32_t index = joint->second.id;
 
-			glm::mat4 offset =
-					glm::translate(glm::mat4(1.0f), joint->second.translation) * glm::toMat4(joint->second.rotation);
-
-			data.model->bone_matrices[index] = global_matrices[i] * offset;
+			data.model->bone_matrices[index] =
+					glm::mat4(global_matrices[i] * Xform(joint->second.translation, joint->second.rotation));
 		}
 	}
 }
@@ -87,18 +96,45 @@ void AnimationManager::change_animation(Entity entity, const std::string &new_an
 }
 
 void AnimationManager::blend_poses(const Pose &pose1, const Pose &pose2, Pose &result_pose, float alpha) {
-	if (pose1.xfroms.size() != pose2.xfroms.size() || pose1.xfroms.size() != result_pose.xfroms.size()) {
-		SPDLOG_WARN("Poses have not equal xfroms count");
+	if (pose1.xforms.size() != pose2.xforms.size() || pose1.xforms.size() != result_pose.xforms.size()) {
+		SPDLOG_WARN("Poses have not equal xforms count {} {} {}", pose1.xforms.size(), pose2.xforms.size(),
+				result_pose.xforms.size());
 		assert(false);
 		return;
 	}
 
-	for (int32_t i = 0; i < result_pose.xfroms.size(); ++i) {
-		slerp(pose1.xfroms[i], pose2.xfroms[i], result_pose.xfroms[i], alpha);
+	for (int32_t i = 0; i < result_pose.xforms.size(); ++i) {
+		slerp(pose1.xforms[i], pose2.xforms[i], result_pose.xforms[i], alpha);
 	}
 }
 
 void AnimationManager::slerp(const Xform &m1, const Xform &m2, Xform &result, float alpha) {
 	result.rotation = glm::normalize(glm::slerp(m1.rotation, m2.rotation, alpha));
 	result.translation = glm::mix(m1.translation, m2.translation, alpha);
+}
+
+glm::mat4 AnimationManager::get_bone_transform(Entity holder, std::string &bone_name) {
+	ResourceManager &resource_manager = ResourceManager::get();
+	AnimData &data = animation_map[holder];
+	SkinnedModel &model = resource_manager.get_skinned_model(data.model->model_handle);
+
+	for (int32_t i = 0; i < data.model_pose.xforms.size(); ++i) {
+		if (model.rig.names[i] == bone_name) {
+			return glm::mat4(data.model_pose.xforms[i]);
+		}
+	}
+	SPDLOG_WARN("Bone with name {} not found in model {}.", bone_name, model.name);
+	bone_name = "";
+	return glm::mat4(1.0f);
+}
+
+void AnimationManager::attach_to_entity(World &world, Entity holder, Entity attached, const std::string &bone_name) {
+	if (!world.has_component<SkinnedModelInstance>(holder)) {
+		SPDLOG_WARN("Cannot attach to {}, entity has not have SkinnedModelInstance.", holder);
+		assert(false);
+		return;
+	}
+
+	Attachment component{ bone_name, holder };
+	world.add_component(attached, component);
 }

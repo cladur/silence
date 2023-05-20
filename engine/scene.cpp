@@ -1,14 +1,16 @@
 #include "scene.h"
+#include "animation/ecs/animation_instance.h"
 #include "display/display_manager.h"
 #include "ecs/systems/interactable_system.h"
 #include "ecs/world.h"
 #include "editor/editor.h"
 #include "physics/physics_manager.h"
-#include "managers/animation/ecs/animation_instance.h"
 #include "render/ecs/model_instance.h"
 #include "render/ecs/skinned_model_instance.h"
 #include "render/render_manager.h"
 
+#include "animation/ecs/animation_system.h"
+#include "animation/ecs/attachment_system.h"
 #include "ecs/systems/agent_system.h"
 #include "ecs/systems/collider_draw.h"
 #include "ecs/systems/collision_system.h"
@@ -19,7 +21,6 @@
 #include "ecs/systems/light_system.h"
 #include "ecs/systems/physics_system.h"
 #include "ecs/systems/root_parent_system.h"
-#include "managers/animation/ecs/animation_system.h"
 #include "render/ecs/frustum_draw_system.h"
 #include "render/ecs/render_system.h"
 #include "render/ecs/skinned_render_system.h"
@@ -52,13 +53,14 @@ Scene::Scene() {
 	world.register_component<HackerData>();
 	world.register_component<EnemyPath>();
 	world.register_component<Interactable>();
+	world.register_component<Attachment>();
 
 	// Systems
 	// TODO: Set update order instead of using default value
 	world.register_system<RenderSystem>();
 	world.register_system<SkinnedRenderSystem>();
 	world.register_system<ColliderDrawSystem>();
-	world.register_system<AnimationSystem>();
+	world.register_system<AnimationSystem>(EcsOnLoad);
 	world.register_system<FrustumDrawSystem>();
 	world.register_system<LightSystem>();
 	world.register_system<EnemyPathDraw>();
@@ -66,6 +68,7 @@ Scene::Scene() {
 	// Transform
 	world.register_system<IsolatedEntitiesSystem>(EcsOnLoad);
 	world.register_system<RootParentSystem>(EcsOnLoad);
+	world.register_system<AttachmentSystem>(EcsPostLoad);
 
 	auto &physics_manager = PhysicsManager::get();
 	physics_manager.add_collision_layer("default");

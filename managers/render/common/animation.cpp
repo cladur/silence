@@ -28,12 +28,7 @@ void Animation::load_from_asset(const char *path) {
 		channels.insert(std::make_pair(info.node_names[i], Channel(nodes[i])));
 	}
 
-	ticks_per_second = 1000;
 	duration_ms = info.duration_seconds * SECONDS_TO_MS;
-}
-
-int32_t Animation::get_ticks_per_second() const {
-	return ticks_per_second;
 }
 
 float Animation::get_duration() const {
@@ -43,17 +38,17 @@ float Animation::get_duration() const {
 void Animation::sample(AnimData &data, Pose &result) {
 	ResourceManager &resource_manager = ResourceManager::get();
 	const Rig &rig = resource_manager.get_skinned_model(data.model->model_handle).rig;
-	result.xfroms.resize(rig.names.size());
-	for (int32_t i = 0; i < result.xfroms.size(); ++i) {
-		result.xfroms[i].translation = rig.positions[i];
-		result.xfroms[i].rotation = rig.rotations[i];
+	result.xforms.resize(rig.names.size());
+	for (int32_t i = 0; i < result.xforms.size(); ++i) {
+		result.xforms[i].translation = rig.positions[i];
+		result.xforms[i].rotation = rig.rotations[i];
 
 		const auto &it = channels.find(rig.names[i]);
 		if (it != channels.end()) {
 			Channel &channel = it->second;
 
 			channel.update(data.animation->current_time);
-			result.xfroms[i] = channel.local_transform;
+			result.xforms[i] = channel.local_transform;
 		}
 	}
 }

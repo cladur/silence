@@ -22,6 +22,7 @@ private:
 	void show_children();
 	void show_skinnedmodelinstance();
 	void show_animationinstance();
+	void show_attachment();
 	void show_modelinstance();
 	void show_fmodlistener();
 	void show_camera();

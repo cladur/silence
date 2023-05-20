@@ -47,8 +47,6 @@ void AgentSystem::update(World &world, float dt) {
 		auto &camera_tf = world.get_component<Transform>(agent_data.camera);
 		auto &animation_instance = world.get_component<AnimationInstance>(agent_data.model);
 
-		
-
 		auto &dd = world.get_parent_scene()->get_render_scene().debug_draw;
 
 		auto camera_forward = camera_pivot_tf.get_global_forward();
@@ -70,23 +68,34 @@ void AgentSystem::update(World &world, float dt) {
 		if (input_manager.is_action_pressed("move_right")) {
 			acc_direction -= camera_right;
 		}
+
+		static bool is_killing = false;
+		{ // Temporary stuff
+			if (input_manager.is_action_pressed("mouse_left")) {
+				if (animation_instance.animation_handle.id !=
+						resource_manager.get_animation_handle("agent/agent_ANIM_GLTF/agent_grab_and_stab.anim").id) {
+					animation_manager.change_animation(
+							agent_data.model, "agent/agent_ANIM_GLTF/agent_grab_and_stab.anim");
+				}
+				is_killing = true;
+			}
+			if (input_manager.is_action_pressed("mouse_right")) {
+				is_killing = false;
+			}
+		}
 		glm::normalize(acc_direction);
 		glm::vec3 velocity = move_ground(acc_direction, previous_velocity, dt);
 		// Use dot instead of length when u want to check 0 value, to avoid calculating square root
-		if (glm::dot(velocity, velocity) > physics_manager.get_epsilon()) {
+		if (glm::dot(velocity, velocity) > physics_manager.get_epsilon() && !is_killing) {
 			if (animation_instance.animation_handle.id !=
 					resource_manager.get_animation_handle("agent/agent_ANIM_GLTF/agent_walk.anim").id) {
 				animation_manager.change_animation(agent_data.model, "agent/agent_ANIM_GLTF/agent_walk.anim");
 			}
-			//			animation_instance.animation_handle =
-			//					resource_manager.get_animation_handle("agent/agent_ANIM_GLTF/agent_walk.anim");
-		} else {
+		} else if (!is_killing) {
 			if (animation_instance.animation_handle.id !=
 					resource_manager.get_animation_handle("agent/agent_ANIM_GLTF/agent_idle.anim").id) {
 				animation_manager.change_animation(agent_data.model, "agent/agent_ANIM_GLTF/agent_idle.anim");
 			}
-			//			animation_instance.animation_handle =
-			//					resource_manager.get_animation_handle("agent/agent_ANIM_GLTF/agent_idle.anim");
 		}
 
 		transform.add_position(glm::vec3(velocity.x, 0.0, velocity.z));
