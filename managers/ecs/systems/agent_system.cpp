@@ -81,7 +81,6 @@ void AgentSystem::update(World &world, float dt) {
 			} else {
 				if (animation_instance.animation_handle.id !=
 						resource_manager.get_animation_handle("agent/agent_ANIM_GLTF/agent_idle.anim").id) {
-					SPDLOG_INFO("IDLE");
 					animation_manager.change_animation(agent_data.model, "agent/agent_ANIM_GLTF/agent_idle.anim");
 				}
 			}
