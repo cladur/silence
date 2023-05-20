@@ -19,8 +19,10 @@ struct RenderScene {
 	glm::vec3 camera_pos;
 
 	DebugCamera debug_camera;
-	Transform camera_transform;
-	Camera camera_params;
+	Transform left_camera_transform;
+	Camera left_camera_params;
+	Transform right_camera_transform;
+	Camera right_camera_params;
 	Frustum frustum;
 	float aspect_ratio;
 
@@ -35,6 +37,7 @@ struct RenderScene {
 	BloomPass bloom_pass;
 
 	Framebuffer render_framebuffer;
+	Framebuffer final_framebuffer;
 	GBuffer g_buffer;
 	PBRBuffer pbr_buffer;
 	SSAOBuffer ssao_buffer;
@@ -48,10 +51,12 @@ struct RenderScene {
 	std::vector<TransparentObject> transparent_objects;
 
 	std::vector<DrawCommand> draw_commands;
+	std::vector<SkinnedDrawCommand> skinned_draw_commands;
 
 	bool draw_skybox = false;
 
 	void startup();
+	void draw_viewport(bool right_side = false);
 	void draw();
 	void resize_framebuffer(uint32_t width, uint32_t height);
 

@@ -49,6 +49,19 @@ enum class InputKey {
 	LEFT,
 	RIGHT,
 
+	F1,
+	F2,
+	F3,
+	F4,
+	F5,
+	F6,
+	F7,
+	F8,
+	F9,
+	F10,
+	F11,
+	F12,
+
 	MOUSE_LEFT,
 	MOUSE_RIGHT,
 	MOUSE_MIDDLE,
@@ -215,6 +228,30 @@ static InputKey glfw_key_to_input_key(int key) {
 			return InputKey::LEFT;
 		case GLFW_KEY_RIGHT:
 			return InputKey::RIGHT;
+		case GLFW_KEY_F1:
+			return InputKey::F1;
+		case GLFW_KEY_F2:
+			return InputKey::F2;
+		case GLFW_KEY_F3:
+			return InputKey::F3;
+		case GLFW_KEY_F4:
+			return InputKey::F4;
+		case GLFW_KEY_F5:
+			return InputKey::F5;
+		case GLFW_KEY_F6:
+			return InputKey::F6;
+		case GLFW_KEY_F7:
+			return InputKey::F7;
+		case GLFW_KEY_F8:
+			return InputKey::F8;
+		case GLFW_KEY_F9:
+			return InputKey::F9;
+		case GLFW_KEY_F10:
+			return InputKey::F10;
+		case GLFW_KEY_F11:
+			return InputKey::F11;
+		case GLFW_KEY_F12:
+			return InputKey::F12;
 		default:
 			return InputKey::UNKNOWN;
 	}

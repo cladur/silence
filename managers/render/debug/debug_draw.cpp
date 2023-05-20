@@ -48,8 +48,6 @@ void DebugDraw::draw() {
 	glBindVertexArray(vao);
 	glDrawArrays(GL_LINES, 0, vertices.size());
 	glBindVertexArray(0);
-
-	vertices.clear();
 }
 
 void DebugDraw::draw_line(const glm::vec3 &from, const glm::vec3 &to, const glm::vec3 &color) {

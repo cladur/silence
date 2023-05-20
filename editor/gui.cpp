@@ -181,6 +181,9 @@ void Editor::display_entity(EditorScene &scene, Entity entity, const std::string
 	}
 
 	bool is_leaf = true;
+	if (world.has_component<Children>(entity)) {
+		is_leaf = false;
+	}
 	if (is_leaf) {
 		node_flags |= ImGuiTreeNodeFlags_Leaf;
 	}
