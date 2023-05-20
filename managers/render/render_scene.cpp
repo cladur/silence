@@ -192,7 +192,11 @@ void RenderScene::draw() {
 		glBlitFramebuffer(0, 0, render_extent.x, render_extent.y, render_extent.x, 0, 2 * render_extent.x,
 				render_extent.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 	} else {
-		bool right_side = !*CVarSystem::get()->get_int_cvar("game.controlling_agent");
+		int *controlling_agent = CVarSystem::get()->get_int_cvar("game.controlling_agent");
+		bool right_side = false;
+		if (controlling_agent != nullptr) {
+			right_side = !*controlling_agent;
+		}
 		draw_viewport(right_side);
 
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, render_framebuffer.framebuffer_id);
