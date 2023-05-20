@@ -266,6 +266,9 @@ void input_setup() {
 
 	input_manager.add_action("mouse_left");
 	input_manager.add_key_to_action("mouse_left", InputKey::MOUSE_LEFT);
+
+	input_manager.add_action("mouse_right");
+	input_manager.add_key_to_action("mouse_right", InputKey::MOUSE_RIGHT);
 }
 
 void handle_camera(DebugCamera &cam, float dt) {

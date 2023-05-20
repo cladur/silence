@@ -18,6 +18,9 @@ void InteractableSystem::update(World &world, float dt) {
 				case Interaction::NoInteraction:
 					no_interaction(world, interactable, entity);
 					break;
+				case HackerCameraJump:
+					interactable.triggered = false;
+					break;
 			}
 		}
 	}

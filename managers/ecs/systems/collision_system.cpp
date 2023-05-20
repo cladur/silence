@@ -521,12 +521,16 @@ bool CollisionSystem::ray_cast_layer(World &world, const Ray &ray, HitInfo &resu
 			continue;
 		}
 
-		ColliderTag &tag = world.get_component<ColliderTag>(entity);
+		if (std::find(ray.ignore_list.begin(), ray.ignore_list.end(), entity) != ray.ignore_list.end()) {
+			continue;
+		}
+
+		auto &tag = world.get_component<ColliderTag>(entity);
 		if (!physics_manager.are_layers_collide(ray.layer_name, tag.layer_name)) {
 			continue;
 		}
 
-		Transform &transform = world.get_component<Transform>(entity);
+		auto &transform = world.get_component<Transform>(entity);
 		HitInfo info;
 		info.entity = entity;
 		if (world.has_component<ColliderAABB>(entity)) {

@@ -4,6 +4,7 @@
 struct HackerData {
 	Entity model;
 	Entity camera_pivot;
+	Entity scorpion_camera_transform;
 	Entity camera;
 
 	void serialize_json(nlohmann::json &serialized_scene) {
@@ -12,6 +13,7 @@ struct HackerData {
 
 		serialized_component["model"] = model;
 		serialized_component["camera_pivot"] = camera_pivot;
+		serialized_component["scorpion_camera_transform"] = scorpion_camera_transform;
 		serialized_component["camera"] = camera;
 
 		serialized_scene.back()["component_data"] = serialized_component;
@@ -22,6 +24,11 @@ struct HackerData {
 		model = serialized_component["model"];
 		camera_pivot = serialized_component["camera_pivot"];
 		camera = serialized_component["camera"];
+		if (serialized_component.contains("scorpion_camera_transform")) {
+			scorpion_camera_transform = serialized_component["scorpion_camera_transform"];
+		} else {
+			scorpion_camera_transform = -1;
+		}
 	}
 };
 
