@@ -10,6 +10,7 @@
 
 #include "input/input_manager.h"
 #include "resource/resource_manager.h"
+#include <spdlog/spdlog.h>
 #include <glm/geometric.hpp>
 
 AutoCVarFloat cvar_agent_acc_ground("agent.acc_ground", "acceleration on ground ", 0.4f, CVarFlags::EditCheckbox);
@@ -133,6 +134,29 @@ void AgentSystem::update(World &world, float dt) {
 				transform.position.y = info.point.y + 0.001f;
 				transform.set_changed(true);
 			}
+		}
+
+		if(input_manager.is_action_just_pressed("agent_interact")) {
+			Ray ray{};
+			ray.origin = transform.get_global_position() + glm::vec3(0.0f, 1.0f, 0.0f);
+			ray.direction = model_tf.get_global_forward();
+			glm::vec3 end = ray.origin + ray.direction;
+			world.get_parent_scene()->get_render_scene().debug_draw.draw_arrow(ray.origin, end, {1.0f , 0.0f, 0.0f});
+			HitInfo info;
+			//TODO: replace ray_cast with ray_cast_layer
+			if (CollisionSystem::ray_cast(world, ray, info)) {
+				//TODO: remove log
+				auto hit_name = world.get_component<Name>(info.entity);
+				SPDLOG_INFO(hit_name.name);
+
+				if(auto interactable = world.has_component<Interactable>(info.entity)) {
+					if (animation_instance.animation_handle.id != resource_manager.get_animation_handle("agent/agent_ANIM_GLTF/agent_interaction.anim").id) {
+				animation_manager.change_animation(agent_data.model, "agent/agent_ANIM_GLTF/agent_interaction.anim");
+			}
+				};
+
+			 }
+
 		}
 
 		last_position = transform.position;
