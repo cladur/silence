@@ -13,10 +13,13 @@
 #include <spdlog/spdlog.h>
 #include <glm/geometric.hpp>
 
-AutoCVarFloat cvar_agent_acc_ground("agent.acc_ground", "acceleration on ground ", 0.4f, CVarFlags::EditCheckbox);
+AutoCVarFloat cvar_agent_interaction_range(
+		"agent.interaction_range", "range of interaction", 1.5f, CVarFlags::EditCheckbox);
+
+AutoCVarFloat cvar_agent_acc_ground("agent.acc_ground", "acceleration on ground", 0.4f, CVarFlags::EditCheckbox);
 
 AutoCVarFloat cvar_agent_max_vel_ground(
-		"agent.max_vel_ground", "maximum velocity on ground ", 2.0f, CVarFlags::EditCheckbox);
+		"agent.max_vel_ground", "maximum velocity on ground", 2.0f, CVarFlags::EditCheckbox);
 
 AutoCVarFloat cvar_friction_ground("agent.friction_ground", "friction on ground", 8.0f, CVarFlags::EditCheckbox);
 
@@ -145,20 +148,22 @@ void AgentSystem::update(World &world, float dt) {
 				//TODO: remove log
 				// auto hit_name = world.get_component<Name>(info.entity);
 				// SPDLOG_INFO(hit_name.name);
-
-				if (world.has_component<Interactable>(info.entity)) {
-					auto &interactable = world.get_component<Interactable>(info.entity);
-					if ((interactable.type == InteractionType::Agent) && interactable.can_interact) {
-						interactable.triggered = true;
-						auto animation_handle =
-								resource_manager.get_animation_handle("agent/agent_ANIM_GLTF/agent_interaction.anim");
-						if (animation_instance.animation_handle.id != animation_handle.id) {
-							animation_timer = resource_manager.get_animation(animation_handle).get_duration();
-							animation_manager.change_animation(
-									agent_data.model, "agent/agent_ANIM_GLTF/agent_interaction.anim");
+				auto &target_transform = world.get_component<Transform>(info.entity);
+				if (info.distance < cvar_agent_interaction_range.get()) {
+					if (world.has_component<Interactable>(info.entity)) {
+						auto &interactable = world.get_component<Interactable>(info.entity);
+						if ((interactable.type == InteractionType::Agent) && interactable.can_interact) {
+							interactable.triggered = true;
+							auto animation_handle = resource_manager.get_animation_handle(
+									"agent/agent_ANIM_GLTF/agent_interaction.anim");
+							if (animation_instance.animation_handle.id != animation_handle.id) {
+								animation_timer = resource_manager.get_animation(animation_handle).get_duration();
+								animation_manager.change_animation(
+										agent_data.model, "agent/agent_ANIM_GLTF/agent_interaction.anim");
+							}
 						}
 					}
-				};
+				}
 			}
 		}
 		if (animation_timer > 0) {
