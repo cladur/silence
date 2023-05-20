@@ -124,7 +124,8 @@
             },
             {
                 "component_data": {
-                    "fov": 70.0
+                    "fov": 70.0,
+                    "right_side": false
                 },
                 "component_name": "Camera"
             }
@@ -183,12 +184,6 @@
             },
             {
                 "component_data": {
-                    "animation_name": "agent/agent_ANIM_GLTF/agent_walk.anim"
-                },
-                "component_name": "AnimationInstance"
-            },
-            {
-                "component_data": {
                     "orientation": {
                         "w": 0.6371151208877563,
                         "x": 0.0,
@@ -214,6 +209,13 @@
                     "model_name": "agent/agent.skinmdl"
                 },
                 "component_name": "SkinnedModelInstance"
+            },
+            {
+                "component_data": {
+                    "animation_name": "agent/agent_ANIM_GLTF/agent_walk.anim",
+                    "ticks_per_second": 1000.0
+                },
+                "component_name": "AnimationInstance"
             },
             {
                 "component_data": {
@@ -272,12 +274,6 @@
             },
             {
                 "component_data": {
-                    "animation_name": "agent/agent_ANIM_GLTF/agent_grab_and_stab.anim"
-                },
-                "component_name": "AnimationInstance"
-            },
-            {
-                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": 0.0,
@@ -299,16 +295,23 @@
             },
             {
                 "component_data": {
+                    "material_type": 0,
+                    "model_name": "agent/agent.skinmdl"
+                },
+                "component_name": "SkinnedModelInstance"
+            },
+            {
+                "component_data": {
                     "parent": 46
                 },
                 "component_name": "Parent"
             },
             {
                 "component_data": {
-                    "material_type": 0,
-                    "model_name": "agent/agent.skinmdl"
+                    "animation_name": "agent/agent_ANIM_GLTF/agent_grab_and_stab.anim",
+                    "ticks_per_second": 1000.0
                 },
-                "component_name": "SkinnedModelInstance"
+                "component_name": "AnimationInstance"
             }
         ],
         "entity": 6,
@@ -2056,6 +2059,12 @@
             },
             {
                 "component_data": {
+                    "layer_name": "default"
+                },
+                "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {
                     "children": [
                         6,
                         47
@@ -2063,12 +2072,6 @@
                     "children_count": 2
                 },
                 "component_name": "Children"
-            },
-            {
-                "component_data": {
-                    "layer_name": "default"
-                },
-                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -2177,14 +2180,14 @@
                 "component_name": "Parent"
             },
             {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
-            {
                 "component_data": {
                     "layer_name": "default"
                 },
                 "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {},
+                "component_name": "StaticTag"
             },
             {
                 "component_data": {
@@ -2286,14 +2289,14 @@
                 "component_name": "Parent"
             },
             {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
-            {
                 "component_data": {
                     "layer_name": "default"
                 },
                 "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {},
+                "component_name": "StaticTag"
             },
             {
                 "component_data": {
@@ -2350,14 +2353,14 @@
                 "component_name": "Parent"
             },
             {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
-            {
                 "component_data": {
                     "layer_name": "default"
                 },
                 "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {},
+                "component_name": "StaticTag"
             },
             {
                 "component_data": {
@@ -2414,14 +2417,14 @@
                 "component_name": "Parent"
             },
             {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
-            {
                 "component_data": {
                     "layer_name": "default"
                 },
                 "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {},
+                "component_name": "StaticTag"
             },
             {
                 "component_data": {
@@ -2584,12 +2587,6 @@
             },
             {
                 "component_data": {
-                    "animation_name": "scorpion/scorpion_idle_ANIM_GLTF/scorpion_idle_00_walk.anim"
-                },
-                "component_name": "AnimationInstance"
-            },
-            {
-                "component_data": {
                     "orientation": {
                         "w": 0.6668471693992615,
                         "x": -0.169964000582695,
@@ -2615,6 +2612,13 @@
                     "model_name": "scorpion/scorpion_idle.skinmdl"
                 },
                 "component_name": "SkinnedModelInstance"
+            },
+            {
+                "component_data": {
+                    "animation_name": "scorpion/scorpion_idle_ANIM_GLTF/scorpion_idle_00_walk.anim",
+                    "ticks_per_second": 1000.0
+                },
+                "component_name": "AnimationInstance"
             },
             {
                 "component_data": {

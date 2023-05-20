@@ -23,6 +23,7 @@ void AnimationInstance::serialize_json(nlohmann::json &serialized_scene) {
 	nlohmann::json::object_t serialized_component;
 	ResourceManager &resource_manager = ResourceManager::get();
 	serialized_component["animation_name"] = resource_manager.get_animation_name(animation_handle);
+	serialized_component["ticks_per_second"] = ticks_per_second;
 	serialized_scene.push_back(nlohmann::json::object());
 	serialized_scene.back()["component_data"] = serialized_component;
 	serialized_scene.back()["component_name"] = "AnimationInstance";
@@ -30,6 +31,7 @@ void AnimationInstance::serialize_json(nlohmann::json &serialized_scene) {
 
 void AnimationInstance::deserialize_json(nlohmann::json &serialized_component) {
 	std::string animation_name = serialized_component["animation_name"];
+	ticks_per_second = serialized_component["ticks_per_second"];
 	ResourceManager &resource_manager = ResourceManager::get();
 	animation_handle = resource_manager.load_animation(animation_name.c_str());
 }
