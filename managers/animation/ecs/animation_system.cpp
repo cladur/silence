@@ -12,13 +12,17 @@ void AnimationSystem::startup(World &world) {
 
 void AnimationSystem::update(World &world, float dt) {
 	auto &animation_manager = AnimationManager::get();
+	auto &resource_manager = ResourceManager::get();
 	auto &animation_map = animation_manager.animation_map;
 	for (Entity entity : entities) {
-		if (animation_map.find(entity) == animation_map.end()) {
-			animation_map[entity].model = &world.get_component<SkinnedModelInstance>(entity);
-			animation_map[entity].animation = &world.get_component<AnimationInstance>(entity);
-			animation_map[entity].model->bone_matrices =
-					std::vector<glm::mat4>(animation_manager.MAX_BONE_COUNT, glm::mat4(1.0f));
+		if (!animation_map.contains(entity)) {
+			AnimData &data = animation_map[entity];
+			data.model = &world.get_component<SkinnedModelInstance>(entity);
+			size_t size = resource_manager.get_skinned_model(data.model->model_handle).rig.names.size();
+			data.animation = &world.get_component<AnimationInstance>(entity);
+			data.local_pose.xforms = std::vector<Xform>(size, Xform{ glm::vec3(1.0f), glm::quat() });
+			data.model_pose.xforms = std::vector<Xform>(size, Xform{ glm::vec3(1.0f), glm::quat() });
+			data.model->bone_matrices = std::vector<glm::mat4>(animation_manager.MAX_BONE_COUNT, glm::mat4(1.0f));
 		}
 		animation_manager.update_pose(animation_map[entity], dt);
 	}

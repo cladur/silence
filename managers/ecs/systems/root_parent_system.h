@@ -13,7 +13,7 @@ public:
 	void update(World &world, float dt) override;
 
 private:
-	void update_children(World &world, Entity parent, glm::mat4 parent_model);
+	void update_children(World &world, Entity parent, const glm::mat4 &parent_model);
 };
 
 #endif //SILENCE_ROOT_PARENT_SYSTEM_H

@@ -39,7 +39,7 @@ add_library(${CORE_LIB_NAME} STATIC
         components/enemy_path_component.h
         components/interactable_component.h
         cvars/cvars.cpp
-        cvars/cvars.h)
+        cvars/cvars.h components/attachment_component.h)
 
 target_include_directories(${CORE_LIB_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 

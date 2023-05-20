@@ -98,7 +98,7 @@ Handle<Animation> ResourceManager::get_animation_handle(std::string name) {
 	if (found_asset_path) {
 		name = remove_asset_path(name);
 	}
-	if(!name_to_animation.contains(name)) {
+	if (!name_to_animation.contains(name)) {
 		SPDLOG_WARN("not found animation with name: {}", name);
 	}
 	return name_to_animation[name];

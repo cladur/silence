@@ -41,6 +41,7 @@ void Inspector::show_components() {
 	SHOW_COMPONENT(ModelInstance, show_modelinstance);
 	SHOW_COMPONENT(SkinnedModelInstance, show_skinnedmodelinstance);
 	SHOW_COMPONENT(AnimationInstance, show_animationinstance);
+	SHOW_COMPONENT(Attachment, show_attachment);
 	SHOW_COMPONENT(FmodListener, show_fmodlistener);
 	SHOW_COMPONENT(Camera, show_camera);
 	SHOW_COMPONENT(ColliderTag, show_collidertag);
@@ -330,11 +331,12 @@ void Inspector::show_modelinstance() {
 
 void Inspector::show_animationinstance() {
 	auto &animation_instance = world->get_component<AnimationInstance>(selected_entity);
-	auto models = resource_manager.get_skinned_models();
-	auto animations = resource_manager.get_animations();
+	auto &models = resource_manager.get_skinned_models();
+	auto &animations = resource_manager.get_animations();
 	if (ImGui::CollapsingHeader("Animation Instance", tree_flags)) {
 		remove_component_popup<AnimationInstance>();
-		std::string name = resource_manager.get_animation(animation_instance.animation_handle).name;
+		auto &selected_animation = resource_manager.get_animation(animation_instance.animation_handle);
+		std::string name = selected_animation.name;
 		std::size_t last_slash_pos = name.find_last_of("/\\");
 
 		if (last_slash_pos != std::string::npos) {
@@ -380,12 +382,88 @@ void Inspector::show_animationinstance() {
 			ImGui::EndCombo();
 		}
 		ImGui::TableNextRow();
-		ImGui::TableNextRow();
 		ImGui::TableSetColumnIndex(0);
 		ImGui::Text("Is looping");
 		ImGui::TableSetColumnIndex(1);
-		ImGui::SetNextItemWidth(-FLT_MIN);
 		ImGui::Checkbox("##Is looping", &animation_instance.is_looping);
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Ticks per second");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		ImGui::DragFloat("##Ticks per second", &animation_instance.ticks_per_second, 20.0f, 0, 50000);
+
+		ImGui::EndTable();
+	}
+}
+
+void Inspector::show_attachment() {
+	auto &attachment = world->get_component<Attachment>(selected_entity);
+	if (ImGui::CollapsingHeader("Attachment", tree_flags)) {
+		remove_component_popup<Attachment>();
+
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Bone name");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		if (ImGui::BeginCombo("##Bone name", attachment.bone_name.c_str())) {
+			if (attachment.holder != -1) {
+				SkinnedModelInstance &instance = world->get_component<SkinnedModelInstance>(attachment.holder);
+				SkinnedModel &model = resource_manager.get_skinned_model(instance.model_handle);
+				for (const auto &pair : model.joint_map) {
+					bool is_selected = (attachment.bone_name == pair.first);
+
+					if (ImGui::Selectable(pair.first.c_str(), is_selected)) {
+						attachment.bone_name = pair.first;
+					}
+					if (is_selected) {
+						ImGui::SetItemDefaultFocus();
+					}
+				}
+			}
+			ImGui::EndCombo();
+		}
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Holder ");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		std::string name;
+		if (attachment.holder == -1) {
+			name = "None";
+		} else if (world->has_component<Name>(attachment.holder)) {
+			name = world->get_component<Name>(attachment.holder).name;
+		} else {
+			name = std::to_string(attachment.holder);
+		}
+
+		if (ImGui::BeginCombo("##Holder", name.c_str())) {
+			for (auto entity : world->get_parent_scene()->entities) {
+				if (!world->has_component<SkinnedModelInstance>(entity)) {
+					continue;
+				}
+				bool is_selected = (attachment.holder == entity);
+				std::string other_name;
+				if (world->has_component<Name>(entity)) {
+					other_name = world->get_component<Name>(entity).name;
+				} else {
+					other_name = std::to_string(entity);
+				}
+				if (ImGui::Selectable(other_name.c_str(), is_selected)) {
+					attachment.holder = entity;
+					attachment.bone_name = "";
+				}
+				if (is_selected) {
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+
+			ImGui::EndCombo();
+		}
 
 		ImGui::EndTable();
 	}
@@ -870,6 +948,7 @@ void Inspector::show_add_component() {
 			SHOW_ADD_COMPONENT(ModelInstance);
 			SHOW_ADD_COMPONENT(SkinnedModelInstance);
 			SHOW_ADD_COMPONENT(AnimationInstance);
+			SHOW_ADD_COMPONENT(Attachment);
 			SHOW_ADD_COMPONENT(FmodListener);
 			SHOW_ADD_COMPONENT(Camera);
 			SHOW_ADD_COMPONENT(ColliderTag);

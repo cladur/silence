@@ -10,6 +10,7 @@ public:
 	Handle<Animation> animation_handle;
 	Handle<Animation> next_animation;
 	float current_time = 0.0f;
+	float ticks_per_second = 1000;
 	bool is_looping = true;
 
 	AnimationInstance();
