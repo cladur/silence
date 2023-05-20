@@ -1,8 +1,5 @@
 # Dependencies
 find_package(glfw3 CONFIG REQUIRED)
-find_package(Vulkan REQUIRED)
-find_package(unofficial-vulkan-memory-allocator CONFIG REQUIRED)
-find_package(unofficial-vulkan-memory-allocator-hpp CONFIG REQUIRED)
 
 include(FetchContent)
 FetchContent_Declare(

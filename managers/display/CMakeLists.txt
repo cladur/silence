@@ -8,7 +8,6 @@ target_include_directories(${DISPLAY_MANAGER_NAME} PUBLIC ${MANAGER_DIR})
 
 target_link_libraries(${DISPLAY_MANAGER_NAME}
         PUBLIC
-        Vulkan::Vulkan
         PRIVATE
         silence_common
         glfw
