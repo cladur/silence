@@ -319,7 +319,15 @@ void Inspector::show_modelinstance() {
 
 		if (ImGui::BeginDragDropTarget()) {
 			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_MODEL_PATH")) {
-				const std::string payload_n = *(const std::string *)payload->Data;
+				std::string payload_n = *(const std::string *)payload->Data;
+				std::string search_string = "\\";
+				std::string replace_string = "/";
+
+				size_t pos = payload_n.find(search_string);
+				while (pos != std::string::npos) {
+					payload_n.replace(pos, search_string.length(), replace_string);
+					pos = payload_n.find(search_string, pos + replace_string.length());
+				}
 				resource_manager.load_model(payload_n.c_str());
 				modelinstance.model_handle = resource_manager.get_model_handle(payload_n);
 			}
