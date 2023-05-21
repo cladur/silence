@@ -56,6 +56,7 @@ Scene::Scene() {
 	world.register_component<EnemyPath>();
 	world.register_component<Interactable>();
 	world.register_component<Attachment>();
+	world.register_component<Platform>();
 
 	// Systems
 	// TODO: Set update order instead of using default value
