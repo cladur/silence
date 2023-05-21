@@ -2,6 +2,7 @@
 #include "animation/ecs/animation_instance.h"
 #include "display/display_manager.h"
 #include "ecs/systems/interactable_system.h"
+#include "ecs/systems/platform_system.h"
 #include "ecs/world.h"
 #include "editor/editor.h"
 #include "managers/animation/ecs/animation_instance.h"
@@ -25,7 +26,6 @@
 #include "render/ecs/light_render_system.h"
 #include "render/ecs/render_system.h"
 #include "render/ecs/skinned_render_system.h"
-
 
 #define COLLISION_TEST_ENTITY 4
 
@@ -56,6 +56,7 @@ Scene::Scene() {
 	world.register_component<EnemyPath>();
 	world.register_component<Interactable>();
 	world.register_component<Attachment>();
+	world.register_component<Platform>();
 
 	// Systems
 	// TODO: Set update order instead of using default value
@@ -90,6 +91,7 @@ void Scene::register_game_systems() {
 	world.register_system<HackerSystem>(EcsOnUpdate);
 	world.register_system<EnemyPathing>(EcsOnUpdate);
 	world.register_system<InteractableSystem>(EcsOnUpdate);
+	world.register_system<PlatformSystem>(EcsOnUpdate);
 }
 
 void Scene::update(float dt) {

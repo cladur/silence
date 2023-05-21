@@ -21,6 +21,14 @@ void InteractableSystem::update(World &world, float dt) {
 				case HackerCameraJump:
 					interactable.triggered = false;
 					break;
+				case HackerPlatform: {
+					auto &platform = world.get_component<Platform>(interactable.interaction_target);
+					if (!platform.is_moving) {
+						platform.is_moving = true;
+					}
+					SPDLOG_INFO("{}", "Hacker platform triggered");
+					break;
+				}
 			}
 		}
 	}
