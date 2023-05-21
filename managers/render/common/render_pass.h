@@ -1,6 +1,7 @@
 #ifndef SILENCE_RENDER_PASS_H
 #define SILENCE_RENDER_PASS_H
 
+#include "components/light_component.h"
 #include "components/transform_component.h"
 #include "managers/render/ecs/model_instance.h"
 #include "managers/render/ecs/skinned_model_instance.h"
@@ -21,6 +22,11 @@ struct SkinnedDrawCommand {
 	Transform *transform;
 };
 
+struct LightDrawCommand {
+	Light *light;
+	Transform *transform;
+};
+
 class SkinnedPass {
 public:
 	std::vector<SkinnedDrawCommand> draw_commands;
@@ -38,6 +44,13 @@ public:
 class PBRPass : public RenderPass {
 public:
 	MaterialPBR material;
+	void startup() override;
+	void draw(RenderScene &scene) override;
+};
+
+class LightPass : public RenderPass {
+public:
+	MaterialLight material;
 	void startup() override;
 	void draw(RenderScene &scene) override;
 };

@@ -22,6 +22,21 @@ void PBRPass::draw(RenderScene &scene) {
 	utils::render_quad();
 }
 
+void LightPass::startup() {
+	material.startup();
+}
+
+void LightPass::draw(RenderScene &scene) {
+	ResourceManager &resource_manager = ResourceManager::get();
+	material.bind_resources(scene);
+	for (auto &cmd : scene.light_draw_commands) {
+		Light &light = *cmd.light;
+		Transform &transform = *cmd.transform;
+		material.bind_light_resources(light, transform);
+		utils::render_sphere();
+	}
+}
+
 void AOPass::startup() {
 	material.startup();
 }

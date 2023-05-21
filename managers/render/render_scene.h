@@ -29,6 +29,7 @@ struct RenderScene {
 	RenderPass *default_pass;
 	GBufferPass g_buffer_pass;
 	PBRPass pbr_pass;
+	LightPass light_pass;
 	SkyboxPass skybox_pass;
 	TransparentPass transparent_pass;
 	AOPass ssao_pass;
@@ -50,6 +51,7 @@ struct RenderScene {
 
 	std::vector<TransparentObject> transparent_objects;
 
+	std::vector<LightDrawCommand> light_draw_commands;
 	std::vector<DrawCommand> draw_commands;
 	std::vector<SkinnedDrawCommand> skinned_draw_commands;
 
@@ -62,6 +64,7 @@ struct RenderScene {
 
 	void queue_draw(ModelInstance *model_instance, Transform *transform);
 	void queue_skinned_draw(SkinnedModelInstance *model_instance, Transform *transform);
+	void queue_light_draw(Light *light, Transform *transform);
 };
 
 #endif //SILENCE_RENDER_SCENE_H

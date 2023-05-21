@@ -526,7 +526,19 @@ void Inspector::show_light() {
 		ImGui::BeginTable("Light", 2);
 		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
 
-		show_vec3("Color", light.color, 1.0f, 255.0f, 0.0f, 255.0f);
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Color");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		ImGui::ColorPicker3("##Color", (float *)&light.color);
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Intensity");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		ImGui::DragFloat("##Intensity", &light.intensity, 0.01f, 0.0f, 100.0f);
 
 		ImGui::TableNextRow();
 		ImGui::TableSetColumnIndex(0);

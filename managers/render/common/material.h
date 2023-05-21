@@ -11,6 +11,8 @@ struct Mesh;
 struct SkinnedModelInstance;
 struct SkinnedMesh;
 
+struct Light;
+
 struct RenderScene;
 
 enum class MaterialType { Default, PBR };
@@ -35,20 +37,20 @@ public:
 	virtual void bind_instance_resources(SkinnedModelInstance &instance, Transform &transform) = 0;
 };
 
-class MaterialSkinnedUnlit : public MaterialSkinned {
-public:
-	void startup() override;
-	void bind_resources(RenderScene &scene) override;
-	void bind_instance_resources(SkinnedModelInstance &instance, Transform &transform) override;
-	void bind_mesh_resources(SkinnedMesh &mesh);
-};
-
 class MaterialPBR : public Material {
 public:
 	void startup() override;
 	void bind_resources(RenderScene &scene) override;
 	void bind_instance_resources(ModelInstance &instance, Transform &transform) override;
 	void bind_mesh_resources(Mesh &mesh);
+};
+
+class MaterialLight : public Material {
+public:
+	void startup() override;
+	void bind_resources(RenderScene &scene) override;
+	void bind_instance_resources(ModelInstance &instance, Transform &transform) override;
+	void bind_light_resources(Light &light, Transform &transform);
 };
 
 class MaterialAO : public Material {
@@ -93,6 +95,7 @@ public:
 
 class MaterialGBuffer : public Material {
 	Shader skinned_shader;
+
 public:
 	void startup() override;
 	void bind_resources(RenderScene &scene) override;
