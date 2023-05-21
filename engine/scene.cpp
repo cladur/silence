@@ -2,6 +2,7 @@
 #include "animation/ecs/animation_instance.h"
 #include "display/display_manager.h"
 #include "ecs/systems/interactable_system.h"
+#include "ecs/systems/platform_system.h"
 #include "ecs/world.h"
 #include "editor/editor.h"
 #include "managers/animation/ecs/animation_instance.h"
@@ -90,6 +91,7 @@ void Scene::register_game_systems() {
 	world.register_system<HackerSystem>(EcsOnUpdate);
 	world.register_system<EnemyPathing>(EcsOnUpdate);
 	world.register_system<InteractableSystem>(EcsOnUpdate);
+	world.register_system<PlatformSystem>(EcsOnUpdate);
 }
 
 void Scene::update(float dt) {

@@ -17,7 +17,11 @@ void PlatformSystem::update(World &world, float dt) {
 
 		auto &platform_transform = world.get_component<Transform>(entity);
 
-		if (glm::distance(platform_transform.get_global_position(), platform.ending_position) < 0.1f) {
+		auto distance = glm::distance(platform_transform.get_global_position(), platform.ending_position);
+
+		SPDLOG_ERROR("Distance: {}", distance);
+
+		if (distance < 0.01f) {
 			platform_transform.set_position(platform.ending_position);
 
 			platform.is_moving = false;

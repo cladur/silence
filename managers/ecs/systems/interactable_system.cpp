@@ -23,7 +23,10 @@ void InteractableSystem::update(World &world, float dt) {
 					break;
 				case HackerPlatform: {
 					auto &platform = world.get_component<Platform>(interactable.interaction_target);
-					platform.is_moving = !platform.is_moving;
+					if (!platform.is_moving) {
+						platform.is_moving = true;
+					}
+					SPDLOG_INFO("{}", "Hacker platform triggered");
 					break;
 				}
 			}
