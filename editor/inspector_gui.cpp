@@ -6,6 +6,7 @@
 #include "components/fmod_listener_component.h"
 #include "components/interactable_component.h"
 #include "components/light_component.h"
+#include "components/platform_component.h"
 #include "components/rigidbody_component.h"
 #include "physics/physics_manager.h"
 #include "render/ecs/model_instance.h"
@@ -54,6 +55,7 @@ void Inspector::show_components() {
 	SHOW_COMPONENT(HackerData, show_hacker_data);
 	SHOW_COMPONENT(EnemyPath, show_enemy_path);
 	SHOW_COMPONENT(Interactable, show_interactable);
+	SHOW_COMPONENT(Platform, show_platform);
 
 	for (int i = 0; i < remove_component_queue.size(); i++) {
 		auto [entity, component_to_remove] = remove_component_queue.front();
@@ -852,6 +854,51 @@ void Inspector::show_interactable() {
 			ImGui::EndCombo();
 		}
 
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Interaction target");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::InputInt("", (int *)&interactable.interaction_target, 0, 0);
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
+				Entity payload_entity = *(Entity *)payload->Data;
+				interactable.interaction_target = payload_entity;
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+		ImGui::EndTable();
+	}
+}
+
+void Inspector::show_platform() {
+	auto &platform = world->get_component<Platform>(selected_entity);
+
+	if (ImGui::CollapsingHeader("Platform", tree_flags)) {
+		if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+			ImGui::OpenPopup("PlatformContextMenu");
+		}
+		if (ImGui::BeginPopup("PlatformContextMenu")) {
+			if (ImGui::MenuItem("Reset Platform")) {
+				platform.starting_position = glm::vec3(0.0f);
+				platform.ending_position = glm::vec3(0.0f);
+			}
+			remove_component_menu_item<Platform>();
+
+			ImGui::EndPopup();
+		}
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("Platform Component", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+
+		bool changed = false;
+
+		changed |= show_vec3("Starting position", platform.starting_position);
+		changed |= show_vec3("Ending position", platform.ending_position);
+
+		show_float("Platform speed", platform.speed);
+
 		ImGui::EndTable();
 	}
 }
@@ -981,6 +1028,7 @@ void Inspector::show_add_component() {
 			SHOW_ADD_COMPONENT(HackerData);
 			SHOW_ADD_COMPONENT(EnemyPath);
 			SHOW_ADD_COMPONENT(Interactable);
+			SHOW_ADD_COMPONENT(Platform);
 
 			ImGui::EndPopup();
 		}

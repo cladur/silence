@@ -75,7 +75,6 @@ bool HackerSystem::shoot_raycast(
 	}
 
 	interactable.triggered = true;
-
 	return true;
 }
 
@@ -143,30 +142,32 @@ void HackerSystem::update(World &world, float dt) {
 		camera_forward = glm::normalize(camera_forward);
 		auto camera_right = camera_pivot_tf.get_global_right();
 
-		// if (!is_on_camera) {
-		// 	world.get_parent_scene()->get_render_scene().debug_draw.draw_arrow(
-		// 			camera_tf.get_global_position() + glm::vec3(0.0f, 0.0f, -1.0f),
-		// 			camera_tf.get_global_position() + glm::vec3(0.0f, 0.0f, -1.0f) + real_camera_forward * 100.0f,
-		// 			glm::vec3(1.0f, 0.0f, 0.0f));
-		// } else {
-		// 	world.get_parent_scene()->get_render_scene().debug_draw.draw_arrow(
-		// 			camera_tf.get_global_position() + glm::vec3(0.0f, 0.0f, -1.0f),
-		// 			camera_tf.get_global_position() + glm::vec3(0.0f, 0.0f, 1.0f) - real_camera_forward * 100.0f,
-		// 			glm::vec3(1.0f, 0.0f, 0.0f));
-		// }
+		if (!is_on_camera) {
+			world.get_parent_scene()->get_render_scene().debug_draw.draw_arrow(
+					camera_tf.get_global_position() + glm::vec3(0.0f, 0.0f, -1.0f),
+					camera_tf.get_global_position() + glm::vec3(0.0f, 0.0f, -1.0f) + real_camera_forward * 100.0f,
+					glm::vec3(1.0f, 0.0f, 0.0f));
+		} else {
+			world.get_parent_scene()->get_render_scene().debug_draw.draw_arrow(
+					camera_tf.get_global_position() + glm::vec3(0.0f, 0.0f, -1.0f),
+					camera_tf.get_global_position() + glm::vec3(0.0f, 0.0f, 1.0f) - real_camera_forward * 100.0f,
+					glm::vec3(1.0f, 0.0f, 0.0f));
+		}
 
 		glm::vec3 acc_direction = { 0, 0, 0 };
-		if (input_manager.is_action_pressed("hacker_move_forward")) {
-			acc_direction += camera_forward;
-		}
-		if (input_manager.is_action_pressed("hacker_move_backward")) {
-			acc_direction -= camera_forward;
-		}
-		if (input_manager.is_action_pressed("hacker_move_left")) {
-			acc_direction += camera_right;
-		}
-		if (input_manager.is_action_pressed("hacker_move_right")) {
-			acc_direction -= camera_right;
+		if (!is_on_camera) {
+			if (input_manager.is_action_pressed("hacker_move_forward")) {
+				acc_direction += camera_forward;
+			}
+			if (input_manager.is_action_pressed("hacker_move_backward")) {
+				acc_direction -= camera_forward;
+			}
+			if (input_manager.is_action_pressed("hacker_move_left")) {
+				acc_direction += camera_right;
+			}
+			if (input_manager.is_action_pressed("hacker_move_right")) {
+				acc_direction -= camera_right;
+			}
 		}
 
 		if (*CVarSystem::get()->get_int_cvar("debug_camera.use")) {

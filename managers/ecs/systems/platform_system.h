@@ -4,6 +4,10 @@
 #include "base_system.h"
 
 class PlatformSystem : public BaseSystem {
+private:
+	float lerp(float a, float b, float f) {
+		return a + f * (b - a);
+	}
 public:
 	void startup(World &world) override;
 	void update(World &world, float dt) override;

@@ -26,7 +26,6 @@
 #include "render/ecs/render_system.h"
 #include "render/ecs/skinned_render_system.h"
 
-
 #define COLLISION_TEST_ENTITY 4
 
 Scene::Scene() {

@@ -2,7 +2,7 @@
 #define SILENCE_INTERACTABLE_COMPONENT_H
 
 enum InteractionType { None, Agent, Hacker };
-enum Interaction { NoInteraction, HackerCameraJump };
+enum Interaction { NoInteraction, HackerCameraJump, HackerPlatform };
 
 struct Interactable {
 	InteractionType type = None;
