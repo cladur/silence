@@ -26,6 +26,7 @@ AutoCVarInt cvar_splitscreen("render.splitscreen", "Splitscreen", 0, CVarFlags::
 void RenderScene::startup() {
 	g_buffer_pass.startup();
 	pbr_pass.startup();
+	light_pass.startup();
 	skybox_pass.startup();
 	ssao_pass.startup();
 	ssao_blur_pass.startup();
@@ -99,6 +100,19 @@ void RenderScene::draw_viewport(bool right_side) {
 	pbr_buffer.bind();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	pbr_pass.draw(*this);
+
+	glEnable(GL_CULL_FACE);
+	glDisable(GL_DEPTH_TEST);
+	glCullFace(GL_FRONT);
+	glEnable(GL_BLEND);
+	glBlendEquation(GL_FUNC_ADD);
+	glBlendFunc(GL_ONE, GL_ONE);
+
+	light_pass.draw(*this);
+
+	glDisable(GL_BLEND);
+	glDisable(GL_CULL_FACE);
+	glEnable(GL_DEPTH_TEST);
 
 	ssao_buffer.bind();
 	glad_glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -209,6 +223,7 @@ void RenderScene::draw() {
 #ifdef WIN32
 	skinned_draw_commands.clear();
 #endif
+	light_draw_commands.clear();
 	debug_draw.vertices.clear();
 }
 
@@ -246,4 +261,12 @@ void RenderScene::queue_skinned_draw(SkinnedModelInstance *model_instance, Trans
 #ifdef WIN32
 	skinned_draw_commands.push_back(draw_command);
 #endif
+}
+
+void RenderScene::queue_light_draw(Light *light, Transform *transform) {
+	LightDrawCommand draw_command = {};
+	draw_command.light = light;
+	draw_command.transform = transform;
+
+	light_draw_commands.push_back(draw_command);
 }

@@ -19,12 +19,13 @@
 #include "ecs/systems/enemy_pathing.h"
 #include "ecs/systems/hacker_system.h"
 #include "ecs/systems/isolated_entities_system.h"
-#include "ecs/systems/light_system.h"
 #include "ecs/systems/physics_system.h"
 #include "ecs/systems/root_parent_system.h"
 #include "render/ecs/frustum_draw_system.h"
+#include "render/ecs/light_render_system.h"
 #include "render/ecs/render_system.h"
 #include "render/ecs/skinned_render_system.h"
+
 
 #define COLLISION_TEST_ENTITY 4
 
@@ -63,7 +64,7 @@ Scene::Scene() {
 	world.register_system<ColliderDrawSystem>();
 	world.register_system<AnimationSystem>(EcsOnLoad);
 	world.register_system<FrustumDrawSystem>();
-	world.register_system<LightSystem>();
+	world.register_system<LightRenderSystem>();
 	world.register_system<EnemyPathDraw>();
 
 	// Transform

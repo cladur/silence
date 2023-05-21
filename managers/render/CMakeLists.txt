@@ -37,7 +37,9 @@ add_library(${RENDER_MANAGER_NAME} STATIC
         transparent_elements/ui/ui_elements/ui_button.cpp
         transparent_elements/ui/ui_elements/ui_button.h
         common/mesh_bounding_sphere.cpp common/mesh_bounding_sphere.h
-        ecs/skinned_render_system.cpp ecs/skinned_render_system.h)
+        ecs/skinned_render_system.cpp ecs/skinned_render_system.h
+        ecs/light_render_system.cpp ecs/light_render_system.h
+        )
 
 # Include directories
 target_include_directories(${RENDER_MANAGER_NAME} PUBLIC ${MANAGER_DIR})

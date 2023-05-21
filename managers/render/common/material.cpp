@@ -19,40 +19,6 @@ AutoCVarInt cvar_use_fog("render.use_fog", "use simple linear fog", 1, CVarFlags
 AutoCVarFloat cvar_fog_min("render.fog_min", "fog min distance", 20.0f, CVarFlags::EditFloatDrag);
 AutoCVarFloat cvar_fog_max("render.fog_max", "fog max distance", 300.0f, CVarFlags::EditFloatDrag);
 
-void MaterialSkinnedUnlit::startup() {
-	shader.load_from_files(shader_path("skinned_unlit.vert"), shader_path("unlit.frag"));
-}
-
-void MaterialSkinnedUnlit::bind_resources(RenderScene &scene) {
-	shader.use();
-	shader.set_mat4("view", scene.view);
-	shader.set_mat4("projection", scene.projection);
-	shader.set_vec3("camPos", scene.camera_pos);
-	shader.set_int("albedo_map", 0);
-}
-
-void MaterialSkinnedUnlit::bind_instance_resources(SkinnedModelInstance &instance, Transform &transform) {
-	shader.set_mat4("model", transform.get_global_model_matrix());
-	//TODO: make this functionality in shader function
-	glBindBuffer(GL_UNIFORM_BUFFER, instance.skinning_buffer);
-	if (!instance.bone_matrices.empty()) {
-		glBufferSubData(
-				GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4) * instance.bone_matrices.size(), instance.bone_matrices.data());
-	}
-
-	GLuint binding_index = 1;
-	GLuint buffer_index = glGetUniformBlockIndex(shader.id, "SkinningBuffer");
-	glUniformBlockBinding(shader.id, buffer_index, binding_index);
-	glBindBufferBase(GL_UNIFORM_BUFFER, binding_index, instance.skinning_buffer);
-}
-
-void MaterialSkinnedUnlit::bind_mesh_resources(SkinnedMesh &mesh) {
-	if (mesh.textures_present[0]) {
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, mesh.textures[0].id);
-	}
-}
-
 void MaterialPBR::startup() {
 	shader.load_from_files(shader_path("pbr.vert"), shader_path("pbr.frag"));
 }
@@ -93,6 +59,46 @@ void MaterialPBR::bind_instance_resources(ModelInstance &instance, Transform &tr
 }
 
 void MaterialPBR::bind_mesh_resources(Mesh &mesh) {
+}
+
+void MaterialLight::startup() {
+	shader.load_from_files(shader_path("light.vert"), shader_path("light.frag"));
+}
+
+void MaterialLight::bind_resources(RenderScene &scene) {
+	shader.use();
+	shader.set_mat4("projection", scene.projection);
+	shader.set_mat4("view", scene.view);
+	shader.set_vec3("camPos", scene.camera_pos);
+	shader.set_int("gPosition", 0);
+	shader.set_int("gNormal", 1);
+	shader.set_int("gAlbedo", 2);
+	shader.set_int("gAoRoughMetal", 3);
+
+	shader.set_vec2("screen_dimensions", glm::vec2(scene.render_extent.x, scene.render_extent.y));
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.position_texture_id);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.normal_texture_id);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.albedo_texture_id);
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.ao_rough_metal_texture_id);
+}
+
+void MaterialLight::bind_instance_resources(ModelInstance &instance, Transform &transform) {
+}
+
+void MaterialLight::bind_light_resources(Light &light, Transform &transform) {
+	float threshold = *CVarSystem::get()->get_float_cvar("render.light_threshold");
+	float radius = light.intensity * std::sqrtf(1.0f / threshold);
+
+	glm::mat4 model = transform.get_global_model_matrix() * glm::scale(glm::mat4(1.0f), glm::vec3(radius));
+	shader.set_mat4("model", model);
+	shader.set_vec3("light_position", transform.get_global_position());
+	shader.set_vec3("light_color", light.color);
+	shader.set_float("light_intensity", light.intensity);
 }
 
 float our_lerp(float a, float b, float f) {
@@ -282,7 +288,6 @@ void MaterialGBuffer::bind_instance_resources(SkinnedModelInstance &instance, Tr
 void MaterialGBuffer::bind_mesh_resources(SkinnedMesh &mesh) {
 	for (int i = 0; i < mesh.textures.size(); i++) {
 		if (mesh.textures_present[i]) {
-			
 			glActiveTexture(GL_TEXTURE0 + i);
 			glBindTexture(GL_TEXTURE_2D, mesh.textures[i].id);
 		}
