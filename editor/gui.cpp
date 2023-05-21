@@ -664,7 +664,7 @@ void Editor::imgui_content_browser() {
 
 	ImGui::Spacing();
 
-	ImGui::BeginTable("##Content Browser", column_count, ImGuiTableFlags_NoBordersInBody);
+	bool is_begin = ImGui::BeginTable("##Content Browser", column_count, ImGuiTableFlags_NoBordersInBody);
 
 	ImGui::TableNextColumn();
 
@@ -767,7 +767,9 @@ void Editor::imgui_content_browser() {
 		ImGui::TableNextColumn();
 	}
 
-	ImGui::EndTable();
+	if (is_begin) {
+		ImGui::EndTable();
+	}
 
 	ImGui::EndChild();
 
@@ -795,68 +797,68 @@ void Editor::imgui_settings() {
 void Editor::imgui_layers_settings() {
 	ImGui::Begin("Layers");
 
+	PhysicsManager &physics_manager = PhysicsManager::get();
 	float available_width = ImGui::GetContentRegionAvail().x;
 	bool open_popup = false;
-	ImGui::BeginTable("table1", 2, ImGuiTableFlags_SizingFixedFit);
-	ImGui::TableSetupColumn("Column 1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.5f);
-	ImGui::TableSetupColumn("Column 2", ImGuiTableColumnFlags_WidthFixed, available_width * 0.5f);
+	if (ImGui::BeginTable("table1", 2, ImGuiTableFlags_SizingFixedFit)) {
+		ImGui::TableSetupColumn("Column 1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.5f);
+		ImGui::TableSetupColumn("Column 2", ImGuiTableColumnFlags_WidthFixed, available_width * 0.5f);
 
-	PhysicsManager &physics_manager = PhysicsManager::get();
-	const auto &map = physics_manager.get_layers_map();
-	// Add table contents here
-	ImGui::TableNextRow();
-	ImGui::TableSetColumnIndex(0);
-	ImGui::Text("Layer");
-	ImGui::TableSetColumnIndex(1);
-	ImGui::SetNextItemWidth(-FLT_MIN);
-	if (ImGui::BeginCombo("##Layer", selected_layer.c_str())) {
-		for (const auto &pair : map) {
-			bool is_selected = selected_layer == pair.first;
+		const auto &map = physics_manager.get_layers_map();
+		// Add table contents here
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Layer");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		if (ImGui::BeginCombo("##Layer", selected_layer.c_str())) {
+			for (const auto &pair : map) {
+				bool is_selected = selected_layer == pair.first;
 
-			if (ImGui::Selectable(pair.first.c_str(), is_selected)) {
-				selected_layer = pair.first;
+				if (ImGui::Selectable(pair.first.c_str(), is_selected)) {
+					selected_layer = pair.first;
+				}
+				if (is_selected) {
+					ImGui::SetItemDefaultFocus();
+				}
 			}
-			if (is_selected) {
-				ImGui::SetItemDefaultFocus();
-			}
-		}
-		ImGui::EndCombo();
-	}
-	ImGui::TableNextRow();
-	ImGui::TableSetColumnIndex(0);
-	if (ImGui::Button("Remove Layer", ImVec2(ImGui::GetContentRegionAvail().x, 0))) {
-		physics_manager.remove_collision_layer(selected_layer);
-		selected_layer = "default";
-	}
-	ImGui::TableSetColumnIndex(1);
-	if (ImGui::Button("Add Layer", ImVec2(ImGui::GetContentRegionAvail().x, 0))) {
-		open_popup = true;
-	}
-
-	static bool are_collide = false;
-	for (auto &pair : map) {
-		if (pair.first == selected_layer) {
-			continue;
+			ImGui::EndCombo();
 		}
 		ImGui::TableNextRow();
 		ImGui::TableSetColumnIndex(0);
-		ImGui::Text("%s", pair.first.c_str());
+		if (ImGui::Button("Remove Layer", ImVec2(ImGui::GetContentRegionAvail().x, 0))) {
+			physics_manager.remove_collision_layer(selected_layer);
+			selected_layer = "default";
+		}
 		ImGui::TableSetColumnIndex(1);
-		are_collide = physics_manager.are_layers_collide(selected_layer, pair.first);
+		if (ImGui::Button("Add Layer", ImVec2(ImGui::GetContentRegionAvail().x, 0))) {
+			open_popup = true;
+		}
 
-		bool temp = are_collide;
-		ImGui::Checkbox(("##Checkbox_" + pair.first).c_str(), &are_collide);
+		static bool are_collide = false;
+		for (auto &pair : map) {
+			if (pair.first == selected_layer) {
+				continue;
+			}
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex(0);
+			ImGui::Text("%s", pair.first.c_str());
+			ImGui::TableSetColumnIndex(1);
+			are_collide = physics_manager.are_layers_collide(selected_layer, pair.first);
 
-		if (are_collide != temp) {
-			if (are_collide) {
-				physics_manager.set_layers_collision(selected_layer, pair.first);
-			} else {
-				physics_manager.set_layers_no_collision(selected_layer, pair.first);
+			bool temp = are_collide;
+			ImGui::Checkbox(("##Checkbox_" + pair.first).c_str(), &are_collide);
+
+			if (are_collide != temp) {
+				if (are_collide) {
+					physics_manager.set_layers_collision(selected_layer, pair.first);
+				} else {
+					physics_manager.set_layers_no_collision(selected_layer, pair.first);
+				}
 			}
 		}
+		ImGui::EndTable();
 	}
-
-	ImGui::EndTable();
 
 	if (open_popup) {
 		ImGui::OpenPopup("add_layer_popup");
