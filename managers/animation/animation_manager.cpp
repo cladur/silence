@@ -7,7 +7,7 @@
 #include "resource/resource_manager.h"
 #include <glm/gtx/quaternion.hpp>
 
-AutoCVarFloat cvar_alpha("animation.alpha", "animation alpha value", 0.5f, CVarFlags::EditFloatDrag);
+AutoCVarFloat cvar_blend_time_ms("animation.blend_time", "blend time in ms", 700.0f, CVarFlags::EditFloatDrag);
 
 AnimationManager &AnimationManager::get() {
 	static AnimationManager instance;
@@ -25,21 +25,28 @@ void AnimationManager::update_pose(AnimData &data, float dt) {
 	float &current_time = data.animation->current_time;
 	current_time += data.animation->ticks_per_second * dt;
 
-	if (current_time < animation.get_duration() || data.animation->is_looping) {
+	if (current_time >= animation.get_duration() && !data.animation->is_looping) {
+		return;
+	}
+
+	if (data.has_changed && cvar_blend_time_ms.get() > 0.0f) {
+		Animation &next_animation = resource_manager.get_animation(data.animation->animation_handle);
+		current_time = fmod(current_time, next_animation.get_duration());
+		Pose next_pose;
+		next_animation.sample(data, next_pose);
+
+		float alpha = current_time / cvar_blend_time_ms.get();
+		blend_poses(data.local_pose, next_pose, data.local_pose, std::min(calculate_uniform_s(alpha), 1.0f));
+
+		if (alpha >= 1.0f) {
+			data.has_changed = false;
+		}
+	} else {
 		current_time = fmod(current_time, animation.get_duration());
 		animation.sample(data, data.local_pose);
-		if (data.has_changed) {
-			Animation &next_animation = resource_manager.get_animation(data.animation->next_animation);
-			Pose next_pose;
-			current_time = 0.0f;
-			next_animation.sample(data, next_pose);
-			blend_poses(data.local_pose, next_pose, data.local_pose, cvar_alpha.get());
-			data.has_changed = false;
-			data.animation->animation_handle = data.animation->next_animation;
-		}
-		local_to_model(data);
-		model_to_final(data);
 	}
+	local_to_model(data);
+	model_to_final(data);
 }
 
 void AnimationManager::local_to_model(AnimData &data) {
@@ -91,7 +98,9 @@ void AnimationManager::change_animation(Entity entity, const std::string &new_an
 	ResourceManager &resource_manager = ResourceManager::get();
 
 	AnimData &entity_data = item->second;
-	entity_data.animation->next_animation = resource_manager.get_animation_handle(new_animation_name);
+	entity_data.animation->previous_animation = entity_data.animation->animation_handle;
+	entity_data.animation->animation_handle = resource_manager.get_animation_handle(new_animation_name);
+	entity_data.animation->current_time = 0.0f;
 	entity_data.has_changed = true;
 }
 
@@ -137,4 +146,14 @@ void AnimationManager::attach_to_entity(World &world, Entity holder, Entity atta
 
 	Attachment component{ bone_name, holder };
 	world.add_component(attached, component);
+}
+
+void AnimationManager::detach_entity(World &world, Entity attached) {
+	if (!world.has_component<Attachment>(attached)) {
+		SPDLOG_WARN("Cannot detach {}, entity has not have Attachment component.", attached);
+		assert(false);
+		return;
+	}
+
+	world.remove_component<Attachment>(attached);
 }

@@ -13,6 +13,7 @@ struct AnimData {
 	SkinnedModelInstance *model;
 	Pose local_pose;
 	Pose model_pose;
+	//	float blend_time_ms = 400.0f;
 	bool has_changed = false;
 };
 
@@ -35,8 +36,14 @@ public:
 	glm::mat4 get_bone_transform(Entity holder, std::string &bone_name);
 
 	void attach_to_entity(World &world, Entity holder, Entity attached, const std::string &bone_name);
+	void detach_entity(World &world, Entity attached);
 	const int32_t MAX_BONE_COUNT = 512;
 	std::unordered_map<Entity, AnimData> animation_map;
+
+	static inline float calculate_uniform_s(float alpha) {
+		float sqt = alpha * alpha;
+		return sqt / (2.0f * (sqt - alpha) + 1.0f);
+	}
 
 private:
 	AnimationManager() = default;
