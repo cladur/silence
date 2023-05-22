@@ -3,6 +3,7 @@
 
 class World;
 struct ColliderSphere;
+struct ColliderCapsule;
 struct ColliderAABB;
 struct ColliderOBB;
 struct Transform;
@@ -47,6 +48,8 @@ enum class CollisionFlag : uint16_t {
 	SECOND_AABB = 0b0000000000001000,
 	FIRST_OBB = 0b0000000000010000,
 	SECOND_OBB = 0b0000000000100000,
+	FIRST_CAPSULE = 0b0000000001000000,
+	SECOND_CAPSULE = 0b0000000010000000,
 	SPHERE_SPHERE = FIRST_SPHERE | SECOND_SPHERE,
 	AABB_AABB = FIRST_AABB | SECOND_AABB,
 	SPHERE_AABB = FIRST_SPHERE | SECOND_AABB,
@@ -56,6 +59,13 @@ enum class CollisionFlag : uint16_t {
 	OBB_SPHERE = FIRST_OBB | SECOND_SPHERE,
 	AABB_OBB = FIRST_AABB | SECOND_OBB,
 	OBB_AABB = FIRST_OBB | SECOND_AABB,
+	CAPSULE_CAPSULE = FIRST_CAPSULE | SECOND_CAPSULE,
+	SPHERE_CAPSULE = FIRST_SPHERE | SECOND_CAPSULE,
+	CAPSULE_SPHERE = FIRST_CAPSULE | SECOND_SPHERE,
+	AABB_CAPSULE = FIRST_AABB | SECOND_CAPSULE,
+	CAPSULE_AABB = FIRST_CAPSULE | SECOND_AABB,
+	OBB_CAPSULE = FIRST_OBB | SECOND_CAPSULE,
+	CAPSULE_OBB = FIRST_CAPSULE | SECOND_OBB
 };
 
 static CollisionFlag operator|(const CollisionFlag first, const CollisionFlag second) {
@@ -88,6 +98,10 @@ public:
 
 	glm::vec3 is_overlap(const ColliderOBB &a, const ColliderAABB &b);
 	void resolve_obb_aabb(World &world, Entity obb, Entity aabb);
+
+	glm::vec3 is_overlap(const ColliderCapsule &a, const ColliderCapsule &b);
+	float ClosestPtSegmentSegment(
+			glm::vec3 p1, glm::vec3 q1, glm::vec3 p2, glm::vec3 q2, float &s, float &t, glm::vec3 &c1, glm::vec3 &c2);
 
 	bool is_collision_candidate(const glm::vec3 &p1, const glm::vec3 &r1, const glm::vec3 &p2, const glm::vec3 &r2);
 	void make_shift(World &world, Entity e1, Entity e2, const glm::vec3 &offset);

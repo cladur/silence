@@ -49,6 +49,7 @@ Scene::Scene() {
 	world.register_component<ColliderTag>();
 	world.register_component<ColliderSphere>();
 	world.register_component<ColliderAABB>();
+	world.register_component<ColliderCapsule>();
 	world.register_component<ColliderOBB>();
 	world.register_component<Light>();
 	world.register_component<AgentData>();

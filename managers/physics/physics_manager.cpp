@@ -470,6 +470,79 @@ void PhysicsManager::resolve_obb_aabb(World &world, Entity obb, Entity aabb) {
 	make_shift(world, obb, aabb, offset);
 }
 
+glm::vec3 PhysicsManager::is_overlap(const ColliderCapsule &a, const ColliderCapsule &b) {
+	// Compute (squared) distance between the inner structures of the capsules
+	float s, t;
+	glm::vec3 c1, c2;
+	float dist2 = ClosestPtSegmentSegment(a.start, a.end, b.start, b.end, s, t, c1, c2);
+
+	// If (squared) distance smaller than (squared) sum of radii, they collide
+	float radius = a.radius + b.radius;
+	//		return dist2 <= radius * radius;
+	return glm::vec3();
+}
+
+float PhysicsManager::ClosestPtSegmentSegment(
+		glm::vec3 p1, glm::vec3 q1, glm::vec3 p2, glm::vec3 q2, float &s, float &t, glm::vec3 &c1, glm::vec3 &c2) {
+	glm::vec3 d1 = q1 - p1; // Direction vector of segment S1
+	glm::vec3 d2 = q2 - p2; // Direction vector of segment S2
+	glm::vec3 r = p1 - p2;
+	float a = glm::dot(d1, d1); // Squared length of segment S1, always nonnegative
+	float e = glm::dot(d2, d2); // Squared length of segment S2, always nonnegative
+	float f = glm::dot(d2, r);
+	// Check if either or both segments degenerate into points
+	if (a <= cvar_epsilon.get() && e <= cvar_epsilon.get()) {
+		// Both segments degenerate into points
+		s = t = 0.0f;
+		c1 = p1;
+		c2 = p2;
+		return glm::dot(c1 - c2, c1 - c2);
+	}
+	if (a <= cvar_epsilon.get()) {
+		// First segment degenerates into a point
+		s = 0.0f;
+		t = f / e; // s = 0 => t = (b*s + f) / e = f / e
+		t = std::clamp(t, 0.0f, 1.0f);
+	} else {
+		float c = glm::dot(d1, r);
+		if (e <= cvar_epsilon.get()) {
+			// Second segment degenerates into a point
+			t = 0.0f;
+			s = std::clamp(-c / a, 0.0f, 1.0f); // t = 0 => s = (b*t - c) / a = -c / a
+		} else {
+			// The general nondegenerate case starts here
+			float b = glm::dot(d1, d2);
+			float denom = a * e - b * b; // Always nonnegative
+			// If segments not parallel, compute closest point on L1 to L2 and
+			// clamp to segment S1. Else pick arbitrary s (here 0)
+			if (denom != 0.0f) {
+				s = std::clamp((b * f - c * e) / denom, 0.0f, 1.0f);
+			} else {
+				s = 0.0f;
+			}
+			// Compute point on L2 closest to S1(s) using
+			// t = Dot((P1 + D1*s) - P2,D2) / Dot(D2,D2) = (b*s + f) / e
+			t = (b * s + f) / e;
+			// If t in [0,1] done. Else clamp t, recompute s for the new value
+			// of t using s = Dot((P2 + D2*t) - P1,D1) / Dot(D1,D1)= (t*b - c) / a
+			// and clamp s to [0, 1]
+			float tnom = b * s + f;
+			if (tnom < 0.0f) {
+				t = 0.0f;
+				s = std::clamp(-c / a, 0.0f, 1.0f);
+			} else if (tnom > e) {
+				t = 1.0f;
+				s = std::clamp((b - c) / a, 0.0f, 1.0f);
+			} else {
+				t = tnom / e;
+			}
+		}
+	}
+	c1 = p1 + d1 * s;
+	c2 = p2 + d2 * t;
+	return glm::dot(c1 - c2, c1 - c2);
+}
+
 bool PhysicsManager::is_collision_candidate(
 		const glm::vec3 &p1, const glm::vec3 &r1, const glm::vec3 &p2, const glm::vec3 &r2) {
 	glm::vec3 vector_distance = p1 - p2;
@@ -521,6 +594,7 @@ void PhysicsManager::non_physical_shift(
 		t2.add_position(-offset);
 	}
 }
+
 void PhysicsManager::physical_shift(Transform &t1, Transform &t2, RigidBody &b1, RigidBody &b2, bool is_movable1,
 		bool is_movable2, const glm::vec3 &offset) {
 	glm::vec3 velocity_projection1;

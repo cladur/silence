@@ -393,9 +393,14 @@ void Inspector::show_animationinstance() {
 		}
 		ImGui::TableNextRow();
 		ImGui::TableSetColumnIndex(0);
-		ImGui::Text("Is looping");
+		ImGui::Text("Loop");
 		ImGui::TableSetColumnIndex(1);
 		ImGui::Checkbox("##Is looping", &animation_instance.is_looping);
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Freeze");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::Checkbox("##Is freeze", &animation_instance.is_freeze);
 		ImGui::TableNextRow();
 		ImGui::TableSetColumnIndex(0);
 		ImGui::Text("Ticks per second");

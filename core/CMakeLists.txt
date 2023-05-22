@@ -34,12 +34,12 @@ add_library(${CORE_LIB_NAME} STATIC
         components/collider_aabb.h
         components/collider_sphere.h
         components/collider_obb.h
-        components/collider_sphere.h
-        components/collider_obb.h
+        components/collider_capsule.h
         components/enemy_path_component.h
         components/interactable_component.h
         cvars/cvars.cpp
-        cvars/cvars.h components/attachment_component.h)
+        cvars/cvars.h
+        components/attachment_component.h)
 
 target_include_directories(${CORE_LIB_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 
