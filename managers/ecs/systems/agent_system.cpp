@@ -1,5 +1,6 @@
 #include "agent_system.h"
 #include "components/agent_data_component.h"
+#include "components/platform_component.h"
 #include "components/transform_component.h"
 #include "ecs/world.h"
 #include "engine/scene.h"
@@ -11,6 +12,7 @@
 #include "input/input_manager.h"
 #include "resource/resource_manager.h"
 #include <spdlog/spdlog.h>
+#include <glm/fwd.hpp>
 #include <glm/geometric.hpp>
 
 AutoCVarFloat cvar_agent_interaction_range(
@@ -153,6 +155,12 @@ void AgentSystem::update(World &world, float dt) {
 			if (is_on_too_steep_slope || info.distance > 0.1f) {
 				transform.position.y -= 8.0f * dt;
 				transform.set_changed(true);
+			}
+			else if (world.has_component<Platform>(info.entity)) {
+				auto &platform = world.get_component<Platform>(info.entity);
+				if(platform.is_moving) {
+					transform.add_position(platform.change_vector);
+				}
 			}
 
 			// If the agent is close enough to the floor, snap him to it
