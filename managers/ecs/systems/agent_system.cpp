@@ -76,12 +76,10 @@ void AgentSystem::update(World &world, float dt) {
 		}
 		glm::normalize(acc_direction);
 
-		if (input_manager.is_action_pressed("agent_crouch")) {
-			is_crouching = true;
+		if (input_manager.is_action_just_pressed("agent_crouch")) {
+			is_crouching = !is_crouching;
 		}
-		else {
-			is_crouching = false;
-		}
+
 
 		if (*CVarSystem::get()->get_int_cvar("debug_camera.use")) {
 			acc_direction = glm::vec3(0.0f, 0.0f, 0.0f);
