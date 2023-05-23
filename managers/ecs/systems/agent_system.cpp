@@ -18,6 +18,8 @@ AutoCVarFloat cvar_agent_interaction_range(
 
 AutoCVarFloat cvar_agent_acc_ground("agent.acc_ground", "acceleration on ground", 0.4f, CVarFlags::EditCheckbox);
 
+AutoCVarFloat cvar_agent_crouch_slowdown("agent.crouch_slowdown", "slowdown while crouching", 2.0f, CVarFlags::EditCheckbox);
+
 AutoCVarFloat cvar_agent_max_vel_ground(
 		"agent.max_vel_ground", "maximum velocity on ground", 2.0f, CVarFlags::EditCheckbox);
 
@@ -74,26 +76,45 @@ void AgentSystem::update(World &world, float dt) {
 		}
 		glm::normalize(acc_direction);
 
+		if (input_manager.is_action_just_pressed("agent_crouch")) {
+			is_crouching = !is_crouching;
+		}
+
+
 		if (*CVarSystem::get()->get_int_cvar("debug_camera.use")) {
 			acc_direction = glm::vec3(0.0f, 0.0f, 0.0f);
 		}
 
 		glm::vec3 velocity = move_ground(acc_direction, previous_velocity, dt);
+		
 		// Use dot instead of length when u want to check 0 value, to avoid calculating square root
-		if (animation_timer <= 0.0f) {
-			if (glm::dot(velocity, velocity) > physics_manager.get_epsilon()) {
-				if (animation_instance.animation_handle.id !=
-						resource_manager.get_animation_handle("agent/agent_ANIM_GLTF/agent_walk.anim").id) {
-					animation_manager.change_animation(agent_data.model, "agent/agent_ANIM_GLTF/agent_walk.anim");
-				}
-			} else {
-				if (animation_instance.animation_handle.id !=
-						resource_manager.get_animation_handle("agent/agent_ANIM_GLTF/agent_idle.anim").id) {
-					animation_manager.change_animation(agent_data.model, "agent/agent_ANIM_GLTF/agent_idle.anim");
+		if (glm::dot(velocity, velocity) > physics_manager.get_epsilon()) {
+			if(is_crouching) {
+				if (animation_instance.animation_handle.id != resource_manager.get_animation_handle("agent/agent_ANIM_GLTF/agent_crouch.anim").id) {
+				animation_manager.change_animation(agent_data.model, "agent/agent_ANIM_GLTF/agent_crouch.anim");
 				}
 			}
+			else {
+				if (animation_instance.animation_handle.id != resource_manager.get_animation_handle("agent/agent_ANIM_GLTF/agent_walk.anim").id) {
+				animation_manager.change_animation(agent_data.model, "agent/agent_ANIM_GLTF/agent_walk.anim");
+				}
+			}
+			
+		} else if(animation_timer <= 0.0f){
+			if(is_crouching) {
+				if (animation_instance.animation_handle.id !=
+					resource_manager.get_animation_handle("agent/agent_ANIM_GLTF/agent_crouch_idle.anim").id) {
+				animation_manager.change_animation(agent_data.model, "agent/agent_ANIM_GLTF/agent_crouch_idle.anim");
+				}
+			}
+			else {
+				if (animation_instance.animation_handle.id !=
+					resource_manager.get_animation_handle("agent/agent_ANIM_GLTF/agent_idle.anim").id) {
+				animation_manager.change_animation(agent_data.model, "agent/agent_ANIM_GLTF/agent_idle.anim");
+				}
+			}	
 		}
-
+		
 		transform.add_position(glm::vec3(velocity.x, 0.0, velocity.z));
 
 		if (*CVarSystem::get()->get_int_cvar("game.controlling_agent") &&
@@ -165,6 +186,8 @@ void AgentSystem::update(World &world, float dt) {
 									"agent/agent_ANIM_GLTF/agent_interaction.anim");
 							if (animation_instance.animation_handle.id != animation_handle.id) {
 								animation_timer = resource_manager.get_animation(animation_handle).get_duration();
+								previous_velocity = {0.0f,0.0f,0.0f};
+								velocity = {0.0f,0.0f,0.0f};
 								animation_manager.change_animation(
 										agent_data.model, "agent/agent_ANIM_GLTF/agent_interaction.anim");
 							}
@@ -199,6 +222,13 @@ glm::vec3 AgentSystem::move_ground(glm::vec3 accel_dir, glm::vec3 pre_velocity, 
 		float drop = speed * cvar_friction_ground.get() * dt;
 		pre_velocity *= glm::max(speed - drop, 0.0f) / speed;
 	}
+	float acceleration = 0;
+	if(is_crouching) {
+		acceleration = cvar_agent_acc_ground.get()/cvar_agent_crouch_slowdown.get();
+	}
+	else {
+		acceleration = cvar_agent_acc_ground.get();
+	}
 
-	return accelerate(accel_dir, pre_velocity, cvar_agent_acc_ground.get(), cvar_agent_max_vel_ground.get(), dt);
+	return accelerate(accel_dir, pre_velocity, acceleration, cvar_agent_max_vel_ground.get(), dt);
 }
