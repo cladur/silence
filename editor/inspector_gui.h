@@ -31,6 +31,7 @@ private:
 	void show_collidersphere();
 	void show_collideraabb();
 	void show_colliderobb();
+	void show_collidercapsule();
 	void show_light();
 	void show_agent_data();
 	void show_hacker_data();

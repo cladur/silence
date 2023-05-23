@@ -50,6 +50,7 @@ void Inspector::show_components() {
 	SHOW_COMPONENT(ColliderSphere, show_collidersphere);
 	SHOW_COMPONENT(ColliderAABB, show_collideraabb);
 	SHOW_COMPONENT(ColliderOBB, show_colliderobb);
+	SHOW_COMPONENT(ColliderCapsule, show_collidercapsule);
 	SHOW_COMPONENT(Light, show_light);
 	SHOW_COMPONENT(AgentData, show_agent_data);
 	SHOW_COMPONENT(HackerData, show_hacker_data);
@@ -611,6 +612,22 @@ void Inspector::show_colliderobb() {
 	}
 }
 
+void Inspector::show_collidercapsule() {
+	auto &collider_capsule = world->get_component<ColliderCapsule>(selected_entity);
+	if (ImGui::CollapsingHeader("ColliderCapsule", tree_flags)) {
+		remove_component_popup<ColliderOBB>();
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("Transform", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+
+		show_float("Radius", collider_capsule.radius);
+		show_vec3("Start", collider_capsule.start);
+		show_vec3("End", collider_capsule.end);
+
+		ImGui::EndTable();
+	}
+}
+
 void Inspector::show_light() {
 	auto &light = world->get_component<Light>(selected_entity);
 	if (ImGui::CollapsingHeader("Light", tree_flags)) {
@@ -1028,6 +1045,7 @@ void Inspector::show_add_component() {
 			SHOW_ADD_COMPONENT(ColliderSphere);
 			SHOW_ADD_COMPONENT(ColliderAABB);
 			SHOW_ADD_COMPONENT(ColliderOBB);
+			SHOW_ADD_COMPONENT(ColliderCapsule);
 			SHOW_ADD_COMPONENT(Light);
 			SHOW_ADD_COMPONENT(AgentData);
 			SHOW_ADD_COMPONENT(HackerData);

@@ -55,6 +55,8 @@ void CollisionSystem::resolve_collision_dynamic(World &world) {
 			first = CollisionFlag::FIRST_AABB;
 		} else if (world.has_component<ColliderSphere>(e1)) {
 			first = CollisionFlag::FIRST_SPHERE;
+		} else if (world.has_component<ColliderCapsule>(e1)) {
+			first = CollisionFlag::FIRST_CAPSULE;
 		} else {
 			continue;
 		}
@@ -67,6 +69,8 @@ void CollisionSystem::resolve_collision_dynamic(World &world) {
 				second = CollisionFlag::SECOND_AABB;
 			} else if (world.has_component<ColliderSphere>(e2)) {
 				second = CollisionFlag::SECOND_SPHERE;
+			} else if (world.has_component<ColliderCapsule>(e2)) {
+				second = CollisionFlag::SECOND_CAPSULE;
 			} else {
 				continue;
 			}
@@ -99,6 +103,14 @@ void CollisionSystem::resolve_collision_dynamic(World &world) {
 					break;
 				case CollisionFlag::OBB_AABB:
 					physics_manager.resolve_obb_aabb(world, e1, e2);
+					break;
+				case CollisionFlag::CAPSULE_CAPSULE:
+					physics_manager.resolve_collision_capsule(world, e1, e2);
+					break;
+				case CollisionFlag::CAPSULE_AABB:
+				case CollisionFlag::CAPSULE_OBB:
+				case CollisionFlag::CAPSULE_SPHERE:
+					//TODO: implement
 					break;
 				default:
 					break;

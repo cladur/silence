@@ -31,6 +31,8 @@ void PhysicsManager::resolve_collision(World &world, Entity movable_object, cons
 		first = CollisionFlag::FIRST_AABB;
 	} else if (world.has_component<ColliderSphere>(e1)) {
 		first = CollisionFlag::FIRST_SPHERE;
+	} else if (world.has_component<ColliderCapsule>(e1)) {
+		first = CollisionFlag::FIRST_CAPSULE;
 	} else {
 		SPDLOG_WARN("Movable object has invalid collider");
 		return;
@@ -43,6 +45,8 @@ void PhysicsManager::resolve_collision(World &world, Entity movable_object, cons
 			second = CollisionFlag::SECOND_AABB;
 		} else if (world.has_component<ColliderSphere>(e2)) {
 			second = CollisionFlag::SECOND_SPHERE;
+		} else if (world.has_component<ColliderCapsule>(e2)) {
+			second = CollisionFlag::SECOND_CAPSULE;
 		} else {
 			continue;
 		}
@@ -74,6 +78,14 @@ void PhysicsManager::resolve_collision(World &world, Entity movable_object, cons
 				break;
 			case CollisionFlag::OBB_AABB:
 				resolve_obb_aabb(world, e1, e2);
+				break;
+			case CollisionFlag::CAPSULE_CAPSULE:
+				resolve_collision_capsule(world, e1, e2);
+				break;
+			case CollisionFlag::CAPSULE_AABB:
+			case CollisionFlag::CAPSULE_OBB:
+			case CollisionFlag::CAPSULE_SPHERE:
+				//TODO: implement
 				break;
 			default:
 				break;
@@ -304,13 +316,13 @@ void PhysicsManager::resolve_collision_obb(World &world, Entity e1, Entity e2) {
 	c1.orientation[0] = temp_c1.orientation[0];
 	c1.orientation[1] = temp_c1.orientation[1];
 	c1.range = temp_c1.range * t1.get_global_scale();
-	c1.center = t1.get_global_position() + c1.get_orientation_matrix() * (temp_c1.center * t1.get_global_scale());
+	c1.center = t1.get_global_position() + temp_c1.get_orientation_matrix() * (temp_c1.center * t1.get_global_scale());
 
 	temp_c2.set_orientation(t2.get_global_orientation());
 	c2.orientation[0] = temp_c2.orientation[0];
 	c2.orientation[1] = temp_c2.orientation[1];
 	c2.range = temp_c2.range * t2.get_global_scale();
-	c2.center = t2.get_global_position() + c2.get_orientation_matrix() * (temp_c2.center * t2.get_global_scale());
+	c2.center = t2.get_global_position() + temp_c2.get_orientation_matrix() * (temp_c2.center * t2.get_global_scale());
 
 	if (!is_collision_candidate(c1.center, c1.range, c2.center, c2.range)) {
 		return;
@@ -478,8 +490,40 @@ glm::vec3 PhysicsManager::is_overlap(const ColliderCapsule &a, const ColliderCap
 
 	// If (squared) distance smaller than (squared) sum of radii, they collide
 	float radius = a.radius + b.radius;
-	//		return dist2 <= radius * radius;
-	return glm::vec3();
+	if (dist2 <= radius * radius) {
+		return glm::vec3(1.0f);
+	}
+
+	return glm::vec3(0.0f);
+}
+
+void PhysicsManager::resolve_collision_capsule(World &world, Entity e1, Entity e2) {
+	ColliderCapsule &temp_c1 = world.get_component<ColliderCapsule>(e1);
+	ColliderCapsule &temp_c2 = world.get_component<ColliderCapsule>(e2);
+	Transform &t1 = world.get_component<Transform>(e1);
+	Transform &t2 = world.get_component<Transform>(e2);
+	ColliderTag &tag1 = world.get_component<ColliderTag>(e1);
+	ColliderTag &tag2 = world.get_component<ColliderTag>(e2);
+	if (!are_layers_collide(tag1.layer_name, tag2.layer_name)) {
+		return;
+	}
+
+	ColliderCapsule c1{};
+	ColliderCapsule c2{};
+	c1.radius = temp_c1.radius * t1.get_global_scale().x;
+	c1.start = t1.get_global_position() + temp_c1.start * t1.get_global_scale();
+	c1.start = t1.get_global_position() + temp_c1.end * t1.get_global_scale();
+
+	c2.radius = temp_c2.radius * t2.get_global_scale().x;
+	c2.start = t2.get_global_position() + temp_c2.start * t2.get_global_scale();
+	c2.start = t2.get_global_position() + temp_c2.end * t2.get_global_scale();
+
+	glm::vec3 offset = is_overlap(c1, c2);
+	if (glm::dot(offset, offset) < cvar_epsilon.get()) {
+		return;
+	}
+
+	SPDLOG_INFO("COLLIDE!");
 }
 
 float PhysicsManager::ClosestPtSegmentSegment(

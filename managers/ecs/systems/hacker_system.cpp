@@ -6,7 +6,7 @@
 #include "engine/scene.h"
 
 #include "animation/animation_manager.h"
-#include "ecs/systems/collision_system.h"
+#include "managers/physics/ecs/collision_system.h"
 #include "physics/physics_manager.h"
 
 #include "input/input_manager.h"

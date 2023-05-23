@@ -7,12 +7,10 @@ add_library(${ECS_MANAGER_NAME} STATIC
         system_manager.h
         world.cpp world.h
         systems/base_system.h
-        systems/physics_system.cpp systems/physics_system.h
         systems/collider_components_factory.h
         systems/isolated_entities_system.cpp systems/isolated_entities_system.h
         systems/root_parent_system.cpp systems/root_parent_system.h
-        component_visitor.h 
-        systems/collision_system.cpp systems/collision_system.h 
+        component_visitor.h
         systems/collider_draw.cpp systems/collider_draw.h
         systems/agent_system.cpp systems/agent_system.h
         systems/hacker_system.cpp systems/hacker_system.h

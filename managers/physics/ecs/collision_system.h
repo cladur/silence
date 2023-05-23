@@ -1,7 +1,7 @@
 #ifndef SILENCE_COLLISION_SYSTEM_H
 #define SILENCE_COLLISION_SYSTEM_H
 
-#include "base_system.h"
+#include "managers/ecs/systems/base_system.h"
 struct BSPNode;
 struct Plane;
 enum class Side;

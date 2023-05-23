@@ -2,8 +2,8 @@
 #include "engine/scene.h"
 
 #include "display/display_manager.h"
-#include "ecs/systems/collision_system.h"
 #include "input/input_manager.h"
+#include "managers/physics/ecs/collision_system.h"
 #include "physics/physics_manager.h"
 
 #include "editor.h"
