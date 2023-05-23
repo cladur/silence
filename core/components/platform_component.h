@@ -1,9 +1,11 @@
 #ifndef SILENCE_PLATFORM_COMPONENT_H
 #define SILENCE_PLATFORM_COMPONENT_H
 
+#include <glm/fwd.hpp>
 struct Platform {
 	glm::vec3 starting_position;
 	glm::vec3 ending_position;
+	glm::vec3 change_vector;
 
 	float speed = 1.0f;
 
