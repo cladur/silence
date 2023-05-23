@@ -4,8 +4,11 @@
 #include "components/collider_sphere.h"
 #include "components/collider_tag_component.h"
 #include "components/fmod_listener_component.h"
+#include "components/interactable_component.h"
 #include "components/light_component.h"
+#include "components/platform_component.h"
 #include "components/rigidbody_component.h"
+#include "physics/physics_manager.h"
 #include "render/ecs/model_instance.h"
 #include <imgui.h>
 #include <imgui_internal.h>
@@ -39,6 +42,7 @@ void Inspector::show_components() {
 	SHOW_COMPONENT(ModelInstance, show_modelinstance);
 	SHOW_COMPONENT(SkinnedModelInstance, show_skinnedmodelinstance);
 	SHOW_COMPONENT(AnimationInstance, show_animationinstance);
+	SHOW_COMPONENT(Attachment, show_attachment);
 	SHOW_COMPONENT(FmodListener, show_fmodlistener);
 	SHOW_COMPONENT(Camera, show_camera);
 	SHOW_COMPONENT(ColliderTag, show_collidertag);
@@ -48,6 +52,10 @@ void Inspector::show_components() {
 	SHOW_COMPONENT(ColliderOBB, show_colliderobb);
 	SHOW_COMPONENT(Light, show_light);
 	SHOW_COMPONENT(AgentData, show_agent_data);
+	SHOW_COMPONENT(HackerData, show_hacker_data);
+	SHOW_COMPONENT(EnemyPath, show_enemy_path);
+	SHOW_COMPONENT(Interactable, show_interactable);
+	SHOW_COMPONENT(Platform, show_platform);
 
 	for (int i = 0; i < remove_component_queue.size(); i++) {
 		auto [entity, component_to_remove] = remove_component_queue.front();
@@ -174,7 +182,7 @@ void Inspector::show_skinnedmodelinstance() {
 	auto &modelinstance = world->get_component<SkinnedModelInstance>(selected_entity);
 	auto models = resource_manager.get_skinned_models();
 	if (ImGui::CollapsingHeader("Skinned Model Instance", tree_flags)) {
-		remove_component_popup<ModelInstance>();
+		remove_component_popup<SkinnedModelInstance>();
 		std::string name = resource_manager.get_skinned_model(modelinstance.model_handle).name;
 		std::size_t last_slash_pos = name.find_last_of("/\\");
 
@@ -313,7 +321,15 @@ void Inspector::show_modelinstance() {
 
 		if (ImGui::BeginDragDropTarget()) {
 			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_MODEL_PATH")) {
-				const std::string payload_n = *(const std::string *)payload->Data;
+				std::string payload_n = *(const std::string *)payload->Data;
+				std::string search_string = "\\";
+				std::string replace_string = "/";
+
+				size_t pos = payload_n.find(search_string);
+				while (pos != std::string::npos) {
+					payload_n.replace(pos, search_string.length(), replace_string);
+					pos = payload_n.find(search_string, pos + replace_string.length());
+				}
 				resource_manager.load_model(payload_n.c_str());
 				modelinstance.model_handle = resource_manager.get_model_handle(payload_n);
 			}
@@ -325,11 +341,12 @@ void Inspector::show_modelinstance() {
 
 void Inspector::show_animationinstance() {
 	auto &animation_instance = world->get_component<AnimationInstance>(selected_entity);
-	auto models = resource_manager.get_skinned_models();
-	auto animations = resource_manager.get_animations();
+	auto &models = resource_manager.get_skinned_models();
+	auto &animations = resource_manager.get_animations();
 	if (ImGui::CollapsingHeader("Animation Instance", tree_flags)) {
-		remove_component_popup<ModelInstance>();
-		std::string name = resource_manager.get_animation(animation_instance.animation_handle).name;
+		remove_component_popup<AnimationInstance>();
+		auto &selected_animation = resource_manager.get_animation(animation_instance.animation_handle);
+		std::string name = selected_animation.name;
 		std::size_t last_slash_pos = name.find_last_of("/\\");
 
 		if (last_slash_pos != std::string::npos) {
@@ -354,7 +371,6 @@ void Inspector::show_animationinstance() {
 						resource_manager.get_animation_handle(animation.name).id);
 
 				auto animation_handle = resource_manager.get_animation_handle(animation.name);
-				//auto animation = render_manager.get_animation(animation_handle);
 				std::string animation_name = animation.name;
 				std::size_t animation_slash_pos = animation_name.find_last_of("/\\");
 				if (animation_slash_pos != std::string::npos) {
@@ -367,6 +383,7 @@ void Inspector::show_animationinstance() {
 
 				if (ImGui::Selectable(animation_name.c_str(), is_selected)) {
 					animation_instance.animation_handle = animation_handle;
+					animation_instance.current_time = 0.0f;
 				}
 				if (is_selected) {
 					ImGui::SetItemDefaultFocus();
@@ -374,6 +391,90 @@ void Inspector::show_animationinstance() {
 			}
 			ImGui::EndCombo();
 		}
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Is looping");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::Checkbox("##Is looping", &animation_instance.is_looping);
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Ticks per second");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		ImGui::DragFloat("##Ticks per second", &animation_instance.ticks_per_second, 20.0f, 0, 50000);
+
+		ImGui::EndTable();
+	}
+}
+
+void Inspector::show_attachment() {
+	auto &attachment = world->get_component<Attachment>(selected_entity);
+	if (ImGui::CollapsingHeader("Attachment", tree_flags)) {
+		remove_component_popup<Attachment>();
+
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Bone name");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		if (ImGui::BeginCombo("##Bone name", attachment.bone_name.c_str())) {
+			if (attachment.holder != -1) {
+				SkinnedModelInstance &instance = world->get_component<SkinnedModelInstance>(attachment.holder);
+				SkinnedModel &model = resource_manager.get_skinned_model(instance.model_handle);
+				for (const auto &pair : model.joint_map) {
+					bool is_selected = (attachment.bone_name == pair.first);
+
+					if (ImGui::Selectable(pair.first.c_str(), is_selected)) {
+						attachment.bone_name = pair.first;
+					}
+					if (is_selected) {
+						ImGui::SetItemDefaultFocus();
+					}
+				}
+			}
+			ImGui::EndCombo();
+		}
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Holder ");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		std::string name;
+		if (attachment.holder == -1) {
+			name = "None";
+		} else if (world->has_component<Name>(attachment.holder)) {
+			name = world->get_component<Name>(attachment.holder).name;
+		} else {
+			name = std::to_string(attachment.holder);
+		}
+
+		if (ImGui::BeginCombo("##Holder", name.c_str())) {
+			for (auto entity : world->get_parent_scene()->entities) {
+				if (!world->has_component<SkinnedModelInstance>(entity)) {
+					continue;
+				}
+				bool is_selected = (attachment.holder == entity);
+				std::string other_name;
+				if (world->has_component<Name>(entity)) {
+					other_name = world->get_component<Name>(entity).name;
+				} else {
+					other_name = std::to_string(entity);
+				}
+				if (ImGui::Selectable(other_name.c_str(), is_selected)) {
+					attachment.holder = entity;
+					attachment.bone_name = "";
+				}
+				if (is_selected) {
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+
+			ImGui::EndCombo();
+		}
+
 		ImGui::EndTable();
 	}
 }
@@ -402,6 +503,13 @@ void Inspector::show_camera() {
 
 		show_float("Fov", camera.fov);
 
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Right Side");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		ImGui::Checkbox("##Right Side", &camera.right_side);
+
 		ImGui::EndTable();
 	}
 }
@@ -409,11 +517,30 @@ void Inspector::show_camera() {
 void Inspector::show_collidertag() {
 	if (ImGui::CollapsingHeader("ColliderTag", tree_flags)) {
 		remove_component_popup<ColliderTag>();
+		PhysicsManager &physics_manager = PhysicsManager::get();
+		auto &tag = world->get_component<ColliderTag>(selected_entity);
+		const auto &map = physics_manager.get_layers_map();
 		float available_width = ImGui::GetContentRegionAvail().x;
-		ImGui::BeginTable("Transform", 2);
+		ImGui::BeginTable("Collider Tag", 2);
 		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Layer");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		if (ImGui::BeginCombo("##Layer", tag.layer_name.c_str())) {
+			for (const auto &pair : map) {
+				bool is_selected = tag.layer_name == pair.first;
 
-		show_text("Collider Tag", "Yes");
+				if (ImGui::Selectable(pair.first.c_str(), is_selected)) {
+					tag.layer_name = pair.first;
+				}
+				if (is_selected) {
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+			ImGui::EndCombo();
+		}
 
 		ImGui::EndTable();
 	}
@@ -478,6 +605,7 @@ void Inspector::show_colliderobb() {
 		ImGui::EndTable();
 	}
 }
+
 void Inspector::show_light() {
 	auto &light = world->get_component<Light>(selected_entity);
 	if (ImGui::CollapsingHeader("Light", tree_flags)) {
@@ -486,7 +614,19 @@ void Inspector::show_light() {
 		ImGui::BeginTable("Light", 2);
 		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
 
-		show_vec3("Color", light.color, 1.0f, 255.0f, 0.0f, 255.0f);
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Color");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		ImGui::ColorPicker3("##Color", (float *)&light.color);
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Intensity");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		ImGui::DragFloat("##Intensity", &light.intensity, 0.01f, 0.0f, 100.0f);
 
 		ImGui::TableNextRow();
 		ImGui::TableSetColumnIndex(0);
@@ -505,6 +645,74 @@ void Inspector::show_light() {
 			}
 			ImGui::EndCombo();
 		}
+		ImGui::EndTable();
+	}
+}
+
+void Inspector::show_hacker_data() {
+	auto &hacker_data = world->get_component<HackerData>(selected_entity);
+	if (ImGui::CollapsingHeader("Hacker Data", tree_flags)) {
+		remove_component_popup<HackerData>();
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("Hacker Data", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Hacker Model");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::InputInt("", (int *)&hacker_data.model, 0, 0);
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
+				Entity payload_entity = *(Entity *)payload->Data;
+				hacker_data.model = payload_entity;
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Camera Pivot");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::InputInt("", (int *)&hacker_data.camera_pivot, 0, 0);
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
+				Entity payload_entity = *(Entity *)payload->Data;
+				hacker_data.camera_pivot = payload_entity;
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Scorpion camera transform");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::InputInt("", (int *)&hacker_data.scorpion_camera_transform, 0, 0);
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
+				Entity payload_entity = *(Entity *)payload->Data;
+				hacker_data.scorpion_camera_transform = payload_entity;
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Camera");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::InputInt("", (int *)&hacker_data.camera, 0, 0);
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
+				Entity payload_entity = *(Entity *)payload->Data;
+				hacker_data.camera = payload_entity;
+			}
+			ImGui::EndDragDropTarget();
+		}
+
 		ImGui::EndTable();
 	}
 }
@@ -563,6 +771,138 @@ void Inspector::show_agent_data() {
 	}
 }
 
+void Inspector::show_enemy_path() {
+	auto &enemy_path = world->get_component<EnemyPath>(selected_entity);
+	if (ImGui::CollapsingHeader("Enemy Path", tree_flags)) {
+		if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+			ImGui::OpenPopup("EnemyPathContextMenu");
+		}
+		if (ImGui::BeginPopup("EnemyPathContextMenu")) {
+			if (ImGui::MenuItem("Add Node")) {
+				if (enemy_path.path.empty()) {
+					// if this is the first node, add it in place of transform
+					auto &transform = world->get_component<Transform>(selected_entity);
+					enemy_path.path.emplace_back(transform.position);
+				} else {
+					// otherwise, add it in place of the last node
+					enemy_path.path.emplace_back(enemy_path.path.back());
+				}
+			}
+			if (ImGui::MenuItem("Remove Node")) {
+				if (!enemy_path.path.empty()) {
+					enemy_path.path.pop_back();
+				}
+			}
+			ImGui::EndPopup();
+		}
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("Enemy Path", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+
+		int i = 0;
+		show_float("Speed", enemy_path.speed);
+		show_float("Rot Speed", enemy_path.rotation_speed);
+		for (auto &node : enemy_path.path) {
+			std::string label = fmt::format("Node {}", i++);
+			show_vec3(label.c_str(), node);
+		}
+		ImGui::EndTable();
+	}
+}
+
+void Inspector::show_interactable() {
+	auto &interactable = world->get_component<Interactable>(selected_entity);
+	if (ImGui::CollapsingHeader("Interactable", tree_flags)) {
+		remove_component_popup<Interactable>();
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("Interactable", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Interaction type");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		if (ImGui::BeginCombo("##Interaction type", magic_enum::enum_name(interactable.type).data())) {
+			for (auto type : magic_enum::enum_values<InteractionType>()) {
+				bool is_selected = (interactable.type == type);
+				if (ImGui::Selectable(magic_enum::enum_name(type).data(), is_selected)) {
+					interactable.type = type;
+				}
+				if (is_selected) {
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+			ImGui::EndCombo();
+		}
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Interaction");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		if (ImGui::BeginCombo("##Interaction", magic_enum::enum_name(interactable.interaction).data())) {
+			for (auto type : magic_enum::enum_values<Interaction>()) {
+				bool is_selected = (interactable.interaction == type);
+				if (ImGui::Selectable(magic_enum::enum_name(type).data(), is_selected)) {
+					interactable.interaction = type;
+				}
+				if (is_selected) {
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+			ImGui::EndCombo();
+		}
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Interaction target");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::InputInt("", (int *)&interactable.interaction_target, 0, 0);
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
+				Entity payload_entity = *(Entity *)payload->Data;
+				interactable.interaction_target = payload_entity;
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+		ImGui::EndTable();
+	}
+}
+
+void Inspector::show_platform() {
+	auto &platform = world->get_component<Platform>(selected_entity);
+
+	if (ImGui::CollapsingHeader("Platform", tree_flags)) {
+		if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+			ImGui::OpenPopup("PlatformContextMenu");
+		}
+		if (ImGui::BeginPopup("PlatformContextMenu")) {
+			if (ImGui::MenuItem("Reset Platform")) {
+				platform.starting_position = glm::vec3(0.0f);
+				platform.ending_position = glm::vec3(0.0f);
+			}
+			remove_component_menu_item<Platform>();
+
+			ImGui::EndPopup();
+		}
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("Platform Component", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+
+		bool changed = false;
+
+		changed |= show_vec3("Starting position", platform.starting_position);
+		changed |= show_vec3("Ending position", platform.ending_position);
+
+		show_float("Platform speed", platform.speed);
+
+		ImGui::EndTable();
+	}
+}
+
 bool Inspector::show_vec3(
 		const char *label, glm::vec3 &vec3, float speed, float reset_value, float min_value, float max_value) {
 	bool changed = false;
@@ -616,6 +956,15 @@ void Inspector::show_text(const char *label, int value) {
 	Inspector::show_text(label, value_str.c_str());
 }
 
+void Inspector::show_vector_vec3(const char *label, std::vector<glm::vec3> &vec3) {
+	ImGui::TableNextRow();
+	ImGui::TableSetColumnIndex(0);
+	ImGui::Text("%s", label);
+	ImGui::TableSetColumnIndex(1);
+	ImGui::SetNextItemWidth(-FLT_MIN);
+	ImGui::Text("%zu", vec3.size());
+}
+
 void Inspector::show_add_component() {
 	std::vector<std::string> component_names = world->get_component_names();
 	float available_width = ImGui::GetContentRegionAvail().x;
@@ -666,6 +1015,7 @@ void Inspector::show_add_component() {
 			SHOW_ADD_COMPONENT(ModelInstance);
 			SHOW_ADD_COMPONENT(SkinnedModelInstance);
 			SHOW_ADD_COMPONENT(AnimationInstance);
+			SHOW_ADD_COMPONENT(Attachment);
 			SHOW_ADD_COMPONENT(FmodListener);
 			SHOW_ADD_COMPONENT(Camera);
 			SHOW_ADD_COMPONENT(ColliderTag);
@@ -675,6 +1025,10 @@ void Inspector::show_add_component() {
 			SHOW_ADD_COMPONENT(ColliderOBB);
 			SHOW_ADD_COMPONENT(Light);
 			SHOW_ADD_COMPONENT(AgentData);
+			SHOW_ADD_COMPONENT(HackerData);
+			SHOW_ADD_COMPONENT(EnemyPath);
+			SHOW_ADD_COMPONENT(Interactable);
+			SHOW_ADD_COMPONENT(Platform);
 
 			ImGui::EndPopup();
 		}

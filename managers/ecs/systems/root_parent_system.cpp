@@ -25,7 +25,7 @@ void RootParentSystem::update(World &world, float dt) {
 }
 
 void RootParentSystem::update_children(
-		World &world, Entity parent, glm::mat4 parent_model) { // NOLINT(misc-no-recursion)
+		World &world, Entity parent, const glm::mat4 &parent_model) { // NOLINT(misc-no-recursion)
 	auto children = world.get_component<Children>(parent);
 
 	for (int i = 0; i < children.children_count; i++) {

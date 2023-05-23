@@ -1,13 +1,19 @@
 #ifndef SILENCE_PHYSICS_MANAGER_H
 #define SILENCE_PHYSICS_MANAGER_H
 
+class World;
 struct ColliderSphere;
 struct ColliderAABB;
 struct ColliderOBB;
+struct Transform;
+struct RigidBody;
+struct ColliderTag;
 
 struct Ray {
 	glm::vec3 origin;
 	glm::vec3 direction;
+	std::string layer_name = "default";
+	std::vector<Entity> ignore_list;
 };
 
 struct HitInfo {
@@ -56,10 +62,6 @@ static CollisionFlag operator|(const CollisionFlag first, const CollisionFlag se
 	return CollisionFlag(uint16_t(first) | uint16_t(second));
 }
 
-class World;
-struct Transform;
-struct RigidBody;
-
 class PhysicsManager {
 public:
 	static PhysicsManager &get();
@@ -100,7 +102,17 @@ public:
 	// returns true, point and normal if ray intersect with obb
 	bool intersect_ray_obb(const Ray &ray, const ColliderOBB &obb, HitInfo &result);
 
+	void add_collision_layer(const std::string &layer_name);
+	void remove_collision_layer(const std::string &layer_name);
+	void set_layers_no_collision(const std::string &layer1, const std::string &layer2);
+	void set_layers_collision(const std::string &layer1, const std::string &layer2);
+	bool are_layers_collide(const std::string &layer1, const std::string &layer2);
+	const std::unordered_map<std::string, std::unordered_set<std::string>> &get_layers_map();
+
 private:
+	// layers map that contains data about which layer does not collide with which ones
+	// this is something like no collision map
+	std::unordered_map<std::string, std::unordered_set<std::string>> layers_map;
 	glm::vec3 gravity;
 	float epsilon;
 };

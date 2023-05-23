@@ -9,6 +9,8 @@
 #include "render/transparent_elements/ui_manager.h"
 #include <spdlog/spdlog.h>
 
+AutoCVarInt cvar_controlling_agent("game.controlling_agent", "Controlling agent", 1, CVarFlags::EditCheckbox);
+
 void gui_setup() {
 	SPDLOG_INFO("Initializing GUI scenes");
 	SpriteManager::get()->load_sprite_texture("button_hover", "button_lit_1.ktx2");
@@ -220,52 +222,86 @@ void input_setup() {
 	InputManager &input_manager = InputManager::get();
 	input_manager.add_action("move_forward");
 	input_manager.add_key_to_action("move_forward", InputKey::W);
-	input_manager.add_key_to_action("move_forward", InputKey::GAMEPAD_LEFT_STICK_Y_POSITIVE);
 	input_manager.add_action("move_backward");
 	input_manager.add_key_to_action("move_backward", InputKey::S);
-	input_manager.add_key_to_action("move_backward", InputKey::GAMEPAD_LEFT_STICK_Y_NEGATIVE);
 	input_manager.add_action("move_left");
 	input_manager.add_key_to_action("move_left", InputKey::A);
-	input_manager.add_key_to_action("move_left", InputKey::GAMEPAD_LEFT_STICK_X_NEGATIVE);
 	input_manager.add_action("move_right");
 	input_manager.add_key_to_action("move_right", InputKey::D);
-	input_manager.add_key_to_action("move_right", InputKey::GAMEPAD_LEFT_STICK_X_POSITIVE);
 	input_manager.add_action("move_up");
 	input_manager.add_key_to_action("move_up", InputKey::E);
-	input_manager.add_key_to_action("move_up", InputKey::GAMEPAD_BUTTON_A);
 	input_manager.add_action("move_down");
 	input_manager.add_key_to_action("move_down", InputKey::Q);
-	input_manager.add_key_to_action("move_down", InputKey::GAMEPAD_BUTTON_B);
 	input_manager.add_action("move_faster");
 	input_manager.add_key_to_action("move_faster", InputKey::LEFT_SHIFT);
+	input_manager.add_action("agent_interact");
+	input_manager.add_key_to_action("agent_interact", InputKey::E);
+	input_manager.add_key_to_action("agent_interact", InputKey::GAMEPAD_BUTTON_A);
 
 	input_manager.add_action("control_camera");
 	input_manager.add_key_to_action("control_camera", InputKey::MOUSE_RIGHT);
 
+	input_manager.add_action("agent_move_forward");
+	input_manager.add_key_to_action("agent_move_forward", InputKey::W);
+
+	input_manager.add_action("agent_move_backward");
+	input_manager.add_key_to_action("agent_move_backward", InputKey::S);
+
+	input_manager.add_action("agent_move_left");
+	input_manager.add_key_to_action("agent_move_left", InputKey::A);
+
+	input_manager.add_action("agent_move_right");
+	input_manager.add_key_to_action("agent_move_right", InputKey::D);
+
+	input_manager.add_action("agent_crouch");
+	input_manager.add_key_to_action("agent_crouch", InputKey::LEFT_CONTROL);
+
 	//add actions to arrows
-	input_manager.add_action("forward");
-	input_manager.add_key_to_action("forward", InputKey::UP);
+	input_manager.add_action("hacker_move_forward");
+	input_manager.add_key_to_action("hacker_move_forward", InputKey::UP);
+	input_manager.add_key_to_action("hacker_move_forward", InputKey::GAMEPAD_LEFT_STICK_Y_POSITIVE);
 
-	input_manager.add_action("backward");
-	input_manager.add_key_to_action("backward", InputKey::DOWN);
+	input_manager.add_action("hacker_move_backward");
+	input_manager.add_key_to_action("hacker_move_backward", InputKey::DOWN);
+	input_manager.add_key_to_action("hacker_move_backward", InputKey::GAMEPAD_LEFT_STICK_Y_NEGATIVE);
 
-	input_manager.add_action("left");
-	input_manager.add_key_to_action("left", InputKey::LEFT);
+	input_manager.add_action("hacker_move_left");
+	input_manager.add_key_to_action("hacker_move_left", InputKey::LEFT);
+	input_manager.add_key_to_action("hacker_move_left", InputKey::GAMEPAD_LEFT_STICK_X_NEGATIVE);
 
-	input_manager.add_action("right");
-	input_manager.add_key_to_action("right", InputKey::RIGHT);
+	input_manager.add_action("hacker_move_right");
+	input_manager.add_key_to_action("hacker_move_right", InputKey::RIGHT);
+	input_manager.add_key_to_action("hacker_move_right", InputKey::GAMEPAD_LEFT_STICK_X_POSITIVE);
 
-	input_manager.add_action("up");
-	input_manager.add_key_to_action("up", InputKey::O);
+	input_manager.add_action("hacker_look_up");
+	input_manager.add_key_to_action("hacker_look_up", InputKey::GAMEPAD_RIGHT_STICK_Y_POSITIVE);
 
-	input_manager.add_action("down");
-	input_manager.add_key_to_action("down", InputKey::L);
+	input_manager.add_action("hacker_look_down");
+	input_manager.add_key_to_action("hacker_look_down", InputKey::GAMEPAD_RIGHT_STICK_Y_NEGATIVE);
+
+	input_manager.add_action("hacker_look_left");
+	input_manager.add_key_to_action("hacker_look_left", InputKey::GAMEPAD_RIGHT_STICK_X_NEGATIVE);
+
+	input_manager.add_action("hacker_look_right");
+	input_manager.add_key_to_action("hacker_look_right", InputKey::GAMEPAD_RIGHT_STICK_X_POSITIVE);
 
 	input_manager.add_action("toggle_debug_mode");
 	input_manager.add_key_to_action("toggle_debug_mode", InputKey::ESCAPE);
 
 	input_manager.add_action("mouse_left");
 	input_manager.add_key_to_action("mouse_left", InputKey::MOUSE_LEFT);
+
+	input_manager.add_action("mouse_right");
+	input_manager.add_key_to_action("mouse_right", InputKey::MOUSE_RIGHT);
+
+	input_manager.add_action("control_agent");
+	input_manager.add_key_to_action("control_agent", InputKey::F1);
+
+	input_manager.add_action("control_hacker");
+	input_manager.add_key_to_action("control_hacker", InputKey::F2);
+
+	input_manager.add_action("toggle_splitscreen");
+	input_manager.add_key_to_action("toggle_splitscreen", InputKey::F3);
 }
 
 void handle_camera(DebugCamera &cam, float dt) {
@@ -296,6 +332,7 @@ void Game::startup() {
 	CVarSystem::get()->set_int_cvar("debug_draw.frustum.draw", 0);
 	CVarSystem::get()->set_int_cvar("debug_draw.collision.draw", 0);
 	CVarSystem::get()->set_int_cvar("debug_camera.use", 0);
+	CVarSystem::get()->set_int_cvar("render.splitscreen", 1);
 }
 
 void Game::shutdown() {
@@ -305,6 +342,37 @@ void Game::shutdown() {
 void Game::custom_update(float dt) {
 	DisplayManager &display_manager = DisplayManager::get();
 	InputManager &input_manager = InputManager::get();
+
+	// Reforward input events if requested
+	if (input_manager.is_action_just_pressed("control_agent")) {
+		input_manager.remove_key_from_action("hacker_move_forward", InputKey::W);
+		input_manager.remove_key_from_action("hacker_move_backward", InputKey::S);
+		input_manager.remove_key_from_action("hacker_move_left", InputKey::A);
+		input_manager.remove_key_from_action("hacker_move_right", InputKey::D);
+
+		input_manager.add_key_to_action("agent_move_forward", InputKey::W);
+		input_manager.add_key_to_action("agent_move_backward", InputKey::S);
+		input_manager.add_key_to_action("agent_move_left", InputKey::A);
+		input_manager.add_key_to_action("agent_move_right", InputKey::D);
+
+		cvar_controlling_agent.set(1);
+	}
+	if (input_manager.is_action_just_pressed("control_hacker")) {
+		input_manager.remove_key_from_action("agent_move_forward", InputKey::W);
+		input_manager.remove_key_from_action("agent_move_backward", InputKey::S);
+		input_manager.remove_key_from_action("agent_move_left", InputKey::A);
+		input_manager.remove_key_from_action("agent_move_right", InputKey::D);
+
+		input_manager.add_key_to_action("hacker_move_forward", InputKey::W);
+		input_manager.add_key_to_action("hacker_move_backward", InputKey::S);
+		input_manager.add_key_to_action("hacker_move_left", InputKey::A);
+		input_manager.add_key_to_action("hacker_move_right", InputKey::D);
+
+		cvar_controlling_agent.set(0);
+	}
+	if (input_manager.is_action_just_pressed("toggle_splitscreen")) {
+		CVarSystem::get()->set_int_cvar("render.splitscreen", !*CVarSystem::get()->get_int_cvar("render.splitscreen"));
+	}
 
 	// Resize scene's framebuffers if necessary
 	static glm::vec2 last_framebuffer_size = glm::vec2(100, 100);
@@ -325,7 +393,7 @@ void Game::custom_update(float dt) {
 
 		if (in_debug_mode) {
 			DebugCamera &cam = get_active_scene().get_render_scene().debug_camera;
-			cam.set_transform(get_active_scene().get_render_scene().camera_transform);
+			cam.set_transform(get_active_scene().get_render_scene().left_camera_transform);
 		}
 	}
 
@@ -349,6 +417,7 @@ void Game::custom_update(float dt) {
 	if (in_debug_mode) {
 		ImGui::Begin("Debug Menu");
 		ImGui::Text("Press ESC to get back to the game");
+		ImGui::Text("%f FPS (%.2f ms)", 1.0f / dt, 1000.0f * dt);
 		ImGui::End();
 	}
 }

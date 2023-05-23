@@ -19,43 +19,52 @@ struct RenderScene {
 	glm::vec3 camera_pos;
 
 	DebugCamera debug_camera;
-	Transform camera_transform;
-	Camera camera_params;
+	Transform left_camera_transform;
+	Camera left_camera_params;
+	Transform right_camera_transform;
+	Camera right_camera_params;
 	Frustum frustum;
 	float aspect_ratio;
 
 	RenderPass *default_pass;
-#ifdef WIN32
-	SkinnedPassUnlit skinned_unlit_pass;
-#endif
 	GBufferPass g_buffer_pass;
 	PBRPass pbr_pass;
+	LightPass light_pass;
 	SkyboxPass skybox_pass;
 	TransparentPass transparent_pass;
 	AOPass ssao_pass;
 	AOBlurPass ssao_blur_pass;
 	CombinationPass combination_pass;
+	BloomPass bloom_pass;
 
 	Framebuffer render_framebuffer;
+	Framebuffer final_framebuffer;
 	GBuffer g_buffer;
 	PBRBuffer pbr_buffer;
 	SSAOBuffer ssao_buffer;
+	CombinationBuffer combination_buffer;
+	BloomBuffer bloom_buffer;
+	SkyboxBuffer skybox_buffer;
 	glm::vec2 render_extent;
 
 	DebugDraw debug_draw;
 
 	std::vector<TransparentObject> transparent_objects;
 
+	std::vector<LightDrawCommand> light_draw_commands;
 	std::vector<DrawCommand> draw_commands;
+	std::vector<SkinnedDrawCommand> skinned_draw_commands;
 
 	bool draw_skybox = false;
 
 	void startup();
+	void draw_viewport(bool right_side = false);
 	void draw();
 	void resize_framebuffer(uint32_t width, uint32_t height);
 
 	void queue_draw(ModelInstance *model_instance, Transform *transform);
 	void queue_skinned_draw(SkinnedModelInstance *model_instance, Transform *transform);
+	void queue_light_draw(Light *light, Transform *transform);
 };
 
 #endif //SILENCE_RENDER_SCENE_H

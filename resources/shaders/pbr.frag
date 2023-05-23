@@ -14,11 +14,6 @@ uniform samplerCube irradiance_map;
 uniform samplerCube prefilter_map;
 uniform sampler2D brdf_lut;
 
-// lights
-const int NR_LIGHTS = 32;
-uniform vec3 lightPositions[NR_LIGHTS];
-uniform vec3 lightColors[NR_LIGHTS];
-
 uniform mat4 view;
 uniform vec3 camPos;
 
@@ -93,49 +88,6 @@ void main()
     vec3 F0 = vec3(0.04);
     F0 = mix(F0, albedo, metallic);
 
-    // reflectance equation
-    vec3 diffuse_light = vec3(0.0);
-    vec3 specular_light = vec3(0.0);
-    for (int i = 0; i < 5; ++i)
-    {
-        // calculate per-light radiance
-        vec3 L = normalize(lightPositions[i] - WorldPos);
-        vec3 H = normalize(V + L);
-        float distance = length(lightPositions[i] - WorldPos);
-        // TODO: Bring back
-        // float attenuation = 1.0 / (distance * distance);
-
-        float attenuation = 1.0 / distance;
-        vec3 radiance = lightColors[i] * attenuation;
-
-        // Cook-Torrance BRDF
-        float NDF = DistributionGGX(N, H, roughness);
-        float G   = GeometrySmith(N, V, L, roughness);
-        vec3 F    = fresnelSchlick(max(dot(H, V), 0.0), F0);
-
-        vec3 numerator    = NDF * G * F;
-        float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.0001;// + 0.0001 to prevent divide by zero
-        vec3 specular = numerator / denominator;
-
-        // kS is equal to Fresnel
-        vec3 kS = F;
-        // for energy conservation, the diffuse and specular light can't
-        // be above 1.0 (unless the surface emits light); to preserve this
-        // relationship the diffuse component (kD) should equal 1.0 - kS.
-        vec3 kD = vec3(1.0) - kS;
-        // multiply kD by the inverse metalness such that only non-metals 
-        // have diffuse lighting, or a linear blend if partly metal (pure metals
-        // have no diffuse light).
-        kD *= 1.0 - metallic;
-
-        // scale light by NdotL
-        float NdotL = max(dot(N, L), 0.0);
-
-        // add to outgoing radiance Lo
-        diffuse_light += (kD * albedo / PI) * radiance * NdotL;
-        specular_light += (specular * radiance * NdotL);
-    }
-
     // ambient lighting
     vec3 F = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
 
@@ -156,6 +108,6 @@ void main()
 
     // vec3 color = ambient + Lo;
 
-    Diffuse = vec4(kD * irradiance + diffuse_light, 0.0);
-    Specular = vec4(specular + specular_light, 0.0);
+    Diffuse = vec4(kD * irradiance, 0.0);
+    Specular = vec4(specular, 0.0);
 }

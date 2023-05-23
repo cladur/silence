@@ -1,5 +1,6 @@
 #include "resource_manager.h"
 #include "render/common/skinned_model.h"
+#include <spdlog/spdlog.h>
 
 #define ASSET_PATH "resources/assets_export/"
 
@@ -96,6 +97,9 @@ Handle<Animation> ResourceManager::get_animation_handle(std::string name) {
 	bool found_asset_path = name.find(ASSET_PATH) != std::string::npos;
 	if (found_asset_path) {
 		name = remove_asset_path(name);
+	}
+	if (!name_to_animation.contains(name)) {
+		SPDLOG_WARN("not found animation with name: {}", name);
 	}
 	return name_to_animation[name];
 }

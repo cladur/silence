@@ -1,11 +1,13 @@
 #include "material.h"
 #include <render/transparent_elements/ui/sprite_manager.h>
+#include <spdlog/spdlog.h>
 
 #include "display/display_manager.h"
 
 #include "debug_camera/debug_camera.h"
 
 #include "render/common/material.h"
+#include "render/common/skinned_mesh.h"
 #include "render_pass.h"
 
 #include "render/render_manager.h"
@@ -15,42 +17,7 @@
 AutoCVarInt cvar_use_ao("render.use_ao", "use ambient occlusion", 1, CVarFlags::EditCheckbox);
 AutoCVarInt cvar_use_fog("render.use_fog", "use simple linear fog", 1, CVarFlags::EditCheckbox);
 AutoCVarFloat cvar_fog_min("render.fog_min", "fog min distance", 20.0f, CVarFlags::EditFloatDrag);
-AutoCVarFloat cvar_fog_max("render.fog_max", "fog max distance", 100.0f, CVarFlags::EditFloatDrag);
-
-
-void MaterialSkinnedUnlit::startup() {
-	shader.load_from_files(shader_path("skinned_unlit.vert"), shader_path("unlit.frag"));
-}
-
-void MaterialSkinnedUnlit::bind_resources(RenderScene &scene) {
-	shader.use();
-	shader.set_mat4("view", scene.view);
-	shader.set_mat4("projection", scene.projection);
-	shader.set_vec3("camPos", scene.camera_pos);
-	shader.set_int("albedo_map", 0);
-}
-
-void MaterialSkinnedUnlit::bind_instance_resources(SkinnedModelInstance &instance, Transform &transform) {
-	shader.set_mat4("model", transform.get_global_model_matrix());
-	//TODO: make this functionality in shader function
-	glBindBuffer(GL_UNIFORM_BUFFER, instance.skinning_buffer);
-	if (!instance.bone_matrices.empty()) {
-		glBufferSubData(
-				GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4) * instance.bone_matrices.size(), instance.bone_matrices.data());
-	}
-
-	GLuint binding_index = 1;
-	GLuint buffer_index = glGetUniformBlockIndex(shader.id, "SkinningBuffer");
-	glUniformBlockBinding(shader.id, buffer_index, binding_index);
-	glBindBufferBase(GL_UNIFORM_BUFFER, binding_index, instance.skinning_buffer);
-}
-
-void MaterialSkinnedUnlit::bind_mesh_resources(SkinnedMesh &mesh) {
-	if (mesh.textures_present[0]) {
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, mesh.textures[0].id);
-	}
-}
+AutoCVarFloat cvar_fog_max("render.fog_max", "fog max distance", 300.0f, CVarFlags::EditFloatDrag);
 
 void MaterialPBR::startup() {
 	shader.load_from_files(shader_path("pbr.vert"), shader_path("pbr.frag"));
@@ -92,6 +59,46 @@ void MaterialPBR::bind_instance_resources(ModelInstance &instance, Transform &tr
 }
 
 void MaterialPBR::bind_mesh_resources(Mesh &mesh) {
+}
+
+void MaterialLight::startup() {
+	shader.load_from_files(shader_path("light.vert"), shader_path("light.frag"));
+}
+
+void MaterialLight::bind_resources(RenderScene &scene) {
+	shader.use();
+	shader.set_mat4("projection", scene.projection);
+	shader.set_mat4("view", scene.view);
+	shader.set_vec3("camPos", scene.camera_pos);
+	shader.set_int("gPosition", 0);
+	shader.set_int("gNormal", 1);
+	shader.set_int("gAlbedo", 2);
+	shader.set_int("gAoRoughMetal", 3);
+
+	shader.set_vec2("screen_dimensions", glm::vec2(scene.render_extent.x, scene.render_extent.y));
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.position_texture_id);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.normal_texture_id);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.albedo_texture_id);
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.ao_rough_metal_texture_id);
+}
+
+void MaterialLight::bind_instance_resources(ModelInstance &instance, Transform &transform) {
+}
+
+void MaterialLight::bind_light_resources(Light &light, Transform &transform) {
+	float threshold = *CVarSystem::get()->get_float_cvar("render.light_threshold");
+	float radius = light.intensity * std::sqrtf(1.0f / threshold);
+
+	glm::mat4 model = transform.get_global_model_matrix() * glm::scale(glm::mat4(1.0f), glm::vec3(radius));
+	shader.set_mat4("model", model);
+	shader.set_vec3("light_position", transform.get_global_position());
+	shader.set_vec3("light_color", light.color);
+	shader.set_float("light_intensity", light.intensity);
 }
 
 float our_lerp(float a, float b, float f) {
@@ -177,7 +184,10 @@ void MaterialAOBlur::bind_instance_resources(ModelInstance &instance, Transform 
 }
 
 void MaterialGBuffer::startup() {
-	shader.load_from_files(shader_path("gbuffer.vert"), shader_path("gbuffer.frag"));
+	shader.load_from_files(shader_path("gbuffer/gbuffer.vert"), shader_path("gbuffer/gbuffer.frag"));
+#ifdef WIN32
+	skinned_shader.load_from_files(shader_path("gbuffer/skinned_gbuffer.vert"), shader_path("gbuffer/gbuffer.frag"));
+#endif
 }
 
 void MaterialGBuffer::bind_resources(RenderScene &scene) {
@@ -193,6 +203,29 @@ void MaterialGBuffer::bind_resources(RenderScene &scene) {
 	shader.set_int("irradiance_map", 5);
 	shader.set_int("prefilter_map", 6);
 	shader.set_int("brdf_lut", 7);
+
+	glActiveTexture(GL_TEXTURE5);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, scene.skybox_pass.skybox.irradiance_map.id);
+	glActiveTexture(GL_TEXTURE6);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, scene.skybox_pass.skybox.prefilter_map.id);
+
+	glActiveTexture(GL_TEXTURE7);
+	// TODO: Use baked brdf lut instead (it's broken atm)
+	glBindTexture(GL_TEXTURE_2D, scene.skybox_pass.skybox.brdf_lut_texture);
+}
+
+void MaterialGBuffer::bind_skinned_resources(RenderScene &scene) {
+	skinned_shader.use();
+	skinned_shader.set_mat4("view", scene.view);
+	skinned_shader.set_mat4("projection", scene.projection);
+	skinned_shader.set_int("albedo_map", 0);
+	skinned_shader.set_int("normal_map", 1);
+	skinned_shader.set_int("ao_metallic_roughness_map", 2);
+	skinned_shader.set_int("emissive_map", 3);
+
+	skinned_shader.set_int("irradiance_map", 5);
+	skinned_shader.set_int("prefilter_map", 6);
+	skinned_shader.set_int("brdf_lut", 7);
 
 	glActiveTexture(GL_TEXTURE5);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, scene.skybox_pass.skybox.irradiance_map.id);
@@ -235,6 +268,48 @@ void MaterialGBuffer::bind_mesh_resources(Mesh &mesh) {
 	}
 }
 
+void MaterialGBuffer::bind_instance_resources(SkinnedModelInstance &instance, Transform &transform) {
+	skinned_shader.set_mat4("model", transform.get_global_model_matrix());
+	//TODO: make this functionality in shader function
+	glBindBuffer(GL_UNIFORM_BUFFER, instance.skinning_buffer);
+	if (!instance.bone_matrices.empty()) {
+		glBufferSubData(
+				GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4) * instance.bone_matrices.size(), instance.bone_matrices.data());
+	}
+
+	GLuint binding_index = 1;
+	GLuint buffer_index = glGetUniformBlockIndex(skinned_shader.id, "SkinningBuffer");
+	glUniformBlockBinding(skinned_shader.id, buffer_index, binding_index);
+	glBindBufferBase(GL_UNIFORM_BUFFER, binding_index, instance.skinning_buffer);
+
+	skinned_shader.set_vec2("uv_scale", glm::vec2(1.0f));
+}
+
+void MaterialGBuffer::bind_mesh_resources(SkinnedMesh &mesh) {
+	for (int i = 0; i < mesh.textures.size(); i++) {
+		if (mesh.textures_present[i]) {
+			glActiveTexture(GL_TEXTURE0 + i);
+			glBindTexture(GL_TEXTURE_2D, mesh.textures[i].id);
+		}
+	}
+	// We flip the bools here, to force the update of uniforms on the first mesh
+	static bool is_ao_map_set = !mesh.has_ao_map;
+	static bool is_emissive_map_set = !mesh.textures_present[3];
+	static bool is_normal_map_set = !mesh.textures_present[1];
+	if (is_ao_map_set != mesh.has_ao_map) {
+		skinned_shader.set_bool("has_ao_map", mesh.has_ao_map);
+		is_ao_map_set = mesh.has_ao_map;
+	}
+	if (is_normal_map_set != mesh.has_normal_map) {
+		skinned_shader.set_bool("has_normal_map", mesh.has_normal_map);
+		is_normal_map_set = mesh.has_normal_map;
+	}
+	if (is_emissive_map_set != mesh.textures_present[3]) {
+		skinned_shader.set_bool("has_emissive_map", mesh.textures_present[3]);
+		is_emissive_map_set = mesh.textures_present[3];
+	}
+}
+
 void MaterialSkybox::startup() {
 	shader.load_from_files(shader_path("cubemap.vert"), shader_path("skybox.frag"));
 }
@@ -250,7 +325,7 @@ void MaterialSkybox::bind_instance_resources(ModelInstance &instance, Transform 
 }
 
 void MaterialTransparent::startup() {
-	shader.load_from_files(shader_path("transparent.vert"), shader_path("transparent.frag"));
+	shader.load_from_files(shader_path("transparent/transparent.vert"), shader_path("transparent/transparent.frag"));
 }
 
 void MaterialTransparent::bind_resources(RenderScene &scene) {
@@ -319,6 +394,7 @@ void MaterialCombination::bind_resources(RenderScene &scene) {
 	shader.set_int("SSAO", 3);
 	shader.set_int("AoRoughMetal", 4);
 	shader.set_int("ViewPos", 5);
+	shader.set_int("Skybox", 6);
 
 	shader.set_int("use_ao", cvar_use_ao.get());
 
@@ -338,7 +414,21 @@ void MaterialCombination::bind_resources(RenderScene &scene) {
 	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.ao_rough_metal_texture_id);
 	glActiveTexture(GL_TEXTURE5);
 	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.position_texture_id);
+	glActiveTexture(GL_TEXTURE6);
+	glBindTexture(GL_TEXTURE_2D, scene.skybox_buffer.texture_id);
 }
 
 void MaterialCombination::bind_instance_resources(ModelInstance &instance, Transform &transform) {
+}
+
+void MaterialBloom::startup() {
+	shader.load_from_files(shader_path("bloom/bloom.vert"), shader_path("bloom/bloom_combine.frag"));
+	downsample.load_from_files(shader_path("bloom/bloom.vert"), shader_path("bloom/downsample.frag"));
+	bloom.load_from_files(shader_path("bloom/bloom.vert"), shader_path("bloom/upsample.frag"));
+}
+
+void MaterialBloom::bind_resources(RenderScene &scene) {
+}
+
+void MaterialBloom::bind_instance_resources(ModelInstance &instance, Transform &transform) {
 }

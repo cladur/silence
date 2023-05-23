@@ -162,9 +162,10 @@ void World::deserialize_entities_json(nlohmann::json &json, std::vector<Entity> 
 	std::vector<std::future<void>> futures = {};
 	futures.reserve(assets_to_load.size());
 	for (auto &asset : assets_to_load) {
-		futures.emplace_back(std::async(std::launch::deferred , [&resource_manager, &asset]{resource_manager.load_model(asset_path(asset).c_str());} ));
+		futures.emplace_back(std::async(std::launch::deferred,
+				[&resource_manager, &asset] { resource_manager.load_model(asset_path(asset).c_str()); }));
 	}
-    for (auto &f : futures) {
+	for (auto &f : futures) {
 		f.wait();
 	}
 

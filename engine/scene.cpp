@@ -1,21 +1,29 @@
 #include "scene.h"
+#include "animation/ecs/animation_instance.h"
 #include "display/display_manager.h"
+#include "ecs/systems/interactable_system.h"
+#include "ecs/systems/platform_system.h"
 #include "ecs/world.h"
 #include "editor/editor.h"
-#include "render/ecs/animation_instance.h"
+#include "managers/animation/ecs/animation_instance.h"
+#include "physics/physics_manager.h"
 #include "render/ecs/model_instance.h"
 #include "render/ecs/skinned_model_instance.h"
 #include "render/render_manager.h"
 
+#include "animation/ecs/animation_system.h"
+#include "animation/ecs/attachment_system.h"
 #include "ecs/systems/agent_system.h"
 #include "ecs/systems/collider_draw.h"
 #include "ecs/systems/collision_system.h"
+#include "ecs/systems/enemy_path_draw_system.h"
+#include "ecs/systems/enemy_pathing.h"
+#include "ecs/systems/hacker_system.h"
 #include "ecs/systems/isolated_entities_system.h"
-#include "ecs/systems/light_system.h"
 #include "ecs/systems/physics_system.h"
 #include "ecs/systems/root_parent_system.h"
-#include "render/ecs/animation_system.h"
 #include "render/ecs/frustum_draw_system.h"
+#include "render/ecs/light_render_system.h"
 #include "render/ecs/render_system.h"
 #include "render/ecs/skinned_render_system.h"
 
@@ -44,28 +52,46 @@ Scene::Scene() {
 	world.register_component<ColliderOBB>();
 	world.register_component<Light>();
 	world.register_component<AgentData>();
+	world.register_component<HackerData>();
+	world.register_component<EnemyPath>();
+	world.register_component<Interactable>();
+	world.register_component<Attachment>();
+	world.register_component<Platform>();
 
 	// Systems
 	// TODO: Set update order instead of using default value
 	world.register_system<RenderSystem>();
 	world.register_system<SkinnedRenderSystem>();
 	world.register_system<ColliderDrawSystem>();
-	world.register_system<AnimationSystem>();
+	world.register_system<AnimationSystem>(EcsOnLoad);
 	world.register_system<FrustumDrawSystem>();
-	world.register_system<LightSystem>();
+	world.register_system<LightRenderSystem>();
+	world.register_system<EnemyPathDraw>();
 
 	// Transform
-	world.register_system<IsolatedEntitiesSystem>();
-	world.register_system<RootParentSystem>();
+	world.register_system<IsolatedEntitiesSystem>(EcsOnLoad);
+	world.register_system<RootParentSystem>(EcsOnLoad);
+	world.register_system<AttachmentSystem>(EcsPostLoad);
+
+	auto &physics_manager = PhysicsManager::get();
+	physics_manager.add_collision_layer("default");
+	physics_manager.add_collision_layer("hacker");
+	physics_manager.add_collision_layer("agent");
+	physics_manager.set_layers_no_collision("default", "hacker");
+	physics_manager.set_layers_no_collision("agent", "hacker");
 }
 
 void Scene::register_game_systems() {
 	// Physics
-	world.register_system<PhysicsSystem>();
-	world.register_system<CollisionSystem>();
+	world.register_system<PhysicsSystem>(EcsOnUpdate);
+	world.register_system<CollisionSystem>(EcsOnUpdate);
 
 	// Agents
-	world.register_system<AgentSystem>();
+	world.register_system<AgentSystem>(EcsOnUpdate);
+	world.register_system<HackerSystem>(EcsOnUpdate);
+	world.register_system<EnemyPathing>(EcsOnUpdate);
+	world.register_system<InteractableSystem>(EcsOnUpdate);
+	world.register_system<PlatformSystem>(EcsOnUpdate);
 }
 
 void Scene::update(float dt) {
@@ -73,8 +99,13 @@ void Scene::update(float dt) {
 		if (world.has_component<Camera>(entity) && world.has_component<Transform>(entity)) {
 			auto &camera = world.get_component<Camera>(entity);
 			auto &transform = world.get_component<Transform>(entity);
-			get_render_scene().camera_params = camera;
-			get_render_scene().camera_transform = transform;
+			if (camera.right_side) {
+				get_render_scene().right_camera_params = camera;
+				get_render_scene().right_camera_transform = transform;
+			} else {
+				get_render_scene().left_camera_params = camera;
+				get_render_scene().left_camera_transform = transform;
+			}
 		}
 	}
 }
@@ -112,6 +143,4 @@ void Scene::load_from_file(const std::string &path) {
 	nlohmann::json scene_json = nlohmann::json::parse(file);
 	file.close();
 	SceneManager::load_scene_from_json_file(world, scene_json, "", entities);
-
-	bsp_tree = CollisionSystem::build_tree(world, entities, 10);
 }

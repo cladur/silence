@@ -6,25 +6,11 @@
 #include "resource/resource_manager.h"
 #include <tracy/tracy.hpp>
 
-void SkinnedPassUnlit::startup() {
-	material.startup();
-}
+AutoCVarFloat cvar_blur_radius("render.blur_radius", "blur radius", 0.001f, CVarFlags::EditFloatDrag);
+AutoCVarInt cvar_use_bloom("render.use_bloom", "use bloom", 1, CVarFlags::EditCheckbox);
+AutoCVarFloat cvar_bloom_strength("render.bloom_strength", "bloom strength", 0.04f, CVarFlags::EditFloatDrag);
 
-void SkinnedPassUnlit::draw(RenderScene &scene) {
-	ResourceManager &resource_manager = ResourceManager::get();
-	material.bind_resources(scene);
-	for (auto &cmd : draw_commands) {
-		SkinnedModelInstance &instance = *cmd.model_instance;
-		Transform &transform = *cmd.transform;
-		material.bind_instance_resources(instance, transform);
-		SkinnedModel &model = resource_manager.get_skinned_model(instance.model_handle);
-		for (auto &mesh : model.meshes) {
-			material.bind_mesh_resources(mesh);
-			mesh.draw();
-		}
-	}
-	draw_commands.clear();
-}
+AutoCVarFloat cvar_gamma("render.gamma", "gamma", 2.2f, CVarFlags::EditFloatDrag);
 
 void PBRPass::startup() {
 	material.startup();
@@ -34,6 +20,21 @@ void PBRPass::draw(RenderScene &scene) {
 	ResourceManager &resource_manager = ResourceManager::get();
 	material.bind_resources(scene);
 	utils::render_quad();
+}
+
+void LightPass::startup() {
+	material.startup();
+}
+
+void LightPass::draw(RenderScene &scene) {
+	ResourceManager &resource_manager = ResourceManager::get();
+	material.bind_resources(scene);
+	for (auto &cmd : scene.light_draw_commands) {
+		Light &light = *cmd.light;
+		Transform &transform = *cmd.transform;
+		material.bind_light_resources(light, transform);
+		utils::render_sphere();
+	}
 }
 
 void AOPass::startup() {
@@ -63,7 +64,6 @@ void SkyboxPass::startup() {
 }
 
 void SkyboxPass::draw(RenderScene &scene) {
-	RenderManager &render_manager = RenderManager::get();
 	material.bind_resources(scene);
 	skybox.draw();
 }
@@ -110,7 +110,7 @@ void GBufferPass::startup() {
 void GBufferPass::draw(RenderScene &scene) {
 	ResourceManager &resource_manager = ResourceManager::get();
 	material.bind_resources(scene);
-	for (auto &cmd : draw_commands) {
+	for (auto &cmd : scene.draw_commands) {
 		ModelInstance &instance = *cmd.model_instance;
 		Transform &transform = *cmd.transform;
 		material.bind_instance_resources(instance, transform);
@@ -122,7 +122,20 @@ void GBufferPass::draw(RenderScene &scene) {
 			}
 		}
 	}
-	draw_commands.clear();
+
+#ifdef WIN32
+	material.bind_skinned_resources(scene);
+	for (auto &cmd : scene.skinned_draw_commands) {
+		SkinnedModelInstance &instance = *cmd.model_instance;
+		Transform &transform = *cmd.transform;
+		material.bind_instance_resources(instance, transform);
+		SkinnedModel &model = resource_manager.get_skinned_model(instance.model_handle);
+		for (auto &mesh : model.meshes) {
+			material.bind_mesh_resources(mesh);
+			mesh.draw();
+		}
+	}
+#endif
 }
 
 void TransparentPass::draw(RenderScene &scene) {
@@ -184,7 +197,67 @@ void CombinationPass::startup() {
 }
 
 void CombinationPass::draw(RenderScene &scene) {
-	RenderManager &render_manager = RenderManager::get();
 	material.bind_resources(scene);
+	utils::render_quad();
+}
+
+void BloomPass::startup() {
+	material.startup();
+}
+
+void BloomPass::draw(RenderScene &scene) {
+	std::vector<BloomMip> &mips = scene.bloom_buffer.mips;
+
+	// DOWNSAMPLING
+	material.downsample.use();
+	material.downsample.set_int("srcTexture", 0);
+	material.downsample.set_vec2("srcResolution", scene.render_extent.x, scene.render_extent.y);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, scene.combination_buffer.texture_id);
+
+	for (auto &mip : mips) {
+		glViewport(0, 0, mip.size.x, mip.size.y);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mip.texture_id, 0);
+		utils::render_quad();
+
+		material.downsample.set_vec2("srcResolution", mip.size);
+		glBindTexture(GL_TEXTURE_2D, mip.texture_id);
+	}
+
+	// UPSAMPLING
+	material.bloom.use();
+	material.bloom.set_int("srcTexture", 0);
+	material.bloom.set_float("filterRadius", cvar_blur_radius.get());
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_ONE, GL_ONE);
+	glBlendEquation(GL_FUNC_ADD);
+
+	for (int i = mips.size() - 1; i > 0; i--) {
+		auto &mip = mips[i];
+		auto &next_mip = mips[i - 1];
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, mip.texture_id);
+
+		glViewport(0, 0, next_mip.size.x, next_mip.size.y);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, next_mip.texture_id, 0);
+		utils::render_quad();
+	}
+	glDisable(GL_BLEND);
+
+	scene.render_framebuffer.bind();
+	glViewport(0, 0, scene.render_extent.x, scene.render_extent.y);
+
+	// combine shader
+	material.shader.use();
+	material.shader.set_int("scene", 0);
+	material.shader.set_int("bloom_tex", 1);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, scene.combination_buffer.texture_id);
+	glActiveTexture(GL_TEXTURE0 + 1);
+	glBindTexture(GL_TEXTURE_2D, mips[0].texture_id);
+	material.shader.set_int("use_bloom", cvar_use_bloom.get());
+	material.shader.set_float("bloom_strength", cvar_bloom_strength.get());
+	material.shader.set_float("gamma", cvar_gamma.get());
 	utils::render_quad();
 }

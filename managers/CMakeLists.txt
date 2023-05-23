@@ -1,8 +1,5 @@
 # Dependencies
 find_package(glfw3 CONFIG REQUIRED)
-find_package(Vulkan REQUIRED)
-find_package(unofficial-vulkan-memory-allocator CONFIG REQUIRED)
-find_package(unofficial-vulkan-memory-allocator-hpp CONFIG REQUIRED)
 
 include(FetchContent)
 FetchContent_Declare(
@@ -16,7 +13,7 @@ set(MANAGER_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(MANAGER_DIR)
 
 add_subdirectory(audio)
-# add_subdirectory(animation)
+add_subdirectory(animation)
 add_subdirectory(display)
 add_subdirectory(ecs)
 add_subdirectory(scene)

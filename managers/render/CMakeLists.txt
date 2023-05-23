@@ -33,10 +33,13 @@ add_library(${RENDER_MANAGER_NAME} STATIC
         common/skinned_model.cpp common/skinned_model.h
         common/animation.cpp common/animation.h
         common/channel.cpp common/channel.h
-        ecs/animation_system.h ecs/animation_system.cpp ecs/skinned_model_instance.cpp
-        ecs/skinned_model_instance.h ecs/animation_instance.cpp ecs/animation_instance.h
-        transparent_elements/ui/ui_elements/ui_button.cpp transparent_elements/ui/ui_elements/ui_button.h
-        common/mesh_bounding_sphere.cpp common/mesh_bounding_sphere.h ecs/skinned_render_system.cpp ecs/skinned_render_system.h)
+        ecs/skinned_model_instance.cpp ecs/skinned_model_instance.h
+        transparent_elements/ui/ui_elements/ui_button.cpp
+        transparent_elements/ui/ui_elements/ui_button.h
+        common/mesh_bounding_sphere.cpp common/mesh_bounding_sphere.h
+        ecs/skinned_render_system.cpp ecs/skinned_render_system.h
+        ecs/light_render_system.cpp ecs/light_render_system.h
+        )
 
 # Include directories
 target_include_directories(${RENDER_MANAGER_NAME} PUBLIC ${MANAGER_DIR})

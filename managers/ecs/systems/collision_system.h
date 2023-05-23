@@ -26,6 +26,7 @@ public:
 	static void log_tree(BSPNode *node);
 
 	static bool ray_cast(World &world, const Ray &ray, HitInfo &result);
+	static bool ray_cast_layer(World &world, const Ray &ray, HitInfo &result);
 };
 
 #endif //SILENCE_COLLISION_SYSTEM_H
