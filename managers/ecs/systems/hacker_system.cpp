@@ -239,7 +239,7 @@ void HackerSystem::update(World &world, float dt) {
 			glm::vec3 direction = glm::normalize(delta_position);
 			glm::vec3 forward =
 					glm::normalize(glm::vec3(model_tf.get_global_forward().x, 0.0f, model_tf.get_global_forward().z));
-			float angle = glm::acos(glm::dot(forward, direction)) * 0.3f;
+			float angle = glm::acos(glm::clamp(glm::dot(forward, direction), -1.0f, 1.0f)) * 0.3f;
 			glm::vec3 axis = glm::cross(forward, direction);
 			model_tf.add_global_euler_rot(axis * angle);
 		}
