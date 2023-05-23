@@ -13,9 +13,9 @@ struct ColliderCapsule {
 		serialized_component["start"]["y"] = start.y;
 		serialized_component["start"]["z"] = start.z;
 		serialized_component["end"] = nlohmann::json::object();
-		serialized_component["end"]["x"] = start.x;
-		serialized_component["end"]["y"] = start.y;
-		serialized_component["end"]["z"] = start.z;
+		serialized_component["end"]["x"] = end.x;
+		serialized_component["end"]["y"] = end.y;
+		serialized_component["end"]["z"] = end.z;
 		serialized_component["radius"] = radius;
 		serialized_scene.push_back(nlohmann::json::object());
 		serialized_scene.back()["component_data"] = serialized_component;

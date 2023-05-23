@@ -34,7 +34,7 @@ void PhysicsManager::resolve_collision(World &world, Entity movable_object, cons
 	} else if (world.has_component<ColliderCapsule>(e1)) {
 		first = CollisionFlag::FIRST_CAPSULE;
 	} else {
-		SPDLOG_WARN("Movable object has invalid collider");
+		SPDLOG_WARN("Movable object has not supported collider");
 		return;
 	}
 
@@ -93,12 +93,20 @@ void PhysicsManager::resolve_collision(World &world, Entity movable_object, cons
 	}
 }
 
-bool PhysicsManager::is_overlap(const ColliderSphere &a, const ColliderSphere &b) {
-	glm::vec3 distance = a.center - b.center;
-	float distance_squared = glm::dot(distance, distance);
+glm::vec3 PhysicsManager::is_overlap(const ColliderSphere &a, const ColliderSphere &b) {
+	glm::vec3 direction = a.center - b.center;
+	float distance_squared = glm::length2(direction);
 	float radius_sum = a.radius + b.radius;
 
-	return distance_squared <= (radius_sum * radius_sum);
+	float distance = radius_sum - glm::sqrt(distance_squared);
+	if (distance_squared < radius_sum * radius_sum) {
+		if (glm::length2(direction) < cvar_epsilon.get()) {
+			return glm::vec3(0.0f, 1.0f, 0.0f) * distance;
+		} else {
+			return glm::normalize(direction) * distance;
+		}
+	}
+	return glm::vec3(0.0f);
 }
 
 void PhysicsManager::resolve_collision_sphere(World &world, Entity e1, Entity e2) {
@@ -119,14 +127,13 @@ void PhysicsManager::resolve_collision_sphere(World &world, Entity e1, Entity e2
 	c2.radius = temp_c2.radius * t2.get_global_scale().x;
 	c2.center = t2.get_global_position() + temp_c2.center * t2.get_global_scale().x;
 
-	if (!is_collision_candidate(c1.center, glm::vec3(c1.radius), c2.center, glm::vec3(c2.radius)) ||
-			!is_overlap(c1, c2)) {
+	if (!is_collision_candidate(c1.center, glm::vec3(c1.radius), c2.center, glm::vec3(c2.radius))) {
 		return;
 	}
-
-	const glm::vec3 direction = c2.center - c1.center;
-	const float distance = c1.radius + c2.radius - glm::length(direction);
-	const glm::vec3 offset = -glm::normalize(direction) * distance;
+	glm::vec3 offset = is_overlap(c1, c2);
+	if (glm::length2(offset) < cvar_epsilon.get()) {
+		return;
+	}
 
 	make_shift(world, e1, e2, offset);
 }
@@ -210,7 +217,7 @@ glm::vec3 PhysicsManager::is_overlap(const ColliderAABB &a, const ColliderSphere
 	const float length = b.radius - distance;
 
 	if (distance < b.radius) {
-		if (glm::dot(direction, direction) < cvar_epsilon.get()) {
+		if (glm::length2(direction) < cvar_epsilon.get()) {
 			return glm::vec3(0.0f, 1.0f, 0.0f) * length;
 		} else {
 			return glm::normalize(direction) * length;
@@ -243,7 +250,7 @@ void PhysicsManager::resolve_aabb_sphere(World &world, Entity aabb, Entity spher
 	}
 
 	glm::vec3 offset = is_overlap(c1, c2);
-	if (glm::dot(offset, offset) < cvar_epsilon.get()) {
+	if (glm::length2(offset) < cvar_epsilon.get()) {
 		return;
 	}
 
@@ -275,7 +282,7 @@ glm::vec3 PhysicsManager::is_overlap(const ColliderOBB &a, const ColliderOBB &b)
 	float max_overlap = -std::numeric_limits<float>::max();
 	glm::vec3 separation(0.0f);
 	for (const glm::vec3 &axis : axes) {
-		if (glm::dot(axis, axis) < cvar_epsilon.get()) {
+		if (glm::length2(axis) < cvar_epsilon.get()) {
 			continue;
 		}
 		const float overlap = fabs(glm::dot(distance, axis)) -
@@ -329,7 +336,7 @@ void PhysicsManager::resolve_collision_obb(World &world, Entity e1, Entity e2) {
 	}
 
 	glm::vec3 offset = is_overlap(c1, c2);
-	if (glm::dot(offset, offset) < cvar_epsilon.get()) {
+	if (glm::length2(offset) < cvar_epsilon.get()) {
 		return;
 	}
 
@@ -353,7 +360,7 @@ glm::vec3 PhysicsManager::is_overlap(const ColliderOBB &a, const ColliderSphere 
 	const float length = b.radius - distance;
 
 	if (distance < b.radius) {
-		if (glm::dot(direction, direction) < cvar_epsilon.get()) {
+		if (glm::length2(direction) < cvar_epsilon.get()) {
 			return glm::vec3(0.0f, 1.0f, 0.0f) * length;
 		} else {
 			return glm::normalize(direction) * length;
@@ -390,7 +397,7 @@ void PhysicsManager::resolve_obb_sphere(World &world, Entity obb, Entity sphere)
 	}
 
 	glm::vec3 offset = is_overlap(c1, c2);
-	if (glm::dot(offset, offset) < cvar_epsilon.get()) {
+	if (glm::length2(offset) < cvar_epsilon.get()) {
 		return;
 	}
 
@@ -423,7 +430,7 @@ glm::vec3 PhysicsManager::is_overlap(const ColliderOBB &a, const ColliderAABB &b
 	float max_overlap = -std::numeric_limits<float>::max();
 	glm::vec3 separation(0.0f);
 	for (const glm::vec3 &axis : axes) {
-		if (glm::dot(axis, axis) < cvar_epsilon.get()) {
+		if (glm::length2(axis) < cvar_epsilon.get()) {
 			continue;
 		}
 		const float overlap = fabs(glm::dot(distance, axis)) -
@@ -475,7 +482,7 @@ void PhysicsManager::resolve_obb_aabb(World &world, Entity obb, Entity aabb) {
 	}
 
 	glm::vec3 offset = is_overlap(c1, c2);
-	if (glm::dot(offset, offset) < cvar_epsilon.get()) {
+	if (glm::length2(offset) < cvar_epsilon.get()) {
 		return;
 	}
 
@@ -483,15 +490,18 @@ void PhysicsManager::resolve_obb_aabb(World &world, Entity obb, Entity aabb) {
 }
 
 glm::vec3 PhysicsManager::is_overlap(const ColliderCapsule &a, const ColliderCapsule &b) {
-	// Compute (squared) distance between the inner structures of the capsules
 	float s, t;
 	glm::vec3 c1, c2;
-	float dist2 = ClosestPtSegmentSegment(a.start, a.end, b.start, b.end, s, t, c1, c2);
+	float dist2 = closest_point_segment_segment(a.start, a.end, b.start, b.end, s, t, c1, c2);
 
-	// If (squared) distance smaller than (squared) sum of radii, they collide
 	float radius = a.radius + b.radius;
-	if (dist2 <= radius * radius) {
-		return glm::vec3(1.0f);
+	if (dist2 < radius * radius) {
+		float length = (glm::sqrt(dist2) - radius);
+		if (dist2 < cvar_epsilon.get()) {
+			return glm::vec3(0.0f, 1.0f, 0.0f) * length;
+		} else {
+			return glm::normalize(c2 - c1) * length;
+		}
 	}
 
 	return glm::vec3(0.0f);
@@ -512,64 +522,51 @@ void PhysicsManager::resolve_collision_capsule(World &world, Entity e1, Entity e
 	ColliderCapsule c2{};
 	c1.radius = temp_c1.radius * t1.get_global_scale().x;
 	c1.start = t1.get_global_position() + temp_c1.start * t1.get_global_scale();
-	c1.start = t1.get_global_position() + temp_c1.end * t1.get_global_scale();
+	c1.end = t1.get_global_position() + temp_c1.end * t1.get_global_scale();
 
 	c2.radius = temp_c2.radius * t2.get_global_scale().x;
 	c2.start = t2.get_global_position() + temp_c2.start * t2.get_global_scale();
-	c2.start = t2.get_global_position() + temp_c2.end * t2.get_global_scale();
+	c2.end = t2.get_global_position() + temp_c2.end * t2.get_global_scale();
 
 	glm::vec3 offset = is_overlap(c1, c2);
-	if (glm::dot(offset, offset) < cvar_epsilon.get()) {
+	if (glm::length2(offset) < cvar_epsilon.get()) {
 		return;
 	}
 
-	SPDLOG_INFO("COLLIDE!");
+	make_shift(world, e1, e2, offset);
 }
 
-float PhysicsManager::ClosestPtSegmentSegment(
+float PhysicsManager::closest_point_segment_segment(
 		glm::vec3 p1, glm::vec3 q1, glm::vec3 p2, glm::vec3 q2, float &s, float &t, glm::vec3 &c1, glm::vec3 &c2) {
-	glm::vec3 d1 = q1 - p1; // Direction vector of segment S1
-	glm::vec3 d2 = q2 - p2; // Direction vector of segment S2
+	glm::vec3 d1 = q1 - p1;
+	glm::vec3 d2 = q2 - p2;
 	glm::vec3 r = p1 - p2;
-	float a = glm::dot(d1, d1); // Squared length of segment S1, always nonnegative
-	float e = glm::dot(d2, d2); // Squared length of segment S2, always nonnegative
+	float a = glm::length2(d1);
+	float e = glm::length2(d2);
 	float f = glm::dot(d2, r);
-	// Check if either or both segments degenerate into points
 	if (a <= cvar_epsilon.get() && e <= cvar_epsilon.get()) {
-		// Both segments degenerate into points
 		s = t = 0.0f;
 		c1 = p1;
 		c2 = p2;
-		return glm::dot(c1 - c2, c1 - c2);
-	}
-	if (a <= cvar_epsilon.get()) {
-		// First segment degenerates into a point
+		return glm::length2(c1 - c2);
+	} else if (a <= cvar_epsilon.get()) {
 		s = 0.0f;
-		t = f / e; // s = 0 => t = (b*s + f) / e = f / e
-		t = std::clamp(t, 0.0f, 1.0f);
+		t = std::clamp(f / e, 0.0f, 1.0f);
 	} else {
 		float c = glm::dot(d1, r);
 		if (e <= cvar_epsilon.get()) {
-			// Second segment degenerates into a point
 			t = 0.0f;
-			s = std::clamp(-c / a, 0.0f, 1.0f); // t = 0 => s = (b*t - c) / a = -c / a
+			s = std::clamp(-c / a, 0.0f, 1.0f);
 		} else {
-			// The general nondegenerate case starts here
 			float b = glm::dot(d1, d2);
-			float denom = a * e - b * b; // Always nonnegative
-			// If segments not parallel, compute closest point on L1 to L2 and
-			// clamp to segment S1. Else pick arbitrary s (here 0)
+			float denom = a * e - b * b;
+
 			if (denom != 0.0f) {
 				s = std::clamp((b * f - c * e) / denom, 0.0f, 1.0f);
 			} else {
 				s = 0.0f;
 			}
-			// Compute point on L2 closest to S1(s) using
-			// t = Dot((P1 + D1*s) - P2,D2) / Dot(D2,D2) = (b*s + f) / e
-			t = (b * s + f) / e;
-			// If t in [0,1] done. Else clamp t, recompute s for the new value
-			// of t using s = Dot((P2 + D2*t) - P1,D1) / Dot(D1,D1)= (t*b - c) / a
-			// and clamp s to [0, 1]
+
 			float tnom = b * s + f;
 			if (tnom < 0.0f) {
 				t = 0.0f;
@@ -584,7 +581,7 @@ float PhysicsManager::ClosestPtSegmentSegment(
 	}
 	c1 = p1 + d1 * s;
 	c2 = p2 + d2 * t;
-	return glm::dot(c1 - c2, c1 - c2);
+	return glm::length2(c1 - c2);
 }
 
 bool PhysicsManager::is_collision_candidate(

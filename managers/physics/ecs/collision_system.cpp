@@ -158,8 +158,10 @@ void CollisionSystem::resolve_bsp_collision(World &world, BSPNode *node, Entity 
 		c.radius = sphere.radius * t.get_global_scale().x;
 		c.center = t.get_global_position() + sphere.center * c.radius;
 		side = process_collider(node->plane, c);
+	} else if (world.has_component<ColliderCapsule>(entity)) {
+		//todo: implement
 	} else {
-		SPDLOG_WARN("Movable object has invalid collider");
+		SPDLOG_WARN("Movable object has not supported collider");
 		return;
 	}
 

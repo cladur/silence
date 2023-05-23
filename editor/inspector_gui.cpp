@@ -615,7 +615,7 @@ void Inspector::show_colliderobb() {
 void Inspector::show_collidercapsule() {
 	auto &collider_capsule = world->get_component<ColliderCapsule>(selected_entity);
 	if (ImGui::CollapsingHeader("ColliderCapsule", tree_flags)) {
-		remove_component_popup<ColliderOBB>();
+		remove_component_popup<ColliderCapsule>();
 		float available_width = ImGui::GetContentRegionAvail().x;
 		ImGui::BeginTable("Transform", 2);
 		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
