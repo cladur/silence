@@ -79,21 +79,19 @@ void AgentSystem::update(World &world, float dt) {
 		}
 
 		glm::vec3 velocity = move_ground(acc_direction, previous_velocity, dt);
+		
 		// Use dot instead of length when u want to check 0 value, to avoid calculating square root
-		if (animation_timer <= 0.0f) {
-			if (glm::dot(velocity, velocity) > physics_manager.get_epsilon()) {
-				if (animation_instance.animation_handle.id !=
-						resource_manager.get_animation_handle("agent/agent_ANIM_GLTF/agent_walk.anim").id) {
-					animation_manager.change_animation(agent_data.model, "agent/agent_ANIM_GLTF/agent_walk.anim");
-				}
-			} else {
-				if (animation_instance.animation_handle.id !=
-						resource_manager.get_animation_handle("agent/agent_ANIM_GLTF/agent_idle.anim").id) {
-					animation_manager.change_animation(agent_data.model, "agent/agent_ANIM_GLTF/agent_idle.anim");
-				}
+		if (glm::dot(velocity, velocity) > physics_manager.get_epsilon()) {
+			if (animation_instance.animation_handle.id != resource_manager.get_animation_handle("agent/agent_ANIM_GLTF/agent_walk.anim").id) {
+				animation_manager.change_animation(agent_data.model, "agent/agent_ANIM_GLTF/agent_walk.anim");
+			}
+		} else if(animation_timer <= 0.0f){
+			if (animation_instance.animation_handle.id !=
+					resource_manager.get_animation_handle("agent/agent_ANIM_GLTF/agent_idle.anim").id) {
+				animation_manager.change_animation(agent_data.model, "agent/agent_ANIM_GLTF/agent_idle.anim");
 			}
 		}
-
+		
 		transform.add_position(glm::vec3(velocity.x, 0.0, velocity.z));
 
 		if (*CVarSystem::get()->get_int_cvar("game.controlling_agent") &&
@@ -165,6 +163,8 @@ void AgentSystem::update(World &world, float dt) {
 									"agent/agent_ANIM_GLTF/agent_interaction.anim");
 							if (animation_instance.animation_handle.id != animation_handle.id) {
 								animation_timer = resource_manager.get_animation(animation_handle).get_duration();
+								previous_velocity = {0.0f,0.0f,0.0f};
+								velocity = {0.0f,0.0f,0.0f};
 								animation_manager.change_animation(
 										agent_data.model, "agent/agent_ANIM_GLTF/agent_interaction.anim");
 							}
