@@ -8,6 +8,7 @@ AnimationInstance::AnimationInstance() {
 	animation_handle = resource_manager.load_animation("scorpion/scorpion_idle_ANIM_GLTF/scorpion_idle_00_walk.anim");
 	resource_manager.load_animation("scorpion/scorpion_idle_ANIM_GLTF/scorpion_idle_00_idle.anim");
 	resource_manager.load_animation("agent/agent_ANIM_GLTF/agent_crouch.anim");
+	resource_manager.load_animation("agent/agent_ANIM_GLTF/agent_crouch_idle.anim");
 	resource_manager.load_animation("agent/agent_ANIM_GLTF/agent_walk.anim");
 	resource_manager.load_animation("agent/agent_ANIM_GLTF/agent_idle.anim");
 	resource_manager.load_animation("agent/agent_ANIM_GLTF/agent_interaction.anim");
