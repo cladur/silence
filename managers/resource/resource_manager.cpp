@@ -74,18 +74,23 @@ Handle<Model> ResourceManager::get_model_handle(std::string name) {
 }
 
 Handle<Animation> ResourceManager::load_animation(const char *path) {
-	if (name_to_animation.find(path) != name_to_animation.end()) {
-		return name_to_animation[path];
+	std::string name = path;
+	bool found_asset_path = name.find(ASSET_PATH) != std::string::npos;
+	if (found_asset_path) {
+		name = remove_asset_path(name);
+	}
+	if (name_to_animation.find(name) != name_to_animation.end()) {
+		return name_to_animation[name];
 	}
 
 	Animation animation = {};
-	animation.load_from_asset(asset_path(path).c_str());
+	animation.load_from_asset(path);
 
 	animations.push_back(animation);
 	Handle<Animation> handle = {};
 	handle.id = animations.size() - 1;
 
-	name_to_animation[path] = handle;
+	name_to_animation[name] = handle;
 	return handle;
 }
 
