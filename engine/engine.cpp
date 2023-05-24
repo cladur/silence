@@ -42,7 +42,6 @@ void Engine::shutdown() {
 }
 
 void Engine::run() {
-	GameplayManager::get().startup(&get_active_scene());
 	float target_frame_time = 1.0f / (float)DisplayManager::get().get_refresh_rate();
 	float dt = target_frame_time;
 
@@ -128,6 +127,7 @@ uint32_t Engine::get_scene_index(const std::string &name) {
 void Engine::set_active_scene(const std::string &name) {
 	active_scene = get_scene_index(name);
 	RenderManager::get().displayed_scene = scenes[active_scene]->render_scene_idx;
+	GameplayManager::get().startup(&get_active_scene()); // dunno where to put this honestly.
 }
 
 Scene &Engine::get_active_scene() {

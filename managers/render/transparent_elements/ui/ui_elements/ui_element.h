@@ -1,7 +1,7 @@
 #ifndef SILENCE_UI_ELEMENT_H
 #define SILENCE_UI_ELEMENT_H
 
-#include "managers/render/transparent_elements/ui/sprite_draw.h"
+#include "render/transparent_elements/ui/sprite_draw.h"
 
 struct RenderScene;
 
