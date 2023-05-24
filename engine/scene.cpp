@@ -74,6 +74,7 @@ Scene::Scene() {
 	world.register_system<RootParentSystem>(EcsOnLoad);
 	world.register_system<AttachmentSystem>(EcsPostLoad);
 
+	world.register_system<CollisionSystem>(EcsOnUpdate);
 	auto &physics_manager = PhysicsManager::get();
 	physics_manager.add_collision_layer("default");
 	physics_manager.add_collision_layer("hacker");

@@ -18,6 +18,10 @@ AnimationInstance::AnimationInstance() {
 	resource_manager.load_animation("agent/agent_ANIM_GLTF/agent_jump_down.anim");
 	resource_manager.load_animation("agent/agent_ANIM_GLTF/agent_crouch_idle.anim");
 	resource_manager.load_animation("enemy/enemy_ANIM_GLTF/enemy_walk_with_gun.anim");
+	resource_manager.load_animation("enemy/enemy_ANIM_GLTF/enemy_idle_baked.anim");
+	resource_manager.load_animation("enemy/enemy_ANIM_GLTF/enemy_idle.anim");
+	resource_manager.load_animation("enemy/enemy_ANIM_GLTF/enemy_death.anim");
+	resource_manager.load_animation("enemy/enemy_ANIM_GLTF/enemy_down_to_aim.anim");
 }
 
 AnimationInstance::AnimationInstance(const char *path) {

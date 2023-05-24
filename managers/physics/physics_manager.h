@@ -100,8 +100,11 @@ public:
 	void resolve_obb_aabb(World &world, Entity obb, Entity aabb);
 
 	glm::vec3 is_overlap(const ColliderCapsule &a, const ColliderCapsule &b);
-
 	void resolve_collision_capsule(World &world, Entity e1, Entity e2);
+
+	glm::vec3 is_overlap(const ColliderCapsule &a, const ColliderSphere &b);
+	void resolve_capsule_sphere(World &world, Entity capsule, Entity sphere);
+
 	float closest_point_segment_segment(
 			glm::vec3 p1, glm::vec3 q1, glm::vec3 p2, glm::vec3 q2, float &s, float &t, glm::vec3 &c1, glm::vec3 &c2);
 

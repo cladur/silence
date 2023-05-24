@@ -118,16 +118,16 @@
             },
             {
                 "component_data": {
+                    "parent": 47
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "fov": 70.0,
                     "right_side": false
                 },
                 "component_name": "Camera"
-            },
-            {
-                "component_data": {
-                    "parent": 47
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 3,
@@ -184,13 +184,6 @@
         "components": [
             {
                 "component_data": {
-                    "material_type": 0,
-                    "model_name": "enemy/enemy.skinmdl"
-                },
-                "component_name": "SkinnedModelInstance"
-            },
-            {
-                "component_data": {
                     "name": "Enemy"
                 },
                 "component_name": "Name"
@@ -218,10 +211,17 @@
             },
             {
                 "component_data": {
-                    "animation_name": "enemy/enemy_ANIM_GLTF/enemy_walk_with_gun.anim",
-                    "ticks_per_second": 1000.0
+                    "animation_name": "enemy/enemy_ANIM_GLTF/enemy_idle.anim",
+                    "ticks_per_second": 3000.0
                 },
                 "component_name": "AnimationInstance"
+            },
+            {
+                "component_data": {
+                    "material_type": 0,
+                    "model_name": "enemy/enemy.skinmdl"
+                },
+                "component_name": "SkinnedModelInstance"
             },
             {
                 "component_data": {
@@ -274,13 +274,6 @@
         "components": [
             {
                 "component_data": {
-                    "material_type": 0,
-                    "model_name": "agent/agent.skinmdl"
-                },
-                "component_name": "SkinnedModelInstance"
-            },
-            {
-                "component_data": {
                     "name": "Agent"
                 },
                 "component_name": "Name"
@@ -318,6 +311,13 @@
                     "parent": 46
                 },
                 "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "material_type": 0,
+                    "model_name": "agent/agent.skinmdl"
+                },
+                "component_name": "SkinnedModelInstance"
             }
         ],
         "entity": 6,
@@ -377,10 +377,6 @@
                 "component_name": "Name"
             },
             {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
-            {
                 "component_data": {
                     "orientation": {
                         "w": 1.0,
@@ -416,6 +412,10 @@
                 "component_name": "ModelInstance"
             },
             {
+                "component_data": {},
+                "component_name": "StaticTag"
+            },
+            {
                 "component_data": {
                     "layer_name": "default"
                 },
@@ -430,13 +430,13 @@
                     },
                     "orientation": {
                         "0": {
-                            "x": 0.0,
+                            "x": 1.0,
                             "y": 0.0,
                             "z": 0.0
                         },
                         "1": {
                             "x": 0.0,
-                            "y": 0.0,
+                            "y": 1.0,
                             "z": 0.0
                         }
                     },
@@ -459,10 +459,6 @@
                     "name": "Cube 1x1"
                 },
                 "component_name": "Name"
-            },
-            {
-                "component_data": {},
-                "component_name": "StaticTag"
             },
             {
                 "component_data": {
@@ -500,6 +496,10 @@
                 "component_name": "ModelInstance"
             },
             {
+                "component_data": {},
+                "component_name": "StaticTag"
+            },
+            {
                 "component_data": {
                     "layer_name": "default"
                 },
@@ -514,13 +514,13 @@
                     },
                     "orientation": {
                         "0": {
-                            "x": 0.0,
+                            "x": 1.0,
                             "y": 0.0,
                             "z": 0.0
                         },
                         "1": {
                             "x": 0.0,
-                            "y": 0.0,
+                            "y": 1.0,
                             "z": 0.0
                         }
                     },
@@ -2308,18 +2308,18 @@
             },
             {
                 "component_data": {
+                    "parent": 46
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "children": [
                         3
                     ],
                     "children_count": 1
                 },
                 "component_name": "Children"
-            },
-            {
-                "component_data": {
-                    "parent": 46
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 47,
@@ -2332,10 +2332,6 @@
                     "name": "Floor"
                 },
                 "component_name": "Name"
-            },
-            {
-                "component_data": {},
-                "component_name": "StaticTag"
             },
             {
                 "component_data": {
@@ -2363,6 +2359,10 @@
                     "parent": 49
                 },
                 "component_name": "Parent"
+            },
+            {
+                "component_data": {},
+                "component_name": "StaticTag"
             },
             {
                 "component_data": {
@@ -2443,10 +2443,6 @@
                 "component_name": "Name"
             },
             {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
-            {
                 "component_data": {
                     "orientation": {
                         "w": 0.9999999403953552,
@@ -2472,6 +2468,10 @@
                     "parent": 49
                 },
                 "component_name": "Parent"
+            },
+            {
+                "component_data": {},
+                "component_name": "StaticTag"
             },
             {
                 "component_data": {
@@ -2507,10 +2507,6 @@
                 "component_name": "Name"
             },
             {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
-            {
                 "component_data": {
                     "orientation": {
                         "w": 1.0,
@@ -2536,6 +2532,10 @@
                     "parent": 49
                 },
                 "component_name": "Parent"
+            },
+            {
+                "component_data": {},
+                "component_name": "StaticTag"
             },
             {
                 "component_data": {
@@ -2571,10 +2571,6 @@
                 "component_name": "Name"
             },
             {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
-            {
                 "component_data": {
                     "orientation": {
                         "w": 0.9658363461494446,
@@ -2602,6 +2598,10 @@
                 "component_name": "Parent"
             },
             {
+                "component_data": {},
+                "component_name": "StaticTag"
+            },
+            {
                 "component_data": {
                     "layer_name": "default"
                 },
@@ -2616,14 +2616,14 @@
                     },
                     "orientation": {
                         "0": {
-                            "x": 0.0,
+                            "x": 1.0,
                             "y": 0.0,
-                            "z": 0.0
+                            "z": -0.0
                         },
                         "1": {
-                            "x": 0.0,
-                            "y": 0.0,
-                            "z": 0.0
+                            "x": -0.0,
+                            "y": 0.8656798601150513,
+                            "z": -0.5005982518196106
                         }
                     },
                     "range": {
@@ -2656,7 +2656,7 @@
                     },
                     "position": {
                         "x": 11.522523880004883,
-                        "y": -0.09657508134841919,
+                        "y": 5.960464477539063e-08,
                         "z": -3.745940685272217
                     },
                     "scale": {
@@ -2677,7 +2677,7 @@
                     "mass": 100.0,
                     "velocity": {
                         "x": 0.0,
-                        "y": -1109.437744140625,
+                        "y": 0.0,
                         "z": 0.0
                     }
                 },
@@ -2747,15 +2747,6 @@
             },
             {
                 "component_data": {
-                    "camera": 54,
-                    "camera_pivot": 57,
-                    "model": 56,
-                    "scorpion_camera_transform": 58
-                },
-                "component_name": "HackerData"
-            },
-            {
-                "component_data": {
                     "children": [
                         56,
                         57
@@ -2763,6 +2754,15 @@
                     "children_count": 2
                 },
                 "component_name": "Children"
+            },
+            {
+                "component_data": {
+                    "camera": 54,
+                    "camera_pivot": 57,
+                    "model": 56,
+                    "scorpion_camera_transform": 58
+                },
+                "component_name": "HackerData"
             }
         ],
         "entity": 55,
@@ -2770,13 +2770,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "material_type": 0,
-                    "model_name": "scorpion/scorpion_idle.skinmdl"
-                },
-                "component_name": "SkinnedModelInstance"
-            },
             {
                 "component_data": {
                     "name": "ScorpionModel"
@@ -2816,6 +2809,13 @@
                     "parent": 55
                 },
                 "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "material_type": 0,
+                    "model_name": "scorpion/scorpion_idle.skinmdl"
+                },
+                "component_name": "SkinnedModelInstance"
             }
         ],
         "entity": 56,
@@ -2852,18 +2852,18 @@
             },
             {
                 "component_data": {
+                    "parent": 55
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "children": [
                         58
                     ],
                     "children_count": 1
                 },
                 "component_name": "Children"
-            },
-            {
-                "component_data": {
-                    "parent": 55
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 57,
@@ -3027,15 +3027,6 @@
             },
             {
                 "component_data": {
-                    "can_interact": true,
-                    "interaction": 2,
-                    "interaction_target": 60,
-                    "type": 2
-                },
-                "component_name": "Interactable"
-            },
-            {
-                "component_data": {
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
                     "scale_uv_with_transform": false
@@ -3078,6 +3069,15 @@
                     "speed": 1.0
                 },
                 "component_name": "Platform"
+            },
+            {
+                "component_data": {
+                    "can_interact": true,
+                    "interaction": 2,
+                    "interaction_target": 60,
+                    "type": 2
+                },
+                "component_name": "Interactable"
             }
         ],
         "entity": 60,
@@ -3094,15 +3094,15 @@
             {
                 "component_data": {
                     "orientation": {
-                        "w": 0.5508365035057068,
-                        "x": 0.4381985366344452,
-                        "y": 0.5853646993637085,
-                        "z": 0.4023797810077667
+                        "w": 0.3768158555030823,
+                        "x": 0.5868163704872131,
+                        "y": 0.6088021993637085,
+                        "z": 0.3781750798225403
                     },
                     "position": {
                         "x": -0.019999999552965164,
-                        "y": 0.25,
-                        "z": -0.009999999776482582
+                        "y": 0.2199999988079071,
+                        "z": -0.05999999865889549
                     },
                     "scale": {
                         "x": 1.0,

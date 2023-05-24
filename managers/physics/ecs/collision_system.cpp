@@ -107,9 +107,14 @@ void CollisionSystem::resolve_collision_dynamic(World &world) {
 				case CollisionFlag::CAPSULE_CAPSULE:
 					physics_manager.resolve_collision_capsule(world, e1, e2);
 					break;
+				case CollisionFlag::CAPSULE_SPHERE:
+					physics_manager.resolve_capsule_sphere(world, e1, e2);
+					break;
+				case CollisionFlag::SPHERE_CAPSULE:
+					physics_manager.resolve_capsule_sphere(world, e2, e1);
+					break;
 				case CollisionFlag::CAPSULE_AABB:
 				case CollisionFlag::CAPSULE_OBB:
-				case CollisionFlag::CAPSULE_SPHERE:
 					//TODO: implement
 					break;
 				default:
