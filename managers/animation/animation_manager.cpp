@@ -20,6 +20,10 @@ void AnimationManager::update_pose(AnimData &data, float dt) {
 		assert(false);
 		return;
 	}
+
+	if (data.animation->is_freeze) {
+		return;
+	}
 	ResourceManager &resource_manager = ResourceManager::get();
 	Animation &animation = resource_manager.get_animation(data.animation->animation_handle);
 	float &current_time = data.animation->current_time;
@@ -98,7 +102,6 @@ void AnimationManager::change_animation(Entity entity, const std::string &new_an
 	ResourceManager &resource_manager = ResourceManager::get();
 
 	AnimData &entity_data = item->second;
-	entity_data.animation->previous_animation = entity_data.animation->animation_handle;
 	entity_data.animation->animation_handle = resource_manager.get_animation_handle(new_animation_name);
 	entity_data.animation->current_time = 0.0f;
 	entity_data.has_changed = true;

@@ -51,6 +51,7 @@ void Inspector::show_components() {
 	SHOW_COMPONENT(ColliderSphere, show_collidersphere);
 	SHOW_COMPONENT(ColliderAABB, show_collideraabb);
 	SHOW_COMPONENT(ColliderOBB, show_colliderobb);
+	SHOW_COMPONENT(ColliderCapsule, show_collidercapsule);
 	SHOW_COMPONENT(Light, show_light);
 	SHOW_COMPONENT(AgentData, show_agent_data);
 	SHOW_COMPONENT(HackerData, show_hacker_data);
@@ -413,9 +414,14 @@ void Inspector::show_animationinstance() {
 		}
 		ImGui::TableNextRow();
 		ImGui::TableSetColumnIndex(0);
-		ImGui::Text("Is looping");
+		ImGui::Text("Loop");
 		ImGui::TableSetColumnIndex(1);
 		ImGui::Checkbox("##Is looping", &animation_instance.is_looping);
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Freeze");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::Checkbox("##Is freeze", &animation_instance.is_freeze);
 		ImGui::TableNextRow();
 		ImGui::TableSetColumnIndex(0);
 		ImGui::Text("Ticks per second");
@@ -639,6 +645,22 @@ void Inspector::show_colliderobb() {
 		show_vec3("Orientation 1", colliderobb.orientation[0]);
 		show_vec3("Orientation 2", colliderobb.orientation[1]);
 		show_vec3("Range", colliderobb.range);
+
+		ImGui::EndTable();
+	}
+}
+
+void Inspector::show_collidercapsule() {
+	auto &collider_capsule = world->get_component<ColliderCapsule>(selected_entity);
+	if (ImGui::CollapsingHeader("ColliderCapsule", tree_flags)) {
+		remove_component_popup<ColliderCapsule>();
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("Transform", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+
+		show_float("Radius", collider_capsule.radius);
+		show_vec3("Start", collider_capsule.start);
+		show_vec3("End", collider_capsule.end);
 
 		ImGui::EndTable();
 	}
@@ -1077,6 +1099,7 @@ void Inspector::show_add_component() {
 			SHOW_ADD_COMPONENT(ColliderSphere);
 			SHOW_ADD_COMPONENT(ColliderAABB);
 			SHOW_ADD_COMPONENT(ColliderOBB);
+			SHOW_ADD_COMPONENT(ColliderCapsule);
 			SHOW_ADD_COMPONENT(Light);
 			SHOW_ADD_COMPONENT(AgentData);
 			SHOW_ADD_COMPONENT(HackerData);

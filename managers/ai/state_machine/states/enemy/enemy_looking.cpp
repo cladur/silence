@@ -4,9 +4,9 @@
 #include "components/enemy_path_component.h"
 #include "components/transform_component.h"
 #include "engine/scene.h"
-#include "managers/ecs/systems/collision_system.h"
 #include "managers/ecs/world.h"
 #include "managers/gameplay/gameplay_manager.h"
+#include "managers/physics/ecs/collision_system.h"
 #include "managers/physics/physics_manager.h"
 #include "managers/render/render_scene.h"
 #include <animation/animation_manager.h>
@@ -44,8 +44,7 @@ void EnemyLooking::update(World *world, uint32_t entity_id, float dt) {
 		glm::vec3 axis = glm::cross(forward_no_y, direction);
 		rotation_end = (angle * axis);
 
-		if (anim.animation_handle.id !=
-				res.get_animation_handle("agent/agent_ANIM_GLTF/agent_idle.anim").id) {
+		if (anim.animation_handle.id != res.get_animation_handle("agent/agent_ANIM_GLTF/agent_idle.anim").id) {
 			animation_manager.change_animation(entity_id, "agent/agent_ANIM_GLTF/agent_idle.anim");
 		}
 
@@ -54,11 +53,12 @@ void EnemyLooking::update(World *world, uint32_t entity_id, float dt) {
 
 	// smoothly look at the last known player position, stop if already looking
 	float dot = glm::dot(glm::normalize(target_look - transform.position), forward);
-	if ( dot < 0.99f) {
+	if (dot < 0.99f) {
 		transform.add_global_euler_rot(rotation_end * dt * 2.0f);
 	}
 	dd.draw_line(transform.position + glm::vec3(0.0f, 0.1f, 0.0f), target_look, glm::vec3(1.0f, 0.0f, 0.0f));
-	dd.draw_line(transform.position + glm::vec3(0.0f, 0.1f, 0.0f), transform.position + forward, glm::vec3(0.0f, 1.0f, 0.0f));
+	dd.draw_line(transform.position + glm::vec3(0.0f, 0.1f, 0.0f), transform.position + forward,
+			glm::vec3(0.0f, 1.0f, 0.0f));
 
 	bool can_see_player = false;
 	// check if agent is in cone of vision described by view_cone_angle and view_cone_distance
@@ -100,7 +100,8 @@ void EnemyLooking::update(World *world, uint32_t entity_id, float dt) {
 	slider.color = glm::lerp(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 0.0f, 0.0f), slider.value);
 	slider.position = transform.get_global_position() + glm::vec3(0.0f, 2.0f, 0.0f);
 
-	// thresholded detection level, switches to previous state when it goes very low, to avoid jittering and give it more reealism
+	// thresholded detection level, switches to previous state when it goes very low, to avoid jittering and give it
+	// more reealism
 	if (enemy_data.detection_level < 0.2) {
 		state_machine->set_state("patrolling");
 	}
@@ -113,5 +114,3 @@ void EnemyLooking::exit() {
 	first_frame = true;
 	SPDLOG_INFO("EnemyLooking::exit");
 }
-
-

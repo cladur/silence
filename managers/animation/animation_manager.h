@@ -13,7 +13,6 @@ struct AnimData {
 	SkinnedModelInstance *model;
 	Pose local_pose;
 	Pose model_pose;
-	//	float blend_time_ms = 400.0f;
 	bool has_changed = false;
 };
 

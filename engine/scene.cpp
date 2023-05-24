@@ -15,14 +15,14 @@
 #include "animation/ecs/attachment_system.h"
 #include "ecs/systems/agent_system.h"
 #include "ecs/systems/collider_draw.h"
-#include "ecs/systems/collision_system.h"
 #include "ecs/systems/enemy_path_draw_system.h"
 #include "ecs/systems/enemy_pathing.h"
 #include "ecs/systems/enemy_system.h"
 #include "ecs/systems/hacker_system.h"
 #include "ecs/systems/isolated_entities_system.h"
-#include "ecs/systems/physics_system.h"
 #include "ecs/systems/root_parent_system.h"
+#include "managers/physics/ecs/collision_system.h"
+#include "managers/physics/ecs/physics_system.h"
 #include "render/ecs/frustum_draw_system.h"
 #include "render/ecs/light_render_system.h"
 #include "render/ecs/render_system.h"
@@ -50,6 +50,7 @@ Scene::Scene() {
 	world.register_component<ColliderTag>();
 	world.register_component<ColliderSphere>();
 	world.register_component<ColliderAABB>();
+	world.register_component<ColliderCapsule>();
 	world.register_component<ColliderOBB>();
 	world.register_component<Light>();
 	world.register_component<AgentData>();

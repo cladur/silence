@@ -31,8 +31,10 @@ void PhysicsManager::resolve_collision(World &world, Entity movable_object, cons
 		first = CollisionFlag::FIRST_AABB;
 	} else if (world.has_component<ColliderSphere>(e1)) {
 		first = CollisionFlag::FIRST_SPHERE;
+	} else if (world.has_component<ColliderCapsule>(e1)) {
+		first = CollisionFlag::FIRST_CAPSULE;
 	} else {
-		SPDLOG_WARN("Movable object has invalid collider");
+		SPDLOG_WARN("Entity {} has not supported collider", e1);
 		return;
 	}
 
@@ -43,7 +45,10 @@ void PhysicsManager::resolve_collision(World &world, Entity movable_object, cons
 			second = CollisionFlag::SECOND_AABB;
 		} else if (world.has_component<ColliderSphere>(e2)) {
 			second = CollisionFlag::SECOND_SPHERE;
+		} else if (world.has_component<ColliderCapsule>(e2)) {
+			second = CollisionFlag::SECOND_CAPSULE;
 		} else {
+			SPDLOG_WARN("Entity {} has not supported collider", e2);
 			continue;
 		}
 
@@ -75,18 +80,48 @@ void PhysicsManager::resolve_collision(World &world, Entity movable_object, cons
 			case CollisionFlag::OBB_AABB:
 				resolve_obb_aabb(world, e1, e2);
 				break;
+			case CollisionFlag::CAPSULE_CAPSULE:
+				resolve_collision_capsule(world, e1, e2);
+				break;
+			case CollisionFlag::CAPSULE_SPHERE:
+				resolve_capsule_sphere(world, e1, e2);
+				break;
+			case CollisionFlag::SPHERE_CAPSULE:
+				resolve_capsule_sphere(world, e2, e1);
+				break;
+			case CollisionFlag::CAPSULE_AABB:
+				resolve_capsule_aabb(world, e1, e2);
+				break;
+			case CollisionFlag::AABB_CAPSULE:
+				resolve_capsule_aabb(world, e2, e1);
+				break;
+			case CollisionFlag::CAPSULE_OBB:
+				resolve_capsule_obb(world, e1, e2);
+				break;
+			case CollisionFlag::OBB_CAPSULE:
+				resolve_capsule_obb(world, e2, e1);
+				break;
 			default:
+				SPDLOG_WARN("Entities has not supported collision type {} {}", e1, e2);
 				break;
 		}
 	}
 }
 
-bool PhysicsManager::is_overlap(const ColliderSphere &a, const ColliderSphere &b) {
-	glm::vec3 distance = a.center - b.center;
-	float distance_squared = glm::dot(distance, distance);
+glm::vec3 PhysicsManager::is_overlap(const ColliderSphere &a, const ColliderSphere &b) {
+	glm::vec3 direction = a.center - b.center;
+	float distance_squared = glm::length2(direction);
 	float radius_sum = a.radius + b.radius;
 
-	return distance_squared <= (radius_sum * radius_sum);
+	float distance = radius_sum - glm::sqrt(distance_squared);
+	if (distance_squared < radius_sum * radius_sum) {
+		if (glm::length2(direction) < cvar_epsilon.get()) {
+			return glm::vec3(0.0f, 1.0f, 0.0f) * distance;
+		} else {
+			return glm::normalize(direction) * distance;
+		}
+	}
+	return glm::vec3(0.0f);
 }
 
 void PhysicsManager::resolve_collision_sphere(World &world, Entity e1, Entity e2) {
@@ -102,19 +137,21 @@ void PhysicsManager::resolve_collision_sphere(World &world, Entity e1, Entity e2
 
 	ColliderSphere c1;
 	ColliderSphere c2;
-	c1.radius = temp_c1.radius * t1.get_global_scale().x;
-	c1.center = t1.get_global_position() + temp_c1.center * t1.get_global_scale().x;
-	c2.radius = temp_c2.radius * t2.get_global_scale().x;
-	c2.center = t2.get_global_position() + temp_c2.center * t2.get_global_scale().x;
+	const glm::vec3 &scale1 = t1.get_global_scale();
+	c1.radius = temp_c1.radius * scale1.x;
+	c1.center = t1.get_global_position() + temp_c1.center * scale1.x;
 
-	if (!is_collision_candidate(c1.center, glm::vec3(c1.radius), c2.center, glm::vec3(c2.radius)) ||
-			!is_overlap(c1, c2)) {
+	const glm::vec3 &scale2 = t2.get_global_scale();
+	c2.radius = temp_c2.radius * scale2.x;
+	c2.center = t2.get_global_position() + temp_c2.center * scale2.x;
+
+	if (!is_collision_candidate(c1.center, glm::vec3(c1.radius), c2.center, glm::vec3(c2.radius))) {
 		return;
 	}
-
-	const glm::vec3 direction = c2.center - c1.center;
-	const float distance = c1.radius + c2.radius - glm::length(direction);
-	const glm::vec3 offset = -glm::normalize(direction) * distance;
+	glm::vec3 offset = is_overlap(c1, c2);
+	if (glm::length2(offset) < cvar_epsilon.get()) {
+		return;
+	}
 
 	make_shift(world, e1, e2, offset);
 }
@@ -150,10 +187,13 @@ void PhysicsManager::resolve_collision_aabb(World &world, Entity e1, Entity e2) 
 
 	ColliderAABB c1;
 	ColliderAABB c2;
-	c1.range = temp_c1.range * t1.get_global_scale();
-	c1.center = t1.get_global_position() + temp_c1.center * t1.get_global_scale();
-	c2.range = temp_c2.range * t2.get_global_scale();
-	c2.center = t2.get_global_position() + temp_c2.center * t2.get_global_scale();
+	const glm::vec3 &scale1 = t1.get_global_scale();
+	c1.range = temp_c1.range * scale1;
+	c1.center = t1.get_global_position() + temp_c1.center * scale1;
+
+	const glm::vec3 &scale2 = t2.get_global_scale();
+	c2.range = temp_c2.range * scale2;
+	c2.center = t2.get_global_position() + temp_c2.center * scale2;
 
 	if (!is_collision_candidate(c1.center, c1.range, c2.center, c2.range) || !is_overlap(c1, c2)) {
 		return;
@@ -189,16 +229,13 @@ glm::vec3 PhysicsManager::is_overlap(const ColliderAABB &a, const ColliderSphere
 	const glm::vec3 min = a.min();
 	const glm::vec3 max = a.max();
 	// Calculate nearest point AABB and Sphere center
-	const glm::vec3 closest_point = glm::vec3(std::clamp(b.center.x, min.x, max.x),
-			std::clamp(b.center.y, min.y, max.y), std::clamp(b.center.z, min.z, max.z));
-
+	const glm::vec3 closest_point = glm::clamp(b.center, min, max);
 	const glm::vec3 direction = closest_point - b.center;
-	const float distance = glm::length(direction);
+	const float distance2 = glm::length2(direction);
 
-	const float length = b.radius - distance;
-
-	if (distance < b.radius) {
-		if (glm::dot(direction, direction) < cvar_epsilon.get()) {
+	if (distance2 < b.radius * b.radius) {
+		const float length = b.radius - glm::sqrt(distance2);
+		if (glm::length2(direction) < cvar_epsilon.get()) {
 			return glm::vec3(0.0f, 1.0f, 0.0f) * length;
 		} else {
 			return glm::normalize(direction) * length;
@@ -221,17 +258,20 @@ void PhysicsManager::resolve_aabb_sphere(World &world, Entity aabb, Entity spher
 
 	ColliderAABB c1;
 	ColliderSphere c2;
-	c1.range = temp_c1.range * t1.get_global_scale();
-	c1.center = t1.get_global_position() + temp_c1.center * t1.get_global_scale();
-	c2.radius = temp_c2.radius * t2.get_global_scale().x;
-	c2.center = t2.get_global_position() + temp_c2.center * t2.get_global_scale().x;
+	const glm::vec3 &scale1 = t1.get_global_scale();
+	c1.range = temp_c1.range * scale1;
+	c1.center = t1.get_global_position() + temp_c1.center * scale1;
+
+	const glm::vec3 &scale2 = t2.get_global_scale();
+	c2.radius = temp_c2.radius * scale2.x;
+	c2.center = t2.get_global_position() + temp_c2.center * scale2.x;
 
 	if (!is_collision_candidate(c1.center, c1.range, c2.center, glm::vec3(c2.radius))) {
 		return;
 	}
 
 	glm::vec3 offset = is_overlap(c1, c2);
-	if (glm::dot(offset, offset) < cvar_epsilon.get()) {
+	if (glm::length2(offset) < cvar_epsilon.get()) {
 		return;
 	}
 
@@ -263,7 +303,7 @@ glm::vec3 PhysicsManager::is_overlap(const ColliderOBB &a, const ColliderOBB &b)
 	float max_overlap = -std::numeric_limits<float>::max();
 	glm::vec3 separation(0.0f);
 	for (const glm::vec3 &axis : axes) {
-		if (glm::dot(axis, axis) < cvar_epsilon.get()) {
+		if (glm::length2(axis) < cvar_epsilon.get()) {
 			continue;
 		}
 		const float overlap = fabs(glm::dot(distance, axis)) -
@@ -300,24 +340,28 @@ void PhysicsManager::resolve_collision_obb(World &world, Entity e1, Entity e2) {
 
 	ColliderOBB c1{};
 	ColliderOBB c2{};
-	temp_c1.set_orientation(t1.get_global_orientation());
+	const glm::vec3 &scale1 = t1.get_global_scale();
+	const glm::quat &orientation1 = t1.get_global_orientation();
+	temp_c1.set_orientation(orientation1);
 	c1.orientation[0] = temp_c1.orientation[0];
 	c1.orientation[1] = temp_c1.orientation[1];
-	c1.range = temp_c1.range * t1.get_global_scale();
-	c1.center = t1.get_global_position() + c1.get_orientation_matrix() * (temp_c1.center * t1.get_global_scale());
+	c1.range = temp_c1.range * scale1;
+	c1.center = t1.get_global_position() + orientation1 * (temp_c1.center * scale1);
 
-	temp_c2.set_orientation(t2.get_global_orientation());
+	const glm::vec3 &scale2 = t2.get_global_scale();
+	const glm::quat &orientation2 = t2.get_global_orientation();
+	temp_c2.set_orientation(orientation2);
 	c2.orientation[0] = temp_c2.orientation[0];
 	c2.orientation[1] = temp_c2.orientation[1];
-	c2.range = temp_c2.range * t2.get_global_scale();
-	c2.center = t2.get_global_position() + c2.get_orientation_matrix() * (temp_c2.center * t2.get_global_scale());
+	c2.range = temp_c2.range * scale2;
+	c2.center = t2.get_global_position() + orientation2 * (temp_c2.center * scale2);
 
 	if (!is_collision_candidate(c1.center, c1.range, c2.center, c2.range)) {
 		return;
 	}
 
 	glm::vec3 offset = is_overlap(c1, c2);
-	if (glm::dot(offset, offset) < cvar_epsilon.get()) {
+	if (glm::length2(offset) < cvar_epsilon.get()) {
 		return;
 	}
 
@@ -325,23 +369,22 @@ void PhysicsManager::resolve_collision_obb(World &world, Entity e1, Entity e2) {
 }
 
 glm::vec3 PhysicsManager::is_overlap(const ColliderOBB &a, const ColliderSphere &b) {
-	const glm::mat3 orientation = a.get_orientation_matrix();
-	const glm::vec3 sphere_center_local = glm::transpose(orientation) * (b.center - a.center);
+	const glm::mat3 &orientation = a.get_orientation_matrix();
+	const glm::vec3 &sphere_center_local = glm::transpose(orientation) * (b.center - a.center);
 
 	// Closest point on a to b center
-	const glm::vec3 closest_point_on_obb = glm::clamp(sphere_center_local, -a.range, a.range);
+	const glm::vec3 &closest_point_on_obb = glm::clamp(sphere_center_local, -a.range, a.range);
 
 	// Convert closest point back to world space
-	const glm::vec3 closest_point_world = orientation * closest_point_on_obb + a.center;
+	const glm::vec3 &closest_point_world = orientation * closest_point_on_obb + a.center;
 
 	// Calculate distance between b center and closest point on a
-	const glm::vec3 direction = closest_point_world - b.center;
-	const float distance = glm::length(direction);
+	const glm::vec3 &direction = closest_point_world - b.center;
+	const float distance2 = glm::length2(direction);
 
-	const float length = b.radius - distance;
-
-	if (distance < b.radius) {
-		if (glm::dot(direction, direction) < cvar_epsilon.get()) {
+	if (distance2 < b.radius * b.radius) {
+		const float length = b.radius - glm::sqrt(distance2);
+		if (glm::length2(direction) < cvar_epsilon.get()) {
 			return glm::vec3(0.0f, 1.0f, 0.0f) * length;
 		} else {
 			return glm::normalize(direction) * length;
@@ -364,21 +407,24 @@ void PhysicsManager::resolve_obb_sphere(World &world, Entity obb, Entity sphere)
 
 	ColliderOBB c1{};
 	ColliderSphere c2{};
-	temp_c1.set_orientation(t1.get_global_orientation());
+	const glm::vec3 &scale1 = t1.get_global_scale();
+	const glm::quat &orientation1 = t1.get_global_orientation();
+	temp_c1.set_orientation(orientation1);
 	c1.orientation[0] = temp_c1.orientation[0];
 	c1.orientation[1] = temp_c1.orientation[1];
-	c1.range = temp_c1.range * t1.get_global_scale();
-	c1.center = t1.get_global_position() + c1.get_orientation_matrix() * (temp_c1.center * t1.get_global_scale());
+	c1.range = temp_c1.range * scale1;
+	c1.center = t1.get_global_position() + orientation1 * (temp_c1.center * scale1);
 
-	c2.radius = temp_c2.radius * t2.get_global_scale().x;
-	c2.center = t2.get_global_position() + temp_c2.center * t2.get_global_scale().x;
+	const glm::vec3 &scale2 = t2.get_global_scale();
+	c2.radius = temp_c2.radius * scale2.x;
+	c2.center = t2.get_global_position() + temp_c2.center * scale2.x;
 
 	if (!is_collision_candidate(c1.center, c1.range, c2.center, glm::vec3(c2.radius))) {
 		return;
 	}
 
 	glm::vec3 offset = is_overlap(c1, c2);
-	if (glm::dot(offset, offset) < cvar_epsilon.get()) {
+	if (glm::length2(offset) < cvar_epsilon.get()) {
 		return;
 	}
 
@@ -411,7 +457,7 @@ glm::vec3 PhysicsManager::is_overlap(const ColliderOBB &a, const ColliderAABB &b
 	float max_overlap = -std::numeric_limits<float>::max();
 	glm::vec3 separation(0.0f);
 	for (const glm::vec3 &axis : axes) {
-		if (glm::dot(axis, axis) < cvar_epsilon.get()) {
+		if (glm::length2(axis) < cvar_epsilon.get()) {
 			continue;
 		}
 		const float overlap = fabs(glm::dot(distance, axis)) -
@@ -449,25 +495,322 @@ void PhysicsManager::resolve_obb_aabb(World &world, Entity obb, Entity aabb) {
 
 	ColliderOBB c1{};
 	ColliderAABB c2{};
-	temp_c1.set_orientation(t1.get_global_orientation());
+	const glm::vec3 &scale1 = t1.get_global_scale();
+	const glm::quat &orientation1 = t1.get_global_orientation();
+	temp_c1.set_orientation(orientation1);
 	c1.orientation[0] = temp_c1.orientation[0];
 	c1.orientation[1] = temp_c1.orientation[1];
-	c1.range = temp_c1.range * t1.get_global_scale();
-	c1.center = t1.get_global_position() + c1.get_orientation_matrix() * (temp_c1.center * t1.get_global_scale());
+	c1.range = temp_c1.range * scale1;
+	c1.center = t1.get_global_position() + orientation1 * (temp_c1.center * scale1);
 
-	c2.range = temp_c2.range * t2.get_global_scale();
-	c2.center = t2.get_global_position() + temp_c2.center * t2.get_global_scale();
+	const glm::vec3 &scale2 = t2.get_global_scale();
+	c2.range = temp_c2.range * scale2;
+	c2.center = t2.get_global_position() + temp_c2.center * scale2;
 
 	if (!is_collision_candidate(c1.center, c1.range, c2.center, c2.range)) {
 		return;
 	}
 
 	glm::vec3 offset = is_overlap(c1, c2);
-	if (glm::dot(offset, offset) < cvar_epsilon.get()) {
+	if (glm::length2(offset) < cvar_epsilon.get()) {
 		return;
 	}
 
 	make_shift(world, obb, aabb, offset);
+}
+
+glm::vec3 PhysicsManager::is_overlap(const ColliderCapsule &a, const ColliderCapsule &b) {
+	float offset1, offset2;
+	glm::vec3 capsule_point1, capsule_point2;
+
+	float distance2;
+	const glm::vec3 &d1 = a.end - a.start;
+	const glm::vec3 &d2 = b.end - b.start;
+	const glm::vec3 &r = a.start - b.start;
+	const float l1 = glm::length2(d1);
+	const float l2 = glm::length2(d2);
+	const float f = glm::dot(d2, r);
+	if (l1 <= cvar_epsilon.get() && l2 <= cvar_epsilon.get()) {
+		offset1 = 0.0f;
+		offset2 = 0.0f;
+	} else if (l1 <= cvar_epsilon.get()) {
+		offset1 = 0.0f;
+		offset2 = std::clamp(f / l2, 0.0f, 1.0f);
+	} else {
+		float c = glm::dot(d1, r);
+		if (l2 <= cvar_epsilon.get()) {
+			offset1 = std::clamp(-c / l1, 0.0f, 1.0f);
+			offset2 = 0.0f;
+		} else {
+			float l = glm::dot(d1, d2);
+			float denom = l1 * l2 - l * l;
+
+			if (denom != 0.0f) {
+				offset1 = std::clamp((l * f - c * l2) / denom, 0.0f, 1.0f);
+			} else {
+				offset1 = 0.0f;
+			}
+
+			float tnom = l * offset1 + f;
+			if (tnom < 0.0f) {
+				offset1 = std::clamp(-c / l1, 0.0f, 1.0f);
+				offset2 = 0.0f;
+			} else if (tnom > l2) {
+				offset1 = std::clamp((l - c) / l1, 0.0f, 1.0f);
+				offset2 = 1.0f;
+			} else {
+				offset2 = tnom / l2;
+			}
+		}
+	}
+	capsule_point1 = a.start + d1 * offset1;
+	capsule_point2 = b.start + d2 * offset2;
+	distance2 = glm::length2(capsule_point1 - capsule_point2);
+
+	float radius = a.radius + b.radius;
+	if (distance2 < radius * radius) {
+		float length = glm::sqrt(distance2) - radius;
+		if (distance2 < cvar_epsilon.get()) {
+			return glm::vec3(0.0f, 1.0f, 0.0f) * length;
+		} else {
+			return glm::normalize(capsule_point2 - capsule_point1) * length;
+		}
+	}
+
+	return glm::vec3(0.0f);
+}
+
+void PhysicsManager::resolve_collision_capsule(World &world, Entity e1, Entity e2) {
+	ColliderCapsule &temp_c1 = world.get_component<ColliderCapsule>(e1);
+	ColliderCapsule &temp_c2 = world.get_component<ColliderCapsule>(e2);
+	Transform &t1 = world.get_component<Transform>(e1);
+	Transform &t2 = world.get_component<Transform>(e2);
+	ColliderTag &tag1 = world.get_component<ColliderTag>(e1);
+	ColliderTag &tag2 = world.get_component<ColliderTag>(e2);
+	if (!are_layers_collide(tag1.layer_name, tag2.layer_name)) {
+		return;
+	}
+
+	ColliderCapsule c1{};
+	ColliderCapsule c2{};
+	const glm::vec3 &scale1 = t1.get_global_scale();
+	const glm::vec3 &position1 = t1.get_global_position();
+	c1.radius = temp_c1.radius * scale1.x;
+	c1.start = position1 + temp_c1.start * scale1;
+	c1.end = position1 + temp_c1.end * scale1;
+
+	const glm::vec3 &scale2 = t2.get_global_scale();
+	const glm::vec3 &position2 = t2.get_global_position();
+	c2.radius = temp_c2.radius * scale2.x;
+	c2.start = position2 + temp_c2.start * scale2;
+	c2.end = position2 + temp_c2.end * scale2;
+
+	glm::vec3 offset = is_overlap(c1, c2);
+	if (glm::length2(offset) < cvar_epsilon.get()) {
+		return;
+	}
+
+	make_shift(world, e1, e2, offset);
+}
+
+glm::vec3 PhysicsManager::is_overlap(const ColliderCapsule &a, const ColliderSphere &b) {
+	glm::vec3 c1, c2;
+
+	glm::vec3 d = a.end - a.start;
+	glm::vec3 r = a.start - b.center;
+	c2 = b.center;
+	float d2 = glm::length2(d);
+	if (d2 <= cvar_epsilon.get()) {
+		c1 = a.start;
+	} else {
+		float c = glm::dot(d, r);
+		float s = std::clamp(-c / d2, 0.0f, 1.0f);
+		c1 = a.start + d * s;
+	}
+
+	float dist2 = glm::length2(c1 - c2);
+
+	float radius = a.radius + b.radius;
+	if (dist2 < radius * radius) {
+		float length = (glm::sqrt(dist2) - radius);
+		if (dist2 < cvar_epsilon.get()) {
+			return glm::vec3(0.0f, 1.0f, 0.0f) * length;
+		} else {
+			return glm::normalize(c2 - c1) * length;
+		}
+	}
+
+	return glm::vec3(0.0f);
+}
+
+void PhysicsManager::resolve_capsule_sphere(World &world, Entity capsule, Entity sphere) {
+	ColliderCapsule &temp_c1 = world.get_component<ColliderCapsule>(capsule);
+	ColliderSphere &temp_c2 = world.get_component<ColliderSphere>(sphere);
+	Transform &t1 = world.get_component<Transform>(capsule);
+	Transform &t2 = world.get_component<Transform>(sphere);
+	ColliderTag &tag1 = world.get_component<ColliderTag>(capsule);
+	ColliderTag &tag2 = world.get_component<ColliderTag>(sphere);
+	if (!are_layers_collide(tag1.layer_name, tag2.layer_name)) {
+		return;
+	}
+
+	ColliderCapsule c1{};
+	ColliderSphere c2{};
+	const glm::vec3 &scale1 = t1.get_global_scale();
+	const glm::vec3 &position1 = t1.get_global_position();
+	c1.radius = temp_c1.radius * scale1.x;
+	c1.start = position1 + temp_c1.start * scale1;
+	c1.end = position1 + temp_c1.end * scale1;
+
+	const glm::vec3 &scale2 = t2.get_global_scale();
+	c2.radius = temp_c2.radius * scale2.x;
+	c2.center = t2.get_global_position() + temp_c2.center * scale2;
+
+	glm::vec3 offset = is_overlap(c1, c2);
+	if (glm::length2(offset) < cvar_epsilon.get()) {
+		return;
+	}
+
+	make_shift(world, capsule, sphere, offset);
+}
+
+glm::vec3 PhysicsManager::is_overlap(const ColliderCapsule &a, const ColliderAABB &b) {
+	glm::vec3 capsule_point;
+
+	const glm::vec3 &d = a.end - a.start;
+	const glm::vec3 &r = a.start - b.center;
+	float d2 = glm::length2(d);
+	if (d2 <= cvar_epsilon.get()) {
+		capsule_point = a.start;
+	} else {
+		float c = glm::dot(d, r);
+		float s = std::clamp(-c / d2, 0.0f, 1.0f);
+		capsule_point = a.start + d * s;
+	}
+
+	const glm::vec3 min = b.min();
+	const glm::vec3 max = b.max();
+	// Calculate nearest point AABB and Capsule
+	const glm::vec3 closest_point = glm::clamp(capsule_point, min, max);
+
+	const glm::vec3 direction = capsule_point - closest_point;
+	const float distance2 = glm::length2(direction);
+
+	if (distance2 < a.radius * a.radius) {
+		const float length = a.radius - glm::sqrt(distance2);
+		if (glm::length2(direction) < cvar_epsilon.get()) {
+			return glm::vec3(0.0f, 1.0f, 0.0f) * length;
+		} else {
+			return glm::normalize(direction) * length;
+		}
+	}
+
+	return glm::vec3(0.0f);
+}
+
+void PhysicsManager::resolve_capsule_aabb(World &world, Entity capsule, Entity aabb) {
+	ColliderCapsule &temp_c1 = world.get_component<ColliderCapsule>(capsule);
+	ColliderAABB &temp_c2 = world.get_component<ColliderAABB>(aabb);
+	Transform &t1 = world.get_component<Transform>(capsule);
+	Transform &t2 = world.get_component<Transform>(aabb);
+	ColliderTag &tag1 = world.get_component<ColliderTag>(capsule);
+	ColliderTag &tag2 = world.get_component<ColliderTag>(aabb);
+	if (!are_layers_collide(tag1.layer_name, tag2.layer_name)) {
+		return;
+	}
+
+	ColliderCapsule c1{};
+	ColliderAABB c2{};
+	const glm::vec3 &scale1 = t1.get_global_scale();
+	const glm::vec3 &position1 = t1.get_global_position();
+	c1.radius = temp_c1.radius * scale1.x;
+	c1.start = position1 + temp_c1.start * scale1;
+	c1.end = position1 + temp_c1.end * scale1;
+
+	const glm::vec3 &scale2 = t2.get_global_scale();
+	c2.range = temp_c2.range * scale2;
+	c2.center = t2.get_global_position() + temp_c2.center * scale2;
+
+	glm::vec3 offset = is_overlap(c1, c2);
+	if (glm::length2(offset) < cvar_epsilon.get()) {
+		return;
+	}
+
+	make_shift(world, capsule, aabb, offset);
+}
+
+glm::vec3 PhysicsManager::is_overlap(const ColliderCapsule &a, const ColliderOBB &b) {
+	glm::vec3 capsule_point;
+
+	const glm::vec3 &d = a.end - a.start;
+	const glm::vec3 &r = a.start - b.center;
+	float d2 = glm::length2(d);
+	if (d2 <= cvar_epsilon.get()) {
+		capsule_point = a.start;
+	} else {
+		float c = glm::dot(d, r);
+		float s = std::clamp(-c / d2, 0.0f, 1.0f);
+		capsule_point = a.start + d * s;
+	}
+
+	const glm::mat3 &orientation = b.get_orientation_matrix();
+	const glm::vec3 &sphere_center_local = glm::transpose(orientation) * (capsule_point - b.center);
+
+	// Closest point on a to b center
+	const glm::vec3 &closest_point_on_obb = glm::clamp(sphere_center_local, -b.range, b.range);
+
+	// Convert closest point back to world space
+	const glm::vec3 &closest_point_world = orientation * closest_point_on_obb + b.center;
+
+	// Calculate distance between b center and closest point on a
+	const glm::vec3 &direction = capsule_point - closest_point_world;
+	const float distance2 = glm::length2(direction);
+
+	if (distance2 < a.radius * a.radius) {
+		const float length = a.radius - glm::sqrt(distance2);
+		if (glm::length2(direction) < cvar_epsilon.get()) {
+			return glm::vec3(0.0f, 1.0f, 0.0f) * length;
+		} else {
+			return glm::normalize(direction) * length;
+		}
+	}
+
+	return glm::vec3(0.0f);
+}
+
+void PhysicsManager::resolve_capsule_obb(World &world, Entity capsule, Entity obb) {
+	ColliderCapsule &temp_c1 = world.get_component<ColliderCapsule>(capsule);
+	ColliderOBB &temp_c2 = world.get_component<ColliderOBB>(obb);
+	Transform &t1 = world.get_component<Transform>(capsule);
+	Transform &t2 = world.get_component<Transform>(obb);
+	ColliderTag &tag1 = world.get_component<ColliderTag>(capsule);
+	ColliderTag &tag2 = world.get_component<ColliderTag>(obb);
+	if (!are_layers_collide(tag1.layer_name, tag2.layer_name)) {
+		return;
+	}
+
+	ColliderCapsule c1{};
+	ColliderOBB c2{};
+	const glm::vec3 &scale1 = t1.get_global_scale();
+	const glm::vec3 &position1 = t1.get_global_position();
+	c1.radius = temp_c1.radius * scale1.x;
+	c1.start = position1 + temp_c1.start * scale1;
+	c1.end = position1 + temp_c1.end * scale1;
+
+	const glm::quat &orientation2 = t2.get_global_orientation();
+	const glm::vec3 &scale2 = t2.get_global_scale();
+	temp_c2.set_orientation(orientation2);
+	c2.orientation[0] = temp_c2.orientation[0];
+	c2.orientation[1] = temp_c2.orientation[1];
+	c2.range = temp_c2.range * scale2;
+	c2.center = t2.get_global_position() + orientation2 * (temp_c2.center * scale2);
+
+	glm::vec3 offset = is_overlap(c1, c2);
+	if (glm::length2(offset) < cvar_epsilon.get()) {
+		return;
+	}
+
+	make_shift(world, capsule, obb, offset);
 }
 
 bool PhysicsManager::is_collision_candidate(
@@ -521,6 +864,7 @@ void PhysicsManager::non_physical_shift(
 		t2.add_position(-offset);
 	}
 }
+
 void PhysicsManager::physical_shift(Transform &t1, Transform &t2, RigidBody &b1, RigidBody &b2, bool is_movable1,
 		bool is_movable2, const glm::vec3 &offset) {
 	glm::vec3 velocity_projection1;
@@ -557,7 +901,7 @@ void PhysicsManager::physical_shift(Transform &t1, Transform &t2, RigidBody &b1,
 bool PhysicsManager::intersect_ray_sphere(const Ray &ray, const ColliderSphere &sphere, HitInfo &result) {
 	glm::vec3 m = ray.origin - sphere.center;
 	float b = glm::dot(m, ray.direction);
-	float c = glm::dot(m, m) - sphere.radius * sphere.radius;
+	float c = glm::length2(m) - sphere.radius * sphere.radius;
 	// Exit if r’s origin outside s (c > 0) and r pointing away from s (b > 0)
 	if (c > 0.0f && b > 0.0f) {
 		return false;
@@ -671,6 +1015,103 @@ bool PhysicsManager::intersect_ray_obb(const Ray &ray, const ColliderOBB &obb, H
 	}
 	result.normal = glm::normalize(obb.get_orientation_matrix() * hit_normal);
 
+	return true;
+}
+
+bool PhysicsManager::intersect_ray_capsule(const Ray &ray, const ColliderCapsule &capsule, HitInfo &result) {
+	ColliderSphere start{};
+	start.center = capsule.start;
+	start.radius = capsule.radius;
+	if (intersect_ray_sphere(ray, start, result)) {
+		return true;
+	}
+
+	ColliderSphere end{};
+	end.center = capsule.end;
+	end.radius = capsule.radius;
+	if (intersect_ray_sphere(ray, end, result)) {
+		return true;
+	}
+
+	float distance;
+	glm::vec3 d = capsule.end - capsule.start, m = ray.origin - capsule.start,
+			  n = ray.direction * 694202137.8f; // this is a secret value, bcs it's almost infinity, to imitate ray
+	float md = glm::dot(m, d);
+	float nd = glm::dot(n, d);
+	float dd = glm::length2(d);
+	// Test if segment fully outside either endcap of cylinder
+	if (md < 0.0f && md + nd < 0.0f) {
+		return false; // Segment outside ’p’ side of cylinder
+	}
+	if (md > dd && md + nd > dd) {
+		return false; // Segment outside ’q’ side of cylinder
+	}
+	float nn = glm::length2(n);
+	float mn = glm::dot(m, n);
+	float a = dd * nn - nd * nd;
+	float k = glm::length2(m) - capsule.radius * capsule.radius;
+	float c = dd * k - md * md;
+	if (glm::abs(a) < cvar_epsilon.get()) {
+		// Segment runs parallel to cylinder axis
+		if (c > 0.0f) {
+			return false; // ’a’ and thus the segment lie outside cylinder
+		}
+		// Now known that segment intersects cylinder; figure out how it intersects
+		if (md < 0.0f) {
+			distance = -mn / nn; // Intersect segment against ’p’ endcap
+		} else if (md > dd) {
+			distance = (nd - mn) / nn; // Intersect segment against ’q’ endcap
+		} else {
+			distance = 0.0f; // ’a’ lies inside cylinder
+		}
+		result.distance = distance;
+		result.normal = -ray.direction;
+		result.point = ray.origin + ray.direction * distance;
+		return true;
+	}
+	float b = dd * mn - nd * md;
+	float discr = b * b - a * c;
+	if (discr < 0.0f) {
+		return false; // No real roots; no intersection
+	}
+	distance = (-b - glm::sqrt(discr)) / a;
+	if (distance < 0.0f || distance > 1.0f) {
+		return false; // Intersection lies outside segment
+	} else if (md + distance * nd < 0.0f) {
+		// Intersection outside cylinder on ’p’ side
+		if (nd <= 0.0f) {
+			return false; // Segment pointing away from endcap
+		}
+		distance = -md / nd;
+		// Keep intersection if Dot(S(t) - p, S(t) - p) <= r∧2
+		if (k + 2 * distance * (mn + distance * nn) <= 0.0f) {
+			result.distance = distance;
+			result.normal = -ray.direction;
+			result.point = ray.origin + ray.direction * distance;
+			return true;
+		} else {
+			return false;
+		}
+	} else if (md + distance * nd > dd) {
+		// Intersection outside cylinder on ’q’ side
+		if (nd >= 0.0f) {
+			return false; // Segment pointing away from endcap
+		}
+		distance = (dd - md) / nd;
+		// Keep intersection if Dot(S(t) - q, S(t) - q) <= r∧2
+		if (k + dd - 2 * md + distance * (2 * (mn - nd) + distance * nn) <= 0.0f) {
+			result.distance = distance;
+			result.normal = -ray.direction;
+			result.point = ray.origin + ray.direction * distance;
+			return true;
+		} else {
+			return false;
+		}
+	}
+	// Segment intersects cylinder between the endcaps; t is correct
+	result.distance = distance;
+	result.normal = -ray.direction;
+	result.point = ray.origin + ray.direction * distance;
 	return true;
 }
 

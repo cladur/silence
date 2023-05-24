@@ -1,13 +1,13 @@
 #include "enemy_fully_aware.h"
-#include "enemy_patrolling.h"
 #include "ai/state_machine/state_machine.h"
 #include "components/enemy_data_component.h"
 #include "components/enemy_path_component.h"
 #include "components/transform_component.h"
+#include "enemy_patrolling.h"
 #include "engine/scene.h"
-#include "managers/ecs/systems/collision_system.h"
 #include "managers/ecs/world.h"
 #include "managers/gameplay/gameplay_manager.h"
+#include "managers/physics/ecs/collision_system.h"
 #include "managers/physics/physics_manager.h"
 #include "managers/render/render_scene.h"
 #include <animation/animation_manager.h>
@@ -42,7 +42,7 @@ void EnemyFullyAware::update(World *world, uint32_t entity_id, float dt) {
 	glm::vec3 rotation_end = (angle * axis);
 
 	float dot = glm::dot(glm::normalize(target_look - transform.position), forward);
-	if ( dot < 0.99f) {
+	if (dot < 0.99f) {
 		transform.add_global_euler_rot(rotation_end * dt * 4.0f);
 	}
 
@@ -59,7 +59,6 @@ void EnemyFullyAware::update(World *world, uint32_t entity_id, float dt) {
 			ray.origin = transform.position + agent_dir + glm::vec3(0.0f, 0.5f, 0.0f);
 			ray.direction = agent_dir;
 			glm::vec3 ray_end = ray.origin + ray.direction * enemy_data.view_cone_distance;
-
 
 			HitInfo hit_info;
 
@@ -92,8 +91,6 @@ void EnemyFullyAware::update(World *world, uint32_t entity_id, float dt) {
 	if (enemy_data.detection_level < 0.5f) {
 		state_machine->set_state("looking");
 	}
-
-
 }
 
 void EnemyFullyAware::exit() {
