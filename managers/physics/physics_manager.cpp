@@ -901,7 +901,7 @@ void PhysicsManager::physical_shift(Transform &t1, Transform &t2, RigidBody &b1,
 bool PhysicsManager::intersect_ray_sphere(const Ray &ray, const ColliderSphere &sphere, HitInfo &result) {
 	glm::vec3 m = ray.origin - sphere.center;
 	float b = glm::dot(m, ray.direction);
-	float c = glm::dot(m, m) - sphere.radius * sphere.radius;
+	float c = glm::length2(m) - sphere.radius * sphere.radius;
 	// Exit if r’s origin outside s (c > 0) and r pointing away from s (b > 0)
 	if (c > 0.0f && b > 0.0f) {
 		return false;
@@ -1015,6 +1015,103 @@ bool PhysicsManager::intersect_ray_obb(const Ray &ray, const ColliderOBB &obb, H
 	}
 	result.normal = glm::normalize(obb.get_orientation_matrix() * hit_normal);
 
+	return true;
+}
+
+bool PhysicsManager::intersect_ray_capsule(const Ray &ray, const ColliderCapsule &capsule, HitInfo &result) {
+	ColliderSphere start{};
+	start.center = capsule.start;
+	start.radius = capsule.radius;
+	if (intersect_ray_sphere(ray, start, result)) {
+		return true;
+	}
+
+	ColliderSphere end{};
+	end.center = capsule.end;
+	end.radius = capsule.radius;
+	if (intersect_ray_sphere(ray, end, result)) {
+		return true;
+	}
+
+	float distance;
+	glm::vec3 d = capsule.end - capsule.start, m = ray.origin - capsule.start,
+			  n = ray.direction * 694202137.8f; // this is a secret value, bcs it's almost infinity, to imitate ray
+	float md = glm::dot(m, d);
+	float nd = glm::dot(n, d);
+	float dd = glm::length2(d);
+	// Test if segment fully outside either endcap of cylinder
+	if (md < 0.0f && md + nd < 0.0f) {
+		return false; // Segment outside ’p’ side of cylinder
+	}
+	if (md > dd && md + nd > dd) {
+		return false; // Segment outside ’q’ side of cylinder
+	}
+	float nn = glm::length2(n);
+	float mn = glm::dot(m, n);
+	float a = dd * nn - nd * nd;
+	float k = glm::length2(m) - capsule.radius * capsule.radius;
+	float c = dd * k - md * md;
+	if (glm::abs(a) < cvar_epsilon.get()) {
+		// Segment runs parallel to cylinder axis
+		if (c > 0.0f) {
+			return false; // ’a’ and thus the segment lie outside cylinder
+		}
+		// Now known that segment intersects cylinder; figure out how it intersects
+		if (md < 0.0f) {
+			distance = -mn / nn; // Intersect segment against ’p’ endcap
+		} else if (md > dd) {
+			distance = (nd - mn) / nn; // Intersect segment against ’q’ endcap
+		} else {
+			distance = 0.0f; // ’a’ lies inside cylinder
+		}
+		result.distance = distance;
+		result.normal = -ray.direction;
+		result.point = ray.origin + ray.direction * distance;
+		return true;
+	}
+	float b = dd * mn - nd * md;
+	float discr = b * b - a * c;
+	if (discr < 0.0f) {
+		return false; // No real roots; no intersection
+	}
+	distance = (-b - glm::sqrt(discr)) / a;
+	if (distance < 0.0f || distance > 1.0f) {
+		return false; // Intersection lies outside segment
+	} else if (md + distance * nd < 0.0f) {
+		// Intersection outside cylinder on ’p’ side
+		if (nd <= 0.0f) {
+			return false; // Segment pointing away from endcap
+		}
+		distance = -md / nd;
+		// Keep intersection if Dot(S(t) - p, S(t) - p) <= r∧2
+		if (k + 2 * distance * (mn + distance * nn) <= 0.0f) {
+			result.distance = distance;
+			result.normal = -ray.direction;
+			result.point = ray.origin + ray.direction * distance;
+			return true;
+		} else {
+			return false;
+		}
+	} else if (md + distance * nd > dd) {
+		// Intersection outside cylinder on ’q’ side
+		if (nd >= 0.0f) {
+			return false; // Segment pointing away from endcap
+		}
+		distance = (dd - md) / nd;
+		// Keep intersection if Dot(S(t) - q, S(t) - q) <= r∧2
+		if (k + dd - 2 * md + distance * (2 * (mn - nd) + distance * nn) <= 0.0f) {
+			result.distance = distance;
+			result.normal = -ray.direction;
+			result.point = ray.origin + ray.direction * distance;
+			return true;
+		} else {
+			return false;
+		}
+	}
+	// Segment intersects cylinder between the endcaps; t is correct
+	result.distance = distance;
+	result.normal = -ray.direction;
+	result.point = ray.origin + ray.direction * distance;
 	return true;
 }
 

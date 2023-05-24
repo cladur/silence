@@ -123,6 +123,8 @@ public:
 	bool intersect_ray_aabb(const Ray &ray, const ColliderAABB &aabb, HitInfo &result);
 	// returns true, point and normal if ray intersect with obb
 	bool intersect_ray_obb(const Ray &ray, const ColliderOBB &obb, HitInfo &result);
+	// returns true, point and normal if ray intersect with capsule
+	bool intersect_ray_capsule(const Ray &ray, const ColliderCapsule &capsule, HitInfo &result);
 
 	void add_collision_layer(const std::string &layer_name);
 	void remove_collision_layer(const std::string &layer_name);

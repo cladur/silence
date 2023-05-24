@@ -219,11 +219,13 @@ void CollisionSystem::process_node(World &world, const std::set<Entity> &objects
 	node->plane = calculate_plane(world, objects);
 	for (const Entity entity : objects) {
 		Transform &t = world.get_component<Transform>(entity);
+		const glm::vec3 &position = t.get_global_position();
+		const glm::vec3 &scale = t.get_global_scale();
 		if (world.has_component<ColliderAABB>(entity)) {
 			ColliderAABB &aabb = world.get_component<ColliderAABB>(entity);
 			ColliderAABB c;
-			c.range = aabb.range * t.get_global_scale();
-			c.center = t.get_global_position() + aabb.center * c.range;
+			c.range = aabb.range * scale;
+			c.center = position + aabb.center * scale;
 			switch (process_collider(node->plane, c)) {
 				case Side::FRONT:
 					front.insert(entity);
@@ -238,10 +240,10 @@ void CollisionSystem::process_node(World &world, const std::set<Entity> &objects
 		} else if (world.has_component<ColliderOBB>(entity)) {
 			ColliderOBB &obb = world.get_component<ColliderOBB>(entity);
 			ColliderOBB c;
-			c.set_orientation(t.get_global_orientation());
-			glm::mat3 o = c.get_orientation_matrix();
-			c.range = obb.range * t.get_global_scale();
-			c.center = t.get_global_position() + o * (obb.center * c.range);
+			const glm::quat &orientation = t.get_global_orientation();
+			c.set_orientation(orientation);
+			c.range = obb.range * scale;
+			c.center = position + orientation * (obb.center * scale);
 			switch (process_collider(node->plane, c)) {
 				case Side::FRONT:
 					front.insert(entity);
@@ -257,8 +259,8 @@ void CollisionSystem::process_node(World &world, const std::set<Entity> &objects
 		} else if (world.has_component<ColliderSphere>(entity)) {
 			ColliderSphere &sphere = world.get_component<ColliderSphere>(entity);
 			ColliderSphere c;
-			c.radius = sphere.radius * t.get_global_scale().x;
-			c.center = t.get_global_position() + sphere.center * c.radius;
+			c.radius = sphere.radius * scale.x;
+			c.center = position + sphere.center * scale;
 			switch (process_collider(node->plane, c)) {
 				case Side::FRONT:
 					front.insert(entity);
@@ -270,6 +272,25 @@ void CollisionSystem::process_node(World &world, const std::set<Entity> &objects
 					current.insert(entity);
 					break;
 			}
+		} else if (world.has_component<ColliderCapsule>(entity)) {
+			ColliderCapsule &sphere = world.get_component<ColliderCapsule>(entity);
+			ColliderCapsule c;
+			c.radius = sphere.radius * scale.x;
+			c.start = position + sphere.start * scale;
+			c.end = position + sphere.end * scale;
+			switch (process_collider(node->plane, c)) {
+				case Side::FRONT:
+					front.insert(entity);
+					break;
+				case Side::BACK:
+					back.insert(entity);
+					break;
+				case Side::INTERSECT:
+					current.insert(entity);
+					break;
+			}
+		} else {
+			SPDLOG_WARN("Entity has not supported collision type {}", entity);
 		}
 	}
 
@@ -291,40 +312,40 @@ Plane CollisionSystem::calculate_plane(World &world, const std::set<Entity> &col
 	}
 	for (const Entity collider : colliders) {
 		Transform &t = world.get_component<Transform>(collider);
+		const glm::vec3 &position = t.get_global_position();
+		const glm::vec3 &scale = t.get_global_scale();
 
 		if (world.has_component<ColliderAABB>(collider)) {
 			ColliderAABB &aabb = world.get_component<ColliderAABB>(collider);
-			ColliderAABB c;
-			c.range = aabb.range * t.get_global_scale();
-			c.center = t.get_global_position() + aabb.center * c.range;
-			plane.point += c.center;
+			plane.point += position + aabb.center * scale;
 		} else if (world.has_component<ColliderSphere>(collider)) {
 			ColliderSphere &sphere = world.get_component<ColliderSphere>(collider);
-			ColliderSphere c;
-			c.radius = sphere.radius * t.get_global_scale().x;
-			c.center = t.get_global_position() + sphere.center * c.radius;
-
-			plane.point += c.center;
+			plane.point += position + sphere.center * scale.x;
 		} else if (world.has_component<ColliderOBB>(collider)) {
 			ColliderOBB &obb = world.get_component<ColliderOBB>(collider);
-			ColliderOBB c;
-			c.set_orientation(t.get_global_orientation());
-			c.range = obb.range * t.get_global_scale();
-			c.center = t.get_global_position() + c.get_orientation_matrix() * (obb.center * c.range);
-
-			plane.point += c.center;
+			const glm::vec3 &orientation = t.get_global_scale();
+			plane.point += position + orientation * (obb.center * scale);
+		} else if (world.has_component<ColliderCapsule>(collider)) {
+			ColliderCapsule &capsule = world.get_component<ColliderCapsule>(collider);
+			const glm::vec3 &start = position + capsule.start * scale;
+			const glm::vec3 &end = position + capsule.end * scale;
+			plane.point += start + (end - start) * 0.5f;
+		} else {
+			SPDLOG_WARN("Entity has not supported collision type {}", collider);
 		}
 	}
 	plane.point /= colliders.size();
 
 	for (const Entity collider : colliders) {
 		Transform &t = world.get_component<Transform>(collider);
+		const glm::vec3 &position = t.get_global_position();
+		const glm::vec3 &scale = t.get_global_scale();
 
 		if (world.has_component<ColliderAABB>(collider)) {
 			ColliderAABB &aabb = world.get_component<ColliderAABB>(collider);
 			ColliderAABB c;
-			c.range = aabb.range * t.get_global_scale();
-			c.center = t.get_global_position() + aabb.center * c.range;
+			c.range = aabb.range * scale;
+			c.center = position + aabb.center * scale;
 
 			const glm::vec3 direction = plane.point - c.center;
 			if (glm::dot(direction, direction) > 0.0f) {
@@ -353,8 +374,8 @@ Plane CollisionSystem::calculate_plane(World &world, const std::set<Entity> &col
 		} else if (world.has_component<ColliderSphere>(collider)) {
 			ColliderSphere &sphere = world.get_component<ColliderSphere>(collider);
 			ColliderSphere c;
-			c.radius = sphere.radius * t.get_global_scale().x;
-			c.center = t.get_global_position() + sphere.center * c.radius;
+			c.radius = sphere.radius * scale.x;
+			c.center = position + sphere.center * scale;
 
 			glm::vec3 direction = plane.point - c.center;
 			if (glm::dot(direction, direction) > 0.0f) {
@@ -363,14 +384,14 @@ Plane CollisionSystem::calculate_plane(World &world, const std::set<Entity> &col
 					plane.normal = test;
 				}
 			}
-
 		} else if (world.has_component<ColliderOBB>(collider)) {
 			ColliderOBB &obb = world.get_component<ColliderOBB>(collider);
 			ColliderOBB c;
-			c.set_orientation(t.get_global_orientation());
+			const glm::quat &orientation = t.get_global_orientation();
+			c.set_orientation(orientation);
 			glm::mat3 o = c.get_orientation_matrix();
-			c.range = obb.range * t.get_global_scale();
-			c.center = t.get_global_position() + o * (obb.center * c.range);
+			c.range = obb.range * scale;
+			c.center = position + orientation * (obb.center * scale);
 
 			glm::vec3 direction = glm::transpose(o) * (plane.point - c.center);
 			glm::vec3 normal(0.0f);
@@ -391,6 +412,23 @@ Plane CollisionSystem::calculate_plane(World &world, const std::set<Entity> &col
 					plane.normal = test;
 				}
 			}
+		} else if (world.has_component<ColliderCapsule>(collider)) {
+			ColliderCapsule &capsule = world.get_component<ColliderCapsule>(collider);
+			ColliderSphere c;
+			c.radius = capsule.radius * scale.x;
+			const glm::vec3 &start = position + capsule.start * scale;
+			const glm::vec3 &end = position + capsule.end * scale;
+			c.center = start + (end - start) * 0.5f;
+
+			glm::vec3 direction = plane.point - c.center;
+			if (glm::dot(direction, direction) > 0.0f) {
+				glm::vec3 test = plane.normal + glm::normalize(direction);
+				if (glm::dot(test, test) > 0.0f) {
+					plane.normal = test;
+				}
+			}
+		} else {
+			SPDLOG_WARN("Entity has not supported collision type {}", collider);
 		}
 	}
 	plane.normal /= colliders.size();
@@ -489,6 +527,22 @@ Side CollisionSystem::process_collider(const Plane &plane, const ColliderSphere 
 	}
 }
 
+Side CollisionSystem::process_collider(const Plane &plane, const ColliderCapsule &collider) {
+	const glm::vec3 &dir_start = plane.point - collider.start;
+	const glm::vec3 &dir_end = plane.point - collider.end;
+
+	float dot_start = glm::dot(dir_start, plane.normal);
+	float dot_end = glm::dot(dir_end, plane.normal);
+	float radius2 = collider.radius * collider.radius;
+	if (glm::length2(dir_start) > radius2 || glm::length2(dir_end) > radius2 || dot_start * dot_end < 0.0f) {
+		return Side::INTERSECT;
+	} else if (dot_start < 0.0f) {
+		return Side::FRONT;
+	} else {
+		return Side::BACK;
+	}
+}
+
 void CollisionSystem::log_tree(BSPNode *node) {
 	if (node == nullptr) {
 		return;
@@ -507,29 +561,38 @@ bool CollisionSystem::ray_cast(World &world, const Ray &ray, HitInfo &result) {
 		if (!world.has_component<ColliderTag>(entity) || !world.has_component<Transform>(entity)) {
 			continue;
 		}
-		Transform &transform = world.get_component<Transform>(entity);
+		const Transform &transform = world.get_component<Transform>(entity);
+		const glm::vec3 &position = transform.get_global_position();
+		const glm::vec3 &scale = transform.get_global_scale();
 		HitInfo info;
 		info.entity = entity;
 		if (world.has_component<ColliderAABB>(entity)) {
 			ColliderAABB c = world.get_component<ColliderAABB>(entity);
-			c.center += transform.get_global_position();
-			c.range *= transform.get_global_scale();
+			c.center = position + c.center * scale;
+			c.range *= scale;
 			if (physics_manager.intersect_ray_aabb(ray, c, info)) {
 				does_hit = true;
 			}
 		} else if (world.has_component<ColliderOBB>(entity)) {
 			ColliderOBB c = world.get_component<ColliderOBB>(entity);
-			c.center = transform.get_global_position() +
-					c.get_orientation_matrix() * (c.center * transform.get_global_scale());
-			c.range *= transform.get_global_scale();
+			c.center = position + c.get_orientation_matrix() * c.center * scale;
+			c.range *= scale;
 			if (physics_manager.intersect_ray_obb(ray, c, info)) {
 				does_hit = true;
 			}
 		} else if (world.has_component<ColliderSphere>(entity)) {
 			ColliderSphere c = world.get_component<ColliderSphere>(entity);
-			c.center += transform.get_global_position();
-			c.radius *= transform.get_global_scale().x;
+			c.center = position + c.center * scale;
+			c.radius *= scale.x;
 			if (physics_manager.intersect_ray_sphere(ray, c, info)) {
+				does_hit = true;
+			}
+		} else if (world.has_component<ColliderCapsule>(entity)) {
+			ColliderCapsule c = world.get_component<ColliderCapsule>(entity);
+			c.start = position + c.start * scale;
+			c.end = position + c.end * scale;
+			c.radius *= scale.x;
+			if (physics_manager.intersect_ray_capsule(ray, c, info)) {
 				does_hit = true;
 			}
 		}
@@ -559,30 +622,38 @@ bool CollisionSystem::ray_cast_layer(World &world, const Ray &ray, HitInfo &resu
 		if (!physics_manager.are_layers_collide(ray.layer_name, tag.layer_name)) {
 			continue;
 		}
-
-		auto &transform = world.get_component<Transform>(entity);
+		const Transform &transform = world.get_component<Transform>(entity);
+		const glm::vec3 &position = transform.get_global_position();
+		const glm::vec3 &scale = transform.get_global_scale();
 		HitInfo info;
 		info.entity = entity;
 		if (world.has_component<ColliderAABB>(entity)) {
 			ColliderAABB c = world.get_component<ColliderAABB>(entity);
-			c.center += transform.get_global_position();
-			c.range *= transform.get_global_scale();
+			c.center = position + c.center * scale;
+			c.range *= scale;
 			if (physics_manager.intersect_ray_aabb(ray, c, info)) {
 				does_hit = true;
 			}
 		} else if (world.has_component<ColliderOBB>(entity)) {
 			ColliderOBB c = world.get_component<ColliderOBB>(entity);
-			c.center = transform.get_global_position() +
-					c.get_orientation_matrix() * (c.center * transform.get_global_scale());
-			c.range *= transform.get_global_scale();
+			c.center = position + c.get_orientation_matrix() * c.center * scale;
+			c.range *= scale;
 			if (physics_manager.intersect_ray_obb(ray, c, info)) {
 				does_hit = true;
 			}
 		} else if (world.has_component<ColliderSphere>(entity)) {
 			ColliderSphere c = world.get_component<ColliderSphere>(entity);
-			c.center += transform.get_global_position();
-			c.radius *= transform.get_global_scale().x;
+			c.center = position + c.center * scale;
+			c.radius *= scale.x;
 			if (physics_manager.intersect_ray_sphere(ray, c, info)) {
+				does_hit = true;
+			}
+		} else if (world.has_component<ColliderCapsule>(entity)) {
+			ColliderCapsule c = world.get_component<ColliderCapsule>(entity);
+			c.start = position + c.start * scale;
+			c.end = position + c.end * scale;
+			c.radius *= scale.x;
+			if (physics_manager.intersect_ray_capsule(ray, c, info)) {
 				does_hit = true;
 			}
 		}

@@ -23,6 +23,7 @@ public:
 	static Side process_collider(const Plane &plane, const class ColliderAABB &collider);
 	static Side process_collider(const Plane &plane, const class ColliderOBB &collider);
 	static Side process_collider(const Plane &plane, const class ColliderSphere &collider);
+	static Side process_collider(const Plane &plane, const class ColliderCapsule &collider);
 	static void log_tree(BSPNode *node);
 
 	static bool ray_cast(World &world, const Ray &ray, HitInfo &result);
