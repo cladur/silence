@@ -7,6 +7,7 @@
 #include "render/render_manager.h"
 
 #include "audio/adaptive_music_manager.h"
+#include "gameplay/gameplay_manager.h"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
@@ -41,6 +42,7 @@ void Engine::shutdown() {
 }
 
 void Engine::run() {
+	GameplayManager::get().startup(&get_active_scene());
 	float target_frame_time = 1.0f / (float)DisplayManager::get().get_refresh_rate();
 	float dt = target_frame_time;
 
@@ -52,6 +54,11 @@ void Engine::run() {
 		update(dt);
 
 		auto stop_time = std::chrono::high_resolution_clock::now();
+
+		while (std::chrono::duration<float, std::chrono::seconds::period>(stop_time - start_time).count() <
+				target_frame_time) {
+			stop_time = std::chrono::high_resolution_clock::now();
+		}
 
 		dt = std::chrono::duration<float, std::chrono::seconds::period>(stop_time - start_time).count();
 
