@@ -108,8 +108,8 @@ public:
 	glm::vec3 is_overlap(const ColliderCapsule &a, const ColliderAABB &b);
 	void resolve_capsule_aabb(World &world, Entity capsule, Entity aabb);
 
-	float closest_point_segment_segment(
-			glm::vec3 p1, glm::vec3 q1, glm::vec3 p2, glm::vec3 q2, float &s, float &t, glm::vec3 &c1, glm::vec3 &c2);
+	glm::vec3 is_overlap(const ColliderCapsule &a, const ColliderOBB &b);
+	void resolve_capsule_obb(World &world, Entity capsule, Entity obb);
 
 	bool is_collision_candidate(const glm::vec3 &p1, const glm::vec3 &r1, const glm::vec3 &p2, const glm::vec3 &r2);
 	void make_shift(World &world, Entity e1, Entity e2, const glm::vec3 &offset);

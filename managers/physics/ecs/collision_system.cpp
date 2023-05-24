@@ -58,6 +58,7 @@ void CollisionSystem::resolve_collision_dynamic(World &world) {
 		} else if (world.has_component<ColliderCapsule>(e1)) {
 			first = CollisionFlag::FIRST_CAPSULE;
 		} else {
+			SPDLOG_WARN("Entity {} has not supported collider", e1);
 			continue;
 		}
 		for (auto it2 = std::next(it1); it2 != entities.end(); ++it2) {
@@ -72,6 +73,7 @@ void CollisionSystem::resolve_collision_dynamic(World &world) {
 			} else if (world.has_component<ColliderCapsule>(e2)) {
 				second = CollisionFlag::SECOND_CAPSULE;
 			} else {
+				SPDLOG_WARN("Entity {} has not supported collider", e2);
 				continue;
 			}
 
@@ -120,10 +122,13 @@ void CollisionSystem::resolve_collision_dynamic(World &world) {
 					physics_manager.resolve_capsule_aabb(world, e2, e1);
 					break;
 				case CollisionFlag::CAPSULE_OBB:
+					physics_manager.resolve_capsule_obb(world, e1, e2);
+					break;
 				case CollisionFlag::OBB_CAPSULE:
-					//TODO: implement
+					physics_manager.resolve_capsule_obb(world, e2, e1);
 					break;
 				default:
+					SPDLOG_WARN("Entities has not supported collision type {} {}", e1, e2);
 					break;
 			}
 		}
