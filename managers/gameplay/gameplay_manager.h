@@ -15,6 +15,8 @@ public:
 
 	glm::vec3 get_agent_position(Scene *scene) const;
 	glm::vec3 get_hacker_position(Scene *scene) const;
+	uint32_t get_agent_entity() const;
+	uint32_t get_hacker_entity() const;
 };
 
 #endif //SILENCE_GAMEPLAY_MANAGER_H

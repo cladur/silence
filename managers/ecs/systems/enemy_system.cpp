@@ -10,6 +10,7 @@ void EnemySystem::startup(World &world) {
 	Signature whitelist;
 	whitelist.set(world.get_component_type<EnemyPath>());
 	whitelist.set(world.get_component_type<EnemyData>());
+	whitelist.set(world.get_component_type<AnimationInstance>());
 
 	world.set_system_component_blacklist<EnemySystem>(blacklist);
 	world.set_system_component_whitelist<EnemySystem>(whitelist);

@@ -113,7 +113,6 @@ void UIManager::draw() {
     ZoneScopedNC("UIManager::draw()", 0xd459ce);
     text_draw.r_scene = render_scene;
     sprite_draw.r_scene = render_scene;
-	SPDLOG_INFO("drawing {} ui scenes", scenes.size());
     for (auto &scene : scenes) {
         if (scene.second.is_active) {
             for (auto &root : scene.second.roots) {

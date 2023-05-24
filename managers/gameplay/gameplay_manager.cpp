@@ -34,3 +34,11 @@ glm::vec3 GameplayManager::get_hacker_position(Scene *scene) const {
 	auto &transform = world.get_component<Transform>(hacker_entity);
 	return transform.get_global_position();
 }
+
+uint32_t GameplayManager::get_agent_entity() const {
+	return agent_entity;
+}
+
+uint32_t GameplayManager::get_hacker_entity() const {
+	return hacker_entity;
+}

@@ -9,6 +9,7 @@
 #include "managers/gameplay/gameplay_manager.h"
 #include "managers/physics/physics_manager.h"
 #include "managers/render/render_scene.h"
+#include <animation/animation_manager.h>
 #include <render/transparent_elements/ui_manager.h>
 
 void look_at(EnemyPath &path, Transform &t, glm::vec3 &target, float &dt);
@@ -25,9 +26,17 @@ void EnemyPatrolling::enter() {
 
 void EnemyPatrolling::update(World *world, uint32_t entity_id, float dt) {
 	auto &transform = world->get_component<Transform>(entity_id);
+	AnimationManager &animation_manager = AnimationManager::get();
+	ResourceManager &res = ResourceManager::get();
+	auto &anim = world->get_component<AnimationInstance>(entity_id);
 	auto &enemy_path = world->get_component<EnemyPath>(entity_id);
 	auto &enemy_data = world->get_component<EnemyData>(entity_id);
 	auto &dd = world->get_parent_scene()->get_render_scene().debug_draw;
+
+	if (anim.animation_handle.id !=
+			res.get_animation_handle("agent/agent_ANIM_GLTF/agent_walk.anim").id) {
+		animation_manager.change_animation(entity_id, "agent/agent_ANIM_GLTF/agent_walk.anim");
+	}
 
 	glm::vec3 current_position = transform.position;
 	glm::vec3 target_position = enemy_path.path[enemy_path.next_position];
@@ -60,6 +69,7 @@ void EnemyPatrolling::update(World *world, uint32_t entity_id, float dt) {
 	}
 
 	auto agent_pos = GameplayManager::get().get_agent_position(world->get_parent_scene());
+	bool can_see_player = false;
 	// check if agent is in cone of vision described by view_cone_angle and view_cone_distance
 	if (glm::distance(transform.position, agent_pos) < enemy_data.view_cone_distance) {
 		auto agent_dir = glm::normalize(agent_pos - transform.position);
@@ -69,25 +79,32 @@ void EnemyPatrolling::update(World *world, uint32_t entity_id, float dt) {
 		auto angle = glm::acos(glm::dot(agent_dir, forward));
 		if (angle < glm::radians(enemy_data.view_cone_angle)) {
 			Ray ray{};
-			ray.origin = transform.position + agent_dir + glm::vec3(0.0f, 1.0f, 0.0f);
+			ray.origin = transform.position + agent_dir + glm::vec3(0.0f, 0.5f, 0.0f);
 			ray.direction = agent_dir;
 			glm::vec3 ray_end = ray.origin + ray.direction * enemy_data.view_cone_distance;
-			dd.draw_arrow(ray.origin, ray_end, glm::vec3(1.0f, 0.0f, 0.0f));
+
 
 			HitInfo hit_info;
 
-			// todo: make sure this checks for any terrain colliders in the way
+			// todo: make sure this checks properly for hitting a player and stops at terrain in between
 			if (CollisionSystem::ray_cast(*world, ray, hit_info)) {
-				// todo remove log
 				auto hit_name = world->get_component<Name>(hit_info.entity);
-				//SPDLOG_INFO(hit_name.name);
-				enemy_data.detection_level += dt / enemy_data.detection_speed;
-			} else {
-				enemy_data.detection_level -= dt;
+				if (hit_info.entity == GameplayManager::get().get_agent_entity()) {
+					dd.draw_arrow(ray.origin, ray_end, glm::vec3(1.0f, 0.0f, 0.0f));
+					can_see_player = true;
+				}
 			}
-			SPDLOG_INFO("detection level: {}", enemy_data.detection_level);
 		}
 	}
+
+	if (can_see_player) {
+		enemy_data.detection_level += dt / enemy_data.detection_speed;
+	} else {
+		enemy_data.detection_level -= dt / enemy_data.detection_speed;
+	}
+
+	enemy_data.detection_level = glm::clamp(enemy_data.detection_level, 0.0f, 1.0f);
+	//SPDLOG_INFO("detection level: {}", enemy_data.detection_level);
 
 	auto &slider = UIManager::get().get_ui_slider(std::to_string(entity_id) + "_detection", "detection_slider");
 	slider.value = enemy_data.detection_level;
