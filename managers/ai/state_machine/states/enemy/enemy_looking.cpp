@@ -37,7 +37,7 @@ void EnemyLooking::update(World *world, uint32_t entity_id, float dt) {
 	auto current_no_y = glm::vec3(transform.position.x, 0.0f, transform.position.z);
 	glm::vec3 target_look = glm::vec3(agent_pos.x, 0.0f, agent_pos.z);
 	glm::vec3 direction = glm::normalize(target_look - current_no_y);
-	glm::vec3 forward_no_y = glm::normalize(glm::vec3(transform.get_global_forward().x, 0.0f, transform.get_global_forward().z));
+	glm::vec3 forward_no_y = glm::normalize(glm::vec3(forward.x, 0.0f, forward.z));
 
 	if (first_frame) {
 		float angle = glm::acos(glm::dot(forward_no_y, direction));
@@ -62,11 +62,11 @@ void EnemyLooking::update(World *world, uint32_t entity_id, float dt) {
 
 	bool can_see_player = false;
 	// check if agent is in cone of vision described by view_cone_angle and view_cone_distance
-	if (glm::distance(transform.position, agent_pos) < enemy_data.view_cone_distance) {
+	if (glm::distance(transform.get_global_position(), agent_pos) < enemy_data.view_cone_distance) {
 		auto agent_dir = glm::normalize(agent_pos - transform.position);
 
 		auto angle = glm::acos(glm::dot(agent_dir, forward));
-		if (angle < enemy_data.view_cone_angle) {
+		if (angle < enemy_data.view_cone_angle / 2.0f) {
 			Ray ray{};
 			ray.origin = transform.position + agent_dir + glm::vec3(0.0f, 0.5f, 0.0f);
 			ray.direction = agent_dir;
@@ -103,6 +103,9 @@ void EnemyLooking::update(World *world, uint32_t entity_id, float dt) {
 	// thresholded detection level, switches to previous state when it goes very low, to avoid jittering and give it more reealism
 	if (enemy_data.detection_level < 0.2) {
 		state_machine->set_state("patrolling");
+	}
+	if (enemy_data.detection_level > 0.99) {
+		state_machine->set_state("fully_aware");
 	}
 }
 
