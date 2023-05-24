@@ -42,7 +42,6 @@ void Engine::shutdown() {
 }
 
 void Engine::run() {
-	GameplayManager::get().startup(&get_active_scene());
 	float target_frame_time = 1.0f / (float)DisplayManager::get().get_refresh_rate();
 	float dt = target_frame_time;
 
