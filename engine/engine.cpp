@@ -7,6 +7,7 @@
 #include "render/render_manager.h"
 
 #include "audio/adaptive_music_manager.h"
+#include "gameplay/gameplay_manager.h"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
@@ -52,6 +53,11 @@ void Engine::run() {
 		update(dt);
 
 		auto stop_time = std::chrono::high_resolution_clock::now();
+
+		while (std::chrono::duration<float, std::chrono::seconds::period>(stop_time - start_time).count() <
+				target_frame_time) {
+			stop_time = std::chrono::high_resolution_clock::now();
+		}
 
 		dt = std::chrono::duration<float, std::chrono::seconds::period>(stop_time - start_time).count();
 
@@ -121,6 +127,7 @@ uint32_t Engine::get_scene_index(const std::string &name) {
 void Engine::set_active_scene(const std::string &name) {
 	active_scene = get_scene_index(name);
 	RenderManager::get().displayed_scene = scenes[active_scene]->render_scene_idx;
+	GameplayManager::get().startup(&get_active_scene()); // dunno where to put this honestly.
 }
 
 Scene &Engine::get_active_scene() {

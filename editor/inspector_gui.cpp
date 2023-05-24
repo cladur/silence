@@ -8,6 +8,7 @@
 #include "components/light_component.h"
 #include "components/platform_component.h"
 #include "components/rigidbody_component.h"
+#include "components/enemy_data_component.h"
 #include "physics/physics_manager.h"
 #include "render/ecs/model_instance.h"
 #include <imgui.h>
@@ -57,6 +58,7 @@ void Inspector::show_components() {
 	SHOW_COMPONENT(EnemyPath, show_enemy_path);
 	SHOW_COMPONENT(Interactable, show_interactable);
 	SHOW_COMPONENT(Platform, show_platform);
+	SHOW_COMPONENT(EnemyData, show_enemy_data);
 
 	for (int i = 0; i < remove_component_queue.size(); i++) {
 		auto [entity, component_to_remove] = remove_component_queue.front();
@@ -245,6 +247,24 @@ void Inspector::show_skinnedmodelinstance() {
 			ImGui::EndCombo();
 		}
 		ImGui::EndTable();
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_SKINMODEL_PATH")) {
+				std::string payload_n = *(const std::string *)payload->Data;
+				std::string search_string = "\\";
+				std::string replace_string = "/";
+
+				size_t pos = payload_n.find(search_string);
+				while (pos != std::string::npos) {
+					payload_n.replace(pos, search_string.length(), replace_string);
+					pos = payload_n.find(search_string, pos + replace_string.length());
+				}
+				resource_manager.load_skinned_model(payload_n.c_str());
+				modelinstance.model_handle = resource_manager.get_skinned_model_handle(payload_n);
+			}
+
+			ImGui::EndDragDropTarget();
+		}
 	}
 }
 
@@ -410,6 +430,24 @@ void Inspector::show_animationinstance() {
 		ImGui::DragFloat("##Ticks per second", &animation_instance.ticks_per_second, 20.0f, 0, 50000);
 
 		ImGui::EndTable();
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ANIMATION_PATH")) {
+				std::string payload_n = *(const std::string *)payload->Data;
+				std::string search_string = "\\";
+				std::string replace_string = "/";
+
+				size_t pos = payload_n.find(search_string);
+				while (pos != std::string::npos) {
+					payload_n.replace(pos, search_string.length(), replace_string);
+					pos = payload_n.find(search_string, pos + replace_string.length());
+				}
+				resource_manager.load_animation(payload_n.c_str());
+				animation_instance.animation_handle = resource_manager.get_animation_handle(payload_n);
+			}
+
+			ImGui::EndDragDropTarget();
+		}
 	}
 }
 
@@ -925,6 +963,22 @@ void Inspector::show_platform() {
 	}
 }
 
+void Inspector::show_enemy_data() {
+	auto &data = world->get_component<EnemyData>(selected_entity);
+	if (ImGui::CollapsingHeader("Enemy Data", tree_flags)) {
+
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("Enemy Path", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+
+		show_float("Detection Speed", data.detection_speed);
+		show_float("View Angle", data.view_cone_angle);
+		show_float("View Distance", data.view_cone_distance);
+
+		ImGui::EndTable();
+	}
+}
+
 bool Inspector::show_vec3(
 		const char *label, glm::vec3 &vec3, float speed, float reset_value, float min_value, float max_value) {
 	bool changed = false;
@@ -1052,6 +1106,7 @@ void Inspector::show_add_component() {
 			SHOW_ADD_COMPONENT(EnemyPath);
 			SHOW_ADD_COMPONENT(Interactable);
 			SHOW_ADD_COMPONENT(Platform);
+			SHOW_ADD_COMPONENT(EnemyData);
 
 			ImGui::EndPopup();
 		}
@@ -1061,3 +1116,4 @@ void Inspector::show_add_component() {
 void Inspector::set_active_entity(Entity entity) {
 	selected_entity = entity;
 }
+

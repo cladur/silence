@@ -11,9 +11,8 @@ add_library(${CORE_LIB_NAME} STATIC
         components/parent_component.h
         components/children_component.h
         components/fmod_listener_component.h
-        state_machine/states/state.h
-        state_machine/states/test_state.cpp state_machine/states/test_state.h
-        state_machine/state_machine.cpp state_machine/state_machine.h
+        ../managers/ai/state_machine/state.h
+        ../managers/ai/state_machine/state_machine.cpp ../managers/ai/state_machine/state_machine.h
         behavior_tree/tree_node.h
         behavior_tree/leaf_node.h
         behavior_tree/composite_node.h
@@ -37,9 +36,9 @@ add_library(${CORE_LIB_NAME} STATIC
         components/collider_capsule.h
         components/enemy_path_component.h
         components/interactable_component.h
-        cvars/cvars.cpp
-        cvars/cvars.h
-        components/attachment_component.h)
+        cvars/cvars.cpp cvars/cvars.h
+        components/attachment_component.h
+        components/enemy_data_component.h)
 
 target_include_directories(${CORE_LIB_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 

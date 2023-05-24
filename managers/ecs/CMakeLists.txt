@@ -16,12 +16,18 @@ add_library(${ECS_MANAGER_NAME} STATIC
         systems/hacker_system.cpp systems/hacker_system.h
         systems/enemy_pathing.cpp systems/enemy_pathing.h systems/enemy_path_draw_system.cpp systems/enemy_path_draw_system.h
         systems/interactable_system.cpp systems/interactable_system.h
-        systems/platform_system.cpp systems/platform_system.h)
+        systems/platform_system.cpp
+        systems/platform_system.h
+        systems/enemy_system.cpp
+        systems/enemy_system.h)
 
 target_include_directories(${ECS_MANAGER_NAME} PUBLIC ${MANAGER_DIR})
 
 
-target_link_libraries(${ECS_MANAGER_NAME} PRIVATE
+target_link_libraries(${ECS_MANAGER_NAME}
+        PUBLIC
+        fmod
+        PRIVATE
         silence_core
         silence_common
         )

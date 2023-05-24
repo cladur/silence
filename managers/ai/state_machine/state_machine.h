@@ -1,7 +1,8 @@
 #ifndef SILENCE_STATE_MACHINE_H
 #define SILENCE_STATE_MACHINE_H
 
-#include "states/state.h"
+class State;
+class World;
 
 class StateMachine {
 private:
@@ -9,8 +10,9 @@ private:
 	std::vector<State *> states;
 
 public:
+	StateMachine() = default;
 	void startup();
-	void update(float dt);
+	void update(World *world, uint32_t entity_id, float dt);
 
 	/*
 	 * Add a state to the state machine and assign this as its machine.

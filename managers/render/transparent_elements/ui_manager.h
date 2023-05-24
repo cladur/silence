@@ -59,7 +59,6 @@ public:
     void add_as_root(const std::string &scene_name, const std::string &element_name);
     void add_to_root(const std::string &scene_name, const std::string &element_name, const std::string &root_name);
 
-    // todo getters
     UIAnchor &get_ui_anchor(const std::string &scene_name, const std::string &anchor_name);
     UIImage &get_ui_image(const std::string &scene_name, const std::string &image_name);
     UIButton &get_ui_button(const std::string &scene_name, const std::string &button_name);

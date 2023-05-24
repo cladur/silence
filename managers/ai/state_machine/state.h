@@ -2,9 +2,10 @@
 #define SILENCE_STATE_H
 
 class StateMachine;
+class World;
 
 class State {
-private:
+protected:
 	// no idea if this should be here for now?
 	// kind of no idea how it should be initialized, godot makes it look easy
 	StateMachine *state_machine;
@@ -12,10 +13,12 @@ private:
 	std::string name;
 
 public:
+	State() = default;
 	State(std::string name) : name(std::move(name)) {
 	}
+	virtual void startup(StateMachine *machine, std::string name) = 0;
 	virtual void enter() = 0;
-	virtual void update(float dt) = 0;
+	virtual void update(World *world, uint32_t entity_id, float dt) = 0;
 	virtual void exit() = 0;
 	virtual std::string get_name() {
 		return name;
