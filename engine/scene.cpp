@@ -18,6 +18,7 @@
 #include "ecs/systems/collision_system.h"
 #include "ecs/systems/enemy_path_draw_system.h"
 #include "ecs/systems/enemy_pathing.h"
+#include "ecs/systems/enemy_system.h"
 #include "ecs/systems/hacker_system.h"
 #include "ecs/systems/isolated_entities_system.h"
 #include "ecs/systems/physics_system.h"
@@ -57,6 +58,7 @@ Scene::Scene() {
 	world.register_component<Interactable>();
 	world.register_component<Attachment>();
 	world.register_component<Platform>();
+	world.register_component<EnemyData>();
 
 	// Systems
 	// TODO: Set update order instead of using default value
@@ -89,7 +91,8 @@ void Scene::register_game_systems() {
 	// Agents
 	world.register_system<AgentSystem>(EcsOnUpdate);
 	world.register_system<HackerSystem>(EcsOnUpdate);
-	world.register_system<EnemyPathing>(EcsOnUpdate);
+	world.register_system<EnemySystem>(EcsOnUpdate);
+	//world.register_system<EnemyPathing>(EcsOnUpdate);
 	world.register_system<InteractableSystem>(EcsOnUpdate);
 	world.register_system<PlatformSystem>(EcsOnUpdate);
 }

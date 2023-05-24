@@ -37,6 +37,7 @@ private:
 	void show_enemy_path();
 	void show_interactable();
 	void show_platform();
+	void show_enemy_data();
 	static bool show_vec3(const char *label, glm::vec3 &vec3, float speed = 0.1f, float reset_value = 0.0f,
 			float min_value = 100.0f, float max_value = 100.0f);
 	static bool show_float(const char *label, float &value, float speed = 0.1f);

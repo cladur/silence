@@ -1,11 +1,11 @@
 #include "state_machine.h"
+#include "state.h"
 
 void StateMachine::startup() {
 }
 
-void StateMachine::update(float dt) {
-	// should this be here?
-	current_state->update(dt);
+void StateMachine::update(World *world, uint32_t entity_id, float dt) {
+	current_state->update(world, entity_id, dt);
 }
 
 void StateMachine::add_state(State *new_state) {
@@ -31,7 +31,9 @@ void StateMachine::set_state(std::string state_name) {
 		current_state->enter();
 		return;
 	} else {
-		SPDLOG_INFO("State machine does not contain state with name: {}", state_name);
+		SPDLOG_WARN(
+				"State machine does not contain state with name: {}, state has not been set",
+				state_name);
 		return;
 	}
 }

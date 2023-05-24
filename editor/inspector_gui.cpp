@@ -8,6 +8,7 @@
 #include "components/light_component.h"
 #include "components/platform_component.h"
 #include "components/rigidbody_component.h"
+#include "components/enemy_data_component.h"
 #include "physics/physics_manager.h"
 #include "render/ecs/model_instance.h"
 #include <imgui.h>
@@ -56,6 +57,7 @@ void Inspector::show_components() {
 	SHOW_COMPONENT(EnemyPath, show_enemy_path);
 	SHOW_COMPONENT(Interactable, show_interactable);
 	SHOW_COMPONENT(Platform, show_platform);
+	SHOW_COMPONENT(EnemyData, show_enemy_data);
 
 	for (int i = 0; i < remove_component_queue.size(); i++) {
 		auto [entity, component_to_remove] = remove_component_queue.front();
@@ -939,6 +941,22 @@ void Inspector::show_platform() {
 	}
 }
 
+void Inspector::show_enemy_data() {
+	auto &data = world->get_component<EnemyData>(selected_entity);
+	if (ImGui::CollapsingHeader("Enemy Data", tree_flags)) {
+
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("Enemy Path", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+
+		show_float("Detection Speed", data.detection_speed);
+		show_float("View Angle", data.view_cone_angle);
+		show_float("View Distance", data.view_cone_distance);
+
+		ImGui::EndTable();
+	}
+}
+
 bool Inspector::show_vec3(
 		const char *label, glm::vec3 &vec3, float speed, float reset_value, float min_value, float max_value) {
 	bool changed = false;
@@ -1065,6 +1083,7 @@ void Inspector::show_add_component() {
 			SHOW_ADD_COMPONENT(EnemyPath);
 			SHOW_ADD_COMPONENT(Interactable);
 			SHOW_ADD_COMPONENT(Platform);
+			SHOW_ADD_COMPONENT(EnemyData);
 
 			ImGui::EndPopup();
 		}
@@ -1074,3 +1093,4 @@ void Inspector::show_add_component() {
 void Inspector::set_active_entity(Entity entity) {
 	selected_entity = entity;
 }
+
