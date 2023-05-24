@@ -244,6 +244,24 @@ void Inspector::show_skinnedmodelinstance() {
 			ImGui::EndCombo();
 		}
 		ImGui::EndTable();
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_SKINMODEL_PATH")) {
+				std::string payload_n = *(const std::string *)payload->Data;
+				std::string search_string = "\\";
+				std::string replace_string = "/";
+
+				size_t pos = payload_n.find(search_string);
+				while (pos != std::string::npos) {
+					payload_n.replace(pos, search_string.length(), replace_string);
+					pos = payload_n.find(search_string, pos + replace_string.length());
+				}
+				resource_manager.load_skinned_model(payload_n.c_str());
+				modelinstance.model_handle = resource_manager.get_skinned_model_handle(payload_n);
+			}
+
+			ImGui::EndDragDropTarget();
+		}
 	}
 }
 
@@ -404,6 +422,24 @@ void Inspector::show_animationinstance() {
 		ImGui::DragFloat("##Ticks per second", &animation_instance.ticks_per_second, 20.0f, 0, 50000);
 
 		ImGui::EndTable();
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ANIMATION_PATH")) {
+				std::string payload_n = *(const std::string *)payload->Data;
+				std::string search_string = "\\";
+				std::string replace_string = "/";
+
+				size_t pos = payload_n.find(search_string);
+				while (pos != std::string::npos) {
+					payload_n.replace(pos, search_string.length(), replace_string);
+					pos = payload_n.find(search_string, pos + replace_string.length());
+				}
+				resource_manager.load_animation(payload_n.c_str());
+				animation_instance.animation_handle = resource_manager.get_animation_handle(payload_n);
+			}
+
+			ImGui::EndDragDropTarget();
+		}
 	}
 }
 
