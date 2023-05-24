@@ -10,7 +10,8 @@ AnimationInstance::AnimationInstance() {
 	resource_manager.load_animation(asset_path("scorpion/scorpion_idle_ANIM_GLTF/scorpion_idle_00_idle.anim").c_str());
 	resource_manager.load_animation(asset_path("agent/agent_ANIM_GLTF/agent_crouch.anim").c_str());
 	resource_manager.load_animation(asset_path("agent/agent_ANIM_GLTF/agent_crouch_idle.anim").c_str());
-	resource_manager.load_animation(asset_path("agent/agent_ANIM_GLTF/agent_walk.anim").c_str());
+	resource_manager.load_animation(asset_path("agent/agent_ANIM_GLTF/agent_walk_stealthy.anim").c_str());
+	resource_manager.load_animation(asset_path("agent/agent_ANIM_GLTF/agent_idle.anim").c_str());
 	resource_manager.load_animation(asset_path("agent/agent_ANIM_GLTF/agent_idle.anim").c_str());
 	resource_manager.load_animation(asset_path("agent/agent_ANIM_GLTF/agent_interaction.anim").c_str());
 	resource_manager.load_animation(asset_path("agent/agent_ANIM_GLTF/agent_grab_and_stab.anim").c_str());

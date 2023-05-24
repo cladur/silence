@@ -4,9 +4,9 @@
 #include "components/enemy_path_component.h"
 #include "components/transform_component.h"
 #include "engine/scene.h"
-#include "managers/ecs/systems/collision_system.h"
 #include "managers/ecs/world.h"
 #include "managers/gameplay/gameplay_manager.h"
+#include "managers/physics/ecs/collision_system.h"
 #include "managers/physics/physics_manager.h"
 #include "managers/render/render_scene.h"
 #include <animation/animation_manager.h>
@@ -33,14 +33,15 @@ void EnemyPatrolling::update(World *world, uint32_t entity_id, float dt) {
 	auto &enemy_data = world->get_component<EnemyData>(entity_id);
 	auto &dd = world->get_parent_scene()->get_render_scene().debug_draw;
 
-	if (anim.animation_handle.id !=
-			res.get_animation_handle("agent/agent_ANIM_GLTF/agent_walk.anim").id) {
+	if (anim.animation_handle.id != res.get_animation_handle("agent/agent_ANIM_GLTF/agent_walk.anim").id) {
 		animation_manager.change_animation(entity_id, "agent/agent_ANIM_GLTF/agent_walk.anim");
 	}
 
 	glm::vec3 current_position = transform.position;
 	glm::vec3 target_position = enemy_path.path[enemy_path.next_position];
-	int idx = ((enemy_path.next_position - 1) % (int)enemy_path.path.size() == -1) ? enemy_path.path.size() - 1 : (enemy_path.next_position - 1) % enemy_path.path.size();
+	int idx = ((enemy_path.next_position - 1) % (int)enemy_path.path.size() == -1)
+			? enemy_path.path.size() - 1
+			: (enemy_path.next_position - 1) % enemy_path.path.size();
 	enemy_path.prev_position = enemy_path.path[idx];
 
 	if (glm::distance(current_position, target_position) > 0.1f) {
@@ -50,8 +51,10 @@ void EnemyPatrolling::update(World *world, uint32_t entity_id, float dt) {
 	}
 
 	// this huge if just means "when near a node on either side" start rotating
-	if (glm::distance(current_position, target_position) < (glm::distance(enemy_path.prev_position, target_position)) * 0.1f
-			|| glm::distance(current_position, enemy_path.prev_position) < (glm::distance(enemy_path.prev_position, target_position)) * 0.1f) {
+	if (glm::distance(current_position, target_position) <
+					(glm::distance(enemy_path.prev_position, target_position)) * 0.1f ||
+			glm::distance(current_position, enemy_path.prev_position) <
+					(glm::distance(enemy_path.prev_position, target_position)) * 0.1f) {
 		if (!enemy_path.is_rotating) {
 			enemy_path.first_rotation_frame = true;
 		}
@@ -64,7 +67,8 @@ void EnemyPatrolling::update(World *world, uint32_t entity_id, float dt) {
 	}
 
 	// if the entity is facing the next node, stop rotating
-	if (glm::dot(glm::normalize(target_position - transform.position), glm::normalize(transform.get_global_forward())) > 0.99f) {
+	if (glm::dot(glm::normalize(target_position - transform.position), glm::normalize(transform.get_global_forward())) >
+			0.99f) {
 		enemy_path.is_rotating = false;
 	}
 
@@ -82,7 +86,6 @@ void EnemyPatrolling::update(World *world, uint32_t entity_id, float dt) {
 			ray.origin = transform.position + agent_dir + glm::vec3(0.0f, 0.5f, 0.0f);
 			ray.direction = agent_dir;
 			glm::vec3 ray_end = ray.origin + ray.direction * enemy_data.view_cone_distance;
-
 
 			HitInfo hit_info;
 
@@ -134,5 +137,4 @@ void look_at(EnemyPath &path, Transform &t, glm::vec3 &target, float &dt) {
 		path.first_rotation_frame = false;
 	}
 	t.add_global_euler_rot(path.rotation_end * dt * path.rotation_speed);
-
 }
