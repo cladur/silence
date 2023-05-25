@@ -1,5 +1,6 @@
 #include "physics_manager.h"
 #include "ecs/world.h"
+#include "engine/scene.h"
 
 // Most times we cannot compare float value to 0, than we epsilon
 AutoCVarFloat cvar_epsilon("physics.epsilon", "float error value", 0.000001f, CVarFlags::EditFloatDrag);
@@ -1176,19 +1177,8 @@ bool PhysicsManager::are_layers_collide(const std::string &layer1, const std::st
 	}
 
 	const auto &it1 = layers_map.find(layer1);
-	//  I don't think that we need to check this
-	//	if (it1 == layers_map.end()) {
-	//		SPDLOG_WARN("Layer name not found: {}", layer1);
-	//		return false;
-	//	}
-	//
-	//	const auto &it2 = layers_map.find(layer2);
-	//	if (it2 == layers_map.end()) {
-	//		SPDLOG_WARN("Layer name not found: {}", layer2);
-	//		return false;
-	//	}
 
-	if (it1->second.count(layer2) == 1) {
+	if (it1->second.contains(layer2)) {
 		return false;
 	}
 
@@ -1197,4 +1187,59 @@ bool PhysicsManager::are_layers_collide(const std::string &layer1, const std::st
 
 const std::unordered_map<std::string, std::unordered_set<std::string>> &PhysicsManager::get_layers_map() {
 	return layers_map;
+}
+
+std::vector<Entity> PhysicsManager::overlap_sphere(
+		World &world, const ColliderSphere &sphere, const std::string &layer_name) {
+	std::vector<Entity> entities = world.get_parent_scene()->entities;
+	std::vector<Entity> result;
+	// Reserve for optimization I didn't expect that more than 20 enemies will be in range
+	result.reserve(20);
+
+	for (auto entity : entities) {
+		if (!world.has_component<ColliderTag>(entity) || !world.has_component<Transform>(entity)) {
+			continue;
+		}
+
+		auto &tag = world.get_component<ColliderTag>(entity);
+		if (!are_layers_collide(layer_name, tag.layer_name)) {
+			continue;
+		}
+		const Transform &transform = world.get_component<Transform>(entity);
+		const glm::vec3 &position = transform.get_global_position();
+		const glm::vec3 &scale = transform.get_global_scale();
+		HitInfo info;
+		info.entity = entity;
+		if (world.has_component<ColliderAABB>(entity)) {
+			ColliderAABB c = world.get_component<ColliderAABB>(entity);
+			c.center = position + c.center * scale;
+			c.range *= scale;
+			if (glm::length2(is_overlap(c, sphere)) > cvar_epsilon.get()) {
+				result.push_back(entity);
+			}
+		} else if (world.has_component<ColliderOBB>(entity)) {
+			ColliderOBB c = world.get_component<ColliderOBB>(entity);
+			c.center = position + c.get_orientation_matrix() * c.center * scale;
+			c.range *= scale;
+			if (glm::length2(is_overlap(c, sphere)) > cvar_epsilon.get()) {
+				result.push_back(entity);
+			}
+		} else if (world.has_component<ColliderSphere>(entity)) {
+			ColliderSphere c = world.get_component<ColliderSphere>(entity);
+			c.center = position + c.center * scale;
+			c.radius *= scale.x;
+			if (glm::length2(is_overlap(c, sphere)) > cvar_epsilon.get()) {
+				result.push_back(entity);
+			}
+		} else if (world.has_component<ColliderCapsule>(entity)) {
+			ColliderCapsule c = world.get_component<ColliderCapsule>(entity);
+			c.start = position + c.start * scale;
+			c.end = position + c.end * scale;
+			c.radius *= scale.x;
+			if (glm::length2(is_overlap(c, sphere)) > cvar_epsilon.get()) {
+				result.push_back(entity);
+			}
+		}
+	}
+	return result;
 }
