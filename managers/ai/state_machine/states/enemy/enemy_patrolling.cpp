@@ -33,8 +33,8 @@ void EnemyPatrolling::update(World *world, uint32_t entity_id, float dt) {
 	auto &enemy_data = world->get_component<EnemyData>(entity_id);
 	auto &dd = world->get_parent_scene()->get_render_scene().debug_draw;
 
-	if (anim.animation_handle.id != res.get_animation_handle("agent/agent_ANIM_GLTF/agent_walk.anim").id) {
-		animation_manager.change_animation(entity_id, "agent/agent_ANIM_GLTF/agent_walk.anim");
+	if (anim.animation_handle.id != res.get_animation_handle("enemy/enemy_ANIM_GLTF/enemy_walk_with_gun.anim").id) {
+		animation_manager.change_animation(entity_id, "enemy/enemy_ANIM_GLTF/enemy_walk_with_gun.anim");
 	}
 
 	glm::vec3 current_position = transform.position;
