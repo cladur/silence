@@ -1022,12 +1022,12 @@ bool PhysicsManager::intersect_ray_obb(const Ray &ray, const ColliderOBB &obb, H
 
 		if (t1 > nearest_distance) {
 			nearest_distance = t1;
-			hit_normal[i] = -1.0f;
+			hit_normal = -o[i];
 		}
 
 		if (t2 < ray_range) {
 			ray_range = t2;
-			hit_normal[i] = 1.0f;
+			hit_normal = o[i];
 		}
 		if (nearest_distance > ray_range) {
 			return false;
@@ -1037,10 +1037,7 @@ bool PhysicsManager::intersect_ray_obb(const Ray &ray, const ColliderOBB &obb, H
 	result.distance = nearest_distance;
 	result.point = ray.origin + ray.direction * nearest_distance;
 
-	if (glm::dot(local_ray.direction, hit_normal) > 0.0f) {
-		hit_normal = -hit_normal;
-	}
-	result.normal = glm::normalize(o * hit_normal);
+	result.normal = glm::normalize(hit_normal);
 
 	return true;
 }

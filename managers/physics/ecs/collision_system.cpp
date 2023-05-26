@@ -558,6 +558,9 @@ bool CollisionSystem::ray_cast(World &world, const Ray &ray, HitInfo &result) {
 
 	bool does_hit = false;
 	for (auto entity : entities) {
+		if (std::find(ray.ignore_list.begin(), ray.ignore_list.end(), entity) != ray.ignore_list.end()) {
+			continue;
+		}
 		if (!world.has_component<ColliderTag>(entity) || !world.has_component<Transform>(entity)) {
 			continue;
 		}
