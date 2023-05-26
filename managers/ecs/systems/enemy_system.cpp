@@ -29,9 +29,11 @@ void EnemySystem::update(World &world, float dt) {
 			ed.patrolling_state.startup(&ed.state_machine, "patrolling");
 			ed.looking_state.startup(&ed.state_machine, "looking");
 			ed.fully_aware_state.startup(&ed.state_machine, "fully_aware");
+			ed.stationary_patrolling_state.startup(&ed.state_machine, "stationary_patrolling");
 			ed.state_machine.add_state(&ed.patrolling_state);
 			ed.state_machine.add_state(&ed.looking_state);
 			ed.state_machine.add_state(&ed.fully_aware_state);
+			ed.state_machine.add_state(&ed.stationary_patrolling_state);
 			ed.state_machine.set_state("patrolling");
 
 			ui.create_ui_scene(std::to_string(entity) + "_detection");

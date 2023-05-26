@@ -12,6 +12,8 @@ struct EnemyPath {
 	glm::vec3 prev_position = glm::vec3(0.0f);
 	bool is_rotating = false;
 	bool first_rotation_frame = false;
+	bool is_patrolling = false;
+	float patrol_cooldown = 0.0f;
 
 	void serialize_json(nlohmann::json &serialized_scene) {
 		nlohmann::json::object_t serialized_component;

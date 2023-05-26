@@ -5,12 +5,14 @@
 #include "ai/state_machine/states/enemy/enemy_fully_aware.h"
 #include "ai/state_machine/states/enemy/enemy_looking.h"
 #include "ai/state_machine/states/enemy/enemy_patrolling.h"
+#include "ai/state_machine/states/enemy/enemy_stationary_patrolling.h"
 
 struct EnemyData {
 	StateMachine state_machine;
 	EnemyPatrolling patrolling_state;
 	EnemyLooking looking_state;
 	EnemyFullyAware fully_aware_state;
+	EnemyStationaryPatrolling stationary_patrolling_state;
 	//UISlider detection_slider;
 	bool first_frame = true;
 	float detection_level = 0.0f;

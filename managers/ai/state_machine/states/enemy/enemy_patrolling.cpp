@@ -28,19 +28,30 @@ void EnemyPatrolling::update(World *world, uint32_t entity_id, float dt) {
 	auto &enemy_data = world->get_component<EnemyData>(entity_id);
 	auto &dd = world->get_parent_scene()->get_render_scene().debug_draw;
 
+	// change animation
 	if (anim.animation_handle.id != res.get_animation_handle("enemy/enemy_ANIM_GLTF/enemy_walk_with_gun.anim").id) {
 		animation_manager.change_animation(entity_id, "enemy/enemy_ANIM_GLTF/enemy_walk_with_gun.anim");
 	}
 
 	glm::vec3 current_position = transform.position;
 	glm::vec3 target_position = enemy_path.path[enemy_path.next_position];
+
+	// get index of previous node
 	int idx = ((enemy_path.next_position - 1) % (int)enemy_path.path.size() == -1)
 			? enemy_path.path.size() - 1
 			: (enemy_path.next_position - 1) % enemy_path.path.size();
 	enemy_path.prev_position = enemy_path.path[idx];
 
+	// move towards the next node. If already there, change target to next node
 	if (glm::distance(current_position, target_position) > 0.1f) {
 		transform.add_position(glm::normalize(target_position - current_position) * enemy_path.speed * dt);
+
+		// if the point is a patrol point, switch state
+	} else if (enemy_path.patrol_points[enemy_path.next_position].second) {
+		enemy_path.patrol_cooldown = enemy_path.patrol_points[enemy_path.next_position].first;
+		enemy_data.state_machine.set_state("stationary_patrolling");
+
+		// if the node is not patrol node, just move to the next node
 	} else {
 		enemy_path.next_position = (enemy_path.next_position + 1) % enemy_path.path.size();
 	}
