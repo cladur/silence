@@ -3,6 +3,8 @@
 #include "components/collider_aabb.h"
 #include "components/collider_sphere.h"
 #include "components/collider_tag_component.h"
+#include "components/enemy_data_component.h"
+#include "components/exploding_box_component.h"
 #include "components/fmod_listener_component.h"
 #include "components/interactable_component.h"
 #include "components/light_component.h"
@@ -976,6 +978,35 @@ void Inspector::show_platform() {
 	}
 }
 
+void Inspector::show_exploding_box() {
+	auto &exploding_box = world->get_component<ExplodingBox>(selected_entity);
+
+	if (ImGui::CollapsingHeader("ExplodingBox", tree_flags)) {
+		if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+			ImGui::OpenPopup("ExplodingBoxContextMenu");
+		}
+		if (ImGui::BeginPopup("ExplodingBoxContextMenu")) {
+			if (ImGui::MenuItem("Reset ExplodingBox")) {
+				exploding_box.explosion_radius = 0.0f;
+				exploding_box.distraction_radius = 0.0f;
+			}
+			remove_component_menu_item<ExplodingBox>();
+
+			ImGui::EndPopup();
+		}
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("ExplodingBox Component", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+
+		bool changed = false;
+
+		changed |= show_float("Explosion radius", exploding_box.explosion_radius);
+		changed |= show_float("Distraction radius", exploding_box.distraction_radius);
+
+		ImGui::EndTable();
+	}
+}
+
 void Inspector::show_enemy_data() {
 	auto &data = world->get_component<EnemyData>(selected_entity);
 	if (ImGui::CollapsingHeader("Enemy Data", tree_flags)) {
@@ -1120,6 +1151,7 @@ void Inspector::show_add_component() {
 			SHOW_ADD_COMPONENT(EnemyPath);
 			SHOW_ADD_COMPONENT(Interactable);
 			SHOW_ADD_COMPONENT(Platform);
+			SHOW_ADD_COMPONENT(ExplodingBox);
 			SHOW_ADD_COMPONENT(EnemyData);
 
 			ImGui::EndPopup();
