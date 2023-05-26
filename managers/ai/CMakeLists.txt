@@ -8,7 +8,7 @@ add_library(${AI_MANAGER_NAME} STATIC
         state_machine/states/enemy/enemy_patrolling.h
         state_machine/states/enemy/enemy_looking.cpp
         state_machine/states/enemy/enemy_looking.h
-        state_machine/states/enemy/enemy_fully_aware.cpp state_machine/states/enemy/enemy_fully_aware.h state_machine/states/enemy/enemy_utils.h state_machine/states/enemy/enemy_stationary_patrolling.cpp state_machine/states/enemy/enemy_stationary_patrolling.h)
+        state_machine/states/enemy/enemy_fully_aware.cpp state_machine/states/enemy/enemy_fully_aware.h state_machine/states/enemy/enemy_utils.h state_machine/states/enemy/enemy_stationary_patrolling.cpp state_machine/states/enemy/enemy_stationary_patrolling.h state_machine/states/enemy/enemy_dead.cpp state_machine/states/enemy/enemy_dead.h)
 
 target_include_directories(${AI_MANAGER_NAME} PUBLIC ${MANAGER_DIR})
 

@@ -2,6 +2,7 @@
 #define SILENCE_ENEMY_DATA_H
 
 #include "ai/state_machine/state_machine.h"
+#include "ai/state_machine/states/enemy/enemy_dead.h"
 #include "ai/state_machine/states/enemy/enemy_fully_aware.h"
 #include "ai/state_machine/states/enemy/enemy_looking.h"
 #include "ai/state_machine/states/enemy/enemy_patrolling.h"
@@ -13,6 +14,7 @@ struct EnemyData {
 	EnemyLooking looking_state;
 	EnemyFullyAware fully_aware_state;
 	EnemyStationaryPatrolling stationary_patrolling_state;
+	EnemyDead dead_state;
 	//UISlider detection_slider;
 	bool first_frame = true;
 	float detection_level = 0.0f;

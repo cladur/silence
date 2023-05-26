@@ -6,6 +6,7 @@
 #include "cvars/cvars.h"
 #include "ecs/systems/interactable_system.h"
 #include "ecs/world.h"
+#include "enemy_system.h"
 #include "engine/scene.h"
 #include "physics/ecs/physics_system.h"
 #include "physics/physics_manager.h"
@@ -88,6 +89,9 @@ void InteractableSystem::explosion(World &world, Interactable &interactable, Ent
 			float distance = glm::distance(sphere.center, world.get_component<Transform>(entity).get_position());
 			if (distance < smaller_radius) {
 				//TODO: set enemy state as dead
+				//auto &enemy_sys = world.get_system<EnemySystem>(); // this would be a good way to do it i think
+				auto &enemy = world.get_component<EnemyData>(entity);
+				enemy.state_machine.set_state("dying");
 				SPDLOG_INFO("{} is dead", entity);
 			} else if (distance < larger_radius) {
 				//TODO: set enemy state as distracted
