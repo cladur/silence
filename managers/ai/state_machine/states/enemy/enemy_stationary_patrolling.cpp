@@ -47,6 +47,7 @@ void EnemyStationaryPatrolling::update(World *world, uint32_t entity_id, float d
 	}
 
 	if (enemy_data.detection_level > 0.3f) {
+		enemy_path.next_position = (enemy_path.next_position + 1) % enemy_path.path.size();
 		state_machine->set_state("looking");
 	}
 
