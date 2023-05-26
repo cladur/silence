@@ -1,5 +1,6 @@
 #include "agent_system.h"
 #include "components/agent_data_component.h"
+#include "components/collider_capsule.h"
 #include "components/platform_component.h"
 #include "components/transform_component.h"
 #include "ecs/world.h"
@@ -51,6 +52,7 @@ void AgentSystem::update(World &world, float dt) {
 	for (const Entity entity : entities) {
 		auto &transform = world.get_component<Transform>(entity);
 		auto &agent_data = world.get_component<AgentData>(entity);
+		auto &capsule_collider= world.get_component<ColliderCapsule>(entity);
 		auto &camera_pivot_tf = world.get_component<Transform>(agent_data.camera_pivot);
 		auto &model_tf = world.get_component<Transform>(agent_data.model);
 		auto &camera_tf = world.get_component<Transform>(agent_data.camera);
@@ -79,8 +81,29 @@ void AgentSystem::update(World &world, float dt) {
 		}
 		glm::normalize(acc_direction);
 
+
+		//TODO: replace hard coded values with one derived from collider
 		if (input_manager.is_action_just_pressed("agent_crouch")) {
-			is_crouching = !is_crouching;
+			if(!is_crouching) {
+				is_crouching = true;
+				capsule_collider.end.y = 0.85f;
+			}
+			else {
+				Ray ray{};
+				ray.origin = transform.get_global_position() + glm::vec3(0.0f, 1.0f, 0.0f);
+				ray.direction = model_tf.get_global_up();
+				ray.ignore_list.emplace_back(entity);
+				ray.layer_name = "agent";
+				glm::vec3 end = ray.origin + ray.direction;
+				HitInfo info;
+				bool hit = CollisionSystem::ray_cast_layer(world, ray, info);
+				SPDLOG_INFO(hit);
+				if(!hit || info.distance > 0.8f){
+					SPDLOG_INFO(info.distance);
+					capsule_collider.end.y = 1.3f;
+					is_crouching = false;
+				}			
+			}		
 		}
 
 		if (*CVarSystem::get()->get_int_cvar("debug_camera.use")) {
@@ -206,6 +229,7 @@ void AgentSystem::update(World &world, float dt) {
 				}
 			}
 		}
+
 		if (animation_timer > 0) {
 			animation_timer -= (dt * 1000);
 		}
