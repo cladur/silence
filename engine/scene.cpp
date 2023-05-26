@@ -1,5 +1,6 @@
 #include "scene.h"
 #include "animation/ecs/animation_instance.h"
+#include "components/exploding_box_component.h"
 #include "display/display_manager.h"
 #include "ecs/systems/interactable_system.h"
 #include "ecs/systems/platform_system.h"
@@ -59,6 +60,7 @@ Scene::Scene() {
 	world.register_component<Interactable>();
 	world.register_component<Attachment>();
 	world.register_component<Platform>();
+	world.register_component<ExplodingBox>();
 	world.register_component<EnemyData>();
 
 	// Systems
