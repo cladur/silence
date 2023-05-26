@@ -7,6 +7,7 @@
 class InteractableSystem : public BaseSystem {
 private:
 	static void no_interaction(World &world, Interactable &interactable, Entity entity);
+	static void explosion(World &world, Interactable &interactable, Entity entity);
 
 public:
 	void startup(World &world) override;
