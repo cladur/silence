@@ -31,7 +31,7 @@ void CollisionSystem::update(World &world, float dt) {
 	static bool first = true;
 	if (first) {
 		first = false;
-		world.get_parent_scene()->bsp_tree = CollisionSystem::build_tree(world, world.get_parent_scene()->entities, 10);
+		world.get_parent_scene()->bsp_tree = CollisionSystem::build_tree(world, world.get_parent_scene()->entities, 5);
 	}
 
 	resolve_collision_dynamic(world);
@@ -575,7 +575,7 @@ bool CollisionSystem::ray_cast(World &world, const Ray &ray, HitInfo &result) {
 			}
 		} else if (world.has_component<ColliderOBB>(entity)) {
 			ColliderOBB c = world.get_component<ColliderOBB>(entity);
-			c.center = position + c.get_orientation_matrix() * c.center * scale;
+			c.center = position + c.get_orientation_matrix() * (c.center * scale);
 			c.range *= scale;
 			if (physics_manager.intersect_ray_obb(ray, c, info)) {
 				does_hit = true;
@@ -636,7 +636,7 @@ bool CollisionSystem::ray_cast_layer(World &world, const Ray &ray, HitInfo &resu
 			}
 		} else if (world.has_component<ColliderOBB>(entity)) {
 			ColliderOBB c = world.get_component<ColliderOBB>(entity);
-			c.center = position + c.get_orientation_matrix() * c.center * scale;
+			c.center = position + c.get_orientation_matrix() * (c.center * scale);
 			c.range *= scale;
 			if (physics_manager.intersect_ray_obb(ray, c, info)) {
 				does_hit = true;

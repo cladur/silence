@@ -5,12 +5,14 @@
 #include "ecs/world.h"
 #include "managers/physics/physics_manager.h"
 
+AutoCVarInt cvar_enable_physics("physics.enable", "enable physics", 1, CVarFlags::EditCheckbox);
+
 void PhysicsSystem::startup(World &world) {
 	Signature white_signature;
 	white_signature.set(world.get_component_type<RigidBody>());
 	white_signature.set(world.get_component_type<Transform>());
 	world.set_system_component_whitelist<PhysicsSystem>(white_signature);
-	
+
 	Signature black_signature;
 	black_signature.set(world.get_component_type<StaticTag>());
 	world.set_system_component_blacklist<PhysicsSystem>(black_signature);
@@ -18,6 +20,9 @@ void PhysicsSystem::startup(World &world) {
 
 void PhysicsSystem::update(World &world, float dt) {
 	ZoneScopedN("PhysicsSystem::update");
+	if (!cvar_enable_physics.get()) {
+		return;
+	}
 
 	PhysicsManager &physics_manager = PhysicsManager::get();
 	float epsilon = physics_manager.get_epsilon();

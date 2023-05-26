@@ -17,6 +17,11 @@ struct Ray {
 	std::vector<Entity> ignore_list;
 };
 
+struct Segment {
+	glm::vec3 start;
+	glm::vec3 end;
+};
+
 struct HitInfo {
 	glm::vec3 point;
 	glm::vec3 normal;
@@ -129,12 +134,18 @@ public:
 	// returns true, point and normal if ray intersect with capsule
 	bool intersect_ray_capsule(const Ray &ray, const ColliderCapsule &capsule, HitInfo &result);
 
+	// returns true, point and normal if segment intersect with capsule
+	bool intersect_segment_capsule(const Segment &segment, const ColliderCapsule &capsule, HitInfo &result);
+
 	void add_collision_layer(const std::string &layer_name);
 	void remove_collision_layer(const std::string &layer_name);
 	void set_layers_no_collision(const std::string &layer1, const std::string &layer2);
 	void set_layers_collision(const std::string &layer1, const std::string &layer2);
 	bool are_layers_collide(const std::string &layer1, const std::string &layer2);
 	const std::unordered_map<std::string, std::unordered_set<std::string>> &get_layers_map();
+
+	// Support function that returns the AABB vertex with index n
+	glm::vec3 corner(const ColliderAABB &b, int32_t n);
 
 private:
 	// layers map that contains data about which layer does not collide with which ones
