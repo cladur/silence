@@ -65,8 +65,6 @@ void EnemyLooking::update(World *world, uint32_t entity_id, float dt) {
 
 	enemy_utils::update_detection_slider(entity_id, transform, enemy_data);
 
-	// thresholded detection level, switches to previous state when it goes very low, to avoid jittering and give it
-	// more reealism
 	if (enemy_data.detection_level < 0.2) {
 		state_machine->set_state("patrolling");
 	}

@@ -966,6 +966,7 @@ void Inspector::show_platform() {
 void Inspector::show_enemy_data() {
 	auto &data = world->get_component<EnemyData>(selected_entity);
 	if (ImGui::CollapsingHeader("Enemy Data", tree_flags)) {
+		remove_component_popup<EnemyData>();
 
 		float available_width = ImGui::GetContentRegionAvail().x;
 		ImGui::BeginTable("Enemy Path", 2);

@@ -5,12 +5,8 @@
 #include "components/transform_component.h"
 #include "engine/scene.h"
 #include "managers/ecs/world.h"
-#include "managers/gameplay/gameplay_manager.h"
-#include "managers/physics/ecs/collision_system.h"
-#include "managers/physics/physics_manager.h"
 #include "managers/render/render_scene.h"
 #include <animation/animation_manager.h>
-#include <render/transparent_elements/ui_manager.h>
 #include "enemy_utils.h"
 
 void EnemyPatrolling::startup(StateMachine *machine, std::string name) {
@@ -75,7 +71,7 @@ void EnemyPatrolling::update(World *world, uint32_t entity_id, float dt) {
 
 	enemy_utils::update_detection_slider(entity_id, transform, enemy_data);
 
-	if (enemy_data.detection_level > 0.75f) {
+	if (enemy_data.detection_level > 0.3f) {
 		state_machine->set_state("looking");
 	}
 }

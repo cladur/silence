@@ -48,6 +48,8 @@ public:
 			const glm::vec3 &color = glm::vec3(0.0f, 1.0f, 0.0f), int num_of_segments = 32);
 	void draw_circle(const glm::vec3 &center, glm::vec3 direction, float radius,
 			const glm::vec3 &color = glm::vec3(0.0f, 1.0f, 0.0f), int num_of_segments = 32);
+
+	//void draw_cone(const glm::vec3 &origin, const glm::vec3 &direction, float length, float radius, const glm::vec3 &color);
 };
 
 #endif //SILENCE_DEBUG_DRAW_H

@@ -13,6 +13,10 @@
 
 namespace enemy_utils {
 
+	static glm::vec3 enemy_look_offset = glm::vec3(0.0f, 1.0f, 0.0f);
+	static glm::vec3 agent_target_top_offset = glm::vec3(0.0f, 1.2f, 0.0f);
+	static glm::vec3 agent_target_bottom_offset = glm::vec3(0.0f, 0.2f, 0.0f);
+
 	inline void look_at(EnemyPath &path, Transform &t, glm::vec3 &target, float &dt) {
 		if (path.first_rotation_frame) {
 			auto current_no_y = glm::vec3(t.position.x, 0.0f, t.position.z);
@@ -29,37 +33,60 @@ namespace enemy_utils {
 	}
 
 	inline void handle_detection(World *world, Transform &transform, EnemyData &enemy_data, float &dt, DebugDraw *dd = nullptr) {
-		auto agent_pos = GameplayManager::get().get_agent_position(world->get_parent_scene());
+		auto agent_pos = GameplayManager::get().get_agent_position(world->get_parent_scene()) + agent_target_top_offset;
 		bool can_see_player = false;
+		auto enemy_look_origin = transform.position + enemy_look_offset;
+		auto agent_dir = glm::normalize(agent_pos - enemy_look_origin);
+		auto forward = glm::normalize(transform.get_global_forward());
+
+		if (dd != nullptr) {
+			//dd->draw_line(transform.position, transform.position + agent_dir, glm::vec3(1.0f, 0.0f, 0.0f));
+			//dd->draw_line(transform.position, transform.position + forward, glm::vec3(0.0f, 1.0f, 0.0f));
+//			dd->draw_cone(
+//					transform.position + glm::vec3(0.0f, 1.0f, 0.0f),
+//					transform.position + glm::vec3(0.0f, 1.0f, 0.0f) + forward,
+//					enemy_data.view_cone_distance,
+//					glm::tan(glm::radians(enemy_data.view_cone_angle) / 2.0f) * enemy_data.view_cone_distance,
+//					glm::vec3(1.0f, 0.0f, 0.0f), 8);
+		}
 		if (glm::distance(transform.position, agent_pos) < enemy_data.view_cone_distance) {
-			auto agent_dir = glm::normalize(agent_pos - transform.position);
-			auto forward = glm::normalize(transform.get_global_forward());
-
-			if (dd != nullptr) {
-				dd->draw_line(transform.position, transform.position + agent_dir, glm::vec3(1.0f, 0.0f, 0.0f));
-				dd->draw_line(transform.position, transform.position + forward, glm::vec3(0.0f, 1.0f, 0.0f));
-			}
-
 			auto angle = glm::acos(glm::dot(agent_dir, forward));
 			if (angle < glm::radians(enemy_data.view_cone_angle) / 2.0f) {
 				Ray ray{};
-				ray.origin = transform.position + agent_dir + glm::vec3(0.0f, 0.5f, 0.0f);
+				ray.origin = enemy_look_origin + agent_dir;
 				ray.direction = agent_dir;
 				glm::vec3 ray_end = ray.origin + ray.direction * enemy_data.view_cone_distance;
 
 				HitInfo hit_info;
 
 				// todo: make sure this checks properly for hitting a player and stops at terrain in between
-				if (CollisionSystem::ray_cast(*world, ray, hit_info)) {
-					auto hit_name = world->get_component<Name>(hit_info.entity);
-					if (hit_info.entity == GameplayManager::get().get_agent_entity()) {
 
-						if (dd != nullptr) {
-							dd->draw_arrow(ray.origin, ray_end, glm::vec3(1.0f, 0.0f, 0.0f));
-						}
+				// RAY MIDDLE
+				if (CollisionSystem::ray_cast(*world, ray, hit_info)) {
+					if (dd != nullptr) {
+						dd->draw_line(ray.origin, ray_end, glm::vec3(0.0f, 1.0f, 1.0f));
+					}
+					if (hit_info.entity == GameplayManager::get().get_agent_entity()) {
 						can_see_player = true;
 					}
 				}
+
+				// RAY BOTTOM
+
+				agent_pos = GameplayManager::get().get_agent_position(world->get_parent_scene()) + agent_target_bottom_offset;
+				agent_dir = glm::normalize(agent_pos - enemy_look_origin);
+				ray.direction = agent_dir;
+				ray_end = ray.origin + ray.direction * enemy_data.view_cone_distance;
+
+				if (CollisionSystem::ray_cast(*world, ray, hit_info)) {
+					if (dd != nullptr) {
+						dd->draw_line(ray.origin, ray_end, glm::vec3(0.0f, 1.0f, 1.0f));
+					}
+					if (hit_info.entity == GameplayManager::get().get_agent_entity()) {
+						can_see_player = true;
+					}
+				}
+
 			}
 		}
 		if (can_see_player) {

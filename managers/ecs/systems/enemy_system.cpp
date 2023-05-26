@@ -54,35 +54,35 @@ void EnemySystem::update(World &world, float dt) {
 		ed.state_machine.update(&world, entity, dt);
 
 		// draw a flat triangle representing vision using draw_line
-		glm::vec4 vision_start = glm::vec4(t.position + glm::vec3(0.0f, 0.1f, 0.0f), 1.0f);
-		glm::vec4 forward = glm::vec4(t.get_global_forward(), 1.0f);
-		glm::mat4 rot = glm::rotate(
-				glm::mat4(1.0f),
-				glm::radians(ed.view_cone_angle / 2.0f),
-				glm::vec3(0.0f, 1.0f, 0.0f));
-		glm::vec3 vision_end_left = forward * rot;
-		rot = glm::rotate(
-				glm::mat4(1.0f),
-				glm::radians(-ed.view_cone_angle / 2.0f),
-				glm::vec3(0.0f, 1.0f, 0.0f));
-		glm::vec3 vision_end_right = forward * rot;
-
-		dd.draw_line(
-				vision_start,
-				vision_start + glm::vec4(glm::normalize(vision_end_left), 1.0f) * ed.view_cone_distance,
-				glm::vec3(1.0f, 0.0f, 0.0f));
-		dd.draw_line(
-				vision_start,
-				vision_start + glm::vec4(glm::normalize(vision_end_right), 1.0f) * ed.view_cone_distance,
-				glm::vec3(1.0f, 0.0f, 0.0f));
-
-		dd.draw_line(
-				vision_start + glm::vec4(glm::normalize(vision_end_left), 1.0f) * ed.view_cone_distance,
-				vision_start + forward * ed.view_cone_distance,
-				glm::vec3(1.0f, 0.0f, 0.0f));
-		dd.draw_line(
-				vision_start + glm::vec4(glm::normalize(vision_end_right), 1.0f) * ed.view_cone_distance,
-				vision_start + forward * ed.view_cone_distance,
-				glm::vec3(1.0f, 0.0f, 0.0f));
+//		glm::vec4 vision_start = glm::vec4(t.position + glm::vec3(0.0f, 0.1f, 0.0f), 1.0f);
+//		glm::vec4 forward = glm::vec4(t.get_global_forward(), 1.0f);
+//		glm::mat4 rot = glm::rotate(
+//				glm::mat4(1.0f),
+//				glm::radians(ed.view_cone_angle / 2.0f),
+//				glm::vec3(0.0f, 1.0f, 0.0f));
+//		glm::vec3 vision_end_left = forward * rot;
+//		rot = glm::rotate(
+//				glm::mat4(1.0f),
+//				glm::radians(-ed.view_cone_angle / 2.0f),
+//				glm::vec3(0.0f, 1.0f, 0.0f));
+//		glm::vec3 vision_end_right = forward * rot;
+//
+//		dd.draw_line(
+//				vision_start,
+//				vision_start + glm::vec4(glm::normalize(vision_end_left), 1.0f) * ed.view_cone_distance,
+//				glm::vec3(1.0f, 0.0f, 0.0f));
+//		dd.draw_line(
+//				vision_start,
+//				vision_start + glm::vec4(glm::normalize(vision_end_right), 1.0f) * ed.view_cone_distance,
+//				glm::vec3(1.0f, 0.0f, 0.0f));
+//
+//		dd.draw_line(
+//				vision_start + glm::vec4(glm::normalize(vision_end_left), 1.0f) * ed.view_cone_distance,
+//				vision_start + forward * ed.view_cone_distance,
+//				glm::vec3(1.0f, 0.0f, 0.0f));
+//		dd.draw_line(
+//				vision_start + glm::vec4(glm::normalize(vision_end_right), 1.0f) * ed.view_cone_distance,
+//				vision_start + forward * ed.view_cone_distance,
+//				glm::vec3(1.0f, 0.0f, 0.0f));
 	}
 }
