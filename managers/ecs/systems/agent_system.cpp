@@ -52,7 +52,7 @@ void AgentSystem::update(World &world, float dt) {
 	for (const Entity entity : entities) {
 		auto &transform = world.get_component<Transform>(entity);
 		auto &agent_data = world.get_component<AgentData>(entity);
-		auto &capsule_collider= world.get_component<ColliderCapsule>(entity);
+		auto &capsule_collider = world.get_component<ColliderCapsule>(entity);
 		auto &camera_pivot_tf = world.get_component<Transform>(agent_data.camera_pivot);
 		auto &model_tf = world.get_component<Transform>(agent_data.model);
 		auto &camera_tf = world.get_component<Transform>(agent_data.camera);
@@ -81,14 +81,12 @@ void AgentSystem::update(World &world, float dt) {
 		}
 		glm::normalize(acc_direction);
 
-
 		//TODO: replace hard coded values with one derived from collider
 		if (input_manager.is_action_just_pressed("agent_crouch")) {
-			if(!is_crouching) {
+			if (!is_crouching) {
 				is_crouching = true;
 				capsule_collider.end.y = 0.85f;
-			}
-			else {
+			} else {
 				Ray ray{};
 				ray.origin = transform.get_global_position() + glm::vec3(0.0f, 1.0f, 0.0f);
 				ray.direction = model_tf.get_global_up();
@@ -97,13 +95,11 @@ void AgentSystem::update(World &world, float dt) {
 				glm::vec3 end = ray.origin + ray.direction;
 				HitInfo info;
 				bool hit = CollisionSystem::ray_cast_layer(world, ray, info);
-				SPDLOG_INFO(hit);
-				if(!hit || info.distance > 0.8f){
-					SPDLOG_INFO(info.distance);
+				if (!hit || info.distance > 0.8f) {
 					capsule_collider.end.y = 1.3f;
 					is_crouching = false;
-				}			
-			}		
+				}
+			}
 		}
 
 		if (*CVarSystem::get()->get_int_cvar("debug_camera.use")) {
@@ -180,10 +176,9 @@ void AgentSystem::update(World &world, float dt) {
 			if (is_on_too_steep_slope || info.distance > 0.1f) {
 				transform.position.y -= 8.0f * dt;
 				transform.set_changed(true);
-			}
-			else if (world.has_component<Platform>(info.entity)) {
+			} else if (world.has_component<Platform>(info.entity)) {
 				auto &platform = world.get_component<Platform>(info.entity);
-				if(platform.is_moving) {
+				if (platform.is_moving) {
 					transform.add_position(platform.change_vector);
 				}
 			}
