@@ -843,14 +843,17 @@ void Inspector::show_enemy_path() {
 					// if this is the first node, add it in place of transform
 					auto &transform = world->get_component<Transform>(selected_entity);
 					enemy_path.path.emplace_back(transform.position);
+					enemy_path.patrol_points.emplace_back(0.0f, false);
 				} else {
 					// otherwise, add it in place of the last node
 					enemy_path.path.emplace_back(enemy_path.path.back());
+					enemy_path.patrol_points.emplace_back(0.0f, false);
 				}
 			}
 			if (ImGui::MenuItem("Remove Node")) {
 				if (!enemy_path.path.empty()) {
 					enemy_path.path.pop_back();
+					enemy_path.patrol_points.pop_back();
 				}
 			}
 			ImGui::EndPopup();
@@ -863,8 +866,18 @@ void Inspector::show_enemy_path() {
 		show_float("Speed", enemy_path.speed);
 		show_float("Rot Speed", enemy_path.rotation_speed);
 		for (auto &node : enemy_path.path) {
-			std::string label = fmt::format("Node {}", i++);
-			show_vec3(label.c_str(), node);
+
+			std::string label = fmt::format("Node {}", i);
+			std::string pos_label = fmt::format("{} Position", i);
+			std::string checkbox_label = fmt::format("{} Patrol Point", i);
+			std::string float_label = fmt::format("{} Patrol Time", i);
+			ImGui::SeparatorText(label.c_str());
+			show_vec3(pos_label.c_str(), node);
+			show_checkbox(checkbox_label.c_str(), enemy_path.patrol_points[i].second);
+			if (enemy_path.patrol_points[i].second) {
+				show_float(float_label.c_str(), enemy_path.patrol_points[i].first);
+			}
+			i++;
 		}
 		ImGui::EndTable();
 	}
