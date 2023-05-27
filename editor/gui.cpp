@@ -420,6 +420,7 @@ void Editor::imgui_viewport(EditorScene &scene, uint32_t scene_index) {
 
 	uint32_t render_image = scene.get_render_scene().render_framebuffer.texture_id;
 	ImGui::Image((void *)(intptr_t)render_image, viewport_size, ImVec2(0, 1), ImVec2(1, 0));
+	ImVec2 image_rect_min = ImGui::GetItemRectMin();
 
 	if (ImGui::BeginDragDropTarget()) {
 		if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_PREFAB_PATH")) {
@@ -571,6 +572,14 @@ void Editor::imgui_viewport(EditorScene &scene, uint32_t scene_index) {
 		ImGui::EndPopup();
 	}
 	ImGui::PopStyleVar();
+
+	// Get mouse position in viewport
+	ImVec2 mouse_pos = ImGui::GetMousePos();
+	mouse_pos.x -= image_rect_min.x;
+	mouse_pos.y -= image_rect_min.y;
+	if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !ImGuizmo::IsOver()) {
+		scene.selected_entity = scene.get_render_scene().get_entity_at_mouse_position(mouse_pos.x, mouse_pos.y);
+	}
 
 	ImGui::End();
 
