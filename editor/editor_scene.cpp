@@ -109,6 +109,17 @@ void EditorScene::update(float dt) {
 	}
 }
 
+void EditorScene::duplicate_selected_entity() {
+	if (selected_entity == 0) {
+		return;
+	}
+	nlohmann::json scene_json = nlohmann::json::array();
+	scene_json.push_back(nlohmann::json::object());
+	world.serialize_entity_json(scene_json.back(), selected_entity);
+
+	// TODO: DO IT
+}
+
 void EditorScene::save_to_file(const std::string &path) {
 	Scene::save_to_file(path);
 }

@@ -66,6 +66,12 @@ void default_mappings() {
 
 	input_manager.add_action("delete");
 	input_manager.add_key_to_action("delete", InputKey::BACKSPACE);
+
+	input_manager.add_action("control_modifier");
+	input_manager.add_key_to_action("control_modifier", InputKey::LEFT_CONTROL);
+
+	input_manager.add_action("duplicate");
+	input_manager.add_key_to_action("duplicate", InputKey::D);
 }
 
 void bootleg_unity_theme() {
@@ -250,6 +256,10 @@ void Editor::custom_update(float dt) {
 			auto editor_scene = dynamic_cast<EditorScene *>(scenes[active_scene].get());
 			get_editor_scene(active_scene).selected_entity = 0;
 		}
+	}
+
+	if (input_manager.is_action_pressed("control_modifier") && input_manager.is_action_just_pressed("duplicate")) {
+		get_active_scene().duplicate_selected_entity();
 	}
 
 	if (show_cvar_editor) {
