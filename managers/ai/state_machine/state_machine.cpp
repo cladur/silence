@@ -40,3 +40,7 @@ void StateMachine::set_state(std::string state_name) {
 
 void StateMachine::shutdown() {
 }
+
+std::string StateMachine::get_current_state() {
+	return current_state->get_name();
+}
