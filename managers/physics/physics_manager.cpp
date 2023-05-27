@@ -1029,15 +1029,15 @@ bool PhysicsManager::intersect_ray_obb(const Ray &ray, const ColliderOBB &obb, H
 			hit_normal = o[i];
 		}
 
-		//This condition makes bug idk it was in book ;-;
-		//		if (t2 < ray_range) {
-		//			ray_range = t2;
-		//			hit_normal = o[i];
-		//		}
-		//This condition is useless because ray range is float max
-		//		if (nearest_distance > ray_range) {
-		//			return false;
-		//		}
+		if (t2 < ray_range) {
+			ray_range = t2;
+			// This thing made bug
+			//	hit_normal = o[i];
+		}
+
+		if (nearest_distance > ray_range) {
+			return false;
+		}
 	}
 
 	if (glm::dot(hit_normal, ray.direction) > 0.0f) {
