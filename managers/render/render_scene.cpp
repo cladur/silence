@@ -33,6 +33,7 @@ void RenderScene::startup() {
 	combination_pass.startup();
 	default_pass = &pbr_pass;
 	bloom_pass.startup();
+	mouse_pick_pass.startup();
 
 	// Size of the viewport doesn't matter here, it will be resized either way
 	render_extent = glm::vec2(100, 100);
@@ -44,6 +45,7 @@ void RenderScene::startup() {
 	bloom_buffer.startup(render_extent.x, render_extent.y, 5);
 	combination_buffer.startup(render_extent.x, render_extent.y);
 	skybox_buffer.startup(render_extent.x, render_extent.y);
+	mouse_pick_framebuffer.startup(render_extent.x, render_extent.y);
 
 	debug_draw.startup();
 	transparent_pass.startup();
@@ -179,6 +181,12 @@ void RenderScene::draw_viewport(bool right_side) {
 	// sprite_draw.draw();
 	transparent_pass.draw(*this);
 	glDisable(GL_BLEND);
+
+	mouse_pick_framebuffer.bind();
+	glad_glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	mouse_pick_pass.draw(*this);
+	debug_draw.draw_mouse_pick();
 }
 
 void RenderScene::draw() {
@@ -225,6 +233,7 @@ void RenderScene::draw() {
 #endif
 	light_draw_commands.clear();
 	debug_draw.vertices.clear();
+	debug_draw.mouse_pick_vertices.clear();
 }
 
 void RenderScene::resize_framebuffer(uint32_t width, uint32_t height) {
@@ -241,22 +250,25 @@ void RenderScene::resize_framebuffer(uint32_t width, uint32_t height) {
 	bloom_buffer.resize(width, height);
 	combination_buffer.resize(width, height);
 	skybox_buffer.resize(width, height);
+	mouse_pick_framebuffer.resize(width, height);
 
 	render_extent = glm::vec2(width, height);
 }
 
-void RenderScene::queue_draw(ModelInstance *model_instance, Transform *transform) {
+void RenderScene::queue_draw(ModelInstance *model_instance, Transform *transform, Entity entity) {
 	DrawCommand draw_command = {};
 	draw_command.model_instance = model_instance;
 	draw_command.transform = transform;
+	draw_command.entity = entity;
 
 	draw_commands.push_back(draw_command);
 }
 
-void RenderScene::queue_skinned_draw(SkinnedModelInstance *model_instance, Transform *transform) {
+void RenderScene::queue_skinned_draw(SkinnedModelInstance *model_instance, Transform *transform, Entity entity) {
 	SkinnedDrawCommand draw_command = {};
 	draw_command.model_instance = model_instance;
 	draw_command.transform = transform;
+	draw_command.entity = entity;
 
 #ifdef WIN32
 	skinned_draw_commands.push_back(draw_command);
@@ -269,4 +281,16 @@ void RenderScene::queue_light_draw(Light *light, Transform *transform) {
 	draw_command.transform = transform;
 
 	light_draw_commands.push_back(draw_command);
+}
+
+Entity RenderScene::get_entity_at_mouse_position(float x, float y) const {
+	Entity entity = 0;
+	// Invert y
+	y = render_extent.y - y;
+	// Get entity id from mouse_pick_framebuffer.texture_id texture
+	glBindFramebuffer(GL_FRAMEBUFFER, mouse_pick_framebuffer.framebuffer_id);
+	glReadBuffer(GL_COLOR_ATTACHMENT0);
+	glReadPixels(x, y, 1, 1, GL_RED_INTEGER, GL_UNSIGNED_INT, &entity);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	return entity;
 }

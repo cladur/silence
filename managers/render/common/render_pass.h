@@ -15,11 +15,13 @@ struct RenderScene;
 struct DrawCommand {
 	ModelInstance *model_instance;
 	Transform *transform;
+	Entity entity;
 };
 
 struct SkinnedDrawCommand {
 	SkinnedModelInstance *model_instance;
 	Transform *transform;
+	Entity entity;
 };
 
 struct LightDrawCommand {
@@ -105,6 +107,13 @@ public:
 class BloomPass : public RenderPass {
 public:
 	MaterialBloom material;
+	void startup() override;
+	void draw(RenderScene &scene) override;
+};
+
+class MousePickPass : public RenderPass {
+public:
+	MaterialMousePick material;
 	void startup() override;
 	void draw(RenderScene &scene) override;
 };

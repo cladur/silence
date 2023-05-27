@@ -432,3 +432,32 @@ void MaterialBloom::bind_resources(RenderScene &scene) {
 
 void MaterialBloom::bind_instance_resources(ModelInstance &instance, Transform &transform) {
 }
+
+void MaterialMousePick::startup() {
+	shader.load_from_files(shader_path("gbuffer/gbuffer.vert"), shader_path("mouse_pick.frag"));
+#ifdef WIN32
+	skinned_shader.load_from_files(shader_path("gbuffer/skinned_gbuffer.vert"), shader_path("mouse_pick.frag"));
+#endif
+}
+
+void MaterialMousePick::bind_resources(RenderScene &scene) {
+	shader.use();
+	shader.set_mat4("view", scene.view);
+	shader.set_mat4("projection", scene.projection);
+
+	skinned_shader.set_mat4("view", scene.view);
+	skinned_shader.set_mat4("projection", scene.projection);
+}
+
+void MaterialMousePick::bind_instance_resources(ModelInstance &instance, Transform &transform) {
+}
+
+void MaterialMousePick::bind_instance_resources(ModelInstance &instance, Transform &transform, Entity entity) {
+	shader.set_uint("entity_id", (uint32_t)entity);
+	shader.set_mat4("model", transform.get_global_model_matrix());
+}
+
+void MaterialMousePick::bind_instance_resources(SkinnedModelInstance &instance, Transform &transform, Entity entity) {
+	skinned_shader.set_uint("entity_id", (uint32_t)entity);
+	skinned_shader.set_mat4("model", transform.get_global_model_matrix());
+}

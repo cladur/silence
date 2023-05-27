@@ -331,6 +331,7 @@ void Game::startup() {
 	// Disable debug stuff on startup
 	CVarSystem::get()->set_int_cvar("debug_draw.frustum.draw", 0);
 	CVarSystem::get()->set_int_cvar("debug_draw.collision.draw", 0);
+	CVarSystem::get()->set_int_cvar("debug_draw.lights.draw", 0);
 	CVarSystem::get()->set_int_cvar("debug_camera.use", 0);
 	CVarSystem::get()->set_int_cvar("render.splitscreen", 1);
 }

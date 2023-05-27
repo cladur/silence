@@ -122,4 +122,16 @@ public:
 	void bind_instance_resources(ModelInstance &instance, Transform &transform) override;
 };
 
+class MaterialMousePick : public Material {
+public:
+	Shader shader;
+	Shader skinned_shader;
+	void startup() override;
+	void bind_resources(RenderScene &scene) override;
+	void bind_instance_resources(ModelInstance &instance, Transform &transform) override;
+
+	void bind_instance_resources(ModelInstance &instance, Transform &transform, Entity entity);
+	void bind_instance_resources(SkinnedModelInstance &instance, Transform &transform, Entity entity);
+};
+
 #endif // SILENCE_MATERIAL_H

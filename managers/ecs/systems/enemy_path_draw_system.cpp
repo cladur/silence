@@ -1,7 +1,7 @@
 #include "enemy_path_draw_system.h"
-#include <components/enemy_path_component.h>
 #include "ecs/world.h"
 #include "engine/scene.h"
+#include <components/enemy_path_component.h>
 
 void EnemyPathDraw::startup(World &world) {
 	Signature whitelist;
@@ -21,16 +21,12 @@ void EnemyPathDraw::update(World &world, float dt) {
 		for (int i = 0; i < size; i++) {
 			if (enemy_path.patrol_points[i].second) {
 				color = glm::vec3(1.0f, 0.1f, 0.1f);
-			}
-			else {
+			} else {
 				color = glm::vec3(1.0f, 0.8f, 0.0f);
 			}
-			r_s.debug_draw.draw_sphere(enemy_path.path[i], 0.2f, color);
+			r_s.debug_draw.draw_sphere(enemy_path.path[i], 0.2f, color, entity);
 			r_s.debug_draw.draw_line(
-					enemy_path.path[i],
-					enemy_path.path[(i + 1) % enemy_path.path.size()],
-					glm::vec3(1.0f, 1.0f, 1.0f));
+					enemy_path.path[i], enemy_path.path[(i + 1) % enemy_path.path.size()], glm::vec3(1.0f, 1.0f, 1.0f));
 		}
-
 	}
 }

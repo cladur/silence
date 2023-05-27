@@ -261,3 +261,37 @@ void BloomPass::draw(RenderScene &scene) {
 	material.shader.set_float("gamma", cvar_gamma.get());
 	utils::render_quad();
 }
+
+void MousePickPass::startup() {
+	material.startup();
+}
+
+void MousePickPass::draw(RenderScene &scene) {
+	ResourceManager &resource_manager = ResourceManager::get();
+	material.bind_resources(scene);
+	for (auto &cmd : scene.draw_commands) {
+		ModelInstance &instance = *cmd.model_instance;
+		Transform &transform = *cmd.transform;
+		Entity entity = cmd.entity;
+		material.bind_instance_resources(instance, transform, entity);
+		Model &model = resource_manager.get_model(instance.model_handle);
+		for (auto &mesh : model.meshes) {
+			if (mesh.fc_bounding_sphere.is_on_frustum(scene.frustum, transform, scene)) {
+				mesh.draw();
+			}
+		}
+	}
+
+#ifdef WIN32
+	for (auto &cmd : scene.skinned_draw_commands) {
+		SkinnedModelInstance &instance = *cmd.model_instance;
+		Transform &transform = *cmd.transform;
+		Entity entity = cmd.entity;
+		material.bind_instance_resources(instance, transform, entity);
+		SkinnedModel &model = resource_manager.get_skinned_model(instance.model_handle);
+		for (auto &mesh : model.meshes) {
+			mesh.draw();
+		}
+	}
+#endif
+}
