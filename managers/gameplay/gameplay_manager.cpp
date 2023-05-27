@@ -24,6 +24,9 @@ void GameplayManager::shutdown() {
 }
 
 void GameplayManager::update(World &world, float dt) {
+	if (disabled) {
+		return;
+	}
 	// calculate highest detection level
 	highest_detection = *std::max_element(detection_levels.begin(), detection_levels.end());
 
@@ -66,4 +69,7 @@ void GameplayManager::add_enemy_entity(uint32_t entity) {
 }
 void GameplayManager::add_detection_level(float detection_level) {
 	detection_levels.push_back(detection_level);
+}
+void GameplayManager::enable() {
+	disabled = false;
 }

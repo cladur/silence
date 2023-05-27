@@ -5,6 +5,7 @@
 #include "cvars/cvars.h"
 #include "display/display_manager.h"
 #include "fmod_studio.hpp"
+#include "gameplay/gameplay_manager.h"
 #include "input/input_manager.h"
 #include "render/transparent_elements/ui/sprite_manager.h"
 #include "render/transparent_elements/ui_manager.h"
@@ -327,6 +328,7 @@ void Game::startup() {
 	Engine::startup();
 
 	AdaptiveMusicManager::get().play();
+	GameplayManager::get().enable();
 
 	input_setup();
 	// gui_setup();

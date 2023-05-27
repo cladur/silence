@@ -5,6 +5,7 @@ struct Scene;
 class World;
 
 class GameplayManager {
+	bool disabled = true;
 	uint32_t agent_entity = 0;
 	uint32_t hacker_entity = 0;
 	float highest_detection = 0.0f;
@@ -17,6 +18,7 @@ public:
 	void startup(Scene *scene);
 	void shutdown();
 	void update(World &world, float dt);
+	void enable();
 
 	void add_enemy_entity(uint32_t entity);
 	void add_detection_level(float detection_level);
