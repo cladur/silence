@@ -258,8 +258,10 @@ void Editor::custom_update(float dt) {
 		}
 	}
 
-	if (input_manager.is_action_pressed("control_modifier") && input_manager.is_action_just_pressed("duplicate")) {
-		get_active_scene().duplicate_selected_entity();
+	if (!controlling_camera) {
+		if (input_manager.is_action_pressed("control_modifier") && input_manager.is_action_just_pressed("duplicate")) {
+			get_active_scene().duplicate_selected_entity();
+		}
 	}
 
 	if (show_cvar_editor) {
