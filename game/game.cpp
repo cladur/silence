@@ -1,5 +1,6 @@
 #include "game.h"
 
+#include "audio/adaptive_music_manager.h"
 #include "audio/audio_manager.h"
 #include "cvars/cvars.h"
 #include "display/display_manager.h"
@@ -324,6 +325,8 @@ void handle_camera(DebugCamera &cam, float dt) {
 
 void Game::startup() {
 	Engine::startup();
+
+	AdaptiveMusicManager::get().play();
 
 	input_setup();
 	// gui_setup();

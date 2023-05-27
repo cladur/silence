@@ -38,7 +38,7 @@ void GameplayManager::update(World &world, float dt) {
 			enemies_near_player++;
 		}
 	}
-	SPDLOG_INFO("highest detection {}", highest_detection);
+	SPDLOG_INFO("enemies near {}", enemies_near_player);
 }
 
 glm::vec3 GameplayManager::get_agent_position(Scene *scene) const {
