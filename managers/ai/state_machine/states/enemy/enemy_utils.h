@@ -62,6 +62,7 @@ namespace enemy_utils {
 				// todo: make sure this checks properly for hitting a player and stops at terrain in between
 
 				// RAY MIDDLE
+
 				if (CollisionSystem::ray_cast(*world, ray, hit_info)) {
 					if (dd != nullptr) {
 						dd->draw_line(ray.origin, ray_end, glm::vec3(0.0f, 1.0f, 1.0f));

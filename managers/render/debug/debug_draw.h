@@ -37,6 +37,8 @@ public:
 	// Draw a sphere with center at "center" and radius "radius".
 	void draw_sphere(const glm::vec3 &center, float radius, const glm::vec3 &color = glm::vec3(0.0f, 1.0f, 0.0f));
 
+	void draw_sphere(const glm::vec3 &center, float radius, const glm::vec3 &color, int segments);
+
 	void draw_frustum(const glm::vec3 &center, const glm::quat &orientation, float fov, float aspect, float near,
 			float far, const glm::vec3 &color = glm::vec3(0.0f, 1.0f, 0.0f));
 	void draw_arrow(const glm::vec3 &from, const glm::vec3 &to, const glm::vec3 &color = glm::vec3(0.0f, 1.0f, 0.0f));

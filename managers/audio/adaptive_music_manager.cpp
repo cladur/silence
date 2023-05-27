@@ -1,6 +1,7 @@
 #include "adaptive_music_manager.h"
 #include "audio_manager.h"
 #include "fmod_errors.h"
+#include <gameplay/gameplay_manager.h>
 
 #define FMOD_CHECK(x)                                                                                                  \
 	do {                                                                                                               \
@@ -27,10 +28,10 @@ void AdaptiveMusicManager::shutdown() {
 }
 
 void AdaptiveMusicManager::update(float dt) {
-
+	auto &gm = GameplayManager::get();
 	// some made up parameters for controlling the music
-	int enemy_near_count = music_enemy_near_count.get();
-	float detection_level = music_detection_level.get();
+	int enemy_near_count = gm.get_enemies_near_player();	//music_enemy_near_count.get();
+	float detection_level = gm.get_highest_detection();	//music_detection_level.get();
 	float detection_to_intensity;
 	if (detection_level > 0.99f) {
 		detection_to_intensity = 1.0f;
@@ -38,13 +39,14 @@ void AdaptiveMusicManager::update(float dt) {
 		detection_to_intensity = 0.0f;
 	}
 	int is_sprinting = music_is_sprinting.get();
-	int is_crouching = music_is_crounching.get();
+	bool is_crouching = gm.get_agent_crouch(); //music_is_crounching.get();
 
-	// goes from 0 at 0 to 0.67 at inf or 1.0 if detected
-	float drum_intensity = (-(5.0f / ((float)enemy_near_count + 5.0f)) + 1.0f) * 0.67f + detection_to_intensity * 0.33f;
+	// goes from 0 at 0 to 0.8 at inf enemies near without detection. goes to 1.0 if detected
+	float drum_intensity = (-(drum_int_calc_val / ((float)enemy_near_count + drum_int_calc_val)) + 1.0f) * 0.8f + detection_to_intensity * 0.2f;
+	drum_intensity = drum_intensity * drum_intensity + drum_intensity / 5.0f;
 
 	// melodic intensity based on number of enemies, sprinting, crounching and detection
-	float melodic_intensity = (float)is_sprinting * 0.15f + detection_to_intensity * 0.5f + (float)is_crouching * -0.1f + std::clamp((float)enemy_near_count * 0.05f, 0.0f, 1.0f) * 0.55f;
+	float melodic_intensity = (float)is_sprinting * 0.1f + detection_to_intensity * 0.5f + (float)is_crouching * -0.1f + std::clamp((float)enemy_near_count * 0.15f, 0.0f, 1.0f) * 0.55f;
 
 	// slightly filter out the music if the player is crouching
 	float lp_filter = 1.0f - (float)is_crouching * 0.2f;

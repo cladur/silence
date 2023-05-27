@@ -28,6 +28,11 @@ void EnemyPatrolling::update(World *world, uint32_t entity_id, float dt) {
 	auto &enemy_data = world->get_component<EnemyData>(entity_id);
 	auto &dd = world->get_parent_scene()->get_render_scene().debug_draw;
 
+	if (enemy_path.path.size() == 0 || enemy_path.path.size() == 1) {
+		enemy_path.patrol_cooldown = 100.0f;
+		state_machine->set_state("stationary_patrolling");
+	}
+
 	// change animation
 	if (anim.animation_handle.id != res.get_animation_handle("enemy/enemy_ANIM_GLTF/enemy_walk_with_gun.anim").id) {
 		animation_manager.change_animation(entity_id, "enemy/enemy_ANIM_GLTF/enemy_walk_with_gun.anim");

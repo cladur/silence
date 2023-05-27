@@ -27,6 +27,7 @@ void GameplayManager::update(World &world, float dt) {
 	if (disabled) {
 		return;
 	}
+	world.get_parent_scene()->get_render_scene().debug_draw.draw_sphere(get_agent_position(world.get_parent_scene()), cv_enemy_near_player_radius.get(), glm::vec3(1.0f, 1.0f, 0.0f), 128);
 	// calculate highest detection level
 	highest_detection = *std::max_element(detection_levels.begin(), detection_levels.end());
 
@@ -41,7 +42,7 @@ void GameplayManager::update(World &world, float dt) {
 			enemies_near_player++;
 		}
 	}
-	SPDLOG_INFO("enemies near {}", enemies_near_player);
+	//SPDLOG_INFO("enemies near {}", enemies_near_player);
 }
 
 glm::vec3 GameplayManager::get_agent_position(Scene *scene) const {
@@ -72,4 +73,18 @@ void GameplayManager::add_detection_level(float detection_level) {
 }
 void GameplayManager::enable() {
 	disabled = false;
+}
+
+void GameplayManager::set_agent_crouch(bool crouching) {
+	is_agent_crouching = crouching;
+}
+
+bool GameplayManager::get_agent_crouch() const {
+	return is_agent_crouching;
+}
+float GameplayManager::get_highest_detection() const {
+	return highest_detection;
+}
+uint32_t GameplayManager::get_enemies_near_player() const {
+	return enemies_near_player;
 }

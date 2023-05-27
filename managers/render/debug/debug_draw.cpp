@@ -236,6 +236,38 @@ void DebugDraw::draw_sphere(const glm::vec3 &center, float radius, const glm::ve
 		}
 	}
 }
+
+void DebugDraw::draw_sphere(const glm::vec3 &center, float radius, const glm::vec3 &color, int segments) {
+	const float pi = 3.14159265358979323846;
+	const float delta_ring = pi / segments;
+	const float delta_segment = 2.0f * pi / segments;
+
+	// generate vertices
+	float vertices[segments + 1][segments + 1][3];
+	for (int i = 0; i <= segments; i++) {
+		float r = radius * sin(i * delta_ring);
+		for (int j = 0; j <= segments; j++) {
+			vertices[i][j][0] = r * cos(j * delta_segment) + center.x;
+			vertices[i][j][1] = radius * cos(i * delta_ring) + center.y;
+			vertices[i][j][2] = r * sin(j * delta_segment) + center.z;
+		}
+	}
+
+	// generate line segments
+	for (int i = 0; i < segments; i++) {
+		for (int j = 0; j < segments; j++) {
+			int i1 = i;
+			int i2 = i + 1;
+			int j1 = j;
+			int j2 = (j + 1) % segments;
+			draw_line(glm::vec3(vertices[i1][j1][0], vertices[i1][j1][1], vertices[i1][j1][2]),
+					glm::vec3(vertices[i2][j1][0], vertices[i2][j1][1], vertices[i2][j1][2]), color);
+			draw_line(glm::vec3(vertices[i2][j1][0], vertices[i2][j1][1], vertices[i2][j1][2]),
+					glm::vec3(vertices[i2][j2][0], vertices[i2][j2][1], vertices[i2][j2][2]), color);
+		}
+	}
+}
+
 void DebugDraw::draw_box(
 		const glm::vec3 &center, const glm::quat &orientation, const glm::vec3 &scale, const glm::vec3 &color) {
 	glm::vec3 vertices[8] = { glm::vec3(-scale.x / 2.0f, -scale.y / 2.0f, -scale.z / 2.0f),
@@ -307,3 +339,4 @@ void DebugDraw::draw_frustum(const glm::vec3 &center, const glm::quat &orientati
 	draw_line(far_bottom_right, far_bottom_left, color);
 	draw_line(far_bottom_left, far_top_left, color);
 }
+

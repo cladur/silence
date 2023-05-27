@@ -13,6 +13,8 @@ private:
 	const char* intensity_param = "intensity";
 	const char* lpf = "music_master_filter";
 
+	float drum_int_calc_val = 2.3f;
+
 public:
 	static AdaptiveMusicManager &get();
 
