@@ -105,6 +105,7 @@ void AnimationManager::change_animation(Entity entity, const std::string &new_an
 	entity_data.animation->animation_handle = resource_manager.get_animation_handle(new_animation_name);
 	entity_data.animation->current_time = 0.0f;
 	entity_data.has_changed = true;
+	entity_data.animation->is_looping = true;
 }
 
 void AnimationManager::blend_poses(const Pose &pose1, const Pose &pose2, Pose &result_pose, float alpha) {

@@ -45,8 +45,9 @@ void EnemyLooking::update(World *world, uint32_t entity_id, float dt) {
 		glm::vec3 axis = glm::cross(forward_no_y, direction);
 		rotation_end = (angle * axis);
 
-		if (anim.animation_handle.id != res.get_animation_handle("agent/agent_ANIM_GLTF/agent_idle.anim").id) {
-			animation_manager.change_animation(entity_id, "agent/agent_ANIM_GLTF/agent_idle.anim");
+		if (anim.animation_handle.id != res.get_animation_handle("enemy/enemy_ANIM_GLTF/enemy_down_to_aim.anim").id) {
+			animation_manager.change_animation(entity_id, "enemy/enemy_ANIM_GLTF/enemy_down_to_aim.anim");
+			anim.is_looping = false;
 		}
 
 		first_frame = false;
