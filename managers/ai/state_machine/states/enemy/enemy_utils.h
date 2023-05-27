@@ -96,6 +96,7 @@ namespace enemy_utils {
 		}
 
 		enemy_data.detection_level = glm::clamp(enemy_data.detection_level, 0.0f, 1.0f);
+		GameplayManager::get().add_detection_level(enemy_data.detection_level);
 	}
 
 	inline void update_detection_slider(uint32_t entity_id, Transform &transform, EnemyData &enemy_data) {

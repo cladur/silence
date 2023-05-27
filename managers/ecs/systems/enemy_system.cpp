@@ -3,6 +3,7 @@
 #include "engine/scene.h"
 #include <components/enemy_data_component.h>
 #include <components/enemy_path_component.h>
+#include <gameplay/gameplay_manager.h>
 #include <render/transparent_elements/ui_manager.h>
 
 void EnemySystem::startup(World &world) {
@@ -25,6 +26,8 @@ void EnemySystem::update(World &world, float dt) {
 
 		if (ed.first_frame) { // i too hate having Start() function for a system / component 🥱🥱🥱🥱
 			auto &ui = UIManager::get();
+			auto &gm = GameplayManager::get();
+			gm.add_enemy_entity(entity);
 			ed.state_machine.startup();
 			ed.patrolling_state.startup(&ed.state_machine, "patrolling");
 			ed.looking_state.startup(&ed.state_machine, "looking");

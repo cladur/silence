@@ -2,16 +2,24 @@
 #define SILENCE_GAMEPLAY_MANAGER_H
 
 struct Scene;
+class World;
 
 class GameplayManager {
 	uint32_t agent_entity = 0;
 	uint32_t hacker_entity = 0;
+	float highest_detection = 0.0f;
+	uint32_t enemies_near_player = 0;
+	std::vector<uint32_t> enemy_entities;
+	std::vector<float> detection_levels;
 public:
 	static GameplayManager &get();
 
 	void startup(Scene *scene);
 	void shutdown();
-	void update();
+	void update(World &world, float dt);
+
+	void add_enemy_entity(uint32_t entity);
+	void add_detection_level(float detection_level);
 
 	glm::vec3 get_agent_position(Scene *scene) const;
 	glm::vec3 get_hacker_position(Scene *scene) const;

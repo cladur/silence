@@ -22,9 +22,9 @@ void Engine::startup() {
 	RenderManager::get().startup();
 	FontManager::get().startup();
 	AudioManager::get().startup();
-	AdaptiveMusicManager::get().startup("adaptive_music_test");
+	AdaptiveMusicManager::get().startup("AdaptiveMusic/Music_1");
 	// Uncomment if you want music
-	// AdaptiveMusicManager::get().play();
+	AdaptiveMusicManager::get().play();
 	UIManager::get();
 
 	FontManager::get().load_font("resources/fonts/PoltawskiNowy.ttf", 48, "PoltawskiNowy");
@@ -97,7 +97,7 @@ void Engine::update(float dt) {
 		scene->update(dt);
 	}
 
-	AudioManager::get().update();
+	AudioManager::get().update();;
 
 	input_manager.process_input();
 
