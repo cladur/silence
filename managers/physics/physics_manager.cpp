@@ -3,7 +3,7 @@
 #include "engine/scene.h"
 
 // Most times we cannot compare float value to 0, than we epsilon
-AutoCVarFloat cvar_epsilon("physics.epsilon", "float error value", 0.000001f, CVarFlags::EditFloatDrag);
+AutoCVarFloat cvar_epsilon("physics.epsilon", "float error value", glm::epsilon<float>(), CVarFlags::EditFloatDrag);
 AutoCVarFloat cvar_gravity_x("physics.gravity.x", "gravity value", 0.0f, CVarFlags::EditFloatDrag);
 AutoCVarFloat cvar_gravity_y("physics.gravity.y", "gravity value", -9.84f, CVarFlags::EditFloatDrag);
 AutoCVarFloat cvar_gravity_z("physics.gravity.z", "gravity value", 0.0f, CVarFlags::EditFloatDrag);
@@ -116,7 +116,7 @@ glm::vec3 PhysicsManager::is_overlap(const ColliderSphere &a, const ColliderSphe
 
 	float distance = radius_sum - glm::sqrt(distance_squared);
 	if (distance_squared < radius_sum * radius_sum) {
-		if (glm::length2(direction) < cvar_epsilon.get()) {
+		if (glm::length2(direction) <= cvar_epsilon.get()) {
 			return glm::vec3(0.0f, 1.0f, 0.0f) * distance;
 		} else {
 			return glm::normalize(direction) * distance;
@@ -150,7 +150,7 @@ void PhysicsManager::resolve_collision_sphere(World &world, Entity e1, Entity e2
 		return;
 	}
 	glm::vec3 offset = is_overlap(c1, c2);
-	if (glm::length2(offset) < cvar_epsilon.get()) {
+	if (glm::length2(offset) <= cvar_epsilon.get()) {
 		return;
 	}
 
@@ -236,7 +236,7 @@ glm::vec3 PhysicsManager::is_overlap(const ColliderAABB &a, const ColliderSphere
 
 	if (distance2 < b.radius * b.radius) {
 		const float length = b.radius - glm::sqrt(distance2);
-		if (glm::length2(direction) < cvar_epsilon.get()) {
+		if (glm::length2(direction) <= cvar_epsilon.get()) {
 			return glm::vec3(0.0f, 1.0f, 0.0f) * length;
 		} else {
 			return glm::normalize(direction) * length;
@@ -272,7 +272,7 @@ void PhysicsManager::resolve_aabb_sphere(World &world, Entity aabb, Entity spher
 	}
 
 	glm::vec3 offset = is_overlap(c1, c2);
-	if (glm::length2(offset) < cvar_epsilon.get()) {
+	if (glm::length2(offset) <= cvar_epsilon.get()) {
 		return;
 	}
 
@@ -304,7 +304,7 @@ glm::vec3 PhysicsManager::is_overlap(const ColliderOBB &a, const ColliderOBB &b)
 	float max_overlap = -std::numeric_limits<float>::max();
 	glm::vec3 separation(0.0f);
 	for (const glm::vec3 &axis : axes) {
-		if (glm::length2(axis) < cvar_epsilon.get()) {
+		if (glm::length2(axis) <= cvar_epsilon.get()) {
 			continue;
 		}
 		const float overlap = fabs(glm::dot(distance, axis)) -
@@ -362,7 +362,7 @@ void PhysicsManager::resolve_collision_obb(World &world, Entity e1, Entity e2) {
 	}
 
 	glm::vec3 offset = is_overlap(c1, c2);
-	if (glm::length2(offset) < cvar_epsilon.get()) {
+	if (glm::length2(offset) <= cvar_epsilon.get()) {
 		return;
 	}
 
@@ -435,7 +435,7 @@ void PhysicsManager::resolve_obb_sphere(World &world, Entity obb, Entity sphere)
 	}
 
 	glm::vec3 offset = is_overlap(c1, c2);
-	if (glm::length2(offset) < cvar_epsilon.get()) {
+	if (glm::length2(offset) <= cvar_epsilon.get()) {
 		return;
 	}
 
@@ -468,7 +468,7 @@ glm::vec3 PhysicsManager::is_overlap(const ColliderOBB &a, const ColliderAABB &b
 	float max_overlap = -std::numeric_limits<float>::max();
 	glm::vec3 separation(0.0f);
 	for (const glm::vec3 &axis : axes) {
-		if (glm::length2(axis) < cvar_epsilon.get()) {
+		if (glm::length2(axis) <= cvar_epsilon.get()) {
 			continue;
 		}
 		const float overlap = fabs(glm::dot(distance, axis)) -
@@ -523,7 +523,7 @@ void PhysicsManager::resolve_obb_aabb(World &world, Entity obb, Entity aabb) {
 	}
 
 	glm::vec3 offset = is_overlap(c1, c2);
-	if (glm::length2(offset) < cvar_epsilon.get()) {
+	if (glm::length2(offset) <= cvar_epsilon.get()) {
 		return;
 	}
 
@@ -644,7 +644,7 @@ glm::vec3 PhysicsManager::is_overlap(const ColliderCapsule &a, const ColliderSph
 	float radius = a.radius + b.radius;
 	if (dist2 < radius * radius) {
 		float length = (glm::sqrt(dist2) - radius);
-		if (dist2 < cvar_epsilon.get()) {
+		if (dist2 <= cvar_epsilon.get()) {
 			return glm::vec3(0.0f, 1.0f, 0.0f) * length;
 		} else {
 			return glm::normalize(c2 - c1) * length;
@@ -678,7 +678,7 @@ void PhysicsManager::resolve_capsule_sphere(World &world, Entity capsule, Entity
 	c2.center = t2.get_global_position() + temp_c2.center * scale2;
 
 	glm::vec3 offset = is_overlap(c1, c2);
-	if (glm::length2(offset) < cvar_epsilon.get()) {
+	if (glm::length2(offset) <= cvar_epsilon.get()) {
 		return;
 	}
 
@@ -750,7 +750,7 @@ void PhysicsManager::resolve_capsule_aabb(World &world, Entity capsule, Entity a
 	c2.center = t2.get_global_position() + temp_c2.center * scale2;
 
 	glm::vec3 offset = is_overlap(c1, c2);
-	if (glm::length2(offset) < cvar_epsilon.get()) {
+	if (glm::length2(offset) <= cvar_epsilon.get()) {
 		return;
 	}
 
@@ -827,7 +827,7 @@ void PhysicsManager::resolve_capsule_obb(World &world, Entity capsule, Entity ob
 	c2.center = t2.get_global_position() + orientation2 * (temp_c2.center * scale2);
 
 	glm::vec3 offset = is_overlap(c1, c2);
-	if (glm::length2(offset) < cvar_epsilon.get()) {
+	if (glm::length2(offset) <= cvar_epsilon.get()) {
 		return;
 	}
 
@@ -951,7 +951,7 @@ bool PhysicsManager::intersect_ray_aabb(const Ray &ray, const ColliderAABB &aabb
 	const glm::vec3 &min = aabb.min();
 	const glm::vec3 &max = aabb.max();
 
-	glm::vec3 hit_axis(0.0f);
+	glm::vec3 hit_normal(0.0f);
 
 	for (int i = 0; i < 3; i++) {
 		if (glm::abs(ray.direction[i]) <= cvar_epsilon.get()) {
@@ -970,14 +970,14 @@ bool PhysicsManager::intersect_ray_aabb(const Ray &ray, const ColliderAABB &aabb
 
 		if (t1 > nearest_distance) {
 			nearest_distance = t1;
-			hit_axis = glm::vec3(0.0f);
-			hit_axis[i] = -1.0f;
+			hit_normal = glm::vec3(0.0f);
+			hit_normal[i] = -1.0f;
 		}
 
 		if (t2 < ray_range) {
 			ray_range = t2;
-			hit_axis = glm::vec3(0.0f);
-			hit_axis[i] = 1.0f;
+			hit_normal = glm::vec3(0.0f);
+			hit_normal[i] = 1.0f;
 		}
 
 		if (ray_range < nearest_distance) {
@@ -985,9 +985,13 @@ bool PhysicsManager::intersect_ray_aabb(const Ray &ray, const ColliderAABB &aabb
 		}
 	}
 
+	if (glm::dot(hit_normal, ray.direction) > 0.0f) {
+		hit_normal = -hit_normal;
+	}
+
 	result.distance = nearest_distance;
 	result.point = ray.origin + ray.direction * nearest_distance;
-	result.normal = hit_axis;
+	result.normal = hit_normal;
 
 	return true;
 }
@@ -1022,22 +1026,27 @@ bool PhysicsManager::intersect_ray_obb(const Ray &ray, const ColliderOBB &obb, H
 
 		if (t1 > nearest_distance) {
 			nearest_distance = t1;
-			hit_normal = -o[i];
-		}
-
-		if (t2 < ray_range) {
-			ray_range = t2;
 			hit_normal = o[i];
 		}
-		if (nearest_distance > ray_range) {
-			return false;
-		}
+
+		//This condition makes bug idk it was in book ;-;
+		//		if (t2 < ray_range) {
+		//			ray_range = t2;
+		//			hit_normal = o[i];
+		//		}
+		//This condition is useless because ray range is float max
+		//		if (nearest_distance > ray_range) {
+		//			return false;
+		//		}
+	}
+
+	if (glm::dot(hit_normal, ray.direction) > 0.0f) {
+		hit_normal = -hit_normal;
 	}
 
 	result.distance = nearest_distance;
 	result.point = ray.origin + ray.direction * nearest_distance;
-
-	result.normal = glm::normalize(hit_normal);
+	result.normal = hit_normal;
 
 	return true;
 }
@@ -1055,7 +1064,7 @@ bool PhysicsManager::intersect_segment_capsule(
 	Ray ray;
 	ray.origin = segment.start;
 	ray.direction = segment.end - segment.start;
-	if (glm::length2(ray.direction) > cvar_epsilon.get()) {
+	if (glm::length2(ray.direction) > 0.0f) {
 		ray.direction = glm::normalize(ray.direction);
 	}
 
@@ -1090,7 +1099,7 @@ bool PhysicsManager::intersect_segment_capsule(
 	float a = dd * nn - nd * nd;
 	float k = glm::length2(m) - capsule.radius * capsule.radius;
 	float c = dd * k - md * md;
-	if (glm::abs(a) < cvar_epsilon.get()) {
+	if (glm::abs(a) <= cvar_epsilon.get()) {
 		// Segment runs parallel to cylinder axis
 		if (c > 0.0f) {
 			return false; // ’a’ and thus the segment lie outside cylinder
@@ -1252,21 +1261,21 @@ std::vector<Entity> PhysicsManager::overlap_sphere(
 			ColliderAABB c = world.get_component<ColliderAABB>(entity);
 			c.center = position + c.center * scale;
 			c.range *= scale;
-			if (glm::length2(is_overlap(c, sphere)) > cvar_epsilon.get()) {
+			if (glm::length2(is_overlap(c, sphere)) > 0.0f) {
 				result.push_back(entity);
 			}
 		} else if (world.has_component<ColliderOBB>(entity)) {
 			ColliderOBB c = world.get_component<ColliderOBB>(entity);
 			c.center = position + c.get_orientation_matrix() * c.center * scale;
 			c.range *= scale;
-			if (glm::length2(is_overlap(c, sphere)) > cvar_epsilon.get()) {
+			if (glm::length2(is_overlap(c, sphere)) > 0.0f) {
 				result.push_back(entity);
 			}
 		} else if (world.has_component<ColliderSphere>(entity)) {
 			ColliderSphere c = world.get_component<ColliderSphere>(entity);
 			c.center = position + c.center * scale;
 			c.radius *= scale.x;
-			if (glm::length2(is_overlap(c, sphere)) > cvar_epsilon.get()) {
+			if (glm::length2(is_overlap(c, sphere)) > 0.0f) {
 				result.push_back(entity);
 			}
 		} else if (world.has_component<ColliderCapsule>(entity)) {
@@ -1274,14 +1283,10 @@ std::vector<Entity> PhysicsManager::overlap_sphere(
 			c.start = position + c.start * scale;
 			c.end = position + c.end * scale;
 			c.radius *= scale.x;
-			if (glm::length2(is_overlap(c, sphere)) > cvar_epsilon.get()) {
+			if (glm::length2(is_overlap(c, sphere)) > 0.0f) {
 				result.push_back(entity);
 			}
 		}
 	}
 	return result;
-}
-
-glm::vec3 PhysicsManager::corner(const ColliderAABB &b, int32_t n) {
-	return (n & 1) ? b.max() : b.min();
 }

@@ -154,28 +154,32 @@ void CollisionSystem::resolve_bsp_collision(World &world, BSPNode *node, Entity 
 
 	Side side;
 	Transform &t = world.get_component<Transform>(entity);
+	const glm::vec3 &scale = t.get_global_scale();
+	const glm::vec3 &position = t.get_global_position();
+
 	if (world.has_component<ColliderOBB>(entity)) {
-		ColliderOBB &obb = world.get_component<ColliderOBB>(entity);
-		ColliderOBB c;
+		ColliderOBB c = world.get_component<ColliderOBB>(entity);
 		c.set_orientation(t.get_global_orientation());
-		glm::mat3 o = c.get_orientation_matrix();
-		c.range = obb.range * t.get_global_scale();
-		c.center = t.get_global_position() + o * (obb.center * c.range);
+		const glm::mat3 &o = c.get_orientation_matrix();
+		c.range = c.range * scale;
+		c.center = position + o * (c.center * scale);
 		side = process_collider(node->plane, c);
 	} else if (world.has_component<ColliderAABB>(entity)) {
-		ColliderAABB &aabb = world.get_component<ColliderAABB>(entity);
-		ColliderAABB c;
-		c.range = aabb.range * t.get_global_scale();
-		c.center = t.get_global_position() + aabb.center * c.range;
+		ColliderAABB c = world.get_component<ColliderAABB>(entity);
+		c.range = c.range * scale;
+		c.center = position + c.center * scale;
 		side = process_collider(node->plane, c);
 	} else if (world.has_component<ColliderSphere>(entity)) {
-		ColliderSphere &sphere = world.get_component<ColliderSphere>(entity);
-		ColliderSphere c;
-		c.radius = sphere.radius * t.get_global_scale().x;
-		c.center = t.get_global_position() + sphere.center * c.radius;
+		ColliderSphere c = world.get_component<ColliderSphere>(entity);
+		c.radius = c.radius * scale.x;
+		c.center = position + c.center * scale;
 		side = process_collider(node->plane, c);
 	} else if (world.has_component<ColliderCapsule>(entity)) {
-		//todo: implement
+		ColliderCapsule c = world.get_component<ColliderCapsule>(entity);
+		c.radius = c.radius * scale.x;
+		c.start = position + c.start * scale;
+		c.start = position + c.end * scale;
+		side = process_collider(node->plane, c);
 	} else {
 		SPDLOG_WARN("Movable object has not supported collider");
 		return;
