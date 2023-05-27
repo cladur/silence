@@ -22,7 +22,25 @@ void DebugDraw::startup() {
 
 	glBindVertexArray(0);
 
+	glGenVertexArrays(1, &mp_vao);
+	glGenBuffers(1, &mp_vbo);
+
+	glBindVertexArray(mp_vao);
+	glBindBuffer(GL_ARRAY_BUFFER, mp_vbo);
+
+	glBufferData(GL_ARRAY_BUFFER, MAX_VERTEX_COUNT * sizeof(MousePickVertex), nullptr, GL_DYNAMIC_DRAW);
+
+	// vertex translation
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(MousePickVertex), (void *)nullptr);
+	// vertex color
+	glEnableVertexAttribArray(1);
+	glVertexAttribIPointer(1, 1, GL_UNSIGNED_INT, sizeof(MousePickVertex), (void *)offsetof(MousePickVertex, entity));
+
+	glBindVertexArray(0);
+
 	shader.load_from_files(shader_path("debug.vert"), shader_path("debug.frag"));
+	mouse_pick_shader.load_from_files(shader_path("debug_mouse_pick.vert"), shader_path("debug_mouse_pick.frag"));
 }
 
 void DebugDraw::draw() {
@@ -45,26 +63,63 @@ void DebugDraw::draw() {
 	shader.set_mat4("projection", projection);
 	shader.set_mat4("view", view);
 
+	glLineWidth(1.0f);
+	glDisable(GL_LINE_SMOOTH);
+
 	glBindVertexArray(vao);
 	glDrawArrays(GL_LINES, 0, vertices.size());
 	glBindVertexArray(0);
 }
 
-void DebugDraw::draw_line(const glm::vec3 &from, const glm::vec3 &to, const glm::vec3 &color) {
-	vertices.push_back({ from, color });
-	vertices.push_back({ to, color });
+void DebugDraw::draw_mouse_pick() {
+	if (mouse_pick_vertices.empty()) {
+		return;
+	}
+
+	// TODO: Dynamically resize buffers?
+	if (mouse_pick_vertices.size() > MAX_VERTEX_COUNT) {
+		SPDLOG_ERROR("Too many debug vertices to draw!!!");
+		return;
+	}
+
+	mouse_pick_shader.use();
+
+	// update buffers
+	glBindBuffer(GL_ARRAY_BUFFER, mp_vbo);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, mouse_pick_vertices.size() * sizeof(DebugVertex), &mouse_pick_vertices[0]);
+
+	mouse_pick_shader.set_mat4("projection", projection);
+	mouse_pick_shader.set_mat4("view", view);
+
+	glLineWidth(10.0f);
+	glEnable(GL_LINE_SMOOTH);
+
+	glBindVertexArray(mp_vao);
+	glDrawArrays(GL_LINES, 0, mouse_pick_vertices.size());
+	glBindVertexArray(0);
 }
 
-void DebugDraw::draw_arrow(const glm::vec3 &from, const glm::vec3 &to, const glm::vec3 &color) {
+void DebugDraw::draw_line(const glm::vec3 &from, const glm::vec3 &to, const glm::vec3 &color, Entity entity) {
+	vertices.push_back({ from, color });
+	vertices.push_back({ to, color });
+
+	if (entity != 0) {
+		mouse_pick_vertices.push_back({ from, entity });
+		mouse_pick_vertices.push_back({ to, entity });
+	}
+}
+
+void DebugDraw::draw_arrow(const glm::vec3 &from, const glm::vec3 &to, const glm::vec3 &color, Entity entity) {
 	draw_line(from, to, color);
 
 	glm::vec3 part_of_line = (to - from) * 0.2f;
 	float line_length = glm::length(to - from);
 
-	draw_cone(to, to - part_of_line, line_length * 0.05f, color);
+	draw_cone(to, to - part_of_line, line_length * 0.05f, color, entity);
 }
 
-void DebugDraw::draw_arrow(const glm::vec3 &from, const glm::vec3 &to, float length, const glm::vec3 &color) {
+void DebugDraw::draw_arrow(
+		const glm::vec3 &from, const glm::vec3 &to, float length, const glm::vec3 &color, Entity entity) {
 	glm::vec3 end_point = from + length * normalize(to - from);
 	draw_line(from, end_point, color);
 
@@ -72,11 +127,11 @@ void DebugDraw::draw_arrow(const glm::vec3 &from, const glm::vec3 &to, float len
 	float line_length = glm::length(end_point - from);
 	glm::vec3 new_to = end_point - part_of_line;
 
-	draw_cone(end_point, new_to, line_length * 0.05f, color);
+	draw_cone(end_point, new_to, line_length * 0.05f, color, entity);
 }
 
-void DebugDraw::draw_cone(
-		const glm::vec3 &from, const glm::vec3 &to, float radius, const glm::vec3 &color, int num_of_segments) {
+void DebugDraw::draw_cone(const glm::vec3 &from, const glm::vec3 &to, float radius, const glm::vec3 &color,
+		Entity entity, int num_of_segments) {
 	glm::vec3 normalized_direction = normalize(to - from);
 	glm::vec3 v1 = normalize(cross(normalized_direction, glm::vec3(0, 0, 1)));
 	if ((v1.x == 0 && v1.y == 0 && v1.z == 0) || (isnan(v1.x) || isnan(v1.y) || isnan(v1.z))) {
@@ -102,11 +157,11 @@ void DebugDraw::draw_cone(
 		old_point = new_point;
 	}
 
-	draw_circle(to, normalized_direction, radius, color, num_of_segments);
+	draw_circle(to, normalized_direction, radius, color, entity, num_of_segments);
 }
 
 void DebugDraw::draw_cone(const glm::vec3 &from, const glm::vec3 &to, float length, float radius,
-		const glm::vec3 &color, int num_of_segments) {
+		const glm::vec3 &color, Entity entity, int num_of_segments) {
 	glm::vec3 normalized_direction = normalize(to - from);
 	glm::vec3 v1 = normalize(cross(normalized_direction, glm::vec3(0, 0, 1)));
 	if ((v1.x == 0 && v1.y == 0 && v1.z == 0) || (isnan(v1.x) || isnan(v1.y) || isnan(v1.z))) {
@@ -133,11 +188,11 @@ void DebugDraw::draw_cone(const glm::vec3 &from, const glm::vec3 &to, float leng
 		old_point = new_point;
 	}
 
-	draw_circle(end_point, normalized_direction, radius, color, num_of_segments);
+	draw_circle(end_point, normalized_direction, radius, color, entity, num_of_segments);
 }
 
-void DebugDraw::draw_circle(
-		const glm::vec3 &center, const glm::vec3 direction, float radius, const glm::vec3 &color, int num_of_segments) {
+void DebugDraw::draw_circle(const glm::vec3 &center, const glm::vec3 direction, float radius, const glm::vec3 &color,
+		Entity entity, int num_of_segments) {
 	glm::vec3 normalized_direction = normalize(direction);
 	glm::vec3 v1 = normalize(cross(normalized_direction, glm::vec3(0, 0, 1)));
 
@@ -157,15 +212,15 @@ void DebugDraw::draw_circle(
 
 		new_point = center + radius * (cos(current_step) * v1 + sin(current_step) * v2);
 
-		draw_line(old_point, new_point, color);
+		draw_line(old_point, new_point, color, entity);
 
 		old_point = new_point;
 	}
 }
 
 // Draw a box with center at "center" and scale "scale".
-void DebugDraw::draw_box(
-		const glm::vec3 &center, const glm::vec3 &rotation, const glm::vec3 &scale, const glm::vec3 &color) {
+void DebugDraw::draw_box(const glm::vec3 &center, const glm::vec3 &rotation, const glm::vec3 &scale,
+		const glm::vec3 &color, Entity entity) {
 	// Generate a box mesh, using draw_line to draw the lines
 	glm::vec3 vertices[8] = { glm::vec3(-scale.x / 2.0f, -scale.y / 2.0f, -scale.z / 2.0f),
 		glm::vec3(+scale.x / 2.0f, -scale.y / 2.0f, -scale.z / 2.0f),
@@ -188,22 +243,22 @@ void DebugDraw::draw_box(
 		v = glm::vec3(mat * glm::vec4(v, 1.0f));
 	}
 
-	draw_line(vertices[0], vertices[1], color);
-	draw_line(vertices[1], vertices[2], color);
-	draw_line(vertices[2], vertices[3], color);
-	draw_line(vertices[3], vertices[0], color);
-	draw_line(vertices[4], vertices[5], color);
-	draw_line(vertices[5], vertices[6], color);
-	draw_line(vertices[6], vertices[7], color);
-	draw_line(vertices[7], vertices[4], color);
-	draw_line(vertices[0], vertices[4], color);
-	draw_line(vertices[1], vertices[5], color);
-	draw_line(vertices[2], vertices[6], color);
-	draw_line(vertices[3], vertices[7], color);
+	draw_line(vertices[0], vertices[1], color, entity);
+	draw_line(vertices[1], vertices[2], color, entity);
+	draw_line(vertices[2], vertices[3], color, entity);
+	draw_line(vertices[3], vertices[0], color, entity);
+	draw_line(vertices[4], vertices[5], color, entity);
+	draw_line(vertices[5], vertices[6], color, entity);
+	draw_line(vertices[6], vertices[7], color, entity);
+	draw_line(vertices[7], vertices[4], color, entity);
+	draw_line(vertices[0], vertices[4], color, entity);
+	draw_line(vertices[1], vertices[5], color, entity);
+	draw_line(vertices[2], vertices[6], color, entity);
+	draw_line(vertices[3], vertices[7], color, entity);
 }
 
 // Draw a sphere with center at "center" and radius "radius".
-void DebugDraw::draw_sphere(const glm::vec3 &center, float radius, const glm::vec3 &color) {
+void DebugDraw::draw_sphere(const glm::vec3 &center, float radius, const glm::vec3 &color, Entity entity) {
 	// Generate a sphere mesh, using draw_line to draw the lines
 	const int num_segments = 12; // number of horizontal segments
 	const int num_rings = 6; // number of vertical rings
@@ -230,14 +285,14 @@ void DebugDraw::draw_sphere(const glm::vec3 &center, float radius, const glm::ve
 			int j1 = j;
 			int j2 = (j + 1) % num_segments;
 			draw_line(glm::vec3(vertices[i1][j1][0], vertices[i1][j1][1], vertices[i1][j1][2]),
-					glm::vec3(vertices[i2][j1][0], vertices[i2][j1][1], vertices[i2][j1][2]), color);
+					glm::vec3(vertices[i2][j1][0], vertices[i2][j1][1], vertices[i2][j1][2]), color, entity);
 			draw_line(glm::vec3(vertices[i2][j1][0], vertices[i2][j1][1], vertices[i2][j1][2]),
-					glm::vec3(vertices[i2][j2][0], vertices[i2][j2][1], vertices[i2][j2][2]), color);
+					glm::vec3(vertices[i2][j2][0], vertices[i2][j2][1], vertices[i2][j2][2]), color, entity);
 		}
 	}
 }
-void DebugDraw::draw_box(
-		const glm::vec3 &center, const glm::quat &orientation, const glm::vec3 &scale, const glm::vec3 &color) {
+void DebugDraw::draw_box(const glm::vec3 &center, const glm::quat &orientation, const glm::vec3 &scale,
+		const glm::vec3 &color, Entity entity) {
 	glm::vec3 vertices[8] = { glm::vec3(-scale.x / 2.0f, -scale.y / 2.0f, -scale.z / 2.0f),
 		glm::vec3(+scale.x / 2.0f, -scale.y / 2.0f, -scale.z / 2.0f),
 		glm::vec3(+scale.x / 2.0f, +scale.y / 2.0f, -scale.z / 2.0f),
@@ -257,22 +312,22 @@ void DebugDraw::draw_box(
 		v = glm::vec3(mat * glm::vec4(v, 1.0f));
 	}
 
-	draw_line(vertices[0], vertices[1], color);
-	draw_line(vertices[1], vertices[2], color);
-	draw_line(vertices[2], vertices[3], color);
-	draw_line(vertices[3], vertices[0], color);
-	draw_line(vertices[4], vertices[5], color);
-	draw_line(vertices[5], vertices[6], color);
-	draw_line(vertices[6], vertices[7], color);
-	draw_line(vertices[7], vertices[4], color);
-	draw_line(vertices[0], vertices[4], color);
-	draw_line(vertices[1], vertices[5], color);
-	draw_line(vertices[2], vertices[6], color);
-	draw_line(vertices[3], vertices[7], color);
+	draw_line(vertices[0], vertices[1], color, entity);
+	draw_line(vertices[1], vertices[2], color, entity);
+	draw_line(vertices[2], vertices[3], color, entity);
+	draw_line(vertices[3], vertices[0], color, entity);
+	draw_line(vertices[4], vertices[5], color, entity);
+	draw_line(vertices[5], vertices[6], color, entity);
+	draw_line(vertices[6], vertices[7], color, entity);
+	draw_line(vertices[7], vertices[4], color, entity);
+	draw_line(vertices[0], vertices[4], color, entity);
+	draw_line(vertices[1], vertices[5], color, entity);
+	draw_line(vertices[2], vertices[6], color, entity);
+	draw_line(vertices[3], vertices[7], color, entity);
 }
 
 void DebugDraw::draw_frustum(const glm::vec3 &center, const glm::quat &orientation, float fov, float aspect, float near,
-		float far, const glm::vec3 &color) {
+		float far, const glm::vec3 &color, Entity entity) {
 	// Calculate the four corners of the near plane of the frustum
 	float tan_half_fov = tan(glm::radians(fov) / 2);
 	float near_height = 2 * near * tan_half_fov;
@@ -292,18 +347,18 @@ void DebugDraw::draw_frustum(const glm::vec3 &center, const glm::quat &orientati
 
 	// Draw the lines of the frustum using the draw_line function
 	// Near to Far lines
-	draw_line(near_top_left, far_top_left, color);
-	draw_line(near_top_right, far_top_right, color);
-	draw_line(near_bottom_left, far_bottom_left, color);
-	draw_line(near_bottom_right, far_bottom_right, color);
+	draw_line(near_top_left, far_top_left, color, entity);
+	draw_line(near_top_right, far_top_right, color, entity);
+	draw_line(near_bottom_left, far_bottom_left, color, entity);
+	draw_line(near_bottom_right, far_bottom_right, color, entity);
 	// Near rectangle
-	draw_line(near_top_left, near_top_right, color);
-	draw_line(near_top_right, near_bottom_right, color);
-	draw_line(near_bottom_right, near_bottom_left, color);
-	draw_line(near_bottom_left, near_top_left, color);
+	draw_line(near_top_left, near_top_right, color, entity);
+	draw_line(near_top_right, near_bottom_right, color, entity);
+	draw_line(near_bottom_right, near_bottom_left, color, entity);
+	draw_line(near_bottom_left, near_top_left, color, entity);
 	// Far rectangle
-	draw_line(far_top_left, far_top_right, color);
-	draw_line(far_top_right, far_bottom_right, color);
-	draw_line(far_bottom_right, far_bottom_left, color);
-	draw_line(far_bottom_left, far_top_left, color);
+	draw_line(far_top_left, far_top_right, color, entity);
+	draw_line(far_top_right, far_bottom_right, color, entity);
+	draw_line(far_bottom_right, far_bottom_left, color, entity);
+	draw_line(far_bottom_left, far_top_left, color, entity);
 }

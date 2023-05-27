@@ -36,6 +36,7 @@ void FrustumDrawSystem::update(World &world, float dt) {
 		float aspect_ratio = world.get_parent_scene()->get_render_scene().aspect_ratio;
 
 		world.get_parent_scene()->get_render_scene().debug_draw.draw_frustum(transform.get_global_position(),
-				transform.get_global_orientation(), camera.fov, aspect_ratio, near, far);
+				transform.get_global_orientation(), camera.fov, aspect_ratio, near, far, glm::vec3(1.0f, 0.0f, 0.0f),
+				entity);
 	}
 }

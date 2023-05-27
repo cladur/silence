@@ -577,7 +577,7 @@ void Editor::imgui_viewport(EditorScene &scene, uint32_t scene_index) {
 	ImVec2 mouse_pos = ImGui::GetMousePos();
 	mouse_pos.x -= image_rect_min.x;
 	mouse_pos.y -= image_rect_min.y;
-	if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !ImGuizmo::IsOver()) {
+	if (ImGui::IsWindowHovered() && ImGui::IsMouseDown(ImGuiMouseButton_Left) && !ImGuizmo::IsOver()) {
 		scene.selected_entity = scene.get_render_scene().get_entity_at_mouse_position(mouse_pos.x, mouse_pos.y);
 	}
 

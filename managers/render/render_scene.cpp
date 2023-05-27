@@ -99,10 +99,6 @@ void RenderScene::draw_viewport(bool right_side) {
 
 	g_buffer_pass.draw(*this);
 
-	mouse_pick_framebuffer.bind();
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	mouse_pick_pass.draw(*this);
-
 	pbr_buffer.bind();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	pbr_pass.draw(*this);
@@ -185,6 +181,12 @@ void RenderScene::draw_viewport(bool right_side) {
 	// sprite_draw.draw();
 	transparent_pass.draw(*this);
 	glDisable(GL_BLEND);
+
+	mouse_pick_framebuffer.bind();
+	glad_glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	mouse_pick_pass.draw(*this);
+	debug_draw.draw_mouse_pick();
 }
 
 void RenderScene::draw() {
@@ -231,6 +233,7 @@ void RenderScene::draw() {
 #endif
 	light_draw_commands.clear();
 	debug_draw.vertices.clear();
+	debug_draw.mouse_pick_vertices.clear();
 }
 
 void RenderScene::resize_framebuffer(uint32_t width, uint32_t height) {
