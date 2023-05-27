@@ -3,6 +3,7 @@
 #include "components/enemy_data_component.h"
 #include "components/enemy_path_component.h"
 #include "components/transform_component.h"
+#include "enemy_utils.h"
 #include "engine/scene.h"
 #include "managers/ecs/world.h"
 #include "managers/gameplay/gameplay_manager.h"
@@ -60,48 +61,10 @@ void EnemyLooking::update(World *world, uint32_t entity_id, float dt) {
 	dd.draw_line(transform.position + glm::vec3(0.0f, 0.1f, 0.0f), transform.position + forward,
 			glm::vec3(0.0f, 1.0f, 0.0f));
 
-	bool can_see_player = false;
-	// check if agent is in cone of vision described by view_cone_angle and view_cone_distance
-	if (glm::distance(transform.get_global_position(), agent_pos) < enemy_data.view_cone_distance) {
-		auto agent_dir = glm::normalize(agent_pos - transform.position);
+	enemy_utils::handle_detection(world, transform, enemy_data, dt, &dd);
 
-		auto angle = glm::acos(glm::dot(agent_dir, forward));
-		if (angle < enemy_data.view_cone_angle / 2.0f) {
-			Ray ray{};
-			ray.origin = transform.position + agent_dir + glm::vec3(0.0f, 0.5f, 0.0f);
-			ray.direction = agent_dir;
-			glm::vec3 ray_end = ray.origin + ray.direction * enemy_data.view_cone_distance;
-			dd.draw_arrow(ray.origin, ray_end, glm::vec3(1.0f, 0.0f, 0.0f));
+	enemy_utils::update_detection_slider(entity_id, transform, enemy_data);
 
-			HitInfo hit_info;
-
-			// todo: make sure this checks properly for hitting a player and stops at terrain in between
-			if (CollisionSystem::ray_cast(*world, ray, hit_info)) {
-				auto hit_name = world->get_component<Name>(hit_info.entity);
-				if (hit_info.entity == GameplayManager::get().get_agent_entity()) {
-					dd.draw_arrow(ray.origin, ray_end, glm::vec3(1.0f, 0.0f, 0.0f));
-					can_see_player = true;
-				}
-			}
-		}
-	}
-
-	if (can_see_player) {
-		enemy_data.detection_level += dt / enemy_data.detection_speed;
-	} else {
-		enemy_data.detection_level -= dt / enemy_data.detection_speed;
-	}
-
-	enemy_data.detection_level = glm::clamp(enemy_data.detection_level, 0.0f, 1.0f);
-
-	auto &slider = UIManager::get().get_ui_slider(std::to_string(entity_id) + "_detection", "detection_slider");
-	slider.value = enemy_data.detection_level;
-	// lerp from white to red
-	slider.color = glm::lerp(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 0.0f, 0.0f), slider.value);
-	slider.position = transform.get_global_position() + glm::vec3(0.0f, 2.0f, 0.0f);
-
-	// thresholded detection level, switches to previous state when it goes very low, to avoid jittering and give it
-	// more reealism
 	if (enemy_data.detection_level < 0.2) {
 		state_machine->set_state("patrolling");
 	}

@@ -27,6 +27,8 @@ public:
 	 */
 	void set_state(std::string state_name);
 	void shutdown();
+
+	std::string get_current_state();
 };
 
 #endif //SILENCE_STATE_MACHINE_H

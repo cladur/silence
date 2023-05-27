@@ -15,6 +15,8 @@ AnimationInstance::AnimationInstance() {
 	resource_manager.load_animation(asset_path("agent/agent_ANIM_GLTF/agent_idle.anim").c_str());
 	resource_manager.load_animation(asset_path("agent/agent_ANIM_GLTF/agent_interaction.anim").c_str());
 	resource_manager.load_animation(asset_path("agent/agent_ANIM_GLTF/agent_grab_and_stab.anim").c_str());
+	resource_manager.load_animation(asset_path("enemy/enemy_ANIM_GLTF/enemy_idle.anim").c_str());
+	resource_manager.load_animation(asset_path("enemy/enemy_ANIM_GLTF/enemy_death.anim").c_str());
 }
 
 AnimationInstance::AnimationInstance(const char *path) {
