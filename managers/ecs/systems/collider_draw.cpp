@@ -38,6 +38,8 @@ void ColliderDrawSystem::update(World &world, float dt) {
 					position + col.start * scale, col.radius * scale.x, glm::vec3(1.0f));
 			world.get_parent_scene()->get_render_scene().debug_draw.draw_sphere(
 					position + col.end * scale, col.radius * scale.x, glm::vec3(1.0f));
+			world.get_parent_scene()->get_render_scene().debug_draw.draw_line(
+					position + col.start * scale, position + col.end * scale, glm::vec3(1.0f));
 		}
 	}
 }
