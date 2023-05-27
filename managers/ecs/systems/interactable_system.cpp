@@ -71,7 +71,8 @@ void InteractableSystem::no_interaction(World &world, Interactable &interactable
 }
 
 void InteractableSystem::explosion(World &world, Interactable &interactable, Entity entity) {
-	auto box = world.get_component<ExplodingBox>(interactable.interaction_target);
+	auto &box = world.get_component<ExplodingBox>(interactable.interaction_target);
+	auto &t = world.get_component<Transform>(interactable.interaction_target);
 	ColliderSphere sphere;
 	float larger_radius = box.distraction_radius;
 	float smaller_radius = box.explosion_radius;
@@ -88,13 +89,21 @@ void InteractableSystem::explosion(World &world, Interactable &interactable, Ent
 			auto enemy_data = world.get_component<EnemyData>(entity);
 			float distance = glm::distance(sphere.center, world.get_component<Transform>(entity).get_position());
 			if (distance < smaller_radius) {
-				//TODO: set enemy state as dead
-				//auto &enemy_sys = world.get_system<EnemySystem>(); // this would be a good way to do it i think
 				auto &enemy = world.get_component<EnemyData>(entity);
 				enemy.state_machine.set_state("dying");
-				SPDLOG_INFO("{} is dead", entity);
 			} else if (distance < larger_radius) {
 				//TODO: set enemy state as distracted
+				auto &enemy = world.get_component<EnemyData>(entity);
+				auto &enemy_transform = world.get_component<Transform>(entity);
+				// if enemy is dead, don't change his state
+				if (enemy.state_machine.get_current_state() != "dying") {
+					enemy.state_machine.set_state("distracted");
+					enemy.distraction_cooldown = box.distraction_time;
+					auto target = t.position;
+					// yeah, same as in prototype, they would float to the root of the box
+					target.y = enemy_transform.position.y;
+					enemy.distraction_target = target;
+				}
 				SPDLOG_INFO("{} is distracted", entity);
 			}
 		}

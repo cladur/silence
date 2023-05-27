@@ -61,6 +61,7 @@ void Inspector::show_components() {
 	SHOW_COMPONENT(Interactable, show_interactable);
 	SHOW_COMPONENT(Platform, show_platform);
 	SHOW_COMPONENT(EnemyData, show_enemy_data);
+	SHOW_COMPONENT(ExplodingBox, show_exploding_box);
 
 	for (int i = 0; i < remove_component_queue.size(); i++) {
 		auto [entity, component_to_remove] = remove_component_queue.front();
@@ -989,6 +990,7 @@ void Inspector::show_exploding_box() {
 			if (ImGui::MenuItem("Reset ExplodingBox")) {
 				exploding_box.explosion_radius = 0.0f;
 				exploding_box.distraction_radius = 0.0f;
+				exploding_box.distraction_time = 1.0f;
 			}
 			remove_component_menu_item<ExplodingBox>();
 
@@ -998,10 +1000,9 @@ void Inspector::show_exploding_box() {
 		ImGui::BeginTable("ExplodingBox Component", 2);
 		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
 
-		bool changed = false;
-
-		changed |= show_float("Explosion radius", exploding_box.explosion_radius);
-		changed |= show_float("Distraction radius", exploding_box.distraction_radius);
+		show_float("Explosion radius", exploding_box.explosion_radius);
+		show_float("Distraction radius", exploding_box.distraction_radius);
+		show_float("Distraction time", exploding_box.distraction_time);
 
 		ImGui::EndTable();
 	}

@@ -105,6 +105,21 @@ namespace enemy_utils {
 		slider.color = glm::lerp(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 0.0f, 0.0f), slider.value);
 		slider.position = transform.get_global_position() + glm::vec3(0.0f, 2.5f, 0.0f);
 	}
+
+	inline uint32_t find_closest_node(World *world, glm::vec3 &position, EnemyPath &path) {
+		uint32_t closest_node = 0;
+		float closest_distance = 1000000.0f;
+		int i = 0;
+		for (auto &node : path.path) {
+			auto distance = glm::distance(position, node);
+			if (distance < closest_distance) {
+				closest_distance = distance;
+				closest_node = i;
+			}
+			i++;
+		}
+		return closest_node;
+	}
 }
 
 #endif //SILENCE_ENEMY_UTILS_H

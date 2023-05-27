@@ -32,7 +32,10 @@ void EnemyDead::update(World *world, uint32_t entity_id, float dt) {
 	if (anim.animation_handle.id != res.get_animation_handle("enemy/enemy_ANIM_GLTF/enemy_death.anim").id) {
 		animation_manager.change_animation(entity_id, "enemy/enemy_ANIM_GLTF/enemy_death.anim");
 		anim.is_looping = false;
+		UIManager::get().get_ui_button(std::to_string(entity_id) + "_detection", "detection_slider").display = false;
+
 	}
+
 }
 
 void EnemyDead::exit() {

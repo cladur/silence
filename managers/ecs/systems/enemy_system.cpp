@@ -31,12 +31,14 @@ void EnemySystem::update(World &world, float dt) {
 			ed.fully_aware_state.startup(&ed.state_machine, "fully_aware");
 			ed.stationary_patrolling_state.startup(&ed.state_machine, "stationary_patrolling");
 			ed.dead_state.startup(&ed.state_machine, "dying");
+			ed.distracted_state.startup(&ed.state_machine, "distracted");
 
 			ed.state_machine.add_state(&ed.patrolling_state);
 			ed.state_machine.add_state(&ed.looking_state);
 			ed.state_machine.add_state(&ed.fully_aware_state);
 			ed.state_machine.add_state(&ed.stationary_patrolling_state);
 			ed.state_machine.add_state(&ed.dead_state);
+			ed.state_machine.add_state(&ed.distracted_state);
 
 			ed.state_machine.set_state("patrolling");
 
