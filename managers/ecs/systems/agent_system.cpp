@@ -15,6 +15,7 @@
 #include <spdlog/spdlog.h>
 #include <glm/fwd.hpp>
 #include <glm/geometric.hpp>
+#include <glm/gtx/string_cast.hpp>
 
 AutoCVarFloat cvar_agent_interaction_range(
 		"agent.interaction_range", "range of interaction", 1.5f, CVarFlags::EditCheckbox);
@@ -162,8 +163,9 @@ void AgentSystem::update(World &world, float dt) {
 		}
 
 		Ray ray{};
-		ray.origin = transform.get_global_position() + glm::vec3(0.0f, -0.01f, 0.0f);
-		ray.direction = glm::vec3(0.0f, -1.0f, 0.0f);
+		ray.origin = transform.get_global_position() + glm::vec3(0.0f, 1.0f, 0.0f);
+		ray.ignore_list.emplace_back(entity);
+		ray.direction = -transform.get_up();
 		glm::vec3 end = ray.origin + ray.direction;
 		world.get_parent_scene()->get_render_scene().debug_draw.draw_arrow(ray.origin, end);
 		HitInfo info;
@@ -173,7 +175,18 @@ void AgentSystem::update(World &world, float dt) {
 			bool is_on_too_steep_slope =
 					glm::dot(info.normal, glm::vec3(0.0f, 1.0f, 0.0f)) < glm::cos(glm::radians(40.0f));
 
-			if (is_on_too_steep_slope || info.distance > 0.1f) {
+			//SPDLOG_INFO(glm::dot(info.normal, glm::vec3(0.0f, 1.0f, 0.0f)));
+			//			SPDLOG_INFO(glm::to_string(info.normal));
+			//			world.get_parent_scene()->get_render_scene().debug_draw.draw_arrow(
+			//					info.point, info.point + info.normal * 10.0f);
+
+			//			if (world.has_component<Name>(info.entity)) {
+			//				SPDLOG_INFO(world.get_component<Name>(info.entity).name);
+			//			} else {
+			//				SPDLOG_INFO(info.entity);
+			//			}
+
+			if (is_on_too_steep_slope || info.distance > 1.1f) {
 				transform.position.y -= 8.0f * dt;
 				transform.set_changed(true);
 			} else if (world.has_component<Platform>(info.entity)) {
@@ -184,11 +197,11 @@ void AgentSystem::update(World &world, float dt) {
 			}
 
 			// If the agent is close enough to the floor, snap him to it
-			float snap_length = 0.3f;
-			if (info.distance > 0.1f && info.distance < snap_length) {
-				transform.position.y = info.point.y + 0.001f;
-				transform.set_changed(true);
-			}
+			//			float snap_length = 1.3f;
+			//			if (info.distance > 1.1f && info.distance < snap_length) {
+			//				transform.position.y = info.point.y + 0.001f;
+			//				transform.set_changed(true);
+			//			}
 		}
 
 		if (input_manager.is_action_just_pressed("agent_interact")) {
