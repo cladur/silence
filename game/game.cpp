@@ -9,7 +9,6 @@
 #include "render/transparent_elements/ui/sprite_manager.h"
 #include "render/transparent_elements/ui_manager.h"
 
-
 AutoCVarInt cvar_controlling_agent("game.controlling_agent", "Controlling agent", 1, CVarFlags::EditCheckbox);
 
 void gui_setup() {
@@ -255,7 +254,7 @@ void input_setup() {
 	input_manager.add_key_to_action("agent_move_right", InputKey::D);
 
 	input_manager.add_action("agent_crouch");
-	input_manager.add_key_to_action("agent_crouch", InputKey::LEFT_CONTROL);
+	input_manager.add_key_to_action("agent_crouch", InputKey::C);
 
 	//add actions to arrows
 	input_manager.add_action("hacker_move_forward");
