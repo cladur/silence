@@ -90,7 +90,7 @@ void AgentSystem::update(World &world, float dt) {
 		glm::normalize(acc_direction);
 
 		//TODO: replace hard coded values with one derived from collider
-		if (input_manager.is_action_just_pressed("set_agent_crouch")) {
+		if (input_manager.is_action_just_pressed("agent_crouch")) {
 			if (!is_crouching) {
 				is_crouching = true;
 				GameplayManager::get().set_agent_crouch(is_crouching);
