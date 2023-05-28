@@ -147,7 +147,7 @@ void GBufferPass::draw(RenderScene &scene) {
 void TransparentPass::draw(RenderScene &scene) {
 	ZoneScopedNC("TransparentPass::draw", 0xad074f);
 	RenderManager &render_manager = RenderManager::get();
-	static std::vector<TransparentObject> screen_space_objects;
+
 	glm::vec3 cam_pos = scene.camera_pos;
 
 	// transparency sorting for world-space objects
@@ -174,6 +174,40 @@ void TransparentPass::draw(RenderScene &scene) {
 		glBindVertexArray(vao);
 		glDrawElements(GL_TRIANGLES, object.indices.size(), GL_UNSIGNED_INT, nullptr);
 	}
+	scene.transparent_objects.clear();
+}
+
+void TransparentPass::draw_worldspace(RenderScene &scene) {
+	ZoneScopedNC("TransparentPass::draw_worldspace", 0xad074f);
+
+	glm::vec3 cam_pos = scene.camera_pos;
+
+	// transparency sorting for world-space objects
+	std::sort(world_space_objects.begin(), world_space_objects.end(),
+			[cam_pos](const TransparentObject &a, const TransparentObject &b) {
+				return glm::distance(cam_pos, a.position) > glm::distance(cam_pos, b.position);
+			});
+
+	material.bind_resources(scene);
+
+	for (auto &object : world_space_objects) {
+		material.bind_object_resources(scene, object);
+
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, object.vertices.size() * sizeof(TransparentVertex), &object.vertices[0]);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, object.indices.size() * sizeof(uint32_t), &object.indices[0]);
+
+		glBindVertexArray(vao);
+		glDrawElements(GL_TRIANGLES, object.indices.size(), GL_UNSIGNED_INT, nullptr);
+	}
+	world_space_objects.clear();
+}
+
+void TransparentPass::draw_screenspace(RenderScene &scene) {
+	ZoneScopedNC("TransparentPass::draw_screenspace", 0xad074f);
+	material.bind_resources(scene);
 
 	// transparency sorting for screen-space objects
 	std::sort(screen_space_objects.begin(), screen_space_objects.end(),
@@ -195,6 +229,16 @@ void TransparentPass::draw(RenderScene &scene) {
 	glBindVertexArray(0);
 
 	screen_space_objects.clear();
+}
+void TransparentPass::sort_objects(RenderScene &scene) {
+	ZoneScopedNC("TransparentPass::sort_objects", 0xad074f);
+	for (auto &object : scene.transparent_objects) {
+		if (object.vertices[0].is_screen_space) {
+			screen_space_objects.push_back(object);
+		} else {
+			world_space_objects.push_back(object);
+		}
+	}
 	scene.transparent_objects.clear();
 }
 

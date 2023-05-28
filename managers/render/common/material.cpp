@@ -341,7 +341,8 @@ void MaterialTransparent::bind_object_resources(RenderScene &scene, TransparentO
 	static glm::mat4 view;
 	static glm::vec2 window_size;
 
-	window_size = DisplayManager::get().get_window_size();
+	window_size = scene.full_render_extent;//DisplayManager::get().get_window_size();
+
 	view = scene.view;
 
 	if (object.type == TransparentType::TEXT) {

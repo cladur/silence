@@ -46,6 +46,10 @@ struct RenderScene {
 	CombinationBuffer combination_buffer;
 	BloomBuffer bloom_buffer;
 	SkyboxBuffer skybox_buffer;
+
+	// render extent that does not change whether we're in splitscreen or not
+	glm::vec2 full_render_extent;
+
 	glm::vec2 render_extent;
 
 	// Editor only
