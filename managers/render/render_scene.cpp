@@ -93,8 +93,8 @@ void RenderScene::draw_viewport(bool right_side) {
 		camera_pos = camera_transform.get_global_position();
 	}
 
-	UIManager::get().set_render_scene(this);
-	UIManager::get().draw();
+//	UIManager::get().set_render_scene(this);
+//	UIManager::get().draw_world_space_ui();
 
 	// Enable depth testing
 	glEnable(GL_DEPTH_TEST);
@@ -181,7 +181,7 @@ void RenderScene::draw_viewport(bool right_side) {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	// ui needs to go last, later to be a different render target
 	// sprite_draw.draw();
-	transparent_pass.draw(*this);
+	transparent_pass.draw_worldspace(*this);
 	glDisable(GL_BLEND);
 
 	mouse_pick_framebuffer.bind();
@@ -202,9 +202,13 @@ void RenderScene::draw() {
 		resize_framebuffer(window_extent.x, window_extent.y);
 	}
 
+	UIManager::get().set_render_scene(this);
+	UIManager::get().draw();
+
+	transparent_pass.sort_objects(*this);
+
 	if (cvar_splitscreen.get() && !cvar_debug_camera_use.get()) {
 		draw_viewport(false);
-
 		{
 			ZoneScopedN("RenderScene::draw");
 			glBindFramebuffer(GL_READ_FRAMEBUFFER, render_framebuffer.framebuffer_id);
@@ -214,7 +218,6 @@ void RenderScene::draw() {
 		}
 
 		draw_viewport(true);
-
 		{
 			ZoneScopedN("RenderScene::blit");
 			glBindFramebuffer(GL_READ_FRAMEBUFFER, render_framebuffer.framebuffer_id);
@@ -230,6 +233,7 @@ void RenderScene::draw() {
 		}
 		draw_viewport(right_side);
 
+
 		{
 			ZoneScopedN("RenderScene::blit");
 			glBindFramebuffer(GL_READ_FRAMEBUFFER, render_framebuffer.framebuffer_id);
@@ -238,6 +242,20 @@ void RenderScene::draw() {
 					GL_COLOR_BUFFER_BIT, GL_NEAREST);
 		}
 	}
+
+	glViewport(0, 0, full_render_extent.x, full_render_extent.y);
+	final_framebuffer.bind();
+	// i assume nothing else that needs depth info will be drawn after UI.
+	glClear(GL_DEPTH_BUFFER_BIT);
+
+	glEnable(GL_BLEND);
+	glDepthMask(GL_FALSE);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	transparent_pass.draw_screenspace(*this);
+
+	glDisable(GL_BLEND);
+	glDepthMask(GL_TRUE);
 
 	draw_commands.clear();
 #ifdef WIN32
@@ -250,6 +268,7 @@ void RenderScene::draw() {
 
 void RenderScene::resize_framebuffer(uint32_t width, uint32_t height) {
 	final_framebuffer.resize(width, height);
+	full_render_extent = glm::vec2(width, height);
 
 	if (cvar_splitscreen.get() && !cvar_debug_camera_use.get()) {
 		width /= 2;
