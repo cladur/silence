@@ -13,6 +13,7 @@
 
 #include "input/input_manager.h"
 #include "resource/resource_manager.h"
+#include <gameplay/gameplay_manager.h>
 #include <spdlog/spdlog.h>
 #include <glm/fwd.hpp>
 #include <glm/geometric.hpp>
@@ -92,6 +93,7 @@ void AgentSystem::update(World &world, float dt) {
 		if (input_manager.is_action_just_pressed("agent_crouch")) {
 			if (!is_crouching) {
 				is_crouching = true;
+				GameplayManager::get().set_agent_crouch(is_crouching);
 				capsule_collider.end.y = 0.85f;
 			} else {
 				Ray ray{};
@@ -105,6 +107,7 @@ void AgentSystem::update(World &world, float dt) {
 				if (!hit || info.distance > 0.8f) {
 					capsule_collider.end.y = 1.3f;
 					is_crouching = false;
+					GameplayManager::get().set_agent_crouch(is_crouching);
 				}
 			}
 		}

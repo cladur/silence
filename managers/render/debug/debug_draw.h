@@ -50,6 +50,8 @@ public:
 	void draw_sphere(const glm::vec3 &center, float radius, const glm::vec3 &color = glm::vec3(0.0f, 1.0f, 0.0f),
 			Entity entity = 0);
 
+	void draw_sphere(const glm::vec3 &center, float radius, const glm::vec3 &color, int segments);
+
 	void draw_frustum(const glm::vec3 &center, const glm::quat &orientation, float fov, float aspect, float near,
 			float far, const glm::vec3 &color = glm::vec3(0.0f, 1.0f, 0.0f), Entity entity = 0);
 	void draw_arrow(const glm::vec3 &from, const glm::vec3 &to, const glm::vec3 &color = glm::vec3(0.0f, 1.0f, 0.0f),
