@@ -46,6 +46,7 @@ target_include_directories(${RENDER_MANAGER_NAME} PUBLIC ${MANAGER_DIR})
 
 # Link libraries
 find_package(glad CONFIG REQUIRED)
+find_package(OpenMP)
 
 target_link_libraries(${RENDER_MANAGER_NAME}
         PUBLIC
@@ -54,6 +55,7 @@ target_link_libraries(${RENDER_MANAGER_NAME}
         PRIVATE
         silence_input_manager
         silence_audio_manager
+        OpenMP::OpenMP_CXX
 
         silence_common
         silence_core

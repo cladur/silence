@@ -1,5 +1,7 @@
 #include "engine.h"
 
+#include "assets/material_asset.h"
+#include "assets/model_asset.h"
 #include "audio/audio_manager.h"
 #include "display/display_manager.h"
 #include "font/font_manager.h"
@@ -13,6 +15,7 @@
 #include "imgui_impl_opengl3.h"
 #include "physics/physics_manager.h"
 #include "render/transparent_elements/ui_manager.h"
+#include <string>
 
 void Engine::startup() {
 	// Managers
