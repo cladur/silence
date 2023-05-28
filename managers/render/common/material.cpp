@@ -435,31 +435,46 @@ void MaterialBloom::bind_instance_resources(ModelInstance &instance, Transform &
 
 void MaterialShadow::startup() {
 	shader.load_from_files(shader_path("shadow/shadow.vert"), shader_path("shadow/shadow.frag"));
+#ifdef WIN32
+	skinned_shader.load_from_files(shader_path("shadow/skinned_shadow.vert"), shader_path("shadow/shadow.vert"));
+#endif
 }
 
 void MaterialShadow::bind_resources(RenderScene &scene) {
-	glEnable(GL_DEPTH_TEST);
-	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	glm::mat4 lightView = glm::lookAt(-Light.GetDirection(), glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
-	m_LightSpace = m_Projection * lightView;
-
 	// render scene from light's point of view
 	shader.use();
-	shader.set_mat4("lightSpaceMatrix", m_LightSpace);
 
-	glViewport(0, 0, WIDTH, HEIGHT);
-	glBindFramebuffer(GL_FRAMEBUFFER, m_FBO);
-	glClear(GL_DEPTH_BUFFER_BIT);
+	const glm::mat4 &light_view = glm::lookAt(current_light_position, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
+	shader.set_mat4("light_space", scene.shadow_buffer.projection * light_view);
+}
 
-	Root.DrawSelfAndChildren(Shader);
+void MaterialShadow::bind_skinned_resources(RenderScene &scene) {
+	// render scene from light's point of view
+	skinned_shader.use();
 
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	const glm::mat4 &light_view = glm::lookAt(current_light_position, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
+	skinned_shader.set_mat4("light_space", scene.shadow_buffer.projection * light_view);
 }
 
 void MaterialShadow::bind_instance_resources(ModelInstance &instance, Transform &transform) {
 	shader.set_mat4("model", transform.get_global_model_matrix());
 }
+
 void MaterialShadow::bind_instance_resources(SkinnedModelInstance &instance, Transform &transform) {
+	skinned_shader.set_mat4("model", transform.get_global_model_matrix());
+	//TODO: make this functionality in shader function
+	glBindBuffer(GL_UNIFORM_BUFFER, instance.skinning_buffer);
+	if (!instance.bone_matrices.empty()) {
+		glBufferSubData(
+				GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4) * instance.bone_matrices.size(), instance.bone_matrices.data());
+	}
+
+	GLuint binding_index = 1;
+	GLuint buffer_index = glGetUniformBlockIndex(skinned_shader.id, "SkinningBuffer");
+	glUniformBlockBinding(skinned_shader.id, buffer_index, binding_index);
+	glBindBufferBase(GL_UNIFORM_BUFFER, binding_index, instance.skinning_buffer);
+}
+
+void MaterialShadow::bind_light_resources(Light &light, Transform &transform) {
+	current_light_position = transform.get_global_position();
 }

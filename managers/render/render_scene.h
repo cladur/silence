@@ -36,6 +36,7 @@ struct RenderScene {
 	AOBlurPass ssao_blur_pass;
 	CombinationPass combination_pass;
 	BloomPass bloom_pass;
+	ShadowPass shadow_pass;
 
 	Framebuffer render_framebuffer;
 	Framebuffer final_framebuffer;

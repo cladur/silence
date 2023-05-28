@@ -10,7 +10,6 @@
 #include "components/light_component.h"
 #include "components/platform_component.h"
 #include "components/rigidbody_component.h"
-#include "components/enemy_data_component.h"
 #include "physics/physics_manager.h"
 #include "render/ecs/model_instance.h"
 #include <imgui.h>
@@ -249,6 +248,13 @@ void Inspector::show_skinnedmodelinstance() {
 			}
 			ImGui::EndCombo();
 		}
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Cast shadow");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		ImGui::Checkbox("##Cast shadow", &modelinstance.in_shadow_pass);
 		ImGui::EndTable();
 
 		if (ImGui::BeginDragDropTarget()) {
@@ -341,6 +347,13 @@ void Inspector::show_modelinstance() {
 		ImGui::TableSetColumnIndex(1);
 		ImGui::SetNextItemWidth(-FLT_MIN);
 		ImGui::Checkbox("##UV Scale", &modelinstance.scale_uv_with_transform);
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Cast shadow");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		ImGui::Checkbox("##Cast shadow", &modelinstance.in_shadow_pass);
 		ImGui::EndTable();
 
 		if (ImGui::BeginDragDropTarget()) {
@@ -693,6 +706,13 @@ void Inspector::show_light() {
 
 		ImGui::TableNextRow();
 		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Cast shadow");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		ImGui::Checkbox("##Cast shadow", &light.cast_shadow);
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
 		ImGui::Text("Light type");
 		ImGui::TableSetColumnIndex(1);
 		ImGui::SetNextItemWidth(-FLT_MIN);
@@ -869,7 +889,6 @@ void Inspector::show_enemy_path() {
 		show_float("Speed", enemy_path.speed);
 		show_float("Rot Speed", enemy_path.rotation_speed);
 		for (auto &node : enemy_path.path) {
-
 			std::string label = fmt::format("Node {}", i);
 			std::string pos_label = fmt::format("{} Position", i);
 			std::string checkbox_label = fmt::format("{} Patrol Point", i);
@@ -1163,4 +1182,3 @@ void Inspector::show_add_component() {
 void Inspector::set_active_entity(Entity entity) {
 	selected_entity = entity;
 }
-

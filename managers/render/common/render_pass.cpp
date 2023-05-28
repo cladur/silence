@@ -269,16 +269,45 @@ void ShadowPass::startup() {
 void ShadowPass::draw(RenderScene &scene) {
 	ResourceManager &resource_manager = ResourceManager::get();
 	material.bind_resources(scene);
-	for (auto &cmd : scene.draw_commands) {
-		ModelInstance &instance = *cmd.model_instance;
-		Transform &transform = *cmd.transform;
-		material.bind_instance_resources(instance, transform);
-		Model &model = resource_manager.get_model(instance.model_handle);
-		for (auto &mesh : model.meshes) {
-			if (mesh.fc_bounding_sphere.is_on_frustum(scene.frustum, transform, scene)) {
-				material.bind_mesh_resources(mesh);
+
+	for (auto &light_cmd : scene.light_draw_commands) {
+		Light &light = *light_cmd.light;
+		if (!light.cast_shadow || light.type != LightType::DIRECTIONAL_LIGHT) {
+			continue;
+		}
+
+		Transform &light_transform = *light_cmd.transform;
+		material.bind_light_resources(light, light_transform);
+
+		for (auto &cmd : scene.draw_commands) {
+			ModelInstance &instance = *cmd.model_instance;
+			if (!instance.in_shadow_pass) {
+				continue;
+			}
+			Transform &transform = *cmd.transform;
+			material.bind_instance_resources(instance, transform);
+			Model &model = resource_manager.get_model(instance.model_handle);
+			for (auto &mesh : model.meshes) {
+				if (mesh.fc_bounding_sphere.is_on_frustum(scene.frustum, transform, scene)) {
+					mesh.draw();
+				}
+			}
+		}
+
+#ifdef WIN32
+		material.bind_skinned_resources(scene);
+		for (auto &cmd : scene.skinned_draw_commands) {
+			SkinnedModelInstance &instance = *cmd.model_instance;
+			if (!instance.in_shadow_pass) {
+				continue;
+			}
+			Transform &transform = *cmd.transform;
+			material.bind_instance_resources(instance, transform);
+			SkinnedModel &model = resource_manager.get_skinned_model(instance.model_handle);
+			for (auto &mesh : model.meshes) {
 				mesh.draw();
 			}
 		}
+#endif
 	}
 }

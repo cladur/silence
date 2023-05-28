@@ -94,7 +94,10 @@ void Shader::load_from_files(
 }
 
 void Shader::use() {
-	glUseProgram(id);
+	if (active_shader_id != id) {
+		glUseProgram(id);
+		active_shader_id = id;
+	}
 }
 
 void Shader::set_bool(const std::string &name, bool value) const {

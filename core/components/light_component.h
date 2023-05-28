@@ -8,6 +8,7 @@ public:
 	glm::vec3 color = { 1.0f, 1.0f, 1.0f };
 	LightType type = POINT_LIGHT;
 	float intensity = 1.0f;
+	bool cast_shadow = false;
 
 	void serialize_json(nlohmann::json &serialized_scene) {
 		nlohmann::json::object_t serialized_component;
@@ -17,6 +18,7 @@ public:
 		serialized_component["color"]["b"] = color.b;
 		serialized_component["intensity"] = intensity;
 		serialized_component["type"] = type;
+		serialized_component["cast_shadow"] = cast_shadow;
 		serialized_scene.push_back(nlohmann::json::object());
 		serialized_scene.back()["component_data"] = serialized_component;
 		serialized_scene.back()["component_name"] = "Light";
@@ -31,6 +33,11 @@ public:
 			intensity = serialized_component["intensity"];
 		} else {
 			intensity = 1.0f;
+		}
+		if (serialized_component.contains("cast_shadow")) {
+			cast_shadow = serialized_component["cast_shadow"];
+		} else {
+			cast_shadow = false;
 		}
 	}
 };

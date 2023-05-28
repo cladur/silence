@@ -84,6 +84,7 @@ class ShadowBuffer {
 public:
 	uint32_t framebuffer_id;
 	uint32_t texture_id;
+	uint32_t shadow_width, shadow_height;
 	glm::mat4 projection;
 
 	void startup(uint32_t width, uint32_t height, float near_plane = 1.0f, float far_plane = 500.5f);

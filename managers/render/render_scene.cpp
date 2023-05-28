@@ -33,6 +33,7 @@ void RenderScene::startup() {
 	combination_pass.startup();
 	default_pass = &pbr_pass;
 	bloom_pass.startup();
+	shadow_pass.startup();
 
 	// Size of the viewport doesn't matter here, it will be resized either way
 	render_extent = glm::vec2(100, 100);
@@ -42,6 +43,7 @@ void RenderScene::startup() {
 	ssao_buffer.startup(render_extent.x, render_extent.y);
 	pbr_buffer.startup(render_extent.x, render_extent.y);
 	bloom_buffer.startup(render_extent.x, render_extent.y, 5);
+	shadow_buffer.startup(1024, 1024, 1.0f, 500.5f);
 	combination_buffer.startup(render_extent.x, render_extent.y);
 	skybox_buffer.startup(render_extent.x, render_extent.y);
 
@@ -56,6 +58,12 @@ void RenderScene::startup() {
 }
 
 void RenderScene::draw_viewport(bool right_side) {
+	glViewport(0, 0, (int)shadow_buffer.shadow_width, (int)shadow_buffer.shadow_height);
+	shadow_buffer.bind();
+	glEnable(GL_DEPTH_TEST);
+	glClear(GL_DEPTH_BUFFER_BIT);
+	shadow_pass.draw(*this);
+
 	glDepthMask(GL_TRUE);
 	g_buffer.bind();
 	glViewport(0, 0, (int)render_extent.x, (int)render_extent.y);
@@ -93,7 +101,7 @@ void RenderScene::draw_viewport(bool right_side) {
 	UIManager::get().draw();
 
 	// Enable depth testing
-	glEnable(GL_DEPTH_TEST);
+	//	glEnable(GL_DEPTH_TEST);
 
 	g_buffer_pass.draw(*this);
 

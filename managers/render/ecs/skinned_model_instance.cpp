@@ -37,6 +37,7 @@ void SkinnedModelInstance::serialize_json(nlohmann::json &serialized_scene) {
 	ResourceManager &resource_manager = ResourceManager::get();
 	serialized_component["model_name"] = resource_manager.get_skinned_model_name(model_handle);
 	serialized_component["material_type"] = material_type;
+	serialized_component["in_shadow_pass"] = in_shadow_pass;
 	serialized_scene.push_back(nlohmann::json::object());
 	serialized_scene.back()["component_data"] = serialized_component;
 	serialized_scene.back()["component_name"] = "SkinnedModelInstance";
@@ -47,6 +48,11 @@ void SkinnedModelInstance::deserialize_json(nlohmann::json &serialized_component
 	ResourceManager &resource_manager = ResourceManager::get();
 	model_handle = resource_manager.load_skinned_model(asset_path(model_name).c_str());
 	material_type = static_cast<MaterialType>(serialized_component["material_type"]);
+	if (serialized_component.contains("in_shadow_pass")) {
+		in_shadow_pass = serialized_component["in_shadow_pass"];
+	} else {
+		in_shadow_pass = false;
+	}
 }
 
 void SkinnedModelInstance::release() {

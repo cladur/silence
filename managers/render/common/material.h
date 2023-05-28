@@ -113,11 +113,16 @@ public:
 };
 
 class MaterialShadow : public Material {
+	Shader skinned_shader;
+
 public:
+	glm::vec3 current_light_position;
 	void startup() override;
 	void bind_resources(RenderScene &scene) override;
+	void bind_skinned_resources(RenderScene &scene);
 	void bind_instance_resources(ModelInstance &instance, Transform &transform) override;
 	void bind_instance_resources(SkinnedModelInstance &instance, Transform &transform);
+	void bind_light_resources(Light &light, Transform &transform);
 };
 
 #endif // SILENCE_MATERIAL_H
