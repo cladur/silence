@@ -11,6 +11,7 @@ AutoCVarInt cvar_use_bloom("render.use_bloom", "use bloom", 1, CVarFlags::EditCh
 AutoCVarFloat cvar_bloom_strength("render.bloom_strength", "bloom strength", 0.04f, CVarFlags::EditFloatDrag);
 
 AutoCVarFloat cvar_gamma("render.gamma", "gamma", 2.2f, CVarFlags::EditFloatDrag);
+AutoCVarFloat cvar_dirt_strength("render.dirt_strength", "dirt strength", 0.275f, CVarFlags::EditFloatDrag);
 
 void PBRPass::startup() {
 	material.startup();
@@ -254,11 +255,18 @@ void CombinationPass::draw(RenderScene &scene) {
 
 void BloomPass::startup() {
 	material.startup();
+	// change dirt texture here
+	ResourceManager::get().load_texture(asset_path("lens_dirts/lens_dirt_2.ktx2").c_str());
+	dirt_texture = ResourceManager::get().get_texture_handle("lens_dirt_2");
+	dirt_offsets[0] = rand() % 4444 / 8888.0f;
+	dirt_offsets[1] = rand() % 2222 / 4444.0f;
+
 }
 
 void BloomPass::draw(RenderScene &scene) {
 	ZoneScopedN("BloomPass::draw");
 	std::vector<BloomMip> &mips = scene.bloom_buffer.mips;
+	static int offset = 0;
 
 	// DOWNSAMPLING
 	material.downsample.use();
@@ -304,13 +312,23 @@ void BloomPass::draw(RenderScene &scene) {
 	material.shader.use();
 	material.shader.set_int("scene", 0);
 	material.shader.set_int("bloom_tex", 1);
+	material.shader.set_int("dirt", 2);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, scene.combination_buffer.texture_id);
 	glActiveTexture(GL_TEXTURE0 + 1);
 	glBindTexture(GL_TEXTURE_2D, mips[0].texture_id);
+	glActiveTexture(GL_TEXTURE0 + 2);
+	glBindTexture(GL_TEXTURE_2D, ResourceManager::get().get_texture(dirt_texture).id);
 	material.shader.set_int("use_bloom", cvar_use_bloom.get());
 	material.shader.set_float("bloom_strength", cvar_bloom_strength.get());
 	material.shader.set_float("gamma", cvar_gamma.get());
+	material.shader.set_float("dirt_strength", cvar_dirt_strength.get());
+	material.shader.set_float("aspect_ratio", (float)scene.render_extent.x / (float)scene.full_render_extent.x);
+	if (scene.render_extent.x - scene.full_render_extent.x < 0.0f) {
+		material.shader.set_float("dirt_offset", dirt_offsets[offset++ % 2]);
+	} else {
+		material.shader.set_float("dirt_offset", 0.0f);
+	}
 	utils::render_quad();
 }
 

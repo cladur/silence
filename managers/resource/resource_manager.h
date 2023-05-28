@@ -14,7 +14,8 @@ template <typename T> struct Handle {
 
 class ResourceManager {
 private:
-	std::unordered_map<std::string, Texture> textures;
+	std::vector<Texture> textures;
+	std::unordered_map<std::string, Handle<Texture>> name_to_texture;
 	std::vector<Model> models;
 	std::unordered_map<std::string, Handle<Model>> name_to_model;
 	std::vector<Animation> animations;
@@ -31,12 +32,15 @@ public:
 	void shutdown();
 
 	Handle<Model> load_model(const char *path);
-	void load_texture(const char *path);
+	Handle<Texture> load_texture(const char *path);
 
 	Model &get_model(Handle<Model> handle);
 	Handle<Model> get_model_handle(std::string name);
 	std::string get_model_name(Handle<Model> handle);
 	std::vector<Model> &get_models();
+	Texture &get_texture(Handle<Texture> handle);
+	Handle<Texture> get_texture_handle(std::string name);
+	std::string get_texture_name(Handle<Texture> handle);
 
 	Handle<Animation> load_animation(const char *path);
 	Animation &get_animation(Handle<Animation> handle);
