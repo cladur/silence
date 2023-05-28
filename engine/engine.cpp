@@ -54,9 +54,12 @@ void Engine::run() {
 
 		auto stop_time = std::chrono::high_resolution_clock::now();
 
-		while (std::chrono::duration<float, std::chrono::seconds::period>(stop_time - start_time).count() <
-				target_frame_time) {
-			stop_time = std::chrono::high_resolution_clock::now();
+		{
+			ZoneScopedNC("Sleep", tracy::Color::Blue);
+			while (std::chrono::duration<float, std::chrono::seconds::period>(stop_time - start_time).count() <
+					target_frame_time) {
+				stop_time = std::chrono::high_resolution_clock::now();
+			}
 		}
 
 		dt = std::chrono::duration<float, std::chrono::seconds::period>(stop_time - start_time).count();
@@ -89,7 +92,6 @@ void Engine::update(float dt) {
 	}
 
 	// Update
-
 	custom_update(dt);
 
 	for (auto &scene : scenes) {

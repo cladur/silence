@@ -109,6 +109,7 @@ void HackerSystem::startup(World &world) {
 }
 
 void HackerSystem::update(World &world, float dt) {
+	ZoneScopedN("HackerSystem::update");
 	InputManager &input_manager = InputManager::get();
 	;
 	AnimationManager &animation_manager = AnimationManager::get();

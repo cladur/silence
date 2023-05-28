@@ -344,6 +344,7 @@ void Game::shutdown() {
 }
 
 void Game::custom_update(float dt) {
+	ZoneScopedN("Custom Update");
 	DisplayManager &display_manager = DisplayManager::get();
 	InputManager &input_manager = InputManager::get();
 

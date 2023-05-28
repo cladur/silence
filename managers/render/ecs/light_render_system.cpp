@@ -24,6 +24,7 @@ void LightRenderSystem::startup(World &world) {
 }
 
 void LightRenderSystem::update(World &world, float dt) {
+	ZoneScopedN("LightRenderSystem::update");
 	auto &render_scene = world.get_parent_scene()->get_render_scene();
 	bool debug_draw_enabled = cvar_light_debug_draw_enabled.get() == 1;
 

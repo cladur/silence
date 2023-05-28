@@ -58,6 +58,8 @@ void RenderScene::startup() {
 }
 
 void RenderScene::draw_viewport(bool right_side) {
+	ZoneScopedN("RenderScene::draw_viewport");
+
 	glDepthMask(GL_TRUE);
 	g_buffer.bind();
 	glViewport(0, 0, (int)render_extent.x, (int)render_extent.y);
@@ -190,6 +192,7 @@ void RenderScene::draw_viewport(bool right_side) {
 }
 
 void RenderScene::draw() {
+	ZoneScopedN("RenderScene::draw");
 	static bool was_splitscreen = cvar_splitscreen.get();
 	static bool was_debug_camera = cvar_debug_camera_use.get();
 	if (was_splitscreen != cvar_splitscreen.get() || was_debug_camera != cvar_debug_camera_use.get()) {
@@ -202,17 +205,23 @@ void RenderScene::draw() {
 	if (cvar_splitscreen.get() && !cvar_debug_camera_use.get()) {
 		draw_viewport(false);
 
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, render_framebuffer.framebuffer_id);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, final_framebuffer.framebuffer_id);
-		glBlitFramebuffer(0, 0, render_extent.x, render_extent.y, 0, 0, render_extent.x, render_extent.y,
-				GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		{
+			ZoneScopedN("RenderScene::draw");
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, render_framebuffer.framebuffer_id);
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, final_framebuffer.framebuffer_id);
+			glBlitFramebuffer(0, 0, render_extent.x, render_extent.y, 0, 0, render_extent.x, render_extent.y,
+					GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		}
 
 		draw_viewport(true);
 
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, render_framebuffer.framebuffer_id);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, final_framebuffer.framebuffer_id);
-		glBlitFramebuffer(0, 0, render_extent.x, render_extent.y, render_extent.x, 0, 2 * render_extent.x,
-				render_extent.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		{
+			ZoneScopedN("RenderScene::blit");
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, render_framebuffer.framebuffer_id);
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, final_framebuffer.framebuffer_id);
+			glBlitFramebuffer(0, 0, render_extent.x, render_extent.y, render_extent.x, 0, 2 * render_extent.x,
+					render_extent.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		}
 	} else {
 		int *controlling_agent = CVarSystem::get()->get_int_cvar("game.controlling_agent");
 		bool right_side = false;
@@ -221,10 +230,13 @@ void RenderScene::draw() {
 		}
 		draw_viewport(right_side);
 
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, render_framebuffer.framebuffer_id);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, final_framebuffer.framebuffer_id);
-		glBlitFramebuffer(0, 0, render_extent.x, render_extent.y, 0, 0, render_extent.x, render_extent.y,
-				GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		{
+			ZoneScopedN("RenderScene::blit");
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, render_framebuffer.framebuffer_id);
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, final_framebuffer.framebuffer_id);
+			glBlitFramebuffer(0, 0, render_extent.x, render_extent.y, 0, 0, render_extent.x, render_extent.y,
+					GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		}
 	}
 
 	draw_commands.clear();

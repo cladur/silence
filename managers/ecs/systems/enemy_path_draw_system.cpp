@@ -12,6 +12,7 @@ void EnemyPathDraw::startup(World &world) {
 }
 
 void EnemyPathDraw::update(World &world, float dt) {
+	ZoneScopedN("EnemyPathDraw::update");
 	auto &r_s = world.get_parent_scene()->get_render_scene();
 	for (const Entity entity : entities) {
 		auto &enemy_path = world.get_component<EnemyPath>(entity);

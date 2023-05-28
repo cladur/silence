@@ -14,6 +14,7 @@ void ColliderDrawSystem::update(World &world, float dt) {
 	if (cvar_collider_draw_system_enabled.get() == 0) {
 		return;
 	}
+	ZoneScopedN("ColliderDrawSystem::update");
 	for (const Entity entity : entities) {
 		const auto &transform = world.get_component<Transform>(entity);
 		const glm::vec3 &position = transform.get_global_position();
@@ -35,8 +36,7 @@ void ColliderDrawSystem::update(World &world, float dt) {
 		} else if (world.has_component<ColliderCapsule>(entity)) {
 			const auto &col = world.get_component<ColliderCapsule>(entity);
 			world.get_parent_scene()->get_render_scene().debug_draw.draw_sphere(
-					position + col.start * scale, col.radius * scale.x, glm::vec3(1.0f)),
-					entity;
+					position + col.start * scale, col.radius * scale.x, glm::vec3(1.0f), entity);
 			world.get_parent_scene()->get_render_scene().debug_draw.draw_sphere(
 					position + col.end * scale, col.radius * scale.x, glm::vec3(1.0f), entity);
 			world.get_parent_scene()->get_render_scene().debug_draw.draw_line(

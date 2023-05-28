@@ -17,6 +17,7 @@ void EnemySystem::startup(World &world) {
 }
 
 void EnemySystem::update(World &world, float dt) {
+	ZoneScopedN("EnemySystem::update");
 	for (auto const &entity : entities) {
 		auto &t = world.get_component<Transform>(entity);
 		auto &ed = world.get_component<EnemyData>(entity);
@@ -43,9 +44,7 @@ void EnemySystem::update(World &world, float dt) {
 			ed.state_machine.set_state("patrolling");
 
 			ui.create_ui_scene(std::to_string(entity) + "_detection");
-			auto &slider = ui.add_ui_slider(
-					std::to_string(entity) + "_detection",
-					"detection_slider");
+			auto &slider = ui.add_ui_slider(std::to_string(entity) + "_detection", "detection_slider");
 			slider.position = glm::vec3(0.0f, 2.0f, 0.0f);
 			slider.is_billboard = true;
 			slider.is_screen_space = false;

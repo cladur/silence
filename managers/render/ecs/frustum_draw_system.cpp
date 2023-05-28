@@ -19,6 +19,7 @@ void FrustumDrawSystem::startup(World &world) {
 }
 
 void FrustumDrawSystem::update(World &world, float dt) {
+	ZoneScopedN("FrustumDrawSystem::update");
 	if (!cvar_frustum_draw_system_enabled.get()) {
 		return;
 	}

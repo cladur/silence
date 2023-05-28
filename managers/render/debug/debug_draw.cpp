@@ -259,6 +259,7 @@ void DebugDraw::draw_box(const glm::vec3 &center, const glm::vec3 &rotation, con
 
 // Draw a sphere with center at "center" and radius "radius".
 void DebugDraw::draw_sphere(const glm::vec3 &center, float radius, const glm::vec3 &color, Entity entity) {
+	ZoneScopedN("DebugDraw::draw_sphere");
 	// Generate a sphere mesh, using draw_line to draw the lines
 	const int num_segments = 12; // number of horizontal segments
 	const int num_rings = 6; // number of vertical rings

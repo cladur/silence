@@ -17,6 +17,7 @@ void PBRPass::startup() {
 }
 
 void PBRPass::draw(RenderScene &scene) {
+	ZoneScopedN("PBRPass::draw");
 	ResourceManager &resource_manager = ResourceManager::get();
 	material.bind_resources(scene);
 	utils::render_quad();
@@ -27,6 +28,7 @@ void LightPass::startup() {
 }
 
 void LightPass::draw(RenderScene &scene) {
+	ZoneScopedN("LightPass::draw");
 	ResourceManager &resource_manager = ResourceManager::get();
 	material.bind_resources(scene);
 	for (auto &cmd : scene.light_draw_commands) {
@@ -42,6 +44,7 @@ void AOPass::startup() {
 }
 
 void AOPass::draw(RenderScene &scene) {
+	ZoneScopedN("AOPass::draw");
 	RenderManager &render_manager = RenderManager::get();
 	material.bind_resources(scene);
 	utils::render_quad();
@@ -52,6 +55,7 @@ void AOBlurPass::startup() {
 }
 
 void AOBlurPass::draw(RenderScene &scene) {
+	ZoneScopedN("AOBlurPass::draw");
 	RenderManager &render_manager = RenderManager::get();
 	material.bind_resources(scene);
 	utils::render_quad();
@@ -64,6 +68,7 @@ void SkyboxPass::startup() {
 }
 
 void SkyboxPass::draw(RenderScene &scene) {
+	ZoneScopedN("SkyboxPass::draw");
 	material.bind_resources(scene);
 	skybox.draw();
 }
@@ -108,6 +113,7 @@ void GBufferPass::startup() {
 }
 
 void GBufferPass::draw(RenderScene &scene) {
+	ZoneScopedN("GBufferPass::draw");
 	ResourceManager &resource_manager = ResourceManager::get();
 	material.bind_resources(scene);
 	for (auto &cmd : scene.draw_commands) {
@@ -139,7 +145,7 @@ void GBufferPass::draw(RenderScene &scene) {
 }
 
 void TransparentPass::draw(RenderScene &scene) {
-	ZoneScopedNC("TransparentPass::draw()", 0xad074f);
+	ZoneScopedNC("TransparentPass::draw", 0xad074f);
 	RenderManager &render_manager = RenderManager::get();
 	static std::vector<TransparentObject> screen_space_objects;
 	glm::vec3 cam_pos = scene.camera_pos;
@@ -197,6 +203,7 @@ void CombinationPass::startup() {
 }
 
 void CombinationPass::draw(RenderScene &scene) {
+	ZoneScopedN("CombinationPass::draw");
 	material.bind_resources(scene);
 	utils::render_quad();
 }
@@ -206,6 +213,7 @@ void BloomPass::startup() {
 }
 
 void BloomPass::draw(RenderScene &scene) {
+	ZoneScopedN("BloomPass::draw");
 	std::vector<BloomMip> &mips = scene.bloom_buffer.mips;
 
 	// DOWNSAMPLING
@@ -267,6 +275,7 @@ void MousePickPass::startup() {
 }
 
 void MousePickPass::draw(RenderScene &scene) {
+	ZoneScopedN("MousePickPass::draw");
 	ResourceManager &resource_manager = ResourceManager::get();
 	material.bind_resources(scene);
 	for (auto &cmd : scene.draw_commands) {

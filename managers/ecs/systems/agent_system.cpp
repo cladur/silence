@@ -51,6 +51,7 @@ void AgentSystem::startup(World &world) {
 }
 
 void AgentSystem::update(World &world, float dt) {
+	ZoneScopedN("AgentSystem::update");
 	InputManager &input_manager = InputManager::get();
 	AnimationManager &animation_manager = AnimationManager::get();
 	ResourceManager &resource_manager = ResourceManager::get();
