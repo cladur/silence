@@ -27,7 +27,7 @@ void GameplayManager::update(World &world, float dt) {
 	if (disabled) {
 		return;
 	}
-	world.get_parent_scene()->get_render_scene().debug_draw.draw_sphere(get_agent_position(world.get_parent_scene()), cv_enemy_near_player_radius.get(), glm::vec3(1.0f, 1.0f, 0.0f), 128);
+	//world.get_parent_scene()->get_render_scene().debug_draw.draw_sphere(get_agent_position(world.get_parent_scene()), cv_enemy_near_player_radius.get(), glm::vec3(1.0f, 1.0f, 0.0f), 32);
 	// calculate highest detection level
 	highest_detection = *std::max_element(detection_levels.begin(), detection_levels.end());
 

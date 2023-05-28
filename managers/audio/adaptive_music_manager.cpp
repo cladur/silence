@@ -2,6 +2,7 @@
 #include "audio_manager.h"
 #include "fmod_errors.h"
 #include <gameplay/gameplay_manager.h>
+//#include <render/transparent_elements/ui_manager.h>
 
 #define FMOD_CHECK(x)                                                                                                  \
 	do {                                                                                                               \
@@ -20,6 +21,39 @@ AutoCVarInt music_is_crounching("music.is_crounching", "is crounching" , 0);
 void AdaptiveMusicManager::startup(std::string name_of_event) {
 	event_ref = EventReference(name_of_event);
 	event_instance = AudioManager::get().create_event_instance(event_ref);
+
+//	auto &ui = UIManager::get();
+//	ui.create_ui_scene("adaptive_music");
+//	auto &anchor = ui.add_ui_anchor("adaptive_music", "adaptive_music_anchor");
+//	anchor.is_screen_space = true;
+//	anchor.x = 0.0f;
+//	anchor.y = 1.0f;
+//	auto &text = ui.add_ui_text("adaptive_music", "drum_intensity");
+//	text.text = "drum_intensity: 0%";
+//	text.is_screen_space = true;
+//	text.size = glm::vec2(0.6f, 0.6f);
+//	text.centered_x = false;
+//	text.position = glm::vec3(150.0f, -100.0f, 0.0f);
+//
+//	auto &text1 = ui.add_ui_text("adaptive_music", "melodic_intensity");
+//	text1.text = "melodic_intensity: 0%";
+//	text1.is_screen_space = true;
+//	text1.size = glm::vec2(0.6f, 0.6f);
+//	text1.centered_x = false;
+//	text1.position = glm::vec3(150.0f, -150.0f, 0.0f);
+//
+//	auto &text2 = ui.add_ui_text("adaptive_music", "detection");
+//	text2.text = "detection: 0%";
+//	text2.is_screen_space = true;
+//	text2.size = glm::vec2(0.6f, 0.6f);
+//	text2.centered_x = false;
+//	text2.position = glm::vec3(150.0f, -200.0f, 0.0f);
+//
+//	ui.add_as_root("adaptive_music", "adaptive_music_anchor");
+//	ui.add_to_root("adaptive_music", "drum_intensity", "adaptive_music_anchor");
+//	ui.add_to_root("adaptive_music", "melodic_intensity", "adaptive_music_anchor");
+//	ui.add_to_root("adaptive_music", "detection", "adaptive_music_anchor");
+//	ui.activate_ui_scene("adaptive_music");
 }
 
 void AdaptiveMusicManager::shutdown() {
@@ -54,6 +88,11 @@ void AdaptiveMusicManager::update(float dt) {
 	// just to make sure
 	drum_intensity = std::clamp(drum_intensity, 0.0f, 1.0f);
 	melodic_intensity = std::clamp(melodic_intensity, 0.0f, 1.0f);
+
+//	auto &ui = UIManager::get();
+//	ui.get_ui_text("adaptive_music", "drum_intensity").text = fmt::format("drum_intensity: {:.0f}%", drum_intensity * 100.0f);
+//	ui.get_ui_text("adaptive_music", "melodic_intensity").text = fmt::format("melodic_intensity: {:.0f}%", melodic_intensity * 100.0f);
+//	ui.get_ui_text("adaptive_music", "detection").text = fmt::format("detection: {:.0f}%", detection_level * 100.0f);
 
 	AudioManager::get().set_global_param_by_name(detection_param, detection_level);
 	AudioManager::get().set_global_param_by_name(drum_param, drum_intensity);
