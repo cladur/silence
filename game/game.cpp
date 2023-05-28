@@ -1,5 +1,6 @@
 #include "game.h"
 
+#include "animation/animation_manager.h"
 #include "audio/adaptive_music_manager.h"
 #include "audio/audio_manager.h"
 #include "cvars/cvars.h"
@@ -9,7 +10,6 @@
 #include "input/input_manager.h"
 #include "render/transparent_elements/ui/sprite_manager.h"
 #include "render/transparent_elements/ui_manager.h"
-#include <spdlog/spdlog.h>
 
 AutoCVarInt cvar_controlling_agent("game.controlling_agent", "Controlling agent", 1, CVarFlags::EditCheckbox);
 
@@ -255,8 +255,8 @@ void input_setup() {
 	input_manager.add_action("agent_move_right");
 	input_manager.add_key_to_action("agent_move_right", InputKey::D);
 
-	input_manager.add_action("set_agent_crouch");
-	input_manager.add_key_to_action("set_agent_crouch", InputKey::LEFT_CONTROL);
+	input_manager.add_action("agent_crouch");
+	input_manager.add_key_to_action("agent_crouch", InputKey::C);
 
 	//add actions to arrows
 	input_manager.add_action("hacker_move_forward");
@@ -304,6 +304,9 @@ void input_setup() {
 
 	input_manager.add_action("toggle_splitscreen");
 	input_manager.add_key_to_action("toggle_splitscreen", InputKey::F3);
+
+	input_manager.add_action("reload_scene");
+	input_manager.add_key_to_action("reload_scene", InputKey::F4);
 }
 
 void handle_camera(DebugCamera &cam, float dt) {
@@ -336,6 +339,7 @@ void Game::startup() {
 	// Disable debug stuff on startup
 	CVarSystem::get()->set_int_cvar("debug_draw.frustum.draw", 0);
 	CVarSystem::get()->set_int_cvar("debug_draw.collision.draw", 0);
+	CVarSystem::get()->set_int_cvar("debug_draw.lights.draw", 0);
 	CVarSystem::get()->set_int_cvar("debug_camera.use", 0);
 	CVarSystem::get()->set_int_cvar("render.splitscreen", 1);
 }
@@ -345,6 +349,7 @@ void Game::shutdown() {
 }
 
 void Game::custom_update(float dt) {
+	ZoneScopedN("Custom Update");
 	DisplayManager &display_manager = DisplayManager::get();
 	InputManager &input_manager = InputManager::get();
 
@@ -424,5 +429,10 @@ void Game::custom_update(float dt) {
 		ImGui::Text("Press ESC to get back to the game");
 		ImGui::Text("%f FPS (%.2f ms)", 1.0f / dt, 1000.0f * dt);
 		ImGui::End();
+	}
+
+	if (input_manager.is_action_just_pressed("reload_scene")) {
+		get_active_scene().load_from_file("resources/scenes/level_0.scn");
+		AnimationManager::get().animation_map.clear();
 	}
 }

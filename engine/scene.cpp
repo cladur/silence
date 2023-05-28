@@ -102,6 +102,7 @@ void Scene::register_game_systems() {
 }
 
 void Scene::update(float dt) {
+	ZoneScopedN("Scene::update");
 	for (Entity entity : entities) {
 		if (world.has_component<Camera>(entity) && world.has_component<Transform>(entity)) {
 			auto &camera = world.get_component<Camera>(entity);

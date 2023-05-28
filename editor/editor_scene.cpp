@@ -109,6 +109,31 @@ void EditorScene::update(float dt) {
 	}
 }
 
+void EditorScene::duplicate_selected_entity() {
+	if (selected_entity == 0) {
+		return;
+	}
+
+	Entity parent = 0;
+	if (world.has_component<Parent>(selected_entity)) {
+		parent = world.get_component<Parent>(selected_entity).parent;
+	}
+
+	nlohmann::json scene_json = nlohmann::json::array();
+	scene_json.push_back(nlohmann::json::object());
+	world.serialize_entity_json(scene_json.back(), selected_entity);
+
+	scene_json.back()["entity"] = 0;
+
+	world.deserialize_entity_json(scene_json.back(), entities);
+
+	selected_entity = entities.back();
+
+	if (parent) {
+		world.add_child(parent, selected_entity);
+	}
+}
+
 void EditorScene::save_to_file(const std::string &path) {
 	Scene::save_to_file(path);
 }

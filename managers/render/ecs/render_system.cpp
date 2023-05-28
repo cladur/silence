@@ -13,11 +13,12 @@ void RenderSystem::startup(World &world) {
 }
 
 void RenderSystem::update(World &world, float dt) {
+	ZoneScopedN("RenderSystem::update");
 	RenderManager &render_manager = RenderManager::get();
 	for (auto const &entity : entities) {
 		auto &transform = world.get_component<Transform>(entity);
 		auto &model_instance = world.get_component<ModelInstance>(entity);
 
-		world.get_parent_scene()->get_render_scene().queue_draw(&model_instance, &transform);
+		world.get_parent_scene()->get_render_scene().queue_draw(&model_instance, &transform, entity);
 	}
 }

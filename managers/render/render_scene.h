@@ -36,6 +36,7 @@ struct RenderScene {
 	AOBlurPass ssao_blur_pass;
 	CombinationPass combination_pass;
 	BloomPass bloom_pass;
+	MousePickPass mouse_pick_pass;
 
 	Framebuffer render_framebuffer;
 	Framebuffer final_framebuffer;
@@ -45,7 +46,14 @@ struct RenderScene {
 	CombinationBuffer combination_buffer;
 	BloomBuffer bloom_buffer;
 	SkyboxBuffer skybox_buffer;
+
+	// render extent that does not change whether we're in splitscreen or not
+	glm::vec2 full_render_extent;
+
 	glm::vec2 render_extent;
+
+	// Editor only
+	MousePickFramebuffer mouse_pick_framebuffer;
 
 	DebugDraw debug_draw;
 
@@ -62,9 +70,11 @@ struct RenderScene {
 	void draw();
 	void resize_framebuffer(uint32_t width, uint32_t height);
 
-	void queue_draw(ModelInstance *model_instance, Transform *transform);
-	void queue_skinned_draw(SkinnedModelInstance *model_instance, Transform *transform);
+	void queue_draw(ModelInstance *model_instance, Transform *transform, Entity entity);
+	void queue_skinned_draw(SkinnedModelInstance *model_instance, Transform *transform, Entity entity);
 	void queue_light_draw(Light *light, Transform *transform);
+
+	Entity get_entity_at_mouse_position(float x, float y) const;
 };
 
 #endif //SILENCE_RENDER_SCENE_H

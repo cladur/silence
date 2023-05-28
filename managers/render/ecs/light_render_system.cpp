@@ -11,7 +11,7 @@ AutoCVarFloat cvar_light_threshold(
 		"render.light_threshold", "At what point do we treat light intensity as 0", 0.025f, CVarFlags::EditFloatDrag);
 
 AutoCVarInt cvar_light_debug_draw_enabled(
-		"debug_draw.lights.draw", "enable lights debug draw", 0, CVarFlags::EditCheckbox);
+		"debug_draw.lights.draw", "enable lights debug draw", 1, CVarFlags::EditCheckbox);
 
 void LightRenderSystem::startup(World &world) {
 	Signature blacklist;
@@ -24,6 +24,7 @@ void LightRenderSystem::startup(World &world) {
 }
 
 void LightRenderSystem::update(World &world, float dt) {
+	ZoneScopedN("LightRenderSystem::update");
 	auto &render_scene = world.get_parent_scene()->get_render_scene();
 	bool debug_draw_enabled = cvar_light_debug_draw_enabled.get() == 1;
 
@@ -45,19 +46,22 @@ void LightRenderSystem::update(World &world, float dt) {
 		switch (light.type) {
 			case LightType::DIRECTIONAL_LIGHT:
 				if (debug_draw_enabled) {
-					render_scene.debug_draw.draw_arrow(position, direction, 2.0f, light.color);
+					render_scene.debug_draw.draw_arrow(position, direction, 2.0f, light.color, entity);
 				}
 				break;
 			case LightType::POINT_LIGHT:
 				if (debug_draw_enabled) {
-					render_scene.debug_draw.draw_circle(position, glm::vec3(1.0f, 0.0f, 0.0f), radius, light.color);
-					render_scene.debug_draw.draw_circle(position, glm::vec3(0.0f, 1.0f, 0.0f), radius, light.color);
-					render_scene.debug_draw.draw_circle(position, glm::vec3(0.0f, 0.0f, 1.0f), radius, light.color);
+					render_scene.debug_draw.draw_circle(
+							position, glm::vec3(1.0f, 0.0f, 0.0f), radius, light.color, entity);
+					render_scene.debug_draw.draw_circle(
+							position, glm::vec3(0.0f, 1.0f, 0.0f), radius, light.color, entity);
+					render_scene.debug_draw.draw_circle(
+							position, glm::vec3(0.0f, 0.0f, 1.0f), radius, light.color, entity);
 				}
 				break;
 			case LightType::SPOT_LIGHT:
 				if (debug_draw_enabled) {
-					render_scene.debug_draw.draw_cone(position, direction, 2.0f, 1.0f, light.color);
+					render_scene.debug_draw.draw_cone(position, direction, 2.0f, 1.0f, light.color, entity);
 				}
 				break;
 		}

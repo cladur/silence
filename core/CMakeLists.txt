@@ -52,6 +52,7 @@ find_package(imgui CONFIG REQUIRED)
 find_package(magic_enum CONFIG REQUIRED)
 find_package(Tracy CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
+find_package(OpenMP)
 
 target_link_libraries(${COMMON_LIB_NAME} INTERFACE
         spdlog::spdlog spdlog::spdlog_header_only
@@ -60,6 +61,7 @@ target_link_libraries(${COMMON_LIB_NAME} INTERFACE
         magic_enum::magic_enum
         Tracy::TracyClient
         nlohmann_json::nlohmann_json
+        OpenMP::OpenMP_CXX
         )
 
 target_link_libraries(${CORE_LIB_NAME} PRIVATE

@@ -15,6 +15,7 @@ void IsolatedEntitiesSystem::startup(World &world) {
 	world.set_system_component_whitelist<IsolatedEntitiesSystem>(whitelist);
 }
 void IsolatedEntitiesSystem::update(World &world, float dt) {
+	ZoneScopedN("IsolatedEntitiesSystem::update");
 	for (auto const &entity : entities) {
 		world.get_component<Transform>(entity).update_global_model_matrix();
 	}
