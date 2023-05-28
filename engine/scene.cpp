@@ -32,51 +32,58 @@
 #define COLLISION_TEST_ENTITY 4
 
 Scene::Scene() {
+	ZoneNamedNC(Zone1, "Scene::Scene()", tracy::Color::RebeccaPurple, true);
 	// ECS
 	world.startup();
 	world.parent_scene = this;
 
+	ZoneNamedNC(Zone2, "Scene::Scene()::Components", tracy::Color::Green, true);
+	{
+		world.register_component<Name>();
+		world.register_component<Transform>();
+		world.register_component<RigidBody>();
+		world.register_component<Parent>();
+		world.register_component<Children>();
+		world.register_component<ModelInstance>();
+		world.register_component<SkinnedModelInstance>();
+		world.register_component<AnimationInstance>();
+		world.register_component<FmodListener>();
+		world.register_component<Camera>();
+		world.register_component<StaticTag>();
+		world.register_component<ColliderTag>();
+		world.register_component<ColliderSphere>();
+		world.register_component<ColliderAABB>();
+		world.register_component<ColliderCapsule>();
+		world.register_component<ColliderOBB>();
+		world.register_component<Light>();
+		world.register_component<AgentData>();
+		world.register_component<HackerData>();
+		world.register_component<EnemyPath>();
+		world.register_component<Interactable>();
+		world.register_component<Attachment>();
+		world.register_component<Platform>();
+		world.register_component<ExplodingBox>();
+		world.register_component<EnemyData>();
+	}
 	// Components
-	world.register_component<Name>();
-	world.register_component<Transform>();
-	world.register_component<RigidBody>();
-	world.register_component<Parent>();
-	world.register_component<Children>();
-	world.register_component<ModelInstance>();
-	world.register_component<SkinnedModelInstance>();
-	world.register_component<AnimationInstance>();
-	world.register_component<FmodListener>();
-	world.register_component<Camera>();
-	world.register_component<StaticTag>();
-	world.register_component<ColliderTag>();
-	world.register_component<ColliderSphere>();
-	world.register_component<ColliderAABB>();
-	world.register_component<ColliderCapsule>();
-	world.register_component<ColliderOBB>();
-	world.register_component<Light>();
-	world.register_component<AgentData>();
-	world.register_component<HackerData>();
-	world.register_component<EnemyPath>();
-	world.register_component<Interactable>();
-	world.register_component<Attachment>();
-	world.register_component<Platform>();
-	world.register_component<ExplodingBox>();
-	world.register_component<EnemyData>();
 
-	// Systems
-	// TODO: Set update order instead of using default value
-	world.register_system<RenderSystem>();
-	world.register_system<SkinnedRenderSystem>();
-	world.register_system<ColliderDrawSystem>();
-	world.register_system<AnimationSystem>(EcsOnLoad);
-	world.register_system<FrustumDrawSystem>();
-	world.register_system<LightRenderSystem>();
-	world.register_system<EnemyPathDraw>();
+	ZoneNamedNC(Zone3, "Scene::Scene()::Systems", tracy::Color::Orange, true);
+	{
+		// Systems
+		// TODO: Set update order instead of using default value
+		world.register_system<RenderSystem>();
+		world.register_system<SkinnedRenderSystem>();
+		world.register_system<ColliderDrawSystem>();
+		world.register_system<AnimationSystem>(EcsOnLoad);
+		world.register_system<FrustumDrawSystem>();
+		world.register_system<LightRenderSystem>();
+		world.register_system<EnemyPathDraw>();
 
-	// Transform
-	world.register_system<IsolatedEntitiesSystem>(EcsOnLoad);
-	world.register_system<RootParentSystem>(EcsOnLoad);
-	world.register_system<AttachmentSystem>(EcsPostLoad);
+		// Transform
+		world.register_system<IsolatedEntitiesSystem>(EcsOnLoad);
+		world.register_system<RootParentSystem>(EcsOnLoad);
+		world.register_system<AttachmentSystem>(EcsPostLoad);
+	}
 
 	auto &physics_manager = PhysicsManager::get();
 	physics_manager.add_collision_layer("default");

@@ -1,5 +1,8 @@
 #include "world.h"
 
+#include "assets/material_asset.h"
+#include "assets/model_asset.h"
+#include "assets/skinned_model_asset.h"
 #include "component_visitor.h"
 #include "components/children_component.h"
 #include "components/parent_component.h"
@@ -7,7 +10,10 @@
 #include "serialization.h"
 #include <spdlog/spdlog.h>
 
+#include <common/TracyColor.hpp>
+#include <common/TracyQueue.hpp>
 #include <future>
+#include <tracy/tracy.hpp>
 #include <vector>
 
 void World::startup() {
@@ -148,6 +154,8 @@ void World::deserialize_entity_json(nlohmann::json &json, std::vector<Entity> &e
 void World::deserialize_entities_json(nlohmann::json &json, std::vector<Entity> &entities) {
 	ResourceManager &resource_manager = ResourceManager::get();
 	std::set<std::string> assets_to_load;
+	std::set<std::string> skinned_assets_to_load;
+
 	for (auto &array_entity : json) {
 		for (auto &component : array_entity["components"]) {
 			std::string component_name = component["component_name"];
@@ -155,18 +163,77 @@ void World::deserialize_entities_json(nlohmann::json &json, std::vector<Entity> 
 			if (component_id == component_ids["ModelInstance"]) {
 				std::string model_path = component["component_data"]["model_name"];
 				assets_to_load.insert(model_path);
+			} else if (component_id == component_ids["SkinnedModelInstance"]) {
+				std::string model_path = component["component_data"]["model_name"];
+				skinned_assets_to_load.insert(model_path);
 			}
 		}
 	}
 
-	std::vector<std::future<void>> futures = {};
-	futures.reserve(assets_to_load.size());
-	for (auto &asset : assets_to_load) {
-		futures.emplace_back(std::async(std::launch::deferred,
-				[&resource_manager, &asset] { resource_manager.load_model(asset_path(asset).c_str()); }));
+	std::set<std::string> ktx_paths;
+	ktx_paths.insert("resources/assets_export/cubemaps/venice_sunset/environment_map.ktx2");
+	ktx_paths.insert("resources/assets_export/cubemaps/venice_sunset/irradiance_map.ktx2");
+	ktx_paths.insert("resources/assets_export/cubemaps/venice_sunset/prefilter_map.ktx2");
+	ktx_paths.insert("resources/assets_export/cubemaps/venice_sunset/brdf_lut.ktx2");
+
+	struct NodeMesh {
+		std::string material_path;
+		std::string mesh_path;
+	};
+#pragma omp parallel for
+	for (int i = 0; i < assets_to_load.size() + skinned_assets_to_load.size(); i++) {
+		std::string asset;
+		if (i >= assets_to_load.size()) {
+			asset = *std::next(skinned_assets_to_load.begin(), i - assets_to_load.size());
+		} else {
+			asset = *std::next(assets_to_load.begin(), i);
+		}
+		//auto asset = *std::next(assets_to_load.begin(), i);
+		assets::AssetFile file;
+		bool loaded = assets::load_binary_file(asset_path(asset).c_str(), file);
+		std::vector<std::string> paths;
+		if (i >= assets_to_load.size()) {
+			assets::SkinnedModelInfo model = assets::read_skinned_model_info(&file);
+			for (const auto &pair : model.node_meshes) {
+				paths.push_back(pair.second.material_path);
+			}
+		} else {
+			assets::ModelInfo model = assets::read_model_info(&file);
+			for (const auto &pair : model.node_meshes) {
+				paths.push_back(pair.second.material_path);
+			}
+		}
+
+		for (auto &path : paths) {
+			auto material_name = path.c_str();
+			assets::AssetFile material_file;
+			loaded = assets::load_binary_file(asset_path(material_name).c_str(), material_file);
+			assets::MaterialInfo material = assets::read_material_info(&material_file);
+			ktx_paths.insert(asset_path(material.textures["baseColor"]));
+			ktx_paths.insert(asset_path(material.textures["normals"]));
+			ktx_paths.insert(asset_path(material.textures["metallicRoughness"]));
+			ktx_paths.insert(asset_path(material.textures["emissive"]));
+		}
 	}
-	for (auto &f : futures) {
-		f.wait();
+//count time for loading ktx
+#pragma omp parallel for
+	for (int i = 0; i < ktx_paths.size(); i++) {
+		int64_t thread = omp_get_thread_num();
+		TracyPlotConfig("Thread", tracy::PlotFormatType::Number, "name", "plot", tracy::Color::GreenYellow);
+		//SPDLOG_ERROR("Thread {}", thread);
+		ktxTexture2 *ktx = nullptr;
+		auto ktx_path = *std::next(ktx_paths.begin(), i);
+		ktxTexture2_CreateFromNamedFile(ktx_path.c_str(), KTX_TEXTURE_CREATE_NO_FLAGS, &ktx);
+		if (ktx) {
+			ktxTexture2_TranscodeBasis(ktx, KTX_TTF_BC7_RGBA, 0);
+		}
+		std::pair<std::string, ktxTexture2 *> pair = std::make_pair(ktx_path, ktx);
+		Texture::ktx_textures.insert(pair);
+		TracyPlot("thread", thread);
+	}
+
+	for (auto &asset : assets_to_load) {
+		resource_manager.load_model(asset_path(asset).c_str());
 	}
 
 	for (auto &array_entity : json) {

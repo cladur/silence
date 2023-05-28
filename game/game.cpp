@@ -337,6 +337,8 @@ void Game::startup() {
 	CVarSystem::get()->set_int_cvar("debug_draw.lights.draw", 0);
 	CVarSystem::get()->set_int_cvar("debug_camera.use", 0);
 	CVarSystem::get()->set_int_cvar("render.splitscreen", 1);
+
+	
 }
 
 void Game::shutdown() {
