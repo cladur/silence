@@ -432,3 +432,34 @@ void MaterialBloom::bind_resources(RenderScene &scene) {
 
 void MaterialBloom::bind_instance_resources(ModelInstance &instance, Transform &transform) {
 }
+
+void MaterialShadow::startup() {
+	shader.load_from_files(shader_path("shadow/shadow.vert"), shader_path("shadow/shadow.frag"));
+}
+
+void MaterialShadow::bind_resources(RenderScene &scene) {
+	glEnable(GL_DEPTH_TEST);
+	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glm::mat4 lightView = glm::lookAt(-Light.GetDirection(), glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
+	m_LightSpace = m_Projection * lightView;
+
+	// render scene from light's point of view
+	shader.use();
+	shader.set_mat4("lightSpaceMatrix", m_LightSpace);
+
+	glViewport(0, 0, WIDTH, HEIGHT);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_FBO);
+	glClear(GL_DEPTH_BUFFER_BIT);
+
+	Root.DrawSelfAndChildren(Shader);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void MaterialShadow::bind_instance_resources(ModelInstance &instance, Transform &transform) {
+	shader.set_mat4("model", transform.get_global_model_matrix());
+}
+void MaterialShadow::bind_instance_resources(SkinnedModelInstance &instance, Transform &transform) {
+}

@@ -44,6 +44,7 @@ struct RenderScene {
 	SSAOBuffer ssao_buffer;
 	CombinationBuffer combination_buffer;
 	BloomBuffer bloom_buffer;
+	ShadowBuffer shadow_buffer;
 	SkyboxBuffer skybox_buffer;
 	glm::vec2 render_extent;
 
