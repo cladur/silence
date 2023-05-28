@@ -22,6 +22,7 @@
 #include "ecs/systems/hacker_system.h"
 #include "ecs/systems/isolated_entities_system.h"
 #include "ecs/systems/root_parent_system.h"
+#include "gameplay/gameplay_manager.h"
 #include "managers/physics/ecs/collision_system.h"
 #include "managers/physics/ecs/physics_system.h"
 #include "render/ecs/frustum_draw_system.h"
@@ -115,6 +116,7 @@ void Scene::update(float dt) {
 			}
 		}
 	}
+	GameplayManager::get().update(world, dt);
 }
 
 RenderScene &Scene::get_render_scene() const {
