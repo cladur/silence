@@ -1042,7 +1042,7 @@ void Inspector::show_billboard() {
 		}
 		if (ImGui::BeginPopup("BillboardContextMenu")) {
 			if (ImGui::MenuItem("Reset Billboard")) {
-				billboard.texture = Handle<Texture>(-1);
+				billboard.texture = Handle<Texture>(0);
 				billboard.scale = glm::vec2(1.0f);
 				billboard.color = glm::vec4(1.0f);
 			}
@@ -1075,7 +1075,6 @@ void Inspector::show_billboard() {
 		} else {
 			ImGui::Text("%s", texture_name.c_str());
 		}
-		ImGui::EndTable();
 
 		if (ImGui::BeginDragDropTarget()) {
 			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_TEXTURE_PATH")) {

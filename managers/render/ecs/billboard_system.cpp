@@ -4,7 +4,7 @@
 #include <render/transparent_elements/ui_manager.h>
 
 void BillboardSystem::startup(World &world) {
-	Signature blacklist;
+
 	Signature whitelist;
 
 	whitelist.set(world.get_component_type<Billboard>());
@@ -33,7 +33,16 @@ void BillboardSystem::update(World &world, float dt) {
 			bill.position = transform.position;
 			bill.size = billboard.scale;
 			bill.texture = billboard.texture;
-
+			ui.add_as_root(ui_scene_name, billboard.ui_name);
+			billboard.first_frame = false;
+		} else {
+			auto &bill = ui.get_ui_image(ui_scene_name, billboard.ui_name);
+			bill.is_billboard = true;
+			bill.is_screen_space = false;
+			bill.display = true;
+			bill.position = transform.position;
+			bill.size = billboard.scale;
+			bill.texture = billboard.texture;
 		}
 	}
 }

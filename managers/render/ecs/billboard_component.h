@@ -10,6 +10,8 @@ struct Billboard {
 	bool first_frame = true;
 	std::string ui_name;
 
+	Billboard() = default;
+
 	void serialize_json(nlohmann::json &serialized_scene) {
 		nlohmann::json::object_t serialized_component;
 		serialized_component["texture"] = ResourceManager::get().get_texture_name(texture);

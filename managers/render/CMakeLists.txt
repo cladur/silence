@@ -39,6 +39,7 @@ add_library(${RENDER_MANAGER_NAME} STATIC
         ecs/skinned_render_system.cpp ecs/skinned_render_system.h
         ecs/light_render_system.cpp ecs/light_render_system.h
         ecs/billboard_component.h
+        ecs/billboard_system.h ecs/billboard_system.cpp
         )
 
 # Include directories
