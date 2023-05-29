@@ -170,7 +170,6 @@ void AgentSystem::update(World &world, float dt) {
 			ray.origin = spring_arm_tf.get_global_position();
 			ray.direction = -spring_arm_tf.get_global_forward();
 			glm::vec3 end = ray.origin + ray.direction;
-			world.get_parent_scene()->get_render_scene().debug_draw.draw_arrow(ray.origin, end, { 0.0f, 0.0f, 0.5f });
 			HitInfo info;
 			if (CollisionSystem::ray_cast_layer(world, ray, info)) {
 				if (info.distance < -def_cam_z) {
@@ -180,13 +179,6 @@ void AgentSystem::update(World &world, float dt) {
 				}
 			} else {
 				camera_tf.set_position({ 0.0f, 0.0f, def_cam_z });
-			}
-			//TODO: ray should be able to check multiple layers
-			ray.layer_name = "camera";
-			if (CollisionSystem::ray_cast_layer(world, ray, info)) {
-				if (info.distance < -def_cam_z) {
-					camera_tf.set_position({ 0.0f, 0.0f, -info.distance });
-				}
 			}
 		}
 
