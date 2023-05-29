@@ -298,6 +298,11 @@ void CollisionSystem::process_node(World &world, const std::set<Entity> &objects
 		}
 	}
 
+	if (current.size() == objects.size() || front.size() == objects.size() || back.size() == objects.size()) {
+		node->entities = objects;
+		return;
+	}
+
 	node->entities = current;
 
 	node->front = std::make_shared<BSPNode>();
@@ -324,10 +329,10 @@ Plane CollisionSystem::calculate_plane(World &world, const std::set<Entity> &col
 			plane.point += position + aabb.center * scale;
 		} else if (world.has_component<ColliderSphere>(collider)) {
 			ColliderSphere &sphere = world.get_component<ColliderSphere>(collider);
-			plane.point += position + sphere.center * scale.x;
+			plane.point += position + sphere.center * scale;
 		} else if (world.has_component<ColliderOBB>(collider)) {
 			ColliderOBB &obb = world.get_component<ColliderOBB>(collider);
-			const glm::vec3 &orientation = t.get_global_scale();
+			const glm::quat &orientation = t.get_global_orientation();
 			plane.point += position + orientation * (obb.center * scale);
 		} else if (world.has_component<ColliderCapsule>(collider)) {
 			ColliderCapsule &capsule = world.get_component<ColliderCapsule>(collider);
