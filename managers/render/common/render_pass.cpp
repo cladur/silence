@@ -17,6 +17,7 @@ void PBRPass::startup() {
 }
 
 void PBRPass::draw(RenderScene &scene) {
+	ZoneScopedN("PBRPass::draw");
 	ResourceManager &resource_manager = ResourceManager::get();
 	material.bind_resources(scene);
 	utils::render_quad();
@@ -27,6 +28,7 @@ void LightPass::startup() {
 }
 
 void LightPass::draw(RenderScene &scene) {
+	ZoneScopedN("LightPass::draw");
 	ResourceManager &resource_manager = ResourceManager::get();
 	material.bind_resources(scene);
 	for (auto &cmd : scene.light_draw_commands) {
@@ -42,6 +44,7 @@ void AOPass::startup() {
 }
 
 void AOPass::draw(RenderScene &scene) {
+	ZoneScopedN("AOPass::draw");
 	RenderManager &render_manager = RenderManager::get();
 	material.bind_resources(scene);
 	utils::render_quad();
@@ -52,6 +55,7 @@ void AOBlurPass::startup() {
 }
 
 void AOBlurPass::draw(RenderScene &scene) {
+	ZoneScopedN("AOBlurPass::draw");
 	RenderManager &render_manager = RenderManager::get();
 	material.bind_resources(scene);
 	utils::render_quad();
@@ -64,6 +68,7 @@ void SkyboxPass::startup() {
 }
 
 void SkyboxPass::draw(RenderScene &scene) {
+	ZoneScopedN("SkyboxPass::draw");
 	material.bind_resources(scene);
 	skybox.draw();
 }
@@ -73,6 +78,7 @@ void GBufferPass::startup() {
 }
 
 void GBufferPass::draw(RenderScene &scene) {
+	ZoneScopedN("GBufferPass::draw");
 	ResourceManager &resource_manager = ResourceManager::get();
 	material.bind_resources(scene);
 	for (auto &cmd : scene.draw_commands) {
@@ -139,9 +145,9 @@ void TransparentPass::startup() {
 }
 
 void TransparentPass::draw(RenderScene &scene) {
-	ZoneScopedNC("TransparentPass::draw()", 0xad074f);
+	ZoneScopedNC("TransparentPass::draw", 0xad074f);
 	RenderManager &render_manager = RenderManager::get();
-	static std::vector<TransparentObject> screen_space_objects;
+
 	glm::vec3 cam_pos = scene.camera_pos;
 
 	// transparency sorting for world-space objects
@@ -168,6 +174,40 @@ void TransparentPass::draw(RenderScene &scene) {
 		glBindVertexArray(vao);
 		glDrawElements(GL_TRIANGLES, object.indices.size(), GL_UNSIGNED_INT, nullptr);
 	}
+	scene.transparent_objects.clear();
+}
+
+void TransparentPass::draw_worldspace(RenderScene &scene) {
+	ZoneScopedNC("TransparentPass::draw_worldspace", 0xad074f);
+
+	glm::vec3 cam_pos = scene.camera_pos;
+
+	// transparency sorting for world-space objects
+	std::sort(world_space_objects.begin(), world_space_objects.end(),
+			[cam_pos](const TransparentObject &a, const TransparentObject &b) {
+				return glm::distance(cam_pos, a.position) > glm::distance(cam_pos, b.position);
+			});
+
+	material.bind_resources(scene);
+
+	for (auto &object : world_space_objects) {
+		material.bind_object_resources(scene, object);
+
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, object.vertices.size() * sizeof(TransparentVertex), &object.vertices[0]);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, object.indices.size() * sizeof(uint32_t), &object.indices[0]);
+
+		glBindVertexArray(vao);
+		glDrawElements(GL_TRIANGLES, object.indices.size(), GL_UNSIGNED_INT, nullptr);
+	}
+	world_space_objects.clear();
+}
+
+void TransparentPass::draw_screenspace(RenderScene &scene) {
+	ZoneScopedNC("TransparentPass::draw_screenspace", 0xad074f);
+	material.bind_resources(scene);
 
 	// transparency sorting for screen-space objects
 	std::sort(screen_space_objects.begin(), screen_space_objects.end(),
@@ -189,6 +229,16 @@ void TransparentPass::draw(RenderScene &scene) {
 	glBindVertexArray(0);
 
 	screen_space_objects.clear();
+}
+void TransparentPass::sort_objects(RenderScene &scene) {
+	ZoneScopedNC("TransparentPass::sort_objects", 0xad074f);
+	for (auto &object : scene.transparent_objects) {
+		if (object.vertices[0].is_screen_space) {
+			screen_space_objects.push_back(object);
+		} else {
+			world_space_objects.push_back(object);
+		}
+	}
 	scene.transparent_objects.clear();
 }
 
@@ -197,6 +247,7 @@ void CombinationPass::startup() {
 }
 
 void CombinationPass::draw(RenderScene &scene) {
+	ZoneScopedN("CombinationPass::draw");
 	material.bind_resources(scene);
 	utils::render_quad();
 }
@@ -206,6 +257,7 @@ void BloomPass::startup() {
 }
 
 void BloomPass::draw(RenderScene &scene) {
+	ZoneScopedN("BloomPass::draw");
 	std::vector<BloomMip> &mips = scene.bloom_buffer.mips;
 
 	// DOWNSAMPLING
@@ -310,4 +362,39 @@ void ShadowPass::draw(RenderScene &scene) {
 		}
 #endif
 	}
+}
+
+void MousePickPass::startup() {
+	material.startup();
+}
+
+void MousePickPass::draw(RenderScene &scene) {
+	ZoneScopedN("MousePickPass::draw");
+	ResourceManager &resource_manager = ResourceManager::get();
+	material.bind_resources(scene);
+	for (auto &cmd : scene.draw_commands) {
+		ModelInstance &instance = *cmd.model_instance;
+		Transform &transform = *cmd.transform;
+		Entity entity = cmd.entity;
+		material.bind_instance_resources(instance, transform, entity);
+		Model &model = resource_manager.get_model(instance.model_handle);
+		for (auto &mesh : model.meshes) {
+			if (mesh.fc_bounding_sphere.is_on_frustum(scene.frustum, transform, scene)) {
+				mesh.draw();
+			}
+		}
+	}
+
+#ifdef WIN32
+	for (auto &cmd : scene.skinned_draw_commands) {
+		SkinnedModelInstance &instance = *cmd.model_instance;
+		Transform &transform = *cmd.transform;
+		Entity entity = cmd.entity;
+		material.bind_instance_resources(instance, transform, entity);
+		SkinnedModel &model = resource_manager.get_skinned_model(instance.model_handle);
+		for (auto &mesh : model.meshes) {
+			mesh.draw();
+		}
+	}
+#endif
 }

@@ -7,9 +7,9 @@
 SkinnedModelInstance::SkinnedModelInstance() {
 	ResourceManager &resource_manager = ResourceManager::get();
 	AnimationManager &animation_manager = AnimationManager::get();
-	model_handle = resource_manager.load_skinned_model(asset_path("scorpion/scorpion_idle.skinmdl").c_str());
-	resource_manager.load_skinned_model(asset_path("agent/agent.skinmdl").c_str());
-	resource_manager.load_skinned_model(asset_path("enemy/enemy.skinmdl").c_str());
+	//model_handle = resource_manager.load_skinned_model(asset_path("scorpion/scorpion_idle.skinmdl").c_str());
+	//resource_manager.load_skinned_model(asset_path("agent/agent.skinmdl").c_str());
+	//resource_manager.load_skinned_model(asset_path("enemy/enemy.skinmdl").c_str());
 	material_type = MaterialType::Default;
 
 	glGenBuffers(1, &skinning_buffer);

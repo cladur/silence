@@ -4,6 +4,7 @@
 #include "assets/skinned_model_asset.h"
 
 void SkinnedModel::load_from_asset(const char *path) {
+	ZoneNamedNC(Zone1, "SkinnedModel::load_from_asset", tracy::Color::Blue, true);
 	name = path;
 
 	assets::AssetFile file;
@@ -74,44 +75,47 @@ void SkinnedModel::load_from_asset(const char *path) {
 
 		assets::MaterialInfo material = assets::read_material_info(&material_file);
 
-		// BASE COLOR
-		if (material.textures.contains("baseColor")) {
-			Texture albedo = {};
-			albedo.load_from_asset(asset_path(material.textures["baseColor"]));
-			mesh.textures[0] = albedo;
-			mesh.textures_present[0] = true;
-		}
-
-		// NORMAL
-		if (material.textures.contains("normals")) {
-			Texture normal = {};
-			normal.load_from_asset(asset_path(material.textures["normals"]));
-			mesh.textures[1] = normal;
-			mesh.textures_present[1] = true;
-			mesh.has_normal_map = true;
-		}
-
-		// METALLIC ROUGHNESS
-		if (material.textures.contains("metallicRoughness")) {
-			Texture met_rough = {};
-			met_rough.load_from_asset(asset_path(material.textures["metallicRoughness"]));
-			mesh.textures[2] = met_rough;
-			mesh.textures_present[2] = true;
-
-			// AMBIENT OCCLUSION
-			if (material.textures.contains("occlusion")) {
-				// We assume that the occlusion map is bundled alongside the metallic roughness map, and don't load it
-				// in here
-				mesh.has_ao_map = true;
+		{
+			ZoneNamedNC(Zone2, "SkinnedModel::load_from_asset::material", tracy::Color::Green, true);
+			// BASE COLOR
+			if (material.textures.contains("baseColor")) {
+				Texture albedo = {};
+				albedo.load_from_asset(asset_path(material.textures["baseColor"]));
+				mesh.textures[0] = albedo;
+				mesh.textures_present[0] = true;
 			}
-		}
 
-		// EMISSIVE
-		if (material.textures.contains("emissive")) {
-			Texture emissive = {};
-			emissive.load_from_asset(asset_path(material.textures["emissive"]));
-			mesh.textures[3] = emissive;
-			mesh.textures_present[3] = true;
+			// NORMAL
+			if (material.textures.contains("normals")) {
+				Texture normal = {};
+				normal.load_from_asset(asset_path(material.textures["normals"]));
+				mesh.textures[1] = normal;
+				mesh.textures_present[1] = true;
+				mesh.has_normal_map = true;
+			}
+
+			// METALLIC ROUGHNESS
+			if (material.textures.contains("metallicRoughness")) {
+				Texture met_rough = {};
+				met_rough.load_from_asset(asset_path(material.textures["metallicRoughness"]));
+				mesh.textures[2] = met_rough;
+				mesh.textures_present[2] = true;
+
+				// AMBIENT OCCLUSION
+				if (material.textures.contains("occlusion")) {
+					// We assume that the occlusion map is bundled alongside the metallic roughness map, and don't load
+					// it in here
+					mesh.has_ao_map = true;
+				}
+			}
+
+			// EMISSIVE
+			if (material.textures.contains("emissive")) {
+				Texture emissive = {};
+				emissive.load_from_asset(asset_path(material.textures["emissive"]));
+				mesh.textures[3] = emissive;
+				mesh.textures_present[3] = true;
+			}
 		}
 
 		meshes.push_back(mesh);

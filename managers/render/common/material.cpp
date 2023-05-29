@@ -360,7 +360,8 @@ void MaterialTransparent::bind_object_resources(RenderScene &scene, TransparentO
 	static glm::mat4 view;
 	static glm::vec2 window_size;
 
-	window_size = DisplayManager::get().get_window_size();
+	window_size = scene.full_render_extent; //DisplayManager::get().get_window_size();
+
 	view = scene.view;
 
 	if (object.type == TransparentType::TEXT) {
@@ -496,4 +497,33 @@ void MaterialShadow::bind_instance_resources(SkinnedModelInstance &instance, Tra
 
 void MaterialShadow::bind_light_resources(Light &light, Transform &transform) {
 	current_light_position = transform.get_global_position();
+}
+
+void MaterialMousePick::startup() {
+	shader.load_from_files(shader_path("gbuffer/gbuffer.vert"), shader_path("mouse_pick.frag"));
+#ifdef WIN32
+	skinned_shader.load_from_files(shader_path("gbuffer/skinned_gbuffer.vert"), shader_path("mouse_pick.frag"));
+#endif
+}
+
+void MaterialMousePick::bind_resources(RenderScene &scene) {
+	shader.use();
+	shader.set_mat4("view", scene.view);
+	shader.set_mat4("projection", scene.projection);
+
+	skinned_shader.set_mat4("view", scene.view);
+	skinned_shader.set_mat4("projection", scene.projection);
+}
+
+void MaterialMousePick::bind_instance_resources(ModelInstance &instance, Transform &transform) {
+}
+
+void MaterialMousePick::bind_instance_resources(ModelInstance &instance, Transform &transform, Entity entity) {
+	shader.set_uint("entity_id", (uint32_t)entity);
+	shader.set_mat4("model", transform.get_global_model_matrix());
+}
+
+void MaterialMousePick::bind_instance_resources(SkinnedModelInstance &instance, Transform &transform, Entity entity) {
+	skinned_shader.set_uint("entity_id", (uint32_t)entity);
+	skinned_shader.set_mat4("model", transform.get_global_model_matrix());
 }

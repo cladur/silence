@@ -3,6 +3,7 @@
 #include "engine/scene.h"
 #include <components/enemy_data_component.h>
 #include <components/enemy_path_component.h>
+#include <gameplay/gameplay_manager.h>
 #include <render/transparent_elements/ui_manager.h>
 
 void EnemySystem::startup(World &world) {
@@ -17,6 +18,7 @@ void EnemySystem::startup(World &world) {
 }
 
 void EnemySystem::update(World &world, float dt) {
+	ZoneScopedN("EnemySystem::update");
 	for (auto const &entity : entities) {
 		auto &t = world.get_component<Transform>(entity);
 		auto &ed = world.get_component<EnemyData>(entity);
@@ -25,6 +27,8 @@ void EnemySystem::update(World &world, float dt) {
 
 		if (ed.first_frame) { // i too hate having Start() function for a system / component 🥱🥱🥱🥱
 			auto &ui = UIManager::get();
+			auto &gm = GameplayManager::get();
+			gm.add_enemy_entity(entity);
 			ed.state_machine.startup();
 			ed.patrolling_state.startup(&ed.state_machine, "patrolling");
 			ed.looking_state.startup(&ed.state_machine, "looking");
@@ -43,9 +47,7 @@ void EnemySystem::update(World &world, float dt) {
 			ed.state_machine.set_state("patrolling");
 
 			ui.create_ui_scene(std::to_string(entity) + "_detection");
-			auto &slider = ui.add_ui_slider(
-					std::to_string(entity) + "_detection",
-					"detection_slider");
+			auto &slider = ui.add_ui_slider(std::to_string(entity) + "_detection", "detection_slider");
 			slider.position = glm::vec3(0.0f, 2.0f, 0.0f);
 			slider.is_billboard = true;
 			slider.is_screen_space = false;

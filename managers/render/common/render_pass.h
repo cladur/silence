@@ -15,11 +15,13 @@ struct RenderScene;
 struct DrawCommand {
 	ModelInstance *model_instance;
 	Transform *transform;
+	Entity entity;
 };
 
 struct SkinnedDrawCommand {
 	SkinnedModelInstance *model_instance;
 	Transform *transform;
+	Entity entity;
 };
 
 struct LightDrawCommand {
@@ -80,11 +82,16 @@ public:
 class TransparentPass : public RenderPass {
 private:
 	unsigned int vao, vbo, ebo;
+	std::vector<TransparentObject> screen_space_objects;
+	std::vector<TransparentObject> world_space_objects;
 
 public:
 	MaterialTransparent material;
 	void startup() override;
 	void draw(RenderScene &scene) override;
+	void sort_objects(RenderScene &scene);
+	void draw_worldspace(RenderScene &scene);
+	void draw_screenspace(RenderScene &scene);
 };
 
 class CombinationPass : public RenderPass {
@@ -104,6 +111,13 @@ public:
 class ShadowPass : public RenderPass {
 public:
 	MaterialShadow material;
+	void startup() override;
+	void draw(RenderScene &scene) override;
+};
+
+class MousePickPass : public RenderPass {
+public:
+	MaterialMousePick material;
 	void startup() override;
 	void draw(RenderScene &scene) override;
 };

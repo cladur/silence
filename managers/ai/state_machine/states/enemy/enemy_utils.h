@@ -4,12 +4,13 @@
 #include "components/enemy_path_component.h"
 #include "components/transform_component.h"
 #include "managers/ecs/world.h"
-#include <render/debug/debug_draw.h>
-#include <glm/vec3.hpp>
 #include "managers/gameplay/gameplay_manager.h"
 #include "managers/physics/ecs/collision_system.h"
 #include "managers/physics/physics_manager.h"
+#include <audio/audio_manager.h>
+#include <render/debug/debug_draw.h>
 #include <render/transparent_elements/ui_manager.h>
+#include <glm/vec3.hpp>
 
 namespace enemy_utils {
 
@@ -62,6 +63,7 @@ namespace enemy_utils {
 				// todo: make sure this checks properly for hitting a player and stops at terrain in between
 
 				// RAY MIDDLE
+
 				if (CollisionSystem::ray_cast(*world, ray, hit_info)) {
 					if (dd != nullptr) {
 						dd->draw_line(ray.origin, ray_end, glm::vec3(0.0f, 1.0f, 1.0f));
@@ -90,12 +92,17 @@ namespace enemy_utils {
 			}
 		}
 		if (can_see_player) {
+			// if this is the first frame that the enemy sees the player, play a warning sound
+			if (enemy_data.detection_level < dt / enemy_data.detection_speed) {
+				AudioManager::get().play_one_shot_2d(EventReference("SFX/Enemies/first_time_detect"));
+			}
 			enemy_data.detection_level += dt / enemy_data.detection_speed;
 		} else {
 			enemy_data.detection_level -= dt / enemy_data.detection_speed;
 		}
 
 		enemy_data.detection_level = glm::clamp(enemy_data.detection_level, 0.0f, 1.0f);
+		GameplayManager::get().add_detection_level(enemy_data.detection_level);
 	}
 
 	inline void update_detection_slider(uint32_t entity_id, Transform &transform, EnemyData &enemy_data) {

@@ -122,6 +122,39 @@ void UIManager::draw() {
     }
 }
 
+// draws world-space ui objects. Use in separate draw_viewport()
+void UIManager::draw_world_space_ui() {
+	ZoneScopedNC("UIManager::draw_world_space_ui()", 0xd459ce);
+	text_draw.r_scene = render_scene;
+	sprite_draw.r_scene = render_scene;
+	for (auto &scene : scenes) {
+		if (scene.second.is_active) {
+			for (auto &root : scene.second.roots) {
+				if (!root.second->is_screen_space) {
+					root.second->draw();
+				}
+			}
+		}
+	}
+}
+
+// draws screenspace ui objects. Use in one call after both draw_viewport()
+void UIManager::draw_screen_space_ui() {
+	ZoneScopedNC("UIManager::draw_world_space_ui()", 0xd459ce);
+	text_draw.r_scene = render_scene;
+	sprite_draw.r_scene = render_scene;
+	for (auto &scene : scenes) {
+		if (scene.second.is_active) {
+			for (auto &root : scene.second.roots) {
+				if (root.second->is_screen_space) {
+					root.second->draw();
+				}
+			}
+		}
+	}
+}
+
+
 void UIManager::add_to_root(const std::string &scene_name, const std::string &element_name, const std::string &root_name) {
     // this works ASSUMING that no two elements from different categories have the same name.
 

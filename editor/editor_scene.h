@@ -17,6 +17,8 @@ struct EditorScene : public Scene {
 
 	void save_to_file(const std::string &path) override;
 
+	void duplicate_selected_entity();
+
 	// Selection
 	Entity selected_entity = 0;
 	// Deletion queue

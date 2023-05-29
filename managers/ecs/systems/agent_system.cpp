@@ -1,6 +1,7 @@
 #include "agent_system.h"
 #include "components/agent_data_component.h"
 #include "components/collider_capsule.h"
+#include "components/enemy_data_component.h"
 #include "components/platform_component.h"
 #include "components/transform_component.h"
 #include "ecs/world.h"
@@ -12,6 +13,7 @@
 
 #include "input/input_manager.h"
 #include "resource/resource_manager.h"
+#include <gameplay/gameplay_manager.h>
 #include <spdlog/spdlog.h>
 #include <glm/fwd.hpp>
 #include <glm/geometric.hpp>
@@ -19,6 +21,10 @@
 
 AutoCVarFloat cvar_agent_interaction_range(
 		"agent.interaction_range", "range of interaction", 1.5f, CVarFlags::EditCheckbox);
+
+AutoCVarFloat cvar_agent_attack_range("agent.attack_range", "range of attack", 1.5f, CVarFlags::EditCheckbox);
+
+AutoCVarFloat cvar_agent_attack_angle("agent.attack_angle", "angle of attack", 70.0f, CVarFlags::EditCheckbox);
 
 AutoCVarFloat cvar_agent_acc_ground("agent.acc_ground", "acceleration on ground", 0.4f, CVarFlags::EditCheckbox);
 
@@ -46,6 +52,7 @@ void AgentSystem::startup(World &world) {
 }
 
 void AgentSystem::update(World &world, float dt) {
+	ZoneScopedN("AgentSystem::update");
 	InputManager &input_manager = InputManager::get();
 	AnimationManager &animation_manager = AnimationManager::get();
 	ResourceManager &resource_manager = ResourceManager::get();
@@ -86,6 +93,7 @@ void AgentSystem::update(World &world, float dt) {
 		if (input_manager.is_action_just_pressed("agent_crouch")) {
 			if (!is_crouching) {
 				is_crouching = true;
+				GameplayManager::get().set_agent_crouch(is_crouching);
 				capsule_collider.end.y = 0.85f;
 			} else {
 				Ray ray{};
@@ -99,6 +107,7 @@ void AgentSystem::update(World &world, float dt) {
 				if (!hit || info.distance > 0.8f) {
 					capsule_collider.end.y = 1.3f;
 					is_crouching = false;
+					GameplayManager::get().set_agent_crouch(is_crouching);
 				}
 			}
 		}
@@ -204,6 +213,7 @@ void AgentSystem::update(World &world, float dt) {
 			//			}
 		}
 
+		//Agent interaction
 		if (input_manager.is_action_just_pressed("agent_interact")) {
 			Ray ray{};
 			ray.origin = transform.get_global_position() + glm::vec3(0.0f, 1.0f, 0.0f);
@@ -232,6 +242,39 @@ void AgentSystem::update(World &world, float dt) {
 								animation_manager.change_animation(
 										agent_data.model, "agent/agent_ANIM_GLTF/agent_interaction.anim");
 							}
+						}
+					}
+				}
+			}
+		}
+
+		//Agent attack
+		//ray.origin = transform.get_global_position() + glm::vec3(0.0f, 1.0f, 0.0f);
+		//ray.ignore_list.emplace_back(entity);
+		ray.direction = model_tf.get_forward();
+		end = ray.origin + ray.direction;
+		world.get_parent_scene()->get_render_scene().debug_draw.draw_arrow(ray.origin, end, { 255, 0, 0 });
+		if (CollisionSystem::ray_cast(world, ray, info)) {
+			if (info.distance < cvar_agent_attack_range.get()) {
+				if (world.has_component<EnemyData>(info.entity)) {
+					auto &enemy = world.get_component<EnemyData>(info.entity);
+					auto &enemy_tf = world.get_component<Transform>(info.entity);
+					bool behind_enemy = glm::dot(enemy_tf.get_forward(), model_tf.get_forward()) >
+							glm::cos(glm::radians(cvar_agent_attack_angle.get()));
+					if (behind_enemy && enemy.state_machine.get_current_state() != "dying") {
+						//TODO: pull out knife or other indicator that agent can attack
+						//auto &enemy_tf = world.get_component<Transform>(info.entity);
+						if (input_manager.is_action_just_pressed("mouse_left")) {
+							auto animation_handle =
+									resource_manager.get_animation_handle("agent/agent_ANIM_GLTF/agent_stab.anim");
+							if (animation_instance.animation_handle.id != animation_handle.id) {
+								animation_timer = resource_manager.get_animation(animation_handle).get_duration();
+								previous_velocity = { 0.0f, 0.0f, 0.0f };
+								velocity = { 0.0f, 0.0f, 0.0f };
+								animation_manager.change_animation(
+										agent_data.model, "agent/agent_ANIM_GLTF/agent_stab.anim");
+							}
+							enemy.state_machine.set_state("dying");
 						}
 					}
 				}

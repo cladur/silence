@@ -57,6 +57,8 @@ public:
     UIText &add_ui_text(const std::string &scene_name, const std::string &text_name);
     UISlider &add_ui_slider(const std::string &scene_name, const std::string &lider_name);
     void add_as_root(const std::string &scene_name, const std::string &element_name);
+
+	// adds an UIObject to root, additionally set's its 'is_screen_space" property to the parent's
     void add_to_root(const std::string &scene_name, const std::string &element_name, const std::string &root_name);
 
     UIAnchor &get_ui_anchor(const std::string &scene_name, const std::string &anchor_name);
@@ -66,6 +68,8 @@ public:
     UISlider &get_ui_slider(const std::string &scene_name, const std::string &lider_name);
 
     void draw();
+	void draw_world_space_ui();
+	void draw_screen_space_ui();
 };
 
 #endif

@@ -16,6 +16,7 @@ void RootParentSystem::startup(World &world) {
 }
 
 void RootParentSystem::update(World &world, float dt) {
+	ZoneScopedN("RootParentSystem::update");
 	for (auto const &entity : entities) {
 		auto &transform = world.get_component<Transform>(entity);
 		transform.update_global_model_matrix();

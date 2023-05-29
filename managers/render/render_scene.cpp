@@ -34,6 +34,7 @@ void RenderScene::startup() {
 	default_pass = &pbr_pass;
 	bloom_pass.startup();
 	shadow_pass.startup();
+	mouse_pick_pass.startup();
 
 	// Size of the viewport doesn't matter here, it will be resized either way
 	render_extent = glm::vec2(100, 100);
@@ -46,6 +47,7 @@ void RenderScene::startup() {
 	shadow_buffer.startup(1024, 1024, 1.0f, 500.5f);
 	combination_buffer.startup(render_extent.x, render_extent.y);
 	skybox_buffer.startup(render_extent.x, render_extent.y);
+	mouse_pick_framebuffer.startup(render_extent.x, render_extent.y);
 
 	debug_draw.startup();
 	transparent_pass.startup();
@@ -58,6 +60,7 @@ void RenderScene::startup() {
 }
 
 void RenderScene::draw_viewport(bool right_side) {
+	ZoneScopedN("RenderScene::draw_viewport");
 	glViewport(0, 0, (int)shadow_buffer.shadow_width, (int)shadow_buffer.shadow_height);
 	shadow_buffer.bind();
 	glEnable(GL_DEPTH_TEST);
@@ -97,8 +100,8 @@ void RenderScene::draw_viewport(bool right_side) {
 		camera_pos = camera_transform.get_global_position();
 	}
 
-	UIManager::get().set_render_scene(this);
-	UIManager::get().draw();
+	//	UIManager::get().set_render_scene(this);
+	//	UIManager::get().draw_world_space_ui();
 
 	// Enable depth testing
 	//	glEnable(GL_DEPTH_TEST);
@@ -188,11 +191,18 @@ void RenderScene::draw_viewport(bool right_side) {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	// ui needs to go last, later to be a different render target
 	// sprite_draw.draw();
-	transparent_pass.draw(*this);
+	transparent_pass.draw_worldspace(*this);
 	glDisable(GL_BLEND);
+
+	mouse_pick_framebuffer.bind();
+	glad_glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	mouse_pick_pass.draw(*this);
+	debug_draw.draw_mouse_pick();
 }
 
 void RenderScene::draw() {
+	ZoneScopedN("RenderScene::draw");
 	static bool was_splitscreen = cvar_splitscreen.get();
 	static bool was_debug_camera = cvar_debug_camera_use.get();
 	if (was_splitscreen != cvar_splitscreen.get() || was_debug_camera != cvar_debug_camera_use.get()) {
@@ -202,20 +212,29 @@ void RenderScene::draw() {
 		resize_framebuffer(window_extent.x, window_extent.y);
 	}
 
+	UIManager::get().set_render_scene(this);
+	UIManager::get().draw();
+
+	transparent_pass.sort_objects(*this);
+
 	if (cvar_splitscreen.get() && !cvar_debug_camera_use.get()) {
 		draw_viewport(false);
-
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, render_framebuffer.framebuffer_id);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, final_framebuffer.framebuffer_id);
-		glBlitFramebuffer(0, 0, render_extent.x, render_extent.y, 0, 0, render_extent.x, render_extent.y,
-				GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		{
+			ZoneScopedN("RenderScene::draw");
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, render_framebuffer.framebuffer_id);
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, final_framebuffer.framebuffer_id);
+			glBlitFramebuffer(0, 0, render_extent.x, render_extent.y, 0, 0, render_extent.x, render_extent.y,
+					GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		}
 
 		draw_viewport(true);
-
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, render_framebuffer.framebuffer_id);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, final_framebuffer.framebuffer_id);
-		glBlitFramebuffer(0, 0, render_extent.x, render_extent.y, render_extent.x, 0, 2 * render_extent.x,
-				render_extent.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		{
+			ZoneScopedN("RenderScene::blit");
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, render_framebuffer.framebuffer_id);
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, final_framebuffer.framebuffer_id);
+			glBlitFramebuffer(0, 0, render_extent.x, render_extent.y, render_extent.x, 0, 2 * render_extent.x,
+					render_extent.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		}
 	} else {
 		int *controlling_agent = CVarSystem::get()->get_int_cvar("game.controlling_agent");
 		bool right_side = false;
@@ -224,11 +243,28 @@ void RenderScene::draw() {
 		}
 		draw_viewport(right_side);
 
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, render_framebuffer.framebuffer_id);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, final_framebuffer.framebuffer_id);
-		glBlitFramebuffer(0, 0, render_extent.x, render_extent.y, 0, 0, render_extent.x, render_extent.y,
-				GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		{
+			ZoneScopedN("RenderScene::blit");
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, render_framebuffer.framebuffer_id);
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, final_framebuffer.framebuffer_id);
+			glBlitFramebuffer(0, 0, render_extent.x, render_extent.y, 0, 0, render_extent.x, render_extent.y,
+					GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		}
 	}
+
+	glViewport(0, 0, full_render_extent.x, full_render_extent.y);
+	final_framebuffer.bind();
+	// i assume nothing else that needs depth info will be drawn after UI.
+	glClear(GL_DEPTH_BUFFER_BIT);
+
+	glEnable(GL_BLEND);
+	glDepthMask(GL_FALSE);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	transparent_pass.draw_screenspace(*this);
+
+	glDisable(GL_BLEND);
+	glDepthMask(GL_TRUE);
 
 	draw_commands.clear();
 #ifdef WIN32
@@ -236,10 +272,12 @@ void RenderScene::draw() {
 #endif
 	light_draw_commands.clear();
 	debug_draw.vertices.clear();
+	debug_draw.mouse_pick_vertices.clear();
 }
 
 void RenderScene::resize_framebuffer(uint32_t width, uint32_t height) {
 	final_framebuffer.resize(width, height);
+	full_render_extent = glm::vec2(width, height);
 
 	if (cvar_splitscreen.get() && !cvar_debug_camera_use.get()) {
 		width /= 2;
@@ -252,22 +290,25 @@ void RenderScene::resize_framebuffer(uint32_t width, uint32_t height) {
 	bloom_buffer.resize(width, height);
 	combination_buffer.resize(width, height);
 	skybox_buffer.resize(width, height);
+	mouse_pick_framebuffer.resize(width, height);
 
 	render_extent = glm::vec2(width, height);
 }
 
-void RenderScene::queue_draw(ModelInstance *model_instance, Transform *transform) {
+void RenderScene::queue_draw(ModelInstance *model_instance, Transform *transform, Entity entity) {
 	DrawCommand draw_command = {};
 	draw_command.model_instance = model_instance;
 	draw_command.transform = transform;
+	draw_command.entity = entity;
 
 	draw_commands.push_back(draw_command);
 }
 
-void RenderScene::queue_skinned_draw(SkinnedModelInstance *model_instance, Transform *transform) {
+void RenderScene::queue_skinned_draw(SkinnedModelInstance *model_instance, Transform *transform, Entity entity) {
 	SkinnedDrawCommand draw_command = {};
 	draw_command.model_instance = model_instance;
 	draw_command.transform = transform;
+	draw_command.entity = entity;
 
 #ifdef WIN32
 	skinned_draw_commands.push_back(draw_command);
@@ -280,4 +321,16 @@ void RenderScene::queue_light_draw(Light *light, Transform *transform) {
 	draw_command.transform = transform;
 
 	light_draw_commands.push_back(draw_command);
+}
+
+Entity RenderScene::get_entity_at_mouse_position(float x, float y) const {
+	Entity entity = 0;
+	// Invert y
+	y = render_extent.y - y;
+	// Get entity id from mouse_pick_framebuffer.texture_id texture
+	glBindFramebuffer(GL_FRAMEBUFFER, mouse_pick_framebuffer.framebuffer_id);
+	glReadBuffer(GL_COLOR_ATTACHMENT0);
+	glReadPixels(x, y, 1, 1, GL_RED_INTEGER, GL_UNSIGNED_INT, &entity);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	return entity;
 }

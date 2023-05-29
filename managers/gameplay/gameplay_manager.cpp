@@ -1,5 +1,8 @@
 #include "gameplay_manager.h"
 #include <engine/scene.h>
+
+AutoCVarFloat cv_enemy_near_player_radius("gameplay.enemy_near_radius", "radius that checks for enemies near player", 15.0f, CVarFlags::EditCheckbox);
+
 GameplayManager &GameplayManager::get() {
 	static GameplayManager instance;
 	return instance;
@@ -20,7 +23,26 @@ void GameplayManager::startup(Scene *scene) {
 void GameplayManager::shutdown() {
 }
 
-void GameplayManager::update() {
+void GameplayManager::update(World &world, float dt) {
+	if (disabled) {
+		return;
+	}
+	//world.get_parent_scene()->get_render_scene().debug_draw.draw_sphere(get_agent_position(world.get_parent_scene()), cv_enemy_near_player_radius.get(), glm::vec3(1.0f, 1.0f, 0.0f), 32);
+	// calculate highest detection level
+	highest_detection = *std::max_element(detection_levels.begin(), detection_levels.end());
+
+	detection_levels.clear();
+
+	// get number of enemies near player
+	enemies_near_player = 0;
+	for (auto &entity : enemy_entities) {
+		auto &player_transform = world.get_component<Transform>(agent_entity);
+		auto &enemy_transform = world.get_component<Transform>(entity);;
+		if (glm::distance(player_transform.position, enemy_transform.position) < cv_enemy_near_player_radius.get()) {
+			enemies_near_player++;
+		}
+	}
+	//SPDLOG_INFO("enemies near {}", enemies_near_player);
 }
 
 glm::vec3 GameplayManager::get_agent_position(Scene *scene) const {
@@ -41,4 +63,28 @@ uint32_t GameplayManager::get_agent_entity() const {
 
 uint32_t GameplayManager::get_hacker_entity() const {
 	return hacker_entity;
+}
+
+void GameplayManager::add_enemy_entity(uint32_t entity) {
+	enemy_entities.push_back(entity);
+}
+void GameplayManager::add_detection_level(float detection_level) {
+	detection_levels.push_back(detection_level);
+}
+void GameplayManager::enable() {
+	disabled = false;
+}
+
+void GameplayManager::set_agent_crouch(bool crouching) {
+	is_agent_crouching = crouching;
+}
+
+bool GameplayManager::get_agent_crouch() const {
+	return is_agent_crouching;
+}
+float GameplayManager::get_highest_detection() const {
+	return highest_detection;
+}
+uint32_t GameplayManager::get_enemies_near_player() const {
+	return enemies_near_player;
 }

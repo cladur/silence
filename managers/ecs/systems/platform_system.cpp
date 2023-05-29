@@ -9,6 +9,7 @@ void PlatformSystem::startup(World &world) {
 	world.set_system_component_whitelist<PlatformSystem>(whitelist);
 }
 void PlatformSystem::update(World &world, float dt) {
+	ZoneScopedN("PlatformSystem::update");
 	for (auto const &entity : entities) {
 		auto &platform = world.get_component<Platform>(entity);
 
@@ -18,7 +19,7 @@ void PlatformSystem::update(World &world, float dt) {
 
 		auto &platform_transform = world.get_component<Transform>(entity);
 		glm::vec3 previous_position = platform_transform.get_position();
-		glm::vec3 next_position = {0.0f, 0.0f, 0.0f};
+		glm::vec3 next_position = { 0.0f, 0.0f, 0.0f };
 
 		auto distance = glm::distance(platform_transform.get_global_position(), platform.ending_position);
 
@@ -31,15 +32,14 @@ void PlatformSystem::update(World &world, float dt) {
 			platform.starting_position = platform.ending_position;
 			platform.ending_position = temp;
 			next_position = platform.starting_position;
-			
+
 		} else {
 			float speed = platform.speed * dt;
-			next_position = {lerp(platform_transform.get_global_position().x, platform.ending_position.x, speed),
-							lerp(platform_transform.get_global_position().y, platform.ending_position.y, speed),
-							lerp(platform_transform.get_global_position().z, platform.ending_position.z, speed)};
+			next_position = { lerp(platform_transform.get_global_position().x, platform.ending_position.x, speed),
+				lerp(platform_transform.get_global_position().y, platform.ending_position.y, speed),
+				lerp(platform_transform.get_global_position().z, platform.ending_position.z, speed) };
 			platform_transform.set_position(next_position);
 		}
 		platform.change_vector = next_position - previous_position;
-
 	}
 }

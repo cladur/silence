@@ -1,5 +1,7 @@
 #include "engine.h"
 
+#include "assets/material_asset.h"
+#include "assets/model_asset.h"
 #include "audio/audio_manager.h"
 #include "display/display_manager.h"
 #include "font/font_manager.h"
@@ -13,6 +15,7 @@
 #include "imgui_impl_opengl3.h"
 #include "physics/physics_manager.h"
 #include "render/transparent_elements/ui_manager.h"
+#include <string>
 
 void Engine::startup() {
 	// Managers
@@ -22,9 +25,7 @@ void Engine::startup() {
 	RenderManager::get().startup();
 	FontManager::get().startup();
 	AudioManager::get().startup();
-	AdaptiveMusicManager::get().startup("adaptive_music_test");
-	// Uncomment if you want music
-	// AdaptiveMusicManager::get().play();
+	AdaptiveMusicManager::get().startup("AdaptiveMusic/Music_1");
 	UIManager::get();
 
 	FontManager::get().load_font("resources/fonts/PoltawskiNowy.ttf", 48, "PoltawskiNowy");
@@ -54,9 +55,12 @@ void Engine::run() {
 
 		auto stop_time = std::chrono::high_resolution_clock::now();
 
-		while (std::chrono::duration<float, std::chrono::seconds::period>(stop_time - start_time).count() <
-				target_frame_time) {
-			stop_time = std::chrono::high_resolution_clock::now();
+		{
+			ZoneScopedNC("Sleep", tracy::Color::Blue);
+			while (std::chrono::duration<float, std::chrono::seconds::period>(stop_time - start_time).count() <
+					target_frame_time) {
+				stop_time = std::chrono::high_resolution_clock::now();
+			}
 		}
 
 		dt = std::chrono::duration<float, std::chrono::seconds::period>(stop_time - start_time).count();
@@ -89,7 +93,6 @@ void Engine::update(float dt) {
 	}
 
 	// Update
-
 	custom_update(dt);
 
 	for (auto &scene : scenes) {
@@ -97,7 +100,7 @@ void Engine::update(float dt) {
 		scene->update(dt);
 	}
 
-	AudioManager::get().update();
+	AudioManager::get().update();;
 
 	input_manager.process_input();
 
