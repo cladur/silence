@@ -180,7 +180,7 @@ void World::deserialize_entities_json(nlohmann::json &json, std::vector<Entity> 
 		std::string material_path;
 		std::string mesh_path;
 	};
-#pragma omp parallel for
+
 	for (int i = 0; i < assets_to_load.size() + skinned_assets_to_load.size(); i++) {
 		std::string asset;
 		if (i >= assets_to_load.size()) {
@@ -219,17 +219,17 @@ void World::deserialize_entities_json(nlohmann::json &json, std::vector<Entity> 
 #pragma omp parallel for
 	for (int i = 0; i < ktx_paths.size(); i++) {
 		int64_t thread = omp_get_thread_num();
-		TracyPlotConfig("Thread", tracy::PlotFormatType::Number, "name", "plot", tracy::Color::GreenYellow);
-		//SPDLOG_ERROR("Thread {}", thread);
 		ktxTexture2 *ktx = nullptr;
-		auto ktx_path = *std::next(ktx_paths.begin(), i);
+		std::string ktx_path;
+#pragma omp critical
+		{ ktx_path = *std::next(ktx_paths.begin(), i); }
 		ktxTexture2_CreateFromNamedFile(ktx_path.c_str(), KTX_TEXTURE_CREATE_NO_FLAGS, &ktx);
 		if (ktx) {
 			ktxTexture2_TranscodeBasis(ktx, KTX_TTF_BC7_RGBA, 0);
 		}
 		std::pair<std::string, ktxTexture2 *> pair = std::make_pair(ktx_path, ktx);
-		Texture::ktx_textures.insert(pair);
-		TracyPlot("thread", thread);
+#pragma omp critical
+		{ Texture::ktx_textures.insert(pair); }
 	}
 
 	for (auto &asset : assets_to_load) {
