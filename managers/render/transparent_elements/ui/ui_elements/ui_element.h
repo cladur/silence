@@ -16,6 +16,7 @@ public:
 	std::string font_name;
 	bool is_screen_space = true;
 	bool is_billboard = false;
+	bool use_camera_right = false;
 	std::vector<UIElement *> children;
 	Alignment alignment = Alignment::NONE;
 	bool display = true;

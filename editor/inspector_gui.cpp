@@ -1054,7 +1054,10 @@ void Inspector::show_billboard() {
 		ImGui::BeginTable("Billboard Component", 2);
 		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
 
+		show_vec3("Position", billboard.position_offset);
+		show_vec3("Center Offset", billboard.center_offset);
 		show_vec2("Size", billboard.scale);
+		show_checkbox("Use Camera Right", billboard.use_camera_right);
 
 		ImGui::TableNextRow();
 		ImGui::TableSetColumnIndex(0);

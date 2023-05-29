@@ -24,6 +24,7 @@ struct TransparentObject {
 	glm::vec3 position;
 	glm::mat4 transform;
 	bool billboard = false;
+	bool use_camera_right = false;
 	TransparentType type;
 	std::string texture_name; // used only for fonts now
 	float alpha = 1.0f;

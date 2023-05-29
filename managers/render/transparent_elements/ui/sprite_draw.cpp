@@ -111,7 +111,7 @@ void SpriteDraw::draw_sprite(const glm::vec3 &position, const glm::vec2 &size, c
 }
 
 void SpriteDraw::draw_sprite_billboard(
-		const glm::vec3 &position, const glm::vec2 &size, const glm::vec4 &color,  const Handle<Texture> texture) {
+		const glm::vec3 &position, const glm::vec2 &size, const glm::vec4 &color, const Handle<Texture> texture, bool use_camera_right) {
 	auto &rm = ResourceManager::get();
 	Texture t = rm.get_texture(texture);
 
@@ -123,6 +123,7 @@ void SpriteDraw::draw_sprite_billboard(
 	sprite.size = size / 2.0f;
 	sprite.position = position;
 	sprite.alpha = color.w;
+	sprite.use_camera_right = use_camera_right;
 
 	r_scene->transparent_objects.push_back(sprite);
 }

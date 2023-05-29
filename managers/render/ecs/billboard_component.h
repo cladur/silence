@@ -7,6 +7,7 @@ struct Billboard {
 	glm::vec3 position_offset;
 	glm::vec2 scale;
 	glm::vec4 color;
+	bool use_camera_right = false;
 	bool first_frame = true;
 	std::string ui_name;
 
@@ -31,6 +32,7 @@ struct Billboard {
 		serialized_component["color"]["g"] = color.g;
 		serialized_component["color"]["b"] = color.b;
 		serialized_component["color"]["a"] = color.a;
+		serialized_component["use_camera_right"] = use_camera_right;
 		serialized_scene.push_back(nlohmann::json::object());
 		serialized_scene.back()["component_data"] = serialized_component;
 		serialized_scene.back()["component_name"] = "Billboard";
@@ -51,6 +53,7 @@ struct Billboard {
 		color.g = serialized_component["color"]["g"];
 		color.b = serialized_component["color"]["b"];
 		color.a = serialized_component["color"]["a"];
+		use_camera_right = serialized_component["use_camera_right"];
 	}
 };
 

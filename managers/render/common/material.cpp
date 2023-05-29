@@ -366,9 +366,11 @@ void MaterialTransparent::bind_object_resources(RenderScene &scene, TransparentO
 		shader.set_vec3("camera_right", right);
 		shader.set_vec3("camera_up", up);
 		shader.set_vec3("camera_look", look);
+		shader.set_vec3("camera_pos", scene.camera_pos);
 		shader.set_vec2("size", object.size);
 		shader.set_vec3("billboard_center", object.position);
 		shader.set_int("is_billboard", 1);
+		shader.set_int("use_camera_right", (int)object.use_camera_right);
 	} else {
 		shader.set_int("is_billboard", 0);
 	}

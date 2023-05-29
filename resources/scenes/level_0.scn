@@ -3727,7 +3727,8 @@
                         "x": 8.100000381469727,
                         "y": 2.799999952316284
                     },
-                    "texture": "test_flare.ktx2"
+                    "texture": "test_flare.ktx2",
+                    "use_camera_right": false
                 },
                 "component_name": "Billboard"
             }

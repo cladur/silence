@@ -38,7 +38,7 @@ public:
 	void draw_sprite(const glm::vec3 &position, const glm::vec2 &size, const glm::vec3 &color, Handle<Texture> texture,
 			bool is_screen_space, Alignment alignment = Alignment::NONE);
 	void draw_sprite_billboard(
-			const glm::vec3 &position, const glm::vec2 &size, const glm::vec4 &color,  Handle<Texture> texture);
+			const glm::vec3 &position, const glm::vec2 &size, const glm::vec4 &color,  Handle<Texture> texture, bool use_camera_right = false);
 
 	void draw_slider_billboard(const glm::vec3 &position, float add_z, const glm::vec2 &size, const glm::vec3 &color,
 			float value, SliderAlignment slider_alignment);

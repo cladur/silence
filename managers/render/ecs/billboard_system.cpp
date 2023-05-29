@@ -30,10 +30,11 @@ void BillboardSystem::update(World &world, float dt) {
 			bill.is_billboard = true;
 			bill.is_screen_space = false;
 			bill.display = true;
-			bill.position = transform.position;
+			bill.position = transform.position + billboard.position_offset;
 			bill.size = billboard.scale;
 			bill.texture = billboard.texture;
 			bill.color = billboard.color;
+			bill.use_camera_right = billboard.use_camera_right;
 			ui.add_as_root(ui_scene_name, billboard.ui_name);
 			billboard.first_frame = false;
 		} else {
@@ -41,10 +42,11 @@ void BillboardSystem::update(World &world, float dt) {
 			bill.is_billboard = true;
 			bill.is_screen_space = false;
 			bill.display = true;
-			bill.position = transform.position;
+			bill.position = transform.position + billboard.position_offset;
 			bill.size = billboard.scale;
 			bill.texture = billboard.texture;
 			bill.color = billboard.color;
+			bill.use_camera_right = billboard.use_camera_right;
 		}
 	}
 }
