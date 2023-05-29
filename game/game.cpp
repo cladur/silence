@@ -449,37 +449,37 @@ void Game::custom_update(float dt) {
 		AnimationManager::get().animation_map.clear();
 	}
 
-	// BSP Vizualization, for now it's left in here, but could be moved to system in the future
-	//
-	// bsp_tree = CollisionSystem::build_tree(world, entities, 10);
+	// // BSP Vizualization, for now it's left in here, but could be moved to system in the future
+	// //
+	// // bsp_tree = CollisionSystem::build_tree(world, entities, 10);
 
-	BSPNode *node = get_active_scene().bsp_tree.get();
-	std::vector<BSPNode> nodes;
-	traverse_bsp_tree(node, nodes);
+	// BSPNode *node = get_active_scene().bsp_tree.get();
+	// std::vector<BSPNode> nodes;
+	// traverse_bsp_tree(node, nodes);
 
-	ImGui::Begin("BSP Tree");
+	// ImGui::Begin("BSP Tree");
 
-	for (auto &node : nodes) {
-		// calculate rotation from normal
-		glm::vec3 up = glm::vec3(0.0f, 0.0f, 1.0f);
-		glm::vec3 axis = glm::cross(up, node.plane.normal);
-		float angle = glm::acos(glm::dot(up, node.plane.normal));
-		glm::quat rotation = glm::angleAxis(angle, axis);
+	// for (auto &node : nodes) {
+	// 	// calculate rotation from normal
+	// 	glm::vec3 up = glm::vec3(0.0f, 0.0f, 1.0f);
+	// 	glm::vec3 axis = glm::cross(up, node.plane.normal);
+	// 	float angle = glm::acos(glm::dot(up, node.plane.normal));
+	// 	glm::quat rotation = glm::angleAxis(angle, axis);
 
-		std::string info = "Node: " + std::to_string(node.entities.size());
-		ImGui::Text("%s", info.c_str());
+	// 	std::string info = "Node: " + std::to_string(node.entities.size());
+	// 	ImGui::Text("%s", info.c_str());
 
-		if (node.front || node.back) {
-			SPDLOG_INFO("normal {}", glm::to_string(node.plane.normal));
-			SPDLOG_INFO("point {}", glm::to_string(node.plane.point));
-			SPDLOG_INFO("entities {}", node.entities.size());
-			get_active_scene().get_render_scene().debug_draw.draw_box(
-					node.plane.point, rotation, glm::vec3(20.0f, 20.0f, 0.1f), glm::vec3(1.0f, 0.0f, 0.0f));
-			// draw arrow
-			get_active_scene().get_render_scene().debug_draw.draw_arrow(
-					node.plane.point, node.plane.point + node.plane.normal, glm::vec3(1.0f, 0.0f, 0.0f));
-		}
-	}
+	// 	if (node.front || node.back) {
+	// 		SPDLOG_INFO("normal {}", glm::to_string(node.plane.normal));
+	// 		SPDLOG_INFO("point {}", glm::to_string(node.plane.point));
+	// 		SPDLOG_INFO("entities {}", node.entities.size());
+	// 		get_active_scene().get_render_scene().debug_draw.draw_box(
+	// 				node.plane.point, rotation, glm::vec3(20.0f, 20.0f, 0.1f), glm::vec3(1.0f, 0.0f, 0.0f));
+	// 		// draw arrow
+	// 		get_active_scene().get_render_scene().debug_draw.draw_arrow(
+	// 				node.plane.point, node.plane.point + node.plane.normal, glm::vec3(1.0f, 0.0f, 0.0f));
+	// 	}
+	// }
 
-	ImGui::End();
+	// ImGui::End();
 }

@@ -100,7 +100,7 @@ void Engine::update(float dt) {
 		scene->update(dt);
 	}
 
-	AudioManager::get().update();;
+	AudioManager::get().update();
 
 	input_manager.process_input();
 
