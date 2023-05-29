@@ -134,18 +134,18 @@ void CalcPointLight(vec3 world_pos, vec3 normal, vec3 view_pos, vec3 F0, float r
 }
 
 // ----------------------------------------------------------------------------
-void CalcSpotLight(vec3 normal, vec3 world_pos, vec3 view_pos, vec3 F0, float roughness, float metalness, vec3 albedo)
+void CalcSpotLight(vec3 world_pos, vec3 normal, vec3 view_pos, vec3 F0, float roughness, float metalness, vec3 albedo)
 {
     vec3 light_dir = normalize(light_position - world_pos);
-    vec3 halfway_dir = normalize(light_dir + view_pos);
+    vec3 halfway_dir = normalize(view_pos + light_dir);
 
     float theta = dot(light_dir, normalize(-light_direction));
     float epsilon = cutoff - outer_cutoff;
-    float intensity = clamp((theta - outer_cutoff) / epsilon, 0.0f, 1.0f);
+    float intensity = clamp((theta - outer_cutoff) / epsilon, 0.0, 1.0);
 
     float distance = length(light_position - world_pos);
     float attenuation = 1.0;// / (distance * distance);
-    vec3 radiance = intensity * light_color * attenuation * light_intensity;
+    vec3 radiance = intensity * light_intensity * light_color * attenuation;
 
     float NDF = DistributionGGX(normal, halfway_dir, roughness);
     float G = GeometrySmith(normal, view_pos, light_dir, roughness);
