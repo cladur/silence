@@ -25,6 +25,8 @@
 #include "gameplay/gameplay_manager.h"
 #include "managers/physics/ecs/collision_system.h"
 #include "managers/physics/ecs/physics_system.h"
+#include "render/ecs/billboard_component.h"
+#include "render/ecs/billboard_system.h"
 #include "render/ecs/frustum_draw_system.h"
 #include "render/ecs/light_render_system.h"
 #include "render/ecs/render_system.h"
@@ -65,6 +67,7 @@ Scene::Scene() {
 		world.register_component<Platform>();
 		world.register_component<ExplodingBox>();
 		world.register_component<EnemyData>();
+		world.register_component<Billboard>();
 	}
 	// Components
 
@@ -84,6 +87,7 @@ Scene::Scene() {
 		world.register_system<IsolatedEntitiesSystem>(EcsOnLoad);
 		world.register_system<RootParentSystem>(EcsOnLoad);
 		world.register_system<AttachmentSystem>(EcsPostLoad);
+		world.register_system<BillboardSystem>();
 	}
 
 	auto &physics_manager = PhysicsManager::get();

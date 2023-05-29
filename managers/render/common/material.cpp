@@ -1,18 +1,9 @@
 #include "material.h"
-#include <render/transparent_elements/ui/sprite_manager.h>
 #include <spdlog/spdlog.h>
-
 #include "display/display_manager.h"
-
-#include "debug_camera/debug_camera.h"
-
-#include "render/common/material.h"
 #include "render/common/skinned_mesh.h"
 #include "render_pass.h"
-
-#include "render/render_manager.h"
 #include "render/render_scene.h"
-#include <glm/gtc/type_ptr.hpp>
 
 AutoCVarInt cvar_use_ao("render.use_ao", "use ambient occlusion", 1, CVarFlags::EditCheckbox);
 AutoCVarInt cvar_use_fog("render.use_fog", "use simple linear fog", 1, CVarFlags::EditCheckbox);
@@ -341,6 +332,8 @@ void MaterialTransparent::bind_object_resources(RenderScene &scene, TransparentO
 	static glm::mat4 view;
 	static glm::vec2 window_size;
 
+	auto &rm = ResourceManager::get();
+
 	window_size = scene.full_render_extent;//DisplayManager::get().get_window_size();
 
 	view = scene.view;
@@ -350,7 +343,8 @@ void MaterialTransparent::bind_object_resources(RenderScene &scene, TransparentO
 		shader.set_int("is_sprite", 0);
 
 	} else if (object.type == TransparentType::SPRITE) {
-		t = SpriteManager::get()->get_sprite_texture(object.texture_name);
+		//t = SpriteManager::get()->get_sprite_texture(object.texture_name);
+		t = rm.get_texture(rm.get_texture_handle(object.texture_name));
 		shader.set_int("is_sprite", 1);
 	}
 	textured = !object.texture_name.empty();
@@ -372,12 +366,16 @@ void MaterialTransparent::bind_object_resources(RenderScene &scene, TransparentO
 		shader.set_vec3("camera_right", right);
 		shader.set_vec3("camera_up", up);
 		shader.set_vec3("camera_look", look);
+		shader.set_vec3("camera_pos", scene.camera_pos);
 		shader.set_vec2("size", object.size);
 		shader.set_vec3("billboard_center", object.position);
 		shader.set_int("is_billboard", 1);
+		shader.set_int("use_camera_right", (int)object.use_camera_right);
+		shader.set_float("billboard_z_offset", object.billboard_z_offset);
 	} else {
 		shader.set_int("is_billboard", 0);
 	}
+	shader.set_float("alpha", object.alpha);
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, t.id);

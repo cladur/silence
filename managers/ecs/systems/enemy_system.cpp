@@ -53,7 +53,7 @@ void EnemySystem::update(World &world, float dt) {
 			slider.is_screen_space = false;
 			slider.size = glm::vec2(0.1f, 0.5f);
 			slider.slider_alignment = SliderAlignment::BOTTOM_TO_TOP;
-			slider.color = glm::vec3(1.0f);
+			slider.color = glm::vec4(1.0f);
 
 			ui.add_ui_slider(std::to_string(entity) + "_detection", "detection_slider");
 			ui.add_as_root(std::to_string(entity) + "_detection", "detection_slider");

@@ -109,7 +109,7 @@ namespace enemy_utils {
 		auto &slider = UIManager::get().get_ui_slider(std::to_string(entity_id) + "_detection", "detection_slider");
 		slider.value = enemy_data.detection_level;
 		// lerp from white to red
-		slider.color = glm::lerp(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 0.0f, 0.0f), slider.value);
+		slider.color = glm::lerp(glm::vec4(1.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), slider.value);
 		slider.position = transform.get_global_position() + glm::vec3(0.0f, 2.5f, 0.0f);
 	}
 

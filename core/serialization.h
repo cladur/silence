@@ -28,6 +28,7 @@
 #include "managers/animation/ecs/animation_instance.h"
 #include "managers/render/ecs/model_instance.h"
 #include "managers/render/ecs/skinned_model_instance.h"
+#include "render/ecs/billboard_component.h"
 
 namespace serialization {
 
@@ -43,7 +44,7 @@ concept Deserializable = requires(T t, nlohmann::json &j) {
 
 typedef std::variant<Children, Parent, Transform, RigidBody, FmodListener, Camera, ModelInstance, AnimationInstance,
 		SkinnedModelInstance, Name, ColliderTag, StaticTag, ColliderSphere, ColliderAABB, ColliderOBB, ColliderCapsule,
-		Light, AgentData, HackerData, EnemyPath, EnemyData, Interactable, Attachment, Platform, ExplodingBox>
+		Light, AgentData, HackerData, EnemyPath, EnemyData, Interactable, Attachment, Platform, ExplodingBox, Billboard>
 		variant_type;
 
 template <typename T>

@@ -17,6 +17,7 @@
 #include <imgui_stdlib.h>
 
 #include "editor.h"
+#include "render/ecs/billboard_component.h"
 
 #define SHOW_COMPONENT(type, func)                                                                                     \
 	if (world->has_component<type>(selected_entity)) {                                                                 \
@@ -63,6 +64,7 @@ void Inspector::show_components() {
 	SHOW_COMPONENT(Platform, show_platform);
 	SHOW_COMPONENT(EnemyData, show_enemy_data);
 	SHOW_COMPONENT(ExplodingBox, show_exploding_box);
+	SHOW_COMPONENT(Billboard, show_billboard);
 
 	for (int i = 0; i < remove_component_queue.size(); i++) {
 		auto [entity, component_to_remove] = remove_component_queue.front();
@@ -1031,6 +1033,82 @@ void Inspector::show_enemy_data() {
 	}
 }
 
+void Inspector::show_billboard() {
+	auto &billboard = world->get_component<Billboard>(selected_entity);
+
+	if (ImGui::CollapsingHeader("Billboard", tree_flags)) {
+		if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+			ImGui::OpenPopup("BillboardContextMenu");
+		}
+		if (ImGui::BeginPopup("BillboardContextMenu")) {
+			if (ImGui::MenuItem("Reset Billboard")) {
+				billboard.texture = Handle<Texture>(0);
+				billboard.scale = glm::vec2(1.0f);
+				billboard.color = glm::vec4(1.0f);
+			}
+			remove_component_menu_item<Billboard>();
+
+			ImGui::EndPopup();
+		}
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("Billboard Component", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+
+		show_vec3("Position", billboard.position_offset);
+		show_float("Z Offset", billboard.billboard_z_offset);
+		show_vec2("Size", billboard.scale);
+		show_checkbox("Use Camera Right", billboard.use_camera_right);
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("%s", "Color");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		ImGui::ColorPicker4("##Color", &billboard.color[0]);
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Texture");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+
+		std::string texture_name = resource_manager.get_texture_name(billboard.texture);
+		if (texture_name.empty()) {
+			ImGui::Text("Texture: None");
+		} else {
+			ImGui::Text("%s", texture_name.c_str());
+		}
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_TEXTURE_PATH")) {
+				const std::string payload_n = *(const std::string *)payload->Data;
+				resource_manager.load_texture(payload_n.c_str());
+				billboard.texture = resource_manager.get_texture_handle(payload_n);
+			}
+
+			ImGui::EndDragDropTarget();
+		}
+
+		ImGui::EndTable();
+	}
+}
+
+bool Inspector::show_vec2(
+		const char *label, glm::vec2 &vec2, float speed, float reset_value, float min_value, float max_value) {
+	bool changed = false;
+	ImGui::TableNextRow();
+	ImGui::TableSetColumnIndex(0);
+	ImGui::Text("%s", label);
+	if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+		vec2 = glm::vec3(reset_value);
+		changed = true;
+	}
+	ImGui::TableSetColumnIndex(1);
+	ImGui::SetNextItemWidth(-FLT_MIN);
+	changed |= ImGui::DragFloat2(fmt::format("##{}", label).c_str(), &vec2.x, speed, min_value, max_value);
+	return changed;
+}
+
 bool Inspector::show_vec3(
 		const char *label, glm::vec3 &vec3, float speed, float reset_value, float min_value, float max_value) {
 	bool changed = false;
@@ -1185,6 +1263,7 @@ void Inspector::show_add_component() {
 			SHOW_ADD_COMPONENT(Platform);
 			SHOW_ADD_COMPONENT(ExplodingBox);
 			SHOW_ADD_COMPONENT(EnemyData);
+			SHOW_ADD_COMPONENT(Billboard);
 
 			ImGui::EndPopup();
 		}
