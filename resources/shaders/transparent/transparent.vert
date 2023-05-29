@@ -20,12 +20,15 @@ uniform vec3 billboard_center;
 uniform int is_billboard;
 uniform int use_camera_right;
 
+uniform float billboard_z_offset;
+
 void main() {
     if (is_screen_space == 1) {
         gl_Position = projection * vec4(aPos, 1.0);
     } else {
         mat4 vp = projection * view;
         vec3 right = camera_right;
+        vec3 look = normalize(billboard_center - camera_pos);
 
         if (use_camera_right == 0) {
             right = normalize(
@@ -40,7 +43,7 @@ void main() {
 
 
         if (is_billboard == 1) {
-            gl_Position = vp * vec4(billboard_center + right * aPos.x + camera_up * aPos.y + camera_look * aPos.z, 1.0);
+            gl_Position = vp * vec4(billboard_center + right * aPos.x + camera_up * aPos.y + look * (aPos.z + billboard_z_offset), 1.0);
         } else {
             gl_Position = vp * vec4(aPos, 1.0);
         }

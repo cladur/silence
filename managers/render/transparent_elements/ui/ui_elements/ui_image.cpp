@@ -14,7 +14,7 @@ void UIImage::draw() {
 
 	if (is_billboard)
 	{
-		ui_manager.sprite_draw.draw_sprite_billboard(position, size, color, texture, use_camera_right);
+		ui_manager.sprite_draw.draw_sprite_billboard(position, size, color, texture, billboard_z_offset, use_camera_right);
 	} else {
 		ui_manager.sprite_draw.draw_sprite(position, size, color, texture, is_screen_space, alignment);
 	}

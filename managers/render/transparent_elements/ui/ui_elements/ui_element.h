@@ -17,6 +17,7 @@ public:
 	bool is_screen_space = true;
 	bool is_billboard = false;
 	bool use_camera_right = false;
+	float billboard_z_offset = 0.0f;
 	std::vector<UIElement *> children;
 	Alignment alignment = Alignment::NONE;
 	bool display = true;

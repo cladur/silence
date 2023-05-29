@@ -35,6 +35,7 @@ void BillboardSystem::update(World &world, float dt) {
 			bill.texture = billboard.texture;
 			bill.color = billboard.color;
 			bill.use_camera_right = billboard.use_camera_right;
+			bill.billboard_z_offset = billboard.billboard_z_offset;
 			ui.add_as_root(ui_scene_name, billboard.ui_name);
 			billboard.first_frame = false;
 		} else {
@@ -47,6 +48,7 @@ void BillboardSystem::update(World &world, float dt) {
 			bill.texture = billboard.texture;
 			bill.color = billboard.color;
 			bill.use_camera_right = billboard.use_camera_right;
+			bill.billboard_z_offset = billboard.billboard_z_offset;
 		}
 	}
 }
