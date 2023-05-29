@@ -173,7 +173,7 @@ void AgentSystem::update(World &world, float dt) {
 			HitInfo info;
 			if (CollisionSystem::ray_cast_layer(world, ray, info)) {
 				if (info.distance < -def_cam_z) {
-					camera_tf.set_position({ 0.0f, 0.0f, -info.distance });
+					camera_tf.set_position({ 0.0f, 0.0f, -info.distance / 1.3f });
 				} else {
 					camera_tf.set_position({ 0.0f, 0.0f, def_cam_z });
 				}
