@@ -31,7 +31,7 @@ void CollisionSystem::update(World &world, float dt) {
 	static bool first = true;
 	if (first) {
 		first = false;
-		world.get_parent_scene()->bsp_tree = CollisionSystem::build_tree(world, world.get_parent_scene()->entities, 1);
+		world.get_parent_scene()->bsp_tree = CollisionSystem::build_tree(world, world.get_parent_scene()->entities, 10);
 	}
 
 	resolve_collision_dynamic(world);
