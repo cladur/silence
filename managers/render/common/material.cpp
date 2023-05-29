@@ -19,6 +19,9 @@ AutoCVarInt cvar_use_fog("render.use_fog", "use simple linear fog", 1, CVarFlags
 AutoCVarFloat cvar_fog_min("render.fog_min", "fog min distance", 20.0f, CVarFlags::EditFloatDrag);
 AutoCVarFloat cvar_fog_max("render.fog_max", "fog max distance", 300.0f, CVarFlags::EditFloatDrag);
 
+AutoCVarInt cvar_use_clut("render.use_clut", "use clut", 1, CVarFlags::EditCheckbox);
+
+
 void MaterialPBR::startup() {
 	shader.load_from_files(shader_path("pbr.vert"), shader_path("pbr.frag"));
 }
@@ -396,12 +399,14 @@ void MaterialCombination::bind_resources(RenderScene &scene) {
 	shader.set_int("AoRoughMetal", 4);
 	shader.set_int("ViewPos", 5);
 	shader.set_int("Skybox", 6);
+	shader.set_int("clut", 7);
 
 	shader.set_int("use_ao", cvar_use_ao.get());
 
 	shader.set_int("use_fog", cvar_use_fog.get());
 	shader.set_float("fog_min", cvar_fog_min.get());
 	shader.set_float("fog_max", cvar_fog_max.get());
+	shader.set_int("use_clut", cvar_use_clut.get());
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.albedo_texture_id);
@@ -417,6 +422,8 @@ void MaterialCombination::bind_resources(RenderScene &scene) {
 	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.position_texture_id);
 	glActiveTexture(GL_TEXTURE6);
 	glBindTexture(GL_TEXTURE_2D, scene.skybox_buffer.texture_id);
+	glActiveTexture(GL_TEXTURE7);
+	glBindTexture(GL_TEXTURE_2D, ResourceManager::get().get_texture(scene.combination_pass.clut_texture).id);
 }
 
 void MaterialCombination::bind_instance_resources(ModelInstance &instance, Transform &transform) {

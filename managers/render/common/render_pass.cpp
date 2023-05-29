@@ -13,6 +13,7 @@ AutoCVarFloat cvar_bloom_strength("render.bloom_strength", "bloom strength", 0.0
 AutoCVarFloat cvar_gamma("render.gamma", "gamma", 2.2f, CVarFlags::EditFloatDrag);
 AutoCVarFloat cvar_dirt_strength("render.dirt_strength", "dirt strength", 0.275f, CVarFlags::EditFloatDrag);
 
+
 void PBRPass::startup() {
 	material.startup();
 }
@@ -244,6 +245,8 @@ void TransparentPass::sort_objects(RenderScene &scene) {
 }
 
 void CombinationPass::startup() {
+	auto &rm = ResourceManager::get();
+	clut_texture = rm.load_texture(asset_path("32_lut.ktx2").c_str(), true, false);
 	material.startup();
 }
 
@@ -256,11 +259,10 @@ void CombinationPass::draw(RenderScene &scene) {
 void BloomPass::startup() {
 	material.startup();
 	// change dirt texture here
-	ResourceManager::get().load_texture(asset_path("lens_dirts/lens_dirt_2.ktx2").c_str());
-	dirt_texture = ResourceManager::get().get_texture_handle("lens_dirt_2");
-	dirt_offsets[0] = rand() % 4444 / 8888.0f;
+	auto &rm = ResourceManager::get();
+	dirt_texture = rm.load_texture(asset_path("lens_dirts/lens_dirt_2.ktx2").c_str());
+	dirt_offsets[0] = rand() % 4444 / 8888.0f; // from 0 to 0.5 to give both players a different offset
 	dirt_offsets[1] = rand() % 2222 / 4444.0f;
-
 }
 
 void BloomPass::draw(RenderScene &scene) {
@@ -329,6 +331,7 @@ void BloomPass::draw(RenderScene &scene) {
 	} else {
 		material.shader.set_float("dirt_offset", 0.0f);
 	}
+
 	utils::render_quad();
 }
 

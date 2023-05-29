@@ -103,6 +103,7 @@ public:
 
 class CombinationPass : public RenderPass {
 public:
+	Handle<Texture> clut_texture;
 	MaterialCombination material;
 	void startup() override;
 	void draw(RenderScene &scene) override;

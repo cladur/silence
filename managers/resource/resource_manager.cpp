@@ -48,7 +48,7 @@ Handle<Model> ResourceManager::load_model(const char *path) {
 	return handle;
 }
 
-Handle<Texture> ResourceManager::load_texture(const char *path) {
+Handle<Texture> ResourceManager::load_texture(const char *path, bool linear, bool repeat) {
 	std::string name = path;
 	bool found_asset_path = name.find(ASSET_PATH) != std::string::npos;
 	if (found_asset_path) {
@@ -59,7 +59,7 @@ Handle<Texture> ResourceManager::load_texture(const char *path) {
 	}
 
 	Texture texture = {};
-	texture.load_from_asset(path);
+	texture.load_from_asset(path, false, linear, repeat);
 
 	textures.push_back(texture);
 	Handle<Texture> handle = {};
