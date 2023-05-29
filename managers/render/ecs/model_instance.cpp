@@ -6,7 +6,8 @@
 
 ModelInstance::ModelInstance() {
 	ResourceManager &resource_manager = ResourceManager::get();
-	//model_handle = resource_manager.load_model(asset_path("items/wooden_box/wooden_box.mdl").c_str());
+	// model_handle = resource_manager.load_model(asset_path("items/wooden_box/wooden_box.mdl").c_str());
+	model_handle = { 0 };
 	material_type = MaterialType::Default;
 }
 

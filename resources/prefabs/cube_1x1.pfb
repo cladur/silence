@@ -3,14 +3,14 @@
         "components": [
             {
                 "component_data": {
-                    "name": "Cube 1x1"
+                    "name": "cube_1x1"
                 },
                 "component_name": "Name"
             },
             {
                 "component_data": {
                     "orientation": {
-                        "w": 0.0,
+                        "w": 1.0,
                         "x": 0.0,
                         "y": 0.0,
                         "z": 0.0
@@ -21,9 +21,9 @@
                         "z": 0.0
                     },
                     "scale": {
-                        "x": 1.0,
-                        "y": 1.0,
-                        "z": 1.0
+                        "x": 0.9999998807907104,
+                        "y": 0.9999998807907104,
+                        "z": 0.9999998807907104
                     }
                 },
                 "component_name": "Transform"
@@ -31,12 +31,50 @@
             {
                 "component_data": {
                     "material_type": 0,
-                    "model_name": "placeholders/cube_1x1x1.mdl"
+                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "scale_uv_with_transform": true
                 },
                 "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {},
+                "component_name": "StaticTag"
+            },
+            {
+                "component_data": {
+                    "layer_name": "default"
+                },
+                "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {
+                    "center": {
+                        "x": 0.0,
+                        "y": 0.5,
+                        "z": 0.0
+                    },
+                    "orientation": {
+                        "0": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                        },
+                        "1": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                        }
+                    },
+                    "range": {
+                        "x": 0.5,
+                        "y": 0.5,
+                        "z": 0.5
+                    }
+                },
+                "component_name": "ColliderOBB"
             }
         ],
         "entity": 1,
-        "signature": "00000000000000000000000001000011"
+        "signature": "00000000000000001000110000100011"
     }
 ]

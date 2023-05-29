@@ -22,15 +22,16 @@ Entity EntityManager::create_entity() {
 }
 
 Entity EntityManager::create_entity(Entity entity) {
+	assert(living_entities_count < MAX_ENTITIES && "Too many entities alive");
+
+	// If entity is in available entities, remove it from there
 	if (std::find(available_entities.begin(), available_entities.end(), entity) != available_entities.end()) {
-		assert(living_entities_count < MAX_ENTITIES && "Too many entities alive");
 		available_entities.erase(
 				std::remove(available_entities.begin(), available_entities.end(), entity), available_entities.end());
-		living_entities_count++;
-		return entity;
-	} else {
-		return entity;
 	}
+
+	living_entities_count++;
+	return entity;
 }
 
 void EntityManager::destroy_entity(Entity entity) {

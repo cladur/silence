@@ -10,6 +10,8 @@
 #include "input/input_manager.h"
 #include "render/transparent_elements/ui_manager.h"
 
+#include "physics/physics_manager.h"
+
 AutoCVarInt cvar_controlling_agent("game.controlling_agent", "Controlling agent", 1, CVarFlags::EditCheckbox);
 
 void gui_setup() {
@@ -122,7 +124,7 @@ void gui_setup() {
 	for (int i = 0; i < 10; i++) {
 		auto &square = ui_manager.add_ui_image("gui_test", "volume_meter_" + std::to_string(i));
 		square.size = glm::vec2(25.0f, 25.0f);
-		square.color = glm::vec3(0.0f);
+		square.color = glm::vec4(0.0f);
 		square.position = glm::vec3(-135.0f + (float)i * 30.0f, 0.0f, 0.0f);
 		options_root.add_child(square);
 	}
@@ -200,9 +202,9 @@ void ui_update() {
 	for (int i = 0; i < 10; i++) {
 		auto &volume_meter = ui_manager.get_ui_image("gui_test", "volume_meter_" + std::to_string(i));
 		if ((i / 10.0f) < volume) {
-			volume_meter.color = glm::vec3(1.0f);
+			volume_meter.color = glm::vec4(1.0f);
 		} else {
-			volume_meter.color = glm::vec3(0.0f);
+			volume_meter.color = glm::vec4(0.0f);
 		}
 	}
 
@@ -349,6 +351,16 @@ void Game::shutdown() {
 	Engine::shutdown();
 }
 
+void traverse_bsp_tree(BSPNode *node, std::vector<BSPNode> &nodes) {
+	if (node == nullptr) {
+		return;
+	}
+
+	nodes.push_back(*node);
+	traverse_bsp_tree(node->front.get(), nodes);
+	traverse_bsp_tree(node->back.get(), nodes);
+}
+
 void Game::custom_update(float dt) {
 	ZoneScopedN("Custom Update");
 	DisplayManager &display_manager = DisplayManager::get();
@@ -433,7 +445,41 @@ void Game::custom_update(float dt) {
 	}
 
 	if (input_manager.is_action_just_pressed("reload_scene")) {
-		get_active_scene().load_from_file("resources/scenes/level_0.scn");
+		get_active_scene().load_from_file("resources/scenes/level_1.scn");
 		AnimationManager::get().animation_map.clear();
 	}
+
+	// BSP Vizualization, for now it's left in here, but could be moved to system in the future
+	//
+	// bsp_tree = CollisionSystem::build_tree(world, entities, 10);
+
+	BSPNode *node = get_active_scene().bsp_tree.get();
+	std::vector<BSPNode> nodes;
+	traverse_bsp_tree(node, nodes);
+
+	ImGui::Begin("BSP Tree");
+
+	for (auto &node : nodes) {
+		// calculate rotation from normal
+		glm::vec3 up = glm::vec3(0.0f, 0.0f, 1.0f);
+		glm::vec3 axis = glm::cross(up, node.plane.normal);
+		float angle = glm::acos(glm::dot(up, node.plane.normal));
+		glm::quat rotation = glm::angleAxis(angle, axis);
+
+		std::string info = "Node: " + std::to_string(node.entities.size());
+		ImGui::Text("%s", info.c_str());
+
+		if (node.front || node.back) {
+			SPDLOG_INFO("normal {}", glm::to_string(node.plane.normal));
+			SPDLOG_INFO("point {}", glm::to_string(node.plane.point));
+			SPDLOG_INFO("entities {}", node.entities.size());
+			get_active_scene().get_render_scene().debug_draw.draw_box(
+					node.plane.point, rotation, glm::vec3(20.0f, 20.0f, 0.1f), glm::vec3(1.0f, 0.0f, 0.0f));
+			// draw arrow
+			get_active_scene().get_render_scene().debug_draw.draw_arrow(
+					node.plane.point, node.plane.point + node.plane.normal, glm::vec3(1.0f, 0.0f, 0.0f));
+		}
+	}
+
+	ImGui::End();
 }

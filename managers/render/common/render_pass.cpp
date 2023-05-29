@@ -11,7 +11,7 @@ AutoCVarInt cvar_use_bloom("render.use_bloom", "use bloom", 1, CVarFlags::EditCh
 AutoCVarFloat cvar_bloom_strength("render.bloom_strength", "bloom strength", 0.04f, CVarFlags::EditFloatDrag);
 
 AutoCVarFloat cvar_gamma("render.gamma", "gamma", 2.2f, CVarFlags::EditFloatDrag);
-AutoCVarFloat cvar_dirt_strength("render.dirt_strength", "dirt strength", 0.275f, CVarFlags::EditFloatDrag);
+AutoCVarFloat cvar_dirt_strength("render.dirt_strength", "dirt strength", 0.075f, CVarFlags::EditFloatDrag);
 
 void PBRPass::startup() {
 	material.startup();
@@ -260,7 +260,6 @@ void BloomPass::startup() {
 	dirt_texture = ResourceManager::get().get_texture_handle("lens_dirt_2");
 	dirt_offsets[0] = rand() % 4444 / 8888.0f;
 	dirt_offsets[1] = rand() % 2222 / 4444.0f;
-
 }
 
 void BloomPass::draw(RenderScene &scene) {
