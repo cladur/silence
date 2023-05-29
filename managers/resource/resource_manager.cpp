@@ -48,13 +48,46 @@ Handle<Model> ResourceManager::load_model(const char *path) {
 	return handle;
 }
 
-void ResourceManager::load_texture(const char *path) {
-	if (textures.find(path) != textures.end()) {
-		return;
+Handle<Texture> ResourceManager::load_texture(const char *path) {
+	std::string name = path;
+	bool found_asset_path = name.find(ASSET_PATH) != std::string::npos;
+	if (found_asset_path) {
+		name = remove_asset_path(name);
 	}
+	if (name_to_texture.find(name) != name_to_texture.end()) {
+		return name_to_texture[name];
+	}
+
 	Texture texture = {};
-	texture.load_from_asset(asset_path(path));
-	textures[path] = texture;
+	texture.load_from_asset(path);
+
+	textures.push_back(texture);
+	Handle<Texture> handle = {};
+	handle.id = textures.size() - 1;
+
+	name_to_texture[name] = handle;
+	return handle;
+}
+
+Texture &ResourceManager::get_texture(Handle<Texture> handle) {
+	return textures[handle.id];
+}
+
+Handle<Texture> ResourceManager::get_texture_handle(std::string name) {
+	bool found_asset_path = name.find(ASSET_PATH) != std::string::npos;
+	if (found_asset_path) {
+		name = remove_asset_path(name);
+	}
+	return name_to_texture[name];
+}
+
+std::string ResourceManager::get_texture_name(Handle<Texture> handle) {
+	for (auto &pair : name_to_texture) {
+		if (pair.second.id == handle.id) {
+			return pair.first;
+		}
+	}
+	return "";
 }
 
 Model &ResourceManager::get_model(Handle<Model> handle) {
