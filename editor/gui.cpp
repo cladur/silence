@@ -735,6 +735,11 @@ void Editor::imgui_content_browser() {
 				// Display preview (could be anything, e.g. when dragging an image we could decide to display
 				// the filename and a small preview of the image, etc.)
 				ImGui::Text("%s", label.c_str());
+			} else if (extension == ".ktx2") {
+				drag_and_drop_path = entry.path().string();
+
+				ImGui::SetDragDropPayload("DND_TEXTURE_PATH", &drag_and_drop_path, sizeof(std::string));
+				ImGui::Text("%s", label.c_str());
 			}
 			ImGui::EndDragDropSource();
 		}

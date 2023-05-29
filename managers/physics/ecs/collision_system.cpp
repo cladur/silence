@@ -143,13 +143,13 @@ void CollisionSystem::resolve_bsp_collision(World &world, BSPNode *node, Entity 
 	//Every node contains entities that intersects with it or if node is a leaf
 	PhysicsManager::get().resolve_collision(world, entity, node->entities);
 
-	if (node->back == nullptr && node->front == nullptr) {
-		return;
-	}
-
 	if (force) {
 		resolve_bsp_collision(world, node->front.get(), entity, force);
 		resolve_bsp_collision(world, node->back.get(), entity, force);
+	}
+
+	if (node->back == nullptr && node->front == nullptr) {
+		return;
 	}
 
 	Side side;

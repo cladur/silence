@@ -1,9 +1,12 @@
 #ifndef SILENCE_SPRITE_DRAW_H
 #define SILENCE_SPRITE_DRAW_H
 
-#include "render/transparent_elements/transparent_object.h"
 #include <render/common/shader.h>
+#include <render/common/texture.h>
+#include "resource/resource_manager.h"
+
 struct RenderScene;
+struct TransparentObject;
 
 enum class Alignment {
 	TOP,
@@ -32,15 +35,15 @@ public:
 	void draw_colored(const glm::vec3 &position, const glm::vec2 &size, const glm::vec3 &color, bool is_screen_space,
 			Alignment alignment = Alignment::NONE);
 	void draw_colored_billboard(const glm::vec3 &position, const glm::vec2 &size, const glm::vec3 &color);
-	void draw_sprite(const glm::vec3 &position, const glm::vec2 &size, const glm::vec3 &color, const char *texture_name,
+	void draw_sprite(const glm::vec3 &position, const glm::vec2 &size, const glm::vec3 &color, Handle<Texture> texture,
 			bool is_screen_space, Alignment alignment = Alignment::NONE);
 	void draw_sprite_billboard(
-			const glm::vec3 &position, const glm::vec2 &size, const glm::vec3 &color, const char *texture_name);
+			const glm::vec3 &position, const glm::vec2 &size, const glm::vec4 &color,  Handle<Texture> texture, float z_offset = 0.0f, bool use_camera_right = false);
 
 	void draw_slider_billboard(const glm::vec3 &position, float add_z, const glm::vec2 &size, const glm::vec3 &color,
 			float value, SliderAlignment slider_alignment);
 
-	void draw_sprite_scene(RenderScene *scene, const glm::vec3 &position, const glm::vec2 &size, const glm::vec3 &color, const char *texture_name,
+	void draw_sprite_scene(RenderScene *scene, const glm::vec3 &position, const glm::vec2 &size, const glm::vec3 &color,  Handle<Texture> texture,
 			bool is_screen_space, Alignment alignment = Alignment::NONE);
 };
 

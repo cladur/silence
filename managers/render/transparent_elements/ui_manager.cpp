@@ -13,6 +13,8 @@
 void UIManager::startup() {
     text_draw = TextDraw();
     sprite_draw = SpriteDraw();
+
+	ResourceManager::get().load_texture("anchor_debug.ktx2");
 }
 
 UIManager &UIManager::get() {
@@ -67,7 +69,8 @@ UIButton &UIManager::add_ui_button(const std::string &scene_name, const std::str
         glm::vec3(0.0f),
         glm::vec2(0.0f),
         "",
-        "",
+		"",
+        Handle<Texture>(-1),
         hover_event_name,
         click_event_name
     );

@@ -8,18 +8,21 @@
 #include "fmod_studio.hpp"
 #include "gameplay/gameplay_manager.h"
 #include "input/input_manager.h"
-#include "render/transparent_elements/ui/sprite_manager.h"
 #include "render/transparent_elements/ui_manager.h"
+
+#include "physics/physics_manager.h"
 
 AutoCVarInt cvar_controlling_agent("game.controlling_agent", "Controlling agent", 1, CVarFlags::EditCheckbox);
 
 void gui_setup() {
 	SPDLOG_INFO("Initializing GUI scenes");
-	SpriteManager::get()->load_sprite_texture("button_hover", "button_lit_1.ktx2");
-	SpriteManager::get()->load_sprite_texture("button", "button_unlit_1.ktx2");
-	SpriteManager::get()->load_sprite_texture("button_hover_square", "button_lit_square.ktx2");
-	SpriteManager::get()->load_sprite_texture("button_square", "button_unlit_square.ktx2");
-	SpriteManager::get()->load_sprite_texture("anchor_debug", "anchor_debug.ktx2");
+
+	auto &rm = ResourceManager::get();
+	auto button_lit = rm.load_texture("button_lit_1.ktx2");
+	auto button_unlit = rm.load_texture("button_unlit_1.ktx2");
+	auto button_lit_sq = rm.load_texture("button_lit_square.ktx2");
+	auto button_unlit_sq = rm.load_texture("button_unlit_square.ktx2");
+	auto anchor = rm.load_texture("anchor_debug.ktx2");
 
 	auto &ui_manager = UIManager::get();
 
@@ -27,7 +30,7 @@ void gui_setup() {
 	ui_manager.activate_ui_scene("gui_test");
 
 	auto &billboard_test = ui_manager.add_ui_image("gui_test", "billboard_test");
-	billboard_test.texture_name = "button_hover_square";
+	billboard_test.texture = button_unlit_sq;
 	billboard_test.is_screen_space = false;
 	billboard_test.is_billboard = true;
 	billboard_test.position = glm::vec3(0.0f);
@@ -41,24 +44,24 @@ void gui_setup() {
 	ui_manager.add_as_root("gui_test", "buttons_anchor");
 
 	auto &play_button = ui_manager.add_ui_button("gui_test", "play_button", "button_hover", "button");
-	play_button.texture_name = "button";
-	play_button.hover_texture_name = "button_hover";
+	play_button.texture = button_unlit;
+	play_button.hover_texture = button_lit;
 	play_button.position = glm::vec3(0.0f, 200.0f, 0.0f);
 	play_button.size = glm::vec2(300.0f, 300.0f);
 	play_button.text = "Play";
 	button_anchor.add_child(play_button);
 
 	auto &options_button = ui_manager.add_ui_button("gui_test", "options_button", "button_hover", "button");
-	options_button.texture_name = "button";
-	options_button.hover_texture_name = "button_hover";
+	options_button.texture = button_unlit;
+	options_button.hover_texture = button_lit;
 	options_button.position = glm::vec3(0.0f, 0.0f, 0.0f);
 	options_button.size = glm::vec2(300.0f, 300.0f);
 	options_button.text = "Options";
 	button_anchor.add_child(options_button);
 
 	auto &credits_button = ui_manager.add_ui_button("gui_test", "credits_button", "button_hover", "button");
-	credits_button.texture_name = "button";
-	credits_button.hover_texture_name = "button_hover";
+	credits_button.texture = button_unlit;
+	credits_button.hover_texture = button_lit;
 	credits_button.position = glm::vec3(0.0f, -200.0f, 0.0f);
 	credits_button.size = glm::vec2(300.0f, 300.0f);
 	credits_button.text = "Credits";
@@ -99,8 +102,8 @@ void gui_setup() {
 	ui_manager.add_as_root("gui_test", "back_button_root");
 
 	auto &back_button = ui_manager.add_ui_button("gui_test", "back_button", "button_hover", "button");
-	back_button.texture_name = "button";
-	back_button.hover_texture_name = "button_hover";
+	back_button.texture = button_unlit;
+	back_button.hover_texture = button_lit;
 	back_button.position = glm::vec3(0.0f, -200.0f, 0.0f);
 	back_button.size = glm::vec2(300.0f, 300.0f);
 	back_button.text = "Back";
@@ -120,16 +123,15 @@ void gui_setup() {
 
 	for (int i = 0; i < 10; i++) {
 		auto &square = ui_manager.add_ui_image("gui_test", "volume_meter_" + std::to_string(i));
-		square.texture_name = "";
 		square.size = glm::vec2(25.0f, 25.0f);
-		square.color = glm::vec3(0.0f);
+		square.color = glm::vec4(0.0f);
 		square.position = glm::vec3(-135.0f + (float)i * 30.0f, 0.0f, 0.0f);
 		options_root.add_child(square);
 	}
 
 	auto &plus_button = ui_manager.add_ui_button("gui_test", "plus_button", "button_hover_square", "button_square");
-	plus_button.texture_name = "button_square";
-	plus_button.hover_texture_name = "button_hover_square";
+	plus_button.texture = button_unlit_sq;
+	plus_button.hover_texture = button_lit_sq;
 	plus_button.position = glm::vec3(200.0f, 0.0f, 0.0f);
 	plus_button.size = glm::vec2(75.0f, 75.0f);
 	plus_button.text = "high";
@@ -137,8 +139,8 @@ void gui_setup() {
 	options_root.add_child(plus_button);
 
 	auto &minus_button = ui_manager.add_ui_button("gui_test", "minus_button", "button_hover_square", "button_square");
-	minus_button.texture_name = "button_square";
-	minus_button.hover_texture_name = "button_hover_square";
+	minus_button.texture = button_unlit_sq;
+	minus_button.hover_texture = button_lit_sq;
 	minus_button.position = glm::vec3(-200.0f, 0.0f, 0.0f);
 	minus_button.size = glm::vec2(75.0f, 75.0f);
 	minus_button.text = "low";
@@ -200,9 +202,9 @@ void ui_update() {
 	for (int i = 0; i < 10; i++) {
 		auto &volume_meter = ui_manager.get_ui_image("gui_test", "volume_meter_" + std::to_string(i));
 		if ((i / 10.0f) < volume) {
-			volume_meter.color = glm::vec3(1.0f);
+			volume_meter.color = glm::vec4(1.0f);
 		} else {
-			volume_meter.color = glm::vec3(0.0f);
+			volume_meter.color = glm::vec4(0.0f);
 		}
 	}
 
@@ -349,6 +351,16 @@ void Game::shutdown() {
 	Engine::shutdown();
 }
 
+void traverse_bsp_tree(BSPNode *node, std::vector<BSPNode> &nodes) {
+	if (node == nullptr) {
+		return;
+	}
+
+	nodes.push_back(*node);
+	traverse_bsp_tree(node->front.get(), nodes);
+	traverse_bsp_tree(node->back.get(), nodes);
+}
+
 void Game::custom_update(float dt) {
 	ZoneScopedN("Custom Update");
 	DisplayManager &display_manager = DisplayManager::get();
@@ -433,7 +445,41 @@ void Game::custom_update(float dt) {
 	}
 
 	if (input_manager.is_action_just_pressed("reload_scene")) {
-		get_active_scene().load_from_file("resources/scenes/level_0.scn");
+		get_active_scene().load_from_file("resources/scenes/level_1.scn");
 		AnimationManager::get().animation_map.clear();
 	}
+
+	// BSP Vizualization, for now it's left in here, but could be moved to system in the future
+	//
+	// bsp_tree = CollisionSystem::build_tree(world, entities, 10);
+
+	BSPNode *node = get_active_scene().bsp_tree.get();
+	std::vector<BSPNode> nodes;
+	traverse_bsp_tree(node, nodes);
+
+	ImGui::Begin("BSP Tree");
+
+	for (auto &node : nodes) {
+		// calculate rotation from normal
+		glm::vec3 up = glm::vec3(0.0f, 0.0f, 1.0f);
+		glm::vec3 axis = glm::cross(up, node.plane.normal);
+		float angle = glm::acos(glm::dot(up, node.plane.normal));
+		glm::quat rotation = glm::angleAxis(angle, axis);
+
+		std::string info = "Node: " + std::to_string(node.entities.size());
+		ImGui::Text("%s", info.c_str());
+
+		if (node.front || node.back) {
+			SPDLOG_INFO("normal {}", glm::to_string(node.plane.normal));
+			SPDLOG_INFO("point {}", glm::to_string(node.plane.point));
+			SPDLOG_INFO("entities {}", node.entities.size());
+			get_active_scene().get_render_scene().debug_draw.draw_box(
+					node.plane.point, rotation, glm::vec3(20.0f, 20.0f, 0.1f), glm::vec3(1.0f, 0.0f, 0.0f));
+			// draw arrow
+			get_active_scene().get_render_scene().debug_draw.draw_arrow(
+					node.plane.point, node.plane.point + node.plane.normal, glm::vec3(1.0f, 0.0f, 0.0f));
+		}
+	}
+
+	ImGui::End();
 }

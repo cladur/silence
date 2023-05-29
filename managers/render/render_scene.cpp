@@ -158,6 +158,22 @@ void RenderScene::draw_viewport(bool right_side) {
 
 	combination_pass.draw(*this);
 
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, g_buffer.framebuffer_id);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, combination_buffer.framebuffer_id); // write to default framebuffer
+	// blit to default framebuffer. Note that this may or may not work as the internal formats of both the FBO and
+	// default framebuffer have to match. the internal formats are implementation defined. This works on all of my
+	// systems, but if it doesn't on yours you'll likely have to write to the depth buffer in another shader stage (or
+	// somehow see to match the default framebuffer's internal format with the FBO's internal format).
+	glBlitFramebuffer(0, 0, render_extent.x, render_extent.y, 0, 0, render_extent.x, render_extent.y,
+			GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+
+	glDepthMask(GL_TRUE);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	transparent_pass.draw_worldspace(*this);
+	glDisable(GL_BLEND);
+	glDepthMask(GL_FALSE);
+
 	bloom_buffer.bind();
 	bloom_pass.draw(*this);
 
@@ -176,13 +192,6 @@ void RenderScene::draw_viewport(bool right_side) {
 	}
 
 	debug_draw.draw();
-
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	// ui needs to go last, later to be a different render target
-	// sprite_draw.draw();
-	transparent_pass.draw_worldspace(*this);
-	glDisable(GL_BLEND);
 
 	mouse_pick_framebuffer.bind();
 	glad_glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
