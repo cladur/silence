@@ -28,6 +28,9 @@ AutoCVarFloat cvar_agent_attack_angle("agent.attack_angle", "angle of attack", 7
 
 AutoCVarFloat cvar_agent_acc_ground("agent.acc_ground", "acceleration on ground", 0.4f, CVarFlags::EditCheckbox);
 
+AutoCVarFloat cvar_agent_camera_back(
+		"agent.cam_back", "distance of camera from player", -1.5f, CVarFlags::EditCheckbox);
+
 AutoCVarFloat cvar_agent_crouch_slowdown(
 		"agent.crouch_slowdown", "slowdown while crouching", 2.0f, CVarFlags::EditCheckbox);
 
@@ -64,6 +67,7 @@ void AgentSystem::update(World &world, float dt) {
 		auto &camera_pivot_tf = world.get_component<Transform>(agent_data.camera_pivot);
 		auto &model_tf = world.get_component<Transform>(agent_data.model);
 		auto &camera_tf = world.get_component<Transform>(agent_data.camera);
+		auto &spring_arm_tf = world.get_component<Transform>(agent_data.spring_arm);
 		auto &animation_instance = world.get_component<AnimationInstance>(agent_data.model);
 
 		auto &dd = world.get_parent_scene()->get_render_scene().debug_draw;
@@ -150,13 +154,34 @@ void AgentSystem::update(World &world, float dt) {
 
 		transform.add_position(glm::vec3(velocity.x, 0.0, velocity.z));
 
+		//Camera
+		float def_cam_z = cvar_agent_camera_back.get();
 		if (*CVarSystem::get()->get_int_cvar("game.controlling_agent") &&
 				!*CVarSystem::get()->get_int_cvar("debug_camera.use")) {
 			glm::vec2 mouse_delta = input_manager.get_mouse_delta();
 			camera_pivot_tf.add_euler_rot(glm::vec3(mouse_delta.y, 0.0f, 0.0f) * cvar_camera_sensitivity.get() * dt);
 			camera_pivot_tf.add_global_euler_rot(
 					glm::vec3(0.0f, -mouse_delta.x, 0.0f) * cvar_camera_sensitivity.get() * dt);
+
+			//check how far behind camera can be
+			Ray ray{};
+			ray.layer_name = "default";
+			ray.ignore_list.emplace_back(entity);
+			ray.origin = spring_arm_tf.get_global_position();
+			ray.direction = -spring_arm_tf.get_global_forward();
+			glm::vec3 end = ray.origin + ray.direction;
+			HitInfo info;
+			if (CollisionSystem::ray_cast_layer(world, ray, info)) {
+				if (info.distance < -def_cam_z) {
+					camera_tf.set_position({ 0.0f, 0.0f, -info.distance });
+				} else {
+					camera_tf.set_position({ 0.0f, 0.0f, def_cam_z });
+				}
+			} else {
+				camera_tf.set_position({ 0.0f, 0.0f, def_cam_z });
+			}
 		}
+
 		static glm::vec3 last_position = transform.position;
 
 		// Lerp model_tf towards movement direction
@@ -183,18 +208,6 @@ void AgentSystem::update(World &world, float dt) {
 			// If the agent is on 40 degree slope or more, move him down
 			bool is_on_too_steep_slope =
 					glm::dot(info.normal, glm::vec3(0.0f, 1.0f, 0.0f)) < glm::cos(glm::radians(40.0f));
-
-			//SPDLOG_INFO(glm::dot(info.normal, glm::vec3(0.0f, 1.0f, 0.0f)));
-			//			SPDLOG_INFO(glm::to_string(info.normal));
-			//			world.get_parent_scene()->get_render_scene().debug_draw.draw_arrow(
-			//					info.point, info.point + info.normal * 10.0f);
-
-			//			if (world.has_component<Name>(info.entity)) {
-			//				SPDLOG_INFO(world.get_component<Name>(info.entity).name);
-			//			} else {
-			//				SPDLOG_INFO(info.entity);
-			//			}
-
 			if (is_on_too_steep_slope || info.distance > 1.1f) {
 				transform.position.y -= 8.0f * dt;
 				transform.set_changed(true);
@@ -204,13 +217,6 @@ void AgentSystem::update(World &world, float dt) {
 					transform.add_position(platform.change_vector);
 				}
 			}
-
-			// If the agent is close enough to the floor, snap him to it
-			//			float snap_length = 1.3f;
-			//			if (info.distance > 1.1f && info.distance < snap_length) {
-			//				transform.position.y = info.point.y + 0.001f;
-			//				transform.set_changed(true);
-			//			}
 		}
 
 		//Agent interaction
@@ -224,9 +230,6 @@ void AgentSystem::update(World &world, float dt) {
 			world.get_parent_scene()->get_render_scene().debug_draw.draw_arrow(ray.origin, end, { 1.0f, 0.0f, 0.0f });
 			HitInfo info;
 			if (CollisionSystem::ray_cast_layer(world, ray, info)) {
-				//TODO: remove log
-				// auto hit_name = world.get_component<Name>(info.entity);
-				// SPDLOG_INFO(hit_name.name);
 				auto &target_transform = world.get_component<Transform>(info.entity);
 				if (info.distance < cvar_agent_interaction_range.get()) {
 					if (world.has_component<Interactable>(info.entity)) {
