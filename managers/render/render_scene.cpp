@@ -33,6 +33,7 @@ void RenderScene::startup() {
 	combination_pass.startup();
 	default_pass = &pbr_pass;
 	bloom_pass.startup();
+	shadow_pass.startup();
 	mouse_pick_pass.startup();
 
 	// Size of the viewport doesn't matter here, it will be resized either way
@@ -43,6 +44,7 @@ void RenderScene::startup() {
 	ssao_buffer.startup(render_extent.x, render_extent.y);
 	pbr_buffer.startup(render_extent.x, render_extent.y);
 	bloom_buffer.startup(render_extent.x, render_extent.y, 5);
+	shadow_buffer.startup(1024, 1024, 1.0f, 500.5f);
 	combination_buffer.startup(render_extent.x, render_extent.y);
 	skybox_buffer.startup(render_extent.x, render_extent.y);
 	mouse_pick_framebuffer.startup(render_extent.x, render_extent.y);
@@ -59,6 +61,11 @@ void RenderScene::startup() {
 
 void RenderScene::draw_viewport(bool right_side) {
 	ZoneScopedN("RenderScene::draw_viewport");
+	glViewport(0, 0, (int)shadow_buffer.shadow_width, (int)shadow_buffer.shadow_height);
+	shadow_buffer.bind();
+	glEnable(GL_DEPTH_TEST);
+	glClear(GL_DEPTH_BUFFER_BIT);
+	shadow_pass.draw(*this);
 
 	glDepthMask(GL_TRUE);
 	g_buffer.bind();
@@ -93,16 +100,19 @@ void RenderScene::draw_viewport(bool right_side) {
 		camera_pos = camera_transform.get_global_position();
 	}
 
-//	UIManager::get().set_render_scene(this);
-//	UIManager::get().draw_world_space_ui();
+	//	UIManager::get().set_render_scene(this);
+	//	UIManager::get().draw_world_space_ui();
 
 	// Enable depth testing
-	glEnable(GL_DEPTH_TEST);
+	//	glEnable(GL_DEPTH_TEST);
 
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_FRONT);
 	g_buffer_pass.draw(*this);
 
 	pbr_buffer.bind();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glDisable(GL_CULL_FACE);
 	pbr_pass.draw(*this);
 
 	glEnable(GL_CULL_FACE);
@@ -241,7 +251,6 @@ void RenderScene::draw() {
 			right_side = !*controlling_agent;
 		}
 		draw_viewport(right_side);
-
 
 		{
 			ZoneScopedN("RenderScene::blit");

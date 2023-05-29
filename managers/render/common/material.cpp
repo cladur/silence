@@ -1,9 +1,10 @@
 #include "material.h"
-#include <spdlog/spdlog.h>
 #include "display/display_manager.h"
 #include "render/common/skinned_mesh.h"
-#include "render_pass.h"
 #include "render/render_scene.h"
+#include "render_pass.h"
+#include <spdlog/spdlog.h>
+
 
 AutoCVarInt cvar_use_ao("render.use_ao", "use ambient occlusion", 1, CVarFlags::EditCheckbox);
 AutoCVarInt cvar_use_fog("render.use_fog", "use simple linear fog", 1, CVarFlags::EditCheckbox);
@@ -87,9 +88,28 @@ void MaterialLight::bind_light_resources(Light &light, Transform &transform) {
 
 	glm::mat4 model = transform.get_global_model_matrix() * glm::scale(glm::mat4(1.0f), glm::vec3(radius));
 	shader.set_mat4("model", model);
-	shader.set_vec3("light_position", transform.get_global_position());
 	shader.set_vec3("light_color", light.color);
 	shader.set_float("light_intensity", light.intensity);
+	shader.set_int("type", (int)light.type);
+	switch (light.type) {
+		case LightType::POINT_LIGHT:
+			shader.set_vec3("light_position", transform.get_global_position());
+			break;
+		case LightType::DIRECTIONAL_LIGHT:
+			shader.set_vec3("light_direction",
+					glm::normalize(transform.get_global_orientation() * glm::vec3(0.0f, 0.0f, -1.0f)));
+			break;
+		case LightType::SPOT_LIGHT:
+			shader.set_vec3("light_position", transform.get_global_position());
+			shader.set_vec3("light_direction",
+					glm::normalize(transform.get_global_orientation() * glm::vec3(0.0f, 0.0f, -1.0f)));
+			shader.set_float("cutoff", glm::cos(glm::radians(light.cutoff)));
+			shader.set_float("outer_cutoff", glm::cos(glm::radians(light.outer_cutoff + light.cutoff)));
+			break;
+		default:
+			SPDLOG_WARN("Invalid light type!");
+			break;
+	}
 }
 
 float our_lerp(float a, float b, float f) {
@@ -334,7 +354,7 @@ void MaterialTransparent::bind_object_resources(RenderScene &scene, TransparentO
 
 	auto &rm = ResourceManager::get();
 
-	window_size = scene.full_render_extent;//DisplayManager::get().get_window_size();
+	window_size = scene.full_render_extent; //DisplayManager::get().get_window_size();
 
 	view = scene.view;
 
@@ -430,6 +450,52 @@ void MaterialBloom::bind_resources(RenderScene &scene) {
 }
 
 void MaterialBloom::bind_instance_resources(ModelInstance &instance, Transform &transform) {
+}
+
+void MaterialShadow::startup() {
+	shader.load_from_files(shader_path("shadow/shadow.vert"), shader_path("shadow/shadow.frag"));
+#ifdef WIN32
+	skinned_shader.load_from_files(shader_path("shadow/skinned_shadow.vert"), shader_path("shadow/shadow.frag"));
+#endif
+}
+
+void MaterialShadow::bind_resources(RenderScene &scene) {
+	// render scene from light's point of view
+	shader.use();
+
+	const glm::mat4 &light_view = glm::lookAt(current_light_position, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
+	shader.set_mat4("light_space", scene.shadow_buffer.projection * light_view);
+}
+
+void MaterialShadow::bind_skinned_resources(RenderScene &scene) {
+	// render scene from light's point of view
+	skinned_shader.use();
+
+	const glm::mat4 &light_view = glm::lookAt(current_light_position, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
+	skinned_shader.set_mat4("light_space", scene.shadow_buffer.projection * light_view);
+}
+
+void MaterialShadow::bind_instance_resources(ModelInstance &instance, Transform &transform) {
+	shader.set_mat4("model", transform.get_global_model_matrix());
+}
+
+void MaterialShadow::bind_instance_resources(SkinnedModelInstance &instance, Transform &transform) {
+	skinned_shader.set_mat4("model", transform.get_global_model_matrix());
+	//TODO: make this functionality in shader function
+	glBindBuffer(GL_UNIFORM_BUFFER, instance.skinning_buffer);
+	if (!instance.bone_matrices.empty()) {
+		glBufferSubData(
+				GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4) * instance.bone_matrices.size(), instance.bone_matrices.data());
+	}
+
+	GLuint binding_index = 1;
+	GLuint buffer_index = glGetUniformBlockIndex(skinned_shader.id, "SkinningBuffer");
+	glUniformBlockBinding(skinned_shader.id, buffer_index, binding_index);
+	glBindBufferBase(GL_UNIFORM_BUFFER, binding_index, instance.skinning_buffer);
+}
+
+void MaterialShadow::bind_light_resources(Light &light, Transform &transform) {
+	current_light_position = transform.get_global_position();
 }
 
 void MaterialMousePick::startup() {

@@ -36,6 +36,7 @@ struct RenderScene {
 	AOBlurPass ssao_blur_pass;
 	CombinationPass combination_pass;
 	BloomPass bloom_pass;
+	ShadowPass shadow_pass;
 	MousePickPass mouse_pick_pass;
 
 	Framebuffer render_framebuffer;
@@ -45,6 +46,7 @@ struct RenderScene {
 	SSAOBuffer ssao_buffer;
 	CombinationBuffer combination_buffer;
 	BloomBuffer bloom_buffer;
+	ShadowBuffer shadow_buffer;
 	SkyboxBuffer skybox_buffer;
 
 	// render extent that does not change whether we're in splitscreen or not

@@ -74,41 +74,6 @@ void SkyboxPass::draw(RenderScene &scene) {
 	skybox.draw();
 }
 
-const uint32_t VERTEX_COUNT = 4000;
-const uint32_t INDEX_COUNT = 6000;
-
-void TransparentPass::startup() {
-	glGenVertexArrays(1, &vao);
-	glGenBuffers(1, &vbo);
-	glGenBuffers(1, &ebo);
-
-	glBindVertexArray(vao);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
-	glBufferData(GL_ARRAY_BUFFER, VERTEX_COUNT * sizeof(TransparentVertex), nullptr, GL_DYNAMIC_DRAW);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, INDEX_COUNT * sizeof(uint32_t), nullptr, GL_DYNAMIC_DRAW);
-
-	// vertex positions
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(TransparentVertex), (void *)nullptr);
-	// vertex color
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(
-			1, 3, GL_FLOAT, GL_FALSE, sizeof(TransparentVertex), (void *)offsetof(TransparentVertex, color));
-	// vertex uv
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(TransparentVertex), (void *)offsetof(TransparentVertex, uv));
-	// is screen space
-	glEnableVertexAttribArray(3);
-	glVertexAttribIPointer(
-			3, 1, GL_INT, sizeof(TransparentVertex), (void *)offsetof(TransparentVertex, is_screen_space));
-
-	glBindVertexArray(0);
-	material.startup();
-}
-
 void GBufferPass::startup() {
 	material.startup();
 }
@@ -143,6 +108,41 @@ void GBufferPass::draw(RenderScene &scene) {
 		}
 	}
 #endif
+}
+
+const uint32_t VERTEX_COUNT = 4000;
+const uint32_t INDEX_COUNT = 6000;
+
+void TransparentPass::startup() {
+	glGenVertexArrays(1, &vao);
+	glGenBuffers(1, &vbo);
+	glGenBuffers(1, &ebo);
+
+	glBindVertexArray(vao);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+	glBufferData(GL_ARRAY_BUFFER, VERTEX_COUNT * sizeof(TransparentVertex), nullptr, GL_DYNAMIC_DRAW);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, INDEX_COUNT * sizeof(uint32_t), nullptr, GL_DYNAMIC_DRAW);
+
+	// vertex positions
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(TransparentVertex), (void *)nullptr);
+	// vertex color
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(
+			1, 3, GL_FLOAT, GL_FALSE, sizeof(TransparentVertex), (void *)offsetof(TransparentVertex, color));
+	// vertex uv
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(TransparentVertex), (void *)offsetof(TransparentVertex, uv));
+	// is screen space
+	glEnableVertexAttribArray(3);
+	glVertexAttribIPointer(
+			3, 1, GL_INT, sizeof(TransparentVertex), (void *)offsetof(TransparentVertex, is_screen_space));
+
+	glBindVertexArray(0);
+	material.startup();
 }
 
 void TransparentPass::draw(RenderScene &scene) {
@@ -329,6 +329,56 @@ void BloomPass::draw(RenderScene &scene) {
 		material.shader.set_float("dirt_offset", 0.0f);
 	}
 	utils::render_quad();
+}
+
+void ShadowPass::startup() {
+	material.startup();
+}
+
+void ShadowPass::draw(RenderScene &scene) {
+	ResourceManager &resource_manager = ResourceManager::get();
+	material.bind_resources(scene);
+
+	for (auto &light_cmd : scene.light_draw_commands) {
+		Light &light = *light_cmd.light;
+		if (!light.cast_shadow || light.type != LightType::DIRECTIONAL_LIGHT) {
+			continue;
+		}
+
+		Transform &light_transform = *light_cmd.transform;
+		material.bind_light_resources(light, light_transform);
+
+		for (auto &cmd : scene.draw_commands) {
+			ModelInstance &instance = *cmd.model_instance;
+			if (!instance.in_shadow_pass) {
+				continue;
+			}
+			Transform &transform = *cmd.transform;
+			material.bind_instance_resources(instance, transform);
+			Model &model = resource_manager.get_model(instance.model_handle);
+			for (auto &mesh : model.meshes) {
+				if (mesh.fc_bounding_sphere.is_on_frustum(scene.frustum, transform, scene)) {
+					mesh.draw();
+				}
+			}
+		}
+
+#ifdef WIN32
+		material.bind_skinned_resources(scene);
+		for (auto &cmd : scene.skinned_draw_commands) {
+			SkinnedModelInstance &instance = *cmd.model_instance;
+			if (!instance.in_shadow_pass) {
+				continue;
+			}
+			Transform &transform = *cmd.transform;
+			material.bind_instance_resources(instance, transform);
+			SkinnedModel &model = resource_manager.get_skinned_model(instance.model_handle);
+			for (auto &mesh : model.meshes) {
+				mesh.draw();
+			}
+		}
+#endif
+	}
 }
 
 void MousePickPass::startup() {

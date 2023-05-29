@@ -29,14 +29,6 @@ struct LightDrawCommand {
 	Transform *transform;
 };
 
-class SkinnedPass {
-public:
-	std::vector<SkinnedDrawCommand> draw_commands;
-
-	virtual void startup() = 0;
-	virtual void draw(RenderScene &scene) = 0;
-};
-
 class RenderPass {
 public:
 	virtual void startup() = 0;
@@ -92,6 +84,7 @@ private:
 	unsigned int vao, vbo, ebo;
 	std::vector<TransparentObject> screen_space_objects;
 	std::vector<TransparentObject> world_space_objects;
+
 public:
 	MaterialTransparent material;
 	void startup() override;
@@ -113,6 +106,13 @@ class BloomPass : public RenderPass {
 	float dirt_offsets[2];
 public:
 	MaterialBloom material;
+	void startup() override;
+	void draw(RenderScene &scene) override;
+};
+
+class ShadowPass : public RenderPass {
+public:
+	MaterialShadow material;
 	void startup() override;
 	void draw(RenderScene &scene) override;
 };

@@ -23,6 +23,7 @@ void ModelInstance::serialize_json(nlohmann::json &serialized_scene) {
 	serialized_component["model_name"] = resource_manager.get_model_name(model_handle);
 	serialized_component["material_type"] = material_type;
 	serialized_component["scale_uv_with_transform"] = scale_uv_with_transform;
+	serialized_component["in_shadow_pass"] = in_shadow_pass;
 	serialized_scene.push_back(nlohmann::json::object());
 	serialized_scene.back()["component_data"] = serialized_component;
 	serialized_scene.back()["component_name"] = "ModelInstance";
@@ -38,5 +39,10 @@ void ModelInstance::deserialize_json(nlohmann::json &serialized_component) {
 		scale_uv_with_transform = serialized_component["scale_uv_with_transform"];
 	} else {
 		scale_uv_with_transform = false;
+	}
+	if (serialized_component.contains("in_shadow_pass")) {
+		in_shadow_pass = serialized_component["in_shadow_pass"];
+	} else {
+		in_shadow_pass = false;
 	}
 }

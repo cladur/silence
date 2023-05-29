@@ -258,6 +258,13 @@ void Inspector::show_skinnedmodelinstance() {
 			}
 			ImGui::EndCombo();
 		}
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Cast shadow");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		ImGui::Checkbox("##Cast shadow", &modelinstance.in_shadow_pass);
 		ImGui::EndTable();
 
 		if (ImGui::BeginDragDropTarget()) {
@@ -350,6 +357,13 @@ void Inspector::show_modelinstance() {
 		ImGui::TableSetColumnIndex(1);
 		ImGui::SetNextItemWidth(-FLT_MIN);
 		ImGui::Checkbox("##UV Scale", &modelinstance.scale_uv_with_transform);
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Cast shadow");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		ImGui::Checkbox("##Cast shadow", &modelinstance.in_shadow_pass);
 		ImGui::EndTable();
 
 		if (ImGui::BeginDragDropTarget()) {
@@ -699,6 +713,29 @@ void Inspector::show_light() {
 		ImGui::TableSetColumnIndex(1);
 		ImGui::SetNextItemWidth(-FLT_MIN);
 		ImGui::DragFloat("##Intensity", &light.intensity, 0.01f, 0.0f, 100.0f);
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Cast shadow");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		ImGui::Checkbox("##Cast shadow", &light.cast_shadow);
+
+		if (light.type == LightType::SPOT_LIGHT) {
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex(0);
+			ImGui::Text("Cutoff");
+			ImGui::TableSetColumnIndex(1);
+			ImGui::SetNextItemWidth(-FLT_MIN);
+			ImGui::DragFloat("##Cutoff", &light.cutoff, 0.01f, 0.0f, 200.0f);
+
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex(0);
+			ImGui::Text("Outer cutoff");
+			ImGui::TableSetColumnIndex(1);
+			ImGui::SetNextItemWidth(-FLT_MIN);
+			ImGui::DragFloat("##Outer cutoff", &light.outer_cutoff, 0.01f, 0.0f, 200.0f);
+		}
 
 		ImGui::TableNextRow();
 		ImGui::TableSetColumnIndex(0);
