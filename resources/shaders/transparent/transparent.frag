@@ -8,6 +8,7 @@ in vec3 Color;
 uniform sampler2D _texture;
 uniform int textured;
 uniform int is_sprite;
+uniform float alpha;
 
 void main()
 {
@@ -21,5 +22,5 @@ void main()
         }
     }
 
-    FragColor = vec4(Color, 1.0) * sampled;
+    FragColor = vec4(Color, alpha) * sampled;
 }

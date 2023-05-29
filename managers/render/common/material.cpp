@@ -372,6 +372,7 @@ void MaterialTransparent::bind_object_resources(RenderScene &scene, TransparentO
 	} else {
 		shader.set_int("is_billboard", 0);
 	}
+	shader.set_float("alpha", object.alpha);
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, t.id);

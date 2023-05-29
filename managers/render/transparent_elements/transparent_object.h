@@ -26,6 +26,7 @@ struct TransparentObject {
 	bool billboard = false;
 	TransparentType type;
 	std::string texture_name; // used only for fonts now
+	float alpha = 1.0f;
 	//Handle<Texture> texture; this cannot be here for no fdssdfasfdasdf reason
 };
 

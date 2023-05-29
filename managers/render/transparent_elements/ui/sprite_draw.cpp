@@ -111,7 +111,7 @@ void SpriteDraw::draw_sprite(const glm::vec3 &position, const glm::vec2 &size, c
 }
 
 void SpriteDraw::draw_sprite_billboard(
-		const glm::vec3 &position, const glm::vec2 &size, const glm::vec3 &color,  const Handle<Texture> texture) {
+		const glm::vec3 &position, const glm::vec2 &size, const glm::vec4 &color,  const Handle<Texture> texture) {
 	auto &rm = ResourceManager::get();
 	Texture t = rm.get_texture(texture);
 
@@ -122,6 +122,7 @@ void SpriteDraw::draw_sprite_billboard(
 	sprite.billboard = true;
 	sprite.size = size / 2.0f;
 	sprite.position = position;
+	sprite.alpha = color.w;
 
 	r_scene->transparent_objects.push_back(sprite);
 }
@@ -211,7 +212,7 @@ void SpriteDraw::draw_sprite_scene(RenderScene *scene, const glm::vec3 &position
 
 	TransparentObject sprite =
 			default_vertex_data(position, size, (float)t.width, (float)t.height, color, is_screen_space, alignment);
-	sprite.texture_name = rm.get_texture_name(texture);;
+	sprite.texture_name= rm.get_texture_name(texture);;
 
 	scene->transparent_objects.push_back(sprite);
 }

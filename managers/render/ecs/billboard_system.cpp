@@ -33,6 +33,7 @@ void BillboardSystem::update(World &world, float dt) {
 			bill.position = transform.position;
 			bill.size = billboard.scale;
 			bill.texture = billboard.texture;
+			bill.color = billboard.color;
 			ui.add_as_root(ui_scene_name, billboard.ui_name);
 			billboard.first_frame = false;
 		} else {
@@ -43,6 +44,7 @@ void BillboardSystem::update(World &world, float dt) {
 			bill.position = transform.position;
 			bill.size = billboard.scale;
 			bill.texture = billboard.texture;
+			bill.color = billboard.color;
 		}
 	}
 }
