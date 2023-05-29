@@ -158,6 +158,16 @@ void RenderScene::draw_viewport(bool right_side) {
 
 	combination_pass.draw(*this);
 
+	glDepthMask(GL_TRUE);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	// ui needs to go last, later to be a different render target
+	// sprite_draw.draw();
+	transparent_pass.draw_worldspace(*this);
+	glDisable(GL_BLEND);
+	glDepthMask(GL_FALSE);
+
 	bloom_buffer.bind();
 	bloom_pass.draw(*this);
 
@@ -177,12 +187,7 @@ void RenderScene::draw_viewport(bool right_side) {
 
 	debug_draw.draw();
 
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	// ui needs to go last, later to be a different render target
-	// sprite_draw.draw();
-	transparent_pass.draw_worldspace(*this);
-	glDisable(GL_BLEND);
+
 
 	mouse_pick_framebuffer.bind();
 	glad_glClearColor(0.0f, 0.0f, 0.0f, 1.0f);

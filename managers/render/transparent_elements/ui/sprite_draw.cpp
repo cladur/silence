@@ -1,6 +1,5 @@
 #include "sprite_draw.h"
 #include "display/display_manager.h"
-#include "sprite_manager.h"
 #include <render/render_manager.h>
 
 const uint32_t VERTEX_COUNT = 4;
@@ -100,24 +99,26 @@ void SpriteDraw::draw_colored(const glm::vec3 &position, const glm::vec2 &size, 
 }
 
 void SpriteDraw::draw_sprite(const glm::vec3 &position, const glm::vec2 &size, const glm::vec3 &color,
-		const char *texture_name, bool is_screen_space, Alignment alignment) {
-	Texture t = SpriteManager::get()->get_sprite_texture(texture_name);
+		const Handle<Texture> texture, bool is_screen_space, Alignment alignment) {
+	auto &rm = ResourceManager::get();
+	Texture t = rm.get_texture(texture);
 
 	TransparentObject sprite =
 			default_vertex_data(position, size, (float)t.width, (float)t.height, color, is_screen_space, alignment);
-	sprite.texture_name = texture_name;
+	sprite.texture_name = rm.get_texture_name(texture);
 
 	r_scene->transparent_objects.push_back(sprite);
 }
 
 void SpriteDraw::draw_sprite_billboard(
-		const glm::vec3 &position, const glm::vec2 &size, const glm::vec3 &color, const char *texture_name) {
-	Texture t = SpriteManager::get()->get_sprite_texture(texture_name);
+		const glm::vec3 &position, const glm::vec2 &size, const glm::vec3 &color,  const Handle<Texture> texture) {
+	auto &rm = ResourceManager::get();
+	Texture t = rm.get_texture(texture);
 
 	TransparentObject sprite = default_vertex_data(
 			glm::vec3(0.0f), size, (float)t.width, (float)t.height, color, false, Alignment::NONE);
 
-	sprite.texture_name = texture_name;
+	sprite.texture_name = rm.get_texture_name(texture);
 	sprite.billboard = true;
 	sprite.size = size / 2.0f;
 	sprite.position = position;
@@ -204,12 +205,13 @@ void SpriteDraw::draw_slider_billboard(const glm::vec3 &position, float add_z, c
 }
 
 void SpriteDraw::draw_sprite_scene(RenderScene *scene, const glm::vec3 &position, const glm::vec2 &size,
-		const glm::vec3 &color, const char *texture_name, bool is_screen_space, Alignment alignment) {
-	Texture t = SpriteManager::get()->get_sprite_texture(texture_name);
+		const glm::vec3 &color,  const Handle<Texture> texture, bool is_screen_space, Alignment alignment) {
+	auto &rm = ResourceManager::get();
+	Texture t = rm.get_texture(texture);
 
 	TransparentObject sprite =
 			default_vertex_data(position, size, (float)t.width, (float)t.height, color, is_screen_space, alignment);
-	sprite.texture_name = texture_name;
+	sprite.texture_name = rm.get_texture_name(texture);;
 
 	scene->transparent_objects.push_back(sprite);
 }

@@ -16,7 +16,7 @@ public:
 	bool centered_x = true;
 	bool centered_y = true;
 	bool active = true;
-	std::string hover_texture_name;
+	Handle<Texture> hover_texture;
 
 	EventReference hover_event;
 	EventReference click_event;
@@ -27,7 +27,7 @@ public:
 			glm::vec2 size,
 			const std::string& text,
 			const std::string& font_name,
-			const std::string &texture_name,
+			Handle<Texture> texture,
 			const std::string &hover_sound_name = "",
 			const std::string &click_sound_name = "");
 

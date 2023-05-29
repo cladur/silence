@@ -2,6 +2,8 @@
 #define SILENCE_TRANSPARENT_OBJECT_H
 
 #include "render/common/shader.h"
+#include "resource/resource_manager.h"
+#include <render/common/texture.h>
 
 struct TransparentVertex {
 	glm::vec3 position;
@@ -23,7 +25,8 @@ struct TransparentObject {
 	glm::mat4 transform;
 	bool billboard = false;
 	TransparentType type;
-	std::string texture_name; // used to find either atlas for fonts or sprites
+	std::string texture_name; // used only for fonts now
+	//Handle<Texture> texture; this cannot be here for no fdssdfasfdasdf reason
 };
 
 

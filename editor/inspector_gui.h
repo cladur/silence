@@ -40,6 +40,10 @@ private:
 	void show_platform();
 	void show_exploding_box();
 	void show_enemy_data();
+	void show_billboard();
+
+	static bool show_vec2(const char *label, glm::vec2 &vec2, float speed = 0.1f, float reset_value = 0.0f,
+			float min_value = 100.0f, float max_value = 100.0f);
 	static bool show_vec3(const char *label, glm::vec3 &vec3, float speed = 0.1f, float reset_value = 0.0f,
 			float min_value = 100.0f, float max_value = 100.0f);
 	static bool show_float(const char *label, float &value, float speed = 0.1f);

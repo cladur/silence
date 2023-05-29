@@ -1,18 +1,9 @@
 #include "material.h"
-#include <render/transparent_elements/ui/sprite_manager.h>
 #include <spdlog/spdlog.h>
-
 #include "display/display_manager.h"
-
-#include "debug_camera/debug_camera.h"
-
-#include "render/common/material.h"
 #include "render/common/skinned_mesh.h"
 #include "render_pass.h"
-
-#include "render/render_manager.h"
 #include "render/render_scene.h"
-#include <glm/gtc/type_ptr.hpp>
 
 AutoCVarInt cvar_use_ao("render.use_ao", "use ambient occlusion", 1, CVarFlags::EditCheckbox);
 AutoCVarInt cvar_use_fog("render.use_fog", "use simple linear fog", 1, CVarFlags::EditCheckbox);
@@ -341,6 +332,8 @@ void MaterialTransparent::bind_object_resources(RenderScene &scene, TransparentO
 	static glm::mat4 view;
 	static glm::vec2 window_size;
 
+	auto &rm = ResourceManager::get();
+
 	window_size = scene.full_render_extent;//DisplayManager::get().get_window_size();
 
 	view = scene.view;
@@ -350,7 +343,8 @@ void MaterialTransparent::bind_object_resources(RenderScene &scene, TransparentO
 		shader.set_int("is_sprite", 0);
 
 	} else if (object.type == TransparentType::SPRITE) {
-		t = SpriteManager::get()->get_sprite_texture(object.texture_name);
+		//t = SpriteManager::get()->get_sprite_texture(object.texture_name);
+		t = rm.get_texture(rm.get_texture_handle(object.texture_name));
 		shader.set_int("is_sprite", 1);
 	}
 	textured = !object.texture_name.empty();
