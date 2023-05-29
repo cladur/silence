@@ -96,9 +96,28 @@ void MaterialLight::bind_light_resources(Light &light, Transform &transform) {
 
 	glm::mat4 model = transform.get_global_model_matrix() * glm::scale(glm::mat4(1.0f), glm::vec3(radius));
 	shader.set_mat4("model", model);
-	shader.set_vec3("light_position", transform.get_global_position());
 	shader.set_vec3("light_color", light.color);
 	shader.set_float("light_intensity", light.intensity);
+	shader.set_int("type", (int)light.type);
+	switch (light.type) {
+		case LightType::POINT_LIGHT:
+			shader.set_vec3("light_position", transform.get_global_position());
+			break;
+		case LightType::DIRECTIONAL_LIGHT:
+			shader.set_vec3("light_direction",
+					glm::normalize(transform.get_global_orientation() * glm::vec3(0.0f, 0.0f, -1.0f)));
+			break;
+		case LightType::SPOT_LIGHT:
+			shader.set_vec3("light_position", transform.get_global_position());
+			shader.set_vec3("light_direction",
+					glm::normalize(transform.get_global_orientation() * glm::vec3(0.0f, 0.0f, -1.0f)));
+			shader.set_float("cutoff", glm::cos(glm::radians(light.cutoff)));
+			shader.set_float("outer_cutoff", glm::cos(glm::radians(light.outer_cutoff + light.cutoff)));
+			break;
+		default:
+			SPDLOG_WARN("Invalid light type!");
+			break;
+	}
 }
 
 float our_lerp(float a, float b, float f) {
@@ -436,7 +455,7 @@ void MaterialBloom::bind_instance_resources(ModelInstance &instance, Transform &
 void MaterialShadow::startup() {
 	shader.load_from_files(shader_path("shadow/shadow.vert"), shader_path("shadow/shadow.frag"));
 #ifdef WIN32
-	skinned_shader.load_from_files(shader_path("shadow/skinned_shadow.vert"), shader_path("shadow/shadow.vert"));
+	skinned_shader.load_from_files(shader_path("shadow/skinned_shadow.vert"), shader_path("shadow/shadow.frag"));
 #endif
 }
 

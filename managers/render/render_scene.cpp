@@ -103,10 +103,13 @@ void RenderScene::draw_viewport(bool right_side) {
 	// Enable depth testing
 	//	glEnable(GL_DEPTH_TEST);
 
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_FRONT);
 	g_buffer_pass.draw(*this);
 
 	pbr_buffer.bind();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glDisable(GL_CULL_FACE);
 	pbr_pass.draw(*this);
 
 	glEnable(GL_CULL_FACE);

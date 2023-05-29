@@ -29,7 +29,7 @@ public:
 
 private:
 	void check_compile_errors(GLuint shader, std::string type);
-	static inline int active_shader_id = 0;
+	static inline unsigned int active_shader_id = 0;
 };
 
 #endif // SILENCE_SHADER_H

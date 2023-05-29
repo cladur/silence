@@ -711,6 +711,22 @@ void Inspector::show_light() {
 		ImGui::SetNextItemWidth(-FLT_MIN);
 		ImGui::Checkbox("##Cast shadow", &light.cast_shadow);
 
+		if (light.type == LightType::SPOT_LIGHT) {
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex(0);
+			ImGui::Text("Cutoff");
+			ImGui::TableSetColumnIndex(1);
+			ImGui::SetNextItemWidth(-FLT_MIN);
+			ImGui::DragFloat("##Cutoff", &light.cutoff, 0.01f, 0.0f, 200.0f);
+
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex(0);
+			ImGui::Text("Outer cutoff");
+			ImGui::TableSetColumnIndex(1);
+			ImGui::SetNextItemWidth(-FLT_MIN);
+			ImGui::DragFloat("##Outer cutoff", &light.outer_cutoff, 0.01f, 0.0f, 200.0f);
+		}
+
 		ImGui::TableNextRow();
 		ImGui::TableSetColumnIndex(0);
 		ImGui::Text("Light type");

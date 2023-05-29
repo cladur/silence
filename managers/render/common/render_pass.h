@@ -27,14 +27,6 @@ struct LightDrawCommand {
 	Transform *transform;
 };
 
-class SkinnedPass {
-public:
-	std::vector<SkinnedDrawCommand> draw_commands;
-
-	virtual void startup() = 0;
-	virtual void draw(RenderScene &scene) = 0;
-};
-
 class RenderPass {
 public:
 	virtual void startup() = 0;

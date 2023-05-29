@@ -1,13 +1,15 @@
 #ifndef SILENCE_LIGHT_H
 #define SILENCE_LIGHT_H
 
-enum LightType { POINT_LIGHT, DIRECTIONAL_LIGHT, SPOT_LIGHT };
+enum class LightType : uint8_t { POINT_LIGHT = 0, DIRECTIONAL_LIGHT = 1, SPOT_LIGHT = 2 };
 
 struct Light {
 public:
 	glm::vec3 color = { 1.0f, 1.0f, 1.0f };
-	LightType type = POINT_LIGHT;
+	LightType type = LightType::POINT_LIGHT;
 	float intensity = 1.0f;
+	float cutoff = 12.5f;
+	float outer_cutoff = 5.0f;
 	bool cast_shadow = false;
 
 	void serialize_json(nlohmann::json &serialized_scene) {
@@ -17,6 +19,8 @@ public:
 		serialized_component["color"]["g"] = color.g;
 		serialized_component["color"]["b"] = color.b;
 		serialized_component["intensity"] = intensity;
+		serialized_component["cutoff"] = cutoff;
+		serialized_component["outer_cutoff"] = outer_cutoff;
 		serialized_component["type"] = type;
 		serialized_component["cast_shadow"] = cast_shadow;
 		serialized_scene.push_back(nlohmann::json::object());
@@ -34,6 +38,19 @@ public:
 		} else {
 			intensity = 1.0f;
 		}
+
+		if (serialized_component.contains("cutoff")) {
+			cutoff = serialized_component["cutoff"];
+		} else {
+			cutoff = 12.5f;
+		}
+
+		if (serialized_component.contains("outer_cutoff")) {
+			outer_cutoff = serialized_component["outer_cutoff"];
+		} else {
+			outer_cutoff = 5.0f;
+		}
+
 		if (serialized_component.contains("cast_shadow")) {
 			cast_shadow = serialized_component["cast_shadow"];
 		} else {
