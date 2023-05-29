@@ -256,7 +256,7 @@ void input_setup() {
 	input_manager.add_key_to_action("agent_move_right", InputKey::D);
 
 	input_manager.add_action("agent_crouch");
-	input_manager.add_key_to_action("agent_crouch", InputKey::LEFT_CONTROL);
+	input_manager.add_key_to_action("agent_crouch", InputKey::C);
 
 	//add actions to arrows
 	input_manager.add_action("hacker_move_forward");
@@ -342,6 +342,8 @@ void Game::startup() {
 	CVarSystem::get()->set_int_cvar("debug_draw.lights.draw", 0);
 	CVarSystem::get()->set_int_cvar("debug_camera.use", 0);
 	CVarSystem::get()->set_int_cvar("render.splitscreen", 1);
+
+	
 }
 
 void Game::shutdown() {
