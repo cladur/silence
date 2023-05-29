@@ -90,8 +90,13 @@ Scene::Scene() {
 	physics_manager.add_collision_layer("default");
 	physics_manager.add_collision_layer("hacker");
 	physics_manager.add_collision_layer("agent");
+	physics_manager.add_collision_layer("camera");
 	physics_manager.set_layers_no_collision("default", "hacker");
 	physics_manager.set_layers_no_collision("agent", "hacker");
+
+	physics_manager.set_layers_no_collision("camera", "default");
+	physics_manager.set_layers_no_collision("camera", "hacker");
+	physics_manager.set_layers_no_collision("camera", "agent");
 }
 
 void Scene::register_game_systems() {
