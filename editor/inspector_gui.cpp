@@ -104,7 +104,13 @@ void Inspector::show_transform() {
 
 		changed |= show_vec3("Position", transform.position);
 		changed |= show_vec3("Rotation", euler_rot, 1.0f);
-		changed |= show_vec3("Scale", transform.scale, 0.1f, 1.0f);
+		changed |= show_vec3("Scale", transform.scale, 0.1f, 1.0f, 0.1f, 100.0f);
+
+		for (int i = 0; i < 3; i++) {
+			if (transform.scale[i] < 0.1f) {
+				transform.scale[i] = 0.1f;
+			}
+		}
 
 		if (changed) {
 			glm::vec3 change = glm::radians(euler_rot - prev_euler_rot);
@@ -934,7 +940,7 @@ void Inspector::show_interactable() {
 		ImGui::TableSetColumnIndex(0);
 		ImGui::Text("Interaction target");
 		ImGui::TableSetColumnIndex(1);
-		ImGui::InputInt("", (int *)&interactable.interaction_target, 0, 0);
+		ImGui::Text("%s", fmt::format("{}", interactable.interaction_target).c_str());
 
 		if (ImGui::BeginDragDropTarget()) {
 			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
