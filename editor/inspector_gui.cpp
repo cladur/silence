@@ -10,7 +10,6 @@
 #include "components/light_component.h"
 #include "components/platform_component.h"
 #include "components/rigidbody_component.h"
-#include "components/enemy_data_component.h"
 #include "physics/physics_manager.h"
 #include "render/ecs/model_instance.h"
 #include <imgui.h>
@@ -31,6 +30,8 @@
 			world->add_component<type>(selected_entity, type{});                                                       \
 		}                                                                                                              \
 	}
+
+glm::vec3 Inspector::copied_vector3;
 
 void Inspector::show_components() {
 	if (selected_entity <= 0) {
@@ -105,7 +106,13 @@ void Inspector::show_transform() {
 
 		changed |= show_vec3("Position", transform.position);
 		changed |= show_vec3("Rotation", euler_rot, 1.0f);
-		changed |= show_vec3("Scale", transform.scale, 0.1f, 1.0f);
+		changed |= show_vec3("Scale", transform.scale, 0.1f, 1.0f, 0.1f, 100.0f);
+
+		for (int i = 0; i < 3; i++) {
+			if (transform.scale[i] < 0.1f) {
+				transform.scale[i] = 0.1f;
+			}
+		}
 
 		if (changed) {
 			glm::vec3 change = glm::radians(euler_rot - prev_euler_rot);
@@ -871,7 +878,6 @@ void Inspector::show_enemy_path() {
 		show_float("Speed", enemy_path.speed);
 		show_float("Rot Speed", enemy_path.rotation_speed);
 		for (auto &node : enemy_path.path) {
-
 			std::string label = fmt::format("Node {}", i);
 			std::string pos_label = fmt::format("{} Position", i);
 			std::string checkbox_label = fmt::format("{} Patrol Point", i);
@@ -936,7 +942,7 @@ void Inspector::show_interactable() {
 		ImGui::TableSetColumnIndex(0);
 		ImGui::Text("Interaction target");
 		ImGui::TableSetColumnIndex(1);
-		ImGui::InputInt("", (int *)&interactable.interaction_target, 0, 0);
+		ImGui::Text("%s", fmt::format("{}", interactable.interaction_target).c_str());
 
 		if (ImGui::BeginDragDropTarget()) {
 			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
@@ -1104,17 +1110,42 @@ bool Inspector::show_vec2(
 bool Inspector::show_vec3(
 		const char *label, glm::vec3 &vec3, float speed, float reset_value, float min_value, float max_value) {
 	bool changed = false;
+	bool open_context_menu = false;
 
 	ImGui::TableNextRow();
 	ImGui::TableSetColumnIndex(0);
 	ImGui::Text("%s", label);
-	if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-		vec3 = glm::vec3(reset_value);
-		changed = true;
+	if (ImGui::IsItemHovered()) {
+		if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+			vec3 = glm::vec3(reset_value);
+			changed = true;
+		} else if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+			open_context_menu = true;
+		}
 	}
 	ImGui::TableSetColumnIndex(1);
 	ImGui::SetNextItemWidth(-FLT_MIN);
 	changed |= ImGui::DragFloat3(fmt::format("##{}", label).c_str(), &vec3.x, speed, min_value, max_value);
+
+	if (open_context_menu) {
+		ImGui::OpenPopup(label);
+	}
+
+	if (ImGui::IsPopupOpen(label)) {
+		ImGui::SetNextWindowSize(ImVec2(200, 0));
+		if (ImGui::BeginPopup(label)) {
+			if (ImGui::MenuItem("Copy")) {
+				Inspector::copied_vector3 = vec3;
+			}
+			if (ImGui::MenuItem("Paste")) {
+				vec3 = Inspector::copied_vector3;
+				changed = true;
+			}
+
+			ImGui::EndPopup();
+		}
+	}
+
 	return changed;
 }
 
@@ -1240,4 +1271,3 @@ void Inspector::show_add_component() {
 void Inspector::set_active_entity(Entity entity) {
 	selected_entity = entity;
 }
-
