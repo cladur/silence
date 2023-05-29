@@ -13,6 +13,8 @@ AutoCVarFloat cvar_bloom_strength("render.bloom_strength", "bloom strength", 0.0
 AutoCVarFloat cvar_gamma("render.gamma", "gamma", 2.2f, CVarFlags::EditFloatDrag);
 AutoCVarFloat cvar_dirt_strength("render.dirt_strength", "dirt strength", 0.275f, CVarFlags::EditFloatDrag);
 
+AutoCVarInt cvar_use_clut("render.use_clut", "use clut", 1, CVarFlags::EditCheckbox);
+
 
 void PBRPass::startup() {
 	material.startup();
@@ -245,8 +247,7 @@ void TransparentPass::sort_objects(RenderScene &scene) {
 }
 
 void CombinationPass::startup() {
-	auto &rm = ResourceManager::get();
-	clut_texture = rm.load_texture(asset_path("32_lut.ktx2").c_str(), true, false);
+
 	material.startup();
 }
 
@@ -260,6 +261,7 @@ void BloomPass::startup() {
 	material.startup();
 	// change dirt texture here
 	auto &rm = ResourceManager::get();
+	clut_texture = rm.load_texture(asset_path("32_lut.ktx2").c_str(), true, false);
 	dirt_texture = rm.load_texture(asset_path("lens_dirts/lens_dirt_2.ktx2").c_str());
 	dirt_offsets[0] = rand() % 4444 / 8888.0f; // from 0 to 0.5 to give both players a different offset
 	dirt_offsets[1] = rand() % 2222 / 4444.0f;
@@ -315,12 +317,15 @@ void BloomPass::draw(RenderScene &scene) {
 	material.shader.set_int("scene", 0);
 	material.shader.set_int("bloom_tex", 1);
 	material.shader.set_int("dirt", 2);
+	material.shader.set_int("clut", 3);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, scene.combination_buffer.texture_id);
 	glActiveTexture(GL_TEXTURE0 + 1);
 	glBindTexture(GL_TEXTURE_2D, mips[0].texture_id);
 	glActiveTexture(GL_TEXTURE0 + 2);
 	glBindTexture(GL_TEXTURE_2D, ResourceManager::get().get_texture(dirt_texture).id);
+	glActiveTexture(GL_TEXTURE0 + 3);
+	glBindTexture(GL_TEXTURE_2D, ResourceManager::get().get_texture(clut_texture).id);
 	material.shader.set_int("use_bloom", cvar_use_bloom.get());
 	material.shader.set_float("bloom_strength", cvar_bloom_strength.get());
 	material.shader.set_float("gamma", cvar_gamma.get());
@@ -331,6 +336,7 @@ void BloomPass::draw(RenderScene &scene) {
 	} else {
 		material.shader.set_float("dirt_offset", 0.0f);
 	}
+	material.shader.set_int("use_clut", cvar_use_clut.get());
 
 	utils::render_quad();
 }
