@@ -11,7 +11,8 @@ private:
 	glm::vec3 previous_velocity;
 
 	std::string ui_name;
-	UIText *ui_text;
+	UIText *ui_interaction_text;
+	UIText *ui_kill_text;
 
 	glm::vec3 accelerate(
 			glm::vec3 accel_dir, glm::vec3 prev_velocity, float acceleration, float max_velocity, float dt);
