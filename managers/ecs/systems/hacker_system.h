@@ -16,6 +16,8 @@ private:
 			glm::vec3 direction = glm::vec3(0.0f, 0.0f, -1.0f));
 	void go_back_to_scorpion(World &world, HackerData &hacker_data);
 
+	std::string ui_name;
+
 	bool is_on_camera = false;
 	Entity current_camera_entity = 0;
 

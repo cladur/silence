@@ -11,6 +11,7 @@
 
 #include "input/input_manager.h"
 #include "resource/resource_manager.h"
+#include <render/transparent_elements/ui_manager.h>
 #include <spdlog/spdlog.h>
 #include <glm/fwd.hpp>
 #include <glm/geometric.hpp>
@@ -106,6 +107,29 @@ void HackerSystem::startup(World &world) {
 	world.set_system_component_whitelist<HackerSystem>(whitelist);
 
 	previous_velocity = { 0, 0, 0 };
+
+	ui_name = "hacker_ui";
+
+	auto &rm = ResourceManager::get();
+	auto crosshair_tex = rm.load_texture(asset_path("crosshair.ktx2").c_str());
+
+	auto &ui = UIManager::get();
+	ui.create_ui_scene(ui_name);
+	ui.activate_ui_scene(ui_name);
+
+	// anchor at the center of hacker's half of screen
+	auto &root_anchor = ui.add_ui_anchor(ui_name, "root_anchor");
+	root_anchor.is_screen_space = true;
+	root_anchor.x = 0.75f;
+	root_anchor.y = 0.5f;
+	root_anchor.display = true;
+	ui.add_as_root(ui_name, "root_anchor");
+
+	auto &crosshair = ui.add_ui_image(ui_name, "crosshair");
+	crosshair.texture = crosshair_tex;
+	crosshair.size = glm::vec2(50.0f);
+
+	ui.add_to_root(ui_name, "crosshair", "root_anchor");
 }
 
 void HackerSystem::update(World &world, float dt) {
