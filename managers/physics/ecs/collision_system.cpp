@@ -648,7 +648,9 @@ bool CollisionSystem::ray_cast_layer(World &world, const Ray &ray, HitInfo &resu
 			}
 		} else if (world.has_component<ColliderOBB>(entity)) {
 			ColliderOBB c = world.get_component<ColliderOBB>(entity);
-			c.center = position + c.get_orientation_matrix() * (c.center * scale);
+			const glm::quat &orientation = transform.get_global_orientation();
+			c.set_orientation(orientation);
+			c.center = position + orientation * (c.center * scale);
 			c.range *= scale;
 			if (physics_manager.intersect_ray_obb(ray, c, info)) {
 				does_hit = true;
