@@ -78,6 +78,9 @@ void AnimationManager::model_to_final(AnimData &data) {
 	SkinnedModel &model = resource_manager.get_skinned_model(data.model->model_handle);
 
 	Rig &rig = model.rig;
+	if (data.model->bone_matrices.size() < MAX_BONE_COUNT) {
+		data.model->bone_matrices.resize(MAX_BONE_COUNT);
+	}
 
 	std::vector<Xform> &global_matrices = data.model_pose.xforms;
 

@@ -341,6 +341,7 @@ void Editor::custom_update(float dt) {
 void Editor::create_scene(const std::string &name) {
 	create_scene(name, SceneType::GameScene);
 }
+
 void Editor::create_scene(const std::string &name, SceneType type, const std::string &path) {
 	auto scene = std::make_unique<EditorScene>(type);
 	scene->name = name;
@@ -353,12 +354,12 @@ void Editor::create_scene(const std::string &name, SceneType type, const std::st
 
 	if (!path.empty()) {
 		std::ifstream file(path);
-		nlohmann::json serialized_scene;
-		file >> serialized_scene;
-		serialized_scene.back()["entity"] = 0;
+		nlohmann::json serialized_scene = nlohmann::json::parse(file);
+		file.close();
+		//		file >> serialized_scene;
+		//		serialized_scene.back()["entity"] = 0;
 		scene->world.deserialize_entities_json(serialized_scene, scene->entities);
 		scenes.push_back(std::move(scene));
-		file.close();
 		return;
 	}
 
