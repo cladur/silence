@@ -20,31 +20,26 @@
 #include <glm/geometric.hpp>
 #include <glm/gtx/string_cast.hpp>
 
-AutoCVarFloat cvar_agent_interaction_range(
-		"agent.interaction_range", "range of interaction", 1.5f, CVarFlags::EditCheckbox);
+AutoCVarFloat cvar_agent_interaction_range("agent.interaction_range", "range of interaction", 1.5f);
 
-AutoCVarFloat cvar_agent_attack_range("agent.attack_range", "range of attack", 1.5f, CVarFlags::EditCheckbox);
+AutoCVarFloat cvar_agent_attack_range("agent.attack_range", "range of attack", 1.5f);
 
-AutoCVarFloat cvar_agent_attack_angle("agent.attack_angle", "angle of attack", 70.0f, CVarFlags::EditCheckbox);
+AutoCVarFloat cvar_agent_attack_angle("agent.attack_angle", "angle of attack", 70.0f);
 
-AutoCVarFloat cvar_agent_acc_ground("agent.acc_ground", "acceleration on ground", 0.4f, CVarFlags::EditCheckbox);
-
-AutoCVarFloat cvar_agent_lock_time(
-		"agent.lock_time", "minimal time of animation in ms", 500.0f, CVarFlags::EditCheckbox);
-
-AutoCVarFloat cvar_agent_camera_back(
-		"agent.cam_back", "distance of camera from player", -1.5f, CVarFlags::EditCheckbox);
-
-AutoCVarFloat cvar_agent_crouch_slowdown(
-		"agent.crouch_slowdown", "slowdown while crouching", 2.0f, CVarFlags::EditCheckbox);
+AutoCVarFloat cvar_agent_acc_ground("agent.acc_ground", "acceleration on ground", 0.4f, CVarFlags::Advanced);
 
 AutoCVarFloat cvar_agent_max_vel_ground(
-		"agent.max_vel_ground", "maximum velocity on ground", 2.0f, CVarFlags::EditCheckbox);
+		"agent.max_vel_ground", "maximum velocity on ground", 2.0f, CVarFlags::Advanced);
 
-AutoCVarFloat cvar_friction_ground("agent.friction_ground", "friction on ground", 8.0f, CVarFlags::EditCheckbox);
+AutoCVarFloat cvar_friction_ground("agent.friction_ground", "friction on ground", 8.0f, CVarFlags::Advanced);
 
-AutoCVarFloat cvar_camera_sensitivity(
-		"settings.camera_sensitivity", "camera sensitivity", 0.1f, CVarFlags::EditCheckbox);
+AutoCVarFloat cvar_agent_lock_time("agent.lock_time", "minimal time of animation in ms", 500.0f);
+
+AutoCVarFloat cvar_agent_camera_back("agent.cam_back", "distance of camera from player", -1.5f);
+
+AutoCVarFloat cvar_agent_crouch_slowdown("agent.crouch_slowdown", "slowdown while crouching", 2.0f);
+
+AutoCVarFloat cvar_camera_sensitivity("settings.camera_sensitivity", "camera sensitivity", 0.1f);
 
 void AgentSystem::startup(World &world) {
 	Signature blacklist;
@@ -124,20 +119,13 @@ void AgentSystem::update(World &world, float dt) {
 
 		glm::vec3 acc_direction = { 0, 0, 0 };
 		if (animation_timer >= cvar_agent_lock_time.get()) {
-			if (input_manager.is_action_pressed("agent_move_forward")) {
-				acc_direction += camera_forward;
-			}
-			if (input_manager.is_action_pressed("agent_move_backward")) {
-				acc_direction -= camera_forward;
-			}
-			if (input_manager.is_action_pressed("agent_move_left")) {
-				acc_direction += camera_right;
-			}
-			if (input_manager.is_action_pressed("agent_move_right")) {
-				acc_direction -= camera_right;
-			}
+			acc_direction += input_manager.get_axis("agent_move_backward", "agent_move_forward") * camera_forward;
+			acc_direction += input_manager.get_axis("agent_move_left", "agent_move_right") * -camera_right;
 		}
-		glm::normalize(acc_direction);
+
+		if (glm::length(acc_direction) > 1) {
+			acc_direction = glm::normalize(acc_direction);
+		}
 
 		//TODO: replace hard coded values with one derived from collider
 		if (input_manager.is_action_just_pressed("agent_crouch")) {
