@@ -155,6 +155,8 @@ void AgentSystem::update(World &world, float dt) {
 		}
 
 		glm::vec3 velocity = move_ground(acc_direction, previous_velocity, dt);
+		//TODO: replace 20.0f with animation accurate value (no idea how to calculate it)
+		float speed = glm::length(glm::vec3{ velocity.x, 0.0f, velocity.z }) * 20.0f;
 
 		// Use dot instead of length when u want to check 0 value, to avoid calculating square root
 		if (glm::dot(velocity, velocity) > physics_manager.get_epsilon()) {
@@ -170,6 +172,8 @@ void AgentSystem::update(World &world, float dt) {
 							agent_data.model, "agent/agent_ANIM_GLTF/agent_walk_stealthy.anim");
 				}
 			}
+			//TODO: works for current speed values, but should be replaced with animation accurate value
+			animation_instance.ticks_per_second = 500.f + (1000.f * speed);
 
 		} else if (animation_timer >=
 				resource_manager.get_animation(animation_instance.animation_handle).get_duration()) {
@@ -185,7 +189,9 @@ void AgentSystem::update(World &world, float dt) {
 					animation_manager.change_animation(agent_data.model, "agent/agent_ANIM_GLTF/agent_idle.anim");
 				}
 			}
+			animation_instance.ticks_per_second = 1000.f;
 		}
+		SPDLOG_INFO(animation_instance.ticks_per_second);
 		transform.add_position(glm::vec3(velocity.x, 0.0, velocity.z));
 
 		//Camera
@@ -277,6 +283,7 @@ void AgentSystem::update(World &world, float dt) {
 							auto animation_handle = resource_manager.get_animation_handle(
 									"agent/agent_ANIM_GLTF/agent_interaction.anim");
 							if (animation_instance.animation_handle.id != animation_handle.id) {
+								animation_instance.ticks_per_second = 1000.f;
 								animation_timer = 0;
 								previous_velocity = { 0.0f, 0.0f, 0.0f };
 								velocity = { 0.0f, 0.0f, 0.0f };
@@ -315,6 +322,7 @@ void AgentSystem::update(World &world, float dt) {
 							auto animation_handle =
 									resource_manager.get_animation_handle("agent/agent_ANIM_GLTF/agent_stab.anim");
 							if (animation_instance.animation_handle.id != animation_handle.id) {
+								animation_instance.ticks_per_second = 1000.f;
 								animation_timer = 0;
 								previous_velocity = { 0, 0, 0 };
 								velocity = { 0, 0, 0 };
