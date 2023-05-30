@@ -68,7 +68,7 @@ void EnemyDistracted::update(World *world, uint32_t entity_id, float dt) {
 		enemy_path.is_rotating = true;
 	}
 
-	enemy_utils::handle_detection(world, transform, enemy_data, dt, &dd);
+	enemy_utils::handle_detection(world, transform, transform.get_global_forward(), enemy_data, dt, &dd);
 
 	enemy_utils::update_detection_slider(entity_id, transform, enemy_data);
 

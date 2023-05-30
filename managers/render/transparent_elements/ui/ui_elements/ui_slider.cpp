@@ -48,7 +48,7 @@ void UISlider::draw() {
 				slider_alignment);
 		ui_manager.sprite_draw.draw_slider_billboard(
 				position,
-				-0.01f,
+				0.1f,
 				size,
 				glm::vec3(0.0f),
 				1.0f,

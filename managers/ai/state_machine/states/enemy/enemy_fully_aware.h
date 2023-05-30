@@ -4,6 +4,11 @@
 #include "ai/state_machine/state.h"
 
 class EnemyFullyAware :public State {
+private:
+	bool first_frame = true;
+	glm::vec3 adjusted_forward;
+	glm::vec3 end_forward;
+	bool forward_block = false;
 public:
 	EnemyFullyAware() = default;
 	void startup(StateMachine *machine, std::string name);
