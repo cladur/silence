@@ -31,7 +31,7 @@ AutoCVarInt cvar_hacker_on_keyboard(
 		"settings.hacker_on_keyboard", "Control hacker with keyboard + mouse", 0, CVarFlags::EditCheckbox);
 
 bool HackerSystem::shoot_raycast(
-		Transform &transform, World &world, HackerData &hacker_data, float dt, glm::vec3 direction) {
+		Transform &transform, World &world, HackerData &hacker_data, float dt, bool trigger, glm::vec3 direction) {
 	Ray ray;
 	ray.origin = transform.get_global_position() + glm::vec3(0.0f, 0.0f, -1.0f);
 	ray.direction = direction;
@@ -42,8 +42,10 @@ bool HackerSystem::shoot_raycast(
 	HitInfo info;
 	bool hit = CollisionSystem::ray_cast_layer(world, ray, info);
 
+	ui_text->text = "";
+
 	if (!hit) {
-		SPDLOG_ERROR("NO HIT");
+		//SPDLOG_ERROR("NO HIT");
 		return false;
 	}
 
@@ -59,23 +61,28 @@ bool HackerSystem::shoot_raycast(
 		return false;
 	}
 
-	auto &interactable = world.get_component<Interactable>(hit_entity);
+	ui_text->text = "[E] Interaction";
 
-	if (!(interactable.type == InteractionType::Hacker)) {
-		SPDLOG_WARN("Entity {} is not a hacker interactable", hit_entity);
-		return false;
+	if (trigger) {
+		auto &interactable = world.get_component<Interactable>(hit_entity);
+
+		if (!(interactable.type == InteractionType::Hacker)) {
+			SPDLOG_WARN("Entity {} is not a hacker interactable", hit_entity);
+			return false;
+		}
+
+		if (!interactable.can_interact) {
+			SPDLOG_WARN("Entity {} cannot be interacted with", hit_entity);
+			return false;
+		}
+
+		if (interactable.interaction == Interaction::HackerCameraJump) {
+			jump_to_camera(world, hacker_data, hit_entity);
+		}
+
+		interactable.triggered = true;
 	}
 
-	if (!interactable.can_interact) {
-		SPDLOG_WARN("Entity {} cannot be interacted with", hit_entity);
-		return false;
-	}
-
-	if (interactable.interaction == Interaction::HackerCameraJump) {
-		jump_to_camera(world, hacker_data, hit_entity);
-	}
-
-	interactable.triggered = true;
 	return true;
 }
 
@@ -128,8 +135,15 @@ void HackerSystem::startup(World &world) {
 	auto &crosshair = ui.add_ui_image(ui_name, "crosshair");
 	crosshair.texture = crosshair_tex;
 	crosshair.size = glm::vec2(50.0f);
-
 	ui.add_to_root(ui_name, "crosshair", "root_anchor");
+
+	ui_text = &ui.add_ui_text(ui_name, "text");
+	ui_text->text = "";
+	ui_text->is_screen_space = true;
+	ui_text->size = glm::vec2(0.5f);
+	ui_text->position = glm::vec3(150.0f, 3.0f, 0.0f);
+	ui_text->centered_y = true;
+	ui.add_to_root(ui_name, "text", "root_anchor");
 }
 
 void HackerSystem::update(World &world, float dt) {
@@ -199,12 +213,12 @@ void HackerSystem::update(World &world, float dt) {
 			acc_direction = glm::vec3(0.0f);
 		}
 
-		if (input_manager.is_action_just_pressed("mouse_left")) {
-			if (!is_on_camera) {
-				shoot_raycast(camera_tf, world, hacker_data, dt, real_camera_forward);
-			} else {
-				shoot_raycast(camera_tf, world, hacker_data, dt, -real_camera_forward);
-			}
+		// for the UI sake we need to shoot the raycast every time to know if we're even hovering over anything.
+		bool triggered = input_manager.is_action_just_pressed("mouse_left");
+		if (!is_on_camera) {
+			shoot_raycast(camera_tf, world, hacker_data, dt, triggered, real_camera_forward);
+		} else {
+			shoot_raycast(camera_tf, world, hacker_data, dt, triggered, -real_camera_forward);
 		}
 		if (input_manager.is_action_just_pressed("mouse_right")) {
 			go_back_to_scorpion(world, hacker_data);
