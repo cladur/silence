@@ -203,7 +203,6 @@ void TransparentPass::draw_worldspace(RenderScene &scene) {
 		glBindVertexArray(vao);
 		glDrawElements(GL_TRIANGLES, object.indices.size(), GL_UNSIGNED_INT, nullptr);
 	}
-	world_space_objects.clear();
 }
 
 void TransparentPass::draw_screenspace(RenderScene &scene) {
@@ -230,6 +229,7 @@ void TransparentPass::draw_screenspace(RenderScene &scene) {
 	glBindVertexArray(0);
 
 	screen_space_objects.clear();
+	world_space_objects.clear();
 }
 void TransparentPass::sort_objects(RenderScene &scene) {
 	ZoneScopedNC("TransparentPass::sort_objects", 0xad074f);

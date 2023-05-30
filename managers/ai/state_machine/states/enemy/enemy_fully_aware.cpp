@@ -13,6 +13,7 @@
 #include "managers/render/render_scene.h"
 #include <animation/animation_manager.h>
 #include <render/transparent_elements/ui_manager.h>
+#include <glm/gtx/rotate_vector.hpp>
 
 void EnemyFullyAware::startup(StateMachine *machine, std::string name) {
 	this->name = name;
@@ -32,19 +33,25 @@ void EnemyFullyAware::update(World *world, uint32_t entity_id, float dt) {
 	auto &enemy_data = world->get_component<EnemyData>(entity_id);
 	auto &dd = world->get_parent_scene()->get_render_scene().debug_draw;
 	auto agent_pos = GameplayManager::get().get_agent_position(world->get_parent_scene());
-	auto forward = glm::normalize(transform.get_global_forward());
+
 	auto current_no_y = glm::vec3(transform.position.x, 0.0f, transform.position.z);
-	glm::vec3 target_look = glm::vec3(agent_pos.x, 0.0f, agent_pos.z);
-	glm::vec3 direction = glm::normalize(target_look - current_no_y);
+	glm::vec3 target_no_y = glm::vec3(agent_pos.x, 0.0f, agent_pos.z);
+
+	auto forward = glm::normalize(transform.get_global_forward());
+	forward =  glm::rotateY(forward, glm::radians(30.0f));
+
+	glm::vec3 direction = glm::normalize(target_no_y - current_no_y);
 	glm::vec3 forward_no_y = glm::normalize(glm::vec3(forward.x, 0.0f, forward.z));
 
 	float angle = glm::acos(glm::dot(forward_no_y, direction));
 	glm::vec3 axis = glm::cross(forward_no_y, direction);
 	glm::vec3 rotation_end = (angle * axis);
 
-	float dot = glm::dot(glm::normalize(target_look - transform.position), forward);
+	float dot = glm::dot(glm::normalize(target_no_y - transform.position), forward);
 	if (dot < 0.99f) {
-		transform.add_global_euler_rot(rotation_end * dt * 4.0f);
+		//std::cout << angle << " * " << glm::to_string(axis) << std::endl;
+		std::cout << glm::to_string(rotation_end) << std::endl;
+		transform.add_global_euler_rot(rotation_end * dt);
 	}
 
 	enemy_utils::handle_detection(world, transform, enemy_data, dt, &dd);

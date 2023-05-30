@@ -151,7 +151,7 @@ void SpriteDraw::draw_slider_billboard(const glm::vec3 &position, float add_z, c
 
 	float x = 0.0f;
 	float y = 0.0f;
-	float z = add_z;
+	float z = 0.0f;
 
 	float w = size.x / 2.0f;
 	float h = size.y / 2.0f;
@@ -199,10 +199,12 @@ void SpriteDraw::draw_slider_billboard(const glm::vec3 &position, float add_z, c
 	sprite.indices[index++] = 2;
 	sprite.indices[index++] = 3;
 
-	sprite.type = sprite.type = TransparentType::SPRITE;
+	sprite.type = TransparentType::SPRITE;
 	sprite.billboard = true;
 	sprite.size = size / 2.0f;
 	sprite.position = position;
+	sprite.use_camera_right = false;
+	sprite.billboard_z_offset = add_z;
 
 	r_scene->transparent_objects.push_back(sprite);
 }
