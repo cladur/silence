@@ -29,6 +29,9 @@ AutoCVarFloat cvar_agent_attack_angle("agent.attack_angle", "angle of attack", 7
 
 AutoCVarFloat cvar_agent_acc_ground("agent.acc_ground", "acceleration on ground", 0.4f, CVarFlags::EditCheckbox);
 
+AutoCVarFloat cvar_agent_lock_time(
+		"agent.lock_time", "minimal time of animation in ms", 500.0f, CVarFlags::EditCheckbox);
+
 AutoCVarFloat cvar_agent_camera_back(
 		"agent.cam_back", "distance of camera from player", -1.5f, CVarFlags::EditCheckbox);
 
@@ -120,17 +123,19 @@ void AgentSystem::update(World &world, float dt) {
 		auto camera_right = camera_pivot_tf.get_global_right();
 
 		glm::vec3 acc_direction = { 0, 0, 0 };
-		if (input_manager.is_action_pressed("agent_move_forward")) {
-			acc_direction += camera_forward;
-		}
-		if (input_manager.is_action_pressed("agent_move_backward")) {
-			acc_direction -= camera_forward;
-		}
-		if (input_manager.is_action_pressed("agent_move_left")) {
-			acc_direction += camera_right;
-		}
-		if (input_manager.is_action_pressed("agent_move_right")) {
-			acc_direction -= camera_right;
+		if (animation_timer >= cvar_agent_lock_time.get()) {
+			if (input_manager.is_action_pressed("agent_move_forward")) {
+				acc_direction += camera_forward;
+			}
+			if (input_manager.is_action_pressed("agent_move_backward")) {
+				acc_direction -= camera_forward;
+			}
+			if (input_manager.is_action_pressed("agent_move_left")) {
+				acc_direction += camera_right;
+			}
+			if (input_manager.is_action_pressed("agent_move_right")) {
+				acc_direction -= camera_right;
+			}
 		}
 		glm::normalize(acc_direction);
 
@@ -178,7 +183,8 @@ void AgentSystem::update(World &world, float dt) {
 				}
 			}
 
-		} else if (animation_timer <= 0.0f) {
+		} else if (animation_timer >=
+				resource_manager.get_animation(animation_instance.animation_handle).get_duration()) {
 			if (is_crouching) {
 				if (animation_instance.animation_handle.id !=
 						resource_manager.get_animation_handle("agent/agent_ANIM_GLTF/agent_crouch_idle.anim").id) {
@@ -192,7 +198,6 @@ void AgentSystem::update(World &world, float dt) {
 				}
 			}
 		}
-
 		transform.add_position(glm::vec3(velocity.x, 0.0, velocity.z));
 
 		//Camera
@@ -284,7 +289,7 @@ void AgentSystem::update(World &world, float dt) {
 							auto animation_handle = resource_manager.get_animation_handle(
 									"agent/agent_ANIM_GLTF/agent_interaction.anim");
 							if (animation_instance.animation_handle.id != animation_handle.id) {
-								animation_timer = resource_manager.get_animation(animation_handle).get_duration();
+								animation_timer = 0;
 								previous_velocity = { 0.0f, 0.0f, 0.0f };
 								velocity = { 0.0f, 0.0f, 0.0f };
 								animation_manager.change_animation(
@@ -301,7 +306,6 @@ void AgentSystem::update(World &world, float dt) {
 		//Agent attack
 		//ray.origin = transform.get_global_position() + glm::vec3(0.0f, 1.0f, 0.0f);
 		//ray.ignore_list.emplace_back(entity);
-
 		ray.direction = model_tf.get_forward();
 		ray.origin = transform.get_global_position() + glm::vec3(0.0f, 1.0f, 0.0f);
 		ray.ignore_list.emplace_back(entity);
@@ -323,9 +327,9 @@ void AgentSystem::update(World &world, float dt) {
 							auto animation_handle =
 									resource_manager.get_animation_handle("agent/agent_ANIM_GLTF/agent_stab.anim");
 							if (animation_instance.animation_handle.id != animation_handle.id) {
-								animation_timer = resource_manager.get_animation(animation_handle).get_duration();
-								previous_velocity = { 0.0f, 0.0f, 0.0f };
-								velocity = { 0.0f, 0.0f, 0.0f };
+								animation_timer = 0;
+								previous_velocity = { 0, 0, 0 };
+								velocity = { 0, 0, 0 };
 								animation_manager.change_animation(
 										agent_data.model, "agent/agent_ANIM_GLTF/agent_stab.anim");
 							}
@@ -336,9 +340,10 @@ void AgentSystem::update(World &world, float dt) {
 			}
 		}
 
-		if (animation_timer > 0) {
-			animation_timer -= (dt * 1000);
+		if (animation_timer < resource_manager.get_animation(animation_instance.animation_handle).get_duration()) {
+			animation_timer += (dt * 1000);
 		}
+
 		last_position = transform.position;
 		previous_velocity = velocity;
 	}
