@@ -191,7 +191,7 @@ void AgentSystem::update(World &world, float dt) {
 			}
 			animation_instance.ticks_per_second = 1000.f;
 		}
-		SPDLOG_INFO(animation_instance.ticks_per_second);
+		//SPDLOG_INFO(animation_instance.ticks_per_second);
 		transform.add_position(glm::vec3(velocity.x, 0.0, velocity.z));
 
 		//Camera
@@ -220,6 +220,17 @@ void AgentSystem::update(World &world, float dt) {
 			} else {
 				camera_tf.set_position({ 0.0f, 0.0f, def_cam_z });
 			}
+			//TODO: raycast should be able to check 2 layers at once
+			Ray ray_floor{};
+			ray_floor.layer_name = "camera";
+			ray_floor.origin = spring_arm_tf.get_global_position();
+			ray_floor.direction = -spring_arm_tf.get_global_forward();
+			end = ray.origin + ray.direction;
+			if (CollisionSystem::ray_cast_layer(world, ray_floor, info)) {
+				if (info.distance < -def_cam_z) {
+					camera_tf.set_position({ 0.0f, 0.0f, -info.distance });
+				}
+			}
 		}
 
 		static glm::vec3 last_position = transform.position;
@@ -239,11 +250,12 @@ void AgentSystem::update(World &world, float dt) {
 		Ray ray{};
 		ray.origin = transform.get_global_position() + glm::vec3(0.0f, 1.0f, 0.0f);
 		ray.ignore_list.emplace_back(entity);
+		ray.layer_name = "default";
 		ray.direction = -transform.get_up();
 		glm::vec3 end = ray.origin + ray.direction;
 		world.get_parent_scene()->get_render_scene().debug_draw.draw_arrow(ray.origin, end);
 		HitInfo info;
-		if (CollisionSystem::ray_cast(world, ray, info)) {
+		if (CollisionSystem::ray_cast_layer(world, ray, info)) {
 			// If the agent is not on the ground, move him down
 			// If the agent is on 40 degree slope or more, move him down
 			bool is_on_too_steep_slope =
@@ -307,7 +319,7 @@ void AgentSystem::update(World &world, float dt) {
 
 		end = ray.origin + ray.direction;
 		world.get_parent_scene()->get_render_scene().debug_draw.draw_arrow(ray.origin, end, { 255, 0, 0 });
-		if (CollisionSystem::ray_cast(world, ray, info)) {
+		if (CollisionSystem::ray_cast_layer(world, ray, info)) {
 			if (info.distance < cvar_agent_attack_range.get()) {
 				if (world.has_component<EnemyData>(info.entity)) {
 					auto &enemy = world.get_component<EnemyData>(info.entity);
