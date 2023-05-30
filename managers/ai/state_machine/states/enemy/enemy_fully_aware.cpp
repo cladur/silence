@@ -22,6 +22,7 @@ void EnemyFullyAware::startup(StateMachine *machine, std::string name) {
 
 void EnemyFullyAware::enter() {
 	SPDLOG_INFO("EnemyFullyAware::enter");
+	first_frame = true;
 }
 
 void EnemyFullyAware::update(World *world, uint32_t entity_id, float dt) {
@@ -38,23 +39,54 @@ void EnemyFullyAware::update(World *world, uint32_t entity_id, float dt) {
 	glm::vec3 target_no_y = glm::vec3(agent_pos.x, 0.0f, agent_pos.z);
 
 	auto forward = glm::normalize(transform.get_global_forward());
-	forward =  glm::rotateY(forward, glm::radians(30.0f));
+
+	if (first_frame) {
+		adjusted_forward = glm::normalize(target_no_y - current_no_y);
+		end_forward = glm::rotateY(forward, glm::radians(27.0f));
+
+		if (anim.animation_handle.id != res.get_animation_handle("enemy/enemy_ANIM_GLTF/enemy_down_to_aim.anim").id) {
+			animation_manager.change_animation(entity_id, "enemy/enemy_ANIM_GLTF/enemy_down_to_aim.anim");
+			anim.is_looping = false;
+		}
+
+		first_frame = false;
+	}
+
+
+	if (glm::distance(adjusted_forward, end_forward) > 0.06 && !forward_block) {
+		adjusted_forward = glm::mix(adjusted_forward, end_forward, dt);
+	} else {
+		forward_block = true;
+		adjusted_forward = end_forward;
+	}
 
 	glm::vec3 direction = glm::normalize(target_no_y - current_no_y);
-	glm::vec3 forward_no_y = glm::normalize(glm::vec3(forward.x, 0.0f, forward.z));
+	glm::vec3 forward_no_y = glm::normalize(glm::vec3(adjusted_forward.x, 0.0f, adjusted_forward.z));
 
 	float angle = glm::acos(glm::dot(forward_no_y, direction));
 	glm::vec3 axis = glm::cross(forward_no_y, direction);
 	glm::vec3 rotation_end = (angle * axis);
 
-	float dot = glm::dot(glm::normalize(target_no_y - transform.position), forward);
+	dd.draw_line(
+			transform.position + glm::vec3(0.0f, 1.0f, 0.0f),
+			transform.position + glm::vec3(0.0f, 1.0f, 0.0f) + adjusted_forward,
+			glm::vec3(0.0f, 0.0f, 1.0f));
+	dd.draw_line(
+			transform.position + glm::vec3(0.0f, 1.0f, 0.0f),
+			transform.position + glm::vec3(0.0f, 1.0f, 0.0f) + end_forward,
+			glm::vec3(1.0f, 0.0f, 0.0f));
+	dd.draw_line(
+			transform.position + glm::vec3(0.0f, 1.0f, 0.0f),
+			transform.position + glm::vec3(0.0f, 1.0f, 0.0f) + glm::normalize(target_no_y - transform.position),
+			glm::vec3(0.0f, 1.0f, 0.0f));
+
+	float dot = glm::dot(glm::normalize(target_no_y - transform.position), adjusted_forward);
 	if (dot < 0.99f) {
-		//std::cout << angle << " * " << glm::to_string(axis) << std::endl;
-		std::cout << glm::to_string(rotation_end) << std::endl;
-		transform.add_global_euler_rot(rotation_end * dt);
+		transform.add_global_euler_rot(rotation_end * dt * 3.0f);
+		end_forward = glm::rotateY(end_forward, rotation_end.y * dt * 3.0f);
 	}
 
-	enemy_utils::handle_detection(world, transform, enemy_data, dt, &dd);
+	enemy_utils::handle_detection(world, transform, adjusted_forward, enemy_data, dt, &dd);
 
 	enemy_utils::update_detection_slider(entity_id, transform, enemy_data);
 

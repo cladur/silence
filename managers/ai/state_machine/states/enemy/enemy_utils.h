@@ -33,12 +33,12 @@ namespace enemy_utils {
 		t.add_global_euler_rot(path.rotation_end * dt * path.rotation_speed);
 	}
 
-	inline void handle_detection(World *world, Transform &transform, EnemyData &enemy_data, float &dt, DebugDraw *dd = nullptr) {
+	inline void handle_detection(World *world, Transform &transform, glm::vec3 forward, EnemyData &enemy_data, float &dt, DebugDraw *dd = nullptr) {
 		auto agent_pos = GameplayManager::get().get_agent_position(world->get_parent_scene()) + agent_target_top_offset;
 		bool can_see_player = false;
 		auto enemy_look_origin = transform.position + enemy_look_offset;
 		auto agent_dir = glm::normalize(agent_pos - enemy_look_origin);
-		auto forward = glm::normalize(transform.get_global_forward());
+		//auto forward = glm::normalize(transform.get_global_forward());
 
 		if (dd != nullptr) {
 			//dd->draw_line(transform.position, transform.position + agent_dir, glm::vec3(1.0f, 0.0f, 0.0f));
