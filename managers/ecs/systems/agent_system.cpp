@@ -14,6 +14,7 @@
 #include "input/input_manager.h"
 #include "resource/resource_manager.h"
 #include <gameplay/gameplay_manager.h>
+#include <render/transparent_elements/ui_manager.h>
 #include <spdlog/spdlog.h>
 #include <glm/fwd.hpp>
 #include <glm/geometric.hpp>
@@ -52,6 +53,46 @@ void AgentSystem::startup(World &world) {
 	world.set_system_component_whitelist<AgentSystem>(whitelist);
 
 	previous_velocity = { 0, 0, 0 };
+
+	ui_name = "agent_ui";
+
+	auto &rm = ResourceManager::get();
+	auto dot_tex = rm.load_texture(asset_path("dot.ktx2").c_str());
+
+	auto &ui = UIManager::get();
+	ui.create_ui_scene(ui_name);
+	ui.activate_ui_scene(ui_name);
+
+	// anchor at the center of hacker's half of screen
+	auto &root_anchor = ui.add_ui_anchor(ui_name, "root_anchor");
+	root_anchor.is_screen_space = true;
+	root_anchor.x = 0.25;
+	root_anchor.y = 0.5f;
+	root_anchor.display = true;
+	ui.add_as_root(ui_name, "root_anchor");
+
+	auto &dot = ui.add_ui_image(ui_name, "dot");
+	dot.texture = dot_tex;
+	dot.size = glm::vec2(2.0f);
+	dot.color = glm::vec4(1.0f, 1.0f, 1.0f, 0.6f);
+
+	ui.add_to_root(ui_name, "dot", "root_anchor");
+
+	ui_interaction_text = &ui.add_ui_text(ui_name, "interaction_text");
+	ui_interaction_text->text = "";
+	ui_interaction_text->is_screen_space = true;
+	ui_interaction_text->size = glm::vec2(0.5f);
+	ui_interaction_text->position = glm::vec3(150.0f, 3.0f, 0.0f);
+	ui_interaction_text->centered_y = true;
+	ui.add_to_root(ui_name, "interaction_text", "root_anchor");
+
+	ui_kill_text = &ui.add_ui_text(ui_name, "kill_text");
+	ui_kill_text->text = "";
+	ui_kill_text->is_screen_space = true;
+	ui_kill_text->size = glm::vec2(0.5f);
+	ui_kill_text->position = glm::vec3(-150.0f, 3.0f, 0.0f);
+	ui_kill_text->centered_y = true;
+	ui.add_to_root(ui_name, "kill_text", "root_anchor");
 }
 
 void AgentSystem::update(World &world, float dt) {
@@ -219,23 +260,27 @@ void AgentSystem::update(World &world, float dt) {
 			}
 		}
 
+		ui_interaction_text->text = "";
 		//Agent interaction
-		if (input_manager.is_action_just_pressed("agent_interact")) {
-			Ray ray{};
-			ray.origin = transform.get_global_position() + glm::vec3(0.0f, 1.0f, 0.0f);
-			ray.direction = model_tf.get_global_forward();
-			ray.ignore_list.emplace_back(entity);
-			ray.layer_name = "agent";
-			glm::vec3 end = ray.origin + ray.direction;
-			world.get_parent_scene()->get_render_scene().debug_draw.draw_arrow(ray.origin, end, { 1.0f, 0.0f, 0.0f });
-			HitInfo info;
-			if (CollisionSystem::ray_cast_layer(world, ray, info)) {
-				auto &target_transform = world.get_component<Transform>(info.entity);
-				if (info.distance < cvar_agent_interaction_range.get()) {
-					if (world.has_component<Interactable>(info.entity)) {
-						auto &interactable = world.get_component<Interactable>(info.entity);
-						if ((interactable.type == InteractionType::Agent) && interactable.can_interact) {
+		bool interaction_triggered = input_manager.is_action_just_pressed("agent_interact");
+		ray = {};
+		ray.origin = transform.get_global_position() + glm::vec3(0.0f, 1.0f, 0.0f);
+		ray.direction = model_tf.get_global_forward();
+		ray.ignore_list.emplace_back(entity);
+		ray.layer_name = "agent";
+		end = ray.origin + ray.direction;
+		world.get_parent_scene()->get_render_scene().debug_draw.draw_arrow(ray.origin, end, { 1.0f, 0.0f, 0.0f });
+		info = {};
+		if (CollisionSystem::ray_cast_layer(world, ray, info)) {
+			auto &target_transform = world.get_component<Transform>(info.entity);
+			if (info.distance < cvar_agent_interaction_range.get()) {
+				if (world.has_component<Interactable>(info.entity)) {
+					auto &interactable = world.get_component<Interactable>(info.entity);
+					if ((interactable.type == InteractionType::Agent) && interactable.can_interact) {
+						ui_interaction_text->text = "Press E to interact";
+						if (interaction_triggered) {
 							interactable.triggered = true;
+
 							auto animation_handle = resource_manager.get_animation_handle(
 									"agent/agent_ANIM_GLTF/agent_interaction.anim");
 							if (animation_instance.animation_handle.id != animation_handle.id) {
@@ -251,10 +296,16 @@ void AgentSystem::update(World &world, float dt) {
 			}
 		}
 
+		ui_kill_text->text = "";
+
 		//Agent attack
 		//ray.origin = transform.get_global_position() + glm::vec3(0.0f, 1.0f, 0.0f);
 		//ray.ignore_list.emplace_back(entity);
+
 		ray.direction = model_tf.get_forward();
+		ray.origin = transform.get_global_position() + glm::vec3(0.0f, 1.0f, 0.0f);
+		ray.ignore_list.emplace_back(entity);
+
 		end = ray.origin + ray.direction;
 		world.get_parent_scene()->get_render_scene().debug_draw.draw_arrow(ray.origin, end, { 255, 0, 0 });
 		if (CollisionSystem::ray_cast(world, ray, info)) {
@@ -266,6 +317,7 @@ void AgentSystem::update(World &world, float dt) {
 							glm::cos(glm::radians(cvar_agent_attack_angle.get()));
 					if (behind_enemy && enemy.state_machine.get_current_state() != "dying") {
 						//TODO: pull out knife or other indicator that agent can attack
+						ui_kill_text->text = "[LMB] Kill";
 						//auto &enemy_tf = world.get_component<Transform>(info.entity);
 						if (input_manager.is_action_just_pressed("mouse_left")) {
 							auto animation_handle =

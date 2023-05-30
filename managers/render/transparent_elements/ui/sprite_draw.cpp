@@ -91,14 +91,15 @@ TransparentObject SpriteDraw::default_vertex_data(const glm::vec3 &position, con
 	return sprite;
 }
 
-void SpriteDraw::draw_colored(const glm::vec3 &position, const glm::vec2 &size, const glm::vec3 &color,
+void SpriteDraw::draw_colored(const glm::vec3 &position, const glm::vec2 &size, const glm::vec4 &color,
 		bool is_screen_space, Alignment alignment) {
 	TransparentObject sprite = default_vertex_data(position, size, 1.0f, 1.0f, color, is_screen_space, alignment);
+	sprite.alpha = color.a;
 
 	r_scene->transparent_objects.push_back(sprite);
 }
 
-void SpriteDraw::draw_sprite(const glm::vec3 &position, const glm::vec2 &size, const glm::vec3 &color,
+void SpriteDraw::draw_sprite(const glm::vec3 &position, const glm::vec2 &size, const glm::vec4 &color,
 		const Handle<Texture> texture, bool is_screen_space, Alignment alignment) {
 	auto &rm = ResourceManager::get();
 	Texture t = rm.get_texture(texture);
@@ -106,6 +107,7 @@ void SpriteDraw::draw_sprite(const glm::vec3 &position, const glm::vec2 &size, c
 	TransparentObject sprite =
 			default_vertex_data(position, size, (float)t.width, (float)t.height, color, is_screen_space, alignment);
 	sprite.texture_name = rm.get_texture_name(texture);
+	sprite.alpha = color.a;
 
 	r_scene->transparent_objects.push_back(sprite);
 }
@@ -122,26 +124,27 @@ void SpriteDraw::draw_sprite_billboard(
 	sprite.billboard = true;
 	sprite.size = size / 2.0f;
 	sprite.position = position;
-	sprite.alpha = color.w;
+	sprite.alpha = color.a;
 	sprite.use_camera_right = use_camera_right;
 	sprite.billboard_z_offset = z_offset;
 
 	r_scene->transparent_objects.push_back(sprite);
 }
 
-void SpriteDraw::draw_colored_billboard(const glm::vec3 &position, const glm::vec2 &size, const glm::vec3 &color) {
+void SpriteDraw::draw_colored_billboard(const glm::vec3 &position, const glm::vec2 &size, const glm::vec4 &color) {
 	TransparentObject sprite =
 			default_vertex_data(glm::vec3(0.0f), size, 1.0f, 1.0f, color, false, Alignment::NONE);
 
 	sprite.billboard = true;
 	sprite.size = size / 2.0f;
 	sprite.position = position;
+	sprite.alpha = color.a;
 
 	r_scene->transparent_objects.push_back(sprite);
 }
 
 void SpriteDraw::draw_slider_billboard(const glm::vec3 &position, float add_z, const glm::vec2 &size,
-		const glm::vec3 &color, float value, SliderAlignment slider_alignment) {
+		const glm::vec4 &color, float value, SliderAlignment slider_alignment) {
 	TransparentObject sprite = {};
 	sprite.vertices.resize(4);
 	sprite.indices.resize(6);
@@ -205,18 +208,20 @@ void SpriteDraw::draw_slider_billboard(const glm::vec3 &position, float add_z, c
 	sprite.position = position;
 	sprite.use_camera_right = false;
 	sprite.billboard_z_offset = add_z;
+	sprite.alpha = color.a;
 
 	r_scene->transparent_objects.push_back(sprite);
 }
 
 void SpriteDraw::draw_sprite_scene(RenderScene *scene, const glm::vec3 &position, const glm::vec2 &size,
-		const glm::vec3 &color,  const Handle<Texture> texture, bool is_screen_space, Alignment alignment) {
+		const glm::vec4 &color,  const Handle<Texture> texture, bool is_screen_space, Alignment alignment) {
 	auto &rm = ResourceManager::get();
 	Texture t = rm.get_texture(texture);
 
 	TransparentObject sprite =
 			default_vertex_data(position, size, (float)t.width, (float)t.height, color, is_screen_space, alignment);
 	sprite.texture_name= rm.get_texture_name(texture);;
+	sprite.alpha = color.a;
 
 	scene->transparent_objects.push_back(sprite);
 }

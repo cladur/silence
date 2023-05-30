@@ -4,6 +4,7 @@
 #include "base_system.h"
 #include "components/hacker_data_component.h"
 #include "components/transform_component.h"
+#include <render/transparent_elements/ui/ui_elements/ui_text.h>
 
 class HackerSystem : public BaseSystem {
 private:
@@ -12,9 +13,12 @@ private:
 			glm::vec3 accel_dir, glm::vec3 prev_velocity, float acceleration, float max_velocity, float dt);
 	glm::vec3 move_ground(glm::vec3 accel_dir, glm::vec3 pre_velocity, float dt);
 	bool jump_to_camera(World &world, HackerData &hacker_data, Entity camera_entity);
-	bool shoot_raycast(Transform &transform, World &world, HackerData &hacker_data, float dt,
+	bool shoot_raycast(Transform &transform, World &world, HackerData &hacker_data, float dt, bool trigger,
 			glm::vec3 direction = glm::vec3(0.0f, 0.0f, -1.0f));
 	void go_back_to_scorpion(World &world, HackerData &hacker_data);
+
+	std::string ui_name;
+	UIText *ui_text;
 
 	bool is_on_camera = false;
 	Entity current_camera_entity = 0;

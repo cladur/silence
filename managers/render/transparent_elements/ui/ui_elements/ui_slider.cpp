@@ -37,7 +37,7 @@ void UISlider::draw() {
 		}
 
 		ui_manager.sprite_draw.draw_colored(new_position + glm::vec3(0.0f, 0.0f, 0.01f), new_size, color, is_screen_space, alignment);
-		ui_manager.sprite_draw.draw_colored(position, size, glm::vec3(0.0f), is_screen_space, alignment);
+		ui_manager.sprite_draw.draw_colored(position, size, glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), is_screen_space, alignment);
 	} else {
 		ui_manager.sprite_draw.draw_slider_billboard(
 				position,
@@ -50,7 +50,7 @@ void UISlider::draw() {
 				position,
 				0.1f,
 				size,
-				glm::vec3(0.0f),
+				glm::vec4(0.0f, 0.0f, 0.0f, 1.0f),
 				1.0f,
 				slider_alignment);
 	}
@@ -103,7 +103,7 @@ void UISlider::draw(glm::vec3 parent_position, glm::vec2 parent_size) {
 	ui_manager.sprite_draw.draw_colored(
 			position + parent_position + glm::vec3(0.0f, 0.0f, 0.01f),
 			size,
-			glm::vec3(0.0f),
+			glm::vec4(0.0f, 0.0f, 0.0f, 1.0f),
 			is_screen_space,
 			Alignment::NONE);
 
