@@ -32,18 +32,18 @@ public:
 			float sprite_y_size, const glm::vec3 &color, bool is_screen_space, Alignment alignment = Alignment::CENTER);
 
 	// draws a single colored quad. If is screen spaced, the scale represents pixel scale.
-	void draw_colored(const glm::vec3 &position, const glm::vec2 &size, const glm::vec3 &color, bool is_screen_space,
+	void draw_colored(const glm::vec3 &position, const glm::vec2 &size, const glm::vec4 &color, bool is_screen_space,
 			Alignment alignment = Alignment::NONE);
-	void draw_colored_billboard(const glm::vec3 &position, const glm::vec2 &size, const glm::vec3 &color);
-	void draw_sprite(const glm::vec3 &position, const glm::vec2 &size, const glm::vec3 &color, Handle<Texture> texture,
+	void draw_colored_billboard(const glm::vec3 &position, const glm::vec2 &size, const glm::vec4 &color);
+	void draw_sprite(const glm::vec3 &position, const glm::vec2 &size, const glm::vec4 &color, Handle<Texture> texture,
 			bool is_screen_space, Alignment alignment = Alignment::NONE);
 	void draw_sprite_billboard(
 			const glm::vec3 &position, const glm::vec2 &size, const glm::vec4 &color,  Handle<Texture> texture, float z_offset = 0.0f, bool use_camera_right = false);
 
-	void draw_slider_billboard(const glm::vec3 &position, float add_z, const glm::vec2 &size, const glm::vec3 &color,
+	void draw_slider_billboard(const glm::vec3 &position, float add_z, const glm::vec2 &size, const glm::vec4 &color,
 			float value, SliderAlignment slider_alignment);
 
-	void draw_sprite_scene(RenderScene *scene, const glm::vec3 &position, const glm::vec2 &size, const glm::vec3 &color,  Handle<Texture> texture,
+	void draw_sprite_scene(RenderScene *scene, const glm::vec3 &position, const glm::vec2 &size, const glm::vec4 &color,  Handle<Texture> texture,
 			bool is_screen_space, Alignment alignment = Alignment::NONE);
 };
 
