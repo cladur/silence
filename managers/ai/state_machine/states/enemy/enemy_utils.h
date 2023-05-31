@@ -56,6 +56,7 @@ namespace enemy_utils {
 				Ray ray{};
 				ray.origin = enemy_look_origin + agent_dir;
 				ray.direction = agent_dir;
+				ray.ignore_layers.emplace_back("camera");
 				glm::vec3 ray_end = ray.origin + ray.direction * enemy_data.view_cone_distance;
 
 				HitInfo hit_info;
@@ -68,6 +69,8 @@ namespace enemy_utils {
 					if (dd != nullptr) {
 						dd->draw_line(ray.origin, ray_end, glm::vec3(0.0f, 1.0f, 1.0f));
 					}
+					auto &tag = world->get_component<ColliderTag>(hit_info.entity);
+					std::cout << "hit layer: " << tag.layer_name << std::endl;
 					if (hit_info.entity == GameplayManager::get().get_agent_entity()) {
 						can_see_player = true;
 					}

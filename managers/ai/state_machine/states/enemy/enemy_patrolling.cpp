@@ -87,6 +87,8 @@ void EnemyPatrolling::update(World *world, uint32_t entity_id, float dt) {
 
 	enemy_utils::update_detection_slider(entity_id, transform, enemy_data);
 
+	//std::cout << enemy_data.detection_level << std::endl;
+
 	if (enemy_data.detection_level > 0.3f) {
 		state_machine->set_state("looking");
 	}
