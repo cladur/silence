@@ -359,12 +359,19 @@ void AgentSystem::update(World &world, float dt) {
 			}
 		}
 
-
 		// ZOOMING LOGIC
 		if (input_manager.is_action_pressed("control_camera")) {
 			is_zooming = true;
 			camera.fov = glm::mix(camera.fov, 30.0f, dt * 3.0f);
 			camera_sens_modifier = glm::mix(camera_sens_modifier, 0.3f, dt * 3.0f);
+			if (input_manager.is_action_just_pressed("mouse_left")) {
+				Ray tag_ray = {};
+				tag_ray.origin = camera_tf.get_global_position();
+				tag_ray.direction = camera_tf.get_global_forward();
+				tag_ray.ignore_list.emplace_back(entity);
+				tag_ray.layer_name = "agent";
+				// todo: tagging logic, checking for component etc.
+			}
 		} else {
 			camera.fov = glm::mix(camera.fov, default_fov, dt * 7.0f);
 			camera_sens_modifier = glm::mix(camera_sens_modifier, 1.0f, dt * 7.0f);
