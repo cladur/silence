@@ -4,6 +4,7 @@
 struct EnemyPath {
 	//std::vector<glm::vec3> path;
 	//std::vector<std::pair<float, bool>> patrol_points;
+	uint32_t path_parent;
 	int next_position = 0;
 	float speed = 1.0f;
 	float rotation_speed = 1.0f;
@@ -19,21 +20,9 @@ struct EnemyPath {
 		nlohmann::json::object_t serialized_component;
 		serialized_scene.push_back(nlohmann::json::object());
 
+		serialized_component["path_parent"] = path_parent;
 		serialized_component["speed"] = speed;
 		serialized_component["rotation_speed"] = rotation_speed;
-
-		//int i = 0;
-//		for (auto &pos : path) {
-//
-//			serialized_component["path_" + std::to_string(i) + "_x"] = pos.x;
-//			serialized_component["path_" + std::to_string(i) + "_y"] = pos.y;
-//			serialized_component["path_" + std::to_string(i) + "_z"] = pos.z;
-//
-//			serialized_component["patrol_points_" + std::to_string(i)] = patrol_points[i].first;
-//			serialized_component["patrol_times_" + std::to_string(i)] = patrol_points[i].second;
-//
-//			i++;
-//		}
 
 		serialized_scene.back()["component_data"] = serialized_component;
 		serialized_scene.back()["component_name"] = "EnemyPath";
@@ -43,6 +32,14 @@ struct EnemyPath {
 		int i = 0;
 		speed = serialized_component["speed"];
 		rotation_speed = serialized_component["rotation_speed"];
+		if (serialized_component.contains("path_parent")) {
+			path_parent = serialized_component["path_parent"];
+		}
+		else {
+			path_parent = 0;
+		}
+
+		// backwards compatibility
 		while (true) {
 			std::string pos_x = "path_" + std::to_string(i) + "_x";
 			std::string pos_y = "path_" + std::to_string(i) + "_y";

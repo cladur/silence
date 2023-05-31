@@ -121,18 +121,19 @@ namespace enemy_utils {
 		slider.position = transform.get_global_position() + glm::vec3(0.0f, 2.5f, 0.0f);
 	}
 
-	inline uint32_t find_closest_node(World *world, glm::vec3 &position, EnemyPath &path) {
+	inline uint32_t find_closest_node(World *world, glm::vec3 &position, Children &path) {
 		uint32_t closest_node = 0;
 		float closest_distance = 1000000.0f;
-		int i = 0;
-//		for (auto &node : path.path) {
-//			auto distance = glm::distance(position, node);
-//			if (distance < closest_distance) {
-//				closest_distance = distance;
-//				closest_node = i;
-//			}
-//			i++;
-//		}
+
+		for (int i = 0; i < path.children_count; i ++) {
+			auto &node = world->get_component<Transform>(path.children[i]).position;
+			auto distance = glm::distance(position, node);
+			if (distance < closest_distance) {
+				closest_distance = distance;
+				closest_node = i;
+			}
+		}
+
 		return closest_node;
 	}
 }

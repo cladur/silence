@@ -20,7 +20,6 @@ void EnemyPathDraw::update(World &world, float dt) {
 
 		glm::vec3 color;
 		for (int i = 0; i < children.children_count; i++) {
-			//std::cout << children.children[i] << std::endl;
 			auto &path_node = world.get_component<PathNode>(children.children[i]);
 			auto &t = world.get_component<Transform>(children.children[i]);
 
@@ -33,9 +32,9 @@ void EnemyPathDraw::update(World &world, float dt) {
 			} else {
 				color = glm::vec3(1.0f, 0.8f, 0.0f);
 			}
-			r_s.debug_draw.draw_sphere(t.position, 0.2f, color, entity);
+			r_s.debug_draw.draw_sphere(t.get_global_position(), 0.2f, color, entity);
 			r_s.debug_draw.draw_line(
-					t.position, t_next.position, glm::vec3(1.0f, 1.0f, 1.0f));
+					t.get_global_position(), t_next.get_global_position(), glm::vec3(1.0f, 1.0f, 1.0f));
 		}
 	}
 }

@@ -74,7 +74,8 @@ void EnemyDistracted::update(World *world, uint32_t entity_id, float dt) {
 
 	if (enemy_data.distraction_cooldown <= 0.0f) {
 		// find the closes node to the entity
-		uint32_t idx = enemy_utils::find_closest_node(world, current_pos, enemy_path);
+		auto &path = world->get_component<Children>(enemy_path.path_parent);
+		uint32_t idx = enemy_utils::find_closest_node(world, current_pos, path);
 		enemy_path.next_position = idx;
 		enemy_path.prev_position = transform.position;
 		enemy_path.is_rotating = true;
