@@ -108,10 +108,16 @@ void AgentSystem::update(World &world, float dt) {
 		auto &camera_tf = world.get_component<Transform>(agent_data.camera);
 		auto &spring_arm_tf = world.get_component<Transform>(agent_data.spring_arm);
 		auto &animation_instance = world.get_component<AnimationInstance>(agent_data.model);
+		auto &camera = world.get_component<Camera>(agent_data.camera);
 
 		auto &dd = world.get_parent_scene()->get_render_scene().debug_draw;
 
 		auto camera_forward = camera_pivot_tf.get_global_forward();
+
+		if (first_frame) {
+			default_fov = camera.fov;
+			first_frame = false;
+		}
 
 		camera_forward.y = 0.0f;
 		camera_forward = glm::normalize(camera_forward);
@@ -199,9 +205,9 @@ void AgentSystem::update(World &world, float dt) {
 		if (*CVarSystem::get()->get_int_cvar("game.controlling_agent") &&
 				!*CVarSystem::get()->get_int_cvar("debug_camera.use")) {
 			glm::vec2 mouse_delta = input_manager.get_mouse_delta();
-			camera_pivot_tf.add_euler_rot(glm::vec3(mouse_delta.y, 0.0f, 0.0f) * cvar_camera_sensitivity.get() * dt);
+			camera_pivot_tf.add_euler_rot(glm::vec3(mouse_delta.y, 0.0f, 0.0f) * cvar_camera_sensitivity.get() * dt * camera_sens_modifier);
 			camera_pivot_tf.add_global_euler_rot(
-					glm::vec3(0.0f, -mouse_delta.x, 0.0f) * cvar_camera_sensitivity.get() * dt);
+					glm::vec3(0.0f, -mouse_delta.x, 0.0f) * cvar_camera_sensitivity.get() * dt * camera_sens_modifier);
 
 			//check how far behind camera can be
 			Ray ray{};
@@ -346,6 +352,16 @@ void AgentSystem::update(World &world, float dt) {
 					}
 				}
 			}
+		}
+
+
+		// ZOOMING LOGIC
+		if (input_manager.is_action_pressed("control_camera")) {
+			camera.fov = glm::mix(camera.fov, 30.0f, dt * 3.0f);
+			camera_sens_modifier = glm::mix(camera_sens_modifier, 0.3f, dt * 3.0f);
+		} else {
+			camera.fov = glm::mix(camera.fov, default_fov, dt * 7.0f);
+			camera_sens_modifier = glm::mix(camera_sens_modifier, 1.0f, dt * 7.0f);
 		}
 
 		if (animation_timer < resource_manager.get_animation(animation_instance.animation_handle).get_duration()) {

@@ -9,6 +9,9 @@ private:
 	float animation_timer;
 	bool is_crouching;
 	glm::vec3 previous_velocity;
+	float default_fov;
+	bool first_frame = true;
+	float camera_sens_modifier = 1.0f;
 
 	std::string ui_name;
 	UIText *ui_interaction_text;
