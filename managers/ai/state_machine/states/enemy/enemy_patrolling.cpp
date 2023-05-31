@@ -28,6 +28,12 @@ void EnemyPatrolling::update(World *world, uint32_t entity_id, float dt) {
 	auto &enemy_data = world->get_component<EnemyData>(entity_id);
 	auto &dd = world->get_parent_scene()->get_render_scene().debug_draw;
 
+	if (first_frame_after_other_state) {
+		first_frame_after_other_state = false;
+		enemy_path.first_rotation_frame = true;
+		enemy_path.is_rotating = true;
+	}
+
 	if (enemy_path.path.size() == 0 || enemy_path.path.size() == 1) {
 		enemy_path.patrol_cooldown = 100.0f;
 		state_machine->set_state("stationary_patrolling");

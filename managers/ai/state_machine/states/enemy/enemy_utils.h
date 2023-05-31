@@ -110,6 +110,11 @@ namespace enemy_utils {
 
 	inline void update_detection_slider(uint32_t entity_id, Transform &transform, EnemyData &enemy_data) {
 		auto &slider = UIManager::get().get_ui_slider(std::to_string(entity_id) + "_detection", "detection_slider");
+		if (enemy_data.detection_level < 0.001f) {
+			slider.display = false;
+		} else {
+			slider.display = true;
+		}
 		slider.value = enemy_data.detection_level;
 		// lerp from white to red
 		slider.color = glm::lerp(glm::vec4(1.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), slider.value);
