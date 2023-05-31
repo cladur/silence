@@ -277,77 +277,82 @@ void AgentSystem::update(World &world, float dt) {
 			}
 		}
 
-		ui_interaction_text->text = "";
-		//Agent interaction
-		bool interaction_triggered = input_manager.is_action_just_pressed("agent_interact");
-		ray = {};
-		ray.origin = transform.get_global_position() + glm::vec3(0.0f, 1.0f, 0.0f);
-		ray.direction = model_tf.get_global_forward();
-		ray.ignore_list.emplace_back(entity);
-		ray.layer_name = "agent";
-		end = ray.origin + ray.direction;
-		world.get_parent_scene()->get_render_scene().debug_draw.draw_arrow(ray.origin, end, { 1.0f, 0.0f, 0.0f });
-		info = {};
-		if (CollisionSystem::ray_cast_layer(world, ray, info)) {
-			auto &target_transform = world.get_component<Transform>(info.entity);
-			if (info.distance < cvar_agent_interaction_range.get()) {
-				if (world.has_component<Interactable>(info.entity)) {
-					auto &interactable = world.get_component<Interactable>(info.entity);
-					if ((interactable.type == InteractionType::Agent) && interactable.can_interact) {
-						ui_interaction_text->text = "Press E to interact";
-						if (interaction_triggered) {
-							interactable.triggered = true;
 
-							auto animation_handle = resource_manager.get_animation_handle(
-									"agent/agent_ANIM_GLTF/agent_interaction.anim");
-							if (animation_instance.animation_handle.id != animation_handle.id) {
-								animation_instance.ticks_per_second = 1000.f;
-								animation_timer = 0;
-								previous_velocity = { 0.0f, 0.0f, 0.0f };
-								velocity = { 0.0f, 0.0f, 0.0f };
-								animation_manager.change_animation(
-										agent_data.model, "agent/agent_ANIM_GLTF/agent_interaction.anim");
+		ui_interaction_text->text = "";
+		ui_kill_text->text = "";
+
+		if (!is_zooming) {
+			//Agent interaction
+			bool interaction_triggered = input_manager.is_action_just_pressed("agent_interact");
+			ray = {};
+			ray.origin = transform.get_global_position() + glm::vec3(0.0f, 1.0f, 0.0f);
+			ray.direction = model_tf.get_global_forward();
+			ray.ignore_list.emplace_back(entity);
+			ray.layer_name = "agent";
+			end = ray.origin + ray.direction;
+			world.get_parent_scene()->get_render_scene().debug_draw.draw_arrow(ray.origin, end, { 1.0f, 0.0f, 0.0f });
+			info = {};
+			if (CollisionSystem::ray_cast_layer(world, ray, info)) {
+				auto &target_transform = world.get_component<Transform>(info.entity);
+				if (info.distance < cvar_agent_interaction_range.get()) {
+					if (world.has_component<Interactable>(info.entity)) {
+						auto &interactable = world.get_component<Interactable>(info.entity);
+						if ((interactable.type == InteractionType::Agent) && interactable.can_interact) {
+							ui_interaction_text->text = "Press E to interact";
+							if (interaction_triggered) {
+								interactable.triggered = true;
+
+								auto animation_handle = resource_manager.get_animation_handle(
+										"agent/agent_ANIM_GLTF/agent_interaction.anim");
+								if (animation_instance.animation_handle.id != animation_handle.id) {
+									animation_instance.ticks_per_second = 1000.f;
+									animation_timer = 0;
+									previous_velocity = { 0.0f, 0.0f, 0.0f };
+									velocity = { 0.0f, 0.0f, 0.0f };
+									animation_manager.change_animation(
+											agent_data.model, "agent/agent_ANIM_GLTF/agent_interaction.anim");
+								}
 							}
 						}
 					}
 				}
 			}
-		}
 
-		ui_kill_text->text = "";
 
-		//Agent attack
-		//ray.origin = transform.get_global_position() + glm::vec3(0.0f, 1.0f, 0.0f);
-		//ray.ignore_list.emplace_back(entity);
-		ray.direction = model_tf.get_forward();
-		ray.origin = transform.get_global_position() + glm::vec3(0.0f, 1.0f, 0.0f);
-		ray.ignore_list.emplace_back(entity);
 
-		end = ray.origin + ray.direction;
-		world.get_parent_scene()->get_render_scene().debug_draw.draw_arrow(ray.origin, end, { 255, 0, 0 });
-		if (CollisionSystem::ray_cast_layer(world, ray, info)) {
-			if (info.distance < cvar_agent_attack_range.get()) {
-				if (world.has_component<EnemyData>(info.entity)) {
-					auto &enemy = world.get_component<EnemyData>(info.entity);
-					auto &enemy_tf = world.get_component<Transform>(info.entity);
-					bool behind_enemy = glm::dot(enemy_tf.get_forward(), model_tf.get_forward()) >
-							glm::cos(glm::radians(cvar_agent_attack_angle.get()));
-					if (behind_enemy && enemy.state_machine.get_current_state() != "dying") {
-						//TODO: pull out knife or other indicator that agent can attack
-						ui_kill_text->text = "[LMB] Kill";
-						//auto &enemy_tf = world.get_component<Transform>(info.entity);
-						if (input_manager.is_action_just_pressed("mouse_left")) {
-							auto animation_handle =
-									resource_manager.get_animation_handle("agent/agent_ANIM_GLTF/agent_stab.anim");
-							if (animation_instance.animation_handle.id != animation_handle.id) {
-								animation_instance.ticks_per_second = 1000.f;
-								animation_timer = 0;
-								previous_velocity = { 0, 0, 0 };
-								velocity = { 0, 0, 0 };
-								animation_manager.change_animation(
-										agent_data.model, "agent/agent_ANIM_GLTF/agent_stab.anim");
+			//Agent attack
+			//ray.origin = transform.get_global_position() + glm::vec3(0.0f, 1.0f, 0.0f);
+			//ray.ignore_list.emplace_back(entity);
+			ray.direction = model_tf.get_forward();
+			ray.origin = transform.get_global_position() + glm::vec3(0.0f, 1.0f, 0.0f);
+			ray.ignore_list.emplace_back(entity);
+
+			end = ray.origin + ray.direction;
+			world.get_parent_scene()->get_render_scene().debug_draw.draw_arrow(ray.origin, end, { 255, 0, 0 });
+			if (CollisionSystem::ray_cast_layer(world, ray, info)) {
+				if (info.distance < cvar_agent_attack_range.get()) {
+					if (world.has_component<EnemyData>(info.entity)) {
+						auto &enemy = world.get_component<EnemyData>(info.entity);
+						auto &enemy_tf = world.get_component<Transform>(info.entity);
+						bool behind_enemy = glm::dot(enemy_tf.get_forward(), model_tf.get_forward()) >
+								glm::cos(glm::radians(cvar_agent_attack_angle.get()));
+						if (behind_enemy && enemy.state_machine.get_current_state() != "dying") {
+							//TODO: pull out knife or other indicator that agent can attack
+							ui_kill_text->text = "[LMB] Kill";
+							//auto &enemy_tf = world.get_component<Transform>(info.entity);
+							if (input_manager.is_action_just_pressed("mouse_left")) {
+								auto animation_handle =
+										resource_manager.get_animation_handle("agent/agent_ANIM_GLTF/agent_stab.anim");
+								if (animation_instance.animation_handle.id != animation_handle.id) {
+									animation_instance.ticks_per_second = 1000.f;
+									animation_timer = 0;
+									previous_velocity = { 0, 0, 0 };
+									velocity = { 0, 0, 0 };
+									animation_manager.change_animation(
+											agent_data.model, "agent/agent_ANIM_GLTF/agent_stab.anim");
+								}
+								enemy.state_machine.set_state("dying");
 							}
-							enemy.state_machine.set_state("dying");
 						}
 					}
 				}
@@ -357,11 +362,17 @@ void AgentSystem::update(World &world, float dt) {
 
 		// ZOOMING LOGIC
 		if (input_manager.is_action_pressed("control_camera")) {
+			is_zooming = true;
 			camera.fov = glm::mix(camera.fov, 30.0f, dt * 3.0f);
 			camera_sens_modifier = glm::mix(camera_sens_modifier, 0.3f, dt * 3.0f);
 		} else {
 			camera.fov = glm::mix(camera.fov, default_fov, dt * 7.0f);
 			camera_sens_modifier = glm::mix(camera_sens_modifier, 1.0f, dt * 7.0f);
+			if (glm::distance(camera.fov, default_fov) < 0.05f) {
+				camera.fov = default_fov;
+				camera_sens_modifier = 1.0f;
+				is_zooming = false;
+			}
 		}
 
 		if (animation_timer < resource_manager.get_animation(animation_instance.animation_handle).get_duration()) {

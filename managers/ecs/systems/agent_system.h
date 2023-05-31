@@ -12,6 +12,7 @@ private:
 	float default_fov;
 	bool first_frame = true;
 	float camera_sens_modifier = 1.0f;
+	bool is_zooming = false;
 
 	std::string ui_name;
 	UIText *ui_interaction_text;
