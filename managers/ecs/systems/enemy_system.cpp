@@ -15,6 +15,9 @@ void EnemySystem::startup(World &world) {
 
 	world.set_system_component_blacklist<EnemySystem>(blacklist);
 	world.set_system_component_whitelist<EnemySystem>(whitelist);
+
+	auto &rm = ResourceManager::get();
+	rm.load_texture(asset_path("tag.ktx2").c_str());
 }
 
 void EnemySystem::update(World &world, float dt) {
@@ -28,6 +31,7 @@ void EnemySystem::update(World &world, float dt) {
 		if (ed.first_frame) { // i too hate having Start() function for a system / component 🥱🥱🥱🥱
 			auto &ui = UIManager::get();
 			auto &gm = GameplayManager::get();
+			auto &rm = ResourceManager::get();
 			gm.add_enemy_entity(entity);
 			ed.state_machine.startup();
 			ed.patrolling_state.startup(&ed.state_machine, "patrolling");
@@ -55,9 +59,18 @@ void EnemySystem::update(World &world, float dt) {
 			slider.slider_alignment = SliderAlignment::BOTTOM_TO_TOP;
 			slider.color = glm::vec4(1.0f);
 
-			ui.add_ui_slider(std::to_string(entity) + "_detection", "detection_slider");
+			//ui.add_ui_slider(std::to_string(entity) + "_detection", "detection_slider");
 			ui.add_as_root(std::to_string(entity) + "_detection", "detection_slider");
 			ui.activate_ui_scene(std::to_string(entity) + "_detection");
+
+			auto &tag = ui.add_ui_image(std::to_string(entity) + "_detection", "tag");
+			tag.position = glm::vec3(0.0f, 1.6f, 0.0f);
+			tag.size = glm::vec2(0.25f, 0.25f);
+			tag.texture = rm.get_texture_handle("tag.ktx2");
+			tag.color = glm::vec4(1.0f, 1.0f, 1.0f, 0.5f);
+			tag.display = false;
+			ui.add_as_root(std::to_string(entity) + "_detection", "tag");
+
 			ed.first_frame = false;
 		}
 

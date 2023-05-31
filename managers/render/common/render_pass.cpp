@@ -186,7 +186,10 @@ void TransparentPass::draw_worldspace(RenderScene &scene) {
 	// transparency sorting for world-space objects
 	std::sort(world_space_objects.begin(), world_space_objects.end(),
 			[cam_pos](const TransparentObject &a, const TransparentObject &b) {
-				return glm::distance(cam_pos, a.position) > glm::distance(cam_pos, b.position);
+				auto cam_vector = glm::normalize(cam_pos - a.position);
+				auto val_a = glm::distance(cam_pos, a.position + (cam_vector * a.billboard_z_offset));
+				auto val_b = glm::distance(cam_pos, b.position + (cam_vector * b.billboard_z_offset));
+				return val_a > val_b;
 			});
 
 	material.bind_resources(scene);
@@ -231,6 +234,7 @@ void TransparentPass::draw_screenspace(RenderScene &scene) {
 	screen_space_objects.clear();
 	world_space_objects.clear();
 }
+
 void TransparentPass::sort_objects(RenderScene &scene) {
 	ZoneScopedNC("TransparentPass::sort_objects", 0xad074f);
 	for (auto &object : scene.transparent_objects) {

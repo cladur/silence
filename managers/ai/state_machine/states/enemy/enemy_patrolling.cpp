@@ -25,10 +25,19 @@ void EnemyPatrolling::update(World *world, uint32_t entity_id, float dt) {
 	ResourceManager &res = ResourceManager::get();
 	auto &anim = world->get_component<AnimationInstance>(entity_id);
 	auto &enemy_path = world->get_component<EnemyPath>(entity_id);
+
+	auto &path = world->get_component<Children>(enemy_path.path_parent);
+
 	auto &enemy_data = world->get_component<EnemyData>(entity_id);
 	auto &dd = world->get_parent_scene()->get_render_scene().debug_draw;
 
-	if (enemy_path.path.size() == 0 || enemy_path.path.size() == 1) {
+	if (first_frame_after_other_state) {
+		first_frame_after_other_state = false;
+		enemy_path.first_rotation_frame = true;
+		enemy_path.is_rotating = true;
+	}
+
+	if (path.children_count == 0 || path.children_count == 1) {
 		enemy_path.patrol_cooldown = 100.0f;
 		state_machine->set_state("stationary_patrolling");
 	}
@@ -39,26 +48,30 @@ void EnemyPatrolling::update(World *world, uint32_t entity_id, float dt) {
 	}
 
 	glm::vec3 current_position = transform.position;
-	glm::vec3 target_position = enemy_path.path[enemy_path.next_position];
+	glm::vec3 target_position = world->get_component<Transform>(path.children[enemy_path.next_position]).get_global_position();
 
 	// get index of previous node
-	int idx = ((enemy_path.next_position - 1) % (int)enemy_path.path.size() == -1)
-			? enemy_path.path.size() - 1
-			: (enemy_path.next_position - 1) % enemy_path.path.size();
-	enemy_path.prev_position = enemy_path.path[idx];
+	int idx = ((enemy_path.next_position - 1) % (int)path.children_count == -1)
+			? path.children_count - 1
+			: (enemy_path.next_position - 1) % path.children_count;
 
-	// move towards the next node. If already there, change target to next node
+	auto &next_node = world->get_component<PathNode>(path.children[enemy_path.next_position]);
+	auto &prev_node = world->get_component<PathNode>(path.children[idx]);
+
+	enemy_path.prev_position = world->get_component<Transform>(path.children[idx]).get_global_position();
+
+	// move the entity towards the next node
 	if (glm::distance(current_position, target_position) > 0.1f) {
 		transform.add_position(glm::normalize(target_position - current_position) * enemy_path.speed * dt);
 
 		// if the point is a patrol point, switch state
-	} else if (enemy_path.patrol_points[enemy_path.next_position].second) {
-		enemy_path.patrol_cooldown = enemy_path.patrol_points[enemy_path.next_position].first;
+	} else if (next_node.is_patrol_point) {
+		enemy_path.patrol_cooldown = next_node.patrol_time;
 		enemy_data.state_machine.set_state("stationary_patrolling");
 
 		// if the node is not patrol node, just move to the next node
 	} else {
-		enemy_path.next_position = (enemy_path.next_position + 1) % enemy_path.path.size();
+		enemy_path.next_position = (enemy_path.next_position + 1) % path.children_count;
 	}
 
 	// this huge if just means "when near a node on either side" start rotating
@@ -86,6 +99,8 @@ void EnemyPatrolling::update(World *world, uint32_t entity_id, float dt) {
 	enemy_utils::handle_detection(world, transform, transform.get_global_forward(), enemy_data, dt, &dd);
 
 	enemy_utils::update_detection_slider(entity_id, transform, enemy_data);
+
+	//std::cout << enemy_data.detection_level << std::endl;
 
 	if (enemy_data.detection_level > 0.3f) {
 		state_machine->set_state("looking");

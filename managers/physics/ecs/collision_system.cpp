@@ -570,9 +570,17 @@ bool CollisionSystem::ray_cast(World &world, const Ray &ray, HitInfo &result) {
 		if (std::find(ray.ignore_list.begin(), ray.ignore_list.end(), entity) != ray.ignore_list.end()) {
 			continue;
 		}
+
 		if (!world.has_component<ColliderTag>(entity) || !world.has_component<Transform>(entity)) {
 			continue;
 		}
+
+		auto &tag = world.get_component<ColliderTag>(entity);
+
+		if (std::find(ray.ignore_layers.begin(), ray.ignore_layers.end(), tag.layer_name) != ray.ignore_layers.end()) {
+			continue;
+		}
+
 		const Transform &transform = world.get_component<Transform>(entity);
 		const glm::vec3 &position = transform.get_global_position();
 		const glm::vec3 &scale = transform.get_global_scale();
@@ -631,6 +639,11 @@ bool CollisionSystem::ray_cast_layer(World &world, const Ray &ray, HitInfo &resu
 		}
 
 		auto &tag = world.get_component<ColliderTag>(entity);
+
+		if (std::find(ray.ignore_layers.begin(), ray.ignore_layers.end(), tag.layer_name) != ray.ignore_layers.end()) {
+			continue;
+		}
+
 		if (!physics_manager.are_layers_collide(ray.layer_name, tag.layer_name)) {
 			continue;
 		}

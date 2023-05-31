@@ -10,6 +10,8 @@
 #include "components/light_component.h"
 #include "components/platform_component.h"
 #include "components/rigidbody_component.h"
+#include "components/path_node_component.h"
+#include "components/path_parent_component.h"
 #include "physics/physics_manager.h"
 #include "render/ecs/model_instance.h"
 #include <imgui.h>
@@ -65,6 +67,8 @@ void Inspector::show_components() {
 	SHOW_COMPONENT(EnemyData, show_enemy_data);
 	SHOW_COMPONENT(ExplodingBox, show_exploding_box);
 	SHOW_COMPONENT(Billboard, show_billboard);
+	SHOW_COMPONENT(PathNode, show_path_node);
+	SHOW_COMPONENT(PathParent, show_path_parent);
 
 	for (int i = 0; i < remove_component_queue.size(); i++) {
 		auto [entity, component_to_remove] = remove_component_queue.front();
@@ -897,30 +901,8 @@ void Inspector::show_agent_data() {
 void Inspector::show_enemy_path() {
 	auto &enemy_path = world->get_component<EnemyPath>(selected_entity);
 	if (ImGui::CollapsingHeader("Enemy Path", tree_flags)) {
-		if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
-			ImGui::OpenPopup("EnemyPathContextMenu");
-		}
-		if (ImGui::BeginPopup("EnemyPathContextMenu")) {
-			if (ImGui::MenuItem("Add Node")) {
-				if (enemy_path.path.empty()) {
-					// if this is the first node, add it in place of transform
-					auto &transform = world->get_component<Transform>(selected_entity);
-					enemy_path.path.emplace_back(transform.position);
-					enemy_path.patrol_points.emplace_back(0.0f, false);
-				} else {
-					// otherwise, add it in place of the last node
-					enemy_path.path.emplace_back(enemy_path.path.back());
-					enemy_path.patrol_points.emplace_back(0.0f, false);
-				}
-			}
-			if (ImGui::MenuItem("Remove Node")) {
-				if (!enemy_path.path.empty()) {
-					enemy_path.path.pop_back();
-					enemy_path.patrol_points.pop_back();
-				}
-			}
-			ImGui::EndPopup();
-		}
+		remove_component_popup<EnemyPath>();
+
 		float available_width = ImGui::GetContentRegionAvail().x;
 		ImGui::BeginTable("Enemy Path", 2);
 		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
@@ -928,19 +910,48 @@ void Inspector::show_enemy_path() {
 		int i = 0;
 		show_float("Speed", enemy_path.speed);
 		show_float("Rot Speed", enemy_path.rotation_speed);
-		for (auto &node : enemy_path.path) {
-			std::string label = fmt::format("Node {}", i);
-			std::string pos_label = fmt::format("{} Position", i);
-			std::string checkbox_label = fmt::format("{} Patrol Point", i);
-			std::string float_label = fmt::format("{} Patrol Time", i);
-			ImGui::SeparatorText(label.c_str());
-			show_vec3(pos_label.c_str(), node);
-			show_checkbox(checkbox_label.c_str(), enemy_path.patrol_points[i].second);
-			if (enemy_path.patrol_points[i].second) {
-				show_float(float_label.c_str(), enemy_path.patrol_points[i].first);
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Path Parent: %d", enemy_path.path_parent);
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
+				Entity payload_entity = *(Entity *)payload->Data;
+				enemy_path.path_parent = payload_entity;
 			}
-			i++;
+			ImGui::EndDragDropTarget();
 		}
+
+		ImGui::EndTable();
+	}
+}
+
+void Inspector::show_path_node() {
+	auto &path_node = world->get_component<PathNode>(selected_entity);
+	if (ImGui::CollapsingHeader("Path Node", tree_flags)) {
+		remove_component_popup<PathNode>();
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("Path Node", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+
+		show_checkbox("Patrol Point", path_node.is_patrol_point);
+		show_float("Patrol Time", path_node.patrol_time);
+
+		ImGui::EndTable();
+	}
+}
+
+void Inspector::show_path_parent() {
+	auto &path_parent = world->get_component<PathParent>(selected_entity);
+	if (ImGui::CollapsingHeader("Path Parent", tree_flags)) {
+		remove_component_popup<PathParent>();
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("Path Parent", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+
 		ImGui::EndTable();
 	}
 }
@@ -1315,6 +1326,8 @@ void Inspector::show_add_component() {
 			SHOW_ADD_COMPONENT(ExplodingBox);
 			SHOW_ADD_COMPONENT(EnemyData);
 			SHOW_ADD_COMPONENT(Billboard);
+			SHOW_ADD_COMPONENT(PathNode);
+			SHOW_ADD_COMPONENT(PathParent);
 
 			ImGui::EndPopup();
 		}
@@ -1324,3 +1337,4 @@ void Inspector::show_add_component() {
 void Inspector::set_active_entity(Entity entity) {
 	selected_entity = entity;
 }
+

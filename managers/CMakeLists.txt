@@ -1,13 +1,13 @@
 # Dependencies
 find_package(glfw3 CONFIG REQUIRED)
 
-include(FetchContent)
-FetchContent_Declare(
-        fetch_vk_bootstrap
-        GIT_REPOSITORY https://github.com/charles-lunarg/vk-bootstrap
-        GIT_TAG v0.7 #suggest using a tag so the library doesn't update whenever new commits are pushed to a branch
-)
-FetchContent_MakeAvailable(fetch_vk_bootstrap)
+#include(FetchContent)
+#FetchContent_Declare(
+#        fetch_vk_bootstrap
+#        GIT_REPOSITORY https://github.com/charles-lunarg/vk-bootstrap
+#        GIT_TAG v0.7 #suggest using a tag so the library doesn't update whenever new commits are pushed to a branch
+#)
+#FetchContent_MakeAvailable(fetch_vk_bootstrap)
 
 set(MANAGER_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(MANAGER_DIR)

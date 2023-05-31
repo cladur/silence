@@ -45,15 +45,17 @@ void UIManager::deactivate_ui_scene(const std::string &scene_name) {
 UIAnchor &UIManager::add_ui_anchor(const std::string &scene_name, const std::string &anchor_name) {
     // check if an element with given name already exists
     if (scenes[scene_name].anchors.find(anchor_name) != scenes[scene_name].anchors.end()) {
+		SPDLOG_WARN("Anchor with name {} already exists in scene {}", anchor_name, scene_name);
         return scenes[scene_name].anchors[anchor_name];
     }
     scenes[scene_name].anchors[anchor_name] = UIAnchor();
     return scenes[scene_name].anchors[anchor_name];
 }
 
-UIImage &UIManager::add_ui_image(const std::string &scene_name, const std::string &image_name) {\
+UIImage &UIManager::add_ui_image(const std::string &scene_name, const std::string &image_name) {
     // check if an element with given name already exists
     if (scenes[scene_name].images.find(image_name) != scenes[scene_name].images.end()) {
+		SPDLOG_WARN("Image with name {} already exists in scene {}", image_name, scene_name);
         return scenes[scene_name].images[image_name];
     }
     scenes[scene_name].images[image_name] = UIImage();
@@ -63,6 +65,7 @@ UIImage &UIManager::add_ui_image(const std::string &scene_name, const std::strin
 UIButton &UIManager::add_ui_button(const std::string &scene_name, const std::string &button_name, const std::string &hover_event_name, const std::string &click_event_name) {
     // check if an element with given name already exists
     if (scenes[scene_name].buttons.find(button_name) != scenes[scene_name].buttons.end()) {
+		SPDLOG_WARN("Button with name {} already exists in scene {}", button_name, scene_name);
         return scenes[scene_name].buttons[button_name];
     }
     scenes[scene_name].buttons[button_name] = UIButton(
@@ -80,6 +83,7 @@ UIButton &UIManager::add_ui_button(const std::string &scene_name, const std::str
 UIText &UIManager::add_ui_text(const std::string &scene_name, const std::string &text_name) {
     // check if an element with given name already exists
     if (scenes[scene_name].texts.find(text_name) != scenes[scene_name].texts.end()) {
+		SPDLOG_WARN("Text with name {} already exists in scene {}", text_name, scene_name);
         return scenes[scene_name].texts[text_name];
     }
     scenes[scene_name].texts[text_name] = UIText();
@@ -89,6 +93,7 @@ UIText &UIManager::add_ui_text(const std::string &scene_name, const std::string 
 UISlider &UIManager::add_ui_slider(const std::string &scene_name, const std::string &lider_name) {
     // check if an element with given name already exists
     if (scenes[scene_name].sliders.find(lider_name) != scenes[scene_name].sliders.end()) {
+		SPDLOG_WARN("Slider with name {} already exists in scene {}", lider_name, scene_name);
         return scenes[scene_name].sliders[lider_name];
     }
     scenes[scene_name].sliders[lider_name] = UISlider();

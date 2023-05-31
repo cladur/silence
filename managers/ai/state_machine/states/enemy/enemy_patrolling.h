@@ -5,6 +5,7 @@
 
 class EnemyPatrolling : public State {
 public:
+	bool first_frame_after_other_state = false;
 	EnemyPatrolling() = default;
 	void startup(StateMachine *machine, std::string name);
 	void enter();
