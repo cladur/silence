@@ -38,18 +38,18 @@ void EnemyStationaryPatrolling::update(World *world, uint32_t entity_id, float d
 	enemy_utils::update_detection_slider(entity_id, transform, enemy_data);
 
 	// decrease the cooldown
-	enemy_path.patrol_cooldown -= dt;
-	if (enemy_path.patrol_cooldown <= 0.0f) {
-		enemy_path.patrol_cooldown = glm::max(0.0f, enemy_path.patrol_cooldown);
-		enemy_path.is_patrolling = false;
-		enemy_path.next_position = (enemy_path.next_position + 1) % enemy_path.path.size();
-		state_machine->set_state("patrolling");
-	}
-
-	if (enemy_data.detection_level > 0.3f) {
-		enemy_path.next_position = (enemy_path.next_position + 1) % enemy_path.path.size();
-		state_machine->set_state("looking");
-	}
+//	enemy_path.patrol_cooldown -= dt;
+//	if (enemy_path.patrol_cooldown <= 0.0f) {
+//		enemy_path.patrol_cooldown = glm::max(0.0f, enemy_path.patrol_cooldown);
+//		enemy_path.is_patrolling = false;
+//		enemy_path.next_position = (enemy_path.next_position + 1) % enemy_path.path.size();
+//		state_machine->set_state("patrolling");
+//	}
+//
+//	if (enemy_data.detection_level > 0.3f) {
+//		enemy_path.next_position = (enemy_path.next_position + 1) % enemy_path.path.size();
+//		state_machine->set_state("looking");
+//	}
 
 }
 

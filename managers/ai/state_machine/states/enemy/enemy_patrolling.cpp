@@ -34,60 +34,60 @@ void EnemyPatrolling::update(World *world, uint32_t entity_id, float dt) {
 		enemy_path.is_rotating = true;
 	}
 
-	if (enemy_path.path.size() == 0 || enemy_path.path.size() == 1) {
-		enemy_path.patrol_cooldown = 100.0f;
-		state_machine->set_state("stationary_patrolling");
-	}
-
-	// change animation
-	if (anim.animation_handle.id != res.get_animation_handle("enemy/enemy_ANIM_GLTF/enemy_walk_with_gun.anim").id) {
-		animation_manager.change_animation(entity_id, "enemy/enemy_ANIM_GLTF/enemy_walk_with_gun.anim");
-	}
-
-	glm::vec3 current_position = transform.position;
-	glm::vec3 target_position = enemy_path.path[enemy_path.next_position];
-
-	// get index of previous node
-	int idx = ((enemy_path.next_position - 1) % (int)enemy_path.path.size() == -1)
-			? enemy_path.path.size() - 1
-			: (enemy_path.next_position - 1) % enemy_path.path.size();
-	enemy_path.prev_position = enemy_path.path[idx];
-
-	// move towards the next node. If already there, change target to next node
-	if (glm::distance(current_position, target_position) > 0.1f) {
-		transform.add_position(glm::normalize(target_position - current_position) * enemy_path.speed * dt);
-
-		// if the point is a patrol point, switch state
-	} else if (enemy_path.patrol_points[enemy_path.next_position].second) {
-		enemy_path.patrol_cooldown = enemy_path.patrol_points[enemy_path.next_position].first;
-		enemy_data.state_machine.set_state("stationary_patrolling");
-
-		// if the node is not patrol node, just move to the next node
-	} else {
-		enemy_path.next_position = (enemy_path.next_position + 1) % enemy_path.path.size();
-	}
-
-	// this huge if just means "when near a node on either side" start rotating
-	if (glm::distance(current_position, target_position) <
-					(glm::distance(enemy_path.prev_position, target_position)) * 0.1f ||
-			glm::distance(current_position, enemy_path.prev_position) <
-					(glm::distance(enemy_path.prev_position, target_position)) * 0.1f) {
-		if (!enemy_path.is_rotating) {
-			enemy_path.first_rotation_frame = true;
-		}
-		enemy_path.is_rotating = true;
-	}
-
-	// smoothly rotate the entity to face the next node
-	if (enemy_path.is_rotating) {
-		enemy_utils::look_at(enemy_path, transform, target_position, dt);
-	}
-
-	// if the entity is facing the next node, stop rotating
-	if (glm::dot(glm::normalize(target_position - transform.position), glm::normalize(transform.get_global_forward())) >
-			0.99f) {
-		enemy_path.is_rotating = false;
-	}
+//	if (enemy_path.path.size() == 0 || enemy_path.path.size() == 1) {
+//		enemy_path.patrol_cooldown = 100.0f;
+//		state_machine->set_state("stationary_patrolling");
+//	}
+//
+//	// change animation
+//	if (anim.animation_handle.id != res.get_animation_handle("enemy/enemy_ANIM_GLTF/enemy_walk_with_gun.anim").id) {
+//		animation_manager.change_animation(entity_id, "enemy/enemy_ANIM_GLTF/enemy_walk_with_gun.anim");
+//	}
+//
+//	glm::vec3 current_position = transform.position;
+//	glm::vec3 target_position = enemy_path.path[enemy_path.next_position];
+//
+//	// get index of previous node
+//	int idx = ((enemy_path.next_position - 1) % (int)enemy_path.path.size() == -1)
+//			? enemy_path.path.size() - 1
+//			: (enemy_path.next_position - 1) % enemy_path.path.size();
+//	enemy_path.prev_position = enemy_path.path[idx];
+//
+//	// move towards the next node. If already there, change target to next node
+//	if (glm::distance(current_position, target_position) > 0.1f) {
+//		transform.add_position(glm::normalize(target_position - current_position) * enemy_path.speed * dt);
+//
+//		// if the point is a patrol point, switch state
+//	} else if (enemy_path.patrol_points[enemy_path.next_position].second) {
+//		enemy_path.patrol_cooldown = enemy_path.patrol_points[enemy_path.next_position].first;
+//		enemy_data.state_machine.set_state("stationary_patrolling");
+//
+//		// if the node is not patrol node, just move to the next node
+//	} else {
+//		enemy_path.next_position = (enemy_path.next_position + 1) % enemy_path.path.size();
+//	}
+//
+//	// this huge if just means "when near a node on either side" start rotating
+//	if (glm::distance(current_position, target_position) <
+//					(glm::distance(enemy_path.prev_position, target_position)) * 0.1f ||
+//			glm::distance(current_position, enemy_path.prev_position) <
+//					(glm::distance(enemy_path.prev_position, target_position)) * 0.1f) {
+//		if (!enemy_path.is_rotating) {
+//			enemy_path.first_rotation_frame = true;
+//		}
+//		enemy_path.is_rotating = true;
+//	}
+//
+//	// smoothly rotate the entity to face the next node
+//	if (enemy_path.is_rotating) {
+//		enemy_utils::look_at(enemy_path, transform, target_position, dt);
+//	}
+//
+//	// if the entity is facing the next node, stop rotating
+//	if (glm::dot(glm::normalize(target_position - transform.position), glm::normalize(transform.get_global_forward())) >
+//			0.99f) {
+//		enemy_path.is_rotating = false;
+//	}
 
 	enemy_utils::handle_detection(world, transform, transform.get_global_forward(), enemy_data, dt, &dd);
 

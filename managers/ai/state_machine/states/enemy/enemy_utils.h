@@ -125,14 +125,14 @@ namespace enemy_utils {
 		uint32_t closest_node = 0;
 		float closest_distance = 1000000.0f;
 		int i = 0;
-		for (auto &node : path.path) {
-			auto distance = glm::distance(position, node);
-			if (distance < closest_distance) {
-				closest_distance = distance;
-				closest_node = i;
-			}
-			i++;
-		}
+//		for (auto &node : path.path) {
+//			auto distance = glm::distance(position, node);
+//			if (distance < closest_distance) {
+//				closest_distance = distance;
+//				closest_node = i;
+//			}
+//			i++;
+//		}
 		return closest_node;
 	}
 }

@@ -68,6 +68,8 @@ Scene::Scene() {
 		world.register_component<ExplodingBox>();
 		world.register_component<EnemyData>();
 		world.register_component<Billboard>();
+		world.register_component<PathNode>();
+		world.register_component<PathParent>();
 	}
 	// Components
 
