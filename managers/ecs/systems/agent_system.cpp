@@ -376,7 +376,6 @@ void AgentSystem::update(World &world, float dt) {
 			//dd.draw_arrow(tag_ray.origin, end, { 1.0f, 0.0f, 0.0f });
 			if (CollisionSystem::ray_cast(world, tag_ray, info)) {
 				auto &name = world.get_component<Name>(info.entity);
-				std::cout << "hit :" << name.name << std::endl;
 				if (world.has_component<Taggable>(info.entity)) {
 					auto &taggable = world.get_component<Taggable>(info.entity);
 
