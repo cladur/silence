@@ -379,11 +379,7 @@ void AgentSystem::update(World &world, float dt) {
 				if (world.has_component<Taggable>(info.entity)) {
 					auto &taggable = world.get_component<Taggable>(info.entity);
 
-					if (tag_trigger) {
-						taggable.tagged = !taggable.tagged;
-					} else {
-						taggable.highlight = true;
-					}
+					taggable.tagging = true;
 				}
 			}
 

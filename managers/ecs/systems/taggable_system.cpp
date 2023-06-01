@@ -1,5 +1,6 @@
 #include "taggable_system.h"
 #include <render/transparent_elements/ui_manager.h>
+
 void TaggableSystem::startup(World &world) {
 	Signature blacklist;
 	Signature whitelist;
@@ -14,6 +15,11 @@ void TaggableSystem::startup(World &world) {
 	auto &rm = ResourceManager::get();
 
 	tag_texture = rm.load_texture(asset_path("tag_mono.ktx2").c_str());
+
+	non_tagged_color = glm::vec4(0.2f);
+	enemy_color = glm::vec4(1.0f, 0.0f, 0.0f, 0.9f);
+	interactive_color = glm::vec4(0.1f, 1.0f, 0.1f, 0.9f);
+	default_color = glm::vec4(0.4f, 0.6f, 1.0f, 0.9f);
 
 	auto &ui = UIManager::get();
 	ui.create_ui_scene(ui_name);
@@ -48,20 +54,30 @@ void TaggableSystem::update(World &world, float dt) {
 		auto &sprite = ui.get_ui_image(ui_name, tag_prefix + std::to_string(entity));
 
 		sprite.position = transform.get_global_position() + tag.tag_position;
-		if (tag.tagged) {
-			// different types of tags, for now colors, later maybe different sprites
-			if (world.has_component<Interactable>(entity)) {
-				color = glm::vec4(0.1f, 1.0f, 0.1f, 0.9f);
-			} else if (world.has_component<EnemyData>(entity)) {
-				color = glm::vec4(1.0f, 0.0f, 0.0f, 0.9f);
+		if (!tag.tagged) {
+			float x = tag.tag_timer / tag.time_to_tag;
+			if (tag.tagging) {
+				tag.tag_timer += dt;
+				if (tag.tag_timer >= tag.time_to_tag) {
+					tag.tagged = true;
+				}
 			} else {
-				color = glm::vec4(0.4f, 0.6f, 1.0f, 0.9f);
+				tag.tag_timer -= dt;
+				tag.tag_timer = glm::max(tag.tag_timer, 0.0f);
 			}
 
-		} else if (tag.highlight){
-			tag.highlight = false;
-			color = glm::vec4(0.2f, 0.2f, 0.9f, 0.4f);
+			if (world.has_component<Interactable>(entity)) {
+				color = glm::mix(non_tagged_color, interactive_color, x);
+			} else if (world.has_component<EnemyData>(entity)) {
+				color = glm::mix(non_tagged_color, enemy_color, x);
+			} else {
+				color = glm::mix(non_tagged_color, default_color, x);
+			}
+
+			sprite.color = color;
+			tag.tagging = false;
 		}
-		sprite.color = color;
+
+
 	}
 }
