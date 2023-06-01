@@ -23,6 +23,11 @@ private:
 	bool is_on_camera = false;
 	Entity current_camera_entity = 0;
 
+	float default_fov;
+	bool first_frame = true;
+	float camera_sens_modifier = 1.0f;
+	bool is_zooming = false;
+
 	Transform old_camera_pivot_tf;
 
 public:
