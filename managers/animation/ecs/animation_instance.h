@@ -5,7 +5,7 @@
 #include "render/common/animation.h"
 #include "render/common/material.h"
 
-class AnimationInstance {
+struct AnimationInstance {
 public:
 	Handle<Animation> animation_handle;
 	float current_time = 0.0f;

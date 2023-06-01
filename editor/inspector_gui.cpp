@@ -8,10 +8,10 @@
 #include "components/fmod_listener_component.h"
 #include "components/interactable_component.h"
 #include "components/light_component.h"
-#include "components/platform_component.h"
-#include "components/rigidbody_component.h"
 #include "components/path_node_component.h"
 #include "components/path_parent_component.h"
+#include "components/platform_component.h"
+#include "components/rigidbody_component.h"
 #include "physics/physics_manager.h"
 #include "render/ecs/model_instance.h"
 #include <imgui.h>
@@ -128,6 +128,7 @@ void Inspector::show_transform() {
 		ImGui::EndTable();
 	}
 }
+
 void Inspector::show_rigidbody() {
 	auto &rigidbody = world->get_component<RigidBody>(selected_entity);
 	if (ImGui::CollapsingHeader("RigidBody", tree_flags)) {
@@ -167,6 +168,7 @@ void Inspector::show_parent() {
 		ImGui::EndTable();
 	}
 }
+
 void Inspector::show_children() {
 	auto &children = world->get_component<Children>(selected_entity);
 	if (ImGui::CollapsingHeader("Children", tree_flags)) {
@@ -199,7 +201,7 @@ void Inspector::show_children() {
 
 void Inspector::show_skinnedmodelinstance() {
 	auto &modelinstance = world->get_component<SkinnedModelInstance>(selected_entity);
-	auto models = resource_manager.get_skinned_models();
+	auto &models = resource_manager.get_skinned_models();
 	if (ImGui::CollapsingHeader("Skinned Model Instance", tree_flags)) {
 		remove_component_popup<SkinnedModelInstance>();
 		std::string name = resource_manager.get_skinned_model(modelinstance.model_handle).name;
@@ -215,7 +217,7 @@ void Inspector::show_skinnedmodelinstance() {
 
 		float available_width = ImGui::GetContentRegionAvail().x;
 		ImGui::BeginTable("Skinned Model Instance", 2);
-		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+		ImGui::TableSetupColumn("##Skinned Model Instance", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
 		ImGui::TableNextRow();
 		ImGui::TableSetColumnIndex(0);
 		ImGui::Text("Model");
@@ -293,7 +295,7 @@ void Inspector::show_skinnedmodelinstance() {
 
 void Inspector::show_modelinstance() {
 	auto &modelinstance = world->get_component<ModelInstance>(selected_entity);
-	auto models = resource_manager.get_models();
+	auto &models = resource_manager.get_models();
 	if (ImGui::CollapsingHeader("Model Instance", tree_flags)) {
 		remove_component_popup<ModelInstance>();
 		std::string name = resource_manager.get_model(modelinstance.model_handle).name;
@@ -392,7 +394,6 @@ void Inspector::show_modelinstance() {
 
 void Inspector::show_animationinstance() {
 	auto &animation_instance = world->get_component<AnimationInstance>(selected_entity);
-	auto &models = resource_manager.get_skinned_models();
 	auto &animations = resource_manager.get_animations();
 	if (ImGui::CollapsingHeader("Animation Instance", tree_flags)) {
 		remove_component_popup<AnimationInstance>();
@@ -410,7 +411,7 @@ void Inspector::show_animationinstance() {
 
 		float available_width = ImGui::GetContentRegionAvail().x;
 		ImGui::BeginTable("Animation Instance", 2);
-		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+		ImGui::TableSetupColumn("##Animation Instance", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
 		ImGui::TableNextRow();
 		ImGui::TableSetColumnIndex(0);
 		ImGui::Text("Animation");
@@ -1337,4 +1338,3 @@ void Inspector::show_add_component() {
 void Inspector::set_active_entity(Entity entity) {
 	selected_entity = entity;
 }
-
