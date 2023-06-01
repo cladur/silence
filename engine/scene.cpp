@@ -23,6 +23,7 @@
 #include "ecs/systems/hacker_system.h"
 #include "ecs/systems/isolated_entities_system.h"
 #include "ecs/systems/root_parent_system.h"
+#include "ecs/systems/taggable_system.h"
 #include "gameplay/gameplay_manager.h"
 #include "managers/physics/ecs/collision_system.h"
 #include "managers/physics/ecs/physics_system.h"
@@ -116,6 +117,7 @@ void Scene::register_game_systems() {
 	world.register_system<AgentSystem>(EcsOnUpdate);
 	world.register_system<HackerSystem>(EcsOnUpdate);
 	world.register_system<EnemySystem>(EcsOnUpdate);
+	world.register_system<TaggableSystem>();
 	//world.register_system<EnemyPathing>(EcsOnUpdate);
 	world.register_system<InteractableSystem>(EcsOnUpdate);
 	world.register_system<PlatformSystem>(EcsOnUpdate);

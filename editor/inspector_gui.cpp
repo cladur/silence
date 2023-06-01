@@ -69,6 +69,7 @@ void Inspector::show_components() {
 	SHOW_COMPONENT(Billboard, show_billboard);
 	SHOW_COMPONENT(PathNode, show_path_node);
 	SHOW_COMPONENT(PathParent, show_path_parent);
+	SHOW_COMPONENT(Taggable, show_taggable);
 
 	for (int i = 0; i < remove_component_queue.size(); i++) {
 		auto [entity, component_to_remove] = remove_component_queue.front();
@@ -1155,6 +1156,28 @@ void Inspector::show_billboard() {
 	}
 }
 
+
+void Inspector::show_taggable() {
+	auto &taggable = world->get_component<Taggable>(selected_entity);
+
+	if (ImGui::CollapsingHeader("Taggable", tree_flags)) {
+		if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+			ImGui::OpenPopup("TaggableContextMenu");
+		}
+		if (ImGui::BeginPopup("TaggableContextMenu")) {
+			remove_component_menu_item<Taggable>();
+			ImGui::EndPopup();
+		}
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("Position", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+
+		show_vec3("Position", taggable.tag_position);
+
+		ImGui::EndTable();
+	}
+}
+
 bool Inspector::show_vec2(
 		const char *label, glm::vec2 &vec2, float speed, float reset_value, float min_value, float max_value) {
 	bool changed = false;
@@ -1328,6 +1351,7 @@ void Inspector::show_add_component() {
 			SHOW_ADD_COMPONENT(Billboard);
 			SHOW_ADD_COMPONENT(PathNode);
 			SHOW_ADD_COMPONENT(PathParent);
+			SHOW_ADD_COMPONENT(Taggable);
 
 			ImGui::EndPopup();
 		}

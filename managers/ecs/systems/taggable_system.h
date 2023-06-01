@@ -7,6 +7,7 @@ class TaggableSystem : public BaseSystem {
 private:
 	std::string ui_name;
 	std::string tag_prefix;
+	Handle<Texture> tag_texture;
 public:
 	void startup(World &world) override;
 	void update(World &world, float dt) override;

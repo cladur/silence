@@ -7,10 +7,10 @@ struct Taggable {
 	glm::vec3 tag_position;
 	bool tagged = false;
 	bool fist_frame = true;
+	bool highlight = false;
 
 	void serialize_json(nlohmann::json &serialized_scene) {
 		nlohmann::json::object_t serialized_component;
-		serialized_component["tagged"] = tagged;
 		serialized_component["tag_position"] = nlohmann::json::object();
 		serialized_component["tag_position"]["x"] = tag_position.x;
 		serialized_component["tag_position"]["y"] = tag_position.y;
@@ -21,7 +21,6 @@ struct Taggable {
 	}
 
 	void deserialize_json(nlohmann::json &serialized_component) {
-		tagged = serialized_component["tagged"];
 		tag_position.x = serialized_component["tag_position"]["x"];
 		tag_position.y = serialized_component["tag_position"]["y"];
 		tag_position.z = serialized_component["tag_position"]["z"];

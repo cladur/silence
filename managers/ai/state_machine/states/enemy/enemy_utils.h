@@ -70,7 +70,6 @@ namespace enemy_utils {
 						dd->draw_line(ray.origin, ray_end, glm::vec3(0.0f, 1.0f, 1.0f));
 					}
 					auto &tag = world->get_component<ColliderTag>(hit_info.entity);
-					std::cout << "hit layer: " << tag.layer_name << std::endl;
 					if (hit_info.entity == GameplayManager::get().get_agent_entity()) {
 						can_see_player = true;
 					}
