@@ -13,6 +13,7 @@
 
 #include "input/input_manager.h"
 #include "resource/resource_manager.h"
+#include <audio/audio_manager.h>
 #include <gameplay/gameplay_manager.h>
 #include <render/transparent_elements/ui_manager.h>
 #include <spdlog/spdlog.h>
@@ -420,6 +421,14 @@ void AgentSystem::update(World &world, float dt) {
 		if (animation_timer < resource_manager.get_animation(animation_instance.animation_handle).get_duration()) {
 			animation_timer += (dt * 1000);
 		}
+
+		AudioManager::get().set_3d_listener_attributes(
+				SILENCE_FMOD_LISTENER_AGENT,
+				camera_tf.get_global_position(),
+				glm::vec3(0.0f),
+				camera_tf.get_global_forward(),
+				camera_tf.get_global_up()
+				);
 
 		last_position = transform.position;
 		previous_velocity = velocity;

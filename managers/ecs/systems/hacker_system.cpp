@@ -11,6 +11,7 @@
 
 #include "input/input_manager.h"
 #include "resource/resource_manager.h"
+#include <audio/audio_manager.h>
 #include <render/transparent_elements/ui_manager.h>
 #include <spdlog/spdlog.h>
 #include <glm/fwd.hpp>
@@ -351,6 +352,14 @@ void HackerSystem::update(World &world, float dt) {
 				transform.set_changed(true);
 			}
 		}
+
+//		AudioManager::get().set_3d_listener_attributes(
+//				SILENCE_FMOD_LISTENER_HACKER,
+//				transform.get_global_position(),
+//				velocity,
+//				transform.get_global_forward(),
+//				transform.get_global_up()
+//		);
 
 		last_position = transform.position;
 		previous_velocity = velocity;
