@@ -15,40 +15,32 @@
 	"nodes":[
 		{
 			"mesh":0,
-			"name":"Plane.003",
-			"rotation":[
-				0,
-				0.7071068286895752,
-				0.7071068286895752,
-				1.067701660417697e-07
-			],
-			"translation":[
-				-2.9011802673339844,
-				0.9687948226928711,
-				4.704666614532471
-			]
+			"name":"door"
 		}
 	],
 	"materials":[
 		{
 			"doubleSided":true,
-			"name":"farba",
+			"name":"door",
 			"normalTexture":{
 				"index":0
 			},
+			"occlusionTexture":{
+				"index":1
+			},
 			"pbrMetallicRoughness":{
 				"baseColorTexture":{
-					"index":1
+					"index":2
 				},
 				"metallicRoughnessTexture":{
-					"index":2
+					"index":1
 				}
 			}
 		}
 	],
 	"meshes":[
 		{
-			"name":"Plane.003",
+			"name":"Cube.016",
 			"primitives":[
 				{
 					"attributes":{
@@ -79,79 +71,79 @@
 	"images":[
 		{
 			"mimeType":"image/png",
-			"name":"paint_Normal",
-			"uri":"tex/paint_Normal.png"
+			"name":"door_Normal",
+			"uri":"tex/door_Normal.png"
 		},
 		{
 			"mimeType":"image/png",
-			"name":"paint_Base_color",
-			"uri":"tex/paint_Base_color.png"
+			"name":"door_Mixed_AO-door_Roughness-door_Metallic",
+			"uri":"tex/door_Mixed_AO-door_Roughness-door_Metallic.png"
 		},
 		{
 			"mimeType":"image/png",
-			"name":"paint_Metallic-paint_Roughness",
-			"uri":"tex/paint_Metallic-paint_Roughness.png"
+			"name":"door_Base_color",
+			"uri":"tex/door_Base_color.png"
 		}
 	],
 	"accessors":[
 		{
 			"bufferView":0,
 			"componentType":5126,
-			"count":4,
+			"count":2946,
 			"max":[
-				1,
-				0,
-				1
+				0.18422375619411469,
+				1.9399181604385376,
+				1.1134532690048218
 			],
 			"min":[
-				-1,
-				0,
-				-1
+				-0.18422375619411469,
+				-0.0009624757803976536,
+				0.004048556089401245
 			],
 			"type":"VEC3"
 		},
 		{
 			"bufferView":1,
 			"componentType":5126,
-			"count":4,
+			"count":2946,
 			"type":"VEC2"
 		},
 		{
 			"bufferView":2,
 			"componentType":5126,
-			"count":4,
+			"count":2946,
 			"type":"VEC3"
 		},
 		{
 			"bufferView":3,
 			"componentType":5123,
-			"count":6,
+			"count":9300,
 			"type":"SCALAR"
 		}
 	],
 	"bufferViews":[
 		{
 			"buffer":0,
-			"byteLength":48,
+			"byteLength":35352,
 			"byteOffset":0,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":32,
-			"byteOffset":48,
+			"byteLength":23568,
+			"byteOffset":35352,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":48,
-			"byteOffset":80,
+			"byteLength":35352,
+			"byteOffset":58920,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":12,
-			"byteOffset":128,
+			"byteLength":18600,
+			"byteOffset":94272,
 			"target":34963
 		}
 	],
@@ -163,8 +155,8 @@
 	],
 	"buffers":[
 		{
-			"byteLength":140,
-			"uri":"paint.bin"
+			"byteLength":112872,
+			"uri":"door.bin"
 		}
 	]
 }

@@ -15,40 +15,32 @@
 	"nodes":[
 		{
 			"mesh":0,
-			"name":"Plane.003",
-			"rotation":[
-				0,
-				0.7071068286895752,
-				0.7071068286895752,
-				1.067701660417697e-07
-			],
-			"translation":[
-				-2.9011802673339844,
-				0.9687948226928711,
-				4.704666614532471
-			]
+			"name":"door_frame"
 		}
 	],
 	"materials":[
 		{
 			"doubleSided":true,
-			"name":"farba",
+			"name":"door_frame",
 			"normalTexture":{
 				"index":0
 			},
+			"occlusionTexture":{
+				"index":1
+			},
 			"pbrMetallicRoughness":{
 				"baseColorTexture":{
-					"index":1
+					"index":2
 				},
 				"metallicRoughnessTexture":{
-					"index":2
+					"index":1
 				}
 			}
 		}
 	],
 	"meshes":[
 		{
-			"name":"Plane.003",
+			"name":"Cube.019",
 			"primitives":[
 				{
 					"attributes":{
@@ -79,79 +71,79 @@
 	"images":[
 		{
 			"mimeType":"image/png",
-			"name":"paint_Normal",
-			"uri":"tex/paint_Normal.png"
+			"name":"door_frame_Normal",
+			"uri":"tex/door_frame_Normal.png"
 		},
 		{
 			"mimeType":"image/png",
-			"name":"paint_Base_color",
-			"uri":"tex/paint_Base_color.png"
+			"name":"door_frame_Mixed_AO-door_frame_Roughness-door_frame_Metallic",
+			"uri":"tex/door_frame_Mixed_AO-door_frame_Roughness-door_frame_Metallic.png"
 		},
 		{
 			"mimeType":"image/png",
-			"name":"paint_Metallic-paint_Roughness",
-			"uri":"tex/paint_Metallic-paint_Roughness.png"
+			"name":"door_frame_Base_color",
+			"uri":"tex/door_frame_Base_color.png"
 		}
 	],
 	"accessors":[
 		{
 			"bufferView":0,
 			"componentType":5126,
-			"count":4,
+			"count":1380,
 			"max":[
-				1,
-				0,
-				1
+				0.21665039658546448,
+				2.1697659492492676,
+				1.1727538108825684
 			],
 			"min":[
-				-1,
-				0,
-				-1
+				-0.21665039658546448,
+				-0.010596772655844688,
+				-1.1727538108825684
 			],
 			"type":"VEC3"
 		},
 		{
 			"bufferView":1,
 			"componentType":5126,
-			"count":4,
+			"count":1380,
 			"type":"VEC2"
 		},
 		{
 			"bufferView":2,
 			"componentType":5126,
-			"count":4,
+			"count":1380,
 			"type":"VEC3"
 		},
 		{
 			"bufferView":3,
 			"componentType":5123,
-			"count":6,
+			"count":4272,
 			"type":"SCALAR"
 		}
 	],
 	"bufferViews":[
 		{
 			"buffer":0,
-			"byteLength":48,
+			"byteLength":16560,
 			"byteOffset":0,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":32,
-			"byteOffset":48,
+			"byteLength":11040,
+			"byteOffset":16560,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":48,
-			"byteOffset":80,
+			"byteLength":16560,
+			"byteOffset":27600,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":12,
-			"byteOffset":128,
+			"byteLength":8544,
+			"byteOffset":44160,
 			"target":34963
 		}
 	],
@@ -163,8 +155,8 @@
 	],
 	"buffers":[
 		{
-			"byteLength":140,
-			"uri":"paint.bin"
+			"byteLength":52704,
+			"uri":"door_frame.bin"
 		}
 	]
 }
