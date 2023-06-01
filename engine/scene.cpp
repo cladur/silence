@@ -14,6 +14,7 @@
 
 #include "animation/ecs/animation_system.h"
 #include "animation/ecs/attachment_system.h"
+#include "components/taggable_component.h"
 #include "ecs/systems/agent_system.h"
 #include "ecs/systems/collider_draw.h"
 #include "ecs/systems/enemy_path_draw_system.h"
@@ -70,6 +71,7 @@ Scene::Scene() {
 		world.register_component<Billboard>();
 		world.register_component<PathNode>();
 		world.register_component<PathParent>();
+		world.register_component<Taggable>();
 	}
 	// Components
 
