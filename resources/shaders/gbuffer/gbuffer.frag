@@ -27,17 +27,17 @@ uniform vec2 uv_scale;
 // technique somewhere later in the normal mapping tutorial.
 vec3 getNormalFromMap(vec2 texutre_coords)
 {
-    
+
     vec3 tangentNormal = texture(normal_map, texutre_coords).xyz * 2.0 - 1.0;
 
-    vec3 Q1  = dFdx(ViewPos);
-    vec3 Q2  = dFdy(ViewPos);
+    vec3 Q1 = dFdx(ViewPos);
+    vec3 Q2 = dFdy(ViewPos);
     vec2 st1 = dFdx(TexCoords);
     vec2 st2 = dFdy(TexCoords);
 
-    vec3 N   = normalize(Normal);
-    vec3 T  = normalize(Q1*st2.t - Q2*st1.t);
-    vec3 B  = -normalize(cross(N, T));
+    vec3 N = normalize(Normal);
+    vec3 T = normalize(Q1 * st2.t - Q2 * st1.t);
+    vec3 B = -normalize(cross(N, T));
     mat3 TBN = mat3(T, B, N);
 
     return normalize(TBN * tangentNormal);
@@ -47,7 +47,12 @@ vec3 getNormalFromMap(vec2 texutre_coords)
 void main()
 {
     vec2 texture_coords = vec2(TexCoords.x * uv_scale.x, TexCoords.y * uv_scale.y);
-    vec3 albedo = pow(texture(albedo_map, texture_coords).rgb, vec3(2.2));
+    vec4 color = texture(albedo_map, texture_coords);
+    vec3 albedo = pow(color.rgb, vec3(2.2));
+    if (color.a < 0.05f)
+    {
+        discard;
+    }
     vec3 ao_metallic_roughness = texture(ao_metallic_roughness_map, texture_coords).rgb;
     float roughness = ao_metallic_roughness.g;
     float metallic = ao_metallic_roughness.b;
