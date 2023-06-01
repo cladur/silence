@@ -61,7 +61,7 @@ bool HackerSystem::shoot_raycast(
 		return false;
 	}
 
-	ui_text->text = "[E] Interaction";
+	ui_text->text = "Press LMB to interact";
 
 	if (trigger) {
 		auto &interactable = world.get_component<Interactable>(hit_entity);

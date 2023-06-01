@@ -1,4 +1,5 @@
 #include "taggable_system.h"
+#include <audio/audio_manager.h>
 #include <render/transparent_elements/ui_manager.h>
 
 void TaggableSystem::startup(World &world) {
@@ -11,6 +12,8 @@ void TaggableSystem::startup(World &world) {
 
 	ui_name = "taggable_ui";
 	tag_prefix = "taggable_entity_";
+
+	on_tagged = EventReference("SFX/tag"); 
 
 	auto &rm = ResourceManager::get();
 
@@ -59,6 +62,7 @@ void TaggableSystem::update(World &world, float dt) {
 			if (tag.tagging) {
 				tag.tag_timer += dt;
 				if (tag.tag_timer >= tag.time_to_tag) {
+					AudioManager::get().play_one_shot_2d(on_tagged);
 					tag.tagged = true;
 				}
 			} else {
