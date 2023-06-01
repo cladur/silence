@@ -20,7 +20,7 @@
 #include <glm/geometric.hpp>
 #include <glm/gtx/string_cast.hpp>
 
-AutoCVarFloat cvar_agent_interaction_range("agent.interaction_range", "range of interaction", 1.5f);
+AutoCVarFloat cvar_agent_interaction_range("agent.interaction_range", "range of interaction", 1.0f);
 
 AutoCVarFloat cvar_agent_attack_range("agent.attack_range", "range of attack", 1.5f);
 
@@ -205,7 +205,8 @@ void AgentSystem::update(World &world, float dt) {
 		if (*CVarSystem::get()->get_int_cvar("game.controlling_agent") &&
 				!*CVarSystem::get()->get_int_cvar("debug_camera.use")) {
 			glm::vec2 mouse_delta = input_manager.get_mouse_delta();
-			camera_pivot_tf.add_euler_rot(glm::vec3(mouse_delta.y, 0.0f, 0.0f) * cvar_camera_sensitivity.get() * dt * camera_sens_modifier);
+			camera_pivot_tf.add_euler_rot(
+					glm::vec3(mouse_delta.y, 0.0f, 0.0f) * cvar_camera_sensitivity.get() * dt * camera_sens_modifier);
 			camera_pivot_tf.add_global_euler_rot(
 					glm::vec3(0.0f, -mouse_delta.x, 0.0f) * cvar_camera_sensitivity.get() * dt * camera_sens_modifier);
 
@@ -277,48 +278,71 @@ void AgentSystem::update(World &world, float dt) {
 			}
 		}
 
-
 		ui_interaction_text->text = "";
 		ui_kill_text->text = "";
 
 		if (!is_zooming) {
 			//Agent interaction
 			bool interaction_triggered = input_manager.is_action_just_pressed("agent_interact");
-			ray = {};
-			ray.origin = transform.get_global_position() + glm::vec3(0.0f, 1.0f, 0.0f);
-			ray.direction = model_tf.get_global_forward();
-			ray.ignore_list.emplace_back(entity);
-			ray.layer_name = "agent";
-			end = ray.origin + ray.direction;
-			world.get_parent_scene()->get_render_scene().debug_draw.draw_arrow(ray.origin, end, { 1.0f, 0.0f, 0.0f });
-			info = {};
-			if (CollisionSystem::ray_cast_layer(world, ray, info)) {
-				auto &target_transform = world.get_component<Transform>(info.entity);
-				if (info.distance < cvar_agent_interaction_range.get()) {
-					if (world.has_component<Interactable>(info.entity)) {
-						auto &interactable = world.get_component<Interactable>(info.entity);
+			ColliderSphere sphere{};
+			sphere.radius = cvar_agent_interaction_range.get();
+			sphere.center = model_tf.get_global_position() + glm::vec3{ 0.0f, 1.0f, 0.0f };
+			auto colliders = PhysicsManager::get().overlap_sphere(world, sphere, "agent");
+			dd.draw_sphere(sphere.center, sphere.radius);
+			if (!colliders.empty()) {
+				Entity closest_interactable;
+				float min_distance = cvar_agent_interaction_range.get() + 1.0f;
+				bool interactable_found = false;
+				for (Entity found_entity : colliders) {
+					if (world.has_component<Interactable>(found_entity)) {
+						auto &interactable = world.get_component<Interactable>(found_entity);
 						if ((interactable.type == InteractionType::Agent) && interactable.can_interact) {
-							ui_interaction_text->text = "Press E to interact";
-							if (interaction_triggered) {
-								interactable.triggered = true;
-
-								auto animation_handle = resource_manager.get_animation_handle(
-										"agent/agent_ANIM_GLTF/agent_interaction.anim");
-								if (animation_instance.animation_handle.id != animation_handle.id) {
-									animation_instance.ticks_per_second = 1000.f;
-									animation_timer = 0;
-									previous_velocity = { 0.0f, 0.0f, 0.0f };
-									velocity = { 0.0f, 0.0f, 0.0f };
-									animation_manager.change_animation(
-											agent_data.model, "agent/agent_ANIM_GLTF/agent_interaction.anim");
+							auto &transform = world.get_component<Transform>(found_entity);
+							if ((glm::distance(sphere.center, transform.get_global_position())) < min_distance) {
+								Ray ray{};
+								ray.layer_name = "default";
+								ray.ignore_list.emplace_back(entity);
+								ray.origin = sphere.center;
+								ray.direction = transform.get_global_position() - sphere.center;
+								HitInfo info;
+								glm::vec3 end = ray.origin + ray.direction;
+								dd.draw_arrow(ray.origin, end, { 1.0f, 0.0f, 0.0f });
+								CollisionSystem::ray_cast_layer(world, ray, info);
+								if (info.entity == found_entity) {
+									interactable_found = true;
+									closest_interactable = found_entity;
+									min_distance = glm::distance(sphere.center, transform.position);
 								}
 							}
 						}
 					}
 				}
+
+				if (interactable_found) {
+					auto &interactable = world.get_component<Interactable>(closest_interactable);
+					ui_interaction_text->text = "Press E to interact";
+					if (interaction_triggered) {
+						interactable.triggered = true;
+						auto animation_handle =
+								resource_manager.get_animation_handle("agent/agent_ANIM_GLTF/agent_interaction.anim");
+						if (animation_instance.animation_handle.id != animation_handle.id) {
+							auto &transform = world.get_component<Transform>(closest_interactable);
+							glm::vec3 direction = model_tf.get_global_position() - transform.get_global_position();
+							direction.y = 0.0f;
+							direction = glm::normalize(direction);
+							//TODO: rotate model towards interactable
+							// model_tf.set_orientation(glm::quat(rotation_matrix));
+
+							animation_instance.ticks_per_second = 1000.f;
+							animation_timer = 0;
+							previous_velocity = { 0.0f, 0.0f, 0.0f };
+							velocity = { 0.0f, 0.0f, 0.0f };
+							animation_manager.change_animation(
+									agent_data.model, "agent/agent_ANIM_GLTF/agent_interaction.anim");
+						}
+					}
+				}
 			}
-
-
 
 			//Agent attack
 			//ray.origin = transform.get_global_position() + glm::vec3(0.0f, 1.0f, 0.0f);
