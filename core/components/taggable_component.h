@@ -6,6 +6,7 @@
 struct Taggable {
 	glm::vec3 tag_position;
 	bool tagged = false;
+	bool fist_frame = true;
 
 	void serialize_json(nlohmann::json &serialized_scene) {
 		nlohmann::json::object_t serialized_component;
