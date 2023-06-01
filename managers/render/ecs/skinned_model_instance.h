@@ -5,7 +5,7 @@
 #include "render/common/material.h"
 #include "render/common/skinned_model.h"
 
-class SkinnedModelInstance {
+struct SkinnedModelInstance {
 public:
 	Handle<SkinnedModel> model_handle;
 	MaterialType material_type = MaterialType::Default;
