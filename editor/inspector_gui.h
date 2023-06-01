@@ -44,6 +44,7 @@ private:
 	void show_path_node();
 	void show_path_parent();
 	void show_taggable();
+	void show_fmod_emitter();
 
 	static bool show_vec2(const char *label, glm::vec2 &vec2, float speed = 0.1f, float reset_value = 0.0f,
 			float min_value = 100.0f, float max_value = 100.0f);

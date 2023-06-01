@@ -18,6 +18,7 @@
 #include <imgui_internal.h>
 #include <imgui_stdlib.h>
 
+#include "audio/audio_manager.h"
 #include "editor.h"
 #include "render/ecs/billboard_component.h"
 
@@ -70,6 +71,7 @@ void Inspector::show_components() {
 	SHOW_COMPONENT(PathNode, show_path_node);
 	SHOW_COMPONENT(PathParent, show_path_parent);
 	SHOW_COMPONENT(Taggable, show_taggable);
+	SHOW_COMPONENT(FMODEmitter, show_fmod_emitter);
 
 	for (int i = 0; i < remove_component_queue.size(); i++) {
 		auto [entity, component_to_remove] = remove_component_queue.front();
@@ -1157,6 +1159,54 @@ void Inspector::show_billboard() {
 	}
 }
 
+void Inspector::show_fmod_emitter() {
+	auto &emitter = world->get_component<FMODEmitter>(selected_entity);
+
+	if (ImGui::CollapsingHeader("Fmod Emitter", tree_flags)) {
+		if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+			ImGui::OpenPopup("FmodEmitterContextMenu");
+		}
+		if (ImGui::BeginPopup("FmodEmitterContextMenu")) {
+			if (ImGui::MenuItem("Reset Fmod Emitter")) {
+				emitter.event_path = "";
+			}
+			remove_component_menu_item<FMODEmitter>();
+
+			ImGui::EndPopup();
+		}
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("Fmod Emitter Component", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Event Name");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		static char event_name[256];
+		ImGui::InputText("##EventName", event_name, 256);
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Event Status: ");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		if (AudioManager::get().is_valid_event_path(event_name)) {
+			emitter.event_path = event_name;
+			ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0,255,0,255));
+			ImGui::Text("Ok");
+		} else {
+			ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255,0,0,255));
+			ImGui::Text("Event Not Found in Banks");
+		}
+		ImGui::PopStyleColor();
+
+		show_checkbox("Is 3D", emitter.is_3d);
+
+		ImGui::EndTable();
+	}
+}
+
 
 void Inspector::show_taggable() {
 	auto &taggable = world->get_component<Taggable>(selected_entity);
@@ -1353,6 +1403,7 @@ void Inspector::show_add_component() {
 			SHOW_ADD_COMPONENT(PathNode);
 			SHOW_ADD_COMPONENT(PathParent);
 			SHOW_ADD_COMPONENT(Taggable);
+			SHOW_ADD_COMPONENT(FMODEmitter);
 
 			ImGui::EndPopup();
 		}

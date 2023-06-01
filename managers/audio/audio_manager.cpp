@@ -1,5 +1,6 @@
 #include "audio_manager.h"
 #include "fmod_errors.h"
+#include <components/transform_component.h>
 
 #define FMOD_CHECK(x)                                                                                                  \
 	do {                                                                                                               \
@@ -19,14 +20,15 @@ void AudioManager::startup() {
 	FMOD_CHECK(FMOD::Studio::System::create(&system));
 	FMOD_CHECK(system->initialize(512, FMOD_STUDIO_INIT_NORMAL, FMOD_INIT_NORMAL, nullptr));
 	load_startup_banks();
+	FMOD_CHECK(system->setNumListeners(1));
+
+	event_paths = get_all_event_paths();
 
 	SPDLOG_INFO("Audio Manager: Initialized audio manager");
 }
 
 void AudioManager::update() {
 	ZoneScopedNC("AudioManager::update", 0xcacaca);
-	FMOD_3D_ATTRIBUTES attributes;
-	system->getListenerAttributes(0, &attributes);
 	FMOD_CHECK(system->update());
 }
 
@@ -78,30 +80,6 @@ void AudioManager::load_sample_data() {
 	}
 }
 
-void AudioManager::test_create_instance() {
-	// create an array of EventDescription pointers
-	//	FMOD::Studio::EventDescription *event_description[10];
-	//	int *count = 0;
-	//	master_bank->getEventCount(count);
-	//	master_bank->getEventList(&event_description[0], 10, count);
-	//
-	//	for (auto &event : event_description) {
-	//		char path[256];
-	//		event->getPath(path, 256, nullptr);
-	//		SPDLOG_INFO("Audio Manager: {}", path);
-	//	}
-	//	FMOD::Studio::EventDescription *event_description[10];
-	//	int *count = 0;
-	//	master_bank->getEventCount(count);
-	//	master_bank->getEventList(&event_description[0], 10, count);
-	//
-	//	for (auto &event : event_description) {
-	//		char path[256];
-	//		event->getPath(path, 256, nullptr);
-	//		SPDLOG_INFO("Audio Manager: {}", path);
-	//	}
-}
-
 void AudioManager::test_play_sound() {
 	FMOD_CHECK(test_event_instance->start());
 }
@@ -140,19 +118,22 @@ void AudioManager::set_3d_listener_attributes(
 	FMOD_CHECK(system->setListenerAttributes(listener_id, &attributes));
 }
 
-void AudioManager::play_one_shot_3d(const EventReference &event_ref, glm::vec3 position, RigidBody *rigid_body) {
+void AudioManager::play_one_shot_3d(const EventReference &event_ref, Transform &transform, RigidBody *rigid_body) {
 	auto event_instance = create_event_instance(event_ref);
-	FMOD_3D_ATTRIBUTES attributes = to_3d_attributes(position, rigid_body);
+	FMOD_3D_ATTRIBUTES attributes = to_3d_attributes(transform, rigid_body);
 	event_instance->set3DAttributes(&attributes);
 	event_instance->start();
 	event_instance->release();
 }
 
-FMOD_3D_ATTRIBUTES AudioManager::to_3d_attributes(glm::vec3 position, RigidBody *rigid_body) {
+FMOD_3D_ATTRIBUTES AudioManager::to_3d_attributes(Transform &transform, RigidBody *rigid_body) {
 	FMOD_3D_ATTRIBUTES attributes;
-	attributes.position = { position.x, position.y, position.z };
-	attributes.forward = { 0, 0, 1 };
-	attributes.up = { 0, 1, 0 };
+	auto p = transform.get_global_position();
+	auto f = transform.get_global_forward();
+	auto u = transform.get_global_up();
+	attributes.position = { p.x, p.y, p.z };
+	attributes.forward = { f.x, f.y, f.z };
+	attributes.up = { u.x, u.y, u.z };
 	if (rigid_body != nullptr) {
 		attributes.velocity = { rigid_body->velocity.x, rigid_body->velocity.y, rigid_body->velocity.z };
 	}
@@ -200,4 +181,44 @@ bool AudioManager::set_global_param_by_name(const std::string &name, float value
 	}
 	FMOD_CHECK(system->setParameterByName(name.c_str(), value));
 	return true;
+}
+
+std::vector<std::string> AudioManager::get_all_event_paths() {
+	// get event paths from all banks
+	std::vector<std::string> event_paths;
+	for (auto &bank : banks) {
+		int count = 0;
+		FMOD_CHECK(bank->getEventCount(&count));
+		if (count == 0) {
+			continue;
+		}
+		std::vector<FMOD::Studio::EventDescription *> event_descriptions(count);
+		FMOD_CHECK(bank->getEventList(&event_descriptions[0], count, &count));
+		for (auto &event_description : event_descriptions) {
+			char path[256];
+			FMOD_CHECK(event_description->getPath(path, 256, nullptr));
+			event_paths.emplace_back(path);
+		}
+	}
+	int count = 0;
+	FMOD_CHECK(master_bank->getEventCount(&count));
+	if (count == 0) {
+		return event_paths;
+	}
+	std::vector<FMOD::Studio::EventDescription *> event_descriptions(count);
+	FMOD_CHECK(master_bank->getEventList(&event_descriptions[0], count, &count));
+	for (auto &event_description : event_descriptions) {
+		char path[256];
+		FMOD_CHECK(event_description->getPath(path, 256, nullptr));
+		event_paths.emplace_back(path);
+	}
+
+	return event_paths;
+}
+
+bool AudioManager::is_valid_event_path(const std::string &path) {
+	std::string full_path = AudioManager::get().event_path_prefix + path;
+	return std::any_of(event_paths.begin(), event_paths.end(), [&full_path](const std::string &event_path) {
+		return event_path == full_path;
+	});
 }
