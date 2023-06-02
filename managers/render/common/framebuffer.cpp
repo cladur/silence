@@ -360,6 +360,10 @@ void ShadowBuffer::bind() {
 }
 
 void ShadowBuffer::generate_shadow_texture(Light &light) {
+	if (light.shadow_map_id == 0) {
+		glDeleteTextures(1, &light.shadow_map_id);
+	}
+
 	glGenTextures(1, &light.shadow_map_id);
 	glBindTexture(GL_TEXTURE_2D, light.shadow_map_id);
 	if (light.type == LightType::DIRECTIONAL_LIGHT) {
@@ -371,7 +375,6 @@ void ShadowBuffer::generate_shadow_texture(Light &light) {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 		glm::vec4 border_color(1.0f);
 		glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, &border_color[0]);
-		// Bind CBO to FBO
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, light.shadow_map_id, 0);
 	} else if (light.type == LightType::POINT_LIGHT) {
 		glBindTexture(GL_TEXTURE_CUBE_MAP, light.shadow_map_id);
@@ -386,6 +389,7 @@ void ShadowBuffer::generate_shadow_texture(Light &light) {
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 		glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, light.shadow_map_id, 0);
 	}
+	light.shadow_type = light.type;
 
 	glDrawBuffer(GL_NONE);
 	glReadBuffer(GL_NONE);

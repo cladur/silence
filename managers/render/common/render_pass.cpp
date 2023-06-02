@@ -346,7 +346,7 @@ void ShadowPass::draw(RenderScene &scene) {
 		}
 
 		Transform &light_transform = *light_cmd.transform;
-		if (light.shadow_map_id == 0) {
+		if (light.shadow_type == LightType::NONE || light.type != light.shadow_type) {
 			scene.shadow_buffer.generate_shadow_texture(light);
 		}
 		scene.shadow_buffer.setup_light_space(light, light_transform);
