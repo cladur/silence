@@ -38,6 +38,7 @@ struct RenderScene {
 	BloomPass bloom_pass;
 	ShadowPass shadow_pass;
 	MousePickPass mouse_pick_pass;
+	ParticlePass particle_pass;
 
 	Framebuffer render_framebuffer;
 	Framebuffer final_framebuffer;
@@ -48,11 +49,14 @@ struct RenderScene {
 	BloomBuffer bloom_buffer;
 	ShadowBuffer shadow_buffer;
 	SkyboxBuffer skybox_buffer;
+	ParticleBuffer particle_buffer;
 
 	// render extent that does not change whether we're in splitscreen or not
 	glm::vec2 full_render_extent;
 
 	glm::vec2 render_extent;
+
+	glm::vec2 camera_near_far;
 
 	// Editor only
 	MousePickFramebuffer mouse_pick_framebuffer;

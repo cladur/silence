@@ -6,6 +6,7 @@
 #include "render/transparent_elements/ui_manager.h"
 #include "render_manager.h"
 #include <glad/glad.h>
+#include <render/transparent_elements/particle_manager.h>
 
 AutoCVarFloat cvar_draw_distance_near("render.draw_distance.near", "Near distance cull", 0.001f);
 AutoCVarFloat cvar_draw_distance_far("render.draw_distance.far", "Far distance cull", 5000);
@@ -35,6 +36,7 @@ void RenderScene::startup() {
 	bloom_pass.startup();
 	shadow_pass.startup();
 	mouse_pick_pass.startup();
+	particle_pass.startup();
 
 	// Size of the viewport doesn't matter here, it will be resized either way
 	render_extent = glm::vec2(100, 100);
@@ -48,6 +50,7 @@ void RenderScene::startup() {
 	combination_buffer.startup(render_extent.x, render_extent.y);
 	skybox_buffer.startup(render_extent.x, render_extent.y);
 	mouse_pick_framebuffer.startup(render_extent.x, render_extent.y);
+	particle_buffer.startup(render_extent.x, render_extent.y);
 
 	debug_draw.startup();
 	transparent_pass.startup();
@@ -161,6 +164,20 @@ void RenderScene::draw_viewport(bool right_side) {
 	skybox_pass.draw(*this);
 	glDepthFunc(GL_LESS);
 
+	particle_buffer.bind();
+	// need to clear alpha channel
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, particle_buffer.framebuffer_id);
+	glBlitFramebuffer(0, 0, render_extent.x, render_extent.y, 0, 0, render_extent.x, render_extent.y,
+			GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	particle_pass.draw(*this);
+
+	glDepthMask(GL_TRUE);
+
 	combination_buffer.bind();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -220,6 +237,8 @@ void RenderScene::draw() {
 		glm::vec2 window_extent = DisplayManager::get().get_framebuffer_size();
 		resize_framebuffer(window_extent.x, window_extent.y);
 	}
+
+	camera_near_far = glm::vec2(cvar_draw_distance_near.get(), cvar_draw_distance_far.get());
 
 	UIManager::get().set_render_scene(this);
 	UIManager::get().draw();
@@ -300,6 +319,7 @@ void RenderScene::resize_framebuffer(uint32_t width, uint32_t height) {
 	combination_buffer.resize(width, height);
 	skybox_buffer.resize(width, height);
 	mouse_pick_framebuffer.resize(width, height);
+	particle_buffer.resize(width, height);
 
 	render_extent = glm::vec2(width, height);
 }

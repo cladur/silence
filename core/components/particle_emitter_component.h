@@ -1,6 +1,8 @@
 #ifndef SILENCE_PARTICLE_EMITTER_COMPONENT_H
 #define SILENCE_PARTICLE_EMITTER_COMPONENT_H
 
+#include "render/common/texture.h"
+#include "resource/resource_manager.h"
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
 #include <nlohmann/json.hpp>
@@ -14,6 +16,7 @@ enum class TransitionType {
 struct ParticleEmitter {
 public:
 	glm::vec3 position = glm::vec3(0.0f);
+	glm::vec3 position_variance = glm::vec3(0.0f);
 	glm::vec3 velocity_begin, velocity_end;
 	TransitionType velocity_transition = TransitionType::LINEAR;
 	glm::vec4 color_begin = glm::vec4(1.0f);
@@ -23,10 +26,15 @@ public:
 	TransitionType size_transition = TransitionType::LINEAR;
 	float rotation_begin, rotation_end;
 	TransitionType rotation_transition = TransitionType::LINEAR;
+	float rate = 5.0f; // particles per second
 	float lifetime = 0.0f;
+	float particle_time = 0.0f;
+	Handle<Texture> texture;
+	bool is_textured = false;
 
 	void serialize_json(nlohmann::json &serialized_scene) {
 		serialized_scene["position"] = {position.x, position.y, position.z};
+		serialized_scene["position_variance"] = {position_variance.x, position_variance.y, position_variance.z};
 		serialized_scene["velocity_begin"] = {velocity_begin.x, velocity_begin.y, velocity_begin.z};
 		serialized_scene["velocity_end"] = {velocity_end.x, velocity_end.y, velocity_end.z};
 		serialized_scene["velocity_transition"] = static_cast<int>(velocity_transition);
@@ -39,11 +47,14 @@ public:
 		serialized_scene["rotation_begin"] = rotation_begin;
 		serialized_scene["rotation_end"] = rotation_end;
 		serialized_scene["rotation_transition"] = static_cast<int>(rotation_transition);
+		serialized_scene["rate"] = rate;
 		serialized_scene["lifetime"] = lifetime;
+		serialized_scene["texture"] = texture.id;
 	}
 
 	void deserialize_json(nlohmann::json &serialized_component) {
 		position = glm::vec3(serialized_component["position"][0], serialized_component["position"][1], serialized_component["position"][2]);
+		position_variance = glm::vec3(serialized_component["position_variance"][0], serialized_component["position_variance"][1], serialized_component["position_variance"][2]);
 		velocity_begin = glm::vec3(serialized_component["velocity_begin"][0], serialized_component["velocity_begin"][1], serialized_component["velocity_begin"][2]);
 		velocity_end = glm::vec3(serialized_component["velocity_end"][0], serialized_component["velocity_end"][1], serialized_component["velocity_end"][2]);
 		velocity_transition = static_cast<TransitionType>(serialized_component["velocity_transition"]);
@@ -56,7 +67,9 @@ public:
 		rotation_begin = serialized_component["rotation_begin"];
 		rotation_end = serialized_component["rotation_end"];
 		rotation_transition = static_cast<TransitionType>(serialized_component["rotation_transition"]);
+		rate = serialized_component["count"];
 		lifetime = serialized_component["lifetime"];
+		texture = Handle<Texture>(serialized_component["texture"]);
 	}
 };
 

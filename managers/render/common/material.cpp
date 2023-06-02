@@ -414,6 +414,7 @@ void MaterialCombination::bind_resources(RenderScene &scene) {
 	shader.set_int("AoRoughMetal", 4);
 	shader.set_int("ViewPos", 5);
 	shader.set_int("Skybox", 6);
+	shader.set_int("Particles", 7);
 
 	shader.set_int("use_ao", cvar_use_ao.get());
 
@@ -435,6 +436,8 @@ void MaterialCombination::bind_resources(RenderScene &scene) {
 	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.position_texture_id);
 	glActiveTexture(GL_TEXTURE6);
 	glBindTexture(GL_TEXTURE_2D, scene.skybox_buffer.texture_id);
+	glActiveTexture(GL_TEXTURE7);
+	glBindTexture(GL_TEXTURE_2D, scene.particle_buffer.texture_id);
 }
 
 void MaterialCombination::bind_instance_resources(ModelInstance &instance, Transform &transform) {
@@ -525,4 +528,28 @@ void MaterialMousePick::bind_instance_resources(ModelInstance &instance, Transfo
 void MaterialMousePick::bind_instance_resources(SkinnedModelInstance &instance, Transform &transform, Entity entity) {
 	skinned_shader.set_uint("entity_id", (uint32_t)entity);
 	skinned_shader.set_mat4("model", transform.get_global_model_matrix());
+}
+
+void MaterialParticle::startup() {
+	shader.load_from_files(shader_path("transparent/particles.vert"), shader_path("transparent/particles.frag"));
+}
+
+void MaterialParticle::bind_resources(RenderScene &scene) {
+	shader.use();
+	static glm::mat4 view;
+
+	view = scene.view;
+
+	shader.set_mat4("view", view);
+	shader.set_mat4("projection", scene.projection);
+
+	auto right = glm::vec3(view[0][0], view[1][0], view[2][0]);
+	auto up = glm::vec3(view[0][1], view[1][1], view[2][1]);
+	auto look = glm::vec3(view[0][2], view[1][2], view[2][2]);
+	shader.set_vec3("camera_pos", scene.camera_pos);
+	shader.set_vec3("camera_look", look);
+	shader.set_vec3("camera_right", right);
+}
+
+void MaterialParticle::bind_instance_resources(ModelInstance &instance, Transform &transform) {
 }

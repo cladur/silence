@@ -1246,6 +1246,7 @@ void Inspector::show_particle_emitter() {
 		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
 
 		show_vec3("Position", ps.position);
+		show_vec3("Position Variation", ps.position_variance);
 		show_vec3("Start Velocity", ps.velocity_begin);
 		show_vec3("End Velocity", ps.velocity_end);
 		ImGui::TableNextRow();
@@ -1336,6 +1337,8 @@ void Inspector::show_particle_emitter() {
 		}
 		ImGui::TableNextRow();
 		ImGui::TableSetColumnIndex(0);
+		show_float("Particles Spawn Rate", ps.rate);
+		ps.rate = glm::max(0.0f, ps.rate);
 		show_float("Lifetime", ps.lifetime);
 		ps.lifetime = glm::max(0.0f, ps.lifetime);
 		ImGui::EndTable();

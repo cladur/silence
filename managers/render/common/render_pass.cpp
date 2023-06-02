@@ -4,6 +4,8 @@
 #include "render/common/utils.h"
 #include "render/render_manager.h"
 #include "resource/resource_manager.h"
+#include <render/transparent_elements/particle_data.h>
+#include <render/transparent_elements/particle_manager.h>
 #include <tracy/tracy.hpp>
 
 AutoCVarFloat cvar_blur_radius("render.blur_radius", "blur radius", 0.001f, CVarFlags::EditFloatDrag);
@@ -12,6 +14,8 @@ AutoCVarFloat cvar_bloom_strength("render.bloom_strength", "bloom strength", 0.0
 
 AutoCVarFloat cvar_gamma("render.gamma", "gamma", 2.2f, CVarFlags::EditFloatDrag);
 AutoCVarFloat cvar_dirt_strength("render.dirt_strength", "dirt strength", 0.075f, CVarFlags::EditFloatDrag);
+
+AutoCVarFloat cvar_smooth("render.particle_smooth", "particle smooth", 0.0003f, CVarFlags::EditFloatDrag);
 
 void PBRPass::startup() {
 	material.startup();
@@ -418,4 +422,156 @@ void MousePickPass::draw(RenderScene &scene) {
 		}
 	}
 #endif
+}
+
+void ParticlePass::startup() {
+	// initialize vao vbo and ebo
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+
+	glGenBuffers(1, &vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+	glGenBuffers(1, &ebo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+
+	// set up vertex attributes
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(ParticleVertex), (void *) offsetof(ParticleVertex, position));
+
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(ParticleVertex), (void *) offsetof(ParticleVertex, color));
+
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(ParticleVertex), (void *) offsetof(ParticleVertex, tex_coords));
+
+	// buffer data for the first time
+	glBufferData(GL_ARRAY_BUFFER, sizeof(ParticleVertex) * 4, nullptr, GL_DYNAMIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * 6, nullptr, GL_DYNAMIC_DRAW);
+
+	// buffer index data as well
+	std::vector<uint32_t> indices;
+	indices.reserve(6);
+	indices.push_back(0);
+	indices.push_back(1);
+	indices.push_back(2);
+	indices.push_back(2);
+	indices.push_back(3);
+	indices.push_back(0);
+
+	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, indices.size() * sizeof(uint32_t), indices.data());
+
+	// initialize SSBO
+	glGenBuffers(1, &ssbo);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
+
+	ParticleSSBODataBlock ssbo_data = {};
+	for (int i = 0; i < MAX_PARTICLES_PER_ENTITY; i++) {
+		ssbo_data.position[i] = glm::vec4(0.0f);
+		ssbo_data.rotation[i] = glm::mat4(1.0f);
+		ssbo_data.colors[i] = glm::vec4(1.0f);
+	}
+
+	glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(ssbo_data), &ssbo_data, GL_DYNAMIC_DRAW);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ssbo);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+	material.startup();
+}
+
+void ParticlePass::draw(RenderScene &scene) {
+	ZoneScopedN("ParticlePass::draw");
+	auto &rm = ResourceManager::get();
+	auto &pm = ParticleManager::get();
+	material.bind_resources(scene);
+
+	auto cam_pos = scene.camera_pos;
+
+	static std::vector<ParticleSSBODataBlock> ssbo_data;
+	ssbo_data.clear();
+	ssbo_data.resize(MAX_PARTICLES_PER_ENTITY);
+
+	// copy the map to a vector of pairs
+	static std::vector<std::pair<Entity, std::array<ParticleData, MAX_PARTICLES_PER_ENTITY>>> particles;
+	particles.clear();
+	particles.reserve(pm.particles.size());
+	for (auto &p : pm.particles) {
+        particles.emplace_back(p);
+    }
+	// now SORT the vector by distance to camera so that the farthest particles are drawn first
+	std::sort(particles.begin(), particles.end(), [&cam_pos](auto &a, auto &b) {
+        return glm::distance2(cam_pos, a.second[0].entity_position) > glm::distance2(cam_pos, b.second[0].entity_position);
+    });
+
+	static int i;
+	static int j;
+
+	i = 0;
+	// draw the particles per entity
+	//std::cout << "rendering [" << particles.size() << "] entities that emit particles" << std::endl;
+	for (auto &p : particles) {
+		auto &entity_id = p.first;
+		auto &particles_array = p.second;
+
+		// SORT particle data by distance to camera
+		std::sort(particles_array.begin(), particles_array.end(), [&cam_pos](auto &a, auto &b) {
+            return glm::distance2(cam_pos, a.position) > glm::distance2(cam_pos, b.position);
+        });
+
+		j = 0;
+		for (auto &particle : particles_array) {
+			if (particle.active) {
+				glm::mat4 rot = glm::mat4(1.0f);
+				rot = glm::rotate(rot, glm::radians(particle.rotation), glm::vec3(0.0f, 0.0f, 1.0f));
+				std::cout << j ;
+				ssbo_data[i].position[j] = glm::vec4(particle.position, particle.size);
+				ssbo_data[i].rotation[j] = rot;
+				ssbo_data[i].colors  [j] = particle.color;
+				std::cout << " end." << std::endl;
+				j++;
+			}
+			if (j >= MAX_PARTICLES_PER_ENTITY) {
+				SPDLOG_WARN("Too many particles for entity {}, consider lowering the rate or lifetime of the particles", entity_id);
+				break;
+			}
+		}
+		//std::cout << "entity {" << i << "} has currently [" << j << "] particles alive" << std::endl;
+
+		// check if there are any particles to draw
+		if (j == 0) {
+			i++;
+			continue;
+		}
+
+		// all particles have the same texture
+		if (particles_array[0].is_textured != 0) {
+			auto tex = rm.get_texture(particles_array[0].tex);
+			material.shader.set_int("particle_tex", 0);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, tex.id);
+		}
+
+		material.shader.set_int("depth", 1);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, scene.g_buffer.depth_texture_id);
+
+		material.shader.set_vec2("screen_size", glm::vec2(scene.render_extent.x, scene.render_extent.y));
+		material.shader.set_float("smooth_size", cvar_smooth.get());
+		material.shader.set_float("far_sub_near", scene.camera_near_far.y - scene.camera_near_far.y);
+		material.shader.set_float("far", scene.camera_near_far.y);
+		material.shader.set_float("near", scene.camera_near_far.x);
+		material.shader.set_int("is_textured", particles_array[0].is_textured);
+
+		glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
+		glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeof(ssbo_data[i]), &ssbo_data[i]); // THIS THROWS EXCEPTION
+
+		glBindVertexArray(vao);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, 4 * sizeof(ParticleVertex), &pm.default_particle_vertices[0]);
+
+		glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr, j);
+
+		i++;
+    }
+	glBindVertexArray(0);
 }

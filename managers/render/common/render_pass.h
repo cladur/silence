@@ -124,4 +124,12 @@ public:
 	void draw(RenderScene &scene) override;
 };
 
+class ParticlePass : public RenderPass {
+	unsigned int vao, vbo, ebo, ssbo;
+public:
+	MaterialParticle material;
+	void startup() override;
+	void draw(RenderScene &scene) override;
+};
+
 #endif // SILENCE_RENDER_PASS_H
