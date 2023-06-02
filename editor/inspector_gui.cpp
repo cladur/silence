@@ -19,6 +19,7 @@
 #include <imgui_stdlib.h>
 
 #include "audio/audio_manager.h"
+#include "components/particle_emitter_component.h"
 #include "editor.h"
 #include "render/ecs/billboard_component.h"
 
@@ -72,6 +73,7 @@ void Inspector::show_components() {
 	SHOW_COMPONENT(PathParent, show_path_parent);
 	SHOW_COMPONENT(Taggable, show_taggable);
 	SHOW_COMPONENT(FMODEmitter, show_fmod_emitter);
+	SHOW_COMPONENT(ParticleEmitter, show_particle_emitter);
 
 	for (int i = 0; i < remove_component_queue.size(); i++) {
 		auto [entity, component_to_remove] = remove_component_queue.front();
@@ -1229,6 +1231,117 @@ void Inspector::show_taggable() {
 	}
 }
 
+void Inspector::show_particle_emitter() {
+	auto &ps = world->get_component<ParticleEmitter>(selected_entity);
+	if (ImGui::CollapsingHeader("Particle Emitter", tree_flags)) {
+		if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+			ImGui::OpenPopup("ParticleEmitterContextMenu");
+		}
+		if (ImGui::BeginPopup("ParticleEmitterContextMenu")) {
+			remove_component_menu_item<Taggable>();
+			ImGui::EndPopup();
+		}
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("Particle System", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+
+		show_vec3("Position", ps.position);
+		show_vec3("Start Velocity", ps.velocity_begin);
+		show_vec3("End Velocity", ps.velocity_end);
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Velocity Transition");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		if (ImGui::BeginCombo("##Velocity Transition", magic_enum::enum_name(ps.velocity_transition).data())) {
+			for (auto transition : magic_enum::enum_values<TransitionType>()) {
+				bool is_selected = (ps.velocity_transition == transition);
+				if (ImGui::Selectable(magic_enum::enum_name(transition).data(), is_selected)) {
+					ps.velocity_transition = transition;
+				}
+				if (is_selected) {
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+			ImGui::EndCombo();
+		}
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Start Color");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::ColorEdit4("##Start Color", &ps.color_begin.x);
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("End Color");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::ColorEdit4("##End Color", &ps.color_end.x);
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Color Transition");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		if (ImGui::BeginCombo("##Color Transition", magic_enum::enum_name(ps.color_transition).data())) {
+			for (auto transition : magic_enum::enum_values<TransitionType>()) {
+				bool is_selected = (ps.color_transition == transition);
+				if (ImGui::Selectable(magic_enum::enum_name(transition).data(), is_selected)) {
+					ps.color_transition = transition;
+				}
+				if (is_selected) {
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+			ImGui::EndCombo();
+		}
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		show_float("Start Scale", ps.size_begin);
+		show_float("End Scale", ps.size_end);
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Scale Transition");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		if (ImGui::BeginCombo("##Scale Transition", magic_enum::enum_name(ps.size_transition).data())) {
+			for (auto transition : magic_enum::enum_values<TransitionType>()) {
+				bool is_selected = (ps.size_transition == transition);
+				if (ImGui::Selectable(magic_enum::enum_name(transition).data(), is_selected)) {
+					ps.size_transition = transition;
+				}
+				if (is_selected) {
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+			ImGui::EndCombo();
+		}
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		show_float("Start Rotation", ps.rotation_begin);
+		show_float("End Rotation", ps.rotation_end);
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Rotation Transition");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		if (ImGui::BeginCombo("##Rotation Transition", magic_enum::enum_name(ps.rotation_transition).data())) {
+			for (auto transition : magic_enum::enum_values<TransitionType>()) {
+				bool is_selected = (ps.rotation_transition == transition);
+				if (ImGui::Selectable(magic_enum::enum_name(transition).data(), is_selected)) {
+					ps.rotation_transition = transition;
+				}
+				if (is_selected) {
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+			ImGui::EndCombo();
+		}
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		show_float("Lifetime", ps.lifetime);
+		ps.lifetime = glm::max(0.0f, ps.lifetime);
+		ImGui::EndTable();
+	}
+}
+
 bool Inspector::show_vec2(
 		const char *label, glm::vec2 &vec2, float speed, float reset_value, float min_value, float max_value) {
 	bool changed = false;
@@ -1404,6 +1517,7 @@ void Inspector::show_add_component() {
 			SHOW_ADD_COMPONENT(PathParent);
 			SHOW_ADD_COMPONENT(Taggable);
 			SHOW_ADD_COMPONENT(FMODEmitter);
+			SHOW_ADD_COMPONENT(ParticleEmitter);
 
 			ImGui::EndPopup();
 		}
@@ -1413,3 +1527,4 @@ void Inspector::show_add_component() {
 void Inspector::set_active_entity(Entity entity) {
 	selected_entity = entity;
 }
+
