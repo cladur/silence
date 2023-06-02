@@ -7,6 +7,7 @@ uniform mat4 projection;
 uniform mat4 view;
 uniform mat4 model;
 uniform mat4 light_space;
+uniform bool cast_shadow;
 
 out vec4 world_light_space;
 
@@ -15,5 +16,8 @@ void main() {
     WorldPos.w = 1.0f;
 
     gl_Position = projection * view * WorldPos;
-    world_light_space = light_space * WorldPos;
+    if (cast_shadow)
+    {
+        world_light_space = light_space * WorldPos;
+    }
 }

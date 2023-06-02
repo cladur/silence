@@ -16,7 +16,7 @@ int main() {
 
 	game.create_scene("Main");
 	game.scenes[0]->register_game_systems();
-	game.scenes[0]->load_from_file("resources/scenes/level_1.scn");
+	game.scenes[0]->load_from_file("resources/scenes/level_0.scn");
 	game.set_active_scene("Main");
 
 	auto end = std::chrono::high_resolution_clock::now();

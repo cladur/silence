@@ -44,7 +44,7 @@ void RenderScene::startup() {
 	ssao_buffer.startup(render_extent.x, render_extent.y);
 	pbr_buffer.startup(render_extent.x, render_extent.y);
 	bloom_buffer.startup(render_extent.x, render_extent.y, 5);
-	shadow_buffer.startup(1024, 1024, 1.0f, 500.5f);
+	shadow_buffer.startup(1024, 1024, 1.0f, 25.0f);
 	combination_buffer.startup(render_extent.x, render_extent.y);
 	skybox_buffer.startup(render_extent.x, render_extent.y);
 	mouse_pick_framebuffer.startup(render_extent.x, render_extent.y);
@@ -64,12 +64,12 @@ void RenderScene::draw_viewport(bool right_side) {
 	glViewport(0, 0, (int)shadow_buffer.shadow_width, (int)shadow_buffer.shadow_height);
 	shadow_buffer.bind();
 	glEnable(GL_DEPTH_TEST);
-	glClear(GL_DEPTH_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	shadow_pass.draw(*this);
 
 	glDepthMask(GL_TRUE);
-	g_buffer.bind();
 	glViewport(0, 0, (int)render_extent.x, (int)render_extent.y);
+	g_buffer.bind();
 
 	// Clear the screen
 	glad_glClearColor(0.0f, 0.0f, 0.0f, 1.0f);

@@ -84,10 +84,12 @@ class ShadowBuffer {
 public:
 	uint32_t framebuffer_id;
 	uint32_t shadow_width, shadow_height;
+	float near, far;
 	glm::mat4 projection;
+	glm::mat4 point_projection;
 
-	void startup(uint32_t width, uint32_t height, float near_plane = 1.0f, float far_plane = 500.5f);
-	void generate_shadow_texture(uint32_t &texture_id);
+	void startup(uint32_t width, uint32_t height, float near_plane = 1.0f, float far_plane = 25.0f);
+	void generate_shadow_texture(struct Light &light);
 	void setup_light_space(struct Light &light, struct Transform &transform);
 	void bind();
 };

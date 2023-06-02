@@ -337,19 +337,21 @@ void ShadowPass::startup() {
 void ShadowPass::draw(RenderScene &scene) {
 	ResourceManager &resource_manager = ResourceManager::get();
 
+	material.bind_skinned_resources(scene);
+	material.bind_resources(scene);
 	for (auto &light_cmd : scene.light_draw_commands) {
 		Light &light = *light_cmd.light;
-		if (!light.cast_shadow || light.type != LightType::DIRECTIONAL_LIGHT) {
+		if (!light.cast_shadow || light.type == LightType::SPOT_LIGHT) {
 			continue;
 		}
 
 		Transform &light_transform = *light_cmd.transform;
 		if (light.shadow_map_id == 0) {
-			scene.shadow_buffer.generate_shadow_texture(light.shadow_map_id);
+			scene.shadow_buffer.generate_shadow_texture(light);
 		}
 		scene.shadow_buffer.setup_light_space(light, light_transform);
-		material.bind_light_resources(light);
 
+		material.bind_light_resources(light, light_transform);
 		for (auto &cmd : scene.draw_commands) {
 			ModelInstance &instance = *cmd.model_instance;
 			if (!instance.in_shadow_pass) {
@@ -366,7 +368,7 @@ void ShadowPass::draw(RenderScene &scene) {
 		}
 
 #ifdef WIN32
-		material.bind_skinned_light_resources(light);
+		material.bind_skinned_light_resources(light, light_transform);
 		for (auto &cmd : scene.skinned_draw_commands) {
 			SkinnedModelInstance &instance = *cmd.model_instance;
 			if (!instance.in_shadow_pass) {
