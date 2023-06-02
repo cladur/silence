@@ -144,9 +144,6 @@ public:
 	bool are_layers_collide(const std::string &layer1, const std::string &layer2);
 	const std::unordered_map<std::string, std::unordered_set<std::string>> &get_layers_map();
 
-	// Support function that returns the AABB vertex with index n
-	glm::vec3 corner(const ColliderAABB &b, int32_t n);
-
 private:
 	// layers map that contains data about which layer does not collide with which ones
 	// this is something like no collision map

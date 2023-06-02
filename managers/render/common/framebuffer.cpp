@@ -1,5 +1,7 @@
 #include "framebuffer.h"
 #include "render/common/framebuffer.h"
+#include <components/light_component.h>
+#include <components/transform_component.h>
 #include <glad/glad.h>
 
 void Framebuffer::startup(uint32_t width, uint32_t height) {
@@ -344,13 +346,24 @@ void SkyboxBuffer::resize(uint32_t width, uint32_t height) {
 void ShadowBuffer::startup(uint32_t width, uint32_t height, float near_plane, float far_plane) {
 	shadow_width = width;
 	shadow_height = height;
-	projection = glm::ortho(-50.0f, 50.0f, -50.0f, 50.0f, near_plane, far_plane);
+	const float size = 50.0f;
+	projection = glm::ortho(-size, size, -size, size, near_plane, far_plane);
 	glGenFramebuffers(1, &framebuffer_id);
 	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer_id);
 
+	// Bind defaults
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void ShadowBuffer::bind() {
+	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer_id);
+}
+
+void ShadowBuffer::generate_shadow_texture(uint32_t &texture_id) {
 	glGenTextures(1, &texture_id);
 	glBindTexture(GL_TEXTURE_2D, texture_id);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexImage2D(
+			GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, shadow_width, shadow_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
@@ -364,33 +377,15 @@ void ShadowBuffer::startup(uint32_t width, uint32_t height, float near_plane, fl
 	glDrawBuffer(GL_NONE);
 	glReadBuffer(GL_NONE);
 
-	// Bind defaults
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void ShadowBuffer::bind() {
-	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer_id);
+void ShadowBuffer::setup_light_space(Light &light, Transform &transform) {
+	const glm::vec3 &position = transform.get_global_position();
+	const glm::vec3 &direction = glm::normalize(transform.get_global_orientation() * glm::vec3(0.0f, 0.0f, -1.0f));
+	light.light_space = projection * glm::lookAt(position, position + direction, glm::vec3(0.0, 1.0, 0.0));
 }
 
-void ShadowBuffer::resize(uint32_t width, uint32_t height, float near_plane, float far_plane) {
-	shadow_width = width;
-	shadow_height = height;
-	projection = glm::ortho(-50.0f, 50.0f, -50.0f, 50.0f, near_plane, far_plane);
-
-	glBindTexture(GL_TEXTURE_2D, texture_id);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-
-	glm::vec4 border_color(1.0f);
-	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, &border_color[0]);
-
-	// Bind defaults
-	glBindTexture(GL_TEXTURE_2D, 0);
-}
 void MousePickFramebuffer::startup(uint32_t width, uint32_t height) {
 	glGenFramebuffers(1, &framebuffer_id);
 	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer_id);

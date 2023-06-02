@@ -98,6 +98,10 @@ void MaterialLight::bind_light_resources(Light &light, Transform &transform) {
 		case LightType::DIRECTIONAL_LIGHT:
 			shader.set_vec3("light_direction",
 					glm::normalize(transform.get_global_orientation() * glm::vec3(0.0f, 0.0f, -1.0f)));
+			shader.set_int("shadowMap", 4);
+			glActiveTexture(GL_TEXTURE4);
+			glBindTexture(GL_TEXTURE_2D, light.shadow_map_id);
+			shader.set_mat4("light_space", light.light_space);
 			break;
 		case LightType::SPOT_LIGHT:
 			shader.set_vec3("light_position", transform.get_global_position());
@@ -460,19 +464,6 @@ void MaterialShadow::startup() {
 }
 
 void MaterialShadow::bind_resources(RenderScene &scene) {
-	// render scene from light's point of view
-	shader.use();
-
-	const glm::mat4 &light_view = glm::lookAt(current_light_position, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
-	shader.set_mat4("light_space", scene.shadow_buffer.projection * light_view);
-}
-
-void MaterialShadow::bind_skinned_resources(RenderScene &scene) {
-	// render scene from light's point of view
-	skinned_shader.use();
-
-	const glm::mat4 &light_view = glm::lookAt(current_light_position, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
-	skinned_shader.set_mat4("light_space", scene.shadow_buffer.projection * light_view);
 }
 
 void MaterialShadow::bind_instance_resources(ModelInstance &instance, Transform &transform) {
@@ -494,8 +485,14 @@ void MaterialShadow::bind_instance_resources(SkinnedModelInstance &instance, Tra
 	glBindBufferBase(GL_UNIFORM_BUFFER, binding_index, instance.skinning_buffer);
 }
 
-void MaterialShadow::bind_light_resources(Light &light, Transform &transform) {
-	current_light_position = transform.get_global_position();
+void MaterialShadow::bind_light_resources(Light &light) {
+	shader.use();
+	shader.set_mat4("light_space", light.light_space);
+}
+
+void MaterialShadow::bind_skinned_light_resources(Light &light) {
+	skinned_shader.use();
+	skinned_shader.set_mat4("light_space", light.light_space);
 }
 
 void MaterialMousePick::startup() {

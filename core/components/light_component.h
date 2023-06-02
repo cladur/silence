@@ -11,6 +11,9 @@ public:
 	float cutoff = 12.5f;
 	float outer_cutoff = 5.0f;
 	bool cast_shadow = false;
+	// Do not serialize this
+	glm::mat4 light_space;
+	uint32_t shadow_map_id = 0;
 
 	void serialize_json(nlohmann::json &serialized_scene) {
 		nlohmann::json::object_t serialized_component;
