@@ -165,7 +165,7 @@ void CalcDirLight(vec3 normal, vec3 view_pos, vec3 F0, float roughness, float me
     float shadow = cast_shadow ? ShadowCalculation(normal, light_dir) : 0.0f;
 
     vec3 diffuse_light = (kD * albedo / PI) * light_color * light_intensity * NdotL * (1.0f - shadow);
-    vec3 specular_light = specular * light_color * light_intensity * NdotL;
+    vec3 specular_light = specular * light_color * light_intensity * NdotL * (1.0f - shadow);
 
 
     Diffuse = vec4(diffuse_light, 0.0);
@@ -198,7 +198,7 @@ void CalcPointLight(vec3 world_pos, vec3 normal, vec3 view_pos, vec3 F0, float r
     float shadow = cast_shadow ? ShadowPointCalculation(world_pos) : 0.0f;
 
     vec3 diffuse_light = (kD * albedo / PI) * radiance * NdotL * (1.0f - shadow);
-    vec3 specular_light = (specular * radiance * NdotL);
+    vec3 specular_light = (specular * radiance * NdotL) * (1.0f - shadow);
 
     Diffuse = vec4(diffuse_light, 0.0);
     Specular = vec4(specular_light, 0.0);
