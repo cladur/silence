@@ -365,8 +365,8 @@ void ShadowBuffer::generate_shadow_texture(Light &light) {
 	}
 
 	glGenTextures(1, &light.shadow_map_id);
-	glBindTexture(GL_TEXTURE_2D, light.shadow_map_id);
 	if (light.type == LightType::DIRECTIONAL_LIGHT) {
+		glBindTexture(GL_TEXTURE_2D, light.shadow_map_id);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, shadow_width, shadow_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT,
 				NULL);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);

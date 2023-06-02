@@ -21,6 +21,7 @@ uniform float cutoff;
 uniform float outer_cutoff;
 uniform int type;
 uniform bool cast_shadow;
+uniform mat4 light_space;
 
 uniform vec2 screen_dimensions;
 
@@ -28,6 +29,9 @@ uniform mat4 view;
 uniform vec3 camPos;
 
 const float PI = 3.14159265359;
+
+vec4 wlp;
+
 // ----------------------------------------------------------------------------
 float DistributionGGX(vec3 N, vec3 H, float roughness)
 {
@@ -113,7 +117,7 @@ float ShadowPointCalculation(vec3 world_pos)
 float ShadowCalculation(vec3 normal, vec3 light_dir)
 {
     // perform perspective divide
-    vec3 projCoords = world_light_space.xyz / world_light_space.w;
+    vec3 projCoords = wlp.xyz / wlp.w;
     // transform to [0,1] range
     projCoords = projCoords * 0.5f + 0.5f;
     // get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
@@ -166,7 +170,6 @@ void CalcDirLight(vec3 normal, vec3 view_pos, vec3 F0, float roughness, float me
 
     vec3 diffuse_light = (kD * albedo / PI) * light_color * light_intensity * NdotL * (1.0f - shadow);
     vec3 specular_light = specular * light_color * light_intensity * NdotL * (1.0f - shadow);
-
 
     Diffuse = vec4(diffuse_light, 0.0);
     Specular = vec4(specular_light, 0.0);
@@ -256,6 +259,8 @@ void main()
     vec3 N = texture(gNormal, TexCoords).rgb;
     vec3 V = normalize(camPos - WorldPos);
     vec3 R = reflect(-V, N);
+
+	wlp = light_space * vec4(WorldPos, 1.0);
 
     // calculate reflectance at normal incidence; if dia-electric (like plastic) use F0
     // of 0.04 and if it's a metal, use the albedo color as F0 (metallic workflow)
