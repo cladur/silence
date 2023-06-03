@@ -33,6 +33,7 @@
 #include "render/ecs/billboard_system.h"
 #include "render/ecs/frustum_draw_system.h"
 #include "render/ecs/light_render_system.h"
+#include "render/ecs/particle_render_system.h"
 #include "render/ecs/render_system.h"
 #include "render/ecs/skinned_render_system.h"
 
@@ -77,6 +78,7 @@ Scene::Scene() {
 		world.register_component<Taggable>();
 		world.register_component<FMODEmitter>();
 		world.register_component<Highlight>();
+		world.register_component<ParticleEmitter>();
 	}
 	// Components
 
@@ -97,6 +99,7 @@ Scene::Scene() {
 		world.register_system<RootParentSystem>(EcsOnLoad);
 		world.register_system<AttachmentSystem>(EcsPostLoad);
 		world.register_system<BillboardSystem>();
+		world.register_system<ParticleRenderSystem>();
 	}
 
 	auto &physics_manager = PhysicsManager::get();

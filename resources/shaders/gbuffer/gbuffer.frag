@@ -3,6 +3,7 @@ layout (location = 0) out vec4 gPosition;
 layout (location = 1) out vec4 gNormal;
 layout (location = 2) out vec4 gAlbedo;
 layout (location = 3) out vec4 gAoRoughMetal;
+layout (location = 4) out vec4 gDepth;
 
 in vec2 TexCoords;
 in vec3 ViewPos;
@@ -76,4 +77,5 @@ void main()
     gNormal = vec4(normal, 1.0);
     gAoRoughMetal = vec4(ao, roughness, metallic, 1.0);
     gAlbedo = vec4(final_albedo, 1.0);
+    gDepth = vec4(-vec3(ViewPos.z), 1.0);
 }
