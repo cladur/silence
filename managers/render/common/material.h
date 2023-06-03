@@ -137,4 +137,11 @@ public:
 	void bind_instance_resources(SkinnedModelInstance &instance, Transform &transform, Entity entity);
 };
 
+class MaterialParticle : public Material {
+public:
+	void startup() override;
+	void bind_resources(RenderScene &scene) override;
+	void bind_instance_resources(ModelInstance &instance, Transform &transform) override;
+};
+
 #endif // SILENCE_MATERIAL_H

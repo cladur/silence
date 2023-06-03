@@ -14,6 +14,7 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 #include "physics/physics_manager.h"
+#include "render/transparent_elements/particle_manager.h"
 #include "render/transparent_elements/ui_manager.h"
 #include <string>
 
@@ -27,6 +28,7 @@ void Engine::startup() {
 	AudioManager::get().startup();
 	AdaptiveMusicManager::get().startup("AdaptiveMusic/Music_1");
 	UIManager::get();
+	ParticleManager::get().startup();
 
 	FontManager::get().load_font("resources/fonts/PoltawskiNowy.ttf", 48, "PoltawskiNowy");
 }
@@ -40,6 +42,7 @@ void Engine::shutdown() {
 	RenderManager::get().shutdown();
 	InputManager::get().shutdown();
 	DisplayManager::get().shutdown();
+	ParticleManager::get().shutdown();
 }
 
 void Engine::run() {
@@ -101,6 +104,7 @@ void Engine::update(float dt) {
 	}
 
 	AudioManager::get().update();
+	ParticleManager::get().update(dt);
 
 	input_manager.process_input();
 
