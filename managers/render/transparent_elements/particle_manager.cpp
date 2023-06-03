@@ -169,8 +169,8 @@ void ParticleManager::update(float dt) {
 	}
 }
 
-void ParticleManager::emit(uint32_t entity, ParticleData &particle) {
+void ParticleManager::emit(uint32_t entity, ParticleData particle, ParticlePerEntityData entity_data) {
 	particles[entity].first[particle_idx[entity]] = particle;
-	particles[entity].second = particle.entity_position;
+	particles[entity].second = entity_data;
 	particle_idx[entity] = ++particle_idx[entity] % particles[entity].first.size();
 }

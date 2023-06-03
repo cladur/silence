@@ -24,8 +24,24 @@ struct ParticleSSBODataBlock {
 	glm::vec4 colors[MAX_PARTICLES_PER_ENTITY];
 };
 
+struct ParticlePerEntityData {
+	glm::vec3 entity_position;
+	Handle<Texture> tex;
+	bool is_textured = false;
+
+	ParticlePerEntityData() = default;
+
+	ParticlePerEntityData(ParticleEmitter &p, glm::vec3 entity_position) {
+		this->entity_position = entity_position;
+		if (p.is_textured) {
+			is_textured = true;
+			tex = p.texture;
+		}
+	}
+};
+
 struct ParticleData {
-	glm::vec3 entity_position, position, velocity_begin, velocity_end;
+	glm::vec3 position, velocity_begin, velocity_end;
 	TransitionType velocity_transition_type = TransitionType::LINEAR;
 	glm::vec4 color, color_begin, color_end;
 	TransitionType color_transition_type = TransitionType::LINEAR;
@@ -36,13 +52,10 @@ struct ParticleData {
 	float rotation, rotation_begin, rotation_end;
 	TransitionType rotation_transition_type = TransitionType::LINEAR;
 	bool active = false;
-	Handle<Texture> tex;
-	bool is_textured = false;
 
 	ParticleData() = default;
 
 	ParticleData(ParticleEmitter &p, glm::vec3 position) {
-		entity_position = position;
 		this->position = position + glm::vec3(
 											((float)(rand() % 1000) / 1000.0f - 0.5f) * p.position_variance.x,
 											((float)(rand() % 1000) / 1000.0f - 0.5f) * p.position_variance.y,
@@ -63,8 +76,6 @@ struct ParticleData {
 		rotation_begin = p.rotation_begin;
 		rotation_end = p.rotation_end;
 		rotation_transition_type = p.rotation_transition;
-		tex = p.texture;
-		is_textured = p.is_textured;
 		this->active = true;
 	}
 };

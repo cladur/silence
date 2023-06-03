@@ -30,6 +30,9 @@ float calc_depth( in float z )
 void main()
 {
     vec4 sampled = vec4(1.0);
+    if (is_textured == 1) {
+        sampled = texture(particle_tex, TexCoords);
+    }
     vec2 depth_uv = vec2(gl_FragCoord.x / screen_size.x, gl_FragCoord.y / screen_size.y);
     vec4 depth_sampled = texture(depth, depth_uv);
     float scene_depth = calc_depth(depth_sampled.x);

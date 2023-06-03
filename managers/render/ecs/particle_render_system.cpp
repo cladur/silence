@@ -20,9 +20,10 @@ void ParticleRenderSystem::update(World &world, float dt) {
 		pe.particle_time += dt;
 		// for now let's assume no more than two particles per frame.
 		if (pe.particle_time > 1.0f / pe.rate) {
-			ParticleData particle = ParticleData(pe, transform.get_global_position());
-			particle.entity_position = transform.get_global_position();
-			pm.emit(entity, particle);
+			auto glob_pos= transform.get_global_position();
+			ParticleData particle = ParticleData(pe, glob_pos);
+			ParticlePerEntityData entity_data = ParticlePerEntityData(pe, glob_pos);
+			pm.emit(entity, particle, entity_data);
 			pe.particle_time = 0.0f;
 		}
 

@@ -16,7 +16,7 @@ enum class TransitionType {
 struct ParticleEmitter {
 public:
 	glm::vec3 position = glm::vec3(0.0f);
-	glm::vec3 position_variance = glm::vec3(0.0f);
+	glm::vec3 position_variance = glm::vec3(0.2f);
 	glm::vec3 velocity_begin, velocity_end;
 	TransitionType velocity_transition = TransitionType::LINEAR;
 	glm::vec4 color_begin = glm::vec4(1.0f);
@@ -33,26 +33,33 @@ public:
 	bool is_textured = false;
 
 	void serialize_json(nlohmann::json &serialized_scene) {
-		serialized_scene["position"] = {position.x, position.y, position.z};
-		serialized_scene["position_variance"] = {position_variance.x, position_variance.y, position_variance.z};
-		serialized_scene["velocity_begin"] = {velocity_begin.x, velocity_begin.y, velocity_begin.z};
-		serialized_scene["velocity_end"] = {velocity_end.x, velocity_end.y, velocity_end.z};
-		serialized_scene["velocity_transition"] = static_cast<int>(velocity_transition);
-		serialized_scene["color_begin"] = {color_begin.r, color_begin.g, color_begin.b, color_begin.a};
-		serialized_scene["color_end"] = {color_end.r, color_end.g, color_end.b, color_end.a};
-		serialized_scene["color_transition"] = static_cast<int>(color_transition);
-		serialized_scene["size_begin"] = size_begin;
-		serialized_scene["size_end"] = size_end;
-		serialized_scene["size_transition"] = static_cast<int>(size_transition);
-		serialized_scene["rotation_begin"] = rotation_begin;
-		serialized_scene["rotation_end"] = rotation_end;
-		serialized_scene["rotation_transition"] = static_cast<int>(rotation_transition);
-		serialized_scene["rate"] = rate;
-		serialized_scene["lifetime"] = lifetime;
-		serialized_scene["texture"] = texture.id;
+		auto &rm = ResourceManager::get();
+		nlohmann::json::object_t serialized_component;
+		serialized_component["position"] = {position.x, position.y, position.z};
+		serialized_component["position_variance"] = {position_variance.x, position_variance.y, position_variance.z};
+		serialized_component["velocity_begin"] = {velocity_begin.x, velocity_begin.y, velocity_begin.z};
+		serialized_component["velocity_end"] = {velocity_end.x, velocity_end.y, velocity_end.z};
+		serialized_component["velocity_transition"] = static_cast<int>(velocity_transition);
+		serialized_component["color_begin"] = {color_begin.r, color_begin.g, color_begin.b, color_begin.a};
+		serialized_component["color_end"] = {color_end.r, color_end.g, color_end.b, color_end.a};
+		serialized_component["color_transition"] = static_cast<int>(color_transition);
+		serialized_component["size_begin"] = size_begin;
+		serialized_component["size_end"] = size_end;
+		serialized_component["size_transition"] = static_cast<int>(size_transition);
+		serialized_component["rotation_begin"] = rotation_begin;
+		serialized_component["rotation_end"] = rotation_end;
+		serialized_component["rotation_transition"] = static_cast<int>(rotation_transition);
+		serialized_component["rate"] = rate;
+		serialized_component["lifetime"] = lifetime;
+		serialized_component["texture_name"] = rm.get_texture_name(texture);
+		serialized_component["is_textured"] = is_textured;
+		serialized_scene.push_back(nlohmann::json::object());
+		serialized_scene.back()["component_data"] = serialized_component;
+		serialized_scene.back()["component_name"] = "ParticleEmitter";
 	}
 
 	void deserialize_json(nlohmann::json &serialized_component) {
+		auto &rm = ResourceManager::get();
 		position = glm::vec3(serialized_component["position"][0], serialized_component["position"][1], serialized_component["position"][2]);
 		position_variance = glm::vec3(serialized_component["position_variance"][0], serialized_component["position_variance"][1], serialized_component["position_variance"][2]);
 		velocity_begin = glm::vec3(serialized_component["velocity_begin"][0], serialized_component["velocity_begin"][1], serialized_component["velocity_begin"][2]);
@@ -67,9 +74,13 @@ public:
 		rotation_begin = serialized_component["rotation_begin"];
 		rotation_end = serialized_component["rotation_end"];
 		rotation_transition = static_cast<TransitionType>(serialized_component["rotation_transition"]);
-		rate = serialized_component["count"];
+		rate = serialized_component["rate"];
 		lifetime = serialized_component["lifetime"];
-		texture = Handle<Texture>(serialized_component["texture"]);
+		std::string tex_name = serialized_component["texture_name"];
+		if (!tex_name.empty()) {
+			texture = rm.load_texture(tex_name.c_str());
+		}
+		is_textured = serialized_component["is_textured"];
 	}
 };
 

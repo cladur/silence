@@ -172,8 +172,11 @@ void RenderScene::draw_viewport(bool right_side) {
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, particle_buffer.framebuffer_id);
 	glBlitFramebuffer(0, 0, render_extent.x, render_extent.y, 0, 0, render_extent.x, render_extent.y,
 			GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glDepthMask(GL_FALSE);
 	particle_pass.draw(*this);
 
 	glDepthMask(GL_TRUE);
