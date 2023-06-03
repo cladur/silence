@@ -16,7 +16,5 @@ void HighlightSystem::update(World &world, float dt) {
 		if (highlight_component.highlighted) {
 			highlight_component.highlighted = false;
 		}
-
-		
 	}
 }

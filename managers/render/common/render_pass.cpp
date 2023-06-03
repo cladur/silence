@@ -92,16 +92,18 @@ void GBufferPass::draw(RenderScene &scene) {
 
 		for (auto &mesh : model.meshes) {
 			if (mesh.fc_bounding_sphere.is_on_frustum(scene.frustum, transform, scene)) {
-				material.bind_mesh_resources(mesh);
+				material.bind_mesh_resources(mesh, highlighted);
 				mesh.draw();
 
-				if (highlighted) {
-					glEnable(GL_BLEND);
-					glBlendEquation(GL_FUNC_ADD);
-					glBlendFunc(GL_ONE, GL_ONE);
-					mesh.draw();
-					glDisable(GL_BLEND);
-				}
+				// if (highlighted) {
+				// 	glEnable(GL_BLEND);
+				// 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+
+				// 	material.bind_mesh_resources(mesh);
+				// 	mesh.draw();
+
+				// 	glDisable(GL_BLEND);
+				// }
 			}
 		}
 	}

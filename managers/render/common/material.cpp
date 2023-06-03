@@ -5,7 +5,6 @@
 #include "render_pass.h"
 #include <spdlog/spdlog.h>
 
-
 AutoCVarInt cvar_use_ao("render.use_ao", "use ambient occlusion", 1, CVarFlags::EditCheckbox);
 AutoCVarInt cvar_use_fog("render.use_fog", "use simple linear fog", 1, CVarFlags::EditCheckbox);
 AutoCVarFloat cvar_fog_min("render.fog_min", "fog min distance", 20.0f, CVarFlags::EditFloatDrag);
@@ -254,7 +253,7 @@ void MaterialGBuffer::bind_instance_resources(ModelInstance &instance, Transform
 	shader.set_vec2("uv_scale", uv_scale);
 }
 
-void MaterialGBuffer::bind_mesh_resources(Mesh &mesh) {
+void MaterialGBuffer::bind_mesh_resources(Mesh &mesh, bool highlighted) {
 	for (int i = 0; i < mesh.textures.size(); i++) {
 		if (mesh.textures_present[i]) {
 			glActiveTexture(GL_TEXTURE0 + i);
@@ -277,6 +276,7 @@ void MaterialGBuffer::bind_mesh_resources(Mesh &mesh) {
 		shader.set_bool("has_emissive_map", mesh.textures_present[3]);
 		is_emissive_map_set = mesh.textures_present[3];
 	}
+	shader.set_bool("is_highlighted", highlighted);
 }
 
 void MaterialGBuffer::bind_instance_resources(SkinnedModelInstance &instance, Transform &transform) {

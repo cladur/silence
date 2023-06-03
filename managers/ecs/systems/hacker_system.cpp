@@ -62,6 +62,13 @@ bool HackerSystem::shoot_raycast(
 		return false;
 	}
 
+	if (world.has_component<Highlight>(hit_entity)) {
+		auto &highlight = world.get_component<Highlight>(hit_entity);
+		highlight.highlighted = true;
+	} else {
+		SPDLOG_ERROR("Hacker raycast hit entity {} without highlight component", hit_entity);
+	}
+
 	ui_text->text = "Press LMB to interact";
 
 	if (trigger) {
@@ -189,15 +196,15 @@ void HackerSystem::update(World &world, float dt) {
 		auto camera_right = camera_pivot_tf.get_global_right();
 
 		if (!is_on_camera) {
-//			world.get_parent_scene()->get_render_scene().debug_draw.draw_arrow(
-//					camera_tf.get_global_position() + glm::vec3(0.0f, 0.0f, -1.0f),
-//					camera_tf.get_global_position() + glm::vec3(0.0f, 0.0f, -1.0f) + real_camera_forward * 100.0f,
-//					glm::vec3(1.0f, 0.0f, 0.0f));
+			//			world.get_parent_scene()->get_render_scene().debug_draw.draw_arrow(
+			//					camera_tf.get_global_position() + glm::vec3(0.0f, 0.0f, -1.0f),
+			//					camera_tf.get_global_position() + glm::vec3(0.0f, 0.0f, -1.0f) + real_camera_forward *
+			//100.0f, 					glm::vec3(1.0f, 0.0f, 0.0f));
 		} else {
-//			world.get_parent_scene()->get_render_scene().debug_draw.draw_arrow(
-//					camera_tf.get_global_position() + glm::vec3(0.0f, 0.0f, -1.0f),
-//					camera_tf.get_global_position() + glm::vec3(0.0f, 0.0f, 1.0f) - real_camera_forward * 100.0f,
-//					glm::vec3(1.0f, 0.0f, 0.0f));
+			//			world.get_parent_scene()->get_render_scene().debug_draw.draw_arrow(
+			//					camera_tf.get_global_position() + glm::vec3(0.0f, 0.0f, -1.0f),
+			//					camera_tf.get_global_position() + glm::vec3(0.0f, 0.0f, 1.0f) - real_camera_forward *
+			//100.0f, 					glm::vec3(1.0f, 0.0f, 0.0f));
 		}
 
 		glm::vec3 acc_direction = { 0, 0, 0 };
@@ -353,13 +360,13 @@ void HackerSystem::update(World &world, float dt) {
 			}
 		}
 
-//		AudioManager::get().set_3d_listener_attributes(
-//				SILENCE_FMOD_LISTENER_HACKER,
-//				transform.get_global_position(),
-//				velocity,
-//				transform.get_global_forward(),
-//				transform.get_global_up()
-//		);
+		//		AudioManager::get().set_3d_listener_attributes(
+		//				SILENCE_FMOD_LISTENER_HACKER,
+		//				transform.get_global_position(),
+		//				velocity,
+		//				transform.get_global_forward(),
+		//				transform.get_global_up()
+		//		);
 
 		last_position = transform.position;
 		previous_velocity = velocity;

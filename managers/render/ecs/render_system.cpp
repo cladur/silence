@@ -23,6 +23,7 @@ void RenderSystem::update(World &world, float dt) {
 		if (world.has_component<Highlight>(entity)) {
 			auto &highlight_component = world.get_component<Highlight>(entity);
 			highlighted = highlight_component.highlighted;
+			highlight_component.highlighted = false;
 		}
 
 		world.get_parent_scene()->get_render_scene().queue_draw(&model_instance, &transform, entity, highlighted);

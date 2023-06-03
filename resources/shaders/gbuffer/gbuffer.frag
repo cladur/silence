@@ -17,6 +17,7 @@ uniform sampler2D emissive_map;
 uniform bool has_ao_map;
 uniform bool has_normal_map;
 uniform bool has_emissive_map;
+uniform bool is_highlighted;
 
 uniform vec2 uv_scale;
 
@@ -65,9 +66,14 @@ void main()
     if (has_ao_map) {
         ao = ao_metallic_roughness.r;
     }
+    vec3 final_albedo = albedo;
+
+    if (is_highlighted) {
+        final_albedo = final_albedo * 5;
+    }
 
     gPosition = vec4(ViewPos, 1.0);
     gNormal = vec4(normal, 1.0);
-    gAlbedo = vec4(albedo, 1.0);
     gAoRoughMetal = vec4(ao, roughness, metallic, 1.0);
+    gAlbedo = vec4(final_albedo, 1.0);
 }

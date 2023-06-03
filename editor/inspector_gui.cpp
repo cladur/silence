@@ -6,6 +6,7 @@
 #include "components/enemy_data_component.h"
 #include "components/exploding_box_component.h"
 #include "components/fmod_listener_component.h"
+#include "components/highlight_component.h"
 #include "components/interactable_component.h"
 #include "components/light_component.h"
 #include "components/path_node_component.h"
@@ -72,6 +73,7 @@ void Inspector::show_components() {
 	SHOW_COMPONENT(PathParent, show_path_parent);
 	SHOW_COMPONENT(Taggable, show_taggable);
 	SHOW_COMPONENT(FMODEmitter, show_fmod_emitter);
+	SHOW_COMPONENT(Highlight, show_highlight);
 
 	for (int i = 0; i < remove_component_queue.size(); i++) {
 		auto [entity, component_to_remove] = remove_component_queue.front();
@@ -1193,10 +1195,10 @@ void Inspector::show_fmod_emitter() {
 		ImGui::SetNextItemWidth(-FLT_MIN);
 		if (AudioManager::get().is_valid_event_path(event_name)) {
 			emitter.event_path = event_name;
-			ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0,255,0,255));
+			ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 255, 0, 255));
 			ImGui::Text("Ok");
 		} else {
-			ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255,0,0,255));
+			ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
 			ImGui::Text("Event Not Found in Banks");
 		}
 		ImGui::PopStyleColor();
@@ -1206,7 +1208,6 @@ void Inspector::show_fmod_emitter() {
 		ImGui::EndTable();
 	}
 }
-
 
 void Inspector::show_taggable() {
 	auto &taggable = world->get_component<Taggable>(selected_entity);
@@ -1226,6 +1227,20 @@ void Inspector::show_taggable() {
 		show_vec3("Position", taggable.tag_position);
 
 		ImGui::EndTable();
+	}
+}
+
+void Inspector::show_highlight() {
+	auto &highlighted = world->get_component<Highlight>(selected_entity);
+
+	if (ImGui::CollapsingHeader("Highlighted", tree_flags)) {
+		if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+			ImGui::OpenPopup("HighlightedContextMenu");
+		}
+		if (ImGui::BeginPopup("HighlightedContextMenu")) {
+			remove_component_menu_item<Highlight>();
+			ImGui::EndPopup();
+		}
 	}
 }
 
@@ -1404,6 +1419,7 @@ void Inspector::show_add_component() {
 			SHOW_ADD_COMPONENT(PathParent);
 			SHOW_ADD_COMPONENT(Taggable);
 			SHOW_ADD_COMPONENT(FMODEmitter);
+			SHOW_ADD_COMPONENT(Highlight);
 
 			ImGui::EndPopup();
 		}
