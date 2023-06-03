@@ -248,24 +248,19 @@
             },
             {
                 "component_data": {
+                    "detection_speed": 5.0,
+                    "view_cone_angle": 70.0,
+                    "view_cone_distance": 10.0
+                },
+                "component_name": "EnemyData"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": false,
                     "material_type": 0,
                     "model_name": "enemy/enemy.skinmdl"
                 },
                 "component_name": "SkinnedModelInstance"
-            },
-            {
-                "component_data": {
-                    "animation_name": "enemy/enemy_ANIM_GLTF/enemy_walk_with_gun.anim",
-                    "ticks_per_second": 1000.0
-                },
-                "component_name": "AnimationInstance"
-            },
-            {
-                "component_data": {
-                    "layer_name": "default"
-                },
-                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -285,19 +280,24 @@
             },
             {
                 "component_data": {
+                    "animation_name": "enemy/enemy_ANIM_GLTF/enemy_walk_with_gun.anim",
+                    "ticks_per_second": 1000.0
+                },
+                "component_name": "AnimationInstance"
+            },
+            {
+                "component_data": {
+                    "layer_name": "default"
+                },
+                "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {
                     "path_parent": 73,
                     "rotation_speed": 5.0,
                     "speed": 1.0
                 },
                 "component_name": "EnemyPath"
-            },
-            {
-                "component_data": {
-                    "detection_speed": 5.0,
-                    "view_cone_angle": 70.0,
-                    "view_cone_distance": 10.0
-                },
-                "component_name": "EnemyData"
             },
             {
                 "component_data": {
@@ -344,17 +344,17 @@
             },
             {
                 "component_data": {
+                    "parent": 46
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": false,
                     "material_type": 0,
                     "model_name": "agent/agent.skinmdl"
                 },
                 "component_name": "SkinnedModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 46
-                },
-                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -2346,12 +2346,6 @@
             },
             {
                 "component_data": {
-                    "layer_name": "default"
-                },
-                "component_name": "ColliderTag"
-            },
-            {
-                "component_data": {
                     "end": {
                         "x": 0.0,
                         "y": 1.2999999523162842,
@@ -2365,6 +2359,12 @@
                     }
                 },
                 "component_name": "ColliderCapsule"
+            },
+            {
+                "component_data": {
+                    "layer_name": "default"
+                },
+                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -2854,6 +2854,17 @@
             },
             {
                 "component_data": {
+                    "center": {
+                        "x": 0.0,
+                        "y": 0.4000000059604645,
+                        "z": 0.0
+                    },
+                    "radius": -0.4000000059604645
+                },
+                "component_name": "ColliderSphere"
+            },
+            {
+                "component_data": {
                     "children": [
                         56,
                         57
@@ -2867,17 +2878,6 @@
                     "layer_name": "default"
                 },
                 "component_name": "ColliderTag"
-            },
-            {
-                "component_data": {
-                    "center": {
-                        "x": 0.0,
-                        "y": 0.4000000059604645,
-                        "z": 0.0
-                    },
-                    "radius": -0.4000000059604645
-                },
-                "component_name": "ColliderSphere"
             },
             {
                 "component_data": {
@@ -2923,17 +2923,17 @@
             },
             {
                 "component_data": {
+                    "parent": 55
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": false,
                     "material_type": 0,
                     "model_name": "scorpion/scorpion_idle.skinmdl"
                 },
                 "component_name": "SkinnedModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 55
-                },
-                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -3104,19 +3104,19 @@
             },
             {
                 "component_data": {
-                    "bone_name": "RightHand",
-                    "holder": 6
-                },
-                "component_name": "Attachment"
-            },
-            {
-                "component_data": {
                     "in_shadow_pass": false,
                     "material_type": 0,
                     "model_name": "knife/knife.mdl",
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
+                    "bone_name": "RightHand",
+                    "holder": 6
+                },
+                "component_name": "Attachment"
             }
         ],
         "entity": 59,
@@ -3483,19 +3483,19 @@
             },
             {
                 "component_data": {
-                    "bone_name": "Gun",
-                    "holder": 5
-                },
-                "component_name": "Attachment"
-            },
-            {
-                "component_data": {
                     "in_shadow_pass": false,
                     "material_type": 0,
                     "model_name": "weapon/weapon.mdl",
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
+                    "bone_name": "Gun",
+                    "holder": 5
+                },
+                "component_name": "Attachment"
             }
         ],
         "entity": 64,
@@ -3578,14 +3578,6 @@
             },
             {
                 "component_data": {
-                    "distraction_radius": 15.0,
-                    "distraction_time": 2.0,
-                    "explosion_radius": 4.0
-                },
-                "component_name": "ExplodingBox"
-            },
-            {
-                "component_data": {
                     "orientation": {
                         "w": 0.7071067094802856,
                         "x": -0.7071068286895752,
@@ -3619,6 +3611,14 @@
                     "layer_name": "hacker"
                 },
                 "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {
+                    "distraction_radius": 15.0,
+                    "distraction_time": 2.0,
+                    "explosion_radius": 4.0
+                },
+                "component_name": "ExplodingBox"
             },
             {
                 "component_data": {
@@ -5234,58 +5234,37 @@
         "components": [
             {
                 "component_data": {
-                    "orientation": {
-                        "w": 1.0,
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    "position": {
-                        "x": -0.24665804207324982,
-                        "y": 0.0001308641949435696,
-                        "z": 4.125362873077393
-                    },
-                    "scale": {
-                        "x": 1.0,
-                        "y": 1.0,
-                        "z": 1.0
-                    }
-                },
-                "component_name": "Transform"
-            },
-            {
-                "component_data": {
                     "color_begin": [
                         1.0,
                         1.0,
                         1.0,
-                        1.0
+                        0.8666666746139526
                     ],
                     "color_end": [
                         1.0,
                         1.0,
                         1.0,
-                        1.0
+                        0.0
                     ],
                     "color_transition": 0,
                     "is_textured": true,
-                    "lifetime": 7.0,
+                    "lifetime": 7.699999809265137,
                     "position": [
                         0.0,
                         0.0,
                         0.0
                     ],
                     "position_variance": [
-                        2.0,
+                        2.5,
                         0.20000000298023224,
-                        1.600000023841858
+                        3.799999952316284
                     ],
-                    "rate": 4.0,
+                    "rate": 2.700000047683716,
                     "rotation_begin": 0.0,
                     "rotation_end": 0.0,
                     "rotation_transition": 0,
-                    "size_begin": 6.800000190734863,
-                    "size_end": 10.0,
+                    "size_begin": 7.699999809265137,
+                    "size_end": 10.699999809265137,
                     "size_transition": 0,
                     "texture_name": "resources\\assets_export\\smoke.ktx2",
                     "velocity_begin": [
@@ -5301,13 +5280,7 @@
                     "velocity_transition": 0
                 },
                 "component_name": "ParticleEmitter"
-            }
-        ],
-        "entity": 72,
-        "signature": "01000000000000000000000000000010"
-    },
-    {
-        "components": [
+            },
             {
                 "component_data": {
                     "orientation": {
@@ -5317,9 +5290,9 @@
                         "z": 0.0
                     },
                     "position": {
-                        "x": 2.829803228378296,
-                        "y": 2.9815782909281552e-05,
-                        "z": 1.3528181314468384
+                        "x": 0.11748415231704712,
+                        "y": 0.00012437424447853118,
+                        "z": 3.9290385246276855
                     },
                     "scale": {
                         "x": 1.0,
@@ -5328,7 +5301,13 @@
                     }
                 },
                 "component_name": "Transform"
-            },
+            }
+        ],
+        "entity": 72,
+        "signature": "01000000000000000000000000000010"
+    },
+    {
+        "components": [
             {
                 "component_data": {
                     "color_begin": [
@@ -5345,7 +5324,7 @@
                     ],
                     "color_transition": 0,
                     "is_textured": true,
-                    "lifetime": 4.900000095367432,
+                    "lifetime": 3.299999952316284,
                     "position": [
                         0.0,
                         0.0,
@@ -5357,11 +5336,11 @@
                         1.600000023841858
                     ],
                     "rate": 4.0,
-                    "rotation_begin": 0.0,
-                    "rotation_end": 0.0,
+                    "rotation_begin": 1.7000000476837158,
+                    "rotation_end": 92.0999984741211,
                     "rotation_transition": 0,
-                    "size_begin": 0.30000001192092896,
-                    "size_end": 0.699999988079071,
+                    "size_begin": 0.800000011920929,
+                    "size_end": 1.2999999523162842,
                     "size_transition": 0,
                     "texture_name": "resources\\assets_export\\skull_emoji.ktx2",
                     "velocity_begin": [
@@ -5377,6 +5356,27 @@
                     "velocity_transition": 0
                 },
                 "component_name": "ParticleEmitter"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 1.0,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 3.9811086654663086,
+                        "y": 3.223116436856799e-05,
+                        "z": 2.260453462600708
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                },
+                "component_name": "Transform"
             }
         ],
         "entity": 100,

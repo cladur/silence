@@ -42,6 +42,5 @@ void main()
     float particle_depth = calc_depth(viewZ);
     float diff = clamp((scene_depth - particle_depth) / smooth_size, 0.0, 1.0);
 
-    //FragColor = vec4(vec3(diff), 1.0);
     FragColor = Color * sampled * vec4(1.0, 1.0, 1.0, diff);
 }

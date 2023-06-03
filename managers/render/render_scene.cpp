@@ -175,6 +175,7 @@ void RenderScene::draw_viewport(bool right_side) {
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glBlendEquation(GL_FUNC_ADD);
 
 	glDepthMask(GL_FALSE);
 	particle_pass.draw(*this);
