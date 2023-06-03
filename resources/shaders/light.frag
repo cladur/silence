@@ -1,5 +1,4 @@
 #version 330 core
-in vec4 world_light_space;
 layout (location = 0) out vec4 Diffuse;
 layout (location = 1) out vec4 Specular;
 
@@ -29,8 +28,7 @@ uniform mat4 view;
 uniform vec3 camPos;
 
 const float PI = 3.14159265359;
-
-vec4 wlp;
+vec4 world_light_space;
 
 // ----------------------------------------------------------------------------
 float DistributionGGX(vec3 N, vec3 H, float roughness)
@@ -107,7 +105,9 @@ float ShadowPointCalculation(vec3 world_pos)
         float closestDepth = texture(depthMap, fragToLight + gridSamplingDisk[i] * diskRadius).r;
         closestDepth *= far_plane;   // undo mapping [0;1]
         if (currentDepth - bias > closestDepth)
-        shadow += 1.0f;
+        {
+            shadow += 1.0f;
+        }
     }
     shadow /= float(samples);
 
@@ -117,7 +117,7 @@ float ShadowPointCalculation(vec3 world_pos)
 float ShadowCalculation(vec3 normal, vec3 light_dir)
 {
     // perform perspective divide
-    vec3 projCoords = wlp.xyz / wlp.w;
+    vec3 projCoords = world_light_space.xyz / world_light_space.w;
     // transform to [0,1] range
     projCoords = projCoords * 0.5f + 0.5f;
     // get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
@@ -234,8 +234,10 @@ void CalcSpotLight(vec3 world_pos, vec3 normal, vec3 view_pos, vec3 F0, float ro
     vec3 kD = vec3(1.0) - kS;
     kD *= 1.0 - metalness;
 
-    vec3 diffuse_light = (kD * albedo / PI) * radiance * NdotL;
-    vec3 specular_light = (specular * radiance * NdotL);
+    float shadow = cast_shadow ? ShadowCalculation(normal, light_dir) : 0.0f;
+
+    vec3 diffuse_light = (kD * albedo / PI) * radiance * NdotL * (1.0f - shadow);
+    vec3 specular_light = (specular * radiance * NdotL) * (1.0f - shadow);
 
     Diffuse = vec4(diffuse_light, 0.0);
     Specular = vec4(specular_light, 0.0);
@@ -260,19 +262,18 @@ void main()
     vec3 V = normalize(camPos - WorldPos);
     vec3 R = reflect(-V, N);
 
-	wlp = light_space * vec4(WorldPos, 1.0);
-
     // calculate reflectance at normal incidence; if dia-electric (like plastic) use F0
     // of 0.04 and if it's a metal, use the albedo color as F0 (metallic workflow)
     vec3 F0 = vec3(0.04);
     F0 = mix(F0, albedo, metallic);
 
-    if (type == 0)
-    {
+    if (type == 0) {
         CalcPointLight(WorldPos, N, V, F0, roughness, metallic, albedo);
     } else if (type == 1) {
+        world_light_space = light_space * vec4(WorldPos, 1.0);
         CalcDirLight(N, V, F0, roughness, metallic, albedo);
     } else if (type == 2) {
+        world_light_space = light_space * vec4(WorldPos, 1.0);
         CalcSpotLight(WorldPos, N, V, F0, roughness, metallic, albedo);
     }
 }

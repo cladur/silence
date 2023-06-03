@@ -108,7 +108,7 @@ void MaterialLight::bind_light_resources(Light &light, Transform &transform) {
 			if (light.cast_shadow) {
 				glActiveTexture(GL_TEXTURE4);
 				glBindTexture(GL_TEXTURE_2D, light.shadow_map_id);
-				shader.set_mat4("light_space", light.light_space[0]);
+				shader.set_mat4("light_space", light.light_space);
 			}
 			break;
 		case LightType::SPOT_LIGHT:
@@ -117,6 +117,11 @@ void MaterialLight::bind_light_resources(Light &light, Transform &transform) {
 					glm::normalize(transform.get_global_orientation() * glm::vec3(0.0f, 0.0f, -1.0f)));
 			shader.set_float("cutoff", glm::cos(glm::radians(light.cutoff)));
 			shader.set_float("outer_cutoff", glm::cos(glm::radians(light.outer_cutoff + light.cutoff)));
+			if (light.cast_shadow) {
+				glActiveTexture(GL_TEXTURE4);
+				glBindTexture(GL_TEXTURE_2D, light.shadow_map_id);
+				shader.set_mat4("light_space", light.light_space);
+			}
 			break;
 		default:
 			SPDLOG_WARN("Invalid light type!");
@@ -483,14 +488,17 @@ void MaterialShadow::bind_instance_resources(ModelInstance &instance, Transform 
 	shader.set_mat4("model", transform.get_global_model_matrix());
 }
 
-void MaterialShadow::bind_light_resources(Light &light, Transform &transform) {
+void MaterialShadow::bind_light_resources(RenderScene &scene, Light &light, Transform &transform) {
 	shader.use();
 	shader.set_int("type", (int)light.type);
 	if (light.type == LightType::DIRECTIONAL_LIGHT) {
-		shader.set_mat4("light_space[0]", light.light_space[0]);
+		shader.set_mat4("light_space[0]", scene.shadow_buffer.light_spaces[0]);
+	} else if (light.type == LightType::SPOT_LIGHT) {
+		shader.set_mat4("light_space[0]", scene.shadow_buffer.light_spaces[0]);
+		shader.set_vec3("light_pos", transform.get_global_position());
 	} else if (light.type == LightType::POINT_LIGHT) {
 		for (int i = 0; i < 6; ++i) {
-			shader.set_mat4("light_space[" + std::to_string(i) + "]", light.light_space[i]);
+			shader.set_mat4("light_space[" + std::to_string(i) + "]", scene.shadow_buffer.light_spaces[i]);
 		}
 
 		shader.set_vec3("light_pos", transform.get_global_position());
@@ -518,14 +526,17 @@ void MaterialShadow::bind_instance_resources(SkinnedModelInstance &instance, Tra
 	glBindBufferBase(GL_UNIFORM_BUFFER, binding_index, instance.skinning_buffer);
 }
 
-void MaterialShadow::bind_skinned_light_resources(Light &light, Transform &transform) {
+void MaterialShadow::bind_skinned_light_resources(RenderScene &scene, Light &light, Transform &transform) {
 	skinned_shader.use();
 	skinned_shader.set_int("type", (int)light.type);
 	if (light.type == LightType::DIRECTIONAL_LIGHT) {
-		skinned_shader.set_mat4("light_space[0]", light.light_space[0]);
+		skinned_shader.set_mat4("light_space[0]", scene.shadow_buffer.light_spaces[0]);
+	} else if (light.type == LightType::SPOT_LIGHT) {
+		skinned_shader.set_mat4("light_space[0]", scene.shadow_buffer.light_spaces[0]);
+		skinned_shader.set_vec3("light_pos", transform.get_global_position());
 	} else if (light.type == LightType::POINT_LIGHT) {
 		for (int i = 0; i < 6; ++i) {
-			skinned_shader.set_mat4("light_space[" + std::to_string(i) + "]", light.light_space[i]);
+			skinned_shader.set_mat4("light_space[" + std::to_string(i) + "]", scene.shadow_buffer.light_spaces[i]);
 		}
 
 		skinned_shader.set_vec3("light_pos", transform.get_global_position());

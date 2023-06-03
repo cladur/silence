@@ -349,9 +349,9 @@ void ShadowBuffer::startup(uint32_t width, uint32_t height, float near_plane, fl
 	near = near_plane;
 	far = far_plane;
 	const float size = 20.0f;
-	projection = glm::ortho(-size, size, -size, size, near_plane, far_plane);
+	orthographic_projection = glm::ortho(-size, size, -size, size, near_plane, far_plane);
 	float aspect = (float)shadow_width / (float)shadow_height;
-	point_projection = glm::perspective(glm::radians(90.0f), aspect, near, far);
+	perspective_projection = glm::perspective(glm::radians(90.0f), aspect, near, far);
 	glGenFramebuffers(1, &framebuffer_id);
 }
 
@@ -365,7 +365,7 @@ void ShadowBuffer::generate_shadow_texture(Light &light) {
 	}
 
 	glGenTextures(1, &light.shadow_map_id);
-	if (light.type == LightType::DIRECTIONAL_LIGHT) {
+	if (light.type == LightType::DIRECTIONAL_LIGHT || light.type == LightType::SPOT_LIGHT) {
 		glBindTexture(GL_TEXTURE_2D, light.shadow_map_id);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, shadow_width, shadow_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT,
 				NULL);
@@ -401,31 +401,28 @@ void ShadowBuffer::generate_shadow_texture(Light &light) {
 
 void ShadowBuffer::setup_light_space(Light &light, Transform &transform) {
 	const glm::vec3 &position = transform.get_global_position();
-	if (!light.light_space.empty()) {
-		light.light_space.clear();
-	}
 
 	if (light.type == LightType::DIRECTIONAL_LIGHT) {
 		const glm::vec3 &direction = glm::normalize(transform.get_global_orientation() * glm::vec3(0.0f, 0.0f, -1.0f));
-		light.light_space.emplace_back(
-				projection * glm::lookAt(position, position + direction, glm::vec3(0.0, 1.0, 0.0)));
+		light_spaces[0] =
+				orthographic_projection * glm::lookAt(position, position + direction, glm::vec3(0.0, 1.0, 0.0));
+		light.light_space = light_spaces[0];
+	} else if (light.type == LightType::SPOT_LIGHT) {
+		const glm::vec3 &direction = glm::normalize(transform.get_global_orientation() * glm::vec3(0.0f, 0.0f, -1.0f));
+		light_spaces[0] =
+				perspective_projection * glm::lookAt(position, position + direction, glm::vec3(0.0, 1.0, 0.0));
+		light.light_space = light_spaces[0];
 	} else if (light.type == LightType::POINT_LIGHT) {
-		if (light.light_space.capacity() < 6) {
-			light.light_space.reserve(6);
-		}
-
-		light.light_space.emplace_back(point_projection *
-				glm::lookAt(position, position + glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-		light.light_space.emplace_back(point_projection *
-				glm::lookAt(position, position + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-		light.light_space.emplace_back(point_projection *
-				glm::lookAt(position, position + glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
-		light.light_space.emplace_back(point_projection *
-				glm::lookAt(position, position + glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)));
-		light.light_space.emplace_back(point_projection *
-				glm::lookAt(position, position + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-		light.light_space.emplace_back(point_projection *
-				glm::lookAt(position, position + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+		const glm::vec3 &down = glm::vec3(0.0f, -1.0f, 0.0f);
+		const glm::vec3 &forward = glm::vec3(0.0f, 0.0f, 1.0f);
+		const glm::vec3 &back = glm::vec3(0.0f, 0.0f, -1.0f);
+		light_spaces[0] = perspective_projection * glm::lookAt(position, position + glm::vec3(1.0f, 0.0f, 0.0f), down);
+		light_spaces[1] = perspective_projection * glm::lookAt(position, position + glm::vec3(-1.0f, 0.0f, 0.0f), down);
+		light_spaces[2] =
+				perspective_projection * glm::lookAt(position, position + glm::vec3(0.0f, 1.0f, 0.0f), forward);
+		light_spaces[3] = perspective_projection * glm::lookAt(position, position + down, back);
+		light_spaces[4] = perspective_projection * glm::lookAt(position, position + forward, down);
+		light_spaces[5] = perspective_projection * glm::lookAt(position, position + back, down);
 	}
 }
 

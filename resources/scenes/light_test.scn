@@ -3,15 +3,6 @@
         "components": [
             {
                 "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "items/cardboard_box/cardboard_box.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": 0.0,
@@ -19,9 +10,9 @@
                         "z": 0.0
                     },
                     "position": {
-                        "x": 0.09009337425231934,
-                        "y": -0.5227847695350647,
-                        "z": -0.04989233613014221
+                        "x": -1.5796936750411987,
+                        "y": -0.5230017304420471,
+                        "z": 0.36533114314079285
                     },
                     "scale": {
                         "x": 1.0,
@@ -30,6 +21,15 @@
                     }
                 },
                 "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/cardboard_box/cardboard_box.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
             }
         ],
         "entity": 1,
@@ -39,15 +39,6 @@
         "components": [
             {
                 "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "items/planes/asfalt.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": 0.0,
@@ -55,9 +46,9 @@
                         "z": 0.0
                     },
                     "position": {
-                        "x": 0.0,
-                        "y": -0.7236371040344238,
-                        "z": 0.0
+                        "x": -0.15483629703521729,
+                        "y": -0.9216663837432861,
+                        "z": 0.0861293375492096
                     },
                     "scale": {
                         "x": 3.277064800262451,
@@ -66,6 +57,15 @@
                     }
                 },
                 "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/planes/asfalt.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
             }
         ],
         "entity": 2,
@@ -82,9 +82,9 @@
                         "z": 0.0
                     },
                     "position": {
-                        "x": 0.0,
-                        "y": 1.047602653503418,
-                        "z": 0.5230005979537964
+                        "x": -0.6448321342468262,
+                        "y": 1.2265961170196533,
+                        "z": 1.5564477443695068
                     },
                     "scale": {
                         "x": 1.0,
@@ -102,10 +102,10 @@
                         "g": 3.0352940559387207,
                         "r": 0.0
                     },
-                    "cutoff": 12.5,
-                    "intensity": 1.0,
+                    "cutoff": 30.0,
+                    "intensity": 30.0,
                     "outer_cutoff": 5.0,
-                    "type": 1
+                    "type": 2
                 },
                 "component_name": "Light"
             }

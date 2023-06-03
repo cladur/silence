@@ -85,8 +85,9 @@ public:
 	uint32_t framebuffer_id;
 	uint32_t shadow_width, shadow_height;
 	float near, far;
-	glm::mat4 projection;
-	glm::mat4 point_projection;
+	glm::mat4 orthographic_projection;
+	glm::mat4 perspective_projection;
+	std::array<glm::mat4, 6> light_spaces;
 
 	void startup(uint32_t width, uint32_t height, float near_plane = 1.0f, float far_plane = 25.0f);
 	void generate_shadow_texture(struct Light &light);

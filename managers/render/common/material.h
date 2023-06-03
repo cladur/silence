@@ -133,10 +133,10 @@ class MaterialShadow : public Material {
 public:
 	void startup() override;
 	void bind_resources(RenderScene &scene) override;
-	void bind_light_resources(Light &light, Transform &transform);
+	void bind_light_resources(RenderScene &scene, Light &light, Transform &transform);
 	void bind_instance_resources(ModelInstance &instance, Transform &transform) override;
 	void bind_skinned_resources(RenderScene &scene);
-	void bind_skinned_light_resources(Light &light, Transform &transform);
+	void bind_skinned_light_resources(RenderScene &scene, Light &light, Transform &transform);
 	void bind_instance_resources(SkinnedModelInstance &instance, Transform &transform);
 };
 

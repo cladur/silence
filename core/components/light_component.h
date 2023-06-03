@@ -13,7 +13,7 @@ public:
 	float outer_cutoff = 5.0f;
 	bool cast_shadow = false;
 	// Do not serialize this
-	std::vector<glm::mat4> light_space;
+	glm::mat4 light_space; // required for dir light shadow
 	uint32_t shadow_map_id = 0;
 
 	void serialize_json(nlohmann::json &serialized_scene) {

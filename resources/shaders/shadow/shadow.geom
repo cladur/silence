@@ -19,8 +19,7 @@ void main()
                 gl_Position = light_space[face] * FragPos;
                 EmitVertex();
             }
-        } else if (type == 1) {
-
+        } else if (type == 1 || type == 2) {
             for (int i = 0; i < 3; ++i)
             {
                 gl_Position = light_space[0] * gl_in[i].gl_Position;
