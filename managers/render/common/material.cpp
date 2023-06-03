@@ -493,16 +493,20 @@ void MaterialShadow::bind_light_resources(RenderScene &scene, Light &light, Tran
 	shader.set_int("type", (int)light.type);
 	if (light.type == LightType::DIRECTIONAL_LIGHT) {
 		shader.set_mat4("light_space[0]", scene.shadow_buffer.light_spaces[0]);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, light.shadow_map_id, 0);
 	} else if (light.type == LightType::SPOT_LIGHT) {
 		shader.set_mat4("light_space[0]", scene.shadow_buffer.light_spaces[0]);
 		shader.set_vec3("light_pos", transform.get_global_position());
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, light.shadow_map_id, 0);
 	} else if (light.type == LightType::POINT_LIGHT) {
 		for (int i = 0; i < 6; ++i) {
 			shader.set_mat4("light_space[" + std::to_string(i) + "]", scene.shadow_buffer.light_spaces[i]);
 		}
-
 		shader.set_vec3("light_pos", transform.get_global_position());
+		glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, light.shadow_map_id, 0);
 	}
+
+	glClear(GL_DEPTH_BUFFER_BIT);
 }
 
 void MaterialShadow::bind_skinned_resources(RenderScene &scene) {
@@ -538,7 +542,6 @@ void MaterialShadow::bind_skinned_light_resources(RenderScene &scene, Light &lig
 		for (int i = 0; i < 6; ++i) {
 			skinned_shader.set_mat4("light_space[" + std::to_string(i) + "]", scene.shadow_buffer.light_spaces[i]);
 		}
-
 		skinned_shader.set_vec3("light_pos", transform.get_global_position());
 	}
 }

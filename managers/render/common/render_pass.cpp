@@ -350,9 +350,7 @@ void ShadowPass::draw(RenderScene &scene) {
 		}
 
 		Transform &light_transform = *light_cmd.transform;
-		bool changed_point_light = light.type != light.shadow_type &&
-				(light.type == LightType::POINT_LIGHT || light.shadow_type == LightType::POINT_LIGHT);
-		if (light.shadow_type == LightType::NONE || changed_point_light) {
+		if (light.shadow_type == LightType::NONE || light.type != light.shadow_type) {
 			scene.shadow_buffer.generate_shadow_texture(light);
 		}
 		scene.shadow_buffer.setup_light_space(light, light_transform);

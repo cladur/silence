@@ -393,10 +393,6 @@ void ShadowBuffer::generate_shadow_texture(Light &light) {
 
 	glDrawBuffer(GL_NONE);
 	glReadBuffer(GL_NONE);
-
-	glBindTexture(GL_TEXTURE_2D, 0);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void ShadowBuffer::setup_light_space(Light &light, Transform &transform) {

@@ -127,7 +127,12 @@ float ShadowCalculation(vec3 normal, vec3 light_dir)
     // check whether current frag pos is in shadow
 
     float shadow = 0.0f;
-    float bias = max(0.05f * (1.0f - dot(normal, light_dir)), 0.005f);
+    float bias;
+    if (type == 2) {
+        bias = max(0.0000025f * (1.0f - dot(normal, light_dir)), 0.0000005f);
+    } else if (type == 1) {
+        bias = max(0.025f * (1.0f - dot(normal, light_dir)), 0.005f);
+    }
     vec2 texelSize = 1.0f / textureSize(shadowMap, 0);
     for (int x = -1; x <= 1; ++x)
     {
