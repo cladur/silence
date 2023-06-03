@@ -1,9 +1,12 @@
 #include "render_pass.h"
+#include "components/highlight_component.h"
 #include "material.h"
 #include "render/common/framebuffer.h"
 #include "render/common/utils.h"
 #include "render/render_manager.h"
 #include "resource/resource_manager.h"
+#include <render/transparent_elements/particle_data.h>
+#include <render/transparent_elements/particle_manager.h>
 #include <tracy/tracy.hpp>
 
 AutoCVarFloat cvar_blur_radius("render.blur_radius", "blur radius", 0.001f, CVarFlags::EditFloatDrag);
@@ -12,6 +15,8 @@ AutoCVarFloat cvar_bloom_strength("render.bloom_strength", "bloom strength", 0.0
 
 AutoCVarFloat cvar_gamma("render.gamma", "gamma", 2.2f, CVarFlags::EditFloatDrag);
 AutoCVarFloat cvar_dirt_strength("render.dirt_strength", "dirt strength", 0.075f, CVarFlags::EditFloatDrag);
+
+AutoCVarFloat cvar_smooth("render.particle_smooth", "particle smooth measured in 1/100th of a unit", 0.005f, CVarFlags::EditFloatDrag);
 
 void PBRPass::startup() {
 	material.startup();
@@ -84,12 +89,24 @@ void GBufferPass::draw(RenderScene &scene) {
 	for (auto &cmd : scene.draw_commands) {
 		ModelInstance &instance = *cmd.model_instance;
 		Transform &transform = *cmd.transform;
+		bool highlighted = cmd.highlighted;
 		material.bind_instance_resources(instance, transform);
 		Model &model = resource_manager.get_model(instance.model_handle);
+
 		for (auto &mesh : model.meshes) {
 			if (mesh.fc_bounding_sphere.is_on_frustum(scene.frustum, transform, scene)) {
-				material.bind_mesh_resources(mesh);
+				material.bind_mesh_resources(mesh, highlighted);
 				mesh.draw();
+
+				// if (highlighted) {
+				// 	glEnable(GL_BLEND);
+				// 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+
+				// 	material.bind_mesh_resources(mesh);
+				// 	mesh.draw();
+
+				// 	glDisable(GL_BLEND);
+				// }
 			}
 		}
 	}
@@ -185,9 +202,10 @@ void TransparentPass::draw_worldspace(RenderScene &scene) {
 	// transparency sorting for world-space objects
 	std::sort(world_space_objects.begin(), world_space_objects.end(),
 			[cam_pos](const TransparentObject &a, const TransparentObject &b) {
-				auto cam_vector = glm::normalize(cam_pos - a.position);
-				auto val_a = glm::distance(cam_pos, a.position + (cam_vector * a.billboard_z_offset));
-				auto val_b = glm::distance(cam_pos, b.position + (cam_vector * b.billboard_z_offset));
+				auto cam_vector_a = glm::normalize(cam_pos - a.position);
+				auto cam_vector_b = glm::normalize(cam_pos - b.position);
+				auto val_a = glm::distance(cam_pos, a.position + (cam_vector_a * a.billboard_z_offset));
+				auto val_b = glm::distance(cam_pos, b.position + (cam_vector_b * b.billboard_z_offset));
 				return val_a > val_b;
 			});
 
@@ -422,4 +440,163 @@ void MousePickPass::draw(RenderScene &scene) {
 		}
 	}
 #endif
+}
+
+void ParticlePass::startup() {
+	// initialize vao vbo and ebo
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+
+	glGenBuffers(1, &vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+	glGenBuffers(1, &ebo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+
+	// set up vertex attributes
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(ParticleVertex), (void *) offsetof(ParticleVertex, position));
+
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(ParticleVertex), (void *) offsetof(ParticleVertex, color));
+
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(ParticleVertex), (void *) offsetof(ParticleVertex, tex_coords));
+
+	// buffer data for the first time
+	glBufferData(GL_ARRAY_BUFFER, sizeof(ParticleVertex) * 4, nullptr, GL_DYNAMIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * 6, nullptr, GL_DYNAMIC_DRAW);
+
+	// buffer index data as well
+	std::vector<uint32_t> indices;
+	indices.reserve(6);
+	indices.push_back(0);
+	indices.push_back(1);
+	indices.push_back(2);
+	indices.push_back(2);
+	indices.push_back(3);
+	indices.push_back(0);
+
+	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, indices.size() * sizeof(uint32_t), indices.data());
+
+	// initialize SSBO
+	glGenBuffers(1, &ssbo);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
+
+	ParticleSSBODataBlock ssbo_data = {};
+	for (int i = 0; i < MAX_PARTICLES_PER_ENTITY; i++) {
+		ssbo_data.position[i] = glm::vec4(0.0f);
+		ssbo_data.rotation[i] = glm::mat4(1.0f);
+		ssbo_data.colors[i] = glm::vec4(1.0f);
+	}
+
+	glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(ssbo_data), &ssbo_data, GL_DYNAMIC_DRAW);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ssbo);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+	material.startup();
+}
+
+void ParticlePass::draw(RenderScene &scene) {
+	ZoneScopedN("ParticlePass::draw");
+	auto &rm = ResourceManager::get();
+	auto &pm = ParticleManager::get();
+	material.bind_resources(scene);
+
+	auto cam_pos = scene.camera_pos;
+
+	static std::vector<ParticleSSBODataBlock> ssbo_data;
+	ssbo_data.clear();
+	ssbo_data.resize(MAX_PARTICLES_PER_ENTITY);
+
+	// copy the map to a vector of pairs
+	static std::vector<std::pair<Entity, std::pair<std::array<ParticleData, MAX_PARTICLES_PER_ENTITY>, ParticlePerEntityData>>> particles;
+	particles.clear();
+	particles.reserve(pm.particles.size());
+	for (auto &p : pm.particles) {
+        particles.emplace_back(p);
+    }
+
+	// now SORT the vector by distance to camera so that the farthest particles are drawn first
+	std::sort(particles.begin(), particles.end(), [&cam_pos](auto &a, auto &b) {
+        return glm::distance2(cam_pos, a.second.second.entity_position) > glm::distance2(cam_pos, b.second.second.entity_position);
+    });
+
+	static int i;
+	static int j;
+
+	i = 0;
+	// draw the particles per entity
+	for (auto &p : particles) {
+		auto &entity_id = p.first;
+		auto &particle_pair_data = p.second;
+		static glm::vec3 entity_pos;
+		entity_pos = particle_pair_data.second.entity_position;
+		static glm::vec3 cam_pos_y_like_entity;
+		cam_pos_y_like_entity = cam_pos;
+		cam_pos_y_like_entity.y = entity_pos.y;
+
+		// sort particles by projecting their position onto a line from the camera to the entity
+		std::sort(particle_pair_data.first.begin(), particle_pair_data.first.end(), [](auto &a, auto &b) {
+			auto a_proj = glm::dot(a.position - cam_pos_y_like_entity, entity_pos - cam_pos_y_like_entity);
+			auto b_proj = glm::dot(b.position - cam_pos_y_like_entity, entity_pos - cam_pos_y_like_entity);
+			return a_proj > b_proj;
+		});
+
+		j = 0;
+		for (auto &particle : particle_pair_data.first) {
+			if (particle.active) {
+				glm::mat4 rot = glm::mat4(1.0f);
+				rot = glm::rotate(rot, glm::radians(particle.rotation), glm::vec3(0.0f, 0.0f, 1.0f));
+				ssbo_data[i].position[j] = glm::vec4(particle.position, particle.size);
+				ssbo_data[i].rotation[j] = rot;
+				ssbo_data[i].colors  [j] = particle.color;
+				j++;
+			}
+			if (j >= MAX_PARTICLES_PER_ENTITY) {
+				SPDLOG_WARN("Too many particles for entity {}, consider lowering the rate or lifetime of the particles", entity_id);
+				break;
+			}
+		}
+
+		// check if there are any particles to draw
+		if (j == 0) {
+			i++;
+			continue;
+		}
+
+		// all particles have the same texture
+		if (particle_pair_data.second.is_textured) {
+			auto tex = rm.get_texture(particle_pair_data.second.tex);
+			material.shader.set_int("is_textured", 1);
+			material.shader.set_int("particle_tex", 0);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, tex.id);
+		} else {
+			material.shader.set_int("is_textured", 0);
+		}
+
+		material.shader.set_int("depth", 1);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, scene.g_buffer.depth_texture_id);
+
+		material.shader.set_vec2("screen_size", glm::vec2(scene.render_extent.x, scene.render_extent.y));
+		material.shader.set_float("smooth_size", cvar_smooth.get());
+		material.shader.set_float("far_sub_near", scene.camera_near_far.y - scene.camera_near_far.y);
+		material.shader.set_float("far", scene.camera_near_far.y);
+		material.shader.set_float("near", scene.camera_near_far.x);
+		material.shader.set_vec3("entity_center", entity_pos);
+
+		glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
+		glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeof(ssbo_data[i]), &ssbo_data[i]); // THIS THROWS EXCEPTION
+
+		glBindVertexArray(vao);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, 4 * sizeof(ParticleVertex), &pm.default_particle_vertices[0]);
+
+		glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr, j);
+
+		i++;
+    }
+	glBindVertexArray(0);
 }

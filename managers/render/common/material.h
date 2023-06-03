@@ -106,7 +106,7 @@ public:
 	void bind_resources(RenderScene &scene) override;
 	void bind_skinned_resources(RenderScene &scene);
 	void bind_instance_resources(ModelInstance &instance, Transform &transform) override;
-	void bind_mesh_resources(Mesh &mesh);
+	void bind_mesh_resources(Mesh &mesh, bool highlighted = false);
 	void bind_instance_resources(SkinnedModelInstance &instance, Transform &transform);
 	void bind_mesh_resources(SkinnedMesh &mesh);
 };
@@ -150,6 +150,13 @@ public:
 
 	void bind_instance_resources(ModelInstance &instance, Transform &transform, Entity entity);
 	void bind_instance_resources(SkinnedModelInstance &instance, Transform &transform, Entity entity);
+};
+
+class MaterialParticle : public Material {
+public:
+	void startup() override;
+	void bind_resources(RenderScene &scene) override;
+	void bind_instance_resources(ModelInstance &instance, Transform &transform) override;
 };
 
 #endif // SILENCE_MATERIAL_H
