@@ -182,27 +182,10 @@ void TransparentPass::draw(RenderScene &scene) {
 	scene.transparent_objects.clear();
 }
 
-//void bubble_sort(std::vector<TransparentObject> &vec, glm::vec3 cam_pos) {
-//	for (int i = 0; i < vec.size(); i++) {
-//		for (int j = 0; j < vec.size() - i - 1; j++) {
-//			auto cam_vector = glm::normalize(cam_pos - a.position);
-//			auto val_a = glm::distance(cam_pos, a.position + (cam_vector * a.billboard_z_offset));
-//			auto val_b = glm::distance(cam_pos, b.position + (cam_vector * b.billboard_z_offset));
-//		}
-//	}
-//}
-
 void TransparentPass::draw_worldspace(RenderScene &scene) {
 	ZoneScopedNC("TransparentPass::draw_worldspace", 0xad074f);
 
 	glm::vec3 cam_pos = scene.camera_pos;
-
-//	std::map<float, glm::vec3> sorted;
-//	for (unsigned int i = 0; i < windows.size(); i++)
-//	{
-//		float distance = glm::length(camera.Position - windows[i]);
-//		sorted[distance] = windows[i];
-//	}
 
 	// transparency sorting for world-space objects
 	std::sort(world_space_objects.begin(), world_space_objects.end(),
@@ -211,7 +194,6 @@ void TransparentPass::draw_worldspace(RenderScene &scene) {
 				auto cam_vector_b = glm::normalize(cam_pos - b.position);
 				auto val_a = glm::distance(cam_pos, a.position + (cam_vector_a * a.billboard_z_offset));
 				auto val_b = glm::distance(cam_pos, b.position + (cam_vector_b * b.billboard_z_offset));
-				std::cout << val_a << ", " << val_b << std::endl;
 				return val_a > val_b;
 			});
 
