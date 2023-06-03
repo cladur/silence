@@ -73,6 +73,11 @@ void InteractableSystem::no_interaction(World &world, Interactable &interactable
 void InteractableSystem::explosion(World &world, Interactable &interactable, Entity entity) {
 	auto &box = world.get_component<ExplodingBox>(interactable.interaction_target);
 	auto &t = world.get_component<Transform>(interactable.interaction_target);
+
+	if (world.has_component<ParticleEmitter>(entity)) {
+		world.get_component<ParticleEmitter>(entity).trigger_oneshot();
+	}
+
 	ColliderSphere sphere;
 	float larger_radius = box.distraction_radius;
 	float smaller_radius = box.explosion_radius;

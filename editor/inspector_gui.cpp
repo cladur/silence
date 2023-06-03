@@ -1339,8 +1339,16 @@ void Inspector::show_particle_emitter() {
 		ImGui::TableSetColumnIndex(0);
 		show_float("Particles Spawn Rate", ps.rate);
 		ps.rate = glm::max(0.0f, ps.rate);
-		show_float("Lifetime", ps.lifetime);
+		show_float("Particle Lifetime", ps.lifetime);
 		ps.lifetime = glm::max(0.0f, ps.lifetime);
+		show_checkbox("Is One Shot", ps.is_one_shot);
+		if (ps.is_one_shot) {
+			// display a button that triggers a oneshot
+			if (ImGui::Button("Trigger One Shot")) {
+				ps.trigger_oneshot();
+			}
+			show_float("One Shot Duration", ps.one_shot_duration);
+		}
 
 		ImGui::TableNextRow();
 		ImGui::TableSetColumnIndex(0);

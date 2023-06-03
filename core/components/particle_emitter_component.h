@@ -31,6 +31,10 @@ public:
 	float particle_time = 0.0f;
 	Handle<Texture> texture;
 	bool is_textured = false;
+	bool is_one_shot = false;
+	float one_shot_duration = 0.5f;
+
+	float oneshot_time_left = 0.0f;
 
 	void serialize_json(nlohmann::json &serialized_scene) {
 		auto &rm = ResourceManager::get();
@@ -53,6 +57,8 @@ public:
 		serialized_component["lifetime"] = lifetime;
 		serialized_component["texture_name"] = rm.get_texture_name(texture);
 		serialized_component["is_textured"] = is_textured;
+		serialized_component["is_one_shot"] = is_one_shot;
+		serialized_component["one_shot_duration"] = one_shot_duration;
 		serialized_scene.push_back(nlohmann::json::object());
 		serialized_scene.back()["component_data"] = serialized_component;
 		serialized_scene.back()["component_name"] = "ParticleEmitter";
@@ -81,6 +87,16 @@ public:
 			texture = rm.load_texture(tex_name.c_str());
 		}
 		is_textured = serialized_component["is_textured"];
+		is_one_shot = serialized_component["is_one_shot"];
+		one_shot_duration = serialized_component["one_shot_duration"];
+	}
+
+	void trigger_oneshot() {
+		if (is_one_shot) {
+			oneshot_time_left = one_shot_duration;
+		} else {
+			SPDLOG_WARN("Tried to trigger oneshot on non-oneshot emitter.");
+		}
 	}
 };
 
