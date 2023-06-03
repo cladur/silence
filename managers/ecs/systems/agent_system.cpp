@@ -321,6 +321,10 @@ void AgentSystem::update(World &world, float dt) {
 
 				if (interactable_found) {
 					auto &interactable = world.get_component<Interactable>(closest_interactable);
+					if (world.has_component<Highlight>(closest_interactable)) {
+						auto &highlight = world.get_component<Highlight>(closest_interactable);
+						highlight.highlighted = true;
+					}
 					ui_interaction_text->text = "Press E to interact";
 					if (interaction_triggered) {
 						interactable.triggered = true;
@@ -422,13 +426,8 @@ void AgentSystem::update(World &world, float dt) {
 			animation_timer += (dt * 1000);
 		}
 
-		AudioManager::get().set_3d_listener_attributes(
-				SILENCE_FMOD_LISTENER_AGENT,
-				camera_tf.get_global_position(),
-				glm::vec3(0.0f),
-				camera_tf.get_global_forward(),
-				camera_tf.get_global_up()
-				);
+		AudioManager::get().set_3d_listener_attributes(SILENCE_FMOD_LISTENER_AGENT, camera_tf.get_global_position(),
+				glm::vec3(0.0f), camera_tf.get_global_forward(), camera_tf.get_global_up());
 
 		last_position = transform.position;
 		previous_velocity = velocity;
