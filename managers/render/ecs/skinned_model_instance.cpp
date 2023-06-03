@@ -51,7 +51,6 @@ void SkinnedModelInstance::deserialize_json(nlohmann::json &serialized_component
 	} else {
 		in_shadow_pass = true;
 	}
-	in_shadow_pass = true;
 }
 
 void SkinnedModelInstance::release() {
