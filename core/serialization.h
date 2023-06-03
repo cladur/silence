@@ -15,6 +15,7 @@
 #include "components/exploding_box_component.h"
 #include "components/fmod_listener_component.h"
 #include "components/hacker_data_component.h"
+#include "components/highlight_component.h"
 #include "components/interactable_component.h"
 #include "components/light_component.h"
 #include "components/name_component.h"
@@ -50,7 +51,7 @@ concept Deserializable = requires(T t, nlohmann::json &j) {
 typedef std::variant<Children, Parent, Transform, RigidBody, FmodListener, Camera, ModelInstance, AnimationInstance,
 		SkinnedModelInstance, Name, ColliderTag, StaticTag, ColliderSphere, ColliderAABB, ColliderOBB, ColliderCapsule,
 		Light, AgentData, HackerData, EnemyPath, EnemyData, Interactable, Attachment, Platform, ExplodingBox, Billboard,
-		PathNode, PathParent, Taggable, FMODEmitter, ParticleEmitter>
+		PathNode, PathParent, Taggable, FMODEmitter, Highlight, ParticleEmitter>
 		variant_type;
 
 template <typename T>

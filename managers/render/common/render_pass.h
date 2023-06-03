@@ -15,6 +15,7 @@ struct RenderScene;
 struct DrawCommand {
 	ModelInstance *model_instance;
 	Transform *transform;
+	bool highlighted;
 	Entity entity;
 };
 
@@ -104,6 +105,7 @@ public:
 class BloomPass : public RenderPass {
 	Handle<Texture> dirt_texture;
 	float dirt_offsets[2];
+
 public:
 	MaterialBloom material;
 	void startup() override;

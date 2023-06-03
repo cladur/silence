@@ -76,7 +76,7 @@ struct RenderScene {
 	void draw();
 	void resize_framebuffer(uint32_t width, uint32_t height);
 
-	void queue_draw(ModelInstance *model_instance, Transform *transform, Entity entity);
+	void queue_draw(ModelInstance *model_instance, Transform *transform, Entity entity, bool highlighted = false);
 	void queue_skinned_draw(SkinnedModelInstance *model_instance, Transform *transform, Entity entity);
 	void queue_light_draw(Light *light, Transform *transform);
 
