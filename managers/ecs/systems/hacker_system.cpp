@@ -277,17 +277,13 @@ void HackerSystem::update(World &world, float dt) {
 		glm::vec3 velocity = move_ground(acc_direction, previous_velocity, dt);
 		if (glm::dot(velocity, velocity) > physics_manager.get_epsilon()) {
 			if (animation_instance.animation_handle.id !=
-					resource_manager.get_animation_handle("scorpion/scorpion_idle_ANIM_GLTF/scorpion_idle_00_walk.anim")
-							.id) {
-				animation_manager.change_animation(
-						hacker_data.model, "scorpion/scorpion_idle_ANIM_GLTF/scorpion_idle_00_walk.anim");
+					resource_manager.get_animation_handle("scorpion/scorpion_ANIM_GLTF/scorpion_idle_walk.anim").id) {
+				animation_manager.change_animation(hacker_data.model, "scorpion/scorpion_ANIM_GLTF/scorpion_walk.anim");
 			}
 		} else {
 			if (animation_instance.animation_handle.id !=
-					resource_manager.get_animation_handle("scorpion/scorpion_idle_ANIM_GLTF/scorpion_idle_00_idle.anim")
-							.id) {
-				animation_manager.change_animation(
-						hacker_data.model, "scorpion/scorpion_idle_ANIM_GLTF/scorpion_idle_00_idle.anim");
+					resource_manager.get_animation_handle("scorpion/scorpion_ANIM_GLTF/scorpion_idle.anim").id) {
+				animation_manager.change_animation(hacker_data.model, "scorpion/scorpion_ANIM_GLTF/scorpion_idle.anim");
 			}
 		}
 
