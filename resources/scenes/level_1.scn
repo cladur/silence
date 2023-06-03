@@ -49,16 +49,16 @@
         "components": [
             {
                 "component_data": {
+                    "name": "Enemy"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
                     "animation_name": "enemy/enemy_ANIM_GLTF/enemy_walk_with_gun.anim",
                     "ticks_per_second": 1000.0
                 },
                 "component_name": "AnimationInstance"
-            },
-            {
-                "component_data": {
-                    "name": "Enemy"
-                },
-                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -83,16 +83,11 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": false,
                     "material_type": 0,
                     "model_name": "enemy/enemy.skinmdl"
                 },
                 "component_name": "SkinnedModelInstance"
-            },
-            {
-                "component_data": {
-                    "layer_name": "default"
-                },
-                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -109,6 +104,12 @@
                     }
                 },
                 "component_name": "ColliderCapsule"
+            },
+            {
+                "component_data": {
+                    "layer_name": "default"
+                },
+                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -193,16 +194,16 @@
         "components": [
             {
                 "component_data": {
+                    "name": "Agent"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
                     "animation_name": "agent/agent_ANIM_GLTF/agent_idle.anim",
                     "ticks_per_second": 1000.0
                 },
                 "component_name": "AnimationInstance"
-            },
-            {
-                "component_data": {
-                    "name": "Agent"
-                },
-                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -227,16 +228,17 @@
             },
             {
                 "component_data": {
-                    "parent": 46
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
+                    "in_shadow_pass": false,
                     "material_type": 0,
                     "model_name": "agent/agent.skinmdl"
                 },
                 "component_name": "SkinnedModelInstance"
+            },
+            {
+                "component_data": {
+                    "parent": 46
+                },
+                "component_name": "Parent"
             }
         ],
         "entity": 6,
@@ -283,12 +285,6 @@
             },
             {
                 "component_data": {
-                    "layer_name": "default"
-                },
-                "component_name": "ColliderTag"
-            },
-            {
-                "component_data": {
                     "end": {
                         "x": 0.0,
                         "y": 1.2999999523162842,
@@ -302,6 +298,12 @@
                     }
                 },
                 "component_name": "ColliderCapsule"
+            },
+            {
+                "component_data": {
+                    "layer_name": "default"
+                },
+                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -395,6 +397,15 @@
             },
             {
                 "component_data": {
+                    "camera": 54,
+                    "camera_pivot": 57,
+                    "model": 56,
+                    "scorpion_camera_transform": 58
+                },
+                "component_name": "HackerData"
+            },
+            {
+                "component_data": {
                     "children": [
                         56,
                         57
@@ -419,15 +430,6 @@
                     "radius": -0.4000000059604645
                 },
                 "component_name": "ColliderSphere"
-            },
-            {
-                "component_data": {
-                    "camera": 54,
-                    "camera_pivot": 57,
-                    "model": 56,
-                    "scorpion_camera_transform": 58
-                },
-                "component_name": "HackerData"
             }
         ],
         "entity": 55,
@@ -437,16 +439,16 @@
         "components": [
             {
                 "component_data": {
+                    "name": "ScorpionModel"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
                     "animation_name": "scorpion/scorpion_idle_ANIM_GLTF/scorpion_idle_00_idle.anim",
                     "ticks_per_second": 5000.0
                 },
                 "component_name": "AnimationInstance"
-            },
-            {
-                "component_data": {
-                    "name": "ScorpionModel"
-                },
-                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -471,16 +473,17 @@
             },
             {
                 "component_data": {
-                    "parent": 55
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
+                    "in_shadow_pass": false,
                     "material_type": 0,
                     "model_name": "scorpion/scorpion_idle.skinmdl"
                 },
                 "component_name": "SkinnedModelInstance"
+            },
+            {
+                "component_data": {
+                    "parent": 55
+                },
+                "component_name": "Parent"
             }
         ],
         "entity": 56,
@@ -644,6 +647,7 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": false,
                     "material_type": 0,
                     "model_name": "knife/knife.mdl",
                     "scale_uv_with_transform": false
@@ -692,6 +696,7 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": false,
                     "material_type": 0,
                     "model_name": "weapon/weapon.mdl",
                     "scale_uv_with_transform": false
@@ -711,6 +716,15 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "can_interact": true,
+                    "interaction": 3,
+                    "interaction_target": 66,
+                    "type": 2
+                },
+                "component_name": "Interactable"
+            },
             {
                 "component_data": {
                     "name": "exp"
@@ -740,6 +754,7 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": false,
                     "material_type": 0,
                     "model_name": "items/electric_box_2/electric_box_2.mdl",
                     "scale_uv_with_transform": false
@@ -774,15 +789,6 @@
                     }
                 },
                 "component_name": "ColliderAABB"
-            },
-            {
-                "component_data": {
-                    "can_interact": true,
-                    "interaction": 3,
-                    "interaction_target": 66,
-                    "type": 2
-                },
-                "component_name": "Interactable"
             }
         ],
         "entity": 66,
@@ -790,6 +796,15 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "can_interact": true,
+                    "interaction": 1,
+                    "interaction_target": 68,
+                    "type": 2
+                },
+                "component_name": "Interactable"
+            },
             {
                 "component_data": {
                     "name": "HackerCameraJump"
@@ -819,6 +834,7 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": false,
                     "material_type": 0,
                     "model_name": "weapon/weapon.mdl",
                     "scale_uv_with_transform": false
@@ -845,15 +861,6 @@
                     }
                 },
                 "component_name": "ColliderAABB"
-            },
-            {
-                "component_data": {
-                    "can_interact": true,
-                    "interaction": 1,
-                    "interaction_target": 68,
-                    "type": 2
-                },
-                "component_name": "Interactable"
             }
         ],
         "entity": 1,
@@ -984,6 +991,7 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": false,
                     "material_type": 0,
                     "model_name": "items/planes/asfalt.mdl",
                     "scale_uv_with_transform": true
@@ -1031,6 +1039,7 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": false,
                     "material_type": 0,
                     "model_name": "items/planes/asfalt.mdl",
                     "scale_uv_with_transform": true
@@ -1078,6 +1087,7 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": false,
                     "material_type": 0,
                     "model_name": "items/planes/asfalt.mdl",
                     "scale_uv_with_transform": true
@@ -1125,6 +1135,7 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": false,
                     "material_type": 0,
                     "model_name": "items/planes/cement.mdl",
                     "scale_uv_with_transform": true
@@ -1172,6 +1183,7 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": false,
                     "material_type": 0,
                     "model_name": "items/planes/cement.mdl",
                     "scale_uv_with_transform": true
@@ -1311,6 +1323,7 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": false,
                     "material_type": 0,
                     "model_name": "items/planes/cement.mdl",
                     "scale_uv_with_transform": true
@@ -1358,6 +1371,7 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": false,
                     "material_type": 0,
                     "model_name": "items/planes/cement.mdl",
                     "scale_uv_with_transform": true
@@ -1450,6 +1464,7 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": false,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
                     "scale_uv_with_transform": true
@@ -1662,6 +1677,7 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": false,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
                     "scale_uv_with_transform": true
@@ -1746,6 +1762,7 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": false,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
                     "scale_uv_with_transform": true
@@ -1830,6 +1847,7 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": false,
                     "material_type": 0,
                     "model_name": "items/planes/cement.mdl",
                     "scale_uv_with_transform": true
@@ -1877,6 +1895,7 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": false,
                     "material_type": 0,
                     "model_name": "items/planes/cement.mdl",
                     "scale_uv_with_transform": true
@@ -1924,6 +1943,7 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": false,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
                     "scale_uv_with_transform": true
@@ -2008,6 +2028,7 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": false,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
                     "scale_uv_with_transform": true
@@ -2092,6 +2113,7 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": false,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
                     "scale_uv_with_transform": true
@@ -2209,6 +2231,7 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": false,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
                     "scale_uv_with_transform": true
@@ -2293,6 +2316,7 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": false,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
                     "scale_uv_with_transform": true
@@ -2487,6 +2511,7 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": false,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
                     "scale_uv_with_transform": true
@@ -2571,6 +2596,7 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": false,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
                     "scale_uv_with_transform": true
@@ -2749,6 +2775,7 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": false,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
                     "scale_uv_with_transform": true
@@ -2833,6 +2860,7 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": false,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
                     "scale_uv_with_transform": true
@@ -2917,6 +2945,7 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": false,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
                     "scale_uv_with_transform": true
@@ -3001,6 +3030,7 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": false,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
                     "scale_uv_with_transform": true
@@ -3085,6 +3115,7 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": false,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
                     "scale_uv_with_transform": true
@@ -3169,6 +3200,7 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": false,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
                     "scale_uv_with_transform": true
@@ -3351,6 +3383,7 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": false,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
                     "scale_uv_with_transform": true
@@ -3435,6 +3468,7 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": false,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
                     "scale_uv_with_transform": true
@@ -3519,6 +3553,7 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": false,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
                     "scale_uv_with_transform": true
@@ -3603,6 +3638,7 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": false,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
                     "scale_uv_with_transform": true
@@ -3731,6 +3767,7 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": false,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
                     "scale_uv_with_transform": true
@@ -3815,6 +3852,7 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": false,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
                     "scale_uv_with_transform": true
@@ -3899,6 +3937,7 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": false,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
                     "scale_uv_with_transform": true
@@ -3983,6 +4022,7 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": false,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
                     "scale_uv_with_transform": true
@@ -4067,6 +4107,7 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": false,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
                     "scale_uv_with_transform": true
@@ -4151,6 +4192,7 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": false,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
                     "scale_uv_with_transform": true

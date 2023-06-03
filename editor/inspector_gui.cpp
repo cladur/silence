@@ -8,6 +8,8 @@
 #include "components/fmod_listener_component.h"
 #include "components/interactable_component.h"
 #include "components/light_component.h"
+#include "components/path_node_component.h"
+#include "components/path_parent_component.h"
 #include "components/platform_component.h"
 #include "components/rigidbody_component.h"
 #include "physics/physics_manager.h"
@@ -16,6 +18,7 @@
 #include <imgui_internal.h>
 #include <imgui_stdlib.h>
 
+#include "audio/audio_manager.h"
 #include "editor.h"
 #include "render/ecs/billboard_component.h"
 
@@ -65,6 +68,10 @@ void Inspector::show_components() {
 	SHOW_COMPONENT(EnemyData, show_enemy_data);
 	SHOW_COMPONENT(ExplodingBox, show_exploding_box);
 	SHOW_COMPONENT(Billboard, show_billboard);
+	SHOW_COMPONENT(PathNode, show_path_node);
+	SHOW_COMPONENT(PathParent, show_path_parent);
+	SHOW_COMPONENT(Taggable, show_taggable);
+	SHOW_COMPONENT(FMODEmitter, show_fmod_emitter);
 
 	for (int i = 0; i < remove_component_queue.size(); i++) {
 		auto [entity, component_to_remove] = remove_component_queue.front();
@@ -124,6 +131,7 @@ void Inspector::show_transform() {
 		ImGui::EndTable();
 	}
 }
+
 void Inspector::show_rigidbody() {
 	auto &rigidbody = world->get_component<RigidBody>(selected_entity);
 	if (ImGui::CollapsingHeader("RigidBody", tree_flags)) {
@@ -163,6 +171,7 @@ void Inspector::show_parent() {
 		ImGui::EndTable();
 	}
 }
+
 void Inspector::show_children() {
 	auto &children = world->get_component<Children>(selected_entity);
 	if (ImGui::CollapsingHeader("Children", tree_flags)) {
@@ -195,7 +204,7 @@ void Inspector::show_children() {
 
 void Inspector::show_skinnedmodelinstance() {
 	auto &modelinstance = world->get_component<SkinnedModelInstance>(selected_entity);
-	auto models = resource_manager.get_skinned_models();
+	auto &models = resource_manager.get_skinned_models();
 	if (ImGui::CollapsingHeader("Skinned Model Instance", tree_flags)) {
 		remove_component_popup<SkinnedModelInstance>();
 		std::string name = resource_manager.get_skinned_model(modelinstance.model_handle).name;
@@ -211,7 +220,7 @@ void Inspector::show_skinnedmodelinstance() {
 
 		float available_width = ImGui::GetContentRegionAvail().x;
 		ImGui::BeginTable("Skinned Model Instance", 2);
-		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+		ImGui::TableSetupColumn("##Skinned Model Instance", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
 		ImGui::TableNextRow();
 		ImGui::TableSetColumnIndex(0);
 		ImGui::Text("Model");
@@ -289,7 +298,7 @@ void Inspector::show_skinnedmodelinstance() {
 
 void Inspector::show_modelinstance() {
 	auto &modelinstance = world->get_component<ModelInstance>(selected_entity);
-	auto models = resource_manager.get_models();
+	auto &models = resource_manager.get_models();
 	if (ImGui::CollapsingHeader("Model Instance", tree_flags)) {
 		remove_component_popup<ModelInstance>();
 		std::string name = resource_manager.get_model(modelinstance.model_handle).name;
@@ -388,7 +397,6 @@ void Inspector::show_modelinstance() {
 
 void Inspector::show_animationinstance() {
 	auto &animation_instance = world->get_component<AnimationInstance>(selected_entity);
-	auto &models = resource_manager.get_skinned_models();
 	auto &animations = resource_manager.get_animations();
 	if (ImGui::CollapsingHeader("Animation Instance", tree_flags)) {
 		remove_component_popup<AnimationInstance>();
@@ -406,7 +414,7 @@ void Inspector::show_animationinstance() {
 
 		float available_width = ImGui::GetContentRegionAvail().x;
 		ImGui::BeginTable("Animation Instance", 2);
-		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+		ImGui::TableSetupColumn("##Animation Instance", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
 		ImGui::TableNextRow();
 		ImGui::TableSetColumnIndex(0);
 		ImGui::Text("Animation");
@@ -897,30 +905,8 @@ void Inspector::show_agent_data() {
 void Inspector::show_enemy_path() {
 	auto &enemy_path = world->get_component<EnemyPath>(selected_entity);
 	if (ImGui::CollapsingHeader("Enemy Path", tree_flags)) {
-		if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
-			ImGui::OpenPopup("EnemyPathContextMenu");
-		}
-		if (ImGui::BeginPopup("EnemyPathContextMenu")) {
-			if (ImGui::MenuItem("Add Node")) {
-				if (enemy_path.path.empty()) {
-					// if this is the first node, add it in place of transform
-					auto &transform = world->get_component<Transform>(selected_entity);
-					enemy_path.path.emplace_back(transform.position);
-					enemy_path.patrol_points.emplace_back(0.0f, false);
-				} else {
-					// otherwise, add it in place of the last node
-					enemy_path.path.emplace_back(enemy_path.path.back());
-					enemy_path.patrol_points.emplace_back(0.0f, false);
-				}
-			}
-			if (ImGui::MenuItem("Remove Node")) {
-				if (!enemy_path.path.empty()) {
-					enemy_path.path.pop_back();
-					enemy_path.patrol_points.pop_back();
-				}
-			}
-			ImGui::EndPopup();
-		}
+		remove_component_popup<EnemyPath>();
+
 		float available_width = ImGui::GetContentRegionAvail().x;
 		ImGui::BeginTable("Enemy Path", 2);
 		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
@@ -928,19 +914,48 @@ void Inspector::show_enemy_path() {
 		int i = 0;
 		show_float("Speed", enemy_path.speed);
 		show_float("Rot Speed", enemy_path.rotation_speed);
-		for (auto &node : enemy_path.path) {
-			std::string label = fmt::format("Node {}", i);
-			std::string pos_label = fmt::format("{} Position", i);
-			std::string checkbox_label = fmt::format("{} Patrol Point", i);
-			std::string float_label = fmt::format("{} Patrol Time", i);
-			ImGui::SeparatorText(label.c_str());
-			show_vec3(pos_label.c_str(), node);
-			show_checkbox(checkbox_label.c_str(), enemy_path.patrol_points[i].second);
-			if (enemy_path.patrol_points[i].second) {
-				show_float(float_label.c_str(), enemy_path.patrol_points[i].first);
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Path Parent: %d", enemy_path.path_parent);
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
+				Entity payload_entity = *(Entity *)payload->Data;
+				enemy_path.path_parent = payload_entity;
 			}
-			i++;
+			ImGui::EndDragDropTarget();
 		}
+
+		ImGui::EndTable();
+	}
+}
+
+void Inspector::show_path_node() {
+	auto &path_node = world->get_component<PathNode>(selected_entity);
+	if (ImGui::CollapsingHeader("Path Node", tree_flags)) {
+		remove_component_popup<PathNode>();
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("Path Node", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+
+		show_checkbox("Patrol Point", path_node.is_patrol_point);
+		show_float("Patrol Time", path_node.patrol_time);
+
+		ImGui::EndTable();
+	}
+}
+
+void Inspector::show_path_parent() {
+	auto &path_parent = world->get_component<PathParent>(selected_entity);
+	if (ImGui::CollapsingHeader("Path Parent", tree_flags)) {
+		remove_component_popup<PathParent>();
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("Path Parent", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+
 		ImGui::EndTable();
 	}
 }
@@ -1144,6 +1159,76 @@ void Inspector::show_billboard() {
 	}
 }
 
+void Inspector::show_fmod_emitter() {
+	auto &emitter = world->get_component<FMODEmitter>(selected_entity);
+
+	if (ImGui::CollapsingHeader("Fmod Emitter", tree_flags)) {
+		if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+			ImGui::OpenPopup("FmodEmitterContextMenu");
+		}
+		if (ImGui::BeginPopup("FmodEmitterContextMenu")) {
+			if (ImGui::MenuItem("Reset Fmod Emitter")) {
+				emitter.event_path = "";
+			}
+			remove_component_menu_item<FMODEmitter>();
+
+			ImGui::EndPopup();
+		}
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("Fmod Emitter Component", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Event Name");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		static char event_name[256];
+		ImGui::InputText("##EventName", event_name, 256);
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Event Status: ");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		if (AudioManager::get().is_valid_event_path(event_name)) {
+			emitter.event_path = event_name;
+			ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0,255,0,255));
+			ImGui::Text("Ok");
+		} else {
+			ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255,0,0,255));
+			ImGui::Text("Event Not Found in Banks");
+		}
+		ImGui::PopStyleColor();
+
+		show_checkbox("Is 3D", emitter.is_3d);
+
+		ImGui::EndTable();
+	}
+}
+
+
+void Inspector::show_taggable() {
+	auto &taggable = world->get_component<Taggable>(selected_entity);
+
+	if (ImGui::CollapsingHeader("Taggable", tree_flags)) {
+		if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+			ImGui::OpenPopup("TaggableContextMenu");
+		}
+		if (ImGui::BeginPopup("TaggableContextMenu")) {
+			remove_component_menu_item<Taggable>();
+			ImGui::EndPopup();
+		}
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("Position", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+
+		show_vec3("Position", taggable.tag_position);
+
+		ImGui::EndTable();
+	}
+}
+
 bool Inspector::show_vec2(
 		const char *label, glm::vec2 &vec2, float speed, float reset_value, float min_value, float max_value) {
 	bool changed = false;
@@ -1315,6 +1400,10 @@ void Inspector::show_add_component() {
 			SHOW_ADD_COMPONENT(ExplodingBox);
 			SHOW_ADD_COMPONENT(EnemyData);
 			SHOW_ADD_COMPONENT(Billboard);
+			SHOW_ADD_COMPONENT(PathNode);
+			SHOW_ADD_COMPONENT(PathParent);
+			SHOW_ADD_COMPONENT(Taggable);
+			SHOW_ADD_COMPONENT(FMODEmitter);
 
 			ImGui::EndPopup();
 		}

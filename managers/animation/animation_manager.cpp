@@ -59,7 +59,7 @@ void AnimationManager::local_to_model(AnimData &data) {
 
 	Rig &rig = model.rig;
 
-	std::vector<Xform> &local_matrices = data.local_pose.xforms;
+	const std::vector<Xform> &local_matrices = data.local_pose.xforms;
 	data.model_pose.xforms.resize(data.local_pose.xforms.size());
 	std::vector<Xform> &global_matrices = data.model_pose.xforms;
 
@@ -78,6 +78,9 @@ void AnimationManager::model_to_final(AnimData &data) {
 	SkinnedModel &model = resource_manager.get_skinned_model(data.model->model_handle);
 
 	Rig &rig = model.rig;
+	if (data.model->bone_matrices.size() < MAX_BONE_COUNT) {
+		data.model->bone_matrices.resize(MAX_BONE_COUNT);
+	}
 
 	std::vector<Xform> &global_matrices = data.model_pose.xforms;
 
@@ -131,7 +134,8 @@ glm::mat4 AnimationManager::get_bone_transform(Entity holder, std::string &bone_
 	AnimData &data = animation_map[holder];
 	SkinnedModel &model = resource_manager.get_skinned_model(data.model->model_handle);
 
-	for (int32_t i = 0; i < data.model_pose.xforms.size(); ++i) {
+	int32_t size = std::min(model.rig.names.size(), data.model_pose.xforms.size());
+	for (int32_t i = 0; i < size; ++i) {
 		if (model.rig.names[i] == bone_name) {
 			return glm::mat4(data.model_pose.xforms[i]);
 		}

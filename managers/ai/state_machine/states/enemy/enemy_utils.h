@@ -33,12 +33,12 @@ namespace enemy_utils {
 		t.add_global_euler_rot(path.rotation_end * dt * path.rotation_speed);
 	}
 
-	inline void handle_detection(World *world, Transform &transform, EnemyData &enemy_data, float &dt, DebugDraw *dd = nullptr) {
+	inline void handle_detection(World *world, Transform &transform, glm::vec3 forward, EnemyData &enemy_data, float &dt, DebugDraw *dd = nullptr) {
 		auto agent_pos = GameplayManager::get().get_agent_position(world->get_parent_scene()) + agent_target_top_offset;
 		bool can_see_player = false;
 		auto enemy_look_origin = transform.position + enemy_look_offset;
 		auto agent_dir = glm::normalize(agent_pos - enemy_look_origin);
-		auto forward = glm::normalize(transform.get_global_forward());
+		//auto forward = glm::normalize(transform.get_global_forward());
 
 		if (dd != nullptr) {
 			//dd->draw_line(transform.position, transform.position + agent_dir, glm::vec3(1.0f, 0.0f, 0.0f));
@@ -56,6 +56,7 @@ namespace enemy_utils {
 				Ray ray{};
 				ray.origin = enemy_look_origin + agent_dir;
 				ray.direction = agent_dir;
+				ray.ignore_layers.emplace_back("camera");
 				glm::vec3 ray_end = ray.origin + ray.direction * enemy_data.view_cone_distance;
 
 				HitInfo hit_info;
@@ -68,6 +69,7 @@ namespace enemy_utils {
 					if (dd != nullptr) {
 						dd->draw_line(ray.origin, ray_end, glm::vec3(0.0f, 1.0f, 1.0f));
 					}
+					auto &tag = world->get_component<ColliderTag>(hit_info.entity);
 					if (hit_info.entity == GameplayManager::get().get_agent_entity()) {
 						can_see_player = true;
 					}
@@ -107,24 +109,30 @@ namespace enemy_utils {
 
 	inline void update_detection_slider(uint32_t entity_id, Transform &transform, EnemyData &enemy_data) {
 		auto &slider = UIManager::get().get_ui_slider(std::to_string(entity_id) + "_detection", "detection_slider");
+		if (enemy_data.detection_level < 0.001f) {
+			slider.display = false;
+		} else {
+			slider.display = true;
+		}
 		slider.value = enemy_data.detection_level;
 		// lerp from white to red
 		slider.color = glm::lerp(glm::vec4(1.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), slider.value);
 		slider.position = transform.get_global_position() + glm::vec3(0.0f, 2.5f, 0.0f);
 	}
 
-	inline uint32_t find_closest_node(World *world, glm::vec3 &position, EnemyPath &path) {
+	inline uint32_t find_closest_node(World *world, glm::vec3 &position, Children &path) {
 		uint32_t closest_node = 0;
 		float closest_distance = 1000000.0f;
-		int i = 0;
-		for (auto &node : path.path) {
+
+		for (int i = 0; i < path.children_count; i ++) {
+			auto &node = world->get_component<Transform>(path.children[i]).position;
 			auto distance = glm::distance(position, node);
 			if (distance < closest_distance) {
 				closest_distance = distance;
 				closest_node = i;
 			}
-			i++;
 		}
+
 		return closest_node;
 	}
 }

@@ -11,5 +11,4 @@ target_link_libraries(${DISPLAY_MANAGER_NAME}
         PRIVATE
         silence_common
         glfw
-        vk-bootstrap::vk-bootstrap
         )

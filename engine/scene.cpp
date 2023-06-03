@@ -14,6 +14,9 @@
 
 #include "animation/ecs/animation_system.h"
 #include "animation/ecs/attachment_system.h"
+#include "audio/ecs/fmod_emitter_system.h"
+#include "components/fmod_emitter_component.h"
+#include "components/taggable_component.h"
 #include "ecs/systems/agent_system.h"
 #include "ecs/systems/collider_draw.h"
 #include "ecs/systems/enemy_path_draw_system.h"
@@ -22,6 +25,7 @@
 #include "ecs/systems/hacker_system.h"
 #include "ecs/systems/isolated_entities_system.h"
 #include "ecs/systems/root_parent_system.h"
+#include "ecs/systems/taggable_system.h"
 #include "gameplay/gameplay_manager.h"
 #include "managers/physics/ecs/collision_system.h"
 #include "managers/physics/ecs/physics_system.h"
@@ -68,6 +72,10 @@ Scene::Scene() {
 		world.register_component<ExplodingBox>();
 		world.register_component<EnemyData>();
 		world.register_component<Billboard>();
+		world.register_component<PathNode>();
+		world.register_component<PathParent>();
+		world.register_component<Taggable>();
+		world.register_component<FMODEmitter>();
 	}
 	// Components
 
@@ -112,9 +120,11 @@ void Scene::register_game_systems() {
 	world.register_system<AgentSystem>(EcsOnUpdate);
 	world.register_system<HackerSystem>(EcsOnUpdate);
 	world.register_system<EnemySystem>(EcsOnUpdate);
+	world.register_system<TaggableSystem>();
 	//world.register_system<EnemyPathing>(EcsOnUpdate);
 	world.register_system<InteractableSystem>(EcsOnUpdate);
 	world.register_system<PlatformSystem>(EcsOnUpdate);
+	world.register_system<FMODEmitterSystem>();
 }
 
 void Scene::update(float dt) {

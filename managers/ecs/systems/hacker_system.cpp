@@ -11,6 +11,8 @@
 
 #include "input/input_manager.h"
 #include "resource/resource_manager.h"
+#include <audio/audio_manager.h>
+#include <render/transparent_elements/ui_manager.h>
 #include <spdlog/spdlog.h>
 #include <glm/fwd.hpp>
 #include <glm/geometric.hpp>
@@ -30,19 +32,21 @@ AutoCVarInt cvar_hacker_on_keyboard(
 		"settings.hacker_on_keyboard", "Control hacker with keyboard + mouse", 0, CVarFlags::EditCheckbox);
 
 bool HackerSystem::shoot_raycast(
-		Transform &transform, World &world, HackerData &hacker_data, float dt, glm::vec3 direction) {
+		Transform &transform, World &world, HackerData &hacker_data, float dt, bool trigger, glm::vec3 direction) {
 	Ray ray;
-	ray.origin = transform.get_global_position() + glm::vec3(0.0f, 0.0f, -1.0f);
+	ray.origin = transform.get_global_position();
 	ray.direction = direction;
 	ray.layer_name = "hacker";
+	ray.ignore_layers.emplace_back("camera");
 	ray.ignore_list.emplace_back(current_camera_entity);
-	glm::vec3 end = ray.origin + direction * 100.0f;
-	// world.get_parent_scene()->get_render_scene().debug_draw.draw_arrow(ray.origin, end, glm::vec3(1.0f, 0.0f, 0.0f));
+	glm::vec3 end = ray.origin + direction * 10.0f;
 	HitInfo info;
 	bool hit = CollisionSystem::ray_cast_layer(world, ray, info);
 
+	ui_text->text = "";
+
 	if (!hit) {
-		SPDLOG_ERROR("NO HIT");
+		//SPDLOG_ERROR("NO HIT");
 		return false;
 	}
 
@@ -58,23 +62,28 @@ bool HackerSystem::shoot_raycast(
 		return false;
 	}
 
-	auto &interactable = world.get_component<Interactable>(hit_entity);
+	ui_text->text = "Press LMB to interact";
 
-	if (!(interactable.type == InteractionType::Hacker)) {
-		SPDLOG_WARN("Entity {} is not a hacker interactable", hit_entity);
-		return false;
+	if (trigger) {
+		auto &interactable = world.get_component<Interactable>(hit_entity);
+
+		if (!(interactable.type == InteractionType::Hacker)) {
+			SPDLOG_WARN("Entity {} is not a hacker interactable", hit_entity);
+			return false;
+		}
+
+		if (!interactable.can_interact) {
+			SPDLOG_WARN("Entity {} cannot be interacted with", hit_entity);
+			return false;
+		}
+
+		if (interactable.interaction == Interaction::HackerCameraJump) {
+			jump_to_camera(world, hacker_data, hit_entity);
+		}
+
+		interactable.triggered = true;
 	}
 
-	if (!interactable.can_interact) {
-		SPDLOG_WARN("Entity {} cannot be interacted with", hit_entity);
-		return false;
-	}
-
-	if (interactable.interaction == Interaction::HackerCameraJump) {
-		jump_to_camera(world, hacker_data, hit_entity);
-	}
-
-	interactable.triggered = true;
 	return true;
 }
 
@@ -106,12 +115,41 @@ void HackerSystem::startup(World &world) {
 	world.set_system_component_whitelist<HackerSystem>(whitelist);
 
 	previous_velocity = { 0, 0, 0 };
+
+	ui_name = "hacker_ui";
+
+	auto &rm = ResourceManager::get();
+	auto crosshair_tex = rm.load_texture(asset_path("crosshair.ktx2").c_str());
+
+	auto &ui = UIManager::get();
+	ui.create_ui_scene(ui_name);
+	ui.activate_ui_scene(ui_name);
+
+	// anchor at the center of hacker's half of screen
+	auto &root_anchor = ui.add_ui_anchor(ui_name, "root_anchor");
+	root_anchor.is_screen_space = true;
+	root_anchor.x = 0.75f;
+	root_anchor.y = 0.5f;
+	root_anchor.display = true;
+	ui.add_as_root(ui_name, "root_anchor");
+
+	auto &crosshair = ui.add_ui_image(ui_name, "crosshair");
+	crosshair.texture = crosshair_tex;
+	crosshair.size = glm::vec2(50.0f);
+	ui.add_to_root(ui_name, "crosshair", "root_anchor");
+
+	ui_text = &ui.add_ui_text(ui_name, "text");
+	ui_text->text = "";
+	ui_text->is_screen_space = true;
+	ui_text->size = glm::vec2(0.5f);
+	ui_text->position = glm::vec3(150.0f, 3.0f, 0.0f);
+	ui_text->centered_y = true;
+	ui.add_to_root(ui_name, "text", "root_anchor");
 }
 
 void HackerSystem::update(World &world, float dt) {
 	ZoneScopedN("HackerSystem::update");
 	InputManager &input_manager = InputManager::get();
-	;
 	AnimationManager &animation_manager = AnimationManager::get();
 	ResourceManager &resource_manager = ResourceManager::get();
 	PhysicsManager &physics_manager = PhysicsManager::get();
@@ -123,6 +161,13 @@ void HackerSystem::update(World &world, float dt) {
 		auto &scorpion_camera_tf = world.get_component<Transform>(hacker_data.scorpion_camera_transform);
 		auto &camera_tf = world.get_component<Transform>(hacker_data.camera);
 		auto &animation_instance = world.get_component<AnimationInstance>(hacker_data.model);
+
+		auto &camera = world.get_component<Camera>(hacker_data.camera);
+
+		if (first_frame) {
+			default_fov = camera.fov;
+			first_frame = false;
+		}
 
 		if (!is_on_camera) {
 			camera_tf.set_position(scorpion_camera_tf.get_global_position());
@@ -144,15 +189,15 @@ void HackerSystem::update(World &world, float dt) {
 		auto camera_right = camera_pivot_tf.get_global_right();
 
 		if (!is_on_camera) {
-			world.get_parent_scene()->get_render_scene().debug_draw.draw_arrow(
-					camera_tf.get_global_position() + glm::vec3(0.0f, 0.0f, -1.0f),
-					camera_tf.get_global_position() + glm::vec3(0.0f, 0.0f, -1.0f) + real_camera_forward * 100.0f,
-					glm::vec3(1.0f, 0.0f, 0.0f));
+//			world.get_parent_scene()->get_render_scene().debug_draw.draw_arrow(
+//					camera_tf.get_global_position() + glm::vec3(0.0f, 0.0f, -1.0f),
+//					camera_tf.get_global_position() + glm::vec3(0.0f, 0.0f, -1.0f) + real_camera_forward * 100.0f,
+//					glm::vec3(1.0f, 0.0f, 0.0f));
 		} else {
-			world.get_parent_scene()->get_render_scene().debug_draw.draw_arrow(
-					camera_tf.get_global_position() + glm::vec3(0.0f, 0.0f, -1.0f),
-					camera_tf.get_global_position() + glm::vec3(0.0f, 0.0f, 1.0f) - real_camera_forward * 100.0f,
-					glm::vec3(1.0f, 0.0f, 0.0f));
+//			world.get_parent_scene()->get_render_scene().debug_draw.draw_arrow(
+//					camera_tf.get_global_position() + glm::vec3(0.0f, 0.0f, -1.0f),
+//					camera_tf.get_global_position() + glm::vec3(0.0f, 0.0f, 1.0f) - real_camera_forward * 100.0f,
+//					glm::vec3(1.0f, 0.0f, 0.0f));
 		}
 
 		glm::vec3 acc_direction = { 0, 0, 0 };
@@ -175,13 +220,49 @@ void HackerSystem::update(World &world, float dt) {
 			acc_direction = glm::vec3(0.0f);
 		}
 
-		if (input_manager.is_action_just_pressed("mouse_left")) {
+		// for the UI sake we need to shoot the raycast every time to know if we're even hovering over anything.
+		bool triggered = input_manager.is_action_just_pressed("mouse_left");
+		if (!is_zooming) {
 			if (!is_on_camera) {
-				shoot_raycast(camera_tf, world, hacker_data, dt, real_camera_forward);
+				shoot_raycast(camera_tf, world, hacker_data, dt, triggered, real_camera_forward);
 			} else {
-				shoot_raycast(camera_tf, world, hacker_data, dt, -real_camera_forward);
+				shoot_raycast(camera_tf, world, hacker_data, dt, triggered, -real_camera_forward);
 			}
 		}
+
+		// ZOOMING LOGIC
+		if (input_manager.is_action_pressed("control_camera")) {
+			is_zooming = true;
+			camera.fov = glm::mix(camera.fov, 30.0f, dt * 3.0f);
+			camera_sens_modifier = glm::mix(camera_sens_modifier, 0.3f, dt * 3.0f);
+			bool tag_trigger = input_manager.is_action_just_pressed("mouse_left");
+			Ray tag_ray = {};
+			tag_ray.origin = camera_tf.get_global_position();
+			tag_ray.direction = -camera_tf.get_global_forward();
+			tag_ray.ignore_list.emplace_back(entity);
+			tag_ray.ignore_layers.emplace_back("camera");
+
+			HitInfo info = {};
+			//dd.draw_arrow(tag_ray.origin, end, { 1.0f, 0.0f, 0.0f });
+			if (CollisionSystem::ray_cast(world, tag_ray, info)) {
+				auto &name = world.get_component<Name>(info.entity);
+				if (world.has_component<Taggable>(info.entity)) {
+					auto &taggable = world.get_component<Taggable>(info.entity);
+
+					taggable.tagging = true;
+				}
+			}
+
+		} else {
+			camera.fov = glm::mix(camera.fov, default_fov, dt * 7.0f);
+			camera_sens_modifier = glm::mix(camera_sens_modifier, 1.0f, dt * 7.0f);
+			if (glm::distance(camera.fov, default_fov) < 0.05f) {
+				camera.fov = default_fov;
+				camera_sens_modifier = 1.0f;
+				is_zooming = false;
+			}
+		}
+
 		if (input_manager.is_action_just_pressed("mouse_right")) {
 			go_back_to_scorpion(world, hacker_data);
 		}
@@ -219,6 +300,8 @@ void HackerSystem::update(World &world, float dt) {
 		if (*CVarSystem::get()->get_int_cvar("debug_camera.use")) {
 			mouse_delta = glm::vec2(0.0f);
 		}
+
+		mouse_delta *= camera_sens_modifier;
 
 		if (!is_on_camera) {
 			camera_pivot_tf.add_euler_rot(
@@ -269,6 +352,14 @@ void HackerSystem::update(World &world, float dt) {
 				transform.set_changed(true);
 			}
 		}
+
+//		AudioManager::get().set_3d_listener_attributes(
+//				SILENCE_FMOD_LISTENER_HACKER,
+//				transform.get_global_position(),
+//				velocity,
+//				transform.get_global_forward(),
+//				transform.get_global_up()
+//		);
 
 		last_position = transform.position;
 		previous_velocity = velocity;
