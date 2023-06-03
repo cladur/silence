@@ -15,7 +15,7 @@ uniform mat4 view;
 uniform vec3 camera_look;
 uniform vec3 camera_pos;
 uniform vec3 camera_right;
-uniform vec3 raw_position;
+uniform vec3 entity_center;
 
 layout (std430, binding = 3) buffer ssbo_data {
     vec4 positions[256]; // X, Y, Z, SIZE
@@ -30,16 +30,18 @@ void main() {
     vec3 pos = vec3(rotations[id] * (positions[id].w * vec4(aPos, 1.0)));
     vec3 look_x0z = normalize(vec3(camera_look.x, 0, camera_look.z));
 
-    vec3 new_right = normalize ( cross(
-    normalize(
-    camera_pos - raw_position
-    ),
-    vec3(0, 1, 0)
-    ) );
+    vec3 new_right = normalize(
+        cross(
+            normalize(
+                camera_pos - entity_center
+            ),
+            vec3(0, 1, 0)
+        )
+    );
 
     vec4 world_space_pos = vec4(
         positions[id].xyz + // position
-        camera_right * pos.x +              // right
+        new_right * pos.x +              // right
         vec3(0, 1, 0) * pos.y +          // up
         look_x0z * pos.z, 1.0            // forward
     );

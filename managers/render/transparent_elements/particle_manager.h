@@ -7,7 +7,9 @@
 
 class ParticleManager {
 public:
-	std::map<uint32_t, std::array<ParticleData, MAX_PARTICLES_PER_ENTITY>> particles;
+
+	// map of entity id to pair of array of particle data and entity position
+	std::map<uint32_t, std::pair<std::array<ParticleData, MAX_PARTICLES_PER_ENTITY>, glm::vec3>> particles;
 	std::map<uint32_t, uint32_t> particle_idx;
 	static ParticleManager &get();
 	ParticleVertex default_particle_vertices[4];

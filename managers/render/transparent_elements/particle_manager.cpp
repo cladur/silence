@@ -44,7 +44,7 @@ void ParticleManager::update(float dt) {
 	//update all active particles
 	for (auto &entity : particles) {
 		auto &particle_datas = entity.second;
-		for (auto &particle : particle_datas) {
+		for (auto &particle : particle_datas.first) {
 			if (!particle.active) { continue; }
 
 			particle.lifetime = glm::max(0.0f, particle.lifetime);
@@ -170,6 +170,7 @@ void ParticleManager::update(float dt) {
 }
 
 void ParticleManager::emit(uint32_t entity, ParticleData &particle) {
-	particles[entity][particle_idx[entity]] = particle;
-	particle_idx[entity] = ++particle_idx[entity] % particles[entity].size();
+	particles[entity].first[particle_idx[entity]] = particle;
+	particles[entity].second = particle.entity_position;
+	particle_idx[entity] = ++particle_idx[entity] % particles[entity].first.size();
 }

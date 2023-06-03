@@ -1341,6 +1341,30 @@ void Inspector::show_particle_emitter() {
 		ps.rate = glm::max(0.0f, ps.rate);
 		show_float("Lifetime", ps.lifetime);
 		ps.lifetime = glm::max(0.0f, ps.lifetime);
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Texture");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		if (ps.is_textured) {
+			ImGui::Text("Texture: %s", resource_manager.get_texture_name(ps.texture).c_str());
+		}
+		else {
+			ImGui::Text("Texture: None");
+		}
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_TEXTURE_PATH")) {
+				const std::string payload_n = *(const std::string *)payload->Data;
+				resource_manager.load_texture(payload_n.c_str());
+				ps.texture = resource_manager.get_texture_handle(payload_n);
+				ps.is_textured = true;
+			}
+
+			ImGui::EndDragDropTarget();
+		}
+
 		ImGui::EndTable();
 	}
 }

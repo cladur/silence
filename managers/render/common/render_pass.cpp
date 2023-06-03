@@ -492,15 +492,16 @@ void ParticlePass::draw(RenderScene &scene) {
 	ssbo_data.resize(MAX_PARTICLES_PER_ENTITY);
 
 	// copy the map to a vector of pairs
-	static std::vector<std::pair<Entity, std::array<ParticleData, MAX_PARTICLES_PER_ENTITY>>> particles;
+	static std::vector<std::pair<Entity, std::pair<std::array<ParticleData, MAX_PARTICLES_PER_ENTITY>, glm::vec3>>> particles;
 	particles.clear();
 	particles.reserve(pm.particles.size());
 	for (auto &p : pm.particles) {
         particles.emplace_back(p);
     }
+
 	// now SORT the vector by distance to camera so that the farthest particles are drawn first
 	std::sort(particles.begin(), particles.end(), [&cam_pos](auto &a, auto &b) {
-        return glm::distance2(cam_pos, a.second[0].entity_position) > glm::distance2(cam_pos, b.second[0].entity_position);
+        return glm::distance2(cam_pos, a.second.first[0].entity_position) > glm::distance2(cam_pos, b.second.first[0].entity_position);
     });
 
 	static int i;
@@ -508,26 +509,36 @@ void ParticlePass::draw(RenderScene &scene) {
 
 	i = 0;
 	// draw the particles per entity
-	//std::cout << "rendering [" << particles.size() << "] entities that emit particles" << std::endl;
 	for (auto &p : particles) {
 		auto &entity_id = p.first;
 		auto &particles_array = p.second;
+		static glm::vec3 entity_pos;
+		entity_pos = particles_array.second;
+		static glm::vec3 cam_pos_y_like_entity;
+		cam_pos_y_like_entity = cam_pos;
+		cam_pos_y_like_entity.y = entity_pos.y;
 
 		// SORT particle data by distance to camera
-		std::sort(particles_array.begin(), particles_array.end(), [&cam_pos](auto &a, auto &b) {
-            return glm::distance2(cam_pos, a.position) > glm::distance2(cam_pos, b.position);
-        });
+//		std::sort(particles_array.begin(), particles_array.end(), [&cam_pos](auto &a, auto &b) {
+//            return glm::distance2(cam_pos, a.position) > glm::distance2(cam_pos, b.position);
+//        });
+
+		// sort particles by projecting their position onto a line from the camera to the entity
+		std::sort(particles_array.first.begin(), particles_array.first.end(), [](auto &a, auto &b) {
+			auto a_proj = glm::dot(a.position - cam_pos_y_like_entity, entity_pos - cam_pos_y_like_entity);
+			auto b_proj = glm::dot(b.position - cam_pos_y_like_entity, entity_pos - cam_pos_y_like_entity);
+			return a_proj > b_proj;
+		});
 
 		j = 0;
-		for (auto &particle : particles_array) {
+		for (auto &particle : particles_array.first) {
 			if (particle.active) {
 				glm::mat4 rot = glm::mat4(1.0f);
 				rot = glm::rotate(rot, glm::radians(particle.rotation), glm::vec3(0.0f, 0.0f, 1.0f));
-				std::cout << j ;
 				ssbo_data[i].position[j] = glm::vec4(particle.position, particle.size);
 				ssbo_data[i].rotation[j] = rot;
 				ssbo_data[i].colors  [j] = particle.color;
-				std::cout << " end." << std::endl;
+				entity_pos = particle.entity_position;
 				j++;
 			}
 			if (j >= MAX_PARTICLES_PER_ENTITY) {
@@ -535,7 +546,12 @@ void ParticlePass::draw(RenderScene &scene) {
 				break;
 			}
 		}
-		//std::cout << "entity {" << i << "} has currently [" << j << "] particles alive" << std::endl;
+
+		scene.debug_draw.draw_sphere(entity_pos, 0.2f, glm::vec3(1.0f, 0.0f, 0.0f));
+//		//std::cout << "entity {" << i << "} has currently [" << j << "] particles alive" << std::endl;
+//		for (int o = 0; o < j; o++) {
+//			scene.debug_draw.draw_sphere(ssbo_data[i].position[o], 0.1f, glm::vec3(0.1f, (float)o / (float)j, 0.1f));
+//		}
 
 		// check if there are any particles to draw
 		if (j == 0) {
@@ -544,8 +560,8 @@ void ParticlePass::draw(RenderScene &scene) {
 		}
 
 		// all particles have the same texture
-		if (particles_array[0].is_textured != 0) {
-			auto tex = rm.get_texture(particles_array[0].tex);
+		if (particles_array.first[0].is_textured != 0) {
+			auto tex = rm.get_texture(particles_array.first[0].tex);
 			material.shader.set_int("particle_tex", 0);
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, tex.id);
@@ -560,7 +576,8 @@ void ParticlePass::draw(RenderScene &scene) {
 		material.shader.set_float("far_sub_near", scene.camera_near_far.y - scene.camera_near_far.y);
 		material.shader.set_float("far", scene.camera_near_far.y);
 		material.shader.set_float("near", scene.camera_near_far.x);
-		material.shader.set_int("is_textured", particles_array[0].is_textured);
+		material.shader.set_int("is_textured", particles_array.first[0].is_textured);
+		material.shader.set_vec3("entity_center", entity_pos);
 
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
 		glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeof(ssbo_data[i]), &ssbo_data[i]); // THIS THROWS EXCEPTION
