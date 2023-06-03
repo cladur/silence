@@ -15,6 +15,7 @@
 #include "components/exploding_box_component.h"
 #include "components/fmod_listener_component.h"
 #include "components/hacker_data_component.h"
+#include "components/highlight_component.h"
 #include "components/interactable_component.h"
 #include "components/light_component.h"
 #include "components/name_component.h"
@@ -24,15 +25,16 @@
 #include "components/static_tag_component.h"
 #include "components/transform_component.h"
 
+
 #include "components/path_node_component.h"
 #include "components/path_parent_component.h"
 #include "components/taggable_component.h"
 #include "core/components/exploding_box_component.h"
+#include "core/components/fmod_emitter_component.h"
 #include "managers/animation/ecs/animation_instance.h"
 #include "managers/render/ecs/model_instance.h"
 #include "managers/render/ecs/skinned_model_instance.h"
 #include "render/ecs/billboard_component.h"
-#include "core/components/fmod_emitter_component.h"
 
 namespace serialization {
 
@@ -49,7 +51,7 @@ concept Deserializable = requires(T t, nlohmann::json &j) {
 typedef std::variant<Children, Parent, Transform, RigidBody, FmodListener, Camera, ModelInstance, AnimationInstance,
 		SkinnedModelInstance, Name, ColliderTag, StaticTag, ColliderSphere, ColliderAABB, ColliderOBB, ColliderCapsule,
 		Light, AgentData, HackerData, EnemyPath, EnemyData, Interactable, Attachment, Platform, ExplodingBox, Billboard,
-		PathNode, PathParent, Taggable, FMODEmitter>
+		PathNode, PathParent, Taggable, FMODEmitter, Highlight>
 		variant_type;
 
 template <typename T>

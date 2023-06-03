@@ -76,6 +76,7 @@ Scene::Scene() {
 		world.register_component<PathParent>();
 		world.register_component<Taggable>();
 		world.register_component<FMODEmitter>();
+		world.register_component<Highlight>();
 	}
 	// Components
 
