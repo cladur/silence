@@ -15,7 +15,7 @@ AutoCVarFloat cvar_bloom_strength("render.bloom_strength", "bloom strength", 0.0
 AutoCVarFloat cvar_gamma("render.gamma", "gamma", 2.2f, CVarFlags::EditFloatDrag);
 AutoCVarFloat cvar_dirt_strength("render.dirt_strength", "dirt strength", 0.075f, CVarFlags::EditFloatDrag);
 
-AutoCVarFloat cvar_smooth("render.particle_smooth", "particle smooth measured in 1/100th of a unit", 0.03f, CVarFlags::EditFloatDrag);
+AutoCVarFloat cvar_smooth("render.particle_smooth", "particle smooth measured in 1/100th of a unit", 0.005f, CVarFlags::EditFloatDrag);
 
 void PBRPass::startup() {
 	material.startup();
