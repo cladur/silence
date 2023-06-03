@@ -3,7 +3,6 @@ layout (location = 0) in vec3 aPos;
 layout (location = 3) in vec4 aWeights;
 layout (location = 4) in ivec4 aBoneIds;
 
-uniform mat4 light_space;
 uniform mat4 model;
 
 const int MAX_BONES = 512;
@@ -25,5 +24,5 @@ void main()
             skinned_pos += (bone * pos) * weight;
         }
     }
-    gl_Position = light_space * model * skinned_pos;
+    gl_Position = model * skinned_pos;
 }

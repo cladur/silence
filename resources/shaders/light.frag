@@ -7,6 +7,9 @@ uniform sampler2D gPosition;
 uniform sampler2D gNormal;
 uniform sampler2D gAlbedo;
 uniform sampler2D gAoRoughMetal;
+uniform sampler2D shadowMap;
+uniform samplerCube depthMap;
+uniform float far_plane;
 
 // lights
 uniform vec3 light_position;
@@ -16,6 +19,8 @@ uniform float light_intensity;
 uniform float cutoff;
 uniform float outer_cutoff;
 uniform int type;
+uniform bool cast_shadow;
+uniform mat4 light_space;
 
 uniform vec2 screen_dimensions;
 
@@ -23,6 +28,8 @@ uniform mat4 view;
 uniform vec3 camPos;
 
 const float PI = 3.14159265359;
+vec4 world_light_space;
+
 // ----------------------------------------------------------------------------
 float DistributionGGX(vec3 N, vec3 H, float roughness)
 {
@@ -75,9 +82,79 @@ vec2 CalcTexCoord()
     return gl_FragCoord.xy / screen_dimensions;
 }
 // ----------------------------------------------------------------------------
+vec3 gridSamplingDisk[20] = vec3[]
+(
+    vec3(1.0f, 1.0f, 1.0f), vec3(1.0f, -1.0f, 1.0f), vec3(-1.0f, -1.0f, 1.0f), vec3(-1.0f, 1.0f, 1.0f),
+    vec3(1.0f, 1.0f, -1.0f), vec3(1.0f, -1.0f, -1.0f), vec3(-1.0f, -1.0f, -1.0f), vec3(-1.0f, 1.0f, -1.0f),
+    vec3(1.0f, 1.0f, 0.0f), vec3(1.0f, -1.0f, 0.0f), vec3(-1.0f, -1.0f, 0.0f), vec3(-1.0f, 1.0f, 0.0f),
+    vec3(1.0f, 0.0f, 1.0f), vec3(-1.0f, 0.0f, 1.0f), vec3(1.0f, 0.0f, -1.0f), vec3(-1.0f, 0.0f, -1.0f),
+    vec3(0.0f, 1.0f, 1.0f), vec3(0.0f, -1.0f, 1.0f), vec3(0.0f, -1.0f, -1.0f), vec3(0.0f, 1.0f, -1.0f)
+);
+
+float ShadowPointCalculation(vec3 world_pos)
+{
+    vec3 fragToLight = world_pos - light_position;
+    float currentDepth = length(fragToLight);
+    float shadow = 0.0f;
+    float bias = 0.15f;
+    int samples = 20;
+    float viewDistance = length(camPos - world_pos);
+    float diskRadius = (1.0f + (viewDistance / far_plane)) / 25.0f;
+    for (int i = 0; i < samples; ++i)
+    {
+        float closestDepth = texture(depthMap, fragToLight + gridSamplingDisk[i] * diskRadius).r;
+        closestDepth *= far_plane;   // undo mapping [0;1]
+        if (currentDepth - bias > closestDepth)
+        {
+            shadow += 1.0f;
+        }
+    }
+    shadow /= float(samples);
+
+    return shadow;
+}
+// ----------------------------------------------------------------------------
+float ShadowCalculation(vec3 normal, vec3 light_dir)
+{
+    // perform perspective divide
+    vec3 projCoords = world_light_space.xyz / world_light_space.w;
+    // transform to [0,1] range
+    projCoords = projCoords * 0.5f + 0.5f;
+    // get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
+    float closestDepth = texture(shadowMap, projCoords.xy).r;
+    // get depth of current fragment from light's perspective
+    float currentDepth = projCoords.z;
+    // check whether current frag pos is in shadow
+
+    float shadow = 0.0f;
+    float bias;
+    if (type == 2) {
+        bias = max(0.0000025f * (1.0f - dot(normal, light_dir)), 0.0000005f);
+    } else if (type == 1) {
+        bias = max(0.025f * (1.0f - dot(normal, light_dir)), 0.005f);
+    }
+    vec2 texelSize = 1.0f / textureSize(shadowMap, 0);
+    for (int x = -1; x <= 1; ++x)
+    {
+        for (int y = -1; y <= 1; ++y)
+        {
+            float pcfDepth = texture(shadowMap, projCoords.xy + vec2(x, y) * texelSize).r;
+            shadow += currentDepth - bias > pcfDepth ? 1.0f : 0.0f;
+        }
+    }
+    shadow /= 9.0f;
+
+    if (projCoords.z > 1.0f)
+    {
+        shadow = 0.0f;
+    }
+
+    return shadow;
+}
+// ----------------------------------------------------------------------------
 void CalcDirLight(vec3 normal, vec3 view_pos, vec3 F0, float roughness, float metalness, vec3 albedo)
 {
-    vec3 light_dir = normalize(light_direction);
+    vec3 light_dir = normalize(-light_direction);
     vec3 halfway_dir = normalize(light_dir + view_pos);
 
     float NDF = DistributionGGX(normal, halfway_dir, roughness);
@@ -94,10 +171,10 @@ void CalcDirLight(vec3 normal, vec3 view_pos, vec3 F0, float roughness, float me
     vec3 kD = vec3(1.0) - kS;
     kD *= 1.0 - metalness;
 
-    vec3 diffuse_light = (kD * albedo / PI) * light_color * NdotL;
-    vec3 specular_light = (specular * light_color * NdotL);
+    float shadow = cast_shadow ? ShadowCalculation(normal, light_dir) : 0.0f;
 
-    //    float shadow = ShadowCalculation(worldPosLightSpace, normal,  lightDir);
+    vec3 diffuse_light = (kD * albedo / PI) * light_color * light_intensity * NdotL * (1.0f - shadow);
+    vec3 specular_light = specular * light_color * light_intensity * NdotL * (1.0f - shadow);
 
     Diffuse = vec4(diffuse_light, 0.0);
     Specular = vec4(specular_light, 0.0);
@@ -126,13 +203,14 @@ void CalcPointLight(vec3 world_pos, vec3 normal, vec3 view_pos, vec3 F0, float r
     vec3 kD = vec3(1.0) - kS;
     kD *= 1.0 - metalness;
 
-    vec3 diffuse_light = (kD * albedo / PI) * radiance * NdotL;
-    vec3 specular_light = (specular * radiance * NdotL);
+    float shadow = cast_shadow ? ShadowPointCalculation(world_pos) : 0.0f;
+
+    vec3 diffuse_light = (kD * albedo / PI) * radiance * NdotL * (1.0f - shadow);
+    vec3 specular_light = (specular * radiance * NdotL) * (1.0f - shadow);
 
     Diffuse = vec4(diffuse_light, 0.0);
     Specular = vec4(specular_light, 0.0);
 }
-
 // ----------------------------------------------------------------------------
 void CalcSpotLight(vec3 world_pos, vec3 normal, vec3 view_pos, vec3 F0, float roughness, float metalness, vec3 albedo)
 {
@@ -144,7 +222,7 @@ void CalcSpotLight(vec3 world_pos, vec3 normal, vec3 view_pos, vec3 F0, float ro
     float intensity = clamp((theta - outer_cutoff) / epsilon, 0.0, 1.0);
 
     float distance = length(light_position - world_pos);
-    float attenuation = 1.0;// / (distance * distance);
+    float attenuation = 1.0 / (distance * distance);
     vec3 radiance = intensity * light_intensity * light_color * attenuation;
 
     float NDF = DistributionGGX(normal, halfway_dir, roughness);
@@ -161,8 +239,10 @@ void CalcSpotLight(vec3 world_pos, vec3 normal, vec3 view_pos, vec3 F0, float ro
     vec3 kD = vec3(1.0) - kS;
     kD *= 1.0 - metalness;
 
-    vec3 diffuse_light = (kD * albedo / PI) * radiance * NdotL;
-    vec3 specular_light = (specular * radiance * NdotL);
+    float shadow = cast_shadow ? ShadowCalculation(normal, light_dir) : 0.0f;
+
+    vec3 diffuse_light = (kD * albedo / PI) * radiance * NdotL * (1.0f - shadow);
+    vec3 specular_light = (specular * radiance * NdotL) * (1.0f - shadow);
 
     Diffuse = vec4(diffuse_light, 0.0);
     Specular = vec4(specular_light, 0.0);
@@ -192,12 +272,13 @@ void main()
     vec3 F0 = vec3(0.04);
     F0 = mix(F0, albedo, metallic);
 
-    if (type == 0)
-    {
+    if (type == 0) {
         CalcPointLight(WorldPos, N, V, F0, roughness, metallic, albedo);
     } else if (type == 1) {
+        world_light_space = light_space * vec4(WorldPos, 1.0);
         CalcDirLight(N, V, F0, roughness, metallic, albedo);
     } else if (type == 2) {
+        world_light_space = light_space * vec4(WorldPos, 1.0);
         CalcSpotLight(WorldPos, N, V, F0, roughness, metallic, albedo);
     }
 }

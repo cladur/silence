@@ -1,16 +1,20 @@
 #ifndef SILENCE_LIGHT_H
 #define SILENCE_LIGHT_H
 
-enum class LightType : uint8_t { POINT_LIGHT = 0, DIRECTIONAL_LIGHT = 1, SPOT_LIGHT = 2 };
+enum class LightType : uint8_t { POINT_LIGHT = 0, DIRECTIONAL_LIGHT = 1, SPOT_LIGHT = 2, NONE };
 
 struct Light {
 public:
 	glm::vec3 color = { 1.0f, 1.0f, 1.0f };
 	LightType type = LightType::POINT_LIGHT;
+	LightType shadow_type = LightType::NONE;
 	float intensity = 1.0f;
 	float cutoff = 12.5f;
 	float outer_cutoff = 5.0f;
 	bool cast_shadow = false;
+	// Do not serialize this
+	glm::mat4 light_space; // required for dir light shadow
+	uint32_t shadow_map_id = 0;
 
 	void serialize_json(nlohmann::json &serialized_scene) {
 		nlohmann::json::object_t serialized_component;

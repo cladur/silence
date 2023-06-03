@@ -49,7 +49,7 @@ void SkinnedModelInstance::deserialize_json(nlohmann::json &serialized_component
 	if (serialized_component.contains("in_shadow_pass")) {
 		in_shadow_pass = serialized_component["in_shadow_pass"];
 	} else {
-		in_shadow_pass = false;
+		in_shadow_pass = true;
 	}
 }
 

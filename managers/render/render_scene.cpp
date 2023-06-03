@@ -46,7 +46,7 @@ void RenderScene::startup() {
 	ssao_buffer.startup(render_extent.x, render_extent.y);
 	pbr_buffer.startup(render_extent.x, render_extent.y);
 	bloom_buffer.startup(render_extent.x, render_extent.y, 5);
-	shadow_buffer.startup(1024, 1024, 1.0f, 500.5f);
+	shadow_buffer.startup(2048, 2048, 0.0001f, 25.0f);
 	combination_buffer.startup(render_extent.x, render_extent.y);
 	skybox_buffer.startup(render_extent.x, render_extent.y);
 	mouse_pick_framebuffer.startup(render_extent.x, render_extent.y);
@@ -67,12 +67,13 @@ void RenderScene::draw_viewport(bool right_side) {
 	glViewport(0, 0, (int)shadow_buffer.shadow_width, (int)shadow_buffer.shadow_height);
 	shadow_buffer.bind();
 	glEnable(GL_DEPTH_TEST);
-	glClear(GL_DEPTH_BUFFER_BIT);
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_FRONT);
 	shadow_pass.draw(*this);
 
 	glDepthMask(GL_TRUE);
-	g_buffer.bind();
 	glViewport(0, 0, (int)render_extent.x, (int)render_extent.y);
+	g_buffer.bind();
 
 	// Clear the screen
 	glad_glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -106,11 +107,6 @@ void RenderScene::draw_viewport(bool right_side) {
 	//	UIManager::get().set_render_scene(this);
 	//	UIManager::get().draw_world_space_ui();
 
-	// Enable depth testing
-	//	glEnable(GL_DEPTH_TEST);
-
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_FRONT);
 	g_buffer_pass.draw(*this);
 
 	pbr_buffer.bind();
