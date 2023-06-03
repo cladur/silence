@@ -1,4 +1,5 @@
 #include "render_pass.h"
+#include "components/highlight_component.h"
 #include "material.h"
 #include "render/common/framebuffer.h"
 #include "render/common/utils.h"
@@ -85,12 +86,22 @@ void GBufferPass::draw(RenderScene &scene) {
 	for (auto &cmd : scene.draw_commands) {
 		ModelInstance &instance = *cmd.model_instance;
 		Transform &transform = *cmd.transform;
+		bool highlighted = cmd.highlighted;
 		material.bind_instance_resources(instance, transform);
 		Model &model = resource_manager.get_model(instance.model_handle);
+
 		for (auto &mesh : model.meshes) {
 			if (mesh.fc_bounding_sphere.is_on_frustum(scene.frustum, transform, scene)) {
 				material.bind_mesh_resources(mesh);
 				mesh.draw();
+
+				if (highlighted) {
+					glEnable(GL_BLEND);
+					glBlendEquation(GL_FUNC_ADD);
+					glBlendFunc(GL_ONE, GL_ONE);
+					mesh.draw();
+					glDisable(GL_BLEND);
+				}
 			}
 		}
 	}

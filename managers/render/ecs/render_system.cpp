@@ -18,7 +18,13 @@ void RenderSystem::update(World &world, float dt) {
 	for (auto const &entity : entities) {
 		auto &transform = world.get_component<Transform>(entity);
 		auto &model_instance = world.get_component<ModelInstance>(entity);
+		bool highlighted = false;
 
-		world.get_parent_scene()->get_render_scene().queue_draw(&model_instance, &transform, entity);
+		if (world.has_component<Highlight>(entity)) {
+			auto &highlight_component = world.get_component<Highlight>(entity);
+			highlighted = highlight_component.highlighted;
+		}
+
+		world.get_parent_scene()->get_render_scene().queue_draw(&model_instance, &transform, entity, highlighted);
 	}
 }

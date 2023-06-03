@@ -304,11 +304,12 @@ void RenderScene::resize_framebuffer(uint32_t width, uint32_t height) {
 	render_extent = glm::vec2(width, height);
 }
 
-void RenderScene::queue_draw(ModelInstance *model_instance, Transform *transform, Entity entity) {
+void RenderScene::queue_draw(ModelInstance *model_instance, Transform *transform, Entity entity, bool highlighted) {
 	DrawCommand draw_command = {};
 	draw_command.model_instance = model_instance;
 	draw_command.transform = transform;
 	draw_command.entity = entity;
+	draw_command.highlighted = highlighted;
 
 	draw_commands.push_back(draw_command);
 }
