@@ -3,11 +3,14 @@
 
 #include "base_system.h"
 #include "components/interactable_component.h"
+#include <audio/event_reference.h>
 
 class InteractableSystem : public BaseSystem {
 private:
-	static void no_interaction(World &world, Interactable &interactable, Entity entity);
-	static void explosion(World &world, Interactable &interactable, Entity entity);
+	EventReference explostion_event;
+
+	void no_interaction(World &world, Interactable &interactable, Entity entity);
+	void explosion(World &world, Interactable &interactable, Entity entity);
 
 public:
 	void startup(World &world) override;

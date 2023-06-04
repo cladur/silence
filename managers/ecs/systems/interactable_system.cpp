@@ -10,6 +10,7 @@
 #include "engine/scene.h"
 #include "physics/ecs/physics_system.h"
 #include "physics/physics_manager.h"
+#include <audio/audio_manager.h>
 #include <spdlog/spdlog.h>
 #include <glm/fwd.hpp>
 #include <glm/geometric.hpp>
@@ -23,6 +24,8 @@ void InteractableSystem::startup(World &world) {
 	Signature signature;
 	signature.set(world.get_component_type<Interactable>());
 	world.set_system_component_whitelist<InteractableSystem>(signature);
+
+	explostion_event = EventReference("SFX/Explosions/electric_box");
 }
 
 void InteractableSystem::update(World &world, float dt) {
@@ -77,6 +80,8 @@ void InteractableSystem::explosion(World &world, Interactable &interactable, Ent
 	if (world.has_component<ParticleEmitter>(entity)) {
 		world.get_component<ParticleEmitter>(entity).trigger_oneshot();
 	}
+
+	AudioManager::get().play_one_shot_3d(explostion_event, world.get_component<Transform>(entity));
 
 	ColliderSphere sphere;
 	float larger_radius = box.distraction_radius;

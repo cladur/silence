@@ -121,19 +121,19 @@ void AudioManager::set_3d_listener_attributes(
 void AudioManager::play_one_shot_3d(const EventReference &event_ref, Transform &transform, RigidBody *rigid_body) {
 	auto event_instance = create_event_instance(event_ref);
 	FMOD_3D_ATTRIBUTES attributes = to_3d_attributes(transform, rigid_body);
-	event_instance->set3DAttributes(&attributes);
-	event_instance->start();
-	event_instance->release();
+	FMOD_CHECK(event_instance->set3DAttributes(&attributes));
+	FMOD_CHECK(event_instance->start());
+	FMOD_CHECK(event_instance->release());
 }
 
 FMOD_3D_ATTRIBUTES AudioManager::to_3d_attributes(Transform &transform, RigidBody *rigid_body) {
-	FMOD_3D_ATTRIBUTES attributes;
+	FMOD_3D_ATTRIBUTES attributes = {};
 	auto p = transform.get_global_position();
 	auto f = transform.get_global_forward();
 	auto u = transform.get_global_up();
-	attributes.position = { p.x, p.y, p.z };
-	attributes.forward = { f.x, f.y, f.z };
-	attributes.up = { u.x, u.y, u.z };
+	attributes.position = to_fmod_vector(p);
+	attributes.forward = to_fmod_vector(f);
+	attributes.up = to_fmod_vector(u);
 	if (rigid_body != nullptr) {
 		attributes.velocity = { rigid_body->velocity.x, rigid_body->velocity.y, rigid_body->velocity.z };
 	}
@@ -221,4 +221,12 @@ bool AudioManager::is_valid_event_path(const std::string &path) {
 	return std::any_of(event_paths.begin(), event_paths.end(), [&full_path](const std::string &event_path) {
 		return event_path == full_path;
 	});
+}
+
+FMOD_VECTOR AudioManager::to_fmod_vector(glm::vec3 vector) {
+	FMOD_VECTOR temp;
+	temp.x = vector.x;
+	temp.y = vector.y;
+	temp.z = vector.z;
+	return temp;
 }
