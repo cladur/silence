@@ -1243,6 +1243,17 @@ void Inspector::show_highlight() {
 			remove_component_menu_item<Highlight>();
 			ImGui::EndPopup();
 		}
+
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("Highlight", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Color");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::ColorEdit3("##Color", &highlighted.highlight_color[0]);
+
+		ImGui::EndTable();
 	}
 }
 

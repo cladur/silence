@@ -16,6 +16,7 @@ struct DrawCommand {
 	ModelInstance *model_instance;
 	Transform *transform;
 	bool highlighted;
+	glm::vec3 highlight_color;
 	Entity entity;
 };
 
