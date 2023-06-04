@@ -305,6 +305,7 @@ void AgentSystem::update(World &world, float dt) {
 								ray.ignore_list.emplace_back(entity);
 								ray.origin = sphere.center;
 								ray.direction = transform.get_global_position() - sphere.center;
+								ray.length = 3.0f;
 								HitInfo info;
 								glm::vec3 end = ray.origin + ray.direction;
 								dd.draw_arrow(ray.origin, end, { 1.0f, 0.0f, 0.0f });
@@ -355,6 +356,7 @@ void AgentSystem::update(World &world, float dt) {
 			ray.direction = model_tf.get_forward();
 			ray.origin = transform.get_global_position() + glm::vec3(0.0f, 1.0f, 0.0f);
 			ray.ignore_list.emplace_back(entity);
+			ray.length = 3.0f;
 
 			end = ray.origin + ray.direction;
 			world.get_parent_scene()->get_render_scene().debug_draw.draw_arrow(ray.origin, end, { 255, 0, 0 });
