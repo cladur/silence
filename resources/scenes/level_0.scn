@@ -263,6 +263,16 @@
             },
             {
                 "component_data": {
+                    "tag_position": {
+                        "x": 0.0,
+                        "y": 2.0,
+                        "z": 0.0
+                    }
+                },
+                "component_name": "Taggable"
+            },
+            {
+                "component_data": {
                     "layer_name": "default"
                 },
                 "component_name": "ColliderTag"
@@ -298,16 +308,6 @@
                     "view_cone_distance": 10.0
                 },
                 "component_name": "EnemyData"
-            },
-            {
-                "component_data": {
-                    "tag_position": {
-                        "x": 0.0,
-                        "y": 2.0,
-                        "z": 0.0
-                    }
-                },
-                "component_name": "Taggable"
             }
         ],
         "entity": 5,
@@ -344,16 +344,16 @@
             },
             {
                 "component_data": {
-                    "parent": 46
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "animation_name": "agent/agent_ANIM_GLTF/agent_idle.anim",
                     "ticks_per_second": 1000.0
                 },
                 "component_name": "AnimationInstance"
+            },
+            {
+                "component_data": {
+                    "parent": 46
+                },
+                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -369,18 +369,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "children": [
-                        10,
-                        9,
-                        8,
-                        11
-                    ],
-                    "children_count": 4
-                },
-                "component_name": "Children"
-            },
             {
                 "component_data": {
                     "name": "Start"
@@ -407,6 +395,18 @@
                     }
                 },
                 "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "children": [
+                        10,
+                        9,
+                        8,
+                        11
+                    ],
+                    "children_count": 4
+                },
+                "component_name": "Children"
             }
         ],
         "entity": 7,
@@ -658,16 +658,6 @@
         "components": [
             {
                 "component_data": {
-                    "children": [
-                        13,
-                        14
-                    ],
-                    "children_count": 2
-                },
-                "component_name": "Children"
-            },
-            {
-                "component_data": {
                     "name": "First Cover"
                 },
                 "component_name": "Name"
@@ -692,6 +682,16 @@
                     }
                 },
                 "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "children": [
+                        13,
+                        14
+                    ],
+                    "children_count": 2
+                },
+                "component_name": "Children"
             }
         ],
         "entity": 12,
@@ -797,24 +797,6 @@
         "components": [
             {
                 "component_data": {
-                    "children": [
-                        4,
-                        16,
-                        17,
-                        18,
-                        19,
-                        21,
-                        20,
-                        31,
-                        45,
-                        67
-                    ],
-                    "children_count": 10
-                },
-                "component_name": "Children"
-            },
-            {
-                "component_data": {
                     "name": "Island On Left"
                 },
                 "component_name": "Name"
@@ -839,6 +821,24 @@
                     }
                 },
                 "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "children": [
+                        4,
+                        16,
+                        17,
+                        18,
+                        19,
+                        21,
+                        20,
+                        31,
+                        45,
+                        67
+                    ],
+                    "children_count": 10
+                },
+                "component_name": "Children"
             }
         ],
         "entity": 15,
@@ -1136,17 +1136,6 @@
         "components": [
             {
                 "component_data": {
-                    "children": [
-                        39,
-                        38,
-                        37
-                    ],
-                    "children_count": 3
-                },
-                "component_name": "Children"
-            },
-            {
-                "component_data": {
                     "name": "End"
                 },
                 "component_name": "Name"
@@ -1171,6 +1160,17 @@
                     }
                 },
                 "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "children": [
+                        39,
+                        38,
+                        37
+                    ],
+                    "children_count": 3
+                },
+                "component_name": "Children"
             }
         ],
         "entity": 22,
@@ -1261,6 +1261,25 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {},
+                "component_name": "StaticTag"
+            },
+            {
+                "component_data": {
+                    "layer_name": "default"
+                },
+                "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {
                     "center": {
                         "x": 0.0,
                         "y": 0.5,
@@ -1285,25 +1304,6 @@
                     }
                 },
                 "component_name": "ColliderOBB"
-            },
-            {
-                "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "placeholders/cube_1x1x1.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
-            {
-                "component_data": {
-                    "layer_name": "default"
-                },
-                "component_name": "ColliderTag"
             }
         ],
         "entity": 24,
@@ -1311,18 +1311,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "children": [
-                        24,
-                        23,
-                        1,
-                        30
-                    ],
-                    "children_count": 4
-                },
-                "component_name": "Children"
-            },
             {
                 "component_data": {
                     "name": "Cover to the Right"
@@ -1349,6 +1337,18 @@
                     }
                 },
                 "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "children": [
+                        24,
+                        23,
+                        1,
+                        30
+                    ],
+                    "children_count": 4
+                },
+                "component_name": "Children"
             }
         ],
         "entity": 25,
@@ -1356,17 +1356,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "children": [
-                        27,
-                        29,
-                        28
-                    ],
-                    "children_count": 3
-                },
-                "component_name": "Children"
-            },
             {
                 "component_data": {
                     "name": "Cover Middle"
@@ -1393,6 +1382,17 @@
                     }
                 },
                 "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "children": [
+                        27,
+                        29,
+                        28
+                    ],
+                    "children_count": 3
+                },
+                "component_name": "Children"
             }
         ],
         "entity": 26,
@@ -1642,19 +1642,6 @@
         "components": [
             {
                 "component_data": {
-                    "children": [
-                        33,
-                        34,
-                        35,
-                        36,
-                        40
-                    ],
-                    "children_count": 5
-                },
-                "component_name": "Children"
-            },
-            {
-                "component_data": {
                     "name": "Walls"
                 },
                 "component_name": "Name"
@@ -1679,6 +1666,19 @@
                     }
                 },
                 "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "children": [
+                        33,
+                        34,
+                        35,
+                        36,
+                        40
+                    ],
+                    "children_count": 5
+                },
+                "component_name": "Children"
             }
         ],
         "entity": 32,
@@ -2120,17 +2120,6 @@
         "components": [
             {
                 "component_data": {
-                    "children": [
-                        41,
-                        43,
-                        44
-                    ],
-                    "children_count": 3
-                },
-                "component_name": "Children"
-            },
-            {
-                "component_data": {
                     "name": "Lights"
                 },
                 "component_name": "Name"
@@ -2155,6 +2144,17 @@
                     }
                 },
                 "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "children": [
+                        41,
+                        43,
+                        44
+                    ],
+                    "children_count": 3
+                },
+                "component_name": "Children"
             }
         ],
         "entity": 42,
@@ -2308,17 +2308,6 @@
         "components": [
             {
                 "component_data": {
-                    "children": [
-                        6,
-                        47,
-                        71
-                    ],
-                    "children_count": 3
-                },
-                "component_name": "Children"
-            },
-            {
-                "component_data": {
                     "name": "Agent Controller"
                 },
                 "component_name": "Name"
@@ -2346,12 +2335,14 @@
             },
             {
                 "component_data": {
-                    "camera": 3,
-                    "camera_pivot": 47,
-                    "model": 6,
-                    "spring_arm": 70
+                    "children": [
+                        6,
+                        47,
+                        71
+                    ],
+                    "children_count": 3
                 },
-                "component_name": "AgentData"
+                "component_name": "Children"
             },
             {
                 "component_data": {
@@ -2374,6 +2365,15 @@
                     }
                 },
                 "component_name": "ColliderCapsule"
+            },
+            {
+                "component_data": {
+                    "camera": 3,
+                    "camera_pivot": 47,
+                    "model": 6,
+                    "spring_arm": 70
+                },
+                "component_name": "AgentData"
             }
         ],
         "entity": 46,
@@ -2381,15 +2381,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "children": [
-                        70
-                    ],
-                    "children_count": 1
-                },
-                "component_name": "Children"
-            },
             {
                 "component_data": {
                     "name": "CameraPivot"
@@ -2422,6 +2413,15 @@
                     "parent": 46
                 },
                 "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "children": [
+                        70
+                    ],
+                    "children_count": 1
+                },
+                "component_name": "Children"
             }
         ],
         "entity": 47,
@@ -2495,18 +2495,6 @@
         "components": [
             {
                 "component_data": {
-                    "children": [
-                        48,
-                        50,
-                        51,
-                        52
-                    ],
-                    "children_count": 4
-                },
-                "component_name": "Children"
-            },
-            {
-                "component_data": {
                     "name": "Colliders"
                 },
                 "component_name": "Name"
@@ -2531,6 +2519,18 @@
                     }
                 },
                 "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "children": [
+                        48,
+                        50,
+                        51,
+                        52
+                    ],
+                    "children_count": 4
+                },
+                "component_name": "Children"
             }
         ],
         "entity": 49,
@@ -2700,6 +2700,16 @@
                 "component_name": "Parent"
             },
             {
+                "component_data": {},
+                "component_name": "StaticTag"
+            },
+            {
+                "component_data": {
+                    "layer_name": "default"
+                },
+                "component_name": "ColliderTag"
+            },
+            {
                 "component_data": {
                     "center": {
                         "x": 0.0,
@@ -2725,16 +2735,6 @@
                     }
                 },
                 "component_name": "ColliderOBB"
-            },
-            {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
-            {
-                "component_data": {
-                    "layer_name": "default"
-                },
-                "component_name": "ColliderTag"
             }
         ],
         "entity": 52,
@@ -2827,16 +2827,6 @@
         "components": [
             {
                 "component_data": {
-                    "children": [
-                        56,
-                        57
-                    ],
-                    "children_count": 2
-                },
-                "component_name": "Children"
-            },
-            {
-                "component_data": {
                     "name": "Hacker Controller"
                 },
                 "component_name": "Name"
@@ -2864,12 +2854,13 @@
             },
             {
                 "component_data": {
-                    "camera": 54,
-                    "camera_pivot": 57,
-                    "model": 56,
-                    "scorpion_camera_transform": 58
+                    "children": [
+                        56,
+                        57
+                    ],
+                    "children_count": 2
                 },
-                "component_name": "HackerData"
+                "component_name": "Children"
             },
             {
                 "component_data": {
@@ -2887,6 +2878,15 @@
                     "radius": -0.4000000059604645
                 },
                 "component_name": "ColliderSphere"
+            },
+            {
+                "component_data": {
+                    "camera": 54,
+                    "camera_pivot": 57,
+                    "model": 56,
+                    "scorpion_camera_transform": 58
+                },
+                "component_name": "HackerData"
             }
         ],
         "entity": 55,
@@ -2923,16 +2923,16 @@
             },
             {
                 "component_data": {
-                    "parent": 55
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "animation_name": "scorpion/scorpion_ANIM_GLTF/scorpion_idle.anim",
                     "ticks_per_second": 5000.0
                 },
                 "component_name": "AnimationInstance"
+            },
+            {
+                "component_data": {
+                    "parent": 55
+                },
+                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -2948,15 +2948,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "children": [
-                        58
-                    ],
-                    "children_count": 1
-                },
-                "component_name": "Children"
-            },
             {
                 "component_data": {
                     "name": "CameraPivot"
@@ -2989,6 +2980,15 @@
                     "parent": 55
                 },
                 "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "children": [
+                        58
+                    ],
+                    "children_count": 1
+                },
+                "component_name": "Children"
             }
         ],
         "entity": 57,
@@ -3162,15 +3162,19 @@
             },
             {
                 "component_data": {
-                    "layer_name": "hacker"
+                    "tag_position": {
+                        "x": 0.0,
+                        "y": 0.5,
+                        "z": 0.0
+                    }
                 },
-                "component_name": "ColliderTag"
+                "component_name": "Taggable"
             },
             {
                 "component_data": {
-                    "highlighted": "twoja misja trwa"
+                    "layer_name": "hacker"
                 },
-                "component_name": "Highlight"
+                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -3189,22 +3193,18 @@
             },
             {
                 "component_data": {
+                    "highlighted": "twoja misja trwa"
+                },
+                "component_name": "Highlight"
+            },
+            {
+                "component_data": {
                     "can_interact": true,
                     "interaction": 2,
                     "interaction_target": 61,
                     "type": 2
                 },
                 "component_name": "Interactable"
-            },
-            {
-                "component_data": {
-                    "tag_position": {
-                        "x": 0.0,
-                        "y": 0.5,
-                        "z": 0.0
-                    }
-                },
-                "component_name": "Taggable"
             }
         ],
         "entity": 60,
@@ -3212,22 +3212,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "first_position": {
-                        "x": 10.399999618530273,
-                        "y": 0.0,
-                        "z": 3.6440000534057617
-                    },
-                    "second_position": {
-                        "x": 10.399999618530273,
-                        "y": 2.0,
-                        "z": 3.6440000534057617
-                    },
-                    "speed": 1.0
-                },
-                "component_name": "Platform"
-            },
             {
                 "component_data": {
                     "name": "Platform 01"
@@ -3288,6 +3272,22 @@
                     }
                 },
                 "component_name": "ColliderAABB"
+            },
+            {
+                "component_data": {
+                    "first_position": {
+                        "x": 10.399999618530273,
+                        "y": 0.0,
+                        "z": 3.6440000534057617
+                    },
+                    "second_position": {
+                        "x": 10.399999618530273,
+                        "y": 2.0,
+                        "z": 3.6440000534057617
+                    },
+                    "speed": 1.0
+                },
+                "component_name": "Platform"
             }
         ],
         "entity": 61,
@@ -3333,15 +3333,19 @@
             },
             {
                 "component_data": {
-                    "layer_name": "hacker"
+                    "tag_position": {
+                        "x": 0.0,
+                        "y": 0.5,
+                        "z": -0.10000000149011612
+                    }
                 },
-                "component_name": "ColliderTag"
+                "component_name": "Taggable"
             },
             {
                 "component_data": {
-                    "highlighted": "twoja misja trwa"
+                    "layer_name": "hacker"
                 },
-                "component_name": "Highlight"
+                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -3360,22 +3364,18 @@
             },
             {
                 "component_data": {
+                    "highlighted": "twoja misja trwa"
+                },
+                "component_name": "Highlight"
+            },
+            {
+                "component_data": {
                     "can_interact": true,
                     "interaction": 2,
                     "interaction_target": 63,
                     "type": 2
                 },
                 "component_name": "Interactable"
-            },
-            {
-                "component_data": {
-                    "tag_position": {
-                        "x": 0.0,
-                        "y": 0.5,
-                        "z": -0.10000000149011612
-                    }
-                },
-                "component_name": "Taggable"
             }
         ],
         "entity": 62,
@@ -3383,22 +3383,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "first_position": {
-                        "x": -4.510000228881836,
-                        "y": 2.611999988555908,
-                        "z": 17.75200080871582
-                    },
-                    "second_position": {
-                        "x": -1.5,
-                        "y": 2.611999988555908,
-                        "z": 17.75200080871582
-                    },
-                    "speed": 1.0
-                },
-                "component_name": "Platform"
-            },
             {
                 "component_data": {
                     "name": "Platform 02"
@@ -3459,6 +3443,22 @@
                     }
                 },
                 "component_name": "ColliderAABB"
+            },
+            {
+                "component_data": {
+                    "first_position": {
+                        "x": -4.510000228881836,
+                        "y": 2.611999988555908,
+                        "z": 17.75200080871582
+                    },
+                    "second_position": {
+                        "x": -1.5,
+                        "y": 2.611999988555908,
+                        "z": 17.75200080871582
+                    },
+                    "speed": 1.0
+                },
+                "component_name": "Platform"
             }
         ],
         "entity": 63,
@@ -3620,15 +3620,70 @@
             },
             {
                 "component_data": {
+                    "tag_position": {
+                        "x": 0.0,
+                        "y": 0.699999988079071,
+                        "z": -0.11999999731779099
+                    }
+                },
+                "component_name": "Taggable"
+            },
+            {
+                "component_data": {
                     "layer_name": "hacker"
                 },
                 "component_name": "ColliderTag"
             },
             {
                 "component_data": {
-                    "highlighted": "twoja misja trwa"
+                    "color_begin": [
+                        0.6313725709915161,
+                        0.4156862795352936,
+                        0.3450980484485626,
+                        1.0
+                    ],
+                    "color_end": [
+                        0.23529411852359772,
+                        0.18039216101169586,
+                        0.054901961237192154,
+                        0.0
+                    ],
+                    "color_transition": 1,
+                    "is_one_shot": true,
+                    "is_textured": true,
+                    "lifetime": 1.2000000476837158,
+                    "one_shot_duration": 0.10000000149011612,
+                    "position": [
+                        0.0,
+                        0.0,
+                        -0.30000001192092896
+                    ],
+                    "position_variance": [
+                        0.800000011920929,
+                        0.20000000298023224,
+                        1.2000000476837158
+                    ],
+                    "rate": 52.20000076293945,
+                    "rotation_begin": 0.0,
+                    "rotation_end": 0.0,
+                    "rotation_transition": 0,
+                    "size_begin": 2.5999999046325684,
+                    "size_end": 3.0,
+                    "size_transition": 0,
+                    "texture_name": "resources\\assets_export\\explosion_fire.ktx2",
+                    "velocity_begin": [
+                        0.0,
+                        0.10000000149011612,
+                        0.0
+                    ],
+                    "velocity_end": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "velocity_transition": 0
                 },
-                "component_name": "Highlight"
+                "component_name": "ParticleEmitter"
             },
             {
                 "component_data": {
@@ -3647,6 +3702,12 @@
             },
             {
                 "component_data": {
+                    "highlighted": "twoja misja trwa"
+                },
+                "component_name": "Highlight"
+            },
+            {
+                "component_data": {
                     "can_interact": true,
                     "interaction": 3,
                     "interaction_target": 66,
@@ -3661,67 +3722,6 @@
                     "explosion_radius": 4.0
                 },
                 "component_name": "ExplodingBox"
-            },
-            {
-                "component_data": {
-                    "tag_position": {
-                        "x": 0.0,
-                        "y": 0.699999988079071,
-                        "z": -0.11999999731779099
-                    }
-                },
-                "component_name": "Taggable"
-            },
-            {
-                "component_data": {
-                    "color_begin": [
-                        1.0,
-                        0.24705882370471954,
-                        0.2980392277240753,
-                        1.0
-                    ],
-                    "color_end": [
-                        1.0,
-                        1.0,
-                        1.0,
-                        0.01568627543747425
-                    ],
-                    "color_transition": 2,
-                    "is_one_shot": true,
-                    "is_textured": true,
-                    "lifetime": 1.5,
-                    "one_shot_duration": 0.10000000149011612,
-                    "position": [
-                        0.0,
-                        0.4000000059604645,
-                        -0.5
-                    ],
-                    "position_variance": [
-                        0.4000000059604645,
-                        0.20000000298023224,
-                        0.4000000059604645
-                    ],
-                    "rate": 33.599998474121094,
-                    "rotation_begin": 0.0,
-                    "rotation_end": 0.0,
-                    "rotation_transition": 0,
-                    "size_begin": 4.5,
-                    "size_end": 7.800000190734863,
-                    "size_transition": 0,
-                    "texture_name": "resources\\assets_export\\smoke.ktx2",
-                    "velocity_begin": [
-                        0.0,
-                        0.10000000149011612,
-                        0.0
-                    ],
-                    "velocity_end": [
-                        0.0,
-                        0.0,
-                        0.0
-                    ],
-                    "velocity_transition": 0
-                },
-                "component_name": "ParticleEmitter"
             }
         ],
         "entity": 66,
@@ -3821,12 +3821,6 @@
             },
             {
                 "component_data": {
-                    "highlighted": "twoja misja trwa"
-                },
-                "component_name": "Highlight"
-            },
-            {
-                "component_data": {
                     "center": {
                         "x": 0.0,
                         "y": 0.0,
@@ -3839,6 +3833,12 @@
                     }
                 },
                 "component_name": "ColliderAABB"
+            },
+            {
+                "component_data": {
+                    "highlighted": "twoja misja trwa"
+                },
+                "component_name": "Highlight"
             },
             {
                 "component_data": {
@@ -3884,21 +3884,6 @@
             },
             {
                 "component_data": {
-                    "cast_shadow": false,
-                    "color": {
-                        "b": 0.036322809755802155,
-                        "g": 0.8989899158477783,
-                        "r": 0.8205655813217163
-                    },
-                    "cutoff": 12.5,
-                    "intensity": 150.0,
-                    "outer_cutoff": 5.0,
-                    "type": 0
-                },
-                "component_name": "Light"
-            },
-            {
-                "component_data": {
                     "billboard_z_offset": -4.800000190734863,
                     "color": {
                         "a": 1.0,
@@ -3919,6 +3904,21 @@
                     "use_camera_right": false
                 },
                 "component_name": "Billboard"
+            },
+            {
+                "component_data": {
+                    "cast_shadow": false,
+                    "color": {
+                        "b": 0.036322809755802155,
+                        "g": 0.8989899158477783,
+                        "r": 0.8205655813217163
+                    },
+                    "cutoff": 12.5,
+                    "intensity": 150.0,
+                    "outer_cutoff": 5.0,
+                    "type": 0
+                },
+                "component_name": "Light"
             }
         ],
         "entity": 69,
@@ -3926,15 +3926,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "children": [
-                        3
-                    ],
-                    "children_count": 1
-                },
-                "component_name": "Children"
-            },
             {
                 "component_data": {
                     "name": "SpringArm"
@@ -3967,6 +3958,15 @@
                     "parent": 47
                 },
                 "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "children": [
+                        3
+                    ],
+                    "children_count": 1
+                },
+                "component_name": "Children"
             }
         ],
         "entity": 70,
@@ -4009,6 +4009,12 @@
             },
             {
                 "component_data": {
+                    "layer_name": "camera"
+                },
+                "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {
                     "center": {
                         "x": 0.0,
                         "y": 0.0,
@@ -4033,12 +4039,6 @@
                     }
                 },
                 "component_name": "ColliderOBB"
-            },
-            {
-                "component_data": {
-                    "layer_name": "camera"
-                },
-                "component_name": "ColliderTag"
             }
         ],
         "entity": 71,
@@ -4046,6 +4046,33 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "name": "EnemyPathParent"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": -0.2785762846469879,
+                        "x": 0.0,
+                        "y": 0.9604141116142273,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": -12.647783279418945,
+                        "y": 0.009121477603912354,
+                        "z": 12.945840835571289
+                    },
+                    "scale": {
+                        "x": 1.0000017881393433,
+                        "y": 1.0,
+                        "z": 1.0000017881393433
+                    }
+                },
+                "component_name": "Transform"
+            },
             {
                 "component_data": {
                     "children": [
@@ -4077,33 +4104,6 @@
             {
                 "component_data": null,
                 "component_name": "PathParent"
-            },
-            {
-                "component_data": {
-                    "name": "EnemyPathParent"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
-                    "orientation": {
-                        "w": -0.2785762846469879,
-                        "x": 0.0,
-                        "y": 0.9604141116142273,
-                        "z": 0.0
-                    },
-                    "position": {
-                        "x": -12.647783279418945,
-                        "y": 0.009121477603912354,
-                        "z": 12.945840835571289
-                    },
-                    "scale": {
-                        "x": 1.0000017881393433,
-                        "y": 1.0,
-                        "z": 1.0000017881393433
-                    }
-                },
-                "component_name": "Transform"
             }
         ],
         "entity": 73,
@@ -4119,6 +4119,13 @@
             },
             {
                 "component_data": {
+                    "is_patrol_point": false,
+                    "patrol_time": 0.0
+                },
+                "component_name": "PathNode"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": 0.0,
@@ -4143,13 +4150,6 @@
                     "parent": 73
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 0.0
-                },
-                "component_name": "PathNode"
             }
         ],
         "entity": 74,
@@ -4165,6 +4165,13 @@
             },
             {
                 "component_data": {
+                    "is_patrol_point": false,
+                    "patrol_time": 0.0
+                },
+                "component_name": "PathNode"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": 0.0,
@@ -4189,13 +4196,6 @@
                     "parent": 73
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 0.0
-                },
-                "component_name": "PathNode"
             }
         ],
         "entity": 75,
@@ -4211,6 +4211,13 @@
             },
             {
                 "component_data": {
+                    "is_patrol_point": false,
+                    "patrol_time": 0.0
+                },
+                "component_name": "PathNode"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": 0.0,
@@ -4235,13 +4242,6 @@
                     "parent": 73
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 0.0
-                },
-                "component_name": "PathNode"
             }
         ],
         "entity": 76,
@@ -4257,6 +4257,13 @@
             },
             {
                 "component_data": {
+                    "is_patrol_point": false,
+                    "patrol_time": 0.0
+                },
+                "component_name": "PathNode"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": 0.0,
@@ -4281,13 +4288,6 @@
                     "parent": 73
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 0.0
-                },
-                "component_name": "PathNode"
             }
         ],
         "entity": 77,
@@ -4303,6 +4303,13 @@
             },
             {
                 "component_data": {
+                    "is_patrol_point": false,
+                    "patrol_time": 0.0
+                },
+                "component_name": "PathNode"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": 0.0,
@@ -4327,13 +4334,6 @@
                     "parent": 73
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 0.0
-                },
-                "component_name": "PathNode"
             }
         ],
         "entity": 78,
@@ -4349,6 +4349,13 @@
             },
             {
                 "component_data": {
+                    "is_patrol_point": false,
+                    "patrol_time": 0.0
+                },
+                "component_name": "PathNode"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": 0.0,
@@ -4373,13 +4380,6 @@
                     "parent": 73
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 0.0
-                },
-                "component_name": "PathNode"
             }
         ],
         "entity": 79,
@@ -4395,6 +4395,13 @@
             },
             {
                 "component_data": {
+                    "is_patrol_point": false,
+                    "patrol_time": 3.0
+                },
+                "component_name": "PathNode"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": 0.0,
@@ -4419,13 +4426,6 @@
                     "parent": 73
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 3.0
-                },
-                "component_name": "PathNode"
             }
         ],
         "entity": 80,
@@ -4438,6 +4438,13 @@
                     "name": "node"
                 },
                 "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "is_patrol_point": false,
+                    "patrol_time": 3.0
+                },
+                "component_name": "PathNode"
             },
             {
                 "component_data": {
@@ -4465,13 +4472,6 @@
                     "parent": 73
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 3.0
-                },
-                "component_name": "PathNode"
             }
         ],
         "entity": 81,
@@ -4484,6 +4484,13 @@
                     "name": "node"
                 },
                 "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "is_patrol_point": false,
+                    "patrol_time": 3.0
+                },
+                "component_name": "PathNode"
             },
             {
                 "component_data": {
@@ -4511,13 +4518,6 @@
                     "parent": 73
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 3.0
-                },
-                "component_name": "PathNode"
             }
         ],
         "entity": 82,
@@ -4530,6 +4530,13 @@
                     "name": "node"
                 },
                 "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "is_patrol_point": false,
+                    "patrol_time": 3.0
+                },
+                "component_name": "PathNode"
             },
             {
                 "component_data": {
@@ -4557,13 +4564,6 @@
                     "parent": 73
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 3.0
-                },
-                "component_name": "PathNode"
             }
         ],
         "entity": 83,
@@ -4576,6 +4576,13 @@
                     "name": "node"
                 },
                 "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "is_patrol_point": false,
+                    "patrol_time": 3.0
+                },
+                "component_name": "PathNode"
             },
             {
                 "component_data": {
@@ -4603,13 +4610,6 @@
                     "parent": 73
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 3.0
-                },
-                "component_name": "PathNode"
             }
         ],
         "entity": 84,
@@ -4622,6 +4622,13 @@
                     "name": "node"
                 },
                 "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "is_patrol_point": false,
+                    "patrol_time": 3.0
+                },
+                "component_name": "PathNode"
             },
             {
                 "component_data": {
@@ -4649,13 +4656,6 @@
                     "parent": 73
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 3.0
-                },
-                "component_name": "PathNode"
             }
         ],
         "entity": 85,
@@ -4668,6 +4668,13 @@
                     "name": "node"
                 },
                 "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "is_patrol_point": false,
+                    "patrol_time": 3.0
+                },
+                "component_name": "PathNode"
             },
             {
                 "component_data": {
@@ -4695,13 +4702,6 @@
                     "parent": 73
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 3.0
-                },
-                "component_name": "PathNode"
             }
         ],
         "entity": 86,
@@ -4714,6 +4714,13 @@
                     "name": "node_patrol"
                 },
                 "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "is_patrol_point": true,
+                    "patrol_time": 3.0
+                },
+                "component_name": "PathNode"
             },
             {
                 "component_data": {
@@ -4741,13 +4748,6 @@
                     "parent": 73
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "is_patrol_point": true,
-                    "patrol_time": 3.0
-                },
-                "component_name": "PathNode"
             }
         ],
         "entity": 87,
@@ -4760,6 +4760,13 @@
                     "name": "node"
                 },
                 "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "is_patrol_point": false,
+                    "patrol_time": 3.0
+                },
+                "component_name": "PathNode"
             },
             {
                 "component_data": {
@@ -4787,13 +4794,6 @@
                     "parent": 73
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 3.0
-                },
-                "component_name": "PathNode"
             }
         ],
         "entity": 88,
@@ -4806,6 +4806,13 @@
                     "name": "node"
                 },
                 "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "is_patrol_point": false,
+                    "patrol_time": 3.0
+                },
+                "component_name": "PathNode"
             },
             {
                 "component_data": {
@@ -4833,13 +4840,6 @@
                     "parent": 73
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 3.0
-                },
-                "component_name": "PathNode"
             }
         ],
         "entity": 89,
@@ -4852,6 +4852,13 @@
                     "name": "node"
                 },
                 "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "is_patrol_point": false,
+                    "patrol_time": 3.0
+                },
+                "component_name": "PathNode"
             },
             {
                 "component_data": {
@@ -4879,13 +4886,6 @@
                     "parent": 73
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 3.0
-                },
-                "component_name": "PathNode"
             }
         ],
         "entity": 90,
@@ -4898,6 +4898,13 @@
                     "name": "node"
                 },
                 "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "is_patrol_point": false,
+                    "patrol_time": 3.0
+                },
+                "component_name": "PathNode"
             },
             {
                 "component_data": {
@@ -4925,13 +4932,6 @@
                     "parent": 73
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 3.0
-                },
-                "component_name": "PathNode"
             }
         ],
         "entity": 91,
@@ -4944,6 +4944,13 @@
                     "name": "node"
                 },
                 "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "is_patrol_point": false,
+                    "patrol_time": 3.0
+                },
+                "component_name": "PathNode"
             },
             {
                 "component_data": {
@@ -4971,13 +4978,6 @@
                     "parent": 73
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 3.0
-                },
-                "component_name": "PathNode"
             }
         ],
         "entity": 92,
@@ -4990,6 +4990,13 @@
                     "name": "node"
                 },
                 "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "is_patrol_point": false,
+                    "patrol_time": 3.0
+                },
+                "component_name": "PathNode"
             },
             {
                 "component_data": {
@@ -5017,13 +5024,6 @@
                     "parent": 73
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 3.0
-                },
-                "component_name": "PathNode"
             }
         ],
         "entity": 93,
@@ -5036,6 +5036,13 @@
                     "name": "node"
                 },
                 "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "is_patrol_point": false,
+                    "patrol_time": 3.0
+                },
+                "component_name": "PathNode"
             },
             {
                 "component_data": {
@@ -5063,13 +5070,6 @@
                     "parent": 73
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 3.0
-                },
-                "component_name": "PathNode"
             }
         ],
         "entity": 94,
@@ -5082,6 +5082,13 @@
                     "name": "node"
                 },
                 "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "is_patrol_point": false,
+                    "patrol_time": 3.0
+                },
+                "component_name": "PathNode"
             },
             {
                 "component_data": {
@@ -5109,13 +5116,6 @@
                     "parent": 73
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 3.0
-                },
-                "component_name": "PathNode"
             }
         ],
         "entity": 95,
@@ -5128,6 +5128,13 @@
                     "name": "node"
                 },
                 "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "is_patrol_point": false,
+                    "patrol_time": 3.0
+                },
+                "component_name": "PathNode"
             },
             {
                 "component_data": {
@@ -5155,13 +5162,6 @@
                     "parent": 73
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 3.0
-                },
-                "component_name": "PathNode"
             }
         ],
         "entity": 96,
@@ -5174,6 +5174,13 @@
                     "name": "node"
                 },
                 "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "is_patrol_point": false,
+                    "patrol_time": 3.0
+                },
+                "component_name": "PathNode"
             },
             {
                 "component_data": {
@@ -5201,13 +5208,6 @@
                     "parent": 73
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 3.0
-                },
-                "component_name": "PathNode"
             }
         ],
         "entity": 97,
@@ -5220,6 +5220,13 @@
                     "name": "node"
                 },
                 "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "is_patrol_point": false,
+                    "patrol_time": 3.0
+                },
+                "component_name": "PathNode"
             },
             {
                 "component_data": {
@@ -5247,13 +5254,6 @@
                     "parent": 73
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 3.0
-                },
-                "component_name": "PathNode"
             }
         ],
         "entity": 98,
@@ -5266,6 +5266,13 @@
                     "name": "node"
                 },
                 "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "is_patrol_point": false,
+                    "patrol_time": 3.0
+                },
+                "component_name": "PathNode"
             },
             {
                 "component_data": {
@@ -5293,13 +5300,6 @@
                     "parent": 73
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 3.0
-                },
-                "component_name": "PathNode"
             }
         ],
         "entity": 99,
