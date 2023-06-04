@@ -76,6 +76,8 @@ public:
 	std::vector<std::string> get_all_event_paths();
 
 	bool is_valid_event_path(const std::string &path);
+
+	static FMOD_VECTOR to_fmod_vector(glm::vec3 vector);
 };
 
 #endif //SILENCE_AUDIO_MANAGER_H
