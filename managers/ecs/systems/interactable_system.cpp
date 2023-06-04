@@ -26,6 +26,7 @@ void InteractableSystem::startup(World &world) {
 	world.set_system_component_whitelist<InteractableSystem>(signature);
 
 	explostion_event = EventReference("SFX/Explosions/electric_box");
+	electric_interaction_event = EventReference("SFX/Interactions/electric_interaction");
 }
 
 void InteractableSystem::update(World &world, float dt) {
@@ -50,6 +51,7 @@ void InteractableSystem::update(World &world, float dt) {
 					break;
 				case HackerPlatform: {
 					auto &platform = world.get_component<Platform>(interactable.interaction_target);
+					AudioManager::get().play_one_shot_3d(electric_interaction_event, world.get_component<Transform>(entity));
 					if (!platform.is_moving) {
 						platform.is_moving = true;
 					}

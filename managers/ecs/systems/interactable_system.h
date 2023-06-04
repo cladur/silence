@@ -8,6 +8,7 @@
 class InteractableSystem : public BaseSystem {
 private:
 	EventReference explostion_event;
+	EventReference electric_interaction_event;
 
 	void no_interaction(World &world, Interactable &interactable, Entity entity);
 	void explosion(World &world, Interactable &interactable, Entity entity);
