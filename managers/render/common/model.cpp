@@ -4,8 +4,6 @@
 #include "assets/model_asset.h"
 
 #include "managers/render/render_manager.h"
-#include <client/TracyScoped.hpp>
-#include <tracy/tracy.hpp>
 
 void Model::load_from_asset(const char *path) {
 	ZoneNamedNC(Zone1, "Load Model From Asset", tracy::Color::Red4, true);

@@ -2,7 +2,6 @@
 
 #include "ktx.h"
 #include <GLFW/glfw3.h>
-#include <common/TracyColor.hpp>
 
 std::map<std::string, ktxTexture2 *> Texture::ktx_textures;
 

@@ -7,7 +7,6 @@
 #include "resource/resource_manager.h"
 #include <render/transparent_elements/particle_data.h>
 #include <render/transparent_elements/particle_manager.h>
-#include <tracy/tracy.hpp>
 
 AutoCVarFloat cvar_blur_radius("render.blur_radius", "blur radius", 0.001f, CVarFlags::EditFloatDrag);
 AutoCVarInt cvar_use_bloom("render.use_bloom", "use bloom", 1, CVarFlags::EditCheckbox);

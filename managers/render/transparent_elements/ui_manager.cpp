@@ -8,7 +8,6 @@
 #include "render/transparent_elements/ui/ui_elements/ui_slider.h"
 #include "render/transparent_elements/ui/ui_elements/ui_text.h"
 #include <spdlog/spdlog.h>
-#include <tracy/tracy.hpp>
 
 void UIManager::startup() {
     text_draw = TextDraw();
