@@ -10,6 +10,7 @@ void SkinnedRenderSystem::startup(World &world) {
 	signature.set(world.get_component_type<SkinnedModelInstance>());
 	world.set_system_component_whitelist<SkinnedRenderSystem>(signature);
 }
+
 void SkinnedRenderSystem::update(World &world, float dt) {
 	ZoneScopedN("SkinnedRenderSystem::update");
 	for (auto const &entity : entities) {

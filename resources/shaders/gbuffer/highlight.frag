@@ -10,8 +10,8 @@ uniform vec3 cam_pos;
 
 uniform int is_highlighted;
 uniform vec3 highlight_color;
-uniform int agent_hacker_pov; //            0 - agent, 1 - hacker
-uniform int highlight_target; // 0 - other, 1 - agent, 2 - hacker
+uniform int agent_hacker_pov; // 0 - agent, 1 - hacker
+uniform int highlight_target; // 0 - agent, 1 - hacker, 2 - enemy, 3 - other
 
 uniform int is_xray;
 
@@ -23,17 +23,20 @@ void main() {
         float diffuse = max(dot(normalize(cam_pos - ViewPos), Normal), 0.0);
         switch (highlight_target) {
             case 0:
-                color = vec4(highlight_color, 1.0f) * diffuse;
-                break;
-            case 1:
                 if (agent_hacker_pov != 0) {
                     color = vec4(highlight_color, 1.0f) * diffuse;
                 }
                 break;
-            case 2:
+            case 1:
                 if (agent_hacker_pov != 1) {
                     color = vec4(highlight_color, 1.0f) * diffuse;
                 }
+                break;
+            case 2:
+                color = vec4(highlight_color, 1.0f) * diffuse;
+                break;
+            case 3:
+                color = vec4(highlight_color, 1.0f) * diffuse;
                 break;
         }
 

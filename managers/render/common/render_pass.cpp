@@ -630,10 +630,11 @@ void HighlightPass::draw_normal(RenderScene &scene, bool right_side) {
 	material.shader.set_int("is_xray", false);
 	material.shader.set_int("agent_hacker_pov", right_side);
 
-	material.shader.set_int("depth", 1);
-	glActiveTexture(GL_TEXTURE1);
+	material.shader.set_int("depth", 0);
+	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.depth_texture_id);
 
+	std::cout << "drawing: " << normal_highlights.size() << " normal highlights\n";
 	for (auto &cmd : normal_highlights) {
 		ModelInstance &instance = *cmd.model_instance;
 		Transform &transform = *cmd.transform;
@@ -645,6 +646,7 @@ void HighlightPass::draw_normal(RenderScene &scene, bool right_side) {
 		for (auto &mesh : model.meshes) {
 			if (mesh.fc_bounding_sphere.is_on_frustum(scene.frustum, transform, scene)) {
 				material.bind_mesh_resources(mesh, highlight_data);
+
 				material.shader.set_int("highlight_target", static_cast<int>(highlight_data.target));
 				mesh.draw();
 			}
@@ -656,10 +658,11 @@ void HighlightPass::draw_normal(RenderScene &scene, bool right_side) {
 	material.skinned_shader.set_int("is_xray", false);
 	material.skinned_shader.set_int("agent_hacker_pov", right_side);
 
-	material.skinned_shader.set_int("depth", 1);
-	glActiveTexture(GL_TEXTURE1);
+	material.skinned_shader.set_int("depth", 0);
+	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.depth_texture_id);
 
+	std::cout << "drawing: " << normal_skinned_highlights.size() << " normal skinned highlights\n";
 	for (auto &cmd : normal_skinned_highlights) {
 		SkinnedModelInstance &instance = *cmd.model_instance;
 		Transform &transform = *cmd.transform;
@@ -684,10 +687,11 @@ void HighlightPass::draw_xray(RenderScene &scene, bool right_side) {
 	material.shader.set_int("is_xray", true);
 	material.shader.set_int("agent_hacker_pov", right_side);
 
-	material.shader.set_int("depth", 1);
-	glActiveTexture(GL_TEXTURE1);
+	material.shader.set_int("depth", 0);
+	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.depth_texture_id);
 
+	std::cout << "drawing: " << xray_highlights.size() << " xray highlights\n";
 	for (auto &cmd : xray_highlights) {
 		ModelInstance &instance = *cmd.model_instance;
 		Transform &transform = *cmd.transform;
@@ -710,10 +714,11 @@ void HighlightPass::draw_xray(RenderScene &scene, bool right_side) {
 	material.skinned_shader.set_int("is_xray", true);
 	material.skinned_shader.set_int("agent_hacker_pov", right_side);
 
-	material.skinned_shader.set_int("depth", 1);
-	glActiveTexture(GL_TEXTURE1);
+	material.skinned_shader.set_int("depth", 0);
+	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.depth_texture_id);
 
+	std::cout << "drawing: " << xray_skinned_highlights.size() << " xray skinned highlights\n";
 	for (auto &cmd : xray_skinned_highlights) {
 		SkinnedModelInstance &instance = *cmd.model_instance;
 		Transform &transform = *cmd.transform;
