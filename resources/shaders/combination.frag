@@ -65,7 +65,7 @@ void main()
     if (length(highlights.rgb) > 0.0) {
         float highlight_power = clamp(((length(color.rgb) + 0.05) / 3.0), 0.0, 1.0);
         if (highlights.a < 0.9) {
-            if (depth.r + 0.4 > highlights_depth.r) {
+            if (depth.r + 0.8 > highlights_depth.r) {
                 highlight_power = 0.0;
             }
             highlight_power *= 4.0; // highlight xray entities a bit more
