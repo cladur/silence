@@ -74,6 +74,13 @@ void EnemySystem::update(World &world, float dt) {
 			ed.first_frame = false;
 		}
 
+		if (world.has_component<Highlight>(entity) && world.has_component<Taggable>(entity)) {
+			auto &h = world.get_component<Highlight>(entity);
+			auto &tag = world.get_component<Taggable>(entity);
+			if (tag.tagged) {
+				h.highlighted = true;
+			}
+		}
 		// whole logic is happening in the state machine's states
 		ed.state_machine.update(&world, entity, dt);
 	}

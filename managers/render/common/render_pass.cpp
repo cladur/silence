@@ -627,7 +627,7 @@ void HighlightPass::draw_normal(RenderScene &scene, bool right_side) {
 	ZoneScopedN("HighlightPass::draw_normal");
 	auto &rm = ResourceManager::get();
 	material.bind_resources(scene);
-	material.shader.set_int("is_xray", false);
+	material.shader.set_int("is_xray", 0);
 	material.shader.set_int("agent_hacker_pov", right_side);
 	material.shader.set_float("near", scene.camera_near_far.x);
 	material.shader.set_float("far", scene.camera_near_far.y);
@@ -657,7 +657,7 @@ void HighlightPass::draw_normal(RenderScene &scene, bool right_side) {
 
 #ifdef WIN32
 	material.bind_skinned_resources(scene);
-	material.skinned_shader.set_int("is_xray", false);
+	material.skinned_shader.set_int("is_xray", 0);
 	material.skinned_shader.set_int("agent_hacker_pov", right_side);
 	material.skinned_shader.set_float("near", scene.camera_near_far.x);
 	material.skinned_shader.set_float("far", scene.camera_near_far.y);
@@ -688,7 +688,7 @@ void HighlightPass::draw_xray(RenderScene &scene, bool right_side) {
 	ZoneScopedN("HighlightPass::draw_xray");
 	auto &rm = ResourceManager::get();
 	material.bind_resources(scene);
-	material.shader.set_int("is_xray", true);
+	material.shader.set_int("is_xray", 1);
 	material.shader.set_int("agent_hacker_pov", right_side);
 	material.shader.set_float("near", scene.camera_near_far.x);
 	material.shader.set_float("far", scene.camera_near_far.y);
@@ -717,7 +717,7 @@ void HighlightPass::draw_xray(RenderScene &scene, bool right_side) {
 
 #ifdef WIN32
 	material.bind_skinned_resources(scene);
-	material.skinned_shader.set_int("is_xray", true);
+	material.skinned_shader.set_int("is_xray", 1);
 	material.skinned_shader.set_int("agent_hacker_pov", right_side);
 	material.skinned_shader.set_float("near", scene.camera_near_far.x);
 	material.skinned_shader.set_float("far", scene.camera_near_far.y);

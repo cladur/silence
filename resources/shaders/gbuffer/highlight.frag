@@ -23,28 +23,28 @@ float calc_depth( in float z )
 }
 
 void main() {
-    vec4 color = vec4(0,0,0,1);
+    vec4 color = vec4(0,0,0,0);
     if (is_highlighted == 1) {
         switch (highlight_target) {
             case 0:
                 if (agent_hacker_pov != 0) {
-                    color = vec4(highlight_color, 1.0f);
+                    color = vec4(highlight_color, 0.0f);
                 }
                 break;
             case 1:
                 if (agent_hacker_pov != 1) {
-                    color = vec4(highlight_color, 1.0f);
+                    color = vec4(highlight_color, 0.0f);
                 }
                 break;
             case 2:
-                color = vec4(highlight_color, 1.0f);
+                color = vec4(highlight_color, 0.0f);
                 break;
             case 3:
-                color = vec4(highlight_color, 1.0f);
+                color = vec4(highlight_color, 0.0f);
                 break;
         }
         if (is_xray == 1) {
-            color.a = 0.5;
+            color.a = 1.0;
         }
     } else {
         color = vec4(0.0f);
