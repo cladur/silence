@@ -133,6 +133,7 @@ class HighlightBuffer {
 public:
 	uint32_t framebuffer_id;
 	uint32_t texture_id;
+	uint32_t depth_texture_id;
 	uint32_t rbo_id;
 
 	void startup(uint32_t width, uint32_t height);

@@ -434,6 +434,8 @@ void MaterialCombination::bind_resources(RenderScene &scene) {
 	shader.set_int("Skybox", 6);
 	shader.set_int("Particles", 7);
 	shader.set_int("Highlights", 8);
+	shader.set_int("HighlightsDepth", 9);
+	shader.set_int("Depth", 10);
 
 	shader.set_int("use_ao", cvar_use_ao.get());
 
@@ -459,6 +461,10 @@ void MaterialCombination::bind_resources(RenderScene &scene) {
 	glBindTexture(GL_TEXTURE_2D, scene.particle_buffer.texture_id);
 	glActiveTexture(GL_TEXTURE8);
 	glBindTexture(GL_TEXTURE_2D, scene.highlight_buffer.texture_id);
+	glActiveTexture(GL_TEXTURE9);
+	glBindTexture(GL_TEXTURE_2D, scene.highlight_buffer.depth_texture_id);
+	glActiveTexture(GL_TEXTURE10);
+	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.depth_texture_id);
 }
 
 void MaterialCombination::bind_instance_resources(ModelInstance &instance, Transform &transform) {

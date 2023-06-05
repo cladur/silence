@@ -12,7 +12,10 @@ uniform sampler2D AoRoughMetal;
 uniform sampler2D ViewPos;
 uniform sampler2D Skybox;
 uniform sampler2D Particles;
+
 uniform sampler2D Highlights;
+uniform sampler2D HighlightsDepth;
+uniform sampler2D Depth;
 
 uniform int use_fog;
 uniform float fog_min;
@@ -31,6 +34,8 @@ void main()
     vec4 view_pos = texture(ViewPos, TexCoords);
     vec4 particles = texture(Particles, TexCoords);
     vec4 highlights = texture(Highlights, TexCoords);
+    vec4 highlights_depth = texture(HighlightsDepth, TexCoords);
+    vec4 depth = texture(Depth, TexCoords);
 
     if (
     albedo == vec3(0.0, 0.0, 0.0) && diffuse == vec3(0.0, 0.0, 0.0) && view_pos.xyz == vec3(0.0, 0.0, 0.0)
@@ -59,6 +64,11 @@ void main()
 
     if (length(highlights.rgb) > 0.0) {
         float highlight_power = clamp(((length(color.rgb) + 0.01) / 3.0), 0.0, 1.0);
+        if (highlights.a < 0.9) {
+            if (depth.r > highlights_depth.r) {
+                highlight_power = 0.0;
+            }
+        }
         color = mix(color, highlights, highlight_power);
     }
 

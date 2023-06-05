@@ -112,9 +112,16 @@ void RenderScene::draw_viewport(bool right_side) {
 	// HIGHLIGHT PASS
 	highlight_buffer.bind();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 	glDepthMask(GL_FALSE);
+
 	// all the see-through highlights
 	highlight_pass.draw_xray(*this, right_side);
+
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, g_buffer.framebuffer_id);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, highlight_buffer.framebuffer_id); // write to default framebuffer
+	glBlitFramebuffer(0, 0, render_extent.x, render_extent.y, 0, 0, render_extent.x, render_extent.y,
+			GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 
 	// all the normal highlights
 	highlight_pass.draw_normal(*this, right_side);
