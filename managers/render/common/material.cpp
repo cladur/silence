@@ -638,6 +638,17 @@ void MaterialHighlight::bind_mesh_resources(Mesh &mesh, HighlightData &highlight
 
 void MaterialHighlight::bind_instance_resources(SkinnedModelInstance &instance, Transform &transform) {
 	skinned_shader.set_mat4("model", transform.get_global_model_matrix());
+
+	glBindBuffer(GL_UNIFORM_BUFFER, instance.skinning_buffer);
+	if (!instance.bone_matrices.empty()) {
+		glBufferSubData(
+				GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4) * instance.bone_matrices.size(), instance.bone_matrices.data());
+	}
+
+	GLuint binding_index = 1;
+	GLuint buffer_index = glGetUniformBlockIndex(skinned_shader.id, "SkinningBuffer");
+	glUniformBlockBinding(skinned_shader.id, buffer_index, binding_index);
+	glBindBufferBase(GL_UNIFORM_BUFFER, binding_index, instance.skinning_buffer);
 }
 
 void MaterialHighlight::bind_mesh_resources(SkinnedMesh &mesh, HighlightData &highlight_data) {

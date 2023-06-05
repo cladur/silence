@@ -120,8 +120,8 @@ void AgentSystem::update(World &world, float dt) {
 			first_frame = false;
 		}
 
-		if (world.has_component<Highlight>(entity)) {
-			auto &highlight = world.get_component<Highlight>(entity);
+		if (world.has_component<Highlight>(agent_data.model)) {
+			auto &highlight = world.get_component<Highlight>(agent_data.model);
 			highlight.highlighted = true;
 		}
 
