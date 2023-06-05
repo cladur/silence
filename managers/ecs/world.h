@@ -9,56 +9,13 @@
 #include <memory>
 #include <type_traits>
 
-enum UpdateOrder {
-	EcsOnLoad,
-	EcsPostLoad,
-	EcsPreUpdate,
-	EcsOnUpdate,
-	EcsOnValidate,
-	EcsPostUpdate,
-	EcsPreStore,
-	EcsOnStore
-};
-
-template <typename T> class SortedVector {
-private:
-	std::vector<T> elements;
-	std::vector<UpdateOrder> priorities;
-	std::map<UpdateOrder, int> elements_per_phase;
-
-public:
-	void add(T element, UpdateOrder priority) {
-		int index = 0;
-		for (int i = 0; i < priority; i++) {
-			index += elements_per_phase[static_cast<UpdateOrder>(i)];
-		}
-		elements_per_phase[priority]++;
-		elements.insert(elements.begin() + index, element);
-		priorities.insert(priorities.begin() + index, priority);
-	}
-
-	T get(int index) {
-		return elements[index];
-	}
-
-	T operator[](int index) {
-		return elements[index];
-	}
-
-	std::vector<T>::iterator begin() {
-		return elements.begin();
-	}
-
-	// Add a method to get the end iterator
-	std::vector<T>::iterator end() {
-		return elements.end();
-	}
-
-	void print_values() {
-		for (int i = 0; i < elements.size(); i++) {
-			SPDLOG_WARN("Prio: {}", priorities[i]);
-		}
-	}
+enum class UpdateOrder {
+	PrePreAnimation,
+	PreAnimation,
+	DuringAnimation,
+	PostAnimation,
+	DuringPhysics,
+	PostPhysics,
 };
 
 struct Scene;
@@ -78,7 +35,12 @@ private:
 	std::vector<std::string> component_names;
 	std::unordered_map<std::string, int> component_ids;
 	int registered_components = 0;
-	SortedVector<std::shared_ptr<BaseSystem>> systems;
+	std::vector<std::shared_ptr<BaseSystem>> pre_pre_animation_systems;
+	std::vector<std::shared_ptr<BaseSystem>> pre_animation_systems;
+	std::vector<std::shared_ptr<BaseSystem>> during_animation_systems;
+	std::vector<std::shared_ptr<BaseSystem>> post_animation_systems;
+	std::vector<std::shared_ptr<BaseSystem>> during_physics_systems;
+	std::vector<std::shared_ptr<BaseSystem>> post_physics_systems;
 
 public:
 	Scene *parent_scene;
@@ -160,15 +122,61 @@ public:
 	}
 
 	// System methods
-	template <typename T> void register_system(UpdateOrder priority = UpdateOrder::EcsOnUpdate) {
+	template <typename T> void register_system(UpdateOrder priority = UpdateOrder::PreAnimation) {
 		auto system = system_manager->register_system<T>();
 		system->startup(*this);
-		//systems.emplace_back(std::move(system));
-		systems.add(std::move(system), priority);
+
+		switch (priority) {
+			case UpdateOrder::PrePreAnimation:
+				pre_pre_animation_systems.emplace_back(system);
+				break;
+			case UpdateOrder::PreAnimation:
+				pre_animation_systems.emplace_back(system);
+				break;
+			case UpdateOrder::DuringAnimation:
+				during_animation_systems.emplace_back(system);
+				break;
+			case UpdateOrder::PostAnimation:
+				post_animation_systems.emplace_back(system);
+				break;
+			case UpdateOrder::DuringPhysics:
+				during_physics_systems.emplace_back(system);
+				break;
+			case UpdateOrder::PostPhysics:
+				post_physics_systems.emplace_back(system);
+				break;
+		}
 	}
 
 	void update(float dt) {
-		for (auto &system : systems) {
+		for (auto &system : pre_pre_animation_systems) {
+			system->update(*this, dt);
+		}
+
+		for (auto &system : pre_animation_systems) {
+			system->update(*this, dt);
+		}
+
+		for (auto &system : during_animation_systems) {
+			system->update(*this, dt);
+		}
+
+		for (auto &system : post_animation_systems) {
+			system->update(*this, dt);
+		}
+
+		float fixed_dt = 1 / 50.0f;
+		static float physics_time_accumulator = 0.0f;
+		physics_time_accumulator += dt;
+
+		while (physics_time_accumulator > fixed_dt) {
+			physics_time_accumulator -= fixed_dt;
+			for (auto &system : during_physics_systems) {
+				system->update(*this, fixed_dt);
+			}
+		}
+
+		for (auto &system : post_physics_systems) {
 			system->update(*this, dt);
 		}
 	}
