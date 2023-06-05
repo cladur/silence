@@ -39,6 +39,7 @@ struct RenderScene {
 	ShadowPass shadow_pass;
 	MousePickPass mouse_pick_pass;
 	ParticlePass particle_pass;
+	HighlightPass highlight_pass;
 
 	Framebuffer render_framebuffer;
 	Framebuffer final_framebuffer;
@@ -50,6 +51,7 @@ struct RenderScene {
 	ShadowBuffer shadow_buffer;
 	SkyboxBuffer skybox_buffer;
 	ParticleBuffer particle_buffer;
+	HighlightBuffer highlight_buffer;
 
 	// render extent that does not change whether we're in splitscreen or not
 	glm::vec2 full_render_extent;
@@ -76,8 +78,8 @@ struct RenderScene {
 	void draw();
 	void resize_framebuffer(uint32_t width, uint32_t height);
 
-	void queue_draw(ModelInstance *model_instance, Transform *transform, Entity entity, bool highlighted = false, glm::vec3 highlight_color = glm::vec3(0.0f));
-	void queue_skinned_draw(SkinnedModelInstance *model_instance, Transform *transform, Entity entity);
+	void queue_draw(ModelInstance *model_instance, Transform *transform, Entity entity, HighlightData highlight_data = {});
+	void queue_skinned_draw(SkinnedModelInstance *model_instance, Transform *transform, Entity entity, HighlightData highlight_data);
 	void queue_light_draw(Light *light, Transform *transform);
 
 	Entity get_entity_at_mouse_position(float x, float y) const;

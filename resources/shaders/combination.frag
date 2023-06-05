@@ -12,6 +12,7 @@ uniform sampler2D AoRoughMetal;
 uniform sampler2D ViewPos;
 uniform sampler2D Skybox;
 uniform sampler2D Particles;
+uniform sampler2D Highlights;
 
 uniform int use_fog;
 uniform float fog_min;
@@ -29,6 +30,7 @@ void main()
     vec3 skybox = texture(Skybox, TexCoords).rgb;
     vec4 view_pos = texture(ViewPos, TexCoords);
     vec4 particles = texture(Particles, TexCoords);
+    vec4 highlights = texture(Highlights, TexCoords);
 
     if (
     albedo == vec3(0.0, 0.0, 0.0) && diffuse == vec3(0.0, 0.0, 0.0) && view_pos.xyz == vec3(0.0, 0.0, 0.0)
@@ -54,6 +56,10 @@ void main()
 
     // blending particles based on alpha
     color = mix(color, particles, particles.a);
+
+    if (length(highlights.rgb) > 0.0) {
+        color = mix(color, highlights, 0.1);
+    }
 
     FragColor = vec4(color.rgb, 1.0);
 }

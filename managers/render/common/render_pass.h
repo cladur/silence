@@ -15,14 +15,14 @@ struct RenderScene;
 struct DrawCommand {
 	ModelInstance *model_instance;
 	Transform *transform;
-	bool highlighted;
-	glm::vec3 highlight_color;
+	HighlightData highlight_data;
 	Entity entity;
 };
 
 struct SkinnedDrawCommand {
 	SkinnedModelInstance *model_instance;
 	Transform *transform;
+	HighlightData highlight_data;
 	Entity entity;
 };
 
@@ -133,6 +133,22 @@ public:
 	MaterialParticle material;
 	void startup() override;
 	void draw(RenderScene &scene) override;
+};
+
+class HighlightPass : public RenderPass {
+	std::vector<DrawCommand> normal_highlights;
+	std::vector<SkinnedDrawCommand> normal_skinned_highlights;
+
+	std::vector<DrawCommand> xray_highlights;
+	std::vector<SkinnedDrawCommand> xray_skinned_highlights;
+public:
+	MaterialHighlight material;
+	void startup() override;
+	void draw(RenderScene &scene) override;
+	void draw_normal(RenderScene &scene, bool right_side);
+	void draw_xray(RenderScene &scene, bool right_side);
+	void sort_highlights(RenderScene &scene);
+	void clear();
 };
 
 #endif // SILENCE_RENDER_PASS_H

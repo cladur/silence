@@ -1253,6 +1253,24 @@ void Inspector::show_highlight() {
 		ImGui::TableSetColumnIndex(1);
 		ImGui::ColorEdit3("##Color", &highlighted.highlight_color[0]);
 
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Highlight Type");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		if (ImGui::BeginCombo("##Highlight Type", magic_enum::enum_name(highlighted.target).data())) {
+			for (auto type : magic_enum::enum_values<HighlightTarget >()) {
+				bool is_selected = (highlighted.target == type);
+				if (ImGui::Selectable(magic_enum::enum_name(type).data(), is_selected)) {
+					highlighted.target = type;
+				}
+				if (is_selected) {
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+			ImGui::EndCombo();
+		}
+
 		ImGui::EndTable();
 	}
 }

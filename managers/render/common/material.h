@@ -106,7 +106,7 @@ public:
 	void bind_resources(RenderScene &scene) override;
 	void bind_skinned_resources(RenderScene &scene);
 	void bind_instance_resources(ModelInstance &instance, Transform &transform) override;
-	void bind_mesh_resources(Mesh &mesh, bool highlighted = false, glm::vec3 highlight_color = glm::vec3(0.0f));
+	void bind_mesh_resources(Mesh &mesh);
 	void bind_instance_resources(SkinnedModelInstance &instance, Transform &transform);
 	void bind_mesh_resources(SkinnedMesh &mesh);
 };
@@ -157,6 +157,31 @@ public:
 	void startup() override;
 	void bind_resources(RenderScene &scene) override;
 	void bind_instance_resources(ModelInstance &instance, Transform &transform) override;
+};
+
+enum class HighlightTarget {
+	AGENT,
+	HACKER,
+	ENEMY,
+	OTHER
+};
+
+struct HighlightData {
+	bool highlighted = false;
+	glm::vec3 highlight_color = glm::vec3(0.0f);
+	HighlightTarget target = HighlightTarget::OTHER;
+};
+
+class MaterialHighlight : public Material {
+public:
+	Shader skinned_shader;
+	void startup() override;
+	void bind_resources(RenderScene &scene) override;
+	void bind_skinned_resources(RenderScene &scene);
+	void bind_instance_resources(ModelInstance &instance, Transform &transform) override;
+	void bind_mesh_resources(Mesh &mesh, HighlightData &highlight_data);
+	void bind_instance_resources(SkinnedModelInstance &instance, Transform &transform);
+	void bind_mesh_resources(SkinnedMesh &mesh, HighlightData &highlight_data);
 };
 
 #endif // SILENCE_MATERIAL_H
