@@ -23,6 +23,7 @@
 #include "ecs/systems/enemy_pathing.h"
 #include "ecs/systems/enemy_system.h"
 #include "ecs/systems/hacker_system.h"
+#include "ecs/systems/highlight_system.h"
 #include "ecs/systems/isolated_entities_system.h"
 #include "ecs/systems/root_parent_system.h"
 #include "ecs/systems/taggable_system.h"
@@ -129,6 +130,7 @@ void Scene::register_game_systems() {
 	world.register_system<InteractableSystem>(EcsOnUpdate);
 	world.register_system<PlatformSystem>(EcsOnUpdate);
 	world.register_system<FMODEmitterSystem>();
+	world.register_system<HighlightSystem>();
 }
 
 void Scene::update(float dt) {

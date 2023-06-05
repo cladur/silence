@@ -5,10 +5,8 @@
 
 class HighlightSystem : public BaseSystem {
 public:
-	std::set<Entity> entities;
-
-	virtual void startup(World &world) = 0;
-	virtual void update(World &world, float dt) = 0;
+	void startup(World &world) override;
+	void update(World &world, float dt) override;
 };
 
 #endif //SILENCE_HIGHLIGHT_SYSTEM_H

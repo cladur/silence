@@ -58,8 +58,8 @@ void main()
     color = mix(color, particles, particles.a);
 
     if (length(highlights.rgb) > 0.0) {
-        float highlight_power = length(highlights.rgb / 3.0) * 0.2;
-        color = mix(color, highlights, highlight_power);
+        float highlight_power = length(highlights.rgb / 3.0) * 0.1;
+        color = mix(color, highlights, highlight_power / 5.0);
     }
 
     FragColor = vec4(color.rgb, 1.0);
