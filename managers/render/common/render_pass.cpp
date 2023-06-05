@@ -61,7 +61,6 @@ void AOBlurPass::startup() {
 
 void AOBlurPass::draw(RenderScene &scene) {
 	ZoneScopedN("AOBlurPass::draw");
-	RenderManager &render_manager = RenderManager::get();
 	material.bind_resources(scene);
 	utils::render_quad();
 }
@@ -89,14 +88,12 @@ void GBufferPass::draw(RenderScene &scene) {
 	for (auto &cmd : scene.draw_commands) {
 		ModelInstance &instance = *cmd.model_instance;
 		Transform &transform = *cmd.transform;
-		bool highlighted = cmd.highlighted;
-		auto high_col = cmd.highlight_color;
 		material.bind_instance_resources(instance, transform);
 		Model &model = resource_manager.get_model(instance.model_handle);
 
 		for (auto &mesh : model.meshes) {
 			if (mesh.fc_bounding_sphere.is_on_frustum(scene.frustum, transform, scene)) {
-				material.bind_mesh_resources(mesh, highlighted, high_col);
+				material.bind_mesh_resources(mesh);
 				mesh.draw();
 			}
 		}
@@ -590,4 +587,161 @@ void ParticlePass::draw(RenderScene &scene) {
 		i++;
     }
 	glBindVertexArray(0);
+}
+
+void HighlightPass::startup() {
+	material.startup();
+}
+void HighlightPass::draw(RenderScene &scene) {
+	// . . .
+}
+
+void HighlightPass::sort_highlights(RenderScene &scene) {
+	auto commands = scene.draw_commands;
+	// sort all draw calls and only collect the ones that are highlighted
+	for (auto &cmd : commands) {
+		if (!cmd.highlight_data.highlighted) {
+			continue;
+		}
+		if (cmd.highlight_data.target == HighlightTarget::OTHER) {
+			normal_highlights.push_back(cmd);
+		} else {
+			xray_highlights.push_back(cmd);
+		}
+	}
+
+	auto skinned_commands = scene.skinned_draw_commands;
+	for (auto &cmd : skinned_commands) {
+		if (!cmd.highlight_data.highlighted) {
+			continue;
+		}
+		if (cmd.highlight_data.target == HighlightTarget::OTHER) {
+			normal_skinned_highlights.push_back(cmd);
+		} else {
+			xray_skinned_highlights.push_back(cmd);
+		}
+	}
+}
+
+void HighlightPass::draw_normal(RenderScene &scene, bool right_side) {
+	ZoneScopedN("HighlightPass::draw_normal");
+	auto &rm = ResourceManager::get();
+	material.bind_resources(scene);
+	material.shader.set_int("is_xray", 0);
+	material.shader.set_int("agent_hacker_pov", right_side);
+	material.shader.set_float("near", scene.camera_near_far.x);
+	material.shader.set_float("far", scene.camera_near_far.y);
+
+	material.shader.set_int("depth", 0);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.depth_texture_id);
+
+	for (auto &cmd : normal_highlights) {
+		ModelInstance &instance = *cmd.model_instance;
+		Transform &transform = *cmd.transform;
+		material.bind_instance_resources(instance, transform);
+		Model &model = rm.get_model(instance.model_handle);
+
+		HighlightData highlight_data = cmd.highlight_data;
+
+		for (auto &mesh : model.meshes) {
+			if (mesh.fc_bounding_sphere.is_on_frustum(scene.frustum, transform, scene)) {
+				material.bind_mesh_resources(mesh, highlight_data);
+
+				material.shader.set_int("highlight_target", static_cast<int>(highlight_data.target));
+				mesh.draw();
+			}
+		}
+	}
+
+#ifdef WIN32
+	material.bind_skinned_resources(scene);
+	material.skinned_shader.set_int("is_xray", 0);
+	material.skinned_shader.set_int("agent_hacker_pov", right_side);
+	material.skinned_shader.set_float("near", scene.camera_near_far.x);
+	material.skinned_shader.set_float("far", scene.camera_near_far.y);
+
+	material.skinned_shader.set_int("depth", 0);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.depth_texture_id);
+
+	for (auto &cmd : normal_skinned_highlights) {
+		SkinnedModelInstance &instance = *cmd.model_instance;
+		Transform &transform = *cmd.transform;
+		material.bind_instance_resources(instance, transform);
+		SkinnedModel &model = rm.get_skinned_model(instance.model_handle);
+
+		HighlightData highlight_data = cmd.highlight_data;
+
+		for (auto &mesh : model.meshes) {
+			material.bind_mesh_resources(mesh, highlight_data);
+			material.skinned_shader.set_int("highlight_target", static_cast<int>(highlight_data.target));
+			mesh.draw();
+		}
+	}
+#endif
+}
+
+void HighlightPass::draw_xray(RenderScene &scene, bool right_side) {
+	ZoneScopedN("HighlightPass::draw_xray");
+	auto &rm = ResourceManager::get();
+	material.bind_resources(scene);
+	material.shader.set_int("is_xray", 1);
+	material.shader.set_int("agent_hacker_pov", right_side);
+	material.shader.set_float("near", scene.camera_near_far.x);
+	material.shader.set_float("far", scene.camera_near_far.y);
+
+	material.shader.set_int("depth", 0);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.depth_texture_id);
+
+	for (auto &cmd : xray_highlights) {
+		ModelInstance &instance = *cmd.model_instance;
+		Transform &transform = *cmd.transform;
+		material.bind_instance_resources(instance, transform);
+		Model &model = rm.get_model(instance.model_handle);
+
+		HighlightData highlight_data = cmd.highlight_data;
+
+		for (auto &mesh : model.meshes) {
+			if (mesh.fc_bounding_sphere.is_on_frustum(scene.frustum, transform, scene)) {
+				material.bind_mesh_resources(mesh, highlight_data);
+				material.shader.set_int("highlight_target", static_cast<int>(highlight_data.target));
+				mesh.draw();
+			}
+		}
+	}
+
+#ifdef WIN32
+	material.bind_skinned_resources(scene);
+	material.skinned_shader.set_int("is_xray", 1);
+	material.skinned_shader.set_int("agent_hacker_pov", right_side);
+	material.skinned_shader.set_float("near", scene.camera_near_far.x);
+	material.skinned_shader.set_float("far", scene.camera_near_far.y);
+
+	material.skinned_shader.set_int("depth", 0);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.depth_texture_id);
+
+	for (auto &cmd : xray_skinned_highlights) {
+		SkinnedModelInstance &instance = *cmd.model_instance;
+		Transform &transform = *cmd.transform;
+		material.bind_instance_resources(instance, transform);
+		SkinnedModel &model = rm.get_skinned_model(instance.model_handle);
+		HighlightData highlight_data = cmd.highlight_data;
+
+		for (auto &mesh : model.meshes) {
+			material.bind_mesh_resources(mesh, highlight_data);
+			material.skinned_shader.set_int("highlight_target", static_cast<int>(highlight_data.target));
+			mesh.draw();
+		}
+	}
+#endif
+}
+
+void HighlightPass::clear() {
+	normal_highlights.clear();
+	xray_highlights.clear();
+	normal_skinned_highlights.clear();
+	xray_skinned_highlights.clear();
 }

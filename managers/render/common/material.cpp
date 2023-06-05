@@ -272,7 +272,7 @@ void MaterialGBuffer::bind_instance_resources(ModelInstance &instance, Transform
 	shader.set_vec2("uv_scale", uv_scale);
 }
 
-void MaterialGBuffer::bind_mesh_resources(Mesh &mesh, bool highlighted, glm::vec3 highlight_color) {
+void MaterialGBuffer::bind_mesh_resources(Mesh &mesh) {
 	for (int i = 0; i < mesh.textures.size(); i++) {
 		if (mesh.textures_present[i]) {
 			glActiveTexture(GL_TEXTURE0 + i);
@@ -295,8 +295,6 @@ void MaterialGBuffer::bind_mesh_resources(Mesh &mesh, bool highlighted, glm::vec
 		shader.set_bool("has_emissive_map", mesh.textures_present[3]);
 		is_emissive_map_set = mesh.textures_present[3];
 	}
-	shader.set_bool("is_highlighted", highlighted);
-	shader.set_vec3("highlight_color", highlight_color);
 }
 
 void MaterialGBuffer::bind_instance_resources(SkinnedModelInstance &instance, Transform &transform) {
@@ -435,7 +433,9 @@ void MaterialCombination::bind_resources(RenderScene &scene) {
 	shader.set_int("ViewPos", 5);
 	shader.set_int("Skybox", 6);
 	shader.set_int("Particles", 7);
-	shader.set_int("Highlight", 8);
+	shader.set_int("Highlights", 8);
+	shader.set_int("HighlightsDepth", 9);
+	shader.set_int("Depth", 10);
 
 	shader.set_int("use_ao", cvar_use_ao.get());
 
@@ -460,7 +460,11 @@ void MaterialCombination::bind_resources(RenderScene &scene) {
 	glActiveTexture(GL_TEXTURE7);
 	glBindTexture(GL_TEXTURE_2D, scene.particle_buffer.texture_id);
 	glActiveTexture(GL_TEXTURE8);
-	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.highlight_texture_id);
+	glBindTexture(GL_TEXTURE_2D, scene.highlight_buffer.texture_id);
+	glActiveTexture(GL_TEXTURE9);
+	glBindTexture(GL_TEXTURE_2D, scene.highlight_buffer.depth_texture_id);
+	glActiveTexture(GL_TEXTURE10);
+	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.depth_texture_id);
 }
 
 void MaterialCombination::bind_instance_resources(ModelInstance &instance, Transform &transform) {
@@ -606,4 +610,54 @@ void MaterialParticle::bind_resources(RenderScene &scene) {
 }
 
 void MaterialParticle::bind_instance_resources(ModelInstance &instance, Transform &transform) {
+}
+
+void MaterialHighlight::startup() {
+	shader.load_from_files(shader_path("gbuffer/gbuffer.vert"), shader_path("gbuffer/highlight.frag"));
+#ifdef WIN32
+	skinned_shader.load_from_files(shader_path("gbuffer/skinned_gbuffer.vert"), shader_path("gbuffer/highlight.frag"));
+#endif
+}
+
+void MaterialHighlight::bind_resources(RenderScene &scene) {
+	shader.use();
+	shader.set_mat4("view", scene.view);
+	shader.set_mat4("projection", scene.projection);
+	shader.set_vec3("cam_pos", scene.camera_pos);
+}
+
+void MaterialHighlight::bind_instance_resources(ModelInstance &instance, Transform &transform) {
+	shader.set_mat4("model", transform.get_global_model_matrix());
+}
+
+void MaterialHighlight::bind_skinned_resources(RenderScene &scene) {
+	skinned_shader.use();
+	skinned_shader.set_mat4("view", scene.view);
+	skinned_shader.set_mat4("projection", scene.projection);
+	skinned_shader.set_vec3("cam_pos", scene.camera_pos);
+}
+
+void MaterialHighlight::bind_mesh_resources(Mesh &mesh, HighlightData &highlight_data) {
+	shader.set_int("is_highlighted", highlight_data.highlighted);
+	shader.set_vec3("highlight_color", highlight_data.highlight_color);
+}
+
+void MaterialHighlight::bind_instance_resources(SkinnedModelInstance &instance, Transform &transform) {
+	skinned_shader.set_mat4("model", transform.get_global_model_matrix());
+
+	glBindBuffer(GL_UNIFORM_BUFFER, instance.skinning_buffer);
+	if (!instance.bone_matrices.empty()) {
+		glBufferSubData(
+				GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4) * instance.bone_matrices.size(), instance.bone_matrices.data());
+	}
+
+	GLuint binding_index = 1;
+	GLuint buffer_index = glGetUniformBlockIndex(skinned_shader.id, "SkinningBuffer");
+	glUniformBlockBinding(skinned_shader.id, buffer_index, binding_index);
+	glBindBufferBase(GL_UNIFORM_BUFFER, binding_index, instance.skinning_buffer);
+}
+
+void MaterialHighlight::bind_mesh_resources(SkinnedMesh &mesh, HighlightData &highlight_data) {
+	skinned_shader.set_int("is_highlighted", highlight_data.highlighted);
+	skinned_shader.set_vec3("highlight_color", highlight_data.highlight_color);
 }

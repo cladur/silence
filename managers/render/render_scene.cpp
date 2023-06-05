@@ -37,6 +37,8 @@ void RenderScene::startup() {
 	shadow_pass.startup();
 	mouse_pick_pass.startup();
 	particle_pass.startup();
+	highlight_pass.startup();
+
 
 	// Size of the viewport doesn't matter here, it will be resized either way
 	render_extent = glm::vec2(100, 100);
@@ -51,6 +53,7 @@ void RenderScene::startup() {
 	skybox_buffer.startup(render_extent.x, render_extent.y);
 	mouse_pick_framebuffer.startup(render_extent.x, render_extent.y);
 	particle_buffer.startup(render_extent.x, render_extent.y);
+	highlight_buffer.startup(render_extent.x, render_extent.y);
 
 	debug_draw.startup();
 	transparent_pass.startup();
@@ -104,10 +107,28 @@ void RenderScene::draw_viewport(bool right_side) {
 		camera_pos = camera_transform.get_global_position();
 	}
 
-	//	UIManager::get().set_render_scene(this);
-	//	UIManager::get().draw_world_space_ui();
-
 	g_buffer_pass.draw(*this);
+
+	// HIGHLIGHT PASS
+	highlight_buffer.bind();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glDepthMask(GL_FALSE);
+
+	// all the see-through highlights
+	highlight_pass.draw_xray(*this, right_side);
+
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, g_buffer.framebuffer_id);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, highlight_buffer.framebuffer_id); // write to default framebuffer
+	glBlitFramebuffer(0, 0, render_extent.x, render_extent.y, 0, 0, render_extent.x, render_extent.y,
+			GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+
+	glDepthFunc(GL_LEQUAL);
+
+	// all the normal highlights
+	highlight_pass.draw_normal(*this, right_side);
+
+	glDepthMask(GL_TRUE);
 
 	pbr_buffer.bind();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -245,8 +266,10 @@ void RenderScene::draw() {
 
 	transparent_pass.sort_objects(*this);
 
+	highlight_pass.sort_highlights(*this);
+
 	if (cvar_splitscreen.get() && !cvar_debug_camera_use.get()) {
-		draw_viewport(false);
+		draw_viewport(false); // agent
 		{
 			ZoneScopedN("RenderScene::draw");
 			glBindFramebuffer(GL_READ_FRAMEBUFFER, render_framebuffer.framebuffer_id);
@@ -255,7 +278,7 @@ void RenderScene::draw() {
 					GL_COLOR_BUFFER_BIT, GL_NEAREST);
 		}
 
-		draw_viewport(true);
+		draw_viewport(true); // hacker
 		{
 			ZoneScopedN("RenderScene::blit");
 			glBindFramebuffer(GL_READ_FRAMEBUFFER, render_framebuffer.framebuffer_id);
@@ -279,6 +302,8 @@ void RenderScene::draw() {
 					GL_COLOR_BUFFER_BIT, GL_NEAREST);
 		}
 	}
+
+	highlight_pass.clear();
 
 	glViewport(0, 0, full_render_extent.x, full_render_extent.y);
 	final_framebuffer.bind();
@@ -320,26 +345,27 @@ void RenderScene::resize_framebuffer(uint32_t width, uint32_t height) {
 	skybox_buffer.resize(width, height);
 	mouse_pick_framebuffer.resize(width, height);
 	particle_buffer.resize(width, height);
+	highlight_buffer.resize(width, height);
 
 	render_extent = glm::vec2(width, height);
 }
 
-void RenderScene::queue_draw(ModelInstance *model_instance, Transform *transform, Entity entity, bool highlighted, glm::vec3 highlight_color) {
+void RenderScene::queue_draw(ModelInstance *model_instance, Transform *transform, Entity entity, HighlightData highlight_data) {
 	DrawCommand draw_command = {};
 	draw_command.model_instance = model_instance;
 	draw_command.transform = transform;
 	draw_command.entity = entity;
-	draw_command.highlighted = highlighted;
-	draw_command.highlight_color = highlight_color;
+	draw_command.highlight_data = highlight_data;
 
 	draw_commands.push_back(draw_command);
 }
 
-void RenderScene::queue_skinned_draw(SkinnedModelInstance *model_instance, Transform *transform, Entity entity) {
+void RenderScene::queue_skinned_draw(SkinnedModelInstance *model_instance, Transform *transform, Entity entity, HighlightData highlight_data) {
 	SkinnedDrawCommand draw_command = {};
 	draw_command.model_instance = model_instance;
 	draw_command.transform = transform;
 	draw_command.entity = entity;
+	draw_command.highlight_data = highlight_data;
 
 #ifdef WIN32
 	skinned_draw_commands.push_back(draw_command);

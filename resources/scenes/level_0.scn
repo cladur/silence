@@ -3,6 +3,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 25
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "Skrzyneczka"
                 },
                 "component_name": "Name"
@@ -27,12 +33,6 @@
                     }
                 },
                 "component_name": "Transform"
-            },
-            {
-                "component_data": {
-                    "parent": 25
-                },
-                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -127,6 +127,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 70
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "Camera"
                 },
                 "component_name": "Name"
@@ -154,12 +160,6 @@
             },
             {
                 "component_data": {
-                    "parent": 70
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "fov": 70.0,
                     "right_side": false
                 },
@@ -171,6 +171,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 15
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Box"
@@ -200,12 +206,6 @@
             },
             {
                 "component_data": {
-                    "parent": 15
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
@@ -219,6 +219,14 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "enemy/enemy.skinmdl"
+                },
+                "component_name": "SkinnedModelInstance"
+            },
             {
                 "component_data": {
                     "name": "Enemy"
@@ -255,11 +263,9 @@
             },
             {
                 "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "enemy/enemy.skinmdl"
+                    "layer_name": "default"
                 },
-                "component_name": "SkinnedModelInstance"
+                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -270,12 +276,6 @@
                     }
                 },
                 "component_name": "Taggable"
-            },
-            {
-                "component_data": {
-                    "layer_name": "default"
-                },
-                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -308,13 +308,39 @@
                     "view_cone_distance": 10.0
                 },
                 "component_name": "EnemyData"
+            },
+            {
+                "component_data": {
+                    "highlight_color": {
+                        "b": 0.0,
+                        "g": 0.0,
+                        "r": 1.0
+                    },
+                    "highlighted": "twoja misja trwa",
+                    "target": 2
+                },
+                "component_name": "Highlight"
             }
         ],
         "entity": 5,
-        "signature": "00010001000010000100100011000011"
+        "signature": "01010001000010000100100011000011"
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "agent/agent.skinmdl"
+                },
+                "component_name": "SkinnedModelInstance"
+            },
+            {
+                "component_data": {
+                    "parent": 46
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Agent"
@@ -351,21 +377,19 @@
             },
             {
                 "component_data": {
-                    "parent": 46
+                    "highlight_color": {
+                        "b": 0.4431372582912445,
+                        "g": 1.0,
+                        "r": 0.4313725531101227
+                    },
+                    "highlighted": "twoja misja trwa",
+                    "target": 0
                 },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "agent/agent.skinmdl"
-                },
-                "component_name": "SkinnedModelInstance"
+                "component_name": "Highlight"
             }
         ],
         "entity": 6,
-        "signature": "00000000000000000000000011001011"
+        "signature": "01000000000000000000000011001011"
     },
     {
         "components": [
@@ -416,6 +440,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 7
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "Cube 1x1"
                 },
                 "component_name": "Name"
@@ -440,12 +470,6 @@
                     }
                 },
                 "component_name": "Transform"
-            },
-            {
-                "component_data": {
-                    "parent": 7
-                },
-                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -489,6 +513,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 7
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "Cube 1x1"
                 },
                 "component_name": "Name"
@@ -513,12 +543,6 @@
                     }
                 },
                 "component_name": "Transform"
-            },
-            {
-                "component_data": {
-                    "parent": 7
-                },
-                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -562,6 +586,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 7
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "Cube 1x1"
                 },
                 "component_name": "Name"
@@ -589,12 +619,6 @@
             },
             {
                 "component_data": {
-                    "parent": 7
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
@@ -608,6 +632,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 7
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Cube 1x1"
@@ -634,12 +664,6 @@
                     }
                 },
                 "component_name": "Transform"
-            },
-            {
-                "component_data": {
-                    "parent": 7
-                },
-                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -701,6 +725,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "Cube 1x1"
                 },
                 "component_name": "Name"
@@ -728,12 +758,6 @@
             },
             {
                 "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
@@ -747,6 +771,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Cube 1x1"
@@ -773,12 +803,6 @@
                     }
                 },
                 "component_name": "Transform"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -848,6 +872,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 15
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "Cube 1x1"
                 },
                 "component_name": "Name"
@@ -875,12 +905,6 @@
             },
             {
                 "component_data": {
-                    "parent": 15
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
@@ -894,6 +918,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 15
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Cube 1x1"
@@ -923,12 +953,6 @@
             },
             {
                 "component_data": {
-                    "parent": 15
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
@@ -942,6 +966,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 15
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Cube 1x1"
@@ -971,12 +1001,6 @@
             },
             {
                 "component_data": {
-                    "parent": 15
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
@@ -990,6 +1014,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 15
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Cover"
@@ -1019,12 +1049,6 @@
             },
             {
                 "component_data": {
-                    "parent": 15
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
@@ -1038,6 +1062,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 15
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Cube 1x1"
@@ -1067,12 +1097,6 @@
             },
             {
                 "component_data": {
-                    "parent": 15
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
@@ -1086,6 +1110,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 15
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Cube 1x1"
@@ -1112,12 +1142,6 @@
                     }
                 },
                 "component_name": "Transform"
-            },
-            {
-                "component_data": {
-                    "parent": 15
-                },
-                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -1180,6 +1204,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 25
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "Cube 1x1"
                 },
                 "component_name": "Name"
@@ -1207,12 +1237,6 @@
             },
             {
                 "component_data": {
-                    "parent": 25
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
@@ -1226,6 +1250,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 25
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Cube 1x1"
@@ -1252,12 +1282,6 @@
                     }
                 },
                 "component_name": "Transform"
-            },
-            {
-                "component_data": {
-                    "parent": 25
-                },
-                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -1402,6 +1426,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 26
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "Cube 1x1"
                 },
                 "component_name": "Name"
@@ -1429,12 +1459,6 @@
             },
             {
                 "component_data": {
-                    "parent": 26
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
@@ -1448,6 +1472,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 26
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Cube 1x1"
@@ -1477,12 +1507,6 @@
             },
             {
                 "component_data": {
-                    "parent": 26
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
@@ -1496,6 +1520,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 26
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Cube 1x1"
@@ -1525,12 +1555,6 @@
             },
             {
                 "component_data": {
-                    "parent": 26
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
@@ -1544,6 +1568,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 25
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Electric Box"
@@ -1573,12 +1603,6 @@
             },
             {
                 "component_data": {
-                    "parent": 25
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "items/electric_box_2/electric_box_2.mdl",
@@ -1592,6 +1616,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 15
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Cardboard Box"
@@ -1618,12 +1648,6 @@
                     }
                 },
                 "component_name": "Transform"
-            },
-            {
-                "component_data": {
-                    "parent": 15
-                },
-                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -1688,6 +1712,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 32
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "Back"
                 },
                 "component_name": "Name"
@@ -1715,12 +1745,6 @@
             },
             {
                 "component_data": {
-                    "parent": 32
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
@@ -1734,6 +1758,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 32
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Left"
@@ -1763,12 +1793,6 @@
             },
             {
                 "component_data": {
-                    "parent": 32
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
@@ -1782,6 +1806,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 32
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Right"
@@ -1811,12 +1841,6 @@
             },
             {
                 "component_data": {
-                    "parent": 32
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
@@ -1830,6 +1854,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 32
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Right 2"
@@ -1859,12 +1889,6 @@
             },
             {
                 "component_data": {
-                    "parent": 32
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
@@ -1878,6 +1902,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 22
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Cube 1x1"
@@ -1907,12 +1937,6 @@
             },
             {
                 "component_data": {
-                    "parent": 22
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
@@ -1926,6 +1950,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 22
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Cube 1x1"
@@ -1955,12 +1985,6 @@
             },
             {
                 "component_data": {
-                    "parent": 22
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
@@ -1974,6 +1998,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 22
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Cube 1x1"
@@ -2003,12 +2033,6 @@
             },
             {
                 "component_data": {
-                    "parent": 22
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
@@ -2022,6 +2046,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 32
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Front"
@@ -2051,12 +2081,6 @@
             },
             {
                 "component_data": {
-                    "parent": 32
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
@@ -2070,6 +2094,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 42
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "orientation": {
@@ -2090,12 +2120,6 @@
                     }
                 },
                 "component_name": "Transform"
-            },
-            {
-                "component_data": {
-                    "parent": 42
-                },
-                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -2164,6 +2188,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 42
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": 0.0,
@@ -2182,12 +2212,6 @@
                     }
                 },
                 "component_name": "Transform"
-            },
-            {
-                "component_data": {
-                    "parent": 42
-                },
-                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -2212,6 +2236,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 42
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": 0.0,
@@ -2230,12 +2260,6 @@
                     }
                 },
                 "component_name": "Transform"
-            },
-            {
-                "component_data": {
-                    "parent": 42
-                },
-                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -2258,6 +2282,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 15
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Electric Box"
@@ -2284,12 +2314,6 @@
                     }
                 },
                 "component_name": "Transform"
-            },
-            {
-                "component_data": {
-                    "parent": 15
-                },
-                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -2322,7 +2346,7 @@
                     },
                     "position": {
                         "x": 0.0,
-                        "y": 0.2023656666278839,
+                        "y": 2.2023656368255615,
                         "z": 4.0
                     },
                     "scale": {
@@ -2383,6 +2407,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 46
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "CameraPivot"
                 },
                 "component_name": "Name"
@@ -2410,12 +2440,6 @@
             },
             {
                 "component_data": {
-                    "parent": 46
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "children": [
                         70
                     ],
@@ -2429,6 +2453,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 49
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Floor"
@@ -2455,12 +2485,6 @@
                     }
                 },
                 "component_name": "Transform"
-            },
-            {
-                "component_data": {
-                    "parent": 49
-                },
-                "component_name": "Parent"
             },
             {
                 "component_data": {},
@@ -2540,6 +2564,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 49
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "Left Wall"
                 },
                 "component_name": "Name"
@@ -2564,12 +2594,6 @@
                     }
                 },
                 "component_name": "Transform"
-            },
-            {
-                "component_data": {
-                    "parent": 49
-                },
-                "component_name": "Parent"
             },
             {
                 "component_data": {},
@@ -2604,6 +2628,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 49
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "Back Wall"
                 },
                 "component_name": "Name"
@@ -2628,12 +2658,6 @@
                     }
                 },
                 "component_name": "Transform"
-            },
-            {
-                "component_data": {
-                    "parent": 49
-                },
-                "component_name": "Parent"
             },
             {
                 "component_data": {},
@@ -2668,6 +2692,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 49
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "Pochylnia"
                 },
                 "component_name": "Name"
@@ -2692,12 +2722,6 @@
                     }
                 },
                 "component_name": "Transform"
-            },
-            {
-                "component_data": {
-                    "parent": 49
-                },
-                "component_name": "Parent"
             },
             {
                 "component_data": {},
@@ -2896,6 +2920,20 @@
         "components": [
             {
                 "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "scorpion/scorpion.skinmdl"
+                },
+                "component_name": "SkinnedModelInstance"
+            },
+            {
+                "component_data": {
+                    "parent": 55
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "ScorpionModel"
                 },
                 "component_name": "Name"
@@ -2930,24 +2968,28 @@
             },
             {
                 "component_data": {
+                    "highlight_color": {
+                        "b": 0.5254902243614197,
+                        "g": 1.0,
+                        "r": 0.0
+                    },
+                    "highlighted": "twoja misja trwa",
+                    "target": 1
+                },
+                "component_name": "Highlight"
+            }
+        ],
+        "entity": 56,
+        "signature": "01000000000000000000000011001011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
                     "parent": 55
                 },
                 "component_name": "Parent"
             },
-            {
-                "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "scorpion/scorpion.skinmdl"
-                },
-                "component_name": "SkinnedModelInstance"
-            }
-        ],
-        "entity": 56,
-        "signature": "00000000000000000000000011001011"
-    },
-    {
-        "components": [
             {
                 "component_data": {
                     "name": "CameraPivot"
@@ -2977,12 +3019,6 @@
             },
             {
                 "component_data": {
-                    "parent": 55
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "children": [
                         58
                     ],
@@ -2996,6 +3032,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 57
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "ScorpionCameraTransform"
@@ -3022,12 +3064,6 @@
                     }
                 },
                 "component_name": "Transform"
-            },
-            {
-                "component_data": {
-                    "parent": 57
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 58,
@@ -3162,6 +3198,12 @@
             },
             {
                 "component_data": {
+                    "layer_name": "hacker"
+                },
+                "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {
                     "tag_position": {
                         "x": 0.0,
                         "y": 0.5,
@@ -3169,12 +3211,6 @@
                     }
                 },
                 "component_name": "Taggable"
-            },
-            {
-                "component_data": {
-                    "layer_name": "hacker"
-                },
-                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -3193,18 +3229,24 @@
             },
             {
                 "component_data": {
-                    "highlighted": "twoja misja trwa"
-                },
-                "component_name": "Highlight"
-            },
-            {
-                "component_data": {
                     "can_interact": true,
                     "interaction": 2,
                     "interaction_target": 61,
                     "type": 2
                 },
                 "component_name": "Interactable"
+            },
+            {
+                "component_data": {
+                    "highlight_color": {
+                        "b": 0.0,
+                        "g": 1.0,
+                        "r": 0.0
+                    },
+                    "highlighted": "twoja misja trwa",
+                    "target": 3
+                },
+                "component_name": "Highlight"
             }
         ],
         "entity": 60,
@@ -3333,6 +3375,12 @@
             },
             {
                 "component_data": {
+                    "layer_name": "hacker"
+                },
+                "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {
                     "tag_position": {
                         "x": 0.0,
                         "y": 0.5,
@@ -3340,12 +3388,6 @@
                     }
                 },
                 "component_name": "Taggable"
-            },
-            {
-                "component_data": {
-                    "layer_name": "hacker"
-                },
-                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -3364,18 +3406,24 @@
             },
             {
                 "component_data": {
-                    "highlighted": "twoja misja trwa"
-                },
-                "component_name": "Highlight"
-            },
-            {
-                "component_data": {
                     "can_interact": true,
                     "interaction": 2,
                     "interaction_target": 63,
                     "type": 2
                 },
                 "component_name": "Interactable"
+            },
+            {
+                "component_data": {
+                    "highlight_color": {
+                        "b": 0.0,
+                        "g": 1.0,
+                        "r": 0.0
+                    },
+                    "highlighted": "twoja misja trwa",
+                    "target": 3
+                },
+                "component_name": "Highlight"
             }
         ],
         "entity": 62,
@@ -3620,6 +3668,12 @@
             },
             {
                 "component_data": {
+                    "layer_name": "hacker"
+                },
+                "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {
                     "tag_position": {
                         "x": 0.0,
                         "y": 0.699999988079071,
@@ -3627,63 +3681,6 @@
                     }
                 },
                 "component_name": "Taggable"
-            },
-            {
-                "component_data": {
-                    "layer_name": "hacker"
-                },
-                "component_name": "ColliderTag"
-            },
-            {
-                "component_data": {
-                    "color_begin": [
-                        0.6313725709915161,
-                        0.4156862795352936,
-                        0.3450980484485626,
-                        1.0
-                    ],
-                    "color_end": [
-                        0.23529411852359772,
-                        0.18039216101169586,
-                        0.054901961237192154,
-                        0.0
-                    ],
-                    "color_transition": 1,
-                    "is_one_shot": true,
-                    "is_textured": true,
-                    "lifetime": 1.2000000476837158,
-                    "one_shot_duration": 0.10000000149011612,
-                    "position": [
-                        0.0,
-                        0.0,
-                        -0.30000001192092896
-                    ],
-                    "position_variance": [
-                        0.800000011920929,
-                        0.20000000298023224,
-                        1.2000000476837158
-                    ],
-                    "rate": 52.20000076293945,
-                    "rotation_begin": 0.0,
-                    "rotation_end": 0.0,
-                    "rotation_transition": 0,
-                    "size_begin": 2.5999999046325684,
-                    "size_end": 3.0,
-                    "size_transition": 0,
-                    "texture_name": "resources\\assets_export\\explosion_fire.ktx2",
-                    "velocity_begin": [
-                        0.0,
-                        0.10000000149011612,
-                        0.0
-                    ],
-                    "velocity_end": [
-                        0.0,
-                        0.0,
-                        0.0
-                    ],
-                    "velocity_transition": 0
-                },
-                "component_name": "ParticleEmitter"
             },
             {
                 "component_data": {
@@ -3702,12 +3699,6 @@
             },
             {
                 "component_data": {
-                    "highlighted": "twoja misja trwa"
-                },
-                "component_name": "Highlight"
-            },
-            {
-                "component_data": {
                     "can_interact": true,
                     "interaction": 3,
                     "interaction_target": 66,
@@ -3722,6 +3713,69 @@
                     "explosion_radius": 4.0
                 },
                 "component_name": "ExplodingBox"
+            },
+            {
+                "component_data": {
+                    "highlight_color": {
+                        "b": 0.0,
+                        "g": 0.0,
+                        "r": 1.0
+                    },
+                    "highlighted": "twoja misja trwa",
+                    "target": 3
+                },
+                "component_name": "Highlight"
+            },
+            {
+                "component_data": {
+                    "color_begin": [
+                        1.0,
+                        0.24705882370471954,
+                        0.2980392277240753,
+                        1.0
+                    ],
+                    "color_end": [
+                        1.0,
+                        1.0,
+                        1.0,
+                        0.01568627543747425
+                    ],
+                    "color_transition": 2,
+                    "is_one_shot": true,
+                    "is_textured": true,
+                    "lifetime": 1.5,
+                    "one_shot_duration": 0.10000000149011612,
+                    "position": [
+                        0.0,
+                        0.4000000059604645,
+                        -0.5
+                    ],
+                    "position_variance": [
+                        0.4000000059604645,
+                        0.20000000298023224,
+                        0.4000000059604645
+                    ],
+                    "rate": 33.599998474121094,
+                    "rotation_begin": 0.0,
+                    "rotation_end": 0.0,
+                    "rotation_transition": 0,
+                    "size_begin": 4.5,
+                    "size_end": 7.800000190734863,
+                    "size_transition": 0,
+                    "texture_name": "resources\\assets_export\\smoke.ktx2",
+                    "velocity_begin": [
+                        0.0,
+                        0.10000000149011612,
+                        0.0
+                    ],
+                    "velocity_end": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "velocity_transition": 0
+                },
+                "component_name": "ParticleEmitter"
             }
         ],
         "entity": 66,
@@ -3729,6 +3783,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 15
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Cardboard Box"
@@ -3755,12 +3815,6 @@
                     }
                 },
                 "component_name": "Transform"
-            },
-            {
-                "component_data": {
-                    "parent": 15
-                },
-                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -3836,18 +3890,24 @@
             },
             {
                 "component_data": {
-                    "highlighted": "twoja misja trwa"
-                },
-                "component_name": "Highlight"
-            },
-            {
-                "component_data": {
                     "can_interact": true,
                     "interaction": 1,
                     "interaction_target": 68,
                     "type": 2
                 },
                 "component_name": "Interactable"
+            },
+            {
+                "component_data": {
+                    "highlight_color": {
+                        "b": 1.0,
+                        "g": 1.0,
+                        "r": 1.0
+                    },
+                    "highlighted": "twoja misja trwa",
+                    "target": 3
+                },
+                "component_name": "Highlight"
             }
         ],
         "entity": 68,
@@ -3884,6 +3944,21 @@
             },
             {
                 "component_data": {
+                    "cast_shadow": false,
+                    "color": {
+                        "b": 0.036322809755802155,
+                        "g": 0.8989899158477783,
+                        "r": 0.8205655813217163
+                    },
+                    "cutoff": 12.5,
+                    "intensity": 150.0,
+                    "outer_cutoff": 5.0,
+                    "type": 0
+                },
+                "component_name": "Light"
+            },
+            {
+                "component_data": {
                     "billboard_z_offset": -4.800000190734863,
                     "color": {
                         "a": 1.0,
@@ -3904,21 +3979,6 @@
                     "use_camera_right": false
                 },
                 "component_name": "Billboard"
-            },
-            {
-                "component_data": {
-                    "cast_shadow": false,
-                    "color": {
-                        "b": 0.036322809755802155,
-                        "g": 0.8989899158477783,
-                        "r": 0.8205655813217163
-                    },
-                    "cutoff": 12.5,
-                    "intensity": 150.0,
-                    "outer_cutoff": 5.0,
-                    "type": 0
-                },
-                "component_name": "Light"
             }
         ],
         "entity": 69,
@@ -3926,6 +3986,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 47
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "SpringArm"
@@ -3955,12 +4021,6 @@
             },
             {
                 "component_data": {
-                    "parent": 47
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "children": [
                         3
                     ],
@@ -3974,6 +4034,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 46
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Camera Floor"
@@ -4000,12 +4066,6 @@
                     }
                 },
                 "component_name": "Transform"
-            },
-            {
-                "component_data": {
-                    "parent": 46
-                },
-                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -4113,16 +4173,15 @@
         "components": [
             {
                 "component_data": {
-                    "name": "PathNode"
+                    "parent": 73
                 },
-                "component_name": "Name"
+                "component_name": "Parent"
             },
             {
                 "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 0.0
+                    "name": "PathNode"
                 },
-                "component_name": "PathNode"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -4147,9 +4206,10 @@
             },
             {
                 "component_data": {
-                    "parent": 73
+                    "is_patrol_point": false,
+                    "patrol_time": 0.0
                 },
-                "component_name": "Parent"
+                "component_name": "PathNode"
             }
         ],
         "entity": 74,
@@ -4159,16 +4219,15 @@
         "components": [
             {
                 "component_data": {
-                    "name": "PathNode"
+                    "parent": 73
                 },
-                "component_name": "Name"
+                "component_name": "Parent"
             },
             {
                 "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 0.0
+                    "name": "PathNode"
                 },
-                "component_name": "PathNode"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -4193,9 +4252,10 @@
             },
             {
                 "component_data": {
-                    "parent": 73
+                    "is_patrol_point": false,
+                    "patrol_time": 0.0
                 },
-                "component_name": "Parent"
+                "component_name": "PathNode"
             }
         ],
         "entity": 75,
@@ -4205,16 +4265,15 @@
         "components": [
             {
                 "component_data": {
-                    "name": "PathNode"
+                    "parent": 73
                 },
-                "component_name": "Name"
+                "component_name": "Parent"
             },
             {
                 "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 0.0
+                    "name": "PathNode"
                 },
-                "component_name": "PathNode"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -4239,9 +4298,10 @@
             },
             {
                 "component_data": {
-                    "parent": 73
+                    "is_patrol_point": false,
+                    "patrol_time": 0.0
                 },
-                "component_name": "Parent"
+                "component_name": "PathNode"
             }
         ],
         "entity": 76,
@@ -4251,16 +4311,15 @@
         "components": [
             {
                 "component_data": {
-                    "name": "PathNode"
+                    "parent": 73
                 },
-                "component_name": "Name"
+                "component_name": "Parent"
             },
             {
                 "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 0.0
+                    "name": "PathNode"
                 },
-                "component_name": "PathNode"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -4285,9 +4344,10 @@
             },
             {
                 "component_data": {
-                    "parent": 73
+                    "is_patrol_point": false,
+                    "patrol_time": 0.0
                 },
-                "component_name": "Parent"
+                "component_name": "PathNode"
             }
         ],
         "entity": 77,
@@ -4297,16 +4357,15 @@
         "components": [
             {
                 "component_data": {
-                    "name": "PathNode"
+                    "parent": 73
                 },
-                "component_name": "Name"
+                "component_name": "Parent"
             },
             {
                 "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 0.0
+                    "name": "PathNode"
                 },
-                "component_name": "PathNode"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -4331,9 +4390,10 @@
             },
             {
                 "component_data": {
-                    "parent": 73
+                    "is_patrol_point": false,
+                    "patrol_time": 0.0
                 },
-                "component_name": "Parent"
+                "component_name": "PathNode"
             }
         ],
         "entity": 78,
@@ -4343,16 +4403,15 @@
         "components": [
             {
                 "component_data": {
-                    "name": "PathNode"
+                    "parent": 73
                 },
-                "component_name": "Name"
+                "component_name": "Parent"
             },
             {
                 "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 0.0
+                    "name": "PathNode"
                 },
-                "component_name": "PathNode"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -4377,9 +4436,10 @@
             },
             {
                 "component_data": {
-                    "parent": 73
+                    "is_patrol_point": false,
+                    "patrol_time": 0.0
                 },
-                "component_name": "Parent"
+                "component_name": "PathNode"
             }
         ],
         "entity": 79,
@@ -4389,16 +4449,15 @@
         "components": [
             {
                 "component_data": {
-                    "name": "node"
+                    "parent": 73
                 },
-                "component_name": "Name"
+                "component_name": "Parent"
             },
             {
                 "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 3.0
+                    "name": "node"
                 },
-                "component_name": "PathNode"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -4423,9 +4482,10 @@
             },
             {
                 "component_data": {
-                    "parent": 73
+                    "is_patrol_point": false,
+                    "patrol_time": 3.0
                 },
-                "component_name": "Parent"
+                "component_name": "PathNode"
             }
         ],
         "entity": 80,
@@ -4435,16 +4495,15 @@
         "components": [
             {
                 "component_data": {
-                    "name": "node"
+                    "parent": 73
                 },
-                "component_name": "Name"
+                "component_name": "Parent"
             },
             {
                 "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 3.0
+                    "name": "node"
                 },
-                "component_name": "PathNode"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -4469,9 +4528,10 @@
             },
             {
                 "component_data": {
-                    "parent": 73
+                    "is_patrol_point": false,
+                    "patrol_time": 3.0
                 },
-                "component_name": "Parent"
+                "component_name": "PathNode"
             }
         ],
         "entity": 81,
@@ -4481,16 +4541,15 @@
         "components": [
             {
                 "component_data": {
-                    "name": "node"
+                    "parent": 73
                 },
-                "component_name": "Name"
+                "component_name": "Parent"
             },
             {
                 "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 3.0
+                    "name": "node"
                 },
-                "component_name": "PathNode"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -4515,9 +4574,10 @@
             },
             {
                 "component_data": {
-                    "parent": 73
+                    "is_patrol_point": false,
+                    "patrol_time": 3.0
                 },
-                "component_name": "Parent"
+                "component_name": "PathNode"
             }
         ],
         "entity": 82,
@@ -4527,16 +4587,15 @@
         "components": [
             {
                 "component_data": {
-                    "name": "node"
+                    "parent": 73
                 },
-                "component_name": "Name"
+                "component_name": "Parent"
             },
             {
                 "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 3.0
+                    "name": "node"
                 },
-                "component_name": "PathNode"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -4561,9 +4620,10 @@
             },
             {
                 "component_data": {
-                    "parent": 73
+                    "is_patrol_point": false,
+                    "patrol_time": 3.0
                 },
-                "component_name": "Parent"
+                "component_name": "PathNode"
             }
         ],
         "entity": 83,
@@ -4573,16 +4633,15 @@
         "components": [
             {
                 "component_data": {
-                    "name": "node"
+                    "parent": 73
                 },
-                "component_name": "Name"
+                "component_name": "Parent"
             },
             {
                 "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 3.0
+                    "name": "node"
                 },
-                "component_name": "PathNode"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -4607,9 +4666,10 @@
             },
             {
                 "component_data": {
-                    "parent": 73
+                    "is_patrol_point": false,
+                    "patrol_time": 3.0
                 },
-                "component_name": "Parent"
+                "component_name": "PathNode"
             }
         ],
         "entity": 84,
@@ -4619,16 +4679,15 @@
         "components": [
             {
                 "component_data": {
-                    "name": "node"
+                    "parent": 73
                 },
-                "component_name": "Name"
+                "component_name": "Parent"
             },
             {
                 "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 3.0
+                    "name": "node"
                 },
-                "component_name": "PathNode"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -4653,9 +4712,10 @@
             },
             {
                 "component_data": {
-                    "parent": 73
+                    "is_patrol_point": false,
+                    "patrol_time": 3.0
                 },
-                "component_name": "Parent"
+                "component_name": "PathNode"
             }
         ],
         "entity": 85,
@@ -4665,16 +4725,15 @@
         "components": [
             {
                 "component_data": {
-                    "name": "node"
+                    "parent": 73
                 },
-                "component_name": "Name"
+                "component_name": "Parent"
             },
             {
                 "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 3.0
+                    "name": "node"
                 },
-                "component_name": "PathNode"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -4699,9 +4758,10 @@
             },
             {
                 "component_data": {
-                    "parent": 73
+                    "is_patrol_point": false,
+                    "patrol_time": 3.0
                 },
-                "component_name": "Parent"
+                "component_name": "PathNode"
             }
         ],
         "entity": 86,
@@ -4711,16 +4771,15 @@
         "components": [
             {
                 "component_data": {
-                    "name": "node_patrol"
+                    "parent": 73
                 },
-                "component_name": "Name"
+                "component_name": "Parent"
             },
             {
                 "component_data": {
-                    "is_patrol_point": true,
-                    "patrol_time": 3.0
+                    "name": "node_patrol"
                 },
-                "component_name": "PathNode"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -4745,9 +4804,10 @@
             },
             {
                 "component_data": {
-                    "parent": 73
+                    "is_patrol_point": true,
+                    "patrol_time": 3.0
                 },
-                "component_name": "Parent"
+                "component_name": "PathNode"
             }
         ],
         "entity": 87,
@@ -4757,16 +4817,15 @@
         "components": [
             {
                 "component_data": {
-                    "name": "node"
+                    "parent": 73
                 },
-                "component_name": "Name"
+                "component_name": "Parent"
             },
             {
                 "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 3.0
+                    "name": "node"
                 },
-                "component_name": "PathNode"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -4791,9 +4850,10 @@
             },
             {
                 "component_data": {
-                    "parent": 73
+                    "is_patrol_point": false,
+                    "patrol_time": 3.0
                 },
-                "component_name": "Parent"
+                "component_name": "PathNode"
             }
         ],
         "entity": 88,
@@ -4803,16 +4863,15 @@
         "components": [
             {
                 "component_data": {
-                    "name": "node"
+                    "parent": 73
                 },
-                "component_name": "Name"
+                "component_name": "Parent"
             },
             {
                 "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 3.0
+                    "name": "node"
                 },
-                "component_name": "PathNode"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -4837,9 +4896,10 @@
             },
             {
                 "component_data": {
-                    "parent": 73
+                    "is_patrol_point": false,
+                    "patrol_time": 3.0
                 },
-                "component_name": "Parent"
+                "component_name": "PathNode"
             }
         ],
         "entity": 89,
@@ -4849,16 +4909,15 @@
         "components": [
             {
                 "component_data": {
-                    "name": "node"
+                    "parent": 73
                 },
-                "component_name": "Name"
+                "component_name": "Parent"
             },
             {
                 "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 3.0
+                    "name": "node"
                 },
-                "component_name": "PathNode"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -4883,9 +4942,10 @@
             },
             {
                 "component_data": {
-                    "parent": 73
+                    "is_patrol_point": false,
+                    "patrol_time": 3.0
                 },
-                "component_name": "Parent"
+                "component_name": "PathNode"
             }
         ],
         "entity": 90,
@@ -4895,16 +4955,15 @@
         "components": [
             {
                 "component_data": {
-                    "name": "node"
+                    "parent": 73
                 },
-                "component_name": "Name"
+                "component_name": "Parent"
             },
             {
                 "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 3.0
+                    "name": "node"
                 },
-                "component_name": "PathNode"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -4929,9 +4988,10 @@
             },
             {
                 "component_data": {
-                    "parent": 73
+                    "is_patrol_point": false,
+                    "patrol_time": 3.0
                 },
-                "component_name": "Parent"
+                "component_name": "PathNode"
             }
         ],
         "entity": 91,
@@ -4941,16 +5001,15 @@
         "components": [
             {
                 "component_data": {
-                    "name": "node"
+                    "parent": 73
                 },
-                "component_name": "Name"
+                "component_name": "Parent"
             },
             {
                 "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 3.0
+                    "name": "node"
                 },
-                "component_name": "PathNode"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -4975,9 +5034,10 @@
             },
             {
                 "component_data": {
-                    "parent": 73
+                    "is_patrol_point": false,
+                    "patrol_time": 3.0
                 },
-                "component_name": "Parent"
+                "component_name": "PathNode"
             }
         ],
         "entity": 92,
@@ -4987,16 +5047,15 @@
         "components": [
             {
                 "component_data": {
-                    "name": "node"
+                    "parent": 73
                 },
-                "component_name": "Name"
+                "component_name": "Parent"
             },
             {
                 "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 3.0
+                    "name": "node"
                 },
-                "component_name": "PathNode"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -5021,9 +5080,10 @@
             },
             {
                 "component_data": {
-                    "parent": 73
+                    "is_patrol_point": false,
+                    "patrol_time": 3.0
                 },
-                "component_name": "Parent"
+                "component_name": "PathNode"
             }
         ],
         "entity": 93,
@@ -5033,16 +5093,15 @@
         "components": [
             {
                 "component_data": {
-                    "name": "node"
+                    "parent": 73
                 },
-                "component_name": "Name"
+                "component_name": "Parent"
             },
             {
                 "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 3.0
+                    "name": "node"
                 },
-                "component_name": "PathNode"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -5067,9 +5126,10 @@
             },
             {
                 "component_data": {
-                    "parent": 73
+                    "is_patrol_point": false,
+                    "patrol_time": 3.0
                 },
-                "component_name": "Parent"
+                "component_name": "PathNode"
             }
         ],
         "entity": 94,
@@ -5079,16 +5139,15 @@
         "components": [
             {
                 "component_data": {
-                    "name": "node"
+                    "parent": 73
                 },
-                "component_name": "Name"
+                "component_name": "Parent"
             },
             {
                 "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 3.0
+                    "name": "node"
                 },
-                "component_name": "PathNode"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -5113,9 +5172,10 @@
             },
             {
                 "component_data": {
-                    "parent": 73
+                    "is_patrol_point": false,
+                    "patrol_time": 3.0
                 },
-                "component_name": "Parent"
+                "component_name": "PathNode"
             }
         ],
         "entity": 95,
@@ -5125,16 +5185,15 @@
         "components": [
             {
                 "component_data": {
-                    "name": "node"
+                    "parent": 73
                 },
-                "component_name": "Name"
+                "component_name": "Parent"
             },
             {
                 "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 3.0
+                    "name": "node"
                 },
-                "component_name": "PathNode"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -5159,9 +5218,10 @@
             },
             {
                 "component_data": {
-                    "parent": 73
+                    "is_patrol_point": false,
+                    "patrol_time": 3.0
                 },
-                "component_name": "Parent"
+                "component_name": "PathNode"
             }
         ],
         "entity": 96,
@@ -5171,16 +5231,15 @@
         "components": [
             {
                 "component_data": {
-                    "name": "node"
+                    "parent": 73
                 },
-                "component_name": "Name"
+                "component_name": "Parent"
             },
             {
                 "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 3.0
+                    "name": "node"
                 },
-                "component_name": "PathNode"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -5205,9 +5264,10 @@
             },
             {
                 "component_data": {
-                    "parent": 73
+                    "is_patrol_point": false,
+                    "patrol_time": 3.0
                 },
-                "component_name": "Parent"
+                "component_name": "PathNode"
             }
         ],
         "entity": 97,
@@ -5217,16 +5277,15 @@
         "components": [
             {
                 "component_data": {
-                    "name": "node"
+                    "parent": 73
                 },
-                "component_name": "Name"
+                "component_name": "Parent"
             },
             {
                 "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 3.0
+                    "name": "node"
                 },
-                "component_name": "PathNode"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -5251,9 +5310,10 @@
             },
             {
                 "component_data": {
-                    "parent": 73
+                    "is_patrol_point": false,
+                    "patrol_time": 3.0
                 },
-                "component_name": "Parent"
+                "component_name": "PathNode"
             }
         ],
         "entity": 98,
@@ -5263,16 +5323,15 @@
         "components": [
             {
                 "component_data": {
-                    "name": "node"
+                    "parent": 73
                 },
-                "component_name": "Name"
+                "component_name": "Parent"
             },
             {
                 "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 3.0
+                    "name": "node"
                 },
-                "component_name": "PathNode"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -5297,9 +5356,10 @@
             },
             {
                 "component_data": {
-                    "parent": 73
+                    "is_patrol_point": false,
+                    "patrol_time": 3.0
                 },
-                "component_name": "Parent"
+                "component_name": "PathNode"
             }
         ],
         "entity": 99,

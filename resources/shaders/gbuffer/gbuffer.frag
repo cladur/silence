@@ -4,7 +4,6 @@ layout (location = 1) out vec4 gNormal;
 layout (location = 2) out vec4 gAlbedo;
 layout (location = 3) out vec4 gAoRoughMetal;
 layout (location = 4) out vec4 gDepth;
-layout (location = 5) out vec3 gHighlight;
 
 in vec2 TexCoords;
 in vec3 ViewPos;
@@ -19,8 +18,6 @@ uniform sampler2D emissive_map;
 uniform bool has_ao_map;
 uniform bool has_normal_map;
 uniform bool has_emissive_map;
-uniform bool is_highlighted;
-uniform vec3 highlight_color;
 
 uniform vec2 uv_scale;
 
@@ -70,16 +67,9 @@ void main()
         ao = ao_metallic_roughness.r;
     }
 
-    vec3 highlight = vec3(0.0);
-
-    if (is_highlighted) {
-        highlight = highlight_color;
-    }
-
     gPosition = vec4(ViewPos, 1.0);
     gNormal = vec4(normal, 1.0);
     gAoRoughMetal = vec4(ao, roughness, metallic, 1.0);
     gAlbedo = vec4(albedo, 1.0);
     gDepth = vec4(-vec3(ViewPos.z), 1.0);
-    gHighlight = highlight;
 }

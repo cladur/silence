@@ -19,7 +19,13 @@ add_library(${ECS_MANAGER_NAME} STATIC
         systems/platform_system.cpp
         systems/platform_system.h
         systems/enemy_system.cpp
-        systems/enemy_system.h systems/taggable_system.cpp systems/taggable_system.h systems/show_taggable_system.cpp systems/show_taggable_system.h)
+        systems/enemy_system.h
+        systems/taggable_system.cpp
+        systems/taggable_system.h
+        systems/show_taggable_system.cpp
+        systems/show_taggable_system.h
+        systems/highlight_system.h
+        systems/highlight_system.cpp)
 
 target_include_directories(${ECS_MANAGER_NAME} PUBLIC ${MANAGER_DIR})
 

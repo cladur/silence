@@ -120,6 +120,11 @@ void AgentSystem::update(World &world, float dt) {
 			first_frame = false;
 		}
 
+		if (world.has_component<Highlight>(agent_data.model)) {
+			auto &highlight = world.get_component<Highlight>(agent_data.model);
+			highlight.highlighted = true;
+		}
+
 		camera_forward.y = 0.0f;
 		camera_forward = glm::normalize(camera_forward);
 		auto camera_right = camera_pivot_tf.get_global_right();

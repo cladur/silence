@@ -18,16 +18,16 @@ void RenderSystem::update(World &world, float dt) {
 	for (auto const &entity : entities) {
 		auto &transform = world.get_component<Transform>(entity);
 		auto &model_instance = world.get_component<ModelInstance>(entity);
-		bool highlighted = false;
-		glm::vec3 highlight_color = glm::vec3(0.0f);
+
+		HighlightData highlight = {};
 
 		if (world.has_component<Highlight>(entity)) {
-			auto &highlight_component = world.get_component<Highlight>(entity);
-			highlighted = highlight_component.highlighted;
-			highlight_color = highlight_component.highlight_color;
-			highlight_component.highlighted = false;
+			auto &hc = world.get_component<Highlight>(entity);
+			highlight.highlighted = hc.highlighted;
+			highlight.highlight_color = hc.highlight_color;
+			highlight.target = hc.target;
 		}
 
-		world.get_parent_scene()->get_render_scene().queue_draw(&model_instance, &transform, entity, highlighted, highlight_color);
+		world.get_parent_scene()->get_render_scene().queue_draw(&model_instance, &transform, entity, highlight);
 	}
 }

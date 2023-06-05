@@ -176,6 +176,11 @@ void HackerSystem::update(World &world, float dt) {
 			first_frame = false;
 		}
 
+		if (world.has_component<Highlight>(hacker_data.model)) {
+			auto &highlight = world.get_component<Highlight>(hacker_data.model);
+			highlight.highlighted = true;
+		}
+
 		if (!is_on_camera) {
 			camera_tf.set_position(scorpion_camera_tf.get_global_position());
 			camera_tf.set_orientation(scorpion_camera_tf.get_global_orientation());
