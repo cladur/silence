@@ -90,23 +90,14 @@ void GBufferPass::draw(RenderScene &scene) {
 		ModelInstance &instance = *cmd.model_instance;
 		Transform &transform = *cmd.transform;
 		bool highlighted = cmd.highlighted;
+		auto high_col = cmd.highlight_color;
 		material.bind_instance_resources(instance, transform);
 		Model &model = resource_manager.get_model(instance.model_handle);
 
 		for (auto &mesh : model.meshes) {
 			if (mesh.fc_bounding_sphere.is_on_frustum(scene.frustum, transform, scene)) {
-				material.bind_mesh_resources(mesh, highlighted);
+				material.bind_mesh_resources(mesh, highlighted, high_col);
 				mesh.draw();
-
-				// if (highlighted) {
-				// 	glEnable(GL_BLEND);
-				// 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-
-				// 	material.bind_mesh_resources(mesh);
-				// 	mesh.draw();
-
-				// 	glDisable(GL_BLEND);
-				// }
 			}
 		}
 	}

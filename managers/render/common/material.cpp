@@ -228,6 +228,7 @@ void MaterialGBuffer::bind_resources(RenderScene &scene) {
 	shader.set_int("ao_metallic_roughness_map", 2);
 	shader.set_int("emissive_map", 3);
 
+
 	shader.set_int("irradiance_map", 5);
 	shader.set_int("prefilter_map", 6);
 	shader.set_int("brdf_lut", 7);
@@ -271,7 +272,7 @@ void MaterialGBuffer::bind_instance_resources(ModelInstance &instance, Transform
 	shader.set_vec2("uv_scale", uv_scale);
 }
 
-void MaterialGBuffer::bind_mesh_resources(Mesh &mesh, bool highlighted) {
+void MaterialGBuffer::bind_mesh_resources(Mesh &mesh, bool highlighted, glm::vec3 highlight_color) {
 	for (int i = 0; i < mesh.textures.size(); i++) {
 		if (mesh.textures_present[i]) {
 			glActiveTexture(GL_TEXTURE0 + i);
@@ -295,6 +296,7 @@ void MaterialGBuffer::bind_mesh_resources(Mesh &mesh, bool highlighted) {
 		is_emissive_map_set = mesh.textures_present[3];
 	}
 	shader.set_bool("is_highlighted", highlighted);
+	shader.set_vec3("highlight_color", highlight_color);
 }
 
 void MaterialGBuffer::bind_instance_resources(SkinnedModelInstance &instance, Transform &transform) {
@@ -433,6 +435,7 @@ void MaterialCombination::bind_resources(RenderScene &scene) {
 	shader.set_int("ViewPos", 5);
 	shader.set_int("Skybox", 6);
 	shader.set_int("Particles", 7);
+	shader.set_int("Highlight", 8);
 
 	shader.set_int("use_ao", cvar_use_ao.get());
 
@@ -456,6 +459,8 @@ void MaterialCombination::bind_resources(RenderScene &scene) {
 	glBindTexture(GL_TEXTURE_2D, scene.skybox_buffer.texture_id);
 	glActiveTexture(GL_TEXTURE7);
 	glBindTexture(GL_TEXTURE_2D, scene.particle_buffer.texture_id);
+	glActiveTexture(GL_TEXTURE8);
+	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.highlight_texture_id);
 }
 
 void MaterialCombination::bind_instance_resources(ModelInstance &instance, Transform &transform) {
