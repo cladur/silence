@@ -609,7 +609,7 @@ void MaterialParticle::bind_instance_resources(ModelInstance &instance, Transfor
 void MaterialHighlight::startup() {
 	shader.load_from_files(shader_path("gbuffer/gbuffer.vert"), shader_path("gbuffer/highlight.frag"));
 #ifdef WIN32
-	skinned_shader.load_from_files(shader_path("gbuffer/skinned_gbuffer.vert"), shader_path("gbuffer/gbuffer.frag"));
+	skinned_shader.load_from_files(shader_path("gbuffer/skinned_gbuffer.vert"), shader_path("gbuffer/highlight.frag"));
 #endif
 }
 
