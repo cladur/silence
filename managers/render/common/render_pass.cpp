@@ -621,9 +621,6 @@ void HighlightPass::sort_highlights(RenderScene &scene) {
 			xray_skinned_highlights.push_back(cmd);
 		}
 	}
-
-	std::cout << " found " << normal_highlights.size() << " normal highlights\n";
-	std::cout << " found " << xray_highlights.size() << " xray highlights\n";
 }
 
 void HighlightPass::draw_normal(RenderScene &scene, bool right_side) {
@@ -639,7 +636,6 @@ void HighlightPass::draw_normal(RenderScene &scene, bool right_side) {
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.depth_texture_id);
 
-	//std::cout << "drawing: " << normal_highlights.size() << " normal highlights\n";
 	for (auto &cmd : normal_highlights) {
 		ModelInstance &instance = *cmd.model_instance;
 		Transform &transform = *cmd.transform;
@@ -669,7 +665,6 @@ void HighlightPass::draw_normal(RenderScene &scene, bool right_side) {
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.depth_texture_id);
 
-	//std::cout << "drawing: " << normal_skinned_highlights.size() << " normal skinned highlights\n";
 	for (auto &cmd : normal_skinned_highlights) {
 		SkinnedModelInstance &instance = *cmd.model_instance;
 		Transform &transform = *cmd.transform;
@@ -700,7 +695,6 @@ void HighlightPass::draw_xray(RenderScene &scene, bool right_side) {
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.depth_texture_id);
 
-	//std::cout << "drawing: " << xray_highlights.size() << " xray highlights\n";
 	for (auto &cmd : xray_highlights) {
 		ModelInstance &instance = *cmd.model_instance;
 		Transform &transform = *cmd.transform;
@@ -729,7 +723,6 @@ void HighlightPass::draw_xray(RenderScene &scene, bool right_side) {
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.depth_texture_id);
 
-	//std::cout << "drawing: " << xray_skinned_highlights.size() << " xray skinned highlights\n";
 	for (auto &cmd : xray_skinned_highlights) {
 		SkinnedModelInstance &instance = *cmd.model_instance;
 		Transform &transform = *cmd.transform;
