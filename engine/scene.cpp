@@ -130,7 +130,7 @@ void Scene::register_game_systems() {
 	world.register_system<InteractableSystem>(EcsOnUpdate);
 	world.register_system<PlatformSystem>(EcsOnUpdate);
 	world.register_system<FMODEmitterSystem>();
-	world.register_system<HighlightSystem>();
+	world.register_system<HighlightSystem>(EcsOnLoad);
 }
 
 void Scene::update(float dt) {
