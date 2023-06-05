@@ -433,7 +433,7 @@ void MaterialCombination::bind_resources(RenderScene &scene) {
 	shader.set_int("ViewPos", 5);
 	shader.set_int("Skybox", 6);
 	shader.set_int("Particles", 7);
-	shader.set_int("Highlight", 8);
+	shader.set_int("Highlights", 8);
 
 	shader.set_int("use_ao", cvar_use_ao.get());
 

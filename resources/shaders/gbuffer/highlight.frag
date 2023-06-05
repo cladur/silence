@@ -6,8 +6,6 @@ in vec2 TexCoords;
 in vec3 ViewPos;
 in vec3 Normal;
 
-uniform vec3 cam_pos;
-
 uniform int is_highlighted;
 uniform vec3 highlight_color;
 uniform int agent_hacker_pov; // 0 - agent, 1 - hacker
@@ -20,7 +18,8 @@ uniform sampler2D depth;
 void main() {
     vec4 color = vec4(0.0f);
     if (is_highlighted == 1) {
-        float diffuse = max(dot(normalize(cam_pos - ViewPos), Normal), 0.0);
+        vec3 cam_pos = vec3(0.0f);
+        float diffuse = 1.0;//max(dot(normalize(cam_pos - ViewPos), Normal), 0.0);
         switch (highlight_target) {
             case 0:
                 if (agent_hacker_pov != 0) {
