@@ -266,7 +266,6 @@ void AgentSystem::update(World &world, float dt) {
 		ray.layer_name = "default";
 		ray.direction = -transform.get_up();
 		glm::vec3 end = ray.origin + ray.direction;
-		world.get_parent_scene()->get_render_scene().debug_draw.draw_arrow(ray.origin, end);
 		HitInfo info;
 		if (CollisionSystem::ray_cast_layer(world, ray, info)) {
 			// If the agent is not on the ground, move him down

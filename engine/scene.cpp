@@ -86,7 +86,6 @@ Scene::Scene() {
 	ZoneNamedNC(Zone3, "Scene::Scene()::Systems", tracy::Color::Orange, true);
 	{
 		// Systems
-		// TODO: Set update order instead of using default value
 		world.register_system<AnimationSystem>(UpdateOrder::DuringAnimation);
 
 		// Render stuff

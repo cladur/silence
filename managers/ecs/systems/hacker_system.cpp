@@ -337,27 +337,25 @@ void HackerSystem::update(World &world, float dt) {
 		}
 
 		Ray ray{};
-		ray.origin = transform.get_global_position() + glm::vec3(0.0f, -0.01f, 0.0f);
-		ray.direction = glm::vec3(0.0f, -1.0f, 0.0f);
+		ray.origin = transform.get_global_position() + glm::vec3(0.0f, 1.0f, 0.0f);
+		ray.ignore_list.emplace_back(entity);
+		ray.layer_name = "default";
+		ray.direction = -transform.get_up();
 		glm::vec3 end = ray.origin + ray.direction;
-		// world.get_parent_scene()->get_render_scene().debug_draw.draw_arrow(ray.origin, end);
 		HitInfo info;
-		if (CollisionSystem::ray_cast(world, ray, info)) {
-			// If the hacker is not on the ground, move him down
-			// If the hacker is on 40 degree slope or more, move him down
+		if (CollisionSystem::ray_cast_layer(world, ray, info)) {
+			// If the agent is not on the ground, move him down
+			// If the agent is on 40 degree slope or more, move him down
 			bool is_on_too_steep_slope =
 					glm::dot(info.normal, glm::vec3(0.0f, 1.0f, 0.0f)) < glm::cos(glm::radians(40.0f));
-
-			if (is_on_too_steep_slope || info.distance > 0.1f) {
+			if (is_on_too_steep_slope || info.distance > 1.1f) {
 				transform.position.y -= 8.0f * dt;
 				transform.set_changed(true);
-			}
-
-			// If the hacker is close enough to the floor, snap him to it
-			float snap_length = 0.3f;
-			if (info.distance > 0.1f && info.distance < snap_length) {
-				transform.position.y = info.point.y + 0.001f;
-				transform.set_changed(true);
+			} else if (world.has_component<Platform>(info.entity)) {
+				auto &platform = world.get_component<Platform>(info.entity);
+				if (platform.is_moving) {
+					transform.add_position(platform.change_vector);
+				}
 			}
 		}
 
