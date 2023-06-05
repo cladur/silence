@@ -87,20 +87,22 @@ Scene::Scene() {
 	{
 		// Systems
 		// TODO: Set update order instead of using default value
-		world.register_system<RenderSystem>();
-		world.register_system<SkinnedRenderSystem>();
-		world.register_system<ColliderDrawSystem>();
 		world.register_system<AnimationSystem>(UpdateOrder::DuringAnimation);
-		world.register_system<FrustumDrawSystem>();
-		world.register_system<LightRenderSystem>();
-		world.register_system<EnemyPathDraw>();
+
+		// Render stuff
+		world.register_system<RenderSystem>(UpdateOrder::PostPhysics);
+		world.register_system<SkinnedRenderSystem>(UpdateOrder::PostPhysics);
+		world.register_system<ColliderDrawSystem>(UpdateOrder::PostPhysics);
+		world.register_system<FrustumDrawSystem>(UpdateOrder::PostPhysics);
+		world.register_system<LightRenderSystem>(UpdateOrder::PostPhysics);
+		world.register_system<EnemyPathDraw>(UpdateOrder::PostPhysics);
+		world.register_system<BillboardSystem>(UpdateOrder::PostPhysics);
+		world.register_system<ParticleRenderSystem>(UpdateOrder::PostPhysics);
 
 		// Transform
 		world.register_system<IsolatedEntitiesSystem>(UpdateOrder::PrePreAnimation);
 		world.register_system<RootParentSystem>(UpdateOrder::PrePreAnimation);
 		world.register_system<AttachmentSystem>(UpdateOrder::PostAnimation);
-		world.register_system<BillboardSystem>();
-		world.register_system<ParticleRenderSystem>();
 	}
 
 	auto &physics_manager = PhysicsManager::get();
@@ -118,19 +120,19 @@ Scene::Scene() {
 
 void Scene::register_game_systems() {
 	// Physics
-	world.register_system<PhysicsSystem>(UpdateOrder::PreAnimation);
-	world.register_system<CollisionSystem>(UpdateOrder::PreAnimation);
+	world.register_system<PhysicsSystem>();
+	world.register_system<CollisionSystem>();
 
 	// Agents
-	world.register_system<AgentSystem>(UpdateOrder::PreAnimation);
-	world.register_system<HackerSystem>(UpdateOrder::PreAnimation);
-	world.register_system<EnemySystem>(UpdateOrder::PreAnimation);
+	world.register_system<AgentSystem>();
+	world.register_system<HackerSystem>();
+	world.register_system<EnemySystem>();
 	world.register_system<TaggableSystem>();
-	//world.register_system<EnemyPathing>(UpdateOrder::PreAnimation);
-	world.register_system<InteractableSystem>(UpdateOrder::PreAnimation);
-	world.register_system<PlatformSystem>(UpdateOrder::PreAnimation);
+	//world.register_system<EnemyPathing>();
+	world.register_system<InteractableSystem>();
+	world.register_system<PlatformSystem>();
 	world.register_system<FMODEmitterSystem>();
-	world.register_system<HighlightSystem>(UpdateOrder::PreAnimation);
+	world.register_system<HighlightSystem>(UpdateOrder::PrePreAnimation);
 }
 
 void Scene::update(float dt) {
