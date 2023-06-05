@@ -123,6 +123,8 @@ void RenderScene::draw_viewport(bool right_side) {
 	glBlitFramebuffer(0, 0, render_extent.x, render_extent.y, 0, 0, render_extent.x, render_extent.y,
 			GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 
+	glDepthFunc(GL_LEQUAL);
+
 	// all the normal highlights
 	highlight_pass.draw_normal(*this, right_side);
 

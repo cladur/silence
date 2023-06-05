@@ -221,16 +221,17 @@
         "components": [
             {
                 "component_data": {
-                    "name": "Enemy"
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "enemy/enemy.skinmdl"
                 },
-                "component_name": "Name"
+                "component_name": "SkinnedModelInstance"
             },
             {
                 "component_data": {
-                    "animation_name": "enemy/enemy_ANIM_GLTF/enemy_walk_with_gun.anim",
-                    "ticks_per_second": 1000.0
+                    "name": "Enemy"
                 },
-                "component_name": "AnimationInstance"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -255,25 +256,16 @@
             },
             {
                 "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "enemy/enemy.skinmdl"
+                    "animation_name": "enemy/enemy_ANIM_GLTF/enemy_walk_with_gun.anim",
+                    "ticks_per_second": 1000.0
                 },
-                "component_name": "SkinnedModelInstance"
+                "component_name": "AnimationInstance"
             },
             {
                 "component_data": {
                     "layer_name": "default"
                 },
                 "component_name": "ColliderTag"
-            },
-            {
-                "component_data": {
-                    "detection_speed": 5.0,
-                    "view_cone_angle": 70.0,
-                    "view_cone_distance": 10.0
-                },
-                "component_name": "EnemyData"
             },
             {
                 "component_data": {
@@ -311,6 +303,14 @@
             },
             {
                 "component_data": {
+                    "detection_speed": 5.0,
+                    "view_cone_angle": 70.0,
+                    "view_cone_distance": 10.0
+                },
+                "component_name": "EnemyData"
+            },
+            {
+                "component_data": {
                     "highlight_color": {
                         "b": 0.0,
                         "g": 0.0,
@@ -329,6 +329,14 @@
         "components": [
             {
                 "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "agent/agent.skinmdl"
+                },
+                "component_name": "SkinnedModelInstance"
+            },
+            {
+                "component_data": {
                     "parent": 46
                 },
                 "component_name": "Parent"
@@ -338,13 +346,6 @@
                     "name": "Agent"
                 },
                 "component_name": "Name"
-            },
-            {
-                "component_data": {
-                    "animation_name": "agent/agent_ANIM_GLTF/agent_idle.anim",
-                    "ticks_per_second": 1000.0
-                },
-                "component_name": "AnimationInstance"
             },
             {
                 "component_data": {
@@ -369,11 +370,10 @@
             },
             {
                 "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "agent/agent.skinmdl"
+                    "animation_name": "agent/agent_ANIM_GLTF/agent_idle.anim",
+                    "ticks_per_second": 1000.0
                 },
-                "component_name": "SkinnedModelInstance"
+                "component_name": "AnimationInstance"
             },
             {
                 "component_data": {
@@ -2920,6 +2920,14 @@
         "components": [
             {
                 "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "scorpion/scorpion.skinmdl"
+                },
+                "component_name": "SkinnedModelInstance"
+            },
+            {
+                "component_data": {
                     "parent": 55
                 },
                 "component_name": "Parent"
@@ -2929,13 +2937,6 @@
                     "name": "ScorpionModel"
                 },
                 "component_name": "Name"
-            },
-            {
-                "component_data": {
-                    "animation_name": "scorpion/scorpion_ANIM_GLTF/scorpion_idle.anim",
-                    "ticks_per_second": 5000.0
-                },
-                "component_name": "AnimationInstance"
             },
             {
                 "component_data": {
@@ -2960,11 +2961,10 @@
             },
             {
                 "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "scorpion/scorpion.skinmdl"
+                    "animation_name": "scorpion/scorpion_ANIM_GLTF/scorpion_idle.anim",
+                    "ticks_per_second": 5000.0
                 },
-                "component_name": "SkinnedModelInstance"
+                "component_name": "AnimationInstance"
             },
             {
                 "component_data": {
@@ -3262,22 +3262,6 @@
             },
             {
                 "component_data": {
-                    "first_position": {
-                        "x": 10.399999618530273,
-                        "y": 0.0,
-                        "z": 3.6440000534057617
-                    },
-                    "second_position": {
-                        "x": 10.399999618530273,
-                        "y": 2.0,
-                        "z": 3.6440000534057617
-                    },
-                    "speed": 1.0
-                },
-                "component_name": "Platform"
-            },
-            {
-                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": 0.0,
@@ -3330,6 +3314,22 @@
                     }
                 },
                 "component_name": "ColliderAABB"
+            },
+            {
+                "component_data": {
+                    "first_position": {
+                        "x": 10.399999618530273,
+                        "y": 0.0,
+                        "z": 3.6440000534057617
+                    },
+                    "second_position": {
+                        "x": 10.399999618530273,
+                        "y": 2.0,
+                        "z": 3.6440000534057617
+                    },
+                    "speed": 1.0
+                },
+                "component_name": "Platform"
             }
         ],
         "entity": 61,
@@ -3416,9 +3416,9 @@
             {
                 "component_data": {
                     "highlight_color": {
-                        "b": 1.0,
+                        "b": 0.0,
                         "g": 1.0,
-                        "r": 1.0
+                        "r": 0.0
                     },
                     "highlighted": "twoja misja trwa",
                     "target": 3
@@ -3436,22 +3436,6 @@
                     "name": "Platform 02"
                 },
                 "component_name": "Name"
-            },
-            {
-                "component_data": {
-                    "first_position": {
-                        "x": -4.510000228881836,
-                        "y": 2.611999988555908,
-                        "z": 17.75200080871582
-                    },
-                    "second_position": {
-                        "x": -1.5,
-                        "y": 2.611999988555908,
-                        "z": 17.75200080871582
-                    },
-                    "speed": 1.0
-                },
-                "component_name": "Platform"
             },
             {
                 "component_data": {
@@ -3507,6 +3491,22 @@
                     }
                 },
                 "component_name": "ColliderAABB"
+            },
+            {
+                "component_data": {
+                    "first_position": {
+                        "x": -4.510000228881836,
+                        "y": 2.611999988555908,
+                        "z": 17.75200080871582
+                    },
+                    "second_position": {
+                        "x": -1.5,
+                        "y": 2.611999988555908,
+                        "z": 17.75200080871582
+                    },
+                    "speed": 1.0
+                },
+                "component_name": "Platform"
             }
         ],
         "entity": 63,
@@ -3718,7 +3718,7 @@
                 "component_data": {
                     "highlight_color": {
                         "b": 0.0,
-                        "g": 0.10588235408067703,
+                        "g": 0.0,
                         "r": 1.0
                     },
                     "highlighted": "twoja misja trwa",

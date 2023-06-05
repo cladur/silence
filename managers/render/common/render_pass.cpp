@@ -621,6 +621,9 @@ void HighlightPass::sort_highlights(RenderScene &scene) {
 			xray_skinned_highlights.push_back(cmd);
 		}
 	}
+
+	std::cout << " found " << normal_highlights.size() << " normal highlights\n";
+	std::cout << " found " << xray_highlights.size() << " xray highlights\n";
 }
 
 void HighlightPass::draw_normal(RenderScene &scene, bool right_side) {
