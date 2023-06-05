@@ -53,7 +53,8 @@ void EnemyDistracted::update(World *world, uint32_t entity_id, float dt) {
 
 	// smoothly rotate the entity to face the next node
 	if (enemy_path.is_rotating) {
-		enemy_utils::look_at(enemy_path, transform, target, dt);
+		float fast_dt = dt * 6.0f;
+		enemy_utils::look_at(enemy_path, transform, target, fast_dt);
 	}
 
 	// if the entity is facing the next node, stop rotating
