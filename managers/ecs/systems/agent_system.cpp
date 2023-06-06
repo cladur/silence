@@ -293,7 +293,7 @@ void AgentSystem::update(World &world, float dt) {
 			sphere.radius = cvar_agent_interaction_range.get();
 			sphere.center = model_tf.get_global_position() + glm::vec3{ 0.0f, 1.0f, 0.0f };
 			auto colliders = PhysicsManager::get().overlap_sphere(world, sphere, "agent");
-			dd.draw_sphere(sphere.center, sphere.radius);
+			// dd.draw_sphere(sphere.center, sphere.radius);
 			if (!colliders.empty()) {
 				Entity closest_interactable;
 				float min_distance = cvar_agent_interaction_range.get() + 1.0f;
@@ -312,7 +312,7 @@ void AgentSystem::update(World &world, float dt) {
 								ray.length = 3.0f;
 								HitInfo info;
 								glm::vec3 end = ray.origin + ray.direction;
-								dd.draw_arrow(ray.origin, end, { 1.0f, 0.0f, 0.0f });
+								// dd.draw_arrow(ray.origin, end, { 1.0f, 0.0f, 0.0f });
 								CollisionSystem::ray_cast_layer(world, ray, info);
 								if (info.entity == found_entity) {
 									interactable_found = true;

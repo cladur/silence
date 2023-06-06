@@ -32,7 +32,7 @@ void EnemyPathDraw::update(World &world, float dt) {
 			} else {
 				color = glm::vec3(1.0f, 0.8f, 0.0f);
 			}
-			r_s.debug_draw.draw_sphere(t.get_global_position(), 0.2f, color, entity);
+			r_s.debug_draw.draw_sphere(t.get_global_position(), 0.2f, color, children.children[i]);
 			r_s.debug_draw.draw_line(
 					t.get_global_position(), t_next.get_global_position(), glm::vec3(1.0f, 1.0f, 1.0f));
 		}
