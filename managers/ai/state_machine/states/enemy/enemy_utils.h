@@ -50,13 +50,14 @@ namespace enemy_utils {
 //					glm::tan(glm::radians(enemy_data.view_cone_angle) / 2.0f) * enemy_data.view_cone_distance,
 //					glm::vec3(1.0f, 0.0f, 0.0f), 8);
 		}
+
 		if (glm::distance(transform.position, agent_pos) < enemy_data.view_cone_distance) {
 			auto angle = glm::acos(glm::dot(agent_dir, forward));
 			if (angle < glm::radians(enemy_data.view_cone_angle) / 2.0f) {
 				Ray ray{};
 				ray.origin = enemy_look_origin + agent_dir;
 				ray.direction = agent_dir;
-				ray.ignore_layers.emplace_back("camera");
+//				ray.ignore_layers.emplace_back("camera");
 				glm::vec3 ray_end = ray.origin + ray.direction * enemy_data.view_cone_distance;
 
 				HitInfo hit_info;
@@ -65,7 +66,7 @@ namespace enemy_utils {
 
 				// RAY MIDDLE
 
-				if (CollisionSystem::ray_cast(*world, ray, hit_info)) {
+				if (CollisionSystem::ray_cast_layer(*world, ray, hit_info)) {
 					if (dd != nullptr) {
 						dd->draw_line(ray.origin, ray_end, glm::vec3(0.0f, 1.0f, 1.0f));
 					}
@@ -82,7 +83,7 @@ namespace enemy_utils {
 				ray.direction = agent_dir;
 				ray_end = ray.origin + ray.direction * enemy_data.view_cone_distance;
 
-				if (CollisionSystem::ray_cast(*world, ray, hit_info)) {
+				if (CollisionSystem::ray_cast_layer(*world, ray, hit_info)) {
 					if (dd != nullptr) {
 						dd->draw_line(ray.origin, ray_end, glm::vec3(0.0f, 1.0f, 1.0f));
 					}
