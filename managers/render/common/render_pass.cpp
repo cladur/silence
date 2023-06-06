@@ -360,6 +360,9 @@ void ShadowPass::draw(RenderScene &scene) {
 		}
 		scene.shadow_buffer.setup_light_space(light, light_transform);
 
+		Frustum frustum = {};
+		frustum.create_frustum_from_light(light, light_transform, 1.0f);
+
 		material.bind_light_resources(scene, light, light_transform);
 		for (auto &cmd : scene.draw_commands) {
 			ModelInstance &instance = *cmd.model_instance;
@@ -367,10 +370,11 @@ void ShadowPass::draw(RenderScene &scene) {
 				continue;
 			}
 			Transform &transform = *cmd.transform;
+
 			material.bind_instance_resources(instance, transform);
 			Model &model = resource_manager.get_model(instance.model_handle);
 			for (auto &mesh : model.meshes) {
-				if (mesh.fc_bounding_sphere.is_on_frustum(scene.frustum, transform, scene)) {
+				if (light.type != LightType::SPOT_LIGHT || mesh.fc_bounding_sphere.is_on_frustum(frustum, transform, scene)) {
 					mesh.draw();
 				}
 			}
@@ -387,6 +391,7 @@ void ShadowPass::draw(RenderScene &scene) {
 			material.bind_instance_resources(instance, transform);
 			SkinnedModel &model = resource_manager.get_skinned_model(instance.model_handle);
 			for (auto &mesh : model.meshes) {
+				// TODO make skinned meshes have frustum bounding sphere
 				mesh.draw();
 			}
 		}

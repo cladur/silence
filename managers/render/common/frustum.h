@@ -1,6 +1,7 @@
 #ifndef SILENCE_FRUSTUM_H
 #define SILENCE_FRUSTUM_H
 
+#include "components/light_component.h"
 class DebugCamera;
 class Camera;
 class Transform;
@@ -33,6 +34,7 @@ struct Frustum {
 
 	void create_frustum_from_camera(const DebugCamera &cam, float aspect_ratio);
 	void create_frustum_from_camera(const Camera &camera, const Transform &transform, float aspect_ratio);
+	void create_frustum_from_light(const Light &light, const Transform &transform, float aspect_ratio);
 };
 
 #endif //SILENCE_FRUSTUM_H
