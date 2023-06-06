@@ -38,6 +38,8 @@ void EnemyStationaryPatrolling::update(World *world, uint32_t entity_id, float d
 
 	enemy_utils::update_detection_slider(entity_id, transform, enemy_data);
 
+	enemy_utils::handle_highlight(entity_id, world);
+
 	// decrease the cooldown
 	enemy_path.patrol_cooldown -= dt;
 	if (enemy_path.patrol_cooldown <= 0.0f) {
