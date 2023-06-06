@@ -48,7 +48,23 @@ void EnemySystem::update(World &world, float dt) {
 			ed.state_machine.add_state(&ed.dead_state);
 			ed.state_machine.add_state(&ed.distracted_state);
 
-			ed.state_machine.set_state("patrolling");
+			if (ep.path_parent > 0) {
+				if (world.has_component<Children>(ep.path_parent)) {
+					auto &children = world.get_component<Children>(ep.path_parent);
+					if (children.children_count > 0) {
+						ed.state_machine.set_state("patrolling");
+					} else {
+						ed.state_machine.set_state("stationary_patrolling");
+						ep.infinite_patrol = true;
+					}
+				} else {
+					ed.state_machine.set_state("stationary_patrolling");
+					ep.infinite_patrol = true;
+				}
+			} else {
+				ed.state_machine.set_state("stationary_patrolling");
+				ep.infinite_patrol = true;
+			}
 
 			ui.create_ui_scene(std::to_string(entity) + "_detection");
 			auto &slider = ui.add_ui_slider(std::to_string(entity) + "_detection", "detection_slider");

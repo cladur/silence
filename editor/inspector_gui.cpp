@@ -909,7 +909,21 @@ void Inspector::show_agent_data() {
 void Inspector::show_enemy_path() {
 	auto &enemy_path = world->get_component<EnemyPath>(selected_entity);
 	if (ImGui::CollapsingHeader("Enemy Path", tree_flags)) {
-		remove_component_popup<EnemyPath>();
+
+		if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+			ImGui::OpenPopup("EnemyPathContextMenu");
+		}
+		if (ImGui::BeginPopup("EnemyPathContextMenu")) {
+			if (ImGui::MenuItem("Reset Path")) {
+				enemy_path.path_parent = -1;
+				enemy_path.speed = 1.0f;
+				enemy_path.rotation_speed = 1.0f;
+			}
+			remove_component_menu_item<EnemyPath>();
+
+			ImGui::EndPopup();
+		}
+
 
 		float available_width = ImGui::GetContentRegionAvail().x;
 		ImGui::BeginTable("Enemy Path", 2);

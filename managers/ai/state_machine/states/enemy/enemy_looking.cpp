@@ -32,6 +32,7 @@ void EnemyLooking::update(World *world, uint32_t entity_id, float dt) {
 	auto &anim = world->get_component<AnimationInstance>(entity_id);
 	auto &enemy_data = world->get_component<EnemyData>(entity_id);
 	auto &dd = world->get_parent_scene()->get_render_scene().debug_draw;
+	auto &ep = world->get_component<EnemyPath>(entity_id);
 
 	// some necessary variables
 	auto agent_pos = GameplayManager::get().get_agent_position(world->get_parent_scene());
@@ -92,12 +93,21 @@ void EnemyLooking::update(World *world, uint32_t entity_id, float dt) {
 
 	enemy_utils::handle_highlight(entity_id, world);
 
-	if (enemy_data.detection_level < 0.2) {
-		state_machine->get_state<EnemyPatrolling>()->first_frame_after_other_state = true;
-		state_machine->set_state("patrolling");
-	}
-	if (enemy_data.detection_level > 0.99) {
-		state_machine->set_state("fully_aware");
+	if (!ep.infinite_patrol) {
+		if (enemy_data.detection_level < 0.2) {
+			state_machine->get_state<EnemyPatrolling>()->first_frame_after_other_state = true;
+			state_machine->set_state("patrolling");
+		}
+		if (enemy_data.detection_level > 0.99) {
+			state_machine->set_state("fully_aware");
+		}
+	} else {
+		if (enemy_data.detection_level < 0.2) {
+			state_machine->set_state("stationary_patrolling");
+		}
+		if (enemy_data.detection_level > 0.99) {
+			state_machine->set_state("fully_aware");
+		}
 	}
 }
 
