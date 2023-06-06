@@ -135,6 +135,16 @@ namespace enemy_utils {
 
 		return closest_node;
 	}
+
+	inline void handle_highlight(uint32_t entity, World *world) {
+		if (world->has_component<Highlight>(entity) && world->has_component<Taggable>(entity)) {
+			auto &h = world->get_component<Highlight>(entity);
+			auto &tag = world->get_component<Taggable>(entity);
+			if (tag.tagged) {
+				h.highlighted = true;
+			}
+		}
+	}
 }
 
 #endif //SILENCE_ENEMY_UTILS_H
