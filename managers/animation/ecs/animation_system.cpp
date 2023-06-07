@@ -16,7 +16,6 @@ void AnimationSystem::update(World &world, float dt) {
 	auto &animation_map = animation_manager.animation_map;
 	for (Entity entity : entities) {
 		if (!animation_map.contains(entity)) {
-			std::cout << "Adding animation data for entity " << entity << std::endl;
 			AnimData &data = animation_map[entity];
 			data.model = &world.get_component<SkinnedModelInstance>(entity);
 			size_t size = resource_manager.get_skinned_model(data.model->model_handle).rig.names.size();

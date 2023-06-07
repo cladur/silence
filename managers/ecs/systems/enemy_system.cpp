@@ -12,7 +12,8 @@ AutoCVarFloat cvar_enemy_min_detection_speed("enemy.min_detection_speed", "enemy
 AutoCVarFloat cvar_enemy_max_detection_speed("enemy.max_detection_speed", "enemy max detection speed", 0.5f);
 AutoCVarFloat cvar_sphere_detection_radius("enemy.sphere_detection_radius", "enemy sphere detection radius", 3.0f);
 AutoCVarFloat cvar_detection_decrease_speed("enemy.detection_decrease_speed", "enemy detection decrease speed", 0.5f);
-
+AutoCVarFloat cvar_crouch_detection_modifier("enemy.crouch_detection_modifier", "enemy crouch detection modifier", 0.5f);
+AutoCVarFloat cvar_hacker_detection_modifier("enemy.hacker_detection_modifier", "enemy hacker detection modifier", 0.75f);
 
 void EnemySystem::startup(World &world) {
 	Signature blacklist;

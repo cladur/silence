@@ -41,6 +41,8 @@ inline void handle_detection(World *world, uint32_t enemy_entity, Transform &tra
 	float max_speed = *cvar->get_float_cvar("enemy.max_detection_speed");
 	float sphere_radus = *cvar->get_float_cvar("enemy.sphere_detection_radius");
 	float decrease_rate = *cvar->get_float_cvar("enemy.detection_decrease_speed");
+	float crouch_mod = *cvar->get_float_cvar("enemy.crouch_detection_modifier");
+	float hacker_mod = *cvar->get_float_cvar("enemy.hacker_detection_modifier");
 
 	auto enemy_look_origin = transform.position + enemy_look_offset;
 
@@ -162,23 +164,30 @@ inline void handle_detection(World *world, uint32_t enemy_entity, Transform &tra
 		// Agent has priority over hacker, because he is bigger and humanoid.
 		enemy_data.detection_target = can_see_player ? DetectionTarget::AGENT : DetectionTarget::HACKER;
 		float detection_speed = 0.0f;
+		float detection_change = dt;
+
 		// interpolate detection speed based on distance
 		switch (enemy_data.detection_target) {
 			case DetectionTarget::AGENT: {
 				detection_speed = glm::mix(
 						min_speed, max_speed, agent_distance_ratio);
+				detection_change *= GameplayManager::get().get_agent_crouch() ? crouch_mod : 1.0f;
 				break;
 			}
 			case DetectionTarget::HACKER: {
 				detection_speed = glm::mix(
 						min_speed, max_speed, hacker_distance_ratio);
+				detection_change *= hacker_mod;
 				break;
 			}
 			default: {
 				break;
 			}
 		}
-		enemy_data.detection_level += dt * detection_speed;
+
+		detection_change *= detection_speed;
+
+		enemy_data.detection_level += detection_change;
 	} else {
 		enemy_data.detection_target = DetectionTarget::NONE;
 		enemy_data.detection_level -= dt * decrease_rate;

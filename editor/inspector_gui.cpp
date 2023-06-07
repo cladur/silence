@@ -1109,10 +1109,6 @@ void Inspector::show_enemy_data() {
 		ImGui::BeginTable("Enemy Path", 2);
 		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
 
-		show_float("Detection Speed", data.detection_speed);
-		show_float("View Angle", data.view_cone_angle);
-		show_float("View Distance", data.view_cone_distance);
-
 		ImGui::EndTable();
 	}
 }
