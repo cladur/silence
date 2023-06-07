@@ -3,6 +3,21 @@
         "components": [
             {
                 "component_data": {
+                    "center": {
+                        "x": 0.0,
+                        "y": 0.5,
+                        "z": 0.0
+                    },
+                    "range": {
+                        "x": 0.5,
+                        "y": 0.5,
+                        "z": 0.5
+                    }
+                },
+                "component_name": "ColliderAABB"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": 0.0,
@@ -24,6 +39,7 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "items/wooden_box/wooden_box.mdl",
                     "scale_uv_with_transform": false
@@ -39,7 +55,13 @@
                     "layer_name": "default"
                 },
                 "component_name": "ColliderTag"
-            },
+            }
+        ],
+        "entity": 1,
+        "signature": "00000000000000000010110000100010"
+    },
+    {
+        "components": [
             {
                 "component_data": {
                     "center": {
@@ -54,13 +76,7 @@
                     }
                 },
                 "component_name": "ColliderAABB"
-            }
-        ],
-        "entity": 1,
-        "signature": "00000000000000000010110000100010"
-    },
-    {
-        "components": [
+            },
             {
                 "component_data": {
                     "orientation": {
@@ -84,6 +100,7 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "items/wooden_box/wooden_box.mdl",
                     "scale_uv_with_transform": false
@@ -99,21 +116,6 @@
                     "layer_name": "default"
                 },
                 "component_name": "ColliderTag"
-            },
-            {
-                "component_data": {
-                    "center": {
-                        "x": 0.0,
-                        "y": 0.5,
-                        "z": 0.0
-                    },
-                    "range": {
-                        "x": 0.5,
-                        "y": 0.5,
-                        "z": 0.5
-                    }
-                },
-                "component_name": "ColliderAABB"
             }
         ],
         "entity": 2,
@@ -136,8 +138,8 @@
                         "z": 0.9172351360321045
                     },
                     "position": {
-                        "x": -8.110658645629883,
-                        "y": -1.5508304834365845,
+                        "x": -7.829076290130615,
+                        "y": -1.8554073572158813,
                         "z": 5.780368804931641
                     },
                     "scale": {
@@ -150,6 +152,7 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
                     "scale_uv_with_transform": false
@@ -228,6 +231,7 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "items/console/console.mdl",
                     "scale_uv_with_transform": false
@@ -263,6 +267,21 @@
         "components": [
             {
                 "component_data": {
+                    "center": {
+                        "x": 0.0,
+                        "y": 0.5,
+                        "z": 0.0
+                    },
+                    "range": {
+                        "x": 0.5,
+                        "y": 0.5,
+                        "z": 0.5
+                    }
+                },
+                "component_name": "ColliderAABB"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": 0.0,
@@ -284,6 +303,7 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "items/wooden_box/wooden_box.mdl",
                     "scale_uv_with_transform": false
@@ -299,21 +319,6 @@
                     "layer_name": "default"
                 },
                 "component_name": "ColliderTag"
-            },
-            {
-                "component_data": {
-                    "center": {
-                        "x": 0.0,
-                        "y": 0.5,
-                        "z": 0.0
-                    },
-                    "range": {
-                        "x": 0.5,
-                        "y": 0.5,
-                        "z": 0.5
-                    }
-                },
-                "component_name": "ColliderAABB"
             }
         ],
         "entity": 5,
@@ -336,8 +341,8 @@
                         "z": 0.2923716902732849
                     },
                     "position": {
-                        "x": 3.8442506790161133,
-                        "y": -1.9189742803573608,
+                        "x": 3.8096280097961426,
+                        "y": -2.147219181060791,
                         "z": 5.478204727172852
                     },
                     "scale": {
@@ -350,6 +355,7 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
                     "scale_uv_with_transform": false
@@ -414,9 +420,9 @@
                         "z": 0.0
                     },
                     "position": {
-                        "x": -3.372213363647461,
-                        "y": -0.43651914596557617,
-                        "z": 7.80452823638916
+                        "x": -2.226478338241577,
+                        "y": -1.6128129959106445,
+                        "z": 2.4694390296936035
                     },
                     "scale": {
                         "x": 1.0,
@@ -428,11 +434,28 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "items/wooden_box/wooden_box.mdl",
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
+                    "acceleration": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "mass": 1.0,
+                    "velocity": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    }
+                },
+                "component_name": "RigidBody"
             },
             {
                 "component_data": {
@@ -469,7 +492,7 @@
             }
         ],
         "entity": 7,
-        "signature": "00000000000000001000100000100011"
+        "signature": "00000000000000001000100000100111"
     },
     {
         "components": [
@@ -478,57 +501,6 @@
                     "name": "AABB"
                 },
                 "component_name": "Name"
-            },
-            {
-                "component_data": {
-                    "acceleration": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    "mass": 1.0,
-                    "velocity": {
-                        "x": 0.0,
-                        "y": -0.16400131583213806,
-                        "z": 0.0
-                    }
-                },
-                "component_name": "RigidBody"
-            },
-            {
-                "component_data": {
-                    "orientation": {
-                        "w": 1.0,
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    "position": {
-                        "x": -2.806908369064331,
-                        "y": -5.5951247215271,
-                        "z": 5.511688709259033
-                    },
-                    "scale": {
-                        "x": 7.699999809265137,
-                        "y": 2.299999952316284,
-                        "z": 6.800000190734863
-                    }
-                },
-                "component_name": "Transform"
-            },
-            {
-                "component_data": {
-                    "material_type": 0,
-                    "model_name": "items/wooden_box/wooden_box.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "layer_name": "default"
-                },
-                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -544,10 +516,66 @@
                     }
                 },
                 "component_name": "ColliderAABB"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 1.0,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": -2.8144490718841553,
+                        "y": -5.60706901550293,
+                        "z": 5.511688709259033
+                    },
+                    "scale": {
+                        "x": 7.699999809265137,
+                        "y": 2.299999952316284,
+                        "z": 6.800000190734863
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
+                    "acceleration": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "mass": 1.0,
+                    "velocity": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    }
+                },
+                "component_name": "RigidBody"
+            },
+            {
+                "component_data": {},
+                "component_name": "StaticTag"
+            },
+            {
+                "component_data": {
+                    "layer_name": "default"
+                },
+                "component_name": "ColliderTag"
             }
         ],
         "entity": 8,
-        "signature": "00000000000000000010100000100111"
+        "signature": "00000000000000000010110000100111"
     },
     {
         "components": [
@@ -559,6 +587,21 @@
             },
             {
                 "component_data": {
+                    "center": {
+                        "x": 0.0,
+                        "y": 0.5,
+                        "z": 0.0
+                    },
+                    "range": {
+                        "x": 0.5,
+                        "y": 0.5,
+                        "z": 0.5
+                    }
+                },
+                "component_name": "ColliderAABB"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": 0.0,
@@ -567,7 +610,7 @@
                     },
                     "position": {
                         "x": -2.393289566040039,
-                        "y": -6.592391490936279,
+                        "y": -6.812524318695068,
                         "z": 0.0
                     },
                     "scale": {
@@ -580,6 +623,7 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "items/wooden_box/wooden_box.mdl",
                     "scale_uv_with_transform": false
@@ -595,21 +639,6 @@
                     "layer_name": "default"
                 },
                 "component_name": "ColliderTag"
-            },
-            {
-                "component_data": {
-                    "center": {
-                        "x": 0.0,
-                        "y": 0.5,
-                        "z": 0.0
-                    },
-                    "range": {
-                        "x": 0.5,
-                        "y": 0.5,
-                        "z": 0.5
-                    }
-                },
-                "component_name": "ColliderAABB"
             }
         ],
         "entity": 9,
@@ -625,22 +654,6 @@
             },
             {
                 "component_data": {
-                    "acceleration": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    "mass": 1.0,
-                    "velocity": {
-                        "x": -9.39559413382085e-07,
-                        "y": -0.32800161838531494,
-                        "z": 0.050234533846378326
-                    }
-                },
-                "component_name": "RigidBody"
-            },
-            {
-                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": 0.0,
@@ -648,9 +661,9 @@
                         "z": 0.0
                     },
                     "position": {
-                        "x": -6.244900703430176,
-                        "y": -2.8115246295928955,
-                        "z": 4.641281604766846
+                        "x": -2.292668104171753,
+                        "y": -3.304940938949585,
+                        "z": 2.592106580734253
                     },
                     "scale": {
                         "x": 1.0,
@@ -662,6 +675,37 @@
             },
             {
                 "component_data": {
+                    "acceleration": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "mass": 1.0,
+                    "velocity": {
+                        "x": -0.001613280619494617,
+                        "y": 0.0,
+                        "z": 0.0
+                    }
+                },
+                "component_name": "RigidBody"
+            },
+            {
+                "component_data": {
+                    "animation_name": "agent/agent_ANIM_GLTF/agent_idle.anim",
+                    "ticks_per_second": 1000.0
+                },
+                "component_name": "AnimationInstance"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "agent/agent.skinmdl"
+                },
+                "component_name": "SkinnedModelInstance"
+            },
+            {
+                "component_data": {
                     "layer_name": "default"
                 },
                 "component_name": "ColliderTag"
@@ -670,13 +714,13 @@
                 "component_data": {
                     "end": {
                         "x": 0.0,
-                        "y": 0.0,
+                        "y": 0.49000000953674316,
                         "z": 0.0
                     },
                     "radius": 0.5,
                     "start": {
                         "x": 0.0,
-                        "y": 1.0,
+                        "y": 1.2000000476837158,
                         "z": 0.0
                     }
                 },
@@ -684,7 +728,7 @@
             }
         ],
         "entity": 10,
-        "signature": "00000000000000000100100000000111"
+        "signature": "00000000000000000100100011000111"
     },
     {
         "components": [
@@ -751,22 +795,6 @@
             },
             {
                 "component_data": {
-                    "acceleration": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    "mass": 1.0,
-                    "velocity": {
-                        "x": -0.11541008949279785,
-                        "y": -0.32800161838531494,
-                        "z": -0.03288673609495163
-                    }
-                },
-                "component_name": "RigidBody"
-            },
-            {
-                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": 0.0,
@@ -774,9 +802,9 @@
                         "z": 0.0
                     },
                     "position": {
-                        "x": -3.9808926582336426,
-                        "y": -2.8115246295928955,
-                        "z": 5.2107253074646
+                        "x": 0.2906927466392517,
+                        "y": -3.311004877090454,
+                        "z": 4.829895973205566
                     },
                     "scale": {
                         "x": 1.0,
@@ -785,6 +813,37 @@
                     }
                 },
                 "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "acceleration": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "mass": 1.0,
+                    "velocity": {
+                        "x": -0.008582234382629395,
+                        "y": 0.0,
+                        "z": -0.000369414163287729
+                    }
+                },
+                "component_name": "RigidBody"
+            },
+            {
+                "component_data": {
+                    "animation_name": "scorpion/scorpion_ANIM_GLTF/scorpion_walk.anim",
+                    "ticks_per_second": 3000.0
+                },
+                "component_name": "AnimationInstance"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "scorpion/scorpion.skinmdl"
+                },
+                "component_name": "SkinnedModelInstance"
             },
             {
                 "component_data": {
@@ -796,16 +855,16 @@
                 "component_data": {
                     "center": {
                         "x": 0.0,
-                        "y": 0.0,
+                        "y": 0.11999999731779099,
                         "z": 0.0
                     },
-                    "radius": 0.5
+                    "radius": 0.11999999731779099
                 },
                 "component_name": "ColliderSphere"
             }
         ],
         "entity": 12,
-        "signature": "00000000000000000001100000000111"
+        "signature": "00000000000000000001100011000111"
     },
     {
         "components": [
@@ -817,22 +876,6 @@
             },
             {
                 "component_data": {
-                    "acceleration": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    "mass": 1.0,
-                    "velocity": {
-                        "x": -0.048148028552532196,
-                        "y": -0.32800161838531494,
-                        "z": -0.013720037415623665
-                    }
-                },
-                "component_name": "RigidBody"
-            },
-            {
-                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": 0.0,
@@ -840,9 +883,9 @@
                         "z": 0.0
                     },
                     "position": {
-                        "x": -4.0566582679748535,
-                        "y": -2.8115246295928955,
-                        "z": 6.228867053985596
+                        "x": -3.9824881553649902,
+                        "y": -2.811004877090454,
+                        "z": 8.567000389099121
                     },
                     "scale": {
                         "x": 1.0,
@@ -851,6 +894,22 @@
                     }
                 },
                 "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "acceleration": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "mass": 1.0,
+                    "velocity": {
+                        "x": 0.0011466210708022118,
+                        "y": 0.0,
+                        "z": 6.9267593971744645e-06
+                    }
+                },
+                "component_name": "RigidBody"
             },
             {
                 "component_data": {
@@ -891,8 +950,8 @@
                     },
                     "position": {
                         "x": -2.6452531814575195,
-                        "y": -3.5692310333251953,
-                        "z": 1.6200840473175049
+                        "y": -3.6225767135620117,
+                        "z": 1.7556654214859009
                     },
                     "scale": {
                         "x": 8.899999618530273,
@@ -904,6 +963,7 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
                     "scale_uv_with_transform": false
@@ -969,8 +1029,8 @@
                     },
                     "position": {
                         "x": -2.7047393321990967,
-                        "y": -3.647813558578491,
-                        "z": 9.15982723236084
+                        "y": -3.795044422149658,
+                        "z": 9.05245304107666
                     },
                     "scale": {
                         "x": 8.199999809265137,
@@ -982,6 +1042,7 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
                     "scale_uv_with_transform": false

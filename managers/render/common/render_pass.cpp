@@ -15,7 +15,8 @@ AutoCVarFloat cvar_bloom_strength("render.bloom_strength", "bloom strength", 0.0
 AutoCVarFloat cvar_gamma("render.gamma", "gamma", 2.2f, CVarFlags::EditFloatDrag);
 AutoCVarFloat cvar_dirt_strength("render.dirt_strength", "dirt strength", 0.075f, CVarFlags::EditFloatDrag);
 
-AutoCVarFloat cvar_smooth("render.particle_smooth", "particle smooth measured in 1/100th of a unit", 0.005f, CVarFlags::EditFloatDrag);
+AutoCVarFloat cvar_smooth(
+		"render.particle_smooth", "particle smooth measured in 1/100th of a unit", 0.005f, CVarFlags::EditFloatDrag);
 
 void PBRPass::startup() {
 	material.startup();
@@ -39,7 +40,11 @@ void LightPass::draw(RenderScene &scene) {
 		Light &light = *cmd.light;
 		Transform &transform = *cmd.transform;
 		material.bind_light_resources(light, transform);
-		utils::render_sphere();
+		if (light.type == LightType::SPOT_LIGHT) {
+			utils::render_cone();
+		} else {
+			utils::render_sphere();
+		}
 	}
 }
 
@@ -374,7 +379,8 @@ void ShadowPass::draw(RenderScene &scene) {
 			material.bind_instance_resources(instance, transform);
 			Model &model = resource_manager.get_model(instance.model_handle);
 			for (auto &mesh : model.meshes) {
-				if (light.type != LightType::SPOT_LIGHT || mesh.fc_bounding_sphere.is_on_frustum(frustum, transform, scene)) {
+				if (light.type != LightType::SPOT_LIGHT ||
+						mesh.fc_bounding_sphere.is_on_frustum(frustum, transform, scene)) {
 					mesh.draw();
 				}
 			}
@@ -447,13 +453,14 @@ void ParticlePass::startup() {
 
 	// set up vertex attributes
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(ParticleVertex), (void *) offsetof(ParticleVertex, position));
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(ParticleVertex), (void *)offsetof(ParticleVertex, position));
 
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(ParticleVertex), (void *) offsetof(ParticleVertex, color));
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(ParticleVertex), (void *)offsetof(ParticleVertex, color));
 
 	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(ParticleVertex), (void *) offsetof(ParticleVertex, tex_coords));
+	glVertexAttribPointer(
+			2, 2, GL_FLOAT, GL_FALSE, sizeof(ParticleVertex), (void *)offsetof(ParticleVertex, tex_coords));
 
 	// buffer data for the first time
 	glBufferData(GL_ARRAY_BUFFER, sizeof(ParticleVertex) * 4, nullptr, GL_DYNAMIC_DRAW);
@@ -502,17 +509,20 @@ void ParticlePass::draw(RenderScene &scene) {
 	ssbo_data.resize(MAX_PARTICLES_PER_ENTITY);
 
 	// copy the map to a vector of pairs
-	static std::vector<std::pair<Entity, std::pair<std::array<ParticleData, MAX_PARTICLES_PER_ENTITY>, ParticlePerEntityData>>> particles;
+	static std::vector<
+			std::pair<Entity, std::pair<std::array<ParticleData, MAX_PARTICLES_PER_ENTITY>, ParticlePerEntityData>>>
+			particles;
 	particles.clear();
 	particles.reserve(pm.particles.size());
 	for (auto &p : pm.particles) {
-        particles.emplace_back(p);
-    }
+		particles.emplace_back(p);
+	}
 
 	// now SORT the vector by distance to camera so that the farthest particles are drawn first
 	std::sort(particles.begin(), particles.end(), [&cam_pos](auto &a, auto &b) {
-        return glm::distance2(cam_pos, a.second.second.entity_position) > glm::distance2(cam_pos, b.second.second.entity_position);
-    });
+		return glm::distance2(cam_pos, a.second.second.entity_position) >
+				glm::distance2(cam_pos, b.second.second.entity_position);
+	});
 
 	static int i;
 	static int j;
@@ -542,11 +552,12 @@ void ParticlePass::draw(RenderScene &scene) {
 				rot = glm::rotate(rot, glm::radians(particle.rotation), glm::vec3(0.0f, 0.0f, 1.0f));
 				ssbo_data[i].position[j] = glm::vec4(particle.position, particle.size);
 				ssbo_data[i].rotation[j] = rot;
-				ssbo_data[i].colors  [j] = particle.color;
+				ssbo_data[i].colors[j] = particle.color;
 				j++;
 			}
 			if (j >= MAX_PARTICLES_PER_ENTITY) {
-				SPDLOG_WARN("Too many particles for entity {}, consider lowering the rate or lifetime of the particles", entity_id);
+				SPDLOG_WARN("Too many particles for entity {}, consider lowering the rate or lifetime of the particles",
+						entity_id);
 				break;
 			}
 		}
@@ -589,7 +600,7 @@ void ParticlePass::draw(RenderScene &scene) {
 		glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr, j);
 
 		i++;
-    }
+	}
 	glBindVertexArray(0);
 }
 

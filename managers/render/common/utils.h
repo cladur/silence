@@ -6,6 +6,7 @@ namespace utils {
 void render_quad();
 void render_cube();
 void render_sphere();
+void render_cone();
 
 } //namespace utils
 

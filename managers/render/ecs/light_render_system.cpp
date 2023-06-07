@@ -42,7 +42,7 @@ void LightRenderSystem::update(World &world, float dt) {
 		const glm::vec3 &direction = glm::normalize(orientation * glm::vec3(0.0f, 0.0f, -1.0f));
 
 		float radius = light.intensity * std::sqrtf(1.0f / cvar_light_threshold.get());
-		float cone_radius = 0.0f;
+		float cone_radius;
 		switch (light.type) {
 			case LightType::DIRECTIONAL_LIGHT:
 				render_scene.debug_draw.draw_arrow(position, position + direction * 2.0f, 1.0f, light.color, entity);
@@ -53,9 +53,9 @@ void LightRenderSystem::update(World &world, float dt) {
 				render_scene.debug_draw.draw_circle(position, glm::vec3(0.0f, 0.0f, 1.0f), radius, light.color, entity);
 				break;
 			case LightType::SPOT_LIGHT:
-				cone_radius = glm::length(direction * radius) * tan(glm::radians(light.cutoff + light.outer_cutoff));
+				cone_radius = radius * tan(glm::radians(light.cutoff + light.outer_cutoff));
 				render_scene.debug_draw.draw_cone(
-						position, position + direction * 2.0f, radius, cone_radius, light.color, entity, 4);
+						position, position + direction, radius, cone_radius, light.color, entity, 4);
 				break;
 			default:
 				SPDLOG_WARN("Invalid light type!");
