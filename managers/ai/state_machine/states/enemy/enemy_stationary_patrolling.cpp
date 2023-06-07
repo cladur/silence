@@ -33,7 +33,7 @@ void EnemyStationaryPatrolling::update(World *world, uint32_t entity_id, float d
 		animation_manager.change_animation(entity_id, "enemy/enemy_ANIM_GLTF/enemy_idle.anim");
 	}
 
-	enemy_utils::handle_detection(world, transform, transform.get_global_forward(), enemy_data, dt, &dd);
+	enemy_utils::handle_detection(world, entity_id, transform, transform.get_global_forward(), enemy_data, dt, &dd);
 
 	enemy_utils::update_detection_slider(entity_id, transform, enemy_data);
 

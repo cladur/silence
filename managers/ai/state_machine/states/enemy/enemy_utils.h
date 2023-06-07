@@ -32,7 +32,7 @@ inline void look_at(EnemyPath &path, Transform &t, glm::vec3 &target, float &dt)
 	t.add_global_euler_rot(path.rotation_end * dt * path.rotation_speed);
 }
 
-inline void handle_detection(World *world, Transform &transform, glm::vec3 forward, EnemyData &enemy_data, float &dt, DebugDraw *dd = nullptr) {
+inline void handle_detection(World *world, uint32_t enemy_entity, Transform &transform, glm::vec3 forward, EnemyData &enemy_data, float &dt, DebugDraw *dd = nullptr) {
 	// cvar stuff
 	auto *cvar = CVarSystem::get();
 	float cone_range = *cvar->get_float_cvar("enemy.detection_range");
@@ -41,7 +41,6 @@ inline void handle_detection(World *world, Transform &transform, glm::vec3 forwa
 	float max_speed = *cvar->get_float_cvar("enemy.max_detection_speed");
 	float sphere_radus = *cvar->get_float_cvar("enemy.sphere_detection_radius");
 	float decrease_rate = *cvar->get_float_cvar("enemy.detection_decrease_speed");
-
 
 	auto enemy_look_origin = transform.position + enemy_look_offset;
 
@@ -125,6 +124,7 @@ inline void handle_detection(World *world, Transform &transform, glm::vec3 forwa
 			hacker_pos = GameplayManager::get().get_hacker_position(world->get_parent_scene()) + agent_target_bottom_offset;
 			hacker_dir = glm::normalize(hacker_pos - enemy_look_origin);
 			ray.direction = hacker_dir;
+			ray.ignore_list.push_back(enemy_entity);
 			ray_end = ray.origin + ray.direction * cone_range;
 
 			if (CollisionSystem::ray_cast_layer(*world, ray, hit_info)) {
@@ -140,6 +140,7 @@ inline void handle_detection(World *world, Transform &transform, glm::vec3 forwa
 		Ray ray{};
 		ray.origin = enemy_look_origin;
 		ray.direction = agent_dir;
+		ray.ignore_list.push_back(enemy_entity);
 		glm::vec3 ray_end = ray.origin + ray.direction * sphere_radus;
 
 		HitInfo hit_info;
@@ -147,6 +148,23 @@ inline void handle_detection(World *world, Transform &transform, glm::vec3 forwa
 		if (CollisionSystem::ray_cast_layer(*world, ray, hit_info)) {
 			if (hit_info.entity == GameplayManager::get().get_agent_entity()) {
 				can_see_player = true;
+			}
+		}
+	}
+
+	// HACKER SPHERE DETECTION LOGIC
+	if (glm::distance(transform.position, hacker_pos) < sphere_radus) {
+		Ray ray{};
+		ray.origin = enemy_look_origin;
+		ray.direction = hacker_dir;
+		ray.ignore_list.push_back(enemy_entity);
+		glm::vec3 ray_end = ray.origin + ray.direction * sphere_radus;
+
+		HitInfo hit_info;
+
+		if (CollisionSystem::ray_cast_layer(*world, ray, hit_info)) {
+			if (hit_info.entity == GameplayManager::get().get_hacker_entity()) {
+				can_see_hacker = true;
 			}
 		}
 	}

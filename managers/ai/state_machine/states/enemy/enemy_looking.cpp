@@ -87,7 +87,7 @@ void EnemyLooking::update(World *world, uint32_t entity_id, float dt) {
 		end_forward = glm::rotateY(end_forward, rotation_end.y * dt * 2.0f);
 	}
 
-	enemy_utils::handle_detection(world, transform, adjusted_forward,enemy_data, dt, &dd);
+	enemy_utils::handle_detection(world, entity_id, transform, adjusted_forward,enemy_data, dt, &dd);
 
 	enemy_utils::update_detection_slider(entity_id, transform, enemy_data);
 
