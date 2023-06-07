@@ -28,6 +28,12 @@ AutoCVarFloat cvar_hacker_friction_ground(
 AutoCVarFloat cvar_hacker_camera_sensitivity(
 		"settings.hacker_camera_sensitivity", "camera sensitivity", 0.1f, CVarFlags::EditCheckbox);
 
+AutoCVarFloat cvar_hacker_camera_max_rotation_x(
+		"hacker.hacker_camera_max_rotation_x", "camera max rotation X in degrees", 75.0f, CVarFlags::EditCheckbox);
+
+AutoCVarFloat cvar_hacker_camera_max_rotation_y(
+		"hacker.hacker_camera_max_rotation_y", "camera max rotation Y in degrees", 30.0f, CVarFlags::EditCheckbox);
+
 AutoCVarInt cvar_hacker_on_keyboard(
 		"settings.hacker_on_keyboard", "Control hacker with keyboard + mouse", 0, CVarFlags::EditCheckbox);
 
@@ -98,16 +104,25 @@ bool HackerSystem::jump_to_camera(World &world, HackerData &hacker_data, Entity 
 	auto &camera_tf = world.get_component<Transform>(hacker_data.camera);
 	auto &new_camera_tf = world.get_component<Transform>(camera_entity);
 
-	camera_tf.set_position(new_camera_tf.get_global_position());
+	camera_tf.set_position(new_camera_tf.get_global_position() + -(new_camera_tf.get_forward()));
 	camera_tf.set_orientation(new_camera_tf.get_global_orientation());
 
 	is_on_camera = true;
 	current_camera_entity = camera_entity;
+	starting_camera_orientation = world.get_component<Transform>(camera_entity).get_global_orientation();
 
 	return true;
 }
 
 void HackerSystem::go_back_to_scorpion(World &world, HackerData &hacker_data) {
+	if (!is_on_camera) {
+		return;
+	}
+
+	world.get_component<Transform>(current_camera_entity).set_orientation(starting_camera_orientation);
+	starting_camera_orientation = glm::quat(1, 0, 0, 0);
+	current_rotation_x = 0.0f;
+	current_rotation_y = 0.0f;
 	current_camera_entity = 0;
 	is_on_camera = false;
 }
@@ -168,8 +183,13 @@ void HackerSystem::update(World &world, float dt) {
 		auto &scorpion_camera_tf = world.get_component<Transform>(hacker_data.scorpion_camera_transform);
 		auto &camera_tf = world.get_component<Transform>(hacker_data.camera);
 		auto &animation_instance = world.get_component<AnimationInstance>(hacker_data.model);
-
 		auto &camera = world.get_component<Camera>(hacker_data.camera);
+
+		Transform *camera_model_tf = nullptr;
+
+		if (is_on_camera) {
+			camera_model_tf = &world.get_component<Transform>(current_camera_entity);
+		}
 
 		if (first_frame) {
 			default_fov = camera.fov;
@@ -200,18 +220,6 @@ void HackerSystem::update(World &world, float dt) {
 		camera_forward = glm::normalize(camera_forward);
 		auto camera_right = camera_pivot_tf.get_global_right();
 
-		if (!is_on_camera) {
-			//			world.get_parent_scene()->get_render_scene().debug_draw.draw_arrow(
-			//					camera_tf.get_global_position() + glm::vec3(0.0f, 0.0f, -1.0f),
-			//					camera_tf.get_global_position() + glm::vec3(0.0f, 0.0f, -1.0f) + real_camera_forward *
-			//100.0f, 					glm::vec3(1.0f, 0.0f, 0.0f));
-		} else {
-			//			world.get_parent_scene()->get_render_scene().debug_draw.draw_arrow(
-			//					camera_tf.get_global_position() + glm::vec3(0.0f, 0.0f, -1.0f),
-			//					camera_tf.get_global_position() + glm::vec3(0.0f, 0.0f, 1.0f) - real_camera_forward *
-			//100.0f, 					glm::vec3(1.0f, 0.0f, 0.0f));
-		}
-
 		glm::vec3 acc_direction = { 0, 0, 0 };
 		if (!is_on_camera) {
 			if (input_manager.is_action_pressed("hacker_move_forward")) {
@@ -230,16 +238,6 @@ void HackerSystem::update(World &world, float dt) {
 
 		if (*CVarSystem::get()->get_int_cvar("debug_camera.use")) {
 			acc_direction = glm::vec3(0.0f);
-		}
-
-		// for the UI sake we need to shoot the raycast every time to know if we're even hovering over anything.
-		bool triggered = input_manager.is_action_just_pressed("mouse_left");
-		if (!is_zooming) {
-			if (!is_on_camera) {
-				shoot_raycast(camera_tf, world, hacker_data, dt, triggered, real_camera_forward);
-			} else {
-				shoot_raycast(camera_tf, world, hacker_data, dt, triggered, -real_camera_forward);
-			}
 		}
 
 		// ZOOMING LOGIC
@@ -275,7 +273,7 @@ void HackerSystem::update(World &world, float dt) {
 			}
 		}
 
-		if (input_manager.is_action_just_pressed("mouse_right")) {
+		if (input_manager.is_action_just_pressed("back_from_camera")) {
 			go_back_to_scorpion(world, hacker_data);
 		}
 		glm::normalize(acc_direction);
@@ -294,7 +292,7 @@ void HackerSystem::update(World &world, float dt) {
 
 		transform.add_position(glm::vec3(velocity.x, 0.0, velocity.z));
 
-		glm::vec2 mouse_delta = glm::vec2(0.0f);
+		auto mouse_delta = glm::vec2(0.0f);
 		mouse_delta.x = input_manager.get_axis("hacker_look_left", "hacker_look_right");
 		mouse_delta.y = input_manager.get_axis("hacker_look_up", "hacker_look_down");
 		mouse_delta *= 20.0;
@@ -317,9 +315,39 @@ void HackerSystem::update(World &world, float dt) {
 			camera_pivot_tf.add_global_euler_rot(
 					glm::vec3(0.0f, -mouse_delta.x, 0.0f) * cvar_hacker_camera_sensitivity.get() * dt);
 		} else {
-			camera_tf.add_euler_rot(glm::vec3(-mouse_delta.y, 0.0f, 0.0f) * cvar_hacker_camera_sensitivity.get() * dt);
-			camera_tf.add_global_euler_rot(
-					glm::vec3(0.0f, -mouse_delta.x, 0.0f) * cvar_hacker_camera_sensitivity.get() * dt);
+			float new_rotation_x = current_rotation_x + (-mouse_delta.x * cvar_hacker_camera_sensitivity.get() * dt);
+			float new_rotation_y = current_rotation_y + (-mouse_delta.y * cvar_hacker_camera_sensitivity.get() * dt);
+
+			float max_rotation_x = cvar_hacker_camera_max_rotation_x.get() * 0.017f;
+			float max_rotation_y = cvar_hacker_camera_max_rotation_y.get() * 0.017f;
+
+			if (abs(new_rotation_x) <= max_rotation_x) {
+				camera_tf.add_global_euler_rot(
+						glm::vec3(0.0f, -mouse_delta.x, 0.0f) * cvar_hacker_camera_sensitivity.get() * dt);
+				camera_model_tf->add_global_euler_rot(
+						glm::vec3(0.0f, -mouse_delta.x, 0.0f) * cvar_hacker_camera_sensitivity.get() * dt);
+
+				current_rotation_x = new_rotation_x;
+			}
+
+			if (abs(new_rotation_y) <= max_rotation_y) {
+				camera_tf.add_euler_rot(
+						glm::vec3(-mouse_delta.y, 0.0f, 0.0f) * cvar_hacker_camera_sensitivity.get() * dt);
+				camera_model_tf->add_euler_rot(
+						glm::vec3(-mouse_delta.y, 0.0f, 0.0f) * cvar_hacker_camera_sensitivity.get() * dt);
+
+				current_rotation_y = new_rotation_y;
+			}
+		}
+
+		// for the UI sake we need to shoot the raycast every time to know if we're even hovering over anything.
+		bool triggered = input_manager.is_action_just_pressed("mouse_left");
+		if (!is_zooming) {
+			if (!is_on_camera) {
+				shoot_raycast(camera_tf, world, hacker_data, dt, triggered, real_camera_forward);
+			} else {
+				shoot_raycast(camera_tf, world, hacker_data, dt, triggered, -real_camera_forward);
+			}
 		}
 
 		static glm::vec3 last_position = transform.position;
