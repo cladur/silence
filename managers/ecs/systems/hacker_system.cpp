@@ -29,10 +29,10 @@ AutoCVarFloat cvar_hacker_camera_sensitivity(
 		"settings.hacker_camera_sensitivity", "camera sensitivity", 0.1f, CVarFlags::EditCheckbox);
 
 AutoCVarFloat cvar_hacker_camera_max_rotation_x(
-		"hacker.hacker_camera_max_rotation_x", "camera max rotation X in degrees", 90.0f, CVarFlags::EditCheckbox);
+		"hacker.hacker_camera_max_rotation_x", "camera max rotation X in degrees", 75.0f, CVarFlags::EditCheckbox);
 
 AutoCVarFloat cvar_hacker_camera_max_rotation_y(
-		"hacker.hacker_camera_max_rotation_y", "camera max rotation Y in degrees", 90.0f, CVarFlags::EditCheckbox);
+		"hacker.hacker_camera_max_rotation_y", "camera max rotation Y in degrees", 30.0f, CVarFlags::EditCheckbox);
 
 AutoCVarInt cvar_hacker_on_keyboard(
 		"settings.hacker_on_keyboard", "Control hacker with keyboard + mouse", 0, CVarFlags::EditCheckbox);
@@ -121,6 +121,8 @@ void HackerSystem::go_back_to_scorpion(World &world, HackerData &hacker_data) {
 
 	world.get_component<Transform>(current_camera_entity).set_orientation(starting_camera_orientation);
 	starting_camera_orientation = glm::quat(1, 0, 0, 0);
+	current_rotation_x = 0.0f;
+	current_rotation_y = 0.0f;
 	current_camera_entity = 0;
 	is_on_camera = false;
 }
@@ -271,7 +273,7 @@ void HackerSystem::update(World &world, float dt) {
 			}
 		}
 
-		if (input_manager.is_action_just_pressed("mouse_right")) {
+		if (input_manager.is_action_just_pressed("back_from_camera")) {
 			go_back_to_scorpion(world, hacker_data);
 		}
 		glm::normalize(acc_direction);
@@ -320,28 +322,22 @@ void HackerSystem::update(World &world, float dt) {
 			float max_rotation_y = cvar_hacker_camera_max_rotation_y.get() * 0.017f;
 
 			if (abs(new_rotation_x) <= max_rotation_x) {
-				// Apply the rotation to the transform
 				camera_tf.add_global_euler_rot(
 						glm::vec3(0.0f, -mouse_delta.x, 0.0f) * cvar_hacker_camera_sensitivity.get() * dt);
 				camera_model_tf->add_global_euler_rot(
 						glm::vec3(0.0f, -mouse_delta.x, 0.0f) * cvar_hacker_camera_sensitivity.get() * dt);
 
-				// Update the current rotation
 				current_rotation_x = new_rotation_x;
 			}
 
 			if (abs(new_rotation_y) <= max_rotation_y) {
-				// Apply the rotation to the transform
 				camera_tf.add_euler_rot(
 						glm::vec3(-mouse_delta.y, 0.0f, 0.0f) * cvar_hacker_camera_sensitivity.get() * dt);
 				camera_model_tf->add_euler_rot(
 						glm::vec3(-mouse_delta.y, 0.0f, 0.0f) * cvar_hacker_camera_sensitivity.get() * dt);
 
-				// Update the current rotation
 				current_rotation_y = new_rotation_y;
 			}
-
-			SPDLOG_WARN("current_rotation_x: {} | current_rotation_y: {}", current_rotation_x, current_rotation_y);
 		}
 
 		// for the UI sake we need to shoot the raycast every time to know if we're even hovering over anything.

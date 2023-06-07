@@ -72,6 +72,9 @@ void default_mappings() {
 
 	input_manager.add_action("delete");
 	input_manager.add_key_to_action("delete", InputKey::DELETE);
+
+	input_manager.add_action("back_from_camera");
+	input_manager.add_key_to_action("back_from_camera", InputKey::TAB);
 }
 
 void bootleg_unity_theme() {
