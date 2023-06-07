@@ -98,7 +98,7 @@ bool HackerSystem::jump_to_camera(World &world, HackerData &hacker_data, Entity 
 	auto &camera_tf = world.get_component<Transform>(hacker_data.camera);
 	auto &new_camera_tf = world.get_component<Transform>(camera_entity);
 
-	camera_tf.set_position(new_camera_tf.get_global_position());
+	camera_tf.set_position(new_camera_tf.get_global_position() + -(new_camera_tf.get_forward() * 2.0f));
 	camera_tf.set_orientation(new_camera_tf.get_global_orientation());
 
 	is_on_camera = true;
