@@ -15,7 +15,8 @@ struct Billboard {
 
 	void serialize_json(nlohmann::json &serialized_scene) {
 		nlohmann::json::object_t serialized_component;
-		serialized_component["texture"] = ResourceManager::get().get_texture_name(texture);
+		std::string texture_name = ResourceManager::get().get_texture_name(texture);
+		serialized_component["texture"] = texture_name;
 		serialized_component["position_offset"] = nlohmann::json::object();
 		serialized_component["position_offset"]["x"] = position_offset.x;
 		serialized_component["position_offset"]["y"] = position_offset.y;

@@ -30,18 +30,18 @@
             },
             {
                 "component_data": {
+                    "parent": 25
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "items/wooden_box/wooden_box.mdl",
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 25
-                },
-                "component_name": "Parent"
             },
             {
                 "component_data": {},
@@ -79,7 +79,7 @@
             }
         ],
         "entity": 1,
-        "signature": "00000000000100000010110000101011"
+        "signature": "0000000000000000000000000000000000000000000100000010110000101011"
     },
     {
         "components": [
@@ -121,7 +121,7 @@
             }
         ],
         "entity": 2,
-        "signature": "00000000000000000000000000100011"
+        "signature": "0000000000000000000000000000000000000000000000000000000000100011"
     },
     {
         "components": [
@@ -167,7 +167,7 @@
             }
         ],
         "entity": 3,
-        "signature": "00000000000000000000001000001011"
+        "signature": "0000000000000000000000000000000000000000000000000000001000001011"
     },
     {
         "components": [
@@ -200,22 +200,22 @@
             },
             {
                 "component_data": {
+                    "parent": 15
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 15
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 4,
-        "signature": "00000000000000000000000000101011"
+        "signature": "0000000000000000000000000000000000000000000000000000000000101011"
     },
     {
         "components": [
@@ -248,15 +248,20 @@
             },
             {
                 "component_data": {
-                    "highlight_color": {
-                        "b": 0.0,
-                        "g": 0.0,
-                        "r": 1.0
-                    },
-                    "highlighted": "twoja misja trwa",
-                    "target": 2
+                    "animation_name": "enemy/enemy_ANIM_GLTF/enemy_walk_with_gun.anim",
+                    "ticks_per_second": 1000.0
                 },
-                "component_name": "Highlight"
+                "component_name": "AnimationInstance"
+            },
+            {
+                "component_data": {
+                    "tag_position": {
+                        "x": 0.0,
+                        "y": 2.0,
+                        "z": 0.0
+                    }
+                },
+                "component_name": "Taggable"
             },
             {
                 "component_data": {
@@ -268,10 +273,9 @@
             },
             {
                 "component_data": {
-                    "animation_name": "enemy/enemy_ANIM_GLTF/enemy_walk_with_gun.anim",
-                    "ticks_per_second": 1000.0
+                    "layer_name": "default"
                 },
-                "component_name": "AnimationInstance"
+                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -291,17 +295,15 @@
             },
             {
                 "component_data": {
-                    "layer_name": "default"
+                    "highlight_color": {
+                        "b": 0.0,
+                        "g": 0.0,
+                        "r": 1.0
+                    },
+                    "highlighted": "twoja misja trwa",
+                    "target": 2
                 },
-                "component_name": "ColliderTag"
-            },
-            {
-                "component_data": {
-                    "detection_speed": 5.0,
-                    "view_cone_angle": 70.0,
-                    "view_cone_distance": 10.0
-                },
-                "component_name": "EnemyData"
+                "component_name": "Highlight"
             },
             {
                 "component_data": {
@@ -312,18 +314,12 @@
                 "component_name": "EnemyPath"
             },
             {
-                "component_data": {
-                    "tag_position": {
-                        "x": 0.0,
-                        "y": 2.0,
-                        "z": 0.0
-                    }
-                },
-                "component_name": "Taggable"
+                "component_data": {},
+                "component_name": "EnemyData"
             }
         ],
         "entity": 5,
-        "signature": "01010001000010000100100011000011"
+        "signature": "0000000000000000000000000000000001010001000010000100100011000011"
     },
     {
         "components": [
@@ -356,15 +352,10 @@
             },
             {
                 "component_data": {
-                    "highlight_color": {
-                        "b": 0.4431372582912445,
-                        "g": 1.0,
-                        "r": 0.4313725531101227
-                    },
-                    "highlighted": "twoja misja trwa",
-                    "target": 0
+                    "animation_name": "agent/agent_ANIM_GLTF/agent_idle.anim",
+                    "ticks_per_second": 1000.0
                 },
-                "component_name": "Highlight"
+                "component_name": "AnimationInstance"
             },
             {
                 "component_data": {
@@ -382,14 +373,19 @@
             },
             {
                 "component_data": {
-                    "animation_name": "agent/agent_ANIM_GLTF/agent_idle.anim",
-                    "ticks_per_second": 1000.0
+                    "highlight_color": {
+                        "b": 0.4431372582912445,
+                        "g": 1.0,
+                        "r": 0.4313725531101227
+                    },
+                    "highlighted": "twoja misja trwa",
+                    "target": 0
                 },
-                "component_name": "AnimationInstance"
+                "component_name": "Highlight"
             }
         ],
         "entity": 6,
-        "signature": "01000000000000000000000011001011"
+        "signature": "0000000000000000000000000000000001000000000000000000000011001011"
     },
     {
         "components": [
@@ -434,7 +430,7 @@
             }
         ],
         "entity": 7,
-        "signature": "00000000000000000000000000010011"
+        "signature": "0000000000000000000000000000000000000000000000000000000000010011"
     },
     {
         "components": [
@@ -467,18 +463,18 @@
             },
             {
                 "component_data": {
+                    "parent": 7
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 7
-                },
-                "component_name": "Parent"
             },
             {
                 "component_data": {},
@@ -507,7 +503,7 @@
             }
         ],
         "entity": 8,
-        "signature": "00000000000000000010110000101011"
+        "signature": "0000000000000000000000000000000000000000000000000010110000101011"
     },
     {
         "components": [
@@ -540,18 +536,18 @@
             },
             {
                 "component_data": {
+                    "parent": 7
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 7
-                },
-                "component_name": "Parent"
             },
             {
                 "component_data": {},
@@ -580,7 +576,7 @@
             }
         ],
         "entity": 9,
-        "signature": "00000000000000000010110000101011"
+        "signature": "0000000000000000000000000000000000000000000000000010110000101011"
     },
     {
         "components": [
@@ -613,22 +609,22 @@
             },
             {
                 "component_data": {
+                    "parent": 7
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 7
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 10,
-        "signature": "00000000000000000000000000101011"
+        "signature": "0000000000000000000000000000000000000000000000000000000000101011"
     },
     {
         "components": [
@@ -661,22 +657,22 @@
             },
             {
                 "component_data": {
+                    "parent": 7
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 7
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 11,
-        "signature": "00000000000000000000000000101011"
+        "signature": "0000000000000000000000000000000000000000000000000000000000101011"
     },
     {
         "components": [
@@ -719,7 +715,7 @@
             }
         ],
         "entity": 12,
-        "signature": "00000000000000000000000000010011"
+        "signature": "0000000000000000000000000000000000000000000000000000000000010011"
     },
     {
         "components": [
@@ -752,22 +748,22 @@
             },
             {
                 "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 13,
-        "signature": "00000000000000000000000000101011"
+        "signature": "0000000000000000000000000000000000000000000000000000000000101011"
     },
     {
         "components": [
@@ -800,22 +796,22 @@
             },
             {
                 "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 14,
-        "signature": "00000000000000000000000000101011"
+        "signature": "0000000000000000000000000000000000000000000000000000000000101011"
     },
     {
         "components": [
@@ -866,7 +862,7 @@
             }
         ],
         "entity": 15,
-        "signature": "00000000000000000000000000010011"
+        "signature": "0000000000000000000000000000000000000000000000000000000000010011"
     },
     {
         "components": [
@@ -899,22 +895,22 @@
             },
             {
                 "component_data": {
+                    "parent": 15
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 15
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 16,
-        "signature": "00000000000000000000000000101011"
+        "signature": "0000000000000000000000000000000000000000000000000000000000101011"
     },
     {
         "components": [
@@ -947,22 +943,22 @@
             },
             {
                 "component_data": {
+                    "parent": 15
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 15
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 17,
-        "signature": "00000000000000000000000000101011"
+        "signature": "0000000000000000000000000000000000000000000000000000000000101011"
     },
     {
         "components": [
@@ -995,22 +991,22 @@
             },
             {
                 "component_data": {
+                    "parent": 15
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 15
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 18,
-        "signature": "00000000000000000000000000101011"
+        "signature": "0000000000000000000000000000000000000000000000000000000000101011"
     },
     {
         "components": [
@@ -1043,22 +1039,22 @@
             },
             {
                 "component_data": {
+                    "parent": 15
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 15
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 19,
-        "signature": "00000000000000000000000000101011"
+        "signature": "0000000000000000000000000000000000000000000000000000000000101011"
     },
     {
         "components": [
@@ -1091,22 +1087,22 @@
             },
             {
                 "component_data": {
+                    "parent": 15
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 15
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 20,
-        "signature": "00000000000000000000000000101011"
+        "signature": "0000000000000000000000000000000000000000000000000000000000101011"
     },
     {
         "components": [
@@ -1139,22 +1135,22 @@
             },
             {
                 "component_data": {
+                    "parent": 15
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 15
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 21,
-        "signature": "00000000000000000000000000101011"
+        "signature": "0000000000000000000000000000000000000000000000000000000000101011"
     },
     {
         "components": [
@@ -1198,7 +1194,7 @@
             }
         ],
         "entity": 22,
-        "signature": "00000000000000000000000000010011"
+        "signature": "0000000000000000000000000000000000000000000000000000000000010011"
     },
     {
         "components": [
@@ -1231,22 +1227,22 @@
             },
             {
                 "component_data": {
+                    "parent": 25
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 25
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 23,
-        "signature": "00000000000000000000000000101011"
+        "signature": "0000000000000000000000000000000000000000000000000000000000101011"
     },
     {
         "components": [
@@ -1279,18 +1275,18 @@
             },
             {
                 "component_data": {
+                    "parent": 25
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 25
-                },
-                "component_name": "Parent"
             },
             {
                 "component_data": {},
@@ -1331,7 +1327,7 @@
             }
         ],
         "entity": 24,
-        "signature": "00000000000000001000110000101011"
+        "signature": "0000000000000000000000000000000000000000000000001000110000101011"
     },
     {
         "components": [
@@ -1376,7 +1372,7 @@
             }
         ],
         "entity": 25,
-        "signature": "00000000000000000000000000010011"
+        "signature": "0000000000000000000000000000000000000000000000000000000000010011"
     },
     {
         "components": [
@@ -1420,7 +1416,7 @@
             }
         ],
         "entity": 26,
-        "signature": "00000000000000000000000000010011"
+        "signature": "0000000000000000000000000000000000000000000000000000000000010011"
     },
     {
         "components": [
@@ -1453,22 +1449,22 @@
             },
             {
                 "component_data": {
+                    "parent": 26
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 26
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 27,
-        "signature": "00000000000000000000000000101011"
+        "signature": "0000000000000000000000000000000000000000000000000000000000101011"
     },
     {
         "components": [
@@ -1501,22 +1497,22 @@
             },
             {
                 "component_data": {
+                    "parent": 26
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 26
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 28,
-        "signature": "00000000000000000000000000101011"
+        "signature": "0000000000000000000000000000000000000000000000000000000000101011"
     },
     {
         "components": [
@@ -1549,22 +1545,22 @@
             },
             {
                 "component_data": {
+                    "parent": 26
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 26
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 29,
-        "signature": "00000000000000000000000000101011"
+        "signature": "0000000000000000000000000000000000000000000000000000000000101011"
     },
     {
         "components": [
@@ -1597,22 +1593,22 @@
             },
             {
                 "component_data": {
+                    "parent": 25
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "items/electric_box_2/electric_box_2.mdl",
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 25
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 30,
-        "signature": "00000000000000000000000000101011"
+        "signature": "0000000000000000000000000000000000000000000000000000000000101011"
     },
     {
         "components": [
@@ -1645,22 +1641,22 @@
             },
             {
                 "component_data": {
+                    "parent": 15
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "items/cardboard_box/cardboard_box.mdl",
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 15
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 31,
-        "signature": "00000000000000000000000000101011"
+        "signature": "0000000000000000000000000000000000000000000000000000000000101011"
     },
     {
         "components": [
@@ -1706,7 +1702,7 @@
             }
         ],
         "entity": 32,
-        "signature": "00000000000000000000000000010011"
+        "signature": "0000000000000000000000000000000000000000000000000000000000010011"
     },
     {
         "components": [
@@ -1739,22 +1735,22 @@
             },
             {
                 "component_data": {
+                    "parent": 32
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 32
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 33,
-        "signature": "00000000000000000000000000101011"
+        "signature": "0000000000000000000000000000000000000000000000000000000000101011"
     },
     {
         "components": [
@@ -1787,22 +1783,22 @@
             },
             {
                 "component_data": {
+                    "parent": 32
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 32
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 34,
-        "signature": "00000000000000000000000000101011"
+        "signature": "0000000000000000000000000000000000000000000000000000000000101011"
     },
     {
         "components": [
@@ -1835,22 +1831,22 @@
             },
             {
                 "component_data": {
+                    "parent": 32
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 32
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 35,
-        "signature": "00000000000000000000000000101011"
+        "signature": "0000000000000000000000000000000000000000000000000000000000101011"
     },
     {
         "components": [
@@ -1883,22 +1879,22 @@
             },
             {
                 "component_data": {
+                    "parent": 32
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 32
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 36,
-        "signature": "00000000000000000000000000101011"
+        "signature": "0000000000000000000000000000000000000000000000000000000000101011"
     },
     {
         "components": [
@@ -1931,22 +1927,22 @@
             },
             {
                 "component_data": {
+                    "parent": 22
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 22
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 37,
-        "signature": "00000000000000000000000000101011"
+        "signature": "0000000000000000000000000000000000000000000000000000000000101011"
     },
     {
         "components": [
@@ -1979,22 +1975,22 @@
             },
             {
                 "component_data": {
+                    "parent": 22
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 22
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 38,
-        "signature": "00000000000000000000000000101011"
+        "signature": "0000000000000000000000000000000000000000000000000000000000101011"
     },
     {
         "components": [
@@ -2027,22 +2023,22 @@
             },
             {
                 "component_data": {
+                    "parent": 22
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 22
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 39,
-        "signature": "00000000000000000000000000101011"
+        "signature": "0000000000000000000000000000000000000000000000000000000000101011"
     },
     {
         "components": [
@@ -2075,22 +2071,22 @@
             },
             {
                 "component_data": {
+                    "parent": 32
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 32
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 40,
-        "signature": "00000000000000000000000000101011"
+        "signature": "0000000000000000000000000000000000000000000000000000000000101011"
     },
     {
         "components": [
@@ -2138,7 +2134,7 @@
             }
         ],
         "entity": 41,
-        "signature": "00000000000000010000000000001010"
+        "signature": "0000000000000000000000000000000000000000000000010000000000001010"
     },
     {
         "components": [
@@ -2182,7 +2178,7 @@
             }
         ],
         "entity": 42,
-        "signature": "00000000000000000000000000010011"
+        "signature": "0000000000000000000000000000000000000000000000000000000000010011"
     },
     {
         "components": [
@@ -2230,7 +2226,7 @@
             }
         ],
         "entity": 43,
-        "signature": "00000000000000010000000000001010"
+        "signature": "0000000000000000000000000000000000000000000000010000000000001010"
     },
     {
         "components": [
@@ -2278,7 +2274,7 @@
             }
         ],
         "entity": 44,
-        "signature": "00000000000000010000000000001010"
+        "signature": "0000000000000000000000000000000000000000000000010000000000001010"
     },
     {
         "components": [
@@ -2311,22 +2307,22 @@
             },
             {
                 "component_data": {
+                    "parent": 15
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "items/electric_box/electric_box.mdl",
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 15
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 45,
-        "signature": "00000000000000000000000000101011"
+        "signature": "0000000000000000000000000000000000000000000000000000000000101011"
     },
     {
         "components": [
@@ -2370,6 +2366,12 @@
             },
             {
                 "component_data": {
+                    "layer_name": "default"
+                },
+                "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {
                     "end": {
                         "x": 0.0,
                         "y": 1.2999999523162842,
@@ -2386,12 +2388,6 @@
             },
             {
                 "component_data": {
-                    "layer_name": "default"
-                },
-                "component_name": "ColliderTag"
-            },
-            {
-                "component_data": {
                     "camera": 3,
                     "camera_pivot": 47,
                     "model": 6,
@@ -2401,7 +2397,7 @@
             }
         ],
         "entity": 46,
-        "signature": "00000000000000100100100000010011"
+        "signature": "0000000000000000000000000000000000000000000000100100100000010011"
     },
     {
         "components": [
@@ -2449,7 +2445,7 @@
             }
         ],
         "entity": 47,
-        "signature": "00000000000000000000000000011011"
+        "signature": "0000000000000000000000000000000000000000000000000000000000011011"
     },
     {
         "components": [
@@ -2513,7 +2509,7 @@
             }
         ],
         "entity": 48,
-        "signature": "00000000000000000010110000001011"
+        "signature": "0000000000000000000000000000000000000000000000000010110000001011"
     },
     {
         "components": [
@@ -2558,7 +2554,7 @@
             }
         ],
         "entity": 49,
-        "signature": "00000000000000000000000000010011"
+        "signature": "0000000000000000000000000000000000000000000000000000000000010011"
     },
     {
         "components": [
@@ -2622,7 +2618,7 @@
             }
         ],
         "entity": 50,
-        "signature": "00000000000000000010110000001011"
+        "signature": "0000000000000000000000000000000000000000000000000010110000001011"
     },
     {
         "components": [
@@ -2686,7 +2682,7 @@
             }
         ],
         "entity": 51,
-        "signature": "00000000000000000010110000001011"
+        "signature": "0000000000000000000000000000000000000000000000000010110000001011"
     },
     {
         "components": [
@@ -2762,7 +2758,7 @@
             }
         ],
         "entity": 52,
-        "signature": "00000000000000001000110000001011"
+        "signature": "0000000000000000000000000000000000000000000000001000110000001011"
     },
     {
         "components": [
@@ -2795,15 +2791,6 @@
             },
             {
                 "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "items/contener/contener.mdl",
-                    "scale_uv_with_transform": true
-                },
-                "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
                     "acceleration": {
                         "x": 0.0,
                         "y": 0.0,
@@ -2817,6 +2804,15 @@
                     }
                 },
                 "component_name": "RigidBody"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/contener/contener.mdl",
+                    "scale_uv_with_transform": true
+                },
+                "component_name": "ModelInstance"
             },
             {
                 "component_data": {},
@@ -2845,7 +2841,7 @@
             }
         ],
         "entity": 53,
-        "signature": "00000000000000000010110000100111"
+        "signature": "0000000000000000000000000000000000000000000000000010110000100111"
     },
     {
         "components": [
@@ -2914,7 +2910,7 @@
             }
         ],
         "entity": 55,
-        "signature": "00000000000001000001100000010011"
+        "signature": "0000000000000000000000000000000000000000000001000001100000010011"
     },
     {
         "components": [
@@ -2947,15 +2943,10 @@
             },
             {
                 "component_data": {
-                    "highlight_color": {
-                        "b": 0.5254902243614197,
-                        "g": 1.0,
-                        "r": 0.0
-                    },
-                    "highlighted": "twoja misja trwa",
-                    "target": 1
+                    "animation_name": "scorpion/scorpion_ANIM_GLTF/scorpion_idle.anim",
+                    "ticks_per_second": 5000.0
                 },
-                "component_name": "Highlight"
+                "component_name": "AnimationInstance"
             },
             {
                 "component_data": {
@@ -2973,14 +2964,19 @@
             },
             {
                 "component_data": {
-                    "animation_name": "scorpion/scorpion_ANIM_GLTF/scorpion_idle.anim",
-                    "ticks_per_second": 5000.0
+                    "highlight_color": {
+                        "b": 0.5254902243614197,
+                        "g": 1.0,
+                        "r": 0.0
+                    },
+                    "highlighted": "twoja misja trwa",
+                    "target": 1
                 },
-                "component_name": "AnimationInstance"
+                "component_name": "Highlight"
             }
         ],
         "entity": 56,
-        "signature": "01000000000000000000000011001011"
+        "signature": "0000000000000000000000000000000001000000000000000000000011001011"
     },
     {
         "components": [
@@ -3028,7 +3024,7 @@
             }
         ],
         "entity": 57,
-        "signature": "00000000000000000000000000011011"
+        "signature": "0000000000000000000000000000000000000000000000000000000000011011"
     },
     {
         "components": [
@@ -3067,7 +3063,7 @@
             }
         ],
         "entity": 58,
-        "signature": "00000000000000000000000000001011"
+        "signature": "0000000000000000000000000000000000000000000000000000000000001011"
     },
     {
         "components": [
@@ -3107,7 +3103,7 @@
             }
         ],
         "entity": 54,
-        "signature": "00000000000000000000001000000011"
+        "signature": "0000000000000000000000000000000000000000000000000000001000000011"
     },
     {
         "components": [
@@ -3156,7 +3152,7 @@
             }
         ],
         "entity": 59,
-        "signature": "00000000001000000000000000100011"
+        "signature": "0000000000000000000000000000000000000000001000000000000000100011"
     },
     {
         "components": [
@@ -3189,24 +3185,22 @@
             },
             {
                 "component_data": {
+                    "tag_position": {
+                        "x": 0.0,
+                        "y": 0.5,
+                        "z": 0.0
+                    }
+                },
+                "component_name": "Taggable"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "items/electric_box/electric_box.mdl",
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "highlight_color": {
-                        "b": 0.0,
-                        "g": 1.0,
-                        "r": 0.0
-                    },
-                    "highlighted": "twoja misja trwa",
-                    "target": 3
-                },
-                "component_name": "Highlight"
             },
             {
                 "component_data": {
@@ -3231,26 +3225,28 @@
             },
             {
                 "component_data": {
+                    "highlight_color": {
+                        "b": 0.0,
+                        "g": 1.0,
+                        "r": 0.0
+                    },
+                    "highlighted": "twoja misja trwa",
+                    "target": 3
+                },
+                "component_name": "Highlight"
+            },
+            {
+                "component_data": {
                     "can_interact": true,
                     "interaction": 2,
                     "interaction_target": 61,
                     "type": 2
                 },
                 "component_name": "Interactable"
-            },
-            {
-                "component_data": {
-                    "tag_position": {
-                        "x": 0.0,
-                        "y": 0.5,
-                        "z": 0.0
-                    }
-                },
-                "component_name": "Taggable"
             }
         ],
         "entity": 60,
-        "signature": "01010000000100000010100000100011"
+        "signature": "0000000000000000000000000000000001010000000100000010100000100011"
     },
     {
         "components": [
@@ -3333,7 +3329,7 @@
             }
         ],
         "entity": 61,
-        "signature": "00000000010000000010110000100011"
+        "signature": "0000000000000000000000000000000000000000010000000010110000100011"
     },
     {
         "components": [
@@ -3366,24 +3362,22 @@
             },
             {
                 "component_data": {
+                    "tag_position": {
+                        "x": 0.0,
+                        "y": 0.5,
+                        "z": -0.10000000149011612
+                    }
+                },
+                "component_name": "Taggable"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "items/electric_box/electric_box.mdl",
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "highlight_color": {
-                        "b": 0.0,
-                        "g": 1.0,
-                        "r": 0.0
-                    },
-                    "highlighted": "twoja misja trwa",
-                    "target": 3
-                },
-                "component_name": "Highlight"
             },
             {
                 "component_data": {
@@ -3408,26 +3402,28 @@
             },
             {
                 "component_data": {
+                    "highlight_color": {
+                        "b": 0.0,
+                        "g": 1.0,
+                        "r": 0.0
+                    },
+                    "highlighted": "twoja misja trwa",
+                    "target": 3
+                },
+                "component_name": "Highlight"
+            },
+            {
+                "component_data": {
                     "can_interact": true,
                     "interaction": 2,
                     "interaction_target": 63,
                     "type": 2
                 },
                 "component_name": "Interactable"
-            },
-            {
-                "component_data": {
-                    "tag_position": {
-                        "x": 0.0,
-                        "y": 0.5,
-                        "z": -0.10000000149011612
-                    }
-                },
-                "component_name": "Taggable"
             }
         ],
         "entity": 62,
-        "signature": "01010000000100000010100000100011"
+        "signature": "0000000000000000000000000000000001010000000100000010100000100011"
     },
     {
         "components": [
@@ -3510,7 +3506,7 @@
             }
         ],
         "entity": 63,
-        "signature": "00000000010000000010110000100011"
+        "signature": "0000000000000000000000000000000000000000010000000010110000100011"
     },
     {
         "components": [
@@ -3559,7 +3555,7 @@
             }
         ],
         "entity": 64,
-        "signature": "00000000001000000000000000100011"
+        "signature": "0000000000000000000000000000000000000000001000000000000000100011"
     },
     {
         "components": [
@@ -3626,7 +3622,7 @@
             }
         ],
         "entity": 65,
-        "signature": "00000000000000000010110000100011"
+        "signature": "0000000000000000000000000000000000000000000000000010110000100011"
     },
     {
         "components": [
@@ -3659,24 +3655,22 @@
             },
             {
                 "component_data": {
+                    "tag_position": {
+                        "x": 0.0,
+                        "y": 0.699999988079071,
+                        "z": -0.11999999731779099
+                    }
+                },
+                "component_name": "Taggable"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "items/electric_box_2/electric_box_2.mdl",
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "highlight_color": {
-                        "b": 0.0,
-                        "g": 0.0,
-                        "r": 1.0
-                    },
-                    "highlighted": "twoja misja trwa",
-                    "target": 3
-                },
-                "component_name": "Highlight"
             },
             {
                 "component_data": {
@@ -3698,6 +3692,18 @@
                     }
                 },
                 "component_name": "ColliderAABB"
+            },
+            {
+                "component_data": {
+                    "highlight_color": {
+                        "b": 0.0,
+                        "g": 0.0,
+                        "r": 1.0
+                    },
+                    "highlighted": "twoja misja trwa",
+                    "target": 3
+                },
+                "component_name": "Highlight"
             },
             {
                 "component_data": {
@@ -3735,7 +3741,7 @@
                     "size_begin": 4.5,
                     "size_end": 7.800000190734863,
                     "size_transition": 0,
-                    "texture_name": "resources\\assets_export\\smoke.ktx2",
+                    "texture_name": "smoke.ktx2",
                     "velocity_begin": [
                         0.0,
                         0.10000000149011612,
@@ -3766,20 +3772,10 @@
                     "explosion_radius": 4.0
                 },
                 "component_name": "ExplodingBox"
-            },
-            {
-                "component_data": {
-                    "tag_position": {
-                        "x": 0.0,
-                        "y": 0.699999988079071,
-                        "z": -0.11999999731779099
-                    }
-                },
-                "component_name": "Taggable"
             }
         ],
         "entity": 66,
-        "signature": "11010000100100000010100000100011"
+        "signature": "0000000000000000000000000000000011010000100100000010100000100011"
     },
     {
         "components": [
@@ -3812,22 +3808,22 @@
             },
             {
                 "component_data": {
+                    "parent": 15
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "items/cardboard_box/cardboard_box.mdl",
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 15
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 67,
-        "signature": "00000000000000000000000000101011"
+        "signature": "0000000000000000000000000000000000000000000000000000000000101011"
     },
     {
         "components": [
@@ -3860,6 +3856,22 @@
             },
             {
                 "component_data": {
+                    "parent": 100
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "tag_position": {
+                        "x": 0.0,
+                        "y": 1.0,
+                        "z": 0.0
+                    }
+                },
+                "component_name": "Taggable"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "items/camera/camera_1.mdl",
@@ -3869,21 +3881,9 @@
             },
             {
                 "component_data": {
-                    "highlight_color": {
-                        "b": 1.0,
-                        "g": 1.0,
-                        "r": 1.0
-                    },
-                    "highlighted": "twoja misja trwa",
-                    "target": 3
+                    "detection_level": 0.0
                 },
-                "component_name": "Highlight"
-            },
-            {
-                "component_data": {
-                    "parent": 100
-                },
-                "component_name": "Parent"
+                "component_name": "DetectionCamera"
             },
             {
                 "component_data": {
@@ -3908,6 +3908,18 @@
             },
             {
                 "component_data": {
+                    "highlight_color": {
+                        "b": 1.0,
+                        "g": 1.0,
+                        "r": 1.0
+                    },
+                    "highlighted": "twoja misja trwa",
+                    "target": 3
+                },
+                "component_name": "Highlight"
+            },
+            {
+                "component_data": {
                     "can_interact": true,
                     "interaction": 1,
                     "interaction_target": 68,
@@ -3917,17 +3929,30 @@
             },
             {
                 "component_data": {
-                    "tag_position": {
+                    "billboard_z_offset": -0.20000000298023224,
+                    "color": {
+                        "a": 0.6666666865348816,
+                        "b": 0.0,
+                        "g": 0.0,
+                        "r": 1.0
+                    },
+                    "position_offset": {
                         "x": 0.0,
-                        "y": 1.0,
+                        "y": -0.20000000298023224,
                         "z": 0.0
-                    }
+                    },
+                    "scale": {
+                        "x": 0.30000001192092896,
+                        "y": 0.30000001192092896
+                    },
+                    "texture": "dot.ktx2",
+                    "use_camera_right": false
                 },
-                "component_name": "Taggable"
+                "component_name": "Billboard"
             }
         ],
         "entity": 68,
-        "signature": "01010000000100000010100000101011"
+        "signature": "0000000000000000000000000000000101010010000100000010100000101011"
     },
     {
         "components": [
@@ -3998,7 +4023,7 @@
             }
         ],
         "entity": 69,
-        "signature": "00000010000000010000000000000011"
+        "signature": "0000000000000000000000000000000000000010000000010000000000000011"
     },
     {
         "components": [
@@ -4046,7 +4071,7 @@
             }
         ],
         "entity": 70,
-        "signature": "00000000000000000000000000011011"
+        "signature": "0000000000000000000000000000000000000000000000000000000000011011"
     },
     {
         "components": [
@@ -4118,7 +4143,7 @@
             }
         ],
         "entity": 71,
-        "signature": "00000000000000001000100000001011"
+        "signature": "0000000000000000000000000000000000000000000000001000100000001011"
     },
     {
         "components": [
@@ -4183,7 +4208,7 @@
             }
         ],
         "entity": 73,
-        "signature": "00001000000000000000000000010011"
+        "signature": "0000000000000000000000000000000000001000000000000000000000010011"
     },
     {
         "components": [
@@ -4229,7 +4254,7 @@
             }
         ],
         "entity": 74,
-        "signature": "00000100000000000000000000001011"
+        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
     },
     {
         "components": [
@@ -4275,7 +4300,7 @@
             }
         ],
         "entity": 75,
-        "signature": "00000100000000000000000000001011"
+        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
     },
     {
         "components": [
@@ -4321,7 +4346,7 @@
             }
         ],
         "entity": 76,
-        "signature": "00000100000000000000000000001011"
+        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
     },
     {
         "components": [
@@ -4367,7 +4392,7 @@
             }
         ],
         "entity": 77,
-        "signature": "00000100000000000000000000001011"
+        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
     },
     {
         "components": [
@@ -4413,7 +4438,7 @@
             }
         ],
         "entity": 78,
-        "signature": "00000100000000000000000000001011"
+        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
     },
     {
         "components": [
@@ -4459,7 +4484,7 @@
             }
         ],
         "entity": 79,
-        "signature": "00000100000000000000000000001011"
+        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
     },
     {
         "components": [
@@ -4505,7 +4530,7 @@
             }
         ],
         "entity": 80,
-        "signature": "00000100000000000000000000001011"
+        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
     },
     {
         "components": [
@@ -4551,7 +4576,7 @@
             }
         ],
         "entity": 81,
-        "signature": "00000100000000000000000000001011"
+        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
     },
     {
         "components": [
@@ -4597,7 +4622,7 @@
             }
         ],
         "entity": 82,
-        "signature": "00000100000000000000000000001011"
+        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
     },
     {
         "components": [
@@ -4643,7 +4668,7 @@
             }
         ],
         "entity": 83,
-        "signature": "00000100000000000000000000001011"
+        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
     },
     {
         "components": [
@@ -4689,7 +4714,7 @@
             }
         ],
         "entity": 84,
-        "signature": "00000100000000000000000000001011"
+        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
     },
     {
         "components": [
@@ -4735,7 +4760,7 @@
             }
         ],
         "entity": 85,
-        "signature": "00000100000000000000000000001011"
+        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
     },
     {
         "components": [
@@ -4781,7 +4806,7 @@
             }
         ],
         "entity": 86,
-        "signature": "00000100000000000000000000001011"
+        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
     },
     {
         "components": [
@@ -4827,7 +4852,7 @@
             }
         ],
         "entity": 87,
-        "signature": "00000100000000000000000000001011"
+        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
     },
     {
         "components": [
@@ -4873,7 +4898,7 @@
             }
         ],
         "entity": 88,
-        "signature": "00000100000000000000000000001011"
+        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
     },
     {
         "components": [
@@ -4919,7 +4944,7 @@
             }
         ],
         "entity": 89,
-        "signature": "00000100000000000000000000001011"
+        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
     },
     {
         "components": [
@@ -4965,7 +4990,7 @@
             }
         ],
         "entity": 90,
-        "signature": "00000100000000000000000000001011"
+        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
     },
     {
         "components": [
@@ -5011,7 +5036,7 @@
             }
         ],
         "entity": 91,
-        "signature": "00000100000000000000000000001011"
+        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
     },
     {
         "components": [
@@ -5057,7 +5082,7 @@
             }
         ],
         "entity": 92,
-        "signature": "00000100000000000000000000001011"
+        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
     },
     {
         "components": [
@@ -5103,7 +5128,7 @@
             }
         ],
         "entity": 93,
-        "signature": "00000100000000000000000000001011"
+        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
     },
     {
         "components": [
@@ -5149,7 +5174,7 @@
             }
         ],
         "entity": 94,
-        "signature": "00000100000000000000000000001011"
+        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
     },
     {
         "components": [
@@ -5195,7 +5220,7 @@
             }
         ],
         "entity": 95,
-        "signature": "00000100000000000000000000001011"
+        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
     },
     {
         "components": [
@@ -5241,7 +5266,7 @@
             }
         ],
         "entity": 96,
-        "signature": "00000100000000000000000000001011"
+        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
     },
     {
         "components": [
@@ -5287,7 +5312,7 @@
             }
         ],
         "entity": 97,
-        "signature": "00000100000000000000000000001011"
+        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
     },
     {
         "components": [
@@ -5333,7 +5358,7 @@
             }
         ],
         "entity": 98,
-        "signature": "00000100000000000000000000001011"
+        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
     },
     {
         "components": [
@@ -5379,7 +5404,7 @@
             }
         ],
         "entity": 99,
-        "signature": "00000100000000000000000000001011"
+        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
     },
     {
         "components": [
@@ -5430,7 +5455,7 @@
             }
         ],
         "entity": 72,
-        "signature": "00000000000000000000000000110011"
+        "signature": "0000000000000000000000000000000000000000000000000000000000110011"
     },
     {
         "components": [
@@ -5463,18 +5488,18 @@
             },
             {
                 "component_data": {
+                    "parent": 72
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "items/camera/camera_2.mdl",
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 72
-                },
-                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -5487,6 +5512,6 @@
             }
         ],
         "entity": 100,
-        "signature": "00000000000000000000000000111011"
+        "signature": "0000000000000000000000000000000000000000000000000000000000111011"
     }
 ]

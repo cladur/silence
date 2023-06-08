@@ -100,8 +100,15 @@ bool HackerSystem::shoot_raycast(
 }
 
 bool HackerSystem::jump_to_camera(World &world, HackerData &hacker_data, Entity camera_entity) {
+	auto &detection_camera = world.get_component<DetectionCamera>(camera_entity);
+	auto &camera_billboard = world.get_component<Billboard>(camera_entity);
 	auto &camera_tf = world.get_component<Transform>(hacker_data.camera);
 	auto &new_camera_tf = world.get_component<Transform>(camera_entity);
+
+	detection_camera.is_active = false;
+	detection_camera.detection_level = 0.0f;
+	detection_camera.detection_target = DetectionTarget::NONE;
+	camera_billboard.color = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
 
 	camera_tf.set_position(new_camera_tf.get_global_position() + -(new_camera_tf.get_forward()));
 	camera_tf.set_orientation(new_camera_tf.get_global_orientation());
@@ -117,6 +124,12 @@ void HackerSystem::go_back_to_scorpion(World &world, HackerData &hacker_data) {
 	if (!is_on_camera) {
 		return;
 	}
+
+	auto &detection_camera = world.get_component<DetectionCamera>(current_camera_entity);
+	auto &camera_billboard = world.get_component<Billboard>(current_camera_entity);
+
+	detection_camera.is_active = true;
+	camera_billboard.color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
 
 	world.get_component<Transform>(current_camera_entity).set_orientation(starting_camera_orientation);
 	starting_camera_orientation = glm::quat(1, 0, 0, 0);

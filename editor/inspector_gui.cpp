@@ -3,6 +3,7 @@
 #include "components/collider_aabb.h"
 #include "components/collider_sphere.h"
 #include "components/collider_tag_component.h"
+#include "components/detection_camera_component.h"
 #include "components/enemy_data_component.h"
 #include "components/exploding_box_component.h"
 #include "components/fmod_listener_component.h"
@@ -76,6 +77,7 @@ void Inspector::show_components() {
 	SHOW_COMPONENT(FMODEmitter, show_fmod_emitter);
 	SHOW_COMPONENT(Highlight, show_highlight);
 	SHOW_COMPONENT(ParticleEmitter, show_particle_emitter);
+	SHOW_COMPONENT(DetectionCamera, show_detection_camera);
 
 	for (int i = 0; i < remove_component_queue.size(); i++) {
 		auto [entity, component_to_remove] = remove_component_queue.front();
@@ -1159,7 +1161,7 @@ void Inspector::show_billboard() {
 
 		if (ImGui::BeginDragDropTarget()) {
 			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_TEXTURE_PATH")) {
-				const std::string payload_n = *(const std::string *)payload->Data;
+				std::string payload_n = *(std::string *)payload->Data;
 				resource_manager.load_texture(payload_n.c_str());
 				billboard.texture = resource_manager.get_texture_handle(payload_n);
 			}
@@ -1428,6 +1430,13 @@ void Inspector::show_particle_emitter() {
 	}
 }
 
+void Inspector::show_detection_camera() {
+	auto &data = world->get_component<DetectionCamera>(selected_entity);
+	if (ImGui::CollapsingHeader("DetectionCamera", tree_flags)) {
+		remove_component_popup<DetectionCamera>();
+	}
+}
+
 bool Inspector::show_vec2(
 		const char *label, glm::vec2 &vec2, float speed, float reset_value, float min_value, float max_value) {
 	bool changed = false;
@@ -1605,6 +1614,7 @@ void Inspector::show_add_component() {
 			SHOW_ADD_COMPONENT(FMODEmitter);
 			SHOW_ADD_COMPONENT(Highlight);
 			SHOW_ADD_COMPONENT(ParticleEmitter);
+			SHOW_ADD_COMPONENT(DetectionCamera);
 
 			ImGui::EndPopup();
 		}

@@ -9,12 +9,6 @@
 #include "ai/state_machine/states/enemy/enemy_patrolling.h"
 #include "ai/state_machine/states/enemy/enemy_stationary_patrolling.h"
 
-enum class DetectionTarget {
-	AGENT,
-	HACKER,
-	NONE
-};
-
 struct EnemyData {
 	StateMachine state_machine;
 	EnemyPatrolling patrolling_state;
