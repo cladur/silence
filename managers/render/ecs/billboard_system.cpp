@@ -4,7 +4,6 @@
 #include <render/transparent_elements/ui_manager.h>
 
 void BillboardSystem::startup(World &world) {
-
 	Signature whitelist;
 
 	whitelist.set(world.get_component_type<Billboard>());
@@ -30,7 +29,7 @@ void BillboardSystem::update(World &world, float dt) {
 			bill.is_billboard = true;
 			bill.is_screen_space = false;
 			bill.display = true;
-			bill.position = transform.position + billboard.position_offset;
+			bill.position = transform.get_global_position() + billboard.position_offset;
 			bill.size = billboard.scale;
 			bill.texture = billboard.texture;
 			bill.color = billboard.color;
@@ -43,7 +42,7 @@ void BillboardSystem::update(World &world, float dt) {
 			bill.is_billboard = true;
 			bill.is_screen_space = false;
 			bill.display = true;
-			bill.position = transform.position + billboard.position_offset;
+			bill.position = transform.get_global_position() + billboard.position_offset;
 			bill.size = billboard.scale;
 			bill.texture = billboard.texture;
 			bill.color = billboard.color;

@@ -1159,7 +1159,7 @@ void Inspector::show_billboard() {
 
 		if (ImGui::BeginDragDropTarget()) {
 			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_TEXTURE_PATH")) {
-				const std::string payload_n = *(const std::string *)payload->Data;
+				std::string payload_n = *(std::string *)payload->Data;
 				resource_manager.load_texture(payload_n.c_str());
 				billboard.texture = resource_manager.get_texture_handle(payload_n);
 			}
