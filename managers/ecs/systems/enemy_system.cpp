@@ -96,16 +96,6 @@ void EnemySystem::update(World &world, float dt) {
 			tag.display = false;
 			ui.add_as_root(std::to_string(entity) + "_detection", "tag");
 
-			auto &debug_text = ui.add_ui_text(std::to_string(entity) + "_detection", "enemy_debug_text");
-			debug_text.position = glm::vec3(0.0f, 2.0f, 0.0f);
-			debug_text.size = glm::vec2(0.5f);
-			debug_text.is_billboard = true;
-			debug_text.is_screen_space = false;
-			debug_text.color = glm::vec4(1.0f);
-			debug_text.display = true;
-			debug_text.text = "NONE";
-			ui.add_as_root(std::to_string(entity) + "_detection", "enemy_debug_text");
-
 			ed.first_frame = false;
 		}
 
