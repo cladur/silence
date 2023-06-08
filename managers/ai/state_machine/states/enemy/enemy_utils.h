@@ -276,8 +276,12 @@ inline void handle_detection_camera(World *world, uint32_t enemy_entity, Transfo
 
 	// HACKER CONE DETECTION LOGIC
 	if (glm::distance(global_position, hacker_pos) < cone_range) {
-		auto angle = glm::acos(glm::dot(hacker_dir, forward));
-		if (angle < glm::radians(cone_angle) / 2.0f) {
+		auto angle = glm::acos(glm::dot(hacker_dir, -forward));
+		auto up_dot = glm::dot(hacker_dir, glm::vec3(0.0f, 1.0f, 0.0f));
+
+		bool in_horizontal_cone = angle < glm::radians(cone_angle) / 2.0f;
+		bool in_vertical_cone = abs(up_dot) > cos(glm::radians(vertical_cone_angle) / 2.0f);
+		if (in_horizontal_cone && in_vertical_cone) {
 			Ray ray{};
 			ray.origin = enemy_look_origin + hacker_dir;
 			ray.direction = hacker_dir;
