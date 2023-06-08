@@ -2,21 +2,36 @@
 #define SILENCE_DETECTION_CAMERA_COMPONENT_H
 
 struct DetectionCamera {
-	std::string bone_name = "";
-	Entity holder = -1;
+	float detection_level = 0.0f;
+	DetectionTarget detection_target = DetectionTarget::NONE;
+	bool first_frame = true;
+	bool is_active = true;
+
+	DetectionCamera() = default;
 
 	void serialize_json(nlohmann::json &serialized_scene) {
 		nlohmann::json::object_t serialized_component;
-		serialized_component["bone_name"] = bone_name;
-		serialized_component["holder"] = holder;
 		serialized_scene.push_back(nlohmann::json::object());
+
+		serialized_component["detection_level"] = detection_level;
+		serialized_component["is_active"] = is_active;
+
 		serialized_scene.back()["component_data"] = serialized_component;
-		serialized_scene.back()["component_name"] = "Attachment";
+		serialized_scene.back()["component_name"] = "DetectionCamera";
 	}
 
 	void deserialize_json(nlohmann::json &serialized_component) {
-		bone_name = serialized_component["bone_name"];
-		holder = serialized_component["holder"];
+		if (serialized_component.contains("detection_level")) {
+			detection_level = serialized_component["detection_level"];
+		} else {
+			detection_level = 0.0f;
+		}
+
+		if (serialized_component.contains("is_active")) {
+			is_active = serialized_component["is_active"];
+		} else {
+			is_active = true;
+		}
 	}
 };
 #endif //SILENCE_DETECTION_CAMERA_COMPONENT_H

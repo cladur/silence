@@ -2,6 +2,7 @@
 #include "animation/ecs/animation_instance.h"
 #include "components/exploding_box_component.h"
 #include "display/display_manager.h"
+#include "ecs/systems/detection_camera_system.h"
 #include "ecs/systems/interactable_system.h"
 #include "ecs/systems/platform_system.h"
 #include "ecs/world.h"
@@ -80,6 +81,7 @@ Scene::Scene() {
 		world.register_component<FMODEmitter>();
 		world.register_component<Highlight>();
 		world.register_component<ParticleEmitter>();
+		world.register_component<DetectionCamera>();
 	}
 	// Components
 
@@ -132,6 +134,7 @@ void Scene::register_game_systems() {
 	world.register_system<PlatformSystem>();
 	world.register_system<FMODEmitterSystem>();
 	world.register_system<HighlightSystem>(UpdateOrder::PrePreAnimation);
+	world.register_system<DetectionCameraSystem>();
 }
 
 void Scene::update(float dt) {
