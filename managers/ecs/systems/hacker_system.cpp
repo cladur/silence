@@ -43,7 +43,6 @@ bool HackerSystem::shoot_raycast(
 	ray.origin = transform.get_global_position();
 	ray.direction = direction;
 	ray.layer_name = "hacker";
-	ray.ignore_layers.emplace_back("camera");
 	ray.ignore_list.emplace_back(current_camera_entity);
 	glm::vec3 end = ray.origin + direction * 10.0f;
 	HitInfo info;
@@ -250,11 +249,12 @@ void HackerSystem::update(World &world, float dt) {
 			tag_ray.origin = camera_tf.get_global_position();
 			tag_ray.direction = -camera_tf.get_global_forward();
 			tag_ray.ignore_list.emplace_back(entity);
-			tag_ray.ignore_layers.emplace_back("camera");
+			tag_ray.layer_name = "hacker";
+			//			tag_ray.ignore_layers.emplace_back("camera");
 
 			HitInfo info = {};
 			//dd.draw_arrow(tag_ray.origin, end, { 1.0f, 0.0f, 0.0f });
-			if (CollisionSystem::ray_cast(world, tag_ray, info)) {
+			if (CollisionSystem::ray_cast_layer(world, tag_ray, info)) {
 				auto &name = world.get_component<Name>(info.entity);
 				if (world.has_component<Taggable>(info.entity)) {
 					auto &taggable = world.get_component<Taggable>(info.entity);

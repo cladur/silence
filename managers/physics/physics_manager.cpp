@@ -938,6 +938,11 @@ bool PhysicsManager::intersect_ray_sphere(const Ray &ray, const ColliderSphere &
 	if (distance < 0.0f) {
 		distance = 0.0f;
 	}
+
+	if (distance > ray.length) {
+		return false;
+	}
+
 	result.distance = distance;
 	result.point = ray.origin + distance * ray.direction;
 	result.normal = glm::normalize(result.point - sphere.center);
@@ -946,7 +951,7 @@ bool PhysicsManager::intersect_ray_sphere(const Ray &ray, const ColliderSphere &
 
 bool PhysicsManager::intersect_ray_aabb(const Ray &ray, const ColliderAABB &aabb, HitInfo &result) {
 	float nearest_distance = 0.0f;
-	float ray_range = std::numeric_limits<float>::max();
+	float ray_range = ray.length;
 
 	const glm::vec3 &min = aabb.min();
 	const glm::vec3 &max = aabb.max();
@@ -1006,7 +1011,7 @@ bool PhysicsManager::intersect_ray_obb(const Ray &ray, const ColliderOBB &obb, H
 	glm::vec3 hit_normal(0.0f);
 
 	float nearest_distance = 0.0f;
-	float ray_range = std::numeric_limits<float>::max();
+	float ray_range = ray.length;
 
 	for (int i = 0; i < 3; i++) {
 		if (glm::abs(local_ray.direction[i]) <= cvar_epsilon.get()) {
@@ -1052,114 +1057,57 @@ bool PhysicsManager::intersect_ray_obb(const Ray &ray, const ColliderOBB &obb, H
 }
 
 bool PhysicsManager::intersect_ray_capsule(const Ray &ray, const ColliderCapsule &capsule, HitInfo &result) {
-	Segment segment;
-	segment.start = ray.origin;
-	// this is a secret value, bcs it's almost infinity, to imitate ray
-	segment.end = ray.origin + ray.direction * 694202137.8f;
-	return intersect_segment_capsule(segment, capsule, result);
-}
-
-bool PhysicsManager::intersect_segment_capsule(
-		const Segment &segment, const ColliderCapsule &capsule, HitInfo &result) {
-	Ray ray;
-	ray.origin = segment.start;
-	ray.direction = segment.end - segment.start;
-	if (glm::length2(ray.direction) > 0.0f) {
-		ray.direction = glm::normalize(ray.direction);
-	}
-
-	ColliderSphere start{};
-	start.center = capsule.start;
-	start.radius = capsule.radius;
-	if (intersect_ray_sphere(ray, start, result)) {
-		return true;
-	}
-
-	ColliderSphere end{};
-	end.center = capsule.end;
-	end.radius = capsule.radius;
-	if (intersect_ray_sphere(ray, end, result)) {
-		return true;
-	}
-
-	float distance;
-	glm::vec3 d = capsule.end - capsule.start, m = ray.origin - capsule.start, n = segment.end - segment.start;
+	float slide;
+	glm::vec3 d = capsule.end - capsule.start, m = ray.origin - capsule.start, n = ray.direction * ray.length;
 	float md = glm::dot(m, d);
 	float nd = glm::dot(n, d);
-	float dd = glm::length2(d);
-	// Test if segment fully outside either endcap of cylinder
-	if (md < 0.0f && md + nd < 0.0f) {
-		return false; // Segment outside ’p’ side of cylinder
-	}
-	if (md > dd && md + nd > dd) {
-		return false; // Segment outside ’q’ side of cylinder
-	}
-	float nn = glm::length2(n);
+	float dd = glm::dot(d, d);
+	float nn = glm::dot(n, n);
 	float mn = glm::dot(m, n);
 	float a = dd * nn - nd * nd;
 	float k = glm::length2(m) - capsule.radius * capsule.radius;
 	float c = dd * k - md * md;
-	if (glm::abs(a) <= cvar_epsilon.get()) {
-		// Segment runs parallel to cylinder axis
-		if (c > 0.0f) {
-			return false; // ’a’ and thus the segment lie outside cylinder
+
+	// Ray is parallel to capsule
+	if (md < 0.0f) {
+		ColliderSphere start{};
+		start.center = capsule.start;
+		start.radius = capsule.radius;
+		if (intersect_ray_sphere(ray, start, result)) {
+			return true;
 		}
-		// Now known that segment intersects cylinder; figure out how it intersects
-		if (md < 0.0f) {
-			distance = -mn / nn; // Intersect segment against ’p’ endcap
-		} else if (md > dd) {
-			distance = (nd - mn) / nn; // Intersect segment against ’q’ endcap
-		} else {
-			distance = 0.0f; // ’a’ lies inside cylinder
+	} else if (md > dd) {
+		ColliderSphere end{};
+		end.center = capsule.end;
+		end.radius = capsule.radius;
+		if (intersect_ray_sphere(ray, end, result)) {
+			return true;
 		}
-		result.distance = distance;
-		result.normal = -ray.direction;
-		result.point = ray.origin + ray.direction * distance;
-		return true;
 	}
+
 	float b = dd * mn - nd * md;
-	float discr = b * b - a * c;
-	if (discr < 0.0f) {
+	float discriminant = b * b - a * c;
+	if (discriminant < 0.0f) {
 		return false; // No real roots; no intersection
 	}
-	distance = (-b - glm::sqrt(discr)) / a;
-	if (distance < 0.0f || distance > 1.0f) {
+	slide = (-b - glm::sqrt(discriminant)) / a;
+	if (slide < 0.0f || slide > 1.0f) {
 		return false; // Intersection lies outside segment
-	} else if (md + distance * nd < 0.0f) {
-		// Intersection outside cylinder on ’p’ side
-		if (nd <= 0.0f) {
-			return false; // Segment pointing away from endcap
-		}
-		distance = -md / nd;
-		// Keep intersection if Dot(S(t) - p, S(t) - p) <= r∧2
-		if (k + 2 * distance * (mn + distance * nn) <= 0.0f) {
-			result.distance = distance;
-			result.normal = -ray.direction;
-			result.point = ray.origin + ray.direction * distance;
-			return true;
-		} else {
-			return false;
-		}
-	} else if (md + distance * nd > dd) {
-		// Intersection outside cylinder on ’q’ side
-		if (nd >= 0.0f) {
-			return false; // Segment pointing away from endcap
-		}
-		distance = (dd - md) / nd;
-		// Keep intersection if Dot(S(t) - q, S(t) - q) <= r∧2
-		if (k + dd - 2 * md + distance * (2 * (mn - nd) + distance * nn) <= 0.0f) {
-			result.distance = distance;
-			result.normal = -ray.direction;
-			result.point = ray.origin + ray.direction * distance;
-			return true;
-		} else {
-			return false;
-		}
+	} else if (md + slide * nd < 0.0f) {
+		ColliderSphere start{};
+		start.center = capsule.start;
+		start.radius = capsule.radius;
+		return intersect_ray_sphere(ray, start, result);
+	} else if (md + slide * nd > dd) {
+		ColliderSphere end{};
+		end.center = capsule.end;
+		end.radius = capsule.radius;
+		return intersect_ray_sphere(ray, end, result);
 	}
 	// Segment intersects cylinder between the endcaps; t is correct
-	result.distance = distance;
-	result.normal = -ray.direction;
-	result.point = ray.origin + ray.direction * distance;
+	result.distance = slide * ray.length;
+	result.normal = -ray.direction; // TODO: this normal is incorrect
+	result.point = ray.origin + ray.direction * result.distance;
 	return true;
 }
 

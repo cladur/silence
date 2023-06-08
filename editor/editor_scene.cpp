@@ -54,6 +54,7 @@ void EditorScene::update(float dt) {
 			Ray ray{};
 			ray.origin = get_render_scene().debug_camera.get_position();
 			ray.direction = glm::normalize(get_render_scene().debug_camera.get_front());
+			ray.length = 10.0f;
 			glm::vec3 end = ray.origin + ray.direction * 1000.0f;
 			get_render_scene().debug_draw.draw_arrow(ray.origin, end);
 			HitInfo info;

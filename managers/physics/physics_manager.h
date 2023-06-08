@@ -13,15 +13,10 @@ struct ColliderTag;
 struct Ray {
 	glm::vec3 origin;
 	glm::vec3 direction;
-	float length = std::numeric_limits<float>::max();
+	// Almost infinite, FLT_MAX not working with capsule
+	float length = 694202137.8f;
 	std::string layer_name = "default";
-	std::vector<std::string> ignore_layers;
 	std::vector<Entity> ignore_list;
-};
-
-struct Segment {
-	glm::vec3 start;
-	glm::vec3 end;
 };
 
 struct HitInfo {
@@ -135,9 +130,6 @@ public:
 	bool intersect_ray_obb(const Ray &ray, const ColliderOBB &obb, HitInfo &result);
 	// returns true, point and normal if ray intersect with capsule
 	bool intersect_ray_capsule(const Ray &ray, const ColliderCapsule &capsule, HitInfo &result);
-
-	// returns true, point and normal if segment intersect with capsule
-	bool intersect_segment_capsule(const Segment &segment, const ColliderCapsule &capsule, HitInfo &result);
 
 	void add_collision_layer(const std::string &layer_name);
 	void remove_collision_layer(const std::string &layer_name);
