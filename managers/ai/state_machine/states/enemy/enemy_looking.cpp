@@ -34,7 +34,6 @@ void EnemyLooking::update(World *world, uint32_t entity_id, float dt) {
 	auto &dd = world->get_parent_scene()->get_render_scene().debug_draw;
 	auto &ep = world->get_component<EnemyPath>(entity_id);
 
-	// some necessary variables
 	auto agent_pos = GameplayManager::get().get_agent_position(world->get_parent_scene());
 	auto agent_pos_no_y = glm::vec3(agent_pos.x, 0.0f, agent_pos.z);
 
@@ -46,7 +45,6 @@ void EnemyLooking::update(World *world, uint32_t entity_id, float dt) {
 	auto current_no_y = glm::vec3(transform.position.x, 0.0f, transform.position.z);
 	glm::vec3 target_look = enemy_data.detection_target == DetectionTarget::AGENT ? agent_pos_no_y : hacker_pos_no_y;
 	glm::vec3 direction = glm::normalize(target_look - current_no_y);
-
 
 	if (first_frame) {
 		adjusted_forward = forward;
@@ -66,7 +64,7 @@ void EnemyLooking::update(World *world, uint32_t entity_id, float dt) {
 	}
 
 	if (glm::distance(adjusted_forward, end_forward) > 0.06 && !forward_block) {
-		adjusted_forward = glm::mix(adjusted_forward, end_forward, dt);
+		adjusted_forward = glm::normalize(glm::mix(adjusted_forward, end_forward, dt));
 	} else {
 		forward_block = true;
 		adjusted_forward = end_forward;
