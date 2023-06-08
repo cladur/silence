@@ -310,6 +310,9 @@ void input_setup() {
 
 	input_manager.add_action("reload_scene");
 	input_manager.add_key_to_action("reload_scene", InputKey::F4);
+
+	input_manager.add_action("back_from_camera");
+	input_manager.add_key_to_action("back_from_camera", InputKey::TAB);
 }
 
 void handle_camera(DebugCamera &cam, float dt) {

@@ -55,7 +55,7 @@ void Frustum::create_frustum_from_light(const Light &light, const Transform &tra
 	glm::vec3 up = transform.get_global_up();
 	glm::vec3 right = transform.get_global_right();
 
-	float half_v_side = far * tanf(fov / 2.0f);
+	float half_v_side = far * tanf(fov * 0.5f);
 	float half_h_side = half_v_side * aspect_ratio;
 	glm::vec3 front_mult_far = far * front;
 

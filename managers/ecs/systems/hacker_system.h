@@ -17,6 +17,11 @@ private:
 			glm::vec3 direction = glm::vec3(0.0f, 0.0f, -1.0f));
 	void go_back_to_scorpion(World &world, HackerData &hacker_data);
 
+	float current_rotation_x = 0.0f;
+	float current_rotation_y = 0.0f;
+
+	glm::quat starting_camera_orientation;
+
 	std::string ui_name;
 	UIText *ui_text;
 
