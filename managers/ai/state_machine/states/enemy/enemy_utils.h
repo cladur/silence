@@ -208,16 +208,6 @@ inline void update_detection_slider(uint32_t entity_id, Transform &transform, En
 	// lerp from white to red
 	slider.color = glm::lerp(glm::vec4(1.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), slider.value);
 	slider.position = transform.get_global_position() + glm::vec3(0.0f, 2.5f, 0.0f);
-
-	auto &debug_text = UIManager::get().get_ui_text(std::to_string(entity_id) + "_detection", "enemy_debug_text");
-	debug_text.position = transform.get_global_position() + glm::vec3(0.0f, 2.0f, 0.0f);
-	if (enemy_data.detection_target == DetectionTarget::AGENT) {
-		debug_text.text = "AGENT";
-	} else if (enemy_data.detection_target == DetectionTarget::HACKER) {
-		debug_text.text = "HACKER";
-	} else {
-		debug_text.text = "NONE";
-	}
 }
 
 inline uint32_t find_closest_node(World *world, glm::vec3 &position, Children &path) {
