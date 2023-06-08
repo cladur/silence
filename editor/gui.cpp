@@ -18,6 +18,7 @@
 
 #include "IconsMaterialDesign.h"
 #include "ImGuizmo.h"
+#include "animation/animation_manager.h"
 #include "nfd.h"
 
 void Editor::imgui_menu_bar() {
@@ -480,6 +481,14 @@ void Editor::imgui_viewport(EditorScene &scene, uint32_t scene_index) {
 				auto &parent = scene.world.get_component<Parent>(scene.selected_entity);
 				auto &parent_transform = scene.world.get_component<Transform>(parent.parent);
 				parent_matrix = glm::inverse(parent_transform.get_global_model_matrix());
+			}
+			if (scene.world.has_component<Attachment>(scene.selected_entity)) {
+				AnimationManager &animation_manager = AnimationManager::get();
+				auto &attachment = scene.world.get_component<Attachment>(scene.selected_entity);
+				auto &holder_transform = scene.world.get_component<Transform>(attachment.holder);
+				const glm::mat4 &bone_matrix =
+						animation_manager.get_bone_transform(attachment.holder, attachment.bone_name);
+				parent_matrix = glm::inverse(holder_transform.get_global_model_matrix() * bone_matrix);
 			}
 			glm::decompose(parent_matrix * temp_matrix, transform.scale, transform.orientation, transform.position,
 					skew, perspective);

@@ -117,11 +117,11 @@ void Inspector::show_transform() {
 
 		changed |= show_vec3("Position", transform.position);
 		changed |= show_vec3("Rotation", euler_rot, 1.0f);
-		changed |= show_vec3("Scale", transform.scale, 0.1f, 1.0f, 0.1f, 100.0f);
+		changed |= show_vec3("Scale", transform.scale, 0.02f, 1.0f, 0.001f, 100.0f);
 
 		for (int i = 0; i < 3; i++) {
-			if (transform.scale[i] < 0.1f) {
-				transform.scale[i] = 0.1f;
+			if (transform.scale[i] < 0.001f) {
+				transform.scale[i] = 0.001f;
 			}
 		}
 
@@ -909,7 +909,6 @@ void Inspector::show_agent_data() {
 void Inspector::show_enemy_path() {
 	auto &enemy_path = world->get_component<EnemyPath>(selected_entity);
 	if (ImGui::CollapsingHeader("Enemy Path", tree_flags)) {
-
 		if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
 			ImGui::OpenPopup("EnemyPathContextMenu");
 		}
@@ -923,7 +922,6 @@ void Inspector::show_enemy_path() {
 
 			ImGui::EndPopup();
 		}
-
 
 		float available_width = ImGui::GetContentRegionAvail().x;
 		ImGui::BeginTable("Enemy Path", 2);
@@ -1269,7 +1267,7 @@ void Inspector::show_highlight() {
 		ImGui::TableSetColumnIndex(1);
 		ImGui::SetNextItemWidth(-FLT_MIN);
 		if (ImGui::BeginCombo("##Highlight Type", magic_enum::enum_name(highlighted.target).data())) {
-			for (auto type : magic_enum::enum_values<HighlightTarget >()) {
+			for (auto type : magic_enum::enum_values<HighlightTarget>()) {
 				bool is_selected = (highlighted.target == type);
 				if (ImGui::Selectable(magic_enum::enum_name(type).data(), is_selected)) {
 					highlighted.target = type;
