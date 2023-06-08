@@ -17,6 +17,7 @@ AutoCVarFloat music_detection_level("music.detection_level", "detection level vo
 AutoCVarInt music_enemy_near_count("music.enemy_near_count", "number of enemies near" , 1);
 AutoCVarInt music_is_sprinting("music.is_sprinting", "is sprinting" , 0);
 AutoCVarInt music_is_crounching("music.is_crounching", "is crounching" , 0);
+AutoCVarInt enable_music("music.enabled", "is music enabled" , 0);
 
 void AdaptiveMusicManager::startup(std::string name_of_event) {
 	event_ref = EventReference(name_of_event);
@@ -98,6 +99,7 @@ void AdaptiveMusicManager::update(float dt) {
 	AudioManager::get().set_global_param_by_name(drum_param, drum_intensity);
 	AudioManager::get().set_global_param_by_name(intensity_param, melodic_intensity);
 	AudioManager::get().set_global_param_by_name(lpf, lp_filter);
+	event_instance->setVolume((float)enable_music.get());
 }
 
 void AdaptiveMusicManager::play() {

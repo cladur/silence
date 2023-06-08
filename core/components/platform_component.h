@@ -1,13 +1,19 @@
 #ifndef SILENCE_PLATFORM_COMPONENT_H
 #define SILENCE_PLATFORM_COMPONENT_H
 
+#include "fmod_studio.hpp"
 #include <glm/fwd.hpp>
+
 struct Platform {
 	glm::vec3 starting_position;
 	glm::vec3 ending_position;
 	glm::vec3 change_vector;
 
 	float speed = 1.0f;
+
+	FMOD::Studio::EventInstance *event_instance = nullptr;
+	bool first_frame = true;
+	bool is_playing = false;
 
 	bool is_moving = false;
 	//bool at_first_position = true;
