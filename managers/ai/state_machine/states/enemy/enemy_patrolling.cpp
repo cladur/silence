@@ -37,11 +37,6 @@ void EnemyPatrolling::update(World *world, uint32_t entity_id, float dt) {
 		enemy_path.is_rotating = true;
 	}
 
-	if (path.children_count == 0 || path.children_count == 1) {
-		enemy_path.patrol_cooldown = 100.0f;
-		state_machine->set_state("stationary_patrolling");
-	}
-
 	// change animation
 	if (anim.animation_handle.id != res.get_animation_handle("enemy/enemy_ANIM_GLTF/enemy_walk_with_gun.anim").id) {
 		animation_manager.change_animation(entity_id, "enemy/enemy_ANIM_GLTF/enemy_walk_with_gun.anim");
@@ -87,7 +82,8 @@ void EnemyPatrolling::update(World *world, uint32_t entity_id, float dt) {
 
 	// smoothly rotate the entity to face the next node
 	if (enemy_path.is_rotating) {
-		enemy_utils::look_at(enemy_path, transform, target_position, dt);
+		float new_dt = dt * 1.2f;
+		enemy_utils::look_at(enemy_path, transform, target_position, new_dt);
 	}
 
 	// if the entity is facing the next node, stop rotating
@@ -96,13 +92,11 @@ void EnemyPatrolling::update(World *world, uint32_t entity_id, float dt) {
 		enemy_path.is_rotating = false;
 	}
 
-	enemy_utils::handle_detection(world, transform, transform.get_global_forward(), enemy_data, dt, &dd);
+	enemy_utils::handle_detection(world, entity_id, transform, transform.get_global_forward(), enemy_data, dt, &dd);
 
 	enemy_utils::update_detection_slider(entity_id, transform, enemy_data);
 
 	enemy_utils::handle_highlight(entity_id, world);
-
-	//std::cout << enemy_data.detection_level << std::endl;
 
 	if (enemy_data.detection_level > 0.3f) {
 		state_machine->set_state("looking");

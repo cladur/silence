@@ -27,31 +27,37 @@ void EnemyStationaryPatrolling::update(World *world, uint32_t entity_id, float d
 	auto &enemy_path = world->get_component<EnemyPath>(entity_id);
 	auto &enemy_data = world->get_component<EnemyData>(entity_id);
 	auto &dd = world->get_parent_scene()->get_render_scene().debug_draw;
-	auto &path = world->get_component<Children>(enemy_path.path_parent);
 
 	// change animation
 	if (anim.animation_handle.id != res.get_animation_handle("enemy/enemy_ANIM_GLTF/enemy_idle.anim").id) {
 		animation_manager.change_animation(entity_id, "enemy/enemy_ANIM_GLTF/enemy_idle.anim");
 	}
 
-	enemy_utils::handle_detection(world, transform, transform.get_global_forward(), enemy_data, dt, &dd);
+	enemy_utils::handle_detection(world, entity_id, transform, transform.get_global_forward(), enemy_data, dt, &dd);
 
 	enemy_utils::update_detection_slider(entity_id, transform, enemy_data);
 
 	enemy_utils::handle_highlight(entity_id, world);
 
-	// decrease the cooldown
-	enemy_path.patrol_cooldown -= dt;
-	if (enemy_path.patrol_cooldown <= 0.0f) {
-		enemy_path.patrol_cooldown = glm::max(0.0f, enemy_path.patrol_cooldown);
-		enemy_path.is_patrolling = false;
-		enemy_path.next_position = (enemy_path.next_position + 1) % path.children_count;
-		state_machine->set_state("patrolling");
-	}
+	if (!enemy_path.infinite_patrol) {
+		auto &path = world->get_component<Children>(enemy_path.path_parent);
+		// decrease the cooldown
+		enemy_path.patrol_cooldown -= dt;
+		if (enemy_path.patrol_cooldown <= 0.0f) {
+			enemy_path.patrol_cooldown = glm::max(0.0f, enemy_path.patrol_cooldown);
+			enemy_path.is_patrolling = false;
+			enemy_path.next_position = (enemy_path.next_position + 1) % path.children_count;
+			state_machine->set_state("patrolling");
+		}
 
-	if (enemy_data.detection_level > 0.3f) {
-		enemy_path.next_position = (enemy_path.next_position + 1) % path.children_count;
-		state_machine->set_state("looking");
+		if (enemy_data.detection_level > 0.3f) {
+			enemy_path.next_position = (enemy_path.next_position + 1) % path.children_count;
+			state_machine->set_state("looking");
+		}
+	} else {
+		if (enemy_data.detection_level > 0.3f) {
+			state_machine->set_state("looking");
+		}
 	}
 }
 

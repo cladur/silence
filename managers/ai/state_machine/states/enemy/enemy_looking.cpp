@@ -32,15 +32,19 @@ void EnemyLooking::update(World *world, uint32_t entity_id, float dt) {
 	auto &anim = world->get_component<AnimationInstance>(entity_id);
 	auto &enemy_data = world->get_component<EnemyData>(entity_id);
 	auto &dd = world->get_parent_scene()->get_render_scene().debug_draw;
+	auto &ep = world->get_component<EnemyPath>(entity_id);
 
-	// some necessary variables
 	auto agent_pos = GameplayManager::get().get_agent_position(world->get_parent_scene());
+	auto agent_pos_no_y = glm::vec3(agent_pos.x, 0.0f, agent_pos.z);
+
+	auto hacker_pos = GameplayManager::get().get_hacker_position(world->get_parent_scene());
+	auto hacker_pos_no_y = glm::vec3(hacker_pos.x, 0.0f, hacker_pos.z);
+
 	auto forward = glm::normalize(transform.get_global_forward());
 
 	auto current_no_y = glm::vec3(transform.position.x, 0.0f, transform.position.z);
-	glm::vec3 target_look = glm::vec3(agent_pos.x, 0.0f, agent_pos.z);
+	glm::vec3 target_look = enemy_data.detection_target == DetectionTarget::AGENT ? agent_pos_no_y : hacker_pos_no_y;
 	glm::vec3 direction = glm::normalize(target_look - current_no_y);
-
 
 	if (first_frame) {
 		adjusted_forward = forward;
@@ -60,7 +64,7 @@ void EnemyLooking::update(World *world, uint32_t entity_id, float dt) {
 	}
 
 	if (glm::distance(adjusted_forward, end_forward) > 0.06 && !forward_block) {
-		adjusted_forward = glm::mix(adjusted_forward, end_forward, dt);
+		adjusted_forward = glm::normalize(glm::mix(adjusted_forward, end_forward, dt));
 	} else {
 		forward_block = true;
 		adjusted_forward = end_forward;
@@ -86,18 +90,27 @@ void EnemyLooking::update(World *world, uint32_t entity_id, float dt) {
 		end_forward = glm::rotateY(end_forward, rotation_end.y * dt * 2.0f);
 	}
 
-	enemy_utils::handle_detection(world, transform, adjusted_forward,enemy_data, dt, &dd);
+	enemy_utils::handle_detection(world, entity_id, transform, adjusted_forward,enemy_data, dt, &dd);
 
 	enemy_utils::update_detection_slider(entity_id, transform, enemy_data);
 
 	enemy_utils::handle_highlight(entity_id, world);
 
-	if (enemy_data.detection_level < 0.2) {
-		state_machine->get_state<EnemyPatrolling>()->first_frame_after_other_state = true;
-		state_machine->set_state("patrolling");
-	}
-	if (enemy_data.detection_level > 0.99) {
-		state_machine->set_state("fully_aware");
+	if (!ep.infinite_patrol) {
+		if (enemy_data.detection_level < 0.2) {
+			state_machine->get_state<EnemyPatrolling>()->first_frame_after_other_state = true;
+			state_machine->set_state("patrolling");
+		}
+		if (enemy_data.detection_level > 0.99) {
+			state_machine->set_state("fully_aware");
+		}
+	} else {
+		if (enemy_data.detection_level < 0.2) {
+			state_machine->set_state("stationary_patrolling");
+		}
+		if (enemy_data.detection_level > 0.99) {
+			state_machine->set_state("fully_aware");
+		}
 	}
 }
 

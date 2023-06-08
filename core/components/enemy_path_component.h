@@ -15,6 +15,7 @@ struct EnemyPath {
 	bool first_rotation_frame = false;
 	bool is_patrolling = false;
 	float patrol_cooldown = 0.0f;
+	bool infinite_patrol = false;
 
 	void serialize_json(nlohmann::json &serialized_scene) {
 		nlohmann::json::object_t serialized_component;

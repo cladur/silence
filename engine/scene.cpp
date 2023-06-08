@@ -125,7 +125,7 @@ void Scene::register_game_systems() {
 	// Agents
 	world.register_system<AgentSystem>();
 	world.register_system<HackerSystem>();
-	world.register_system<EnemySystem>();
+	world.register_system<EnemySystem>(UpdateOrder::PostAnimation);
 	world.register_system<TaggableSystem>();
 	//world.register_system<EnemyPathing>();
 	world.register_system<InteractableSystem>();

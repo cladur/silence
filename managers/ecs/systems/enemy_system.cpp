@@ -6,6 +6,15 @@
 #include <gameplay/gameplay_manager.h>
 #include <render/transparent_elements/ui_manager.h>
 
+AutoCVarFloat cvar_enemy_detection_range("enemy.detection_range", "enemy detection range", 10.0f);
+AutoCVarFloat cvar_enemy_detection_angle("enemy.detection_angle", "enemy detection angle", 90.0f);
+AutoCVarFloat cvar_enemy_min_detection_speed("enemy.min_detection_speed", "enemy min detection speed", 0.1f);
+AutoCVarFloat cvar_enemy_max_detection_speed("enemy.max_detection_speed", "enemy max detection speed", 0.5f);
+AutoCVarFloat cvar_sphere_detection_radius("enemy.sphere_detection_radius", "enemy sphere detection radius", 3.0f);
+AutoCVarFloat cvar_detection_decrease_speed("enemy.detection_decrease_speed", "enemy detection decrease speed", 0.3f);
+AutoCVarFloat cvar_crouch_detection_modifier("enemy.crouch_detection_modifier", "enemy crouch detection modifier", 0.5f);
+AutoCVarFloat cvar_hacker_detection_modifier("enemy.hacker_detection_modifier", "enemy hacker detection modifier", 0.75f);
+
 void EnemySystem::startup(World &world) {
 	Signature blacklist;
 	Signature whitelist;
@@ -48,7 +57,23 @@ void EnemySystem::update(World &world, float dt) {
 			ed.state_machine.add_state(&ed.dead_state);
 			ed.state_machine.add_state(&ed.distracted_state);
 
-			ed.state_machine.set_state("patrolling");
+			if (ep.path_parent > 0) {
+				if (world.has_component<Children>(ep.path_parent)) {
+					auto &children = world.get_component<Children>(ep.path_parent);
+					if (children.children_count > 0) {
+						ed.state_machine.set_state("patrolling");
+					} else {
+						ed.state_machine.set_state("stationary_patrolling");
+						ep.infinite_patrol = true;
+					}
+				} else {
+					ed.state_machine.set_state("stationary_patrolling");
+					ep.infinite_patrol = true;
+				}
+			} else {
+				ed.state_machine.set_state("stationary_patrolling");
+				ep.infinite_patrol = true;
+			}
 
 			ui.create_ui_scene(std::to_string(entity) + "_detection");
 			auto &slider = ui.add_ui_slider(std::to_string(entity) + "_detection", "detection_slider");
@@ -70,6 +95,16 @@ void EnemySystem::update(World &world, float dt) {
 			tag.color = glm::vec4(1.0f, 1.0f, 1.0f, 0.5f);
 			tag.display = false;
 			ui.add_as_root(std::to_string(entity) + "_detection", "tag");
+
+			auto &debug_text = ui.add_ui_text(std::to_string(entity) + "_detection", "enemy_debug_text");
+			debug_text.position = glm::vec3(0.0f, 2.0f, 0.0f);
+			debug_text.size = glm::vec2(0.5f);
+			debug_text.is_billboard = true;
+			debug_text.is_screen_space = false;
+			debug_text.color = glm::vec4(1.0f);
+			debug_text.display = true;
+			debug_text.text = "NONE";
+			ui.add_as_root(std::to_string(entity) + "_detection", "enemy_debug_text");
 
 			ed.first_frame = false;
 		}
