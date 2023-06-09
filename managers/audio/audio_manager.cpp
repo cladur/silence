@@ -1,6 +1,8 @@
 #include "audio_manager.h"
 #include "fmod_errors.h"
 #include <components/transform_component.h>
+#include <engine/scene.h>
+#include <gameplay/gameplay_manager.h>
 
 #define FMOD_CHECK(x)                                                                                                  \
 	do {                                                                                                               \
@@ -20,16 +22,29 @@ void AudioManager::startup() {
 	FMOD_CHECK(FMOD::Studio::System::create(&system));
 	FMOD_CHECK(system->initialize(512, FMOD_STUDIO_INIT_NORMAL, FMOD_INIT_NORMAL, nullptr));
 	load_startup_banks();
-	FMOD_CHECK(system->setNumListeners(1));
+	FMOD_CHECK(system->setNumListeners(2));
 
 	event_paths = get_all_event_paths();
 
 	SPDLOG_INFO("Audio Manager: Initialized audio manager");
 }
 
-void AudioManager::update() {
+void AudioManager::update(Scene &scene) {
 	ZoneScopedNC("AudioManager::update", 0xcacaca);
 	FMOD_CHECK(system->update());
+	this->scene = &scene;
+	auto &gm = GameplayManager::get();
+	auto &agent_tf = scene.world.get_component<Transform>(gm.get_agent_camera(&scene));
+	set_3d_listener_attributes(SILENCE_FMOD_LISTENER_AGENT, agent_tf.get_global_position(),
+			glm::vec3(0.0f), agent_tf.get_global_forward(), agent_tf.get_global_up());
+
+	auto &hacker_tf = scene.world.get_component<Transform>(gm.get_hacker_camera(&scene));
+	set_3d_listener_attributes(SILENCE_FMOD_LISTENER_HACKER, hacker_tf.get_global_position(),
+			glm::vec3(0.0f), hacker_tf.get_global_forward(), hacker_tf.get_global_up());
+
+	for (auto *instance : event_instances) {
+		instance->setListenerMask(create_listener_mask(instance));
+	}
 }
 
 void AudioManager::shutdown() {
@@ -122,6 +137,7 @@ void AudioManager::play_one_shot_3d(const EventReference &event_ref, Transform &
 	auto event_instance = create_event_instance(event_ref);
 	FMOD_3D_ATTRIBUTES attributes = to_3d_attributes(transform, rigid_body);
 	FMOD_CHECK(event_instance->set3DAttributes(&attributes));
+	FMOD_CHECK(event_instance->setListenerMask(create_listener_mask(event_instance)));
 	FMOD_CHECK(event_instance->start());
 	FMOD_CHECK(event_instance->release());
 }
@@ -229,4 +245,26 @@ FMOD_VECTOR AudioManager::to_fmod_vector(glm::vec3 vector) {
 	temp.y = vector.y;
 	temp.z = vector.z;
 	return temp;
+}
+
+void AudioManager::play_local(FMOD::Studio::EventInstance *instance) {
+	FMOD_CHECK(instance->start());
+	event_instances.emplace_back(instance);
+}
+
+uint32_t AudioManager::create_listener_mask(FMOD::Studio::EventInstance *instance) {
+	auto &gm = GameplayManager::get();
+	auto &agent_tf = scene->world.get_component<Transform>(gm.get_agent_camera(scene));
+	auto &hacker_tf = scene->world.get_component<Transform>(gm.get_hacker_camera(scene));
+
+	FMOD_3D_ATTRIBUTES attributes;
+	instance->get3DAttributes(&attributes);
+	glm::vec3 instance_pos = glm::vec3(attributes.position.x, attributes.position.y, attributes.position.z);
+	float dist_to_agent = glm::distance2(instance_pos, agent_tf.get_global_position());
+	float dist_to_hacker = glm::distance2(instance_pos, hacker_tf.get_global_position());
+	if (dist_to_agent < dist_to_hacker) {
+		return 1 << SILENCE_FMOD_LISTENER_AGENT;
+	} else {
+		return 1 << SILENCE_FMOD_LISTENER_HACKER;
+	}
 }

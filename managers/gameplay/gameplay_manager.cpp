@@ -88,3 +88,11 @@ float GameplayManager::get_highest_detection() const {
 uint32_t GameplayManager::get_enemies_near_player() const {
 	return enemies_near_player;
 }
+
+uint32_t GameplayManager::get_agent_camera(Scene *scene) const {
+	return scene->world.get_component<AgentData>(agent_entity).camera;
+}
+
+uint32_t GameplayManager::get_hacker_camera(Scene *scene) const {
+	return scene->world.get_component<HackerData>(hacker_entity).camera;
+}
