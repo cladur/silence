@@ -34,8 +34,6 @@ void PlatformSystem::update(World &world, float dt) {
 			continue;
 		}
 
-
-
 		auto &platform_transform = world.get_component<Transform>(entity);
 		glm::vec3 previous_position = platform_transform.get_position();
 		glm::vec3 next_position = { 0.0f, 0.0f, 0.0f };
@@ -43,7 +41,7 @@ void PlatformSystem::update(World &world, float dt) {
 		FMOD_3D_ATTRIBUTES attributes = AudioManager::to_3d_attributes(platform_transform);
 
 		if (!platform.is_playing) {
-			platform.event_instance->start();
+			AudioManager::get().play_local(platform.event_instance);
 			platform.is_playing = true;
 			platform.event_instance->set3DAttributes(&attributes);
 		} else {
@@ -65,6 +63,8 @@ void PlatformSystem::update(World &world, float dt) {
 			platform.starting_position = platform.ending_position;
 			platform.ending_position = temp;
 			next_position = platform.starting_position;
+
+			AudioManager::get().stop_local(platform.event_instance);
 
 			platform.is_playing = false;
 		} else {
