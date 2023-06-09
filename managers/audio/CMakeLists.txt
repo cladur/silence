@@ -14,4 +14,5 @@ target_link_libraries(${AUDIO_MANAGER_NAME}
         PRIVATE
         silence_common
         silence_core
+        silence_gameplay_manager
         )
