@@ -15,6 +15,7 @@
 
 #include "animation/ecs/animation_system.h"
 #include "animation/ecs/attachment_system.h"
+#include "audio/audio_manager.h"
 #include "audio/ecs/fmod_emitter_system.h"
 #include "components/fmod_emitter_component.h"
 #include "components/taggable_component.h"
@@ -152,6 +153,7 @@ void Scene::update(float dt) {
 			}
 		}
 	}
+
 	GameplayManager::get().update(world, dt);
 }
 

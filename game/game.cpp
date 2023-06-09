@@ -452,6 +452,8 @@ void Game::custom_update(float dt) {
 		AnimationManager::get().animation_map.clear();
 	}
 
+	AudioManager::get().update(get_active_scene());
+
 	// // BSP Vizualization, for now it's left in here, but could be moved to system in the future
 	// //
 	// // bsp_tree = CollisionSystem::build_tree(world, entities, 10);
