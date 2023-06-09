@@ -81,6 +81,8 @@ public:
 
 	void play_local(FMOD::Studio::EventInstance *instance);
 
+	void stop_local(FMOD::Studio::EventInstance *instance);
+
 	uint32_t create_listener_mask(FMOD::Studio::EventInstance *instance);
 };
 

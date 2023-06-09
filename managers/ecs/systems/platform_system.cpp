@@ -64,6 +64,8 @@ void PlatformSystem::update(World &world, float dt) {
 			platform.ending_position = temp;
 			next_position = platform.starting_position;
 
+			AudioManager::get().stop_local(platform.event_instance);
+
 			platform.is_playing = false;
 		} else {
 			float speed = platform.speed * dt;

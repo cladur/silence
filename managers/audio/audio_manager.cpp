@@ -161,7 +161,6 @@ FMOD_GUID AudioManager::path_to_guid(const std::string &path) {
 	FMOD_RESULT res = system->lookupID((event_path_prefix + path).c_str(), &guid);
 	if (res != FMOD_OK) {
 		SPDLOG_ERROR("Audio Manager: Failed to get guid for {}. {}", path, FMOD_ErrorString(res));
-		char c[8] = { 0 };
 		return FMOD_GUID{ 0, 0, 0, "0000000" };
 	}
 	return guid;
@@ -267,4 +266,10 @@ uint32_t AudioManager::create_listener_mask(FMOD::Studio::EventInstance *instanc
 	} else {
 		return 1 << SILENCE_FMOD_LISTENER_HACKER;
 	}
+}
+
+void AudioManager::stop_local(FMOD::Studio::EventInstance *instance) {
+	FMOD_CHECK(instance->stop(FMOD_STUDIO_STOP_ALLOWFADEOUT));
+	event_instances.erase(std::remove(event_instances.begin(), event_instances.end(), instance),
+			event_instances.end());
 }
