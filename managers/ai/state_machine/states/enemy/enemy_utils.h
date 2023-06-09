@@ -228,14 +228,16 @@ inline void handle_detection_camera(World *world, uint32_t enemy_entity, Transfo
 	bool can_see_hacker = false;
 	float hacker_distance_ratio = glm::distance(global_position, hacker_pos) / cone_range;
 
+	if (dd) {
+		dd->draw_arrow(enemy_look_origin, enemy_look_origin + forward, cone_range, glm::vec3(0.0f, 1.0f, 0.0f));
+		dd->draw_cone(enemy_look_origin, enemy_look_origin + forward, cone_range, glm::tan(glm::radians(cone_angle / 2.0f)) * cone_range, glm::vec3(1.0f, 0.0f, 0.0f));
+	}
+
 	// AGENT CONE DETECTION LOGIC
 	if (glm::distance(global_position, agent_pos) < cone_range) {
-		auto angle = glm::acos(glm::dot(agent_dir, -forward));
-		auto up_dot = glm::dot(agent_dir, glm::vec3(0.0f, 1.0f, 0.0f));
 
-		bool in_horizontal_cone = angle < glm::radians(cone_angle) / 2.0f;
-		bool in_vertical_cone = abs(up_dot) > cos(glm::radians(vertical_cone_angle) / 2.0f);
-		if (in_vertical_cone && in_horizontal_cone) {
+		auto angle = glm::acos(glm::dot(agent_dir, forward));
+		if (angle < glm::radians(cone_angle) / 2.0f) {
 			Ray ray{};
 			ray.origin = enemy_look_origin + agent_dir;
 			ray.direction = agent_dir;
@@ -276,12 +278,8 @@ inline void handle_detection_camera(World *world, uint32_t enemy_entity, Transfo
 
 	// HACKER CONE DETECTION LOGIC
 	if (glm::distance(global_position, hacker_pos) < cone_range) {
-		auto angle = glm::acos(glm::dot(hacker_dir, -forward));
-		auto up_dot = glm::dot(hacker_dir, glm::vec3(0.0f, 1.0f, 0.0f));
-
-		bool in_horizontal_cone = angle < glm::radians(cone_angle) / 2.0f;
-		bool in_vertical_cone = abs(up_dot) > cos(glm::radians(vertical_cone_angle) / 2.0f);
-		if (in_horizontal_cone && in_vertical_cone) {
+		auto angle = glm::acos(glm::dot(agent_dir, forward));
+		if (angle < glm::radians(cone_angle) / 2.0f) {
 			Ray ray{};
 			ray.origin = enemy_look_origin + hacker_dir;
 			ray.direction = hacker_dir;
@@ -314,25 +312,6 @@ inline void handle_detection_camera(World *world, uint32_t enemy_entity, Transfo
 				if (hit_info.entity == GameplayManager::get().get_hacker_entity()) {
 					can_see_hacker = true;
 				}
-			}
-		}
-	}
-
-	// AGENT SPHERE DETECTION LOGIC
-	if (glm::distance(global_position, agent_pos) < sphere_radius) {
-		Ray ray{};
-		ray.origin = enemy_look_origin;
-		ray.direction = agent_dir;
-		ray.ignore_list.push_back(enemy_entity);
-		glm::vec3 ray_end = ray.origin + ray.direction * sphere_radius;
-
-		HitInfo hit_info;
-
-		if (CollisionSystem::ray_cast_layer(*world, ray, hit_info)) {
-			// only if agent is crouching then he can get to the enemy
-			if (hit_info.entity == GameplayManager::get().get_agent_entity() &&
-					!GameplayManager::get().get_agent_crouch()) {
-				can_see_player = true;
 			}
 		}
 	}
