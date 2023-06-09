@@ -1415,6 +1415,8 @@ void Inspector::show_particle_emitter() {
 			ImGui::Text("Texture: None");
 		}
 
+		show_checkbox("Is Billboard", ps.is_billboard);
+
 		if (ImGui::BeginDragDropTarget()) {
 			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_TEXTURE_PATH")) {
 				const std::string payload_n = *(const std::string *)payload->Data;

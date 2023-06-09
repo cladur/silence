@@ -28,15 +28,21 @@ struct ParticlePerEntityData {
 	glm::vec3 entity_position;
 	Handle<Texture> tex;
 	bool is_textured = false;
+	bool is_billboard = true;
+	glm::vec3 non_billboard_right = glm::vec3(1.0f, 0.0f, 0.0f);
+	glm::vec3 non_billboard_up = glm::vec3(0.0f, 1.0f, 0.0f);
 
 	ParticlePerEntityData() = default;
 
-	ParticlePerEntityData(ParticleEmitter &p, glm::vec3 entity_position) {
+	ParticlePerEntityData(ParticleEmitter &p, glm::vec3 entity_position, glm::vec3 right = glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f)) {
 		this->entity_position = entity_position;
 		if (p.is_textured) {
 			is_textured = true;
 			tex = p.texture;
 		}
+		is_billboard = p.is_billboard;
+		non_billboard_right = right;
+		non_billboard_up = up;
 	}
 };
 

@@ -23,7 +23,11 @@ void ParticleRenderSystem::update(World &world, float dt) {
 				if (pe.particle_time > 1.0f / pe.rate) {
 					auto glob_pos = transform.get_global_position();
 					ParticleData particle = ParticleData(pe, glob_pos + pe.position);
-					ParticlePerEntityData entity_data = ParticlePerEntityData(pe, glob_pos + pe.position);
+					ParticlePerEntityData entity_data = ParticlePerEntityData(
+							pe,
+							glob_pos + pe.position,
+							transform.get_global_right(),
+							transform.get_global_up());
 					pm.emit(entity, particle, entity_data);
 					pe.particle_time = 0.0f;
 				}
@@ -35,7 +39,11 @@ void ParticleRenderSystem::update(World &world, float dt) {
 			if (pe.particle_time > 1.0f / pe.rate) {
 				auto glob_pos= transform.get_global_position();
 				ParticleData particle = ParticleData(pe, glob_pos + pe.position);
-				ParticlePerEntityData entity_data = ParticlePerEntityData(pe, glob_pos + pe.position);
+				ParticlePerEntityData entity_data = ParticlePerEntityData(
+						pe,
+						glob_pos + pe.position,
+						transform.get_global_right(),
+						transform.get_global_up());
 				pm.emit(entity, particle, entity_data);
 				pe.particle_time = 0.0f;
 			}
