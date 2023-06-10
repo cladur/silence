@@ -573,7 +573,7 @@ void ParticlePass::draw(RenderScene &scene, bool right_camera) {
 					if (glm::length(particle.velocity_begin + particle.velocity_end) > 0.1f) {
 						glm::vec3 direction = glm::normalize(particle.velocity_begin + particle.velocity_end);
 						// calculate right and up to match the velocity direction calculated above
-						glm::vec3 right = glm::normalize(glm::cross(direction, glm::vec3(0.0f, 1.0f, 0.0f)));
+						glm::vec3 right =  glm::vec4(particle_pair_data.second.non_billboard_right, 1.0f);//glm::normalize(glm::cross(direction, glm::vec3(0.0f, 1.0f, 0.0f)));
 						glm::vec3 up = direction;
 						ssbo_data[i].right[j] = glm::vec4(right, 1.0f);
 						ssbo_data[i].up[j] = glm::vec4(up, 1.0f);
