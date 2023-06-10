@@ -6,6 +6,7 @@ struct DetectionCamera {
 	DetectionTarget detection_target = DetectionTarget::NONE;
 	bool first_frame = true;
 	bool is_active = true;
+	glm::quat starting_orientation{};
 
 	DetectionCamera() = default;
 

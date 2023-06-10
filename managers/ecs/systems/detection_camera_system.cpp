@@ -3,6 +3,8 @@
 #include "components/detection_camera_component.h"
 #include "ecs/world.h"
 #include "engine/scene.h"
+#include "gameplay/gameplay_manager.h"
+#include <glm/ext/matrix_transform.hpp>
 
 AutoCVarFloat cvar_enemy_camera_detection_range(
 		"enemy_camera.detection_range", "Detection Camera Range", 55, CVarFlags::EditFloatDrag);
@@ -41,6 +43,8 @@ void DetectionCameraSystem::update(World &world, float dt) {
 
 			ui.add_as_root(std::to_string(entity) + "_detection", "detection_slider");
 			ui.activate_ui_scene(std::to_string(entity) + "_detection");
+
+			detection_camera.starting_orientation = transform.get_orientation();
 		}
 
 		if (!detection_camera.is_active) {
