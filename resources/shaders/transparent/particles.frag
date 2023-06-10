@@ -20,6 +20,8 @@ layout (std430, binding = 3) buffer ssbo_data {
     vec4 positions[256]; // X, Y, Z, SIZE
     mat4 rotations[256];
     vec4 colors[256];
+    vec4 up[256];       // vec3 + 1*float padding
+    vec4 right[256];    // vec3 + 1*float padding
 };
 
 float calc_depth( in float z )

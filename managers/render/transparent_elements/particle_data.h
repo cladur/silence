@@ -22,6 +22,8 @@ struct ParticleSSBODataBlock {
 	glm::mat4 rotation[MAX_PARTICLES_PER_ENTITY];
 	//glm::ivec4 tex_idxs[1000]; dont need it since we're rendering batched per-entity
 	glm::vec4 colors[MAX_PARTICLES_PER_ENTITY];
+	glm::vec4 up[MAX_PARTICLES_PER_ENTITY];
+	glm::vec4 right[MAX_PARTICLES_PER_ENTITY];
 };
 
 struct ParticlePerEntityData {
