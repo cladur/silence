@@ -41,6 +41,8 @@ void DetectionCameraSystem::update(World &world, float dt) {
 
 			ui.add_as_root(std::to_string(entity) + "_detection", "detection_slider");
 			ui.activate_ui_scene(std::to_string(entity) + "_detection");
+
+			detection_camera.detection_event = AudioManager::get().create_event_instance("SFX/camera_detecting");
 		}
 
 		if (!detection_camera.is_active) {

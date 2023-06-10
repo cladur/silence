@@ -405,13 +405,14 @@ void AgentSystem::update(World &world, float dt) {
 			tag_ray.direction = -camera_tf.get_global_forward();
 			tag_ray.ignore_list.emplace_back(entity);
 			tag_ray.layer_name = "hacker";
-			//			tag_ray.ignore_layers.emplace_back("camera");
+			//tag_ray.ignore_layers.emplace_back("camera");
 
 			end = tag_ray.origin + tag_ray.direction;
 			info = {};
 			//dd.draw_arrow(tag_ray.origin, end, { 1.0f, 0.0f, 0.0f });
 			if (CollisionSystem::ray_cast_layer(world, tag_ray, info)) {
 				auto &name = world.get_component<Name>(info.entity);
+				std::cout << "Tagging: " << name.name << std::endl;
 				if (world.has_component<Taggable>(info.entity)) {
 					auto &taggable = world.get_component<Taggable>(info.entity);
 

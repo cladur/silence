@@ -1,11 +1,15 @@
 #ifndef SILENCE_DETECTION_CAMERA_COMPONENT_H
 #define SILENCE_DETECTION_CAMERA_COMPONENT_H
 
+#include "fmod_studio.hpp"
 struct DetectionCamera {
 	float detection_level = 0.0f;
 	DetectionTarget detection_target = DetectionTarget::NONE;
 	bool first_frame = true;
 	bool is_active = true;
+	bool is_playing = false;
+
+	FMOD::Studio::EventInstance *detection_event = nullptr;
 
 	DetectionCamera() = default;
 

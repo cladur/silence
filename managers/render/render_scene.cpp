@@ -194,7 +194,7 @@ void RenderScene::draw_viewport(bool right_side) {
 	glBlendEquation(GL_FUNC_ADD);
 
 	glDepthMask(GL_FALSE);
-	particle_pass.draw(*this);
+	particle_pass.draw(*this, right_side);
 
 	glDepthMask(GL_TRUE);
 

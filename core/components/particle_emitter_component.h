@@ -33,6 +33,7 @@ public:
 	bool is_textured = false;
 	bool is_one_shot = false;
 	float one_shot_duration = 0.5f;
+	bool is_billboard = true;
 
 	float oneshot_time_left = 0.0f;
 
@@ -59,6 +60,7 @@ public:
 		serialized_component["is_textured"] = is_textured;
 		serialized_component["is_one_shot"] = is_one_shot;
 		serialized_component["one_shot_duration"] = one_shot_duration;
+		serialized_component["is_billboard"] = is_billboard;
 		serialized_scene.push_back(nlohmann::json::object());
 		serialized_scene.back()["component_data"] = serialized_component;
 		serialized_scene.back()["component_name"] = "ParticleEmitter";
@@ -89,6 +91,9 @@ public:
 		is_textured = serialized_component["is_textured"];
 		is_one_shot = serialized_component["is_one_shot"];
 		one_shot_duration = serialized_component["one_shot_duration"];
+		if (serialized_component.find("is_billboard") != serialized_component.end()) {
+			is_billboard = serialized_component["is_billboard"];
+		}
 	}
 
 	void trigger_oneshot() {

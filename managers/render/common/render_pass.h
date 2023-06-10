@@ -133,6 +133,7 @@ public:
 	MaterialParticle material;
 	void startup() override;
 	void draw(RenderScene &scene) override;
+	void draw(RenderScene &scene, bool right_camera);
 };
 
 class HighlightPass : public RenderPass {
