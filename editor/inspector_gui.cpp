@@ -1303,6 +1303,7 @@ void Inspector::show_particle_emitter() {
 		show_vec3("Position Variation", ps.position_variance);
 		show_vec3("Start Velocity", ps.velocity_begin);
 		show_vec3("End Velocity", ps.velocity_end);
+		show_vec3("Velocity Variance", ps.velocity_variance);
 		ImGui::TableNextRow();
 		ImGui::TableSetColumnIndex(0);
 		ImGui::Text("Velocity Transition");

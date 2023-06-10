@@ -47,7 +47,7 @@ struct ParticlePerEntityData {
 };
 
 struct ParticleData {
-	glm::vec3 position, velocity_begin, velocity_end;
+	glm::vec3 position, velocity_begin, velocity_end, velocity_variance;
 	TransitionType velocity_transition_type = TransitionType::LINEAR;
 	glm::vec4 color, color_begin, color_end;
 	TransitionType color_transition_type = TransitionType::LINEAR;
@@ -66,8 +66,14 @@ struct ParticleData {
 											(((float)(rand() % 1000) / 1000.0f - 0.5f) * p.position_variance.x * t.get_global_right()) +
 											(((float)(rand() % 1000) / 1000.0f - 0.5f) * p.position_variance.y * t.get_global_up()) +
 											(((float)(rand() % 1000) / 1000.0f - 0.5f) * p.position_variance.z * t.get_global_forward());
-		velocity_begin = p.velocity_begin;
-		velocity_end = p.velocity_end;
+		this->velocity_variance =
+				(((float)(rand() % 1000) / 1000.0f - 0.5f) * p.velocity_variance.x * t.get_global_right()) +
+				(((float)(rand() % 1000) / 1000.0f - 0.5f) * p.velocity_variance.y * t.get_global_up()) +
+				(((float)(rand() % 1000) / 1000.0f - 0.5f) * p.velocity_variance.z * t.get_global_forward());
+		velocity_begin = p.velocity_begin.x * t.get_global_right() + p.velocity_begin.y * t.get_global_up() + p.velocity_begin.z * t.get_global_forward();
+		velocity_begin += velocity_variance;
+		velocity_end = p.velocity_end.x * t.get_global_right() + p.velocity_end.y * t.get_global_up() + p.velocity_end.z * t.get_global_forward();
+		velocity_end += velocity_variance;
 		velocity_transition_type = p.velocity_transition;
 		color_begin = p.color_begin;
 		color_end = p.color_end;

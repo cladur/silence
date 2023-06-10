@@ -16,15 +16,7 @@ void ParticleRenderSystem::update(World &world, float dt) {
 	for (auto const &entity : entities) {
 		auto &transform = world.get_component<Transform>(entity);
 		auto &pe = world.get_component<ParticleEmitter>(entity);
-
-//		world.get_parent_scene()->get_render_scene().debug_draw.draw_line(
-//				transform.get_global_position(),
-//				transform.get_global_position() + transform.get_right(),
-//				glm::vec3(1.0f, 0.0f, 0.0f));
-//		world.get_parent_scene()->get_render_scene().debug_draw.draw_line(
-//				transform.get_global_position(),
-//				transform.get_global_position() + transform.get_global_right(),
-//				glm::vec3(0.0f, 1.0f, 0.0f));
+		auto &dd = world.get_parent_scene()->get_render_scene().debug_draw;
 
 		if (pe.is_one_shot) {
 			if (pe.oneshot_time_left > 0.0f) {

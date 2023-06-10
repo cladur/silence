@@ -18,6 +18,7 @@ public:
 	glm::vec3 position = glm::vec3(0.0f);
 	glm::vec3 position_variance = glm::vec3(0.2f);
 	glm::vec3 velocity_begin, velocity_end;
+	glm::vec3 velocity_variance = glm::vec3(0.0f);
 	TransitionType velocity_transition = TransitionType::LINEAR;
 	glm::vec4 color_begin = glm::vec4(1.0f);
 	glm::vec4 color_end = glm::vec4(1.0f);
@@ -44,6 +45,7 @@ public:
 		serialized_component["position_variance"] = {position_variance.x, position_variance.y, position_variance.z};
 		serialized_component["velocity_begin"] = {velocity_begin.x, velocity_begin.y, velocity_begin.z};
 		serialized_component["velocity_end"] = {velocity_end.x, velocity_end.y, velocity_end.z};
+		serialized_component["velocity_variance"] = {velocity_variance.x, velocity_variance.y, velocity_variance.z};
 		serialized_component["velocity_transition"] = static_cast<int>(velocity_transition);
 		serialized_component["color_begin"] = {color_begin.r, color_begin.g, color_begin.b, color_begin.a};
 		serialized_component["color_end"] = {color_end.r, color_end.g, color_end.b, color_end.a};
@@ -93,6 +95,9 @@ public:
 		one_shot_duration = serialized_component["one_shot_duration"];
 		if (serialized_component.find("is_billboard") != serialized_component.end()) {
 			is_billboard = serialized_component["is_billboard"];
+		}
+		if (serialized_component.find("velocity_variance") != serialized_component.end()) {
+			velocity_variance = glm::vec3(serialized_component["velocity_variance"][0], serialized_component["velocity_variance"][1], serialized_component["velocity_variance"][2]);
 		}
 	}
 
