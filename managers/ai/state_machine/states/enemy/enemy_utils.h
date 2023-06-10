@@ -344,10 +344,24 @@ inline void handle_detection_camera(World *world, uint32_t enemy_entity, Transfo
 			}
 		}
 
+		if(!detection_camera.is_playing) {
+			AudioManager::get().play_local(detection_camera.detection_event);
+			detection_camera.is_playing = true;
+		}
+
+		FMOD_3D_ATTRIBUTES attributes = AudioManager::get().to_3d_attributes(transform);
+		detection_camera.detection_event->set3DAttributes(&attributes);
+
 		detection_change *= detection_speed;
 
 		detection_camera.detection_level += detection_change;
 	} else {
+
+		if (detection_camera.is_playing) {
+			AudioManager::get().stop_local(detection_camera.detection_event);
+			detection_camera.is_playing = false;
+		}
+
 		detection_camera.detection_target = DetectionTarget::NONE;
 		detection_camera.detection_level -= dt * decrease_rate;
 	}
