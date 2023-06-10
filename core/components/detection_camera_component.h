@@ -7,8 +7,9 @@ struct DetectionCamera {
 	DetectionTarget detection_target = DetectionTarget::NONE;
 	bool first_frame = true;
 	bool is_active = true;
-	bool is_playing = false;
+	glm::quat starting_orientation{};
 
+	bool is_playing = false;
 	FMOD::Studio::EventInstance *detection_event = nullptr;
 
 	DetectionCamera() = default;

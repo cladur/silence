@@ -110,6 +110,8 @@ bool HackerSystem::jump_to_camera(World &world, HackerData &hacker_data, Entity 
 	detection_camera.detection_target = DetectionTarget::NONE;
 	camera_billboard.color = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
 
+	new_camera_tf.set_orientation(detection_camera.starting_orientation);
+
 	camera_tf.set_position(new_camera_tf.get_global_position() + -(new_camera_tf.get_forward()));
 	camera_tf.set_orientation(new_camera_tf.get_global_orientation());
 
