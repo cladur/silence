@@ -26,6 +26,9 @@ AutoCVarFloat cvar_hacker_minimal_animation_speed(
 AutoCVarFloat cvar_hacker_velocity_animation_speed_multiplier("hacker.velocity_animation_speed_multiplier",
 		"glm::length(velocity) * this", 400000.0f, CVarFlags::EditCheckbox);
 
+AutoCVarFloat cvar_hacker_idle_animation_tickrate(
+		"hacker.idle_animation_tickrate", "Idle animation tickrate", 1500.0f, CVarFlags::EditCheckbox);
+
 AutoCVarFloat cvar_hacker_max_vel_ground(
 		"hacker.max_vel_ground", "maximum velocity on ground ", 2.0f, CVarFlags::EditCheckbox);
 
@@ -316,11 +319,12 @@ void HackerSystem::update(World &world, float dt) {
 			}
 		}
 		if (glm::length(velocity) == 0.0f) {
-			animation_instance.ticks_per_second = 1000.0f;
+			animation_instance.ticks_per_second = cvar_hacker_idle_animation_tickrate.get();
 		} else {
+			float minimal_speed = cvar_hacker_minimal_animation_speed.get();
 			float new_animation_speed = glm::length(velocity) * cvar_hacker_velocity_animation_speed_multiplier.get();
-			if (new_animation_speed < cvar_hacker_minimal_animation_speed.get()) {
-				new_animation_speed = cvar_hacker_minimal_animation_speed.get();
+			if (new_animation_speed < minimal_speed) {
+				new_animation_speed = minimal_speed;
 			}
 			animation_instance.ticks_per_second = new_animation_speed;
 		}
