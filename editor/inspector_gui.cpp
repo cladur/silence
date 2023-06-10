@@ -1292,7 +1292,7 @@ void Inspector::show_particle_emitter() {
 			ImGui::OpenPopup("ParticleEmitterContextMenu");
 		}
 		if (ImGui::BeginPopup("ParticleEmitterContextMenu")) {
-			remove_component_menu_item<Taggable>();
+			remove_component_menu_item<ParticleEmitter>();
 			ImGui::EndPopup();
 		}
 		float available_width = ImGui::GetContentRegionAvail().x;
