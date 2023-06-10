@@ -591,15 +591,8 @@ void ParticlePass::draw(RenderScene &scene, bool right_camera) {
 		material.shader.set_vec3("entity_center", entity_pos);
 		material.shader.set_int("billboard", particle_pair_data.second.is_billboard);
 
-		material.shader.set_vec3("non_billboard_right", particle_pair_data.second.non_billboard_right);
-		material.shader.set_vec3("non_billboard_up", particle_pair_data.second.non_billboard_up);
-
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
 		glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeof(ssbo_data[i]), &ssbo_data[i]);
-
-		glBindVertexArray(vao);
-		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, 4 * sizeof(ParticleVertex), &pm.default_particle_vertices[0]);
 
 		glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr, j);
 
