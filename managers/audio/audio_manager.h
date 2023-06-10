@@ -11,6 +11,7 @@
  #define SILENCE_FMOD_LISTENER_HACKER 1
 
 struct Transform;
+struct Scene;
 
 class AudioManager {
 	FMOD::Studio::System *system = nullptr;
@@ -24,6 +25,10 @@ class AudioManager {
 
 	std::vector<std::string> event_paths;
 
+	std::vector<FMOD::Studio::EventInstance*> event_instances;
+
+	Scene *scene = nullptr;
+
 public:
 	std::string path_to_banks = "resources/fmod_banks/Desktop/";
 	std::string bank_postfix = ".bank";
@@ -33,7 +38,7 @@ public:
 
 	void startup();
 	void shutdown();
-	void update();
+	void update(Scene &scene);
 
 	FMOD::Studio::System *get_system();
 
@@ -53,12 +58,7 @@ public:
 
 	void test_play_sound();
 
-	/**
-	 * @brief Creates an event instance from the given path.
-	 * The path should be in the format "Bank/path/to/event" without "event:/" prefix.
-	 * @param path
-	 * @return
-	 */
+	// path without "event:/" prefix
 	FMOD::Studio::EventInstance *create_event_instance(const EventReference &event_ref);
 
 	FMOD::Studio::EventInstance *create_event_instance(const std::string &event_name);
@@ -78,6 +78,12 @@ public:
 	bool is_valid_event_path(const std::string &path);
 
 	static FMOD_VECTOR to_fmod_vector(glm::vec3 vector);
+
+	void play_local(FMOD::Studio::EventInstance *instance);
+
+	void stop_local(FMOD::Studio::EventInstance *instance);
+
+	uint32_t create_listener_mask(FMOD::Studio::EventInstance *instance);
 };
 
 #endif //SILENCE_AUDIO_MANAGER_H

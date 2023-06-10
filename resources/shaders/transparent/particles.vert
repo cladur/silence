@@ -17,6 +17,10 @@ uniform vec3 camera_pos;
 uniform vec3 camera_right;
 uniform vec3 entity_center;
 
+uniform int billboard;
+uniform vec3 non_billboard_right;
+uniform vec3 non_billboard_up;
+
 layout (std430, binding = 3) buffer ssbo_data {
     vec4 positions[256]; // X, Y, Z, SIZE
     mat4 rotations[256];
@@ -38,13 +42,24 @@ void main() {
             vec3(0, 1, 0)
         )
     );
+    vec4 world_space_pos;
 
-    vec4 world_space_pos = vec4(
-        positions[id].xyz + // position
-        new_right * pos.x +              // right
-        vec3(0, 1, 0) * pos.y +          // up
-        look_x0z * pos.z, 1.0            // forward
-    );
+    if (billboard == 1) {
+        world_space_pos = vec4(
+            positions[id].xyz + // position
+            new_right * pos.x +              // right
+            vec3(0, 1, 0) * pos.y +          // up
+            look_x0z * pos.z, 1.0            // forward
+        );
+    } else {
+        world_space_pos = vec4(
+            positions[id].xyz +
+            non_billboard_right * pos.x +
+            non_billboard_up * pos.y +
+            look_x0z * pos.z, 1.0
+        );
+    }
+
     gl_Position = vp * world_space_pos;
 
     viewZ = -(view * world_space_pos).z;

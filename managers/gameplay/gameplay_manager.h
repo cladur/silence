@@ -31,6 +31,8 @@ public:
 	glm::vec3 get_hacker_position(Scene *scene) const;
 	uint32_t get_agent_entity() const;
 	uint32_t get_hacker_entity() const;
+	uint32_t get_agent_camera(Scene *scene) const;
+	uint32_t get_hacker_camera(Scene *scene) const;
 	float get_highest_detection() const;
 	uint32_t get_enemies_near_player() const;
 

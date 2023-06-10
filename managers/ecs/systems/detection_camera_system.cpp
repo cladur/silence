@@ -7,9 +7,9 @@
 #include <glm/ext/matrix_transform.hpp>
 
 AutoCVarFloat cvar_enemy_camera_detection_range(
-		"enemy_camera.detection_range", "Detection Camera Range", 55, CVarFlags::EditFloatDrag);
+		"enemy_camera.detection_range", "Detection Camera Range", 12, CVarFlags::EditFloatDrag);
 AutoCVarFloat cvar_enemy_camera_detection_angle(
-		"enemy_camera.detection_angle", "Detection Camera Angle", 135, CVarFlags::EditFloatDrag);
+		"enemy_camera.detection_angle", "Detection Camera Angle", 50, CVarFlags::EditFloatDrag);
 AutoCVarFloat cvar_enemy_camera_detection_vertical_angle(
 		"enemy_camera.detection_vertical_angle", "Detection Camera Vertical Angle", 135, CVarFlags::EditFloatDrag);
 
@@ -45,6 +45,7 @@ void DetectionCameraSystem::update(World &world, float dt) {
 			ui.activate_ui_scene(std::to_string(entity) + "_detection");
 
 			detection_camera.starting_orientation = transform.get_orientation();
+			detection_camera.detection_event = AudioManager::get().create_event_instance("SFX/camera_detecting");
 		}
 
 		if (!detection_camera.is_active) {
@@ -52,7 +53,9 @@ void DetectionCameraSystem::update(World &world, float dt) {
 		}
 		DebugDraw &debug_draw = world.get_parent_scene()->get_render_scene().debug_draw;
 
+		glm::vec3 forward = transform.get_global_forward();
+
 		enemy_utils::handle_detection_camera(
-				&world, entity, transform, transform.get_global_forward(), detection_camera, dt, &debug_draw);
+				&world, entity, transform, -forward, detection_camera, dt, &debug_draw);
 	}
 }
