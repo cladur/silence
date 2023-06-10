@@ -14,10 +14,17 @@
 #include <audio/audio_manager.h>
 #include <render/transparent_elements/ui_manager.h>
 #include <spdlog/spdlog.h>
+#include <glm/common.hpp>
 #include <glm/fwd.hpp>
 #include <glm/geometric.hpp>
 
 AutoCVarFloat cvar_hacker_acc_ground("hacker.acc_ground", "acceleration on ground ", 0.4f, CVarFlags::EditCheckbox);
+
+AutoCVarFloat cvar_hacker_minimal_animation_speed(
+		"hacker.minimal_animation_speed", "minimal walking animation speed ", 3500.0f, CVarFlags::EditCheckbox);
+
+AutoCVarFloat cvar_hacker_velocity_animation_speed_multiplier("hacker.velocity_animation_speed_multiplier",
+		"glm::length(velocity) * this", 400000.0f, CVarFlags::EditCheckbox);
 
 AutoCVarFloat cvar_hacker_max_vel_ground(
 		"hacker.max_vel_ground", "maximum velocity on ground ", 2.0f, CVarFlags::EditCheckbox);
@@ -291,7 +298,11 @@ void HackerSystem::update(World &world, float dt) {
 		if (input_manager.is_action_just_pressed("back_from_camera")) {
 			go_back_to_scorpion(world, hacker_data);
 		}
-		glm::normalize(acc_direction);
+
+		if (glm::length(acc_direction) > 0.0f) {
+			acc_direction = glm::normalize(acc_direction);
+		}
+
 		glm::vec3 velocity = move_ground(acc_direction, previous_velocity, dt);
 		if (glm::dot(velocity, velocity) > physics_manager.get_epsilon()) {
 			if (animation_instance.animation_handle.id !=
@@ -303,6 +314,15 @@ void HackerSystem::update(World &world, float dt) {
 					resource_manager.get_animation_handle("scorpion/scorpion_ANIM_GLTF/scorpion_idle.anim").id) {
 				animation_manager.change_animation(hacker_data.model, "scorpion/scorpion_ANIM_GLTF/scorpion_idle.anim");
 			}
+		}
+		if (glm::length(velocity) == 0.0f) {
+			animation_instance.ticks_per_second = 1000.0f;
+		} else {
+			float new_animation_speed = glm::length(velocity) * cvar_hacker_velocity_animation_speed_multiplier.get();
+			if (new_animation_speed < cvar_hacker_minimal_animation_speed.get()) {
+				new_animation_speed = cvar_hacker_minimal_animation_speed.get();
+			}
+			animation_instance.ticks_per_second = new_animation_speed;
 		}
 
 		transform.add_position(glm::vec3(velocity.x, 0.0, velocity.z));
@@ -370,7 +390,7 @@ void HackerSystem::update(World &world, float dt) {
 		// Lerp model_tf towards movement direction
 		glm::vec3 delta_position = transform.position - last_position;
 		delta_position.y = 0.0f;
-		if (glm::length2(delta_position) > 0.0001f) {
+		if (glm::length2(delta_position) > 0.001f) {
 			glm::vec3 direction = glm::normalize(delta_position);
 			glm::vec3 forward =
 					glm::normalize(glm::vec3(model_tf.get_global_forward().x, 0.0f, model_tf.get_global_forward().z));
@@ -411,6 +431,10 @@ void HackerSystem::update(World &world, float dt) {
 		//		);
 
 		last_position = transform.position;
+
+		if (glm::length(velocity) < 0.0001f) {
+			velocity = glm::vec3(0.0f);
+		}
 		previous_velocity = velocity;
 	}
 }
