@@ -575,8 +575,29 @@ void ParticlePass::draw(RenderScene &scene, bool right_camera) {
 			material.shader.set_int("particle_tex", 0);
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, tex.id);
+
+			ParticleVertex vertices[4];
+			vertices[0] = pm.default_particle_vertices[0];
+			vertices[1] = pm.default_particle_vertices[1];
+			vertices[2] = pm.default_particle_vertices[2];
+			vertices[3] = pm.default_particle_vertices[3];
+
+			float tex_ratio = (float) tex.width / (float) tex.height;
+
+			vertices[0].position.x *= tex_ratio;
+			vertices[1].position.x *= tex_ratio;
+			vertices[2].position.x *= tex_ratio;
+			vertices[3].position.x *= tex_ratio;
+
+			glBindVertexArray(vao);
+			glBindBuffer(GL_ARRAY_BUFFER, vbo);
+			glBufferSubData(GL_ARRAY_BUFFER, 0, 4 * sizeof(ParticleVertex), &vertices[0]);
 		} else {
 			material.shader.set_int("is_textured", 0);
+
+			glBindVertexArray(vao);
+			glBindBuffer(GL_ARRAY_BUFFER, vbo);
+			glBufferSubData(GL_ARRAY_BUFFER, 0, 4 * sizeof(ParticleVertex), &pm.default_particle_vertices[0]);
 		}
 
 		material.shader.set_int("depth", 1);
@@ -596,10 +617,6 @@ void ParticlePass::draw(RenderScene &scene, bool right_camera) {
 
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
 		glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeof(ssbo_data[i]), &ssbo_data[i]);
-
-		glBindVertexArray(vao);
-		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, 4 * sizeof(ParticleVertex), &pm.default_particle_vertices[0]);
 
 		glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr, j);
 

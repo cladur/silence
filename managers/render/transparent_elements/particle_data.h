@@ -61,12 +61,11 @@ struct ParticleData {
 
 	ParticleData() = default;
 
-	ParticleData(ParticleEmitter &p, glm::vec3 position) {
-		this->position = position + glm::vec3(
-											((float)(rand() % 1000) / 1000.0f - 0.5f) * p.position_variance.x,
-											((float)(rand() % 1000) / 1000.0f - 0.5f) * p.position_variance.y,
-											((float)(rand() % 1000) / 1000.0f - 0.5f) * p.position_variance.z
-									);
+	ParticleData(ParticleEmitter &p, Transform &t, glm::vec3 pos) {
+		this->position = pos + t.get_global_position() +
+											(((float)(rand() % 1000) / 1000.0f - 0.5f) * p.position_variance.x * t.get_global_right()) +
+											(((float)(rand() % 1000) / 1000.0f - 0.5f) * p.position_variance.y * t.get_global_up()) +
+											(((float)(rand() % 1000) / 1000.0f - 0.5f) * p.position_variance.z * t.get_global_forward());
 		velocity_begin = p.velocity_begin;
 		velocity_end = p.velocity_end;
 		velocity_transition_type = p.velocity_transition;

@@ -3,18 +3,6 @@
         "components": [
             {
                 "component_data": {
-                    "parent": 25
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "name": "Skrzyneczka"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "orientation": {
                         "w": 0.9996086359024048,
                         "x": 0.0,
@@ -36,6 +24,24 @@
             },
             {
                 "component_data": {
+                    "name": "Skrzyneczka"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 25
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "layer_name": "agent"
+                },
+                "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "items/wooden_box/wooden_box.mdl",
@@ -46,12 +52,6 @@
             {
                 "component_data": {},
                 "component_name": "StaticTag"
-            },
-            {
-                "component_data": {
-                    "layer_name": "agent"
-                },
-                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -85,12 +85,6 @@
         "components": [
             {
                 "component_data": {
-                    "name": "Floor"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": 0.0,
@@ -112,6 +106,12 @@
             },
             {
                 "component_data": {
+                    "name": "Floor"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "items/planes/asfalt.mdl",
@@ -125,18 +125,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "parent": 70
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "name": "Camera"
-                },
-                "component_name": "Name"
-            },
             {
                 "component_data": {
                     "orientation": {
@@ -160,6 +148,18 @@
             },
             {
                 "component_data": {
+                    "name": "Camera"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 70
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "fov": 70.0,
                     "right_side": false
                 },
@@ -171,18 +171,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "parent": 15
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "name": "Box"
-                },
-                "component_name": "Name"
-            },
             {
                 "component_data": {
                     "orientation": {
@@ -206,6 +194,18 @@
             },
             {
                 "component_data": {
+                    "name": "Box"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 15
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
@@ -219,20 +219,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "enemy/enemy.skinmdl"
-                },
-                "component_name": "SkinnedModelInstance"
-            },
-            {
-                "component_data": {
-                    "name": "Enemy"
-                },
-                "component_name": "Name"
-            },
             {
                 "component_data": {
                     "orientation": {
@@ -256,16 +242,30 @@
             },
             {
                 "component_data": {
-                    "animation_name": "enemy/enemy_ANIM_GLTF/enemy_walk_with_gun.anim",
-                    "ticks_per_second": 1000.0
+                    "name": "Enemy"
                 },
-                "component_name": "AnimationInstance"
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "enemy/enemy.skinmdl"
+                },
+                "component_name": "SkinnedModelInstance"
             },
             {
                 "component_data": {
                     "layer_name": "default"
                 },
                 "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {
+                    "animation_name": "enemy/enemy_ANIM_GLTF/enemy_walk_with_gun.anim",
+                    "ticks_per_second": 1000.0
+                },
+                "component_name": "AnimationInstance"
             },
             {
                 "component_data": {
@@ -285,15 +285,13 @@
             },
             {
                 "component_data": {
-                    "highlight_color": {
-                        "b": 0.0,
-                        "g": 0.0,
-                        "r": 1.0
-                    },
-                    "highlighted": "twoja misja trwa",
-                    "target": 2
+                    "tag_position": {
+                        "x": 0.0,
+                        "y": 2.0,
+                        "z": 0.0
+                    }
                 },
-                "component_name": "Highlight"
+                "component_name": "Taggable"
             },
             {
                 "component_data": {
@@ -309,13 +307,15 @@
             },
             {
                 "component_data": {
-                    "tag_position": {
-                        "x": 0.0,
-                        "y": 2.0,
-                        "z": 0.0
-                    }
+                    "highlight_color": {
+                        "b": 0.0,
+                        "g": 0.0,
+                        "r": 1.0
+                    },
+                    "highlighted": "twoja misja trwa",
+                    "target": 2
                 },
-                "component_name": "Taggable"
+                "component_name": "Highlight"
             }
         ],
         "entity": 5,
@@ -325,26 +325,6 @@
         "components": [
             {
                 "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "agent/agent.skinmdl"
-                },
-                "component_name": "SkinnedModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 46
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "name": "Agent"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": -3.204225151876017e-08,
@@ -352,8 +332,8 @@
                         "z": -1.4057295061320474e-07
                     },
                     "position": {
-                        "x": 0.0,
-                        "y": 0.0,
+                        "x": 2.0468005956786328e-08,
+                        "y": 0.07280232012271881,
                         "z": 0.0
                     },
                     "scale": {
@@ -363,6 +343,26 @@
                     }
                 },
                 "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "name": "Agent"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 46
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "agent/agent.skinmdl"
+                },
+                "component_name": "SkinnedModelInstance"
             },
             {
                 "component_data": {
@@ -391,12 +391,6 @@
         "components": [
             {
                 "component_data": {
-                    "name": "Start"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": 0.0,
@@ -418,6 +412,12 @@
             },
             {
                 "component_data": {
+                    "name": "Start"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
                     "children": [
                         10,
                         9,
@@ -434,18 +434,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "parent": 7
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "name": "Cube 1x1"
-                },
-                "component_name": "Name"
-            },
             {
                 "component_data": {
                     "orientation": {
@@ -469,6 +457,24 @@
             },
             {
                 "component_data": {
+                    "name": "Cube 1x1"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 7
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "layer_name": "default"
+                },
+                "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
@@ -479,12 +485,6 @@
             {
                 "component_data": {},
                 "component_name": "StaticTag"
-            },
-            {
-                "component_data": {
-                    "layer_name": "default"
-                },
-                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -509,18 +509,6 @@
         "components": [
             {
                 "component_data": {
-                    "parent": 7
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "name": "Cube 1x1"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": 0.0,
@@ -542,6 +530,24 @@
             },
             {
                 "component_data": {
+                    "name": "Cube 1x1"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 7
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "layer_name": "default"
+                },
+                "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
@@ -552,12 +558,6 @@
             {
                 "component_data": {},
                 "component_name": "StaticTag"
-            },
-            {
-                "component_data": {
-                    "layer_name": "default"
-                },
-                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -582,18 +582,6 @@
         "components": [
             {
                 "component_data": {
-                    "parent": 7
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "name": "Cube 1x1"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": 0.0,
@@ -615,6 +603,18 @@
             },
             {
                 "component_data": {
+                    "name": "Cube 1x1"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 7
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
@@ -628,18 +628,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "parent": 7
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "name": "Cube 1x1"
-                },
-                "component_name": "Name"
-            },
             {
                 "component_data": {
                     "orientation": {
@@ -663,6 +651,18 @@
             },
             {
                 "component_data": {
+                    "name": "Cube 1x1"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 7
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
@@ -676,12 +676,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "name": "First Cover"
-                },
-                "component_name": "Name"
-            },
             {
                 "component_data": {
                     "orientation": {
@@ -705,6 +699,12 @@
             },
             {
                 "component_data": {
+                    "name": "First Cover"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
                     "children": [
                         13,
                         14
@@ -719,18 +719,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "name": "Cube 1x1"
-                },
-                "component_name": "Name"
-            },
             {
                 "component_data": {
                     "orientation": {
@@ -754,6 +742,18 @@
             },
             {
                 "component_data": {
+                    "name": "Cube 1x1"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
@@ -767,18 +767,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "name": "Cube 1x1"
-                },
-                "component_name": "Name"
-            },
             {
                 "component_data": {
                     "orientation": {
@@ -802,6 +790,18 @@
             },
             {
                 "component_data": {
+                    "name": "Cube 1x1"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
@@ -815,12 +815,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "name": "Island On Left"
-                },
-                "component_name": "Name"
-            },
             {
                 "component_data": {
                     "orientation": {
@@ -841,6 +835,12 @@
                     }
                 },
                 "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "name": "Island On Left"
+                },
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -868,18 +868,6 @@
         "components": [
             {
                 "component_data": {
-                    "parent": 15
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "name": "Cube 1x1"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": 0.0,
@@ -901,6 +889,18 @@
             },
             {
                 "component_data": {
+                    "name": "Cube 1x1"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 15
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
@@ -914,18 +914,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "parent": 15
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "name": "Cube 1x1"
-                },
-                "component_name": "Name"
-            },
             {
                 "component_data": {
                     "orientation": {
@@ -949,6 +937,18 @@
             },
             {
                 "component_data": {
+                    "name": "Cube 1x1"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 15
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
@@ -962,18 +962,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "parent": 15
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "name": "Cube 1x1"
-                },
-                "component_name": "Name"
-            },
             {
                 "component_data": {
                     "orientation": {
@@ -997,6 +985,18 @@
             },
             {
                 "component_data": {
+                    "name": "Cube 1x1"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 15
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
@@ -1010,18 +1010,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "parent": 15
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "name": "Cover"
-                },
-                "component_name": "Name"
-            },
             {
                 "component_data": {
                     "orientation": {
@@ -1045,6 +1033,18 @@
             },
             {
                 "component_data": {
+                    "name": "Cover"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 15
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
@@ -1058,18 +1058,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "parent": 15
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "name": "Cube 1x1"
-                },
-                "component_name": "Name"
-            },
             {
                 "component_data": {
                     "orientation": {
@@ -1093,6 +1081,18 @@
             },
             {
                 "component_data": {
+                    "name": "Cube 1x1"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 15
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
@@ -1106,18 +1106,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "parent": 15
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "name": "Cube 1x1"
-                },
-                "component_name": "Name"
-            },
             {
                 "component_data": {
                     "orientation": {
@@ -1141,6 +1129,18 @@
             },
             {
                 "component_data": {
+                    "name": "Cube 1x1"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 15
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
@@ -1154,12 +1154,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "name": "End"
-                },
-                "component_name": "Name"
-            },
             {
                 "component_data": {
                     "orientation": {
@@ -1183,6 +1177,12 @@
             },
             {
                 "component_data": {
+                    "name": "End"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
                     "children": [
                         39,
                         38,
@@ -1198,18 +1198,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "parent": 25
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "name": "Cube 1x1"
-                },
-                "component_name": "Name"
-            },
             {
                 "component_data": {
                     "orientation": {
@@ -1233,6 +1221,18 @@
             },
             {
                 "component_data": {
+                    "name": "Cube 1x1"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 25
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
@@ -1246,18 +1246,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "parent": 25
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "name": "Cube 1x1"
-                },
-                "component_name": "Name"
-            },
             {
                 "component_data": {
                     "orientation": {
@@ -1281,22 +1269,30 @@
             },
             {
                 "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "placeholders/cube_1x1x1.mdl",
-                    "scale_uv_with_transform": false
+                    "name": "Cube 1x1"
                 },
-                "component_name": "ModelInstance"
+                "component_name": "Name"
             },
             {
-                "component_data": {},
-                "component_name": "StaticTag"
+                "component_data": {
+                    "parent": 25
+                },
+                "component_name": "Parent"
             },
             {
                 "component_data": {
                     "layer_name": "default"
                 },
                 "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
             },
             {
                 "component_data": {
@@ -1324,6 +1320,10 @@
                     }
                 },
                 "component_name": "ColliderOBB"
+            },
+            {
+                "component_data": {},
+                "component_name": "StaticTag"
             }
         ],
         "entity": 24,
@@ -1331,12 +1331,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "name": "Cover to the Right"
-                },
-                "component_name": "Name"
-            },
             {
                 "component_data": {
                     "orientation": {
@@ -1360,6 +1354,12 @@
             },
             {
                 "component_data": {
+                    "name": "Cover to the Right"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
                     "children": [
                         24,
                         23,
@@ -1376,12 +1376,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "name": "Cover Middle"
-                },
-                "component_name": "Name"
-            },
             {
                 "component_data": {
                     "orientation": {
@@ -1405,6 +1399,12 @@
             },
             {
                 "component_data": {
+                    "name": "Cover Middle"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
                     "children": [
                         27,
                         29,
@@ -1420,18 +1420,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "parent": 26
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "name": "Cube 1x1"
-                },
-                "component_name": "Name"
-            },
             {
                 "component_data": {
                     "orientation": {
@@ -1455,6 +1443,18 @@
             },
             {
                 "component_data": {
+                    "name": "Cube 1x1"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 26
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
@@ -1468,18 +1468,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "parent": 26
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "name": "Cube 1x1"
-                },
-                "component_name": "Name"
-            },
             {
                 "component_data": {
                     "orientation": {
@@ -1503,6 +1491,18 @@
             },
             {
                 "component_data": {
+                    "name": "Cube 1x1"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 26
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
@@ -1516,18 +1516,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "parent": 26
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "name": "Cube 1x1"
-                },
-                "component_name": "Name"
-            },
             {
                 "component_data": {
                     "orientation": {
@@ -1551,6 +1539,18 @@
             },
             {
                 "component_data": {
+                    "name": "Cube 1x1"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 26
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
@@ -1564,18 +1564,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "parent": 25
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "name": "Electric Box"
-                },
-                "component_name": "Name"
-            },
             {
                 "component_data": {
                     "orientation": {
@@ -1599,6 +1587,18 @@
             },
             {
                 "component_data": {
+                    "name": "Electric Box"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 25
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "items/electric_box_2/electric_box_2.mdl",
@@ -1612,18 +1612,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "parent": 15
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "name": "Cardboard Box"
-                },
-                "component_name": "Name"
-            },
             {
                 "component_data": {
                     "orientation": {
@@ -1647,6 +1635,18 @@
             },
             {
                 "component_data": {
+                    "name": "Cardboard Box"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 15
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "items/cardboard_box/cardboard_box.mdl",
@@ -1660,12 +1660,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "name": "Walls"
-                },
-                "component_name": "Name"
-            },
             {
                 "component_data": {
                     "orientation": {
@@ -1689,6 +1683,12 @@
             },
             {
                 "component_data": {
+                    "name": "Walls"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
                     "children": [
                         33,
                         34,
@@ -1706,18 +1706,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "parent": 32
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "name": "Back"
-                },
-                "component_name": "Name"
-            },
             {
                 "component_data": {
                     "orientation": {
@@ -1741,6 +1729,18 @@
             },
             {
                 "component_data": {
+                    "name": "Back"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 32
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
@@ -1754,18 +1754,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "parent": 32
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "name": "Left"
-                },
-                "component_name": "Name"
-            },
             {
                 "component_data": {
                     "orientation": {
@@ -1789,6 +1777,18 @@
             },
             {
                 "component_data": {
+                    "name": "Left"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 32
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
@@ -1802,18 +1802,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "parent": 32
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "name": "Right"
-                },
-                "component_name": "Name"
-            },
             {
                 "component_data": {
                     "orientation": {
@@ -1837,6 +1825,18 @@
             },
             {
                 "component_data": {
+                    "name": "Right"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 32
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
@@ -1850,18 +1850,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "parent": 32
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "name": "Right 2"
-                },
-                "component_name": "Name"
-            },
             {
                 "component_data": {
                     "orientation": {
@@ -1885,6 +1873,18 @@
             },
             {
                 "component_data": {
+                    "name": "Right 2"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 32
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
@@ -1898,18 +1898,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "parent": 22
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "name": "Cube 1x1"
-                },
-                "component_name": "Name"
-            },
             {
                 "component_data": {
                     "orientation": {
@@ -1933,6 +1921,18 @@
             },
             {
                 "component_data": {
+                    "name": "Cube 1x1"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 22
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
@@ -1946,18 +1946,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "parent": 22
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "name": "Cube 1x1"
-                },
-                "component_name": "Name"
-            },
             {
                 "component_data": {
                     "orientation": {
@@ -1981,6 +1969,18 @@
             },
             {
                 "component_data": {
+                    "name": "Cube 1x1"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 22
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
@@ -1994,18 +1994,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "parent": 22
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "name": "Cube 1x1"
-                },
-                "component_name": "Name"
-            },
             {
                 "component_data": {
                     "orientation": {
@@ -2029,6 +2017,18 @@
             },
             {
                 "component_data": {
+                    "name": "Cube 1x1"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 22
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
@@ -2042,18 +2042,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "parent": 32
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "name": "Front"
-                },
-                "component_name": "Name"
-            },
             {
                 "component_data": {
                     "orientation": {
@@ -2077,6 +2065,18 @@
             },
             {
                 "component_data": {
+                    "name": "Front"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 32
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
@@ -2090,12 +2090,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "parent": 42
-                },
-                "component_name": "Parent"
-            },
             {
                 "component_data": {
                     "orientation": {
@@ -2116,6 +2110,12 @@
                     }
                 },
                 "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "parent": 42
+                },
+                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -2140,12 +2140,6 @@
         "components": [
             {
                 "component_data": {
-                    "name": "Lights"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "orientation": {
                         "w": 0.0,
                         "x": 0.0,
@@ -2167,6 +2161,12 @@
             },
             {
                 "component_data": {
+                    "name": "Lights"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
                     "children": [
                         41,
                         43,
@@ -2182,12 +2182,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "parent": 42
-                },
-                "component_name": "Parent"
-            },
             {
                 "component_data": {
                     "orientation": {
@@ -2208,6 +2202,12 @@
                     }
                 },
                 "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "parent": 42
+                },
+                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -2232,12 +2232,6 @@
         "components": [
             {
                 "component_data": {
-                    "parent": 42
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": 0.0,
@@ -2256,6 +2250,12 @@
                     }
                 },
                 "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "parent": 42
+                },
+                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -2280,18 +2280,6 @@
         "components": [
             {
                 "component_data": {
-                    "parent": 15
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "name": "Electric Box"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "orientation": {
                         "w": -0.5,
                         "x": 0.5000000596046448,
@@ -2313,6 +2301,18 @@
             },
             {
                 "component_data": {
+                    "name": "Electric Box"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 15
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "items/electric_box/electric_box.mdl",
@@ -2326,12 +2326,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "name": "Agent Controller"
-                },
-                "component_name": "Name"
-            },
             {
                 "component_data": {
                     "orientation": {
@@ -2352,6 +2346,21 @@
                     }
                 },
                 "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "name": "Agent Controller"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "camera": 3,
+                    "camera_pivot": 47,
+                    "model": 6,
+                    "spring_arm": 70
+                },
+                "component_name": "AgentData"
             },
             {
                 "component_data": {
@@ -2385,15 +2394,6 @@
                     }
                 },
                 "component_name": "ColliderCapsule"
-            },
-            {
-                "component_data": {
-                    "camera": 3,
-                    "camera_pivot": 47,
-                    "model": 6,
-                    "spring_arm": 70
-                },
-                "component_name": "AgentData"
             }
         ],
         "entity": 46,
@@ -2401,18 +2401,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "parent": 46
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "name": "CameraPivot"
-                },
-                "component_name": "Name"
-            },
             {
                 "component_data": {
                     "orientation": {
@@ -2436,6 +2424,18 @@
             },
             {
                 "component_data": {
+                    "name": "CameraPivot"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 46
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "children": [
                         70
                     ],
@@ -2449,18 +2449,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "parent": 49
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "name": "Floor"
-                },
-                "component_name": "Name"
-            },
             {
                 "component_data": {
                     "orientation": {
@@ -2483,14 +2471,26 @@
                 "component_name": "Transform"
             },
             {
-                "component_data": {},
-                "component_name": "StaticTag"
+                "component_data": {
+                    "name": "Floor"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 49
+                },
+                "component_name": "Parent"
             },
             {
                 "component_data": {
                     "layer_name": "default"
                 },
                 "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {},
+                "component_name": "StaticTag"
             },
             {
                 "component_data": {
@@ -2515,12 +2515,6 @@
         "components": [
             {
                 "component_data": {
-                    "name": "Colliders"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "orientation": {
                         "w": 0.0,
                         "x": 0.0,
@@ -2542,6 +2536,12 @@
             },
             {
                 "component_data": {
+                    "name": "Colliders"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
                     "children": [
                         48,
                         50,
@@ -2558,18 +2558,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "parent": 49
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "name": "Left Wall"
-                },
-                "component_name": "Name"
-            },
             {
                 "component_data": {
                     "orientation": {
@@ -2592,14 +2580,26 @@
                 "component_name": "Transform"
             },
             {
-                "component_data": {},
-                "component_name": "StaticTag"
+                "component_data": {
+                    "name": "Left Wall"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 49
+                },
+                "component_name": "Parent"
             },
             {
                 "component_data": {
                     "layer_name": "default"
                 },
                 "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {},
+                "component_name": "StaticTag"
             },
             {
                 "component_data": {
@@ -2624,18 +2624,6 @@
         "components": [
             {
                 "component_data": {
-                    "parent": 49
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "name": "Back Wall"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": 0.0,
@@ -2656,14 +2644,26 @@
                 "component_name": "Transform"
             },
             {
-                "component_data": {},
-                "component_name": "StaticTag"
+                "component_data": {
+                    "name": "Back Wall"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 49
+                },
+                "component_name": "Parent"
             },
             {
                 "component_data": {
                     "layer_name": "default"
                 },
                 "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {},
+                "component_name": "StaticTag"
             },
             {
                 "component_data": {
@@ -2688,18 +2688,6 @@
         "components": [
             {
                 "component_data": {
-                    "parent": 49
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "name": "Pochylnia"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "orientation": {
                         "w": 0.9658363461494446,
                         "x": -0.25915271043777466,
@@ -2720,8 +2708,16 @@
                 "component_name": "Transform"
             },
             {
-                "component_data": {},
-                "component_name": "StaticTag"
+                "component_data": {
+                    "name": "Pochylnia"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 49
+                },
+                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -2755,6 +2751,10 @@
                     }
                 },
                 "component_name": "ColliderOBB"
+            },
+            {
+                "component_data": {},
+                "component_name": "StaticTag"
             }
         ],
         "entity": 52,
@@ -2762,12 +2762,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "name": "Container"
-                },
-                "component_name": "Name"
-            },
             {
                 "component_data": {
                     "orientation": {
@@ -2791,6 +2785,12 @@
             },
             {
                 "component_data": {
+                    "name": "Container"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
                     "acceleration": {
                         "x": 0.0,
                         "y": 0.0,
@@ -2807,6 +2807,12 @@
             },
             {
                 "component_data": {
+                    "layer_name": "default"
+                },
+                "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "items/contener/contener.mdl",
@@ -2817,12 +2823,6 @@
             {
                 "component_data": {},
                 "component_name": "StaticTag"
-            },
-            {
-                "component_data": {
-                    "layer_name": "default"
-                },
-                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -2847,12 +2847,6 @@
         "components": [
             {
                 "component_data": {
-                    "name": "Hacker Controller"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": 0.0,
@@ -2871,6 +2865,12 @@
                     }
                 },
                 "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "name": "Hacker Controller"
+                },
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -2916,26 +2916,6 @@
         "components": [
             {
                 "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "scorpion/scorpion.skinmdl"
-                },
-                "component_name": "SkinnedModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 55
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "name": "ScorpionModel"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": 0.0,
@@ -2954,6 +2934,26 @@
                     }
                 },
                 "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "name": "ScorpionModel"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 55
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "scorpion/scorpion.skinmdl"
+                },
+                "component_name": "SkinnedModelInstance"
             },
             {
                 "component_data": {
@@ -2982,18 +2982,6 @@
         "components": [
             {
                 "component_data": {
-                    "parent": 55
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "name": "CameraPivot"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": 0.0,
@@ -3015,6 +3003,18 @@
             },
             {
                 "component_data": {
+                    "name": "CameraPivot"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 55
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "children": [
                         58
                     ],
@@ -3028,18 +3028,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "parent": 57
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "name": "ScorpionCameraTransform"
-                },
-                "component_name": "Name"
-            },
             {
                 "component_data": {
                     "orientation": {
@@ -3060,6 +3048,18 @@
                     }
                 },
                 "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "name": "ScorpionCameraTransform"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 57
+                },
+                "component_name": "Parent"
             }
         ],
         "entity": 58,
@@ -3067,12 +3067,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "name": "Hacker Camera"
-                },
-                "component_name": "Name"
-            },
             {
                 "component_data": {
                     "orientation": {
@@ -3096,6 +3090,12 @@
             },
             {
                 "component_data": {
+                    "name": "Hacker Camera"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
                     "fov": 70.0,
                     "right_side": true
                 },
@@ -3107,12 +3107,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "name": "Knife"
-                },
-                "component_name": "Name"
-            },
             {
                 "component_data": {
                     "orientation": {
@@ -3133,6 +3127,12 @@
                     }
                 },
                 "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "name": "Knife"
+                },
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -3158,12 +3158,6 @@
         "components": [
             {
                 "component_data": {
-                    "name": "Platform Switch 01"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": 0.0,
@@ -3185,18 +3179,24 @@
             },
             {
                 "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "items/electric_box/electric_box.mdl",
-                    "scale_uv_with_transform": false
+                    "name": "Platform Switch 01"
                 },
-                "component_name": "ModelInstance"
+                "component_name": "Name"
             },
             {
                 "component_data": {
                     "layer_name": "hacker"
                 },
                 "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/electric_box/electric_box.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
             },
             {
                 "component_data": {
@@ -3215,15 +3215,13 @@
             },
             {
                 "component_data": {
-                    "highlight_color": {
-                        "b": 0.0,
-                        "g": 1.0,
-                        "r": 0.0
-                    },
-                    "highlighted": "twoja misja trwa",
-                    "target": 3
+                    "tag_position": {
+                        "x": 0.0,
+                        "y": 0.5,
+                        "z": 0.0
+                    }
                 },
-                "component_name": "Highlight"
+                "component_name": "Taggable"
             },
             {
                 "component_data": {
@@ -3236,13 +3234,15 @@
             },
             {
                 "component_data": {
-                    "tag_position": {
-                        "x": 0.0,
-                        "y": 0.5,
-                        "z": 0.0
-                    }
+                    "highlight_color": {
+                        "b": 0.0,
+                        "g": 1.0,
+                        "r": 0.0
+                    },
+                    "highlighted": "twoja misja trwa",
+                    "target": 3
                 },
-                "component_name": "Taggable"
+                "component_name": "Highlight"
             }
         ],
         "entity": 60,
@@ -3250,12 +3250,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "name": "Platform 01"
-                },
-                "component_name": "Name"
-            },
             {
                 "component_data": {
                     "orientation": {
@@ -3279,6 +3273,18 @@
             },
             {
                 "component_data": {
+                    "name": "Platform 01"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "layer_name": "default"
+                },
+                "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
@@ -3289,12 +3295,6 @@
             {
                 "component_data": {},
                 "component_name": "StaticTag"
-            },
-            {
-                "component_data": {
-                    "layer_name": "default"
-                },
-                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -3335,12 +3335,6 @@
         "components": [
             {
                 "component_data": {
-                    "name": "Platform Switch 02"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "orientation": {
                         "w": 0.7071067094802856,
                         "x": -0.7071068286895752,
@@ -3362,18 +3356,24 @@
             },
             {
                 "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "items/electric_box/electric_box.mdl",
-                    "scale_uv_with_transform": false
+                    "name": "Platform Switch 02"
                 },
-                "component_name": "ModelInstance"
+                "component_name": "Name"
             },
             {
                 "component_data": {
                     "layer_name": "hacker"
                 },
                 "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/electric_box/electric_box.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
             },
             {
                 "component_data": {
@@ -3392,15 +3392,13 @@
             },
             {
                 "component_data": {
-                    "highlight_color": {
-                        "b": 0.0,
-                        "g": 1.0,
-                        "r": 0.0
-                    },
-                    "highlighted": "twoja misja trwa",
-                    "target": 3
+                    "tag_position": {
+                        "x": 0.0,
+                        "y": 0.5,
+                        "z": -0.10000000149011612
+                    }
                 },
-                "component_name": "Highlight"
+                "component_name": "Taggable"
             },
             {
                 "component_data": {
@@ -3413,13 +3411,15 @@
             },
             {
                 "component_data": {
-                    "tag_position": {
-                        "x": 0.0,
-                        "y": 0.5,
-                        "z": -0.10000000149011612
-                    }
+                    "highlight_color": {
+                        "b": 0.0,
+                        "g": 1.0,
+                        "r": 0.0
+                    },
+                    "highlighted": "twoja misja trwa",
+                    "target": 3
                 },
-                "component_name": "Taggable"
+                "component_name": "Highlight"
             }
         ],
         "entity": 62,
@@ -3427,12 +3427,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "name": "Platform 02"
-                },
-                "component_name": "Name"
-            },
             {
                 "component_data": {
                     "orientation": {
@@ -3456,6 +3450,18 @@
             },
             {
                 "component_data": {
+                    "name": "Platform 02"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "layer_name": "default"
+                },
+                "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
@@ -3466,12 +3472,6 @@
             {
                 "component_data": {},
                 "component_name": "StaticTag"
-            },
-            {
-                "component_data": {
-                    "layer_name": "default"
-                },
-                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -3512,12 +3512,6 @@
         "components": [
             {
                 "component_data": {
-                    "name": "Gun"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "orientation": {
                         "w": 0.3604525923728943,
                         "x": 0.5963832139968872,
@@ -3536,6 +3530,12 @@
                     }
                 },
                 "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "name": "Gun"
+                },
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -3561,12 +3561,6 @@
         "components": [
             {
                 "component_data": {
-                    "name": "barrier"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": 0.0,
@@ -3588,6 +3582,18 @@
             },
             {
                 "component_data": {
+                    "name": "barrier"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "layer_name": "default"
+                },
+                "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "placeholders/cube_1x1x1.mdl",
@@ -3598,12 +3604,6 @@
             {
                 "component_data": {},
                 "component_name": "StaticTag"
-            },
-            {
-                "component_data": {
-                    "layer_name": "default"
-                },
-                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -3628,12 +3628,6 @@
         "components": [
             {
                 "component_data": {
-                    "name": "exp"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "orientation": {
                         "w": 0.7071067094802856,
                         "x": -0.7071068286895752,
@@ -3655,6 +3649,18 @@
             },
             {
                 "component_data": {
+                    "name": "exp"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "layer_name": "hacker"
+                },
+                "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "items/electric_box_2/electric_box_2.mdl",
@@ -3664,9 +3670,57 @@
             },
             {
                 "component_data": {
-                    "layer_name": "hacker"
+                    "center": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "range": {
+                        "x": 0.5,
+                        "y": 0.5,
+                        "z": 0.4000000059604645
+                    }
                 },
-                "component_name": "ColliderTag"
+                "component_name": "ColliderAABB"
+            },
+            {
+                "component_data": {
+                    "tag_position": {
+                        "x": 0.0,
+                        "y": 0.699999988079071,
+                        "z": -0.11999999731779099
+                    }
+                },
+                "component_name": "Taggable"
+            },
+            {
+                "component_data": {
+                    "can_interact": true,
+                    "interaction": 3,
+                    "interaction_target": 66,
+                    "type": 2
+                },
+                "component_name": "Interactable"
+            },
+            {
+                "component_data": {
+                    "distraction_radius": 15.0,
+                    "distraction_time": 2.0,
+                    "explosion_radius": 4.0
+                },
+                "component_name": "ExplodingBox"
+            },
+            {
+                "component_data": {
+                    "highlight_color": {
+                        "b": 0.0,
+                        "g": 0.0,
+                        "r": 1.0
+                    },
+                    "highlighted": "twoja misja trwa",
+                    "target": 3
+                },
+                "component_name": "Highlight"
             },
             {
                 "component_data": {
@@ -3683,6 +3737,7 @@
                         0.01568627543747425
                     ],
                     "color_transition": 2,
+                    "is_billboard": true,
                     "is_one_shot": true,
                     "is_textured": true,
                     "lifetime": 1.5,
@@ -3718,60 +3773,6 @@
                     "velocity_transition": 0
                 },
                 "component_name": "ParticleEmitter"
-            },
-            {
-                "component_data": {
-                    "center": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    "range": {
-                        "x": 0.5,
-                        "y": 0.5,
-                        "z": 0.4000000059604645
-                    }
-                },
-                "component_name": "ColliderAABB"
-            },
-            {
-                "component_data": {
-                    "highlight_color": {
-                        "b": 0.0,
-                        "g": 0.0,
-                        "r": 1.0
-                    },
-                    "highlighted": "twoja misja trwa",
-                    "target": 3
-                },
-                "component_name": "Highlight"
-            },
-            {
-                "component_data": {
-                    "distraction_radius": 15.0,
-                    "distraction_time": 2.0,
-                    "explosion_radius": 4.0
-                },
-                "component_name": "ExplodingBox"
-            },
-            {
-                "component_data": {
-                    "can_interact": true,
-                    "interaction": 3,
-                    "interaction_target": 66,
-                    "type": 2
-                },
-                "component_name": "Interactable"
-            },
-            {
-                "component_data": {
-                    "tag_position": {
-                        "x": 0.0,
-                        "y": 0.699999988079071,
-                        "z": -0.11999999731779099
-                    }
-                },
-                "component_name": "Taggable"
             }
         ],
         "entity": 66,
@@ -3779,18 +3780,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "parent": 15
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "name": "Cardboard Box"
-                },
-                "component_name": "Name"
-            },
             {
                 "component_data": {
                     "orientation": {
@@ -3814,6 +3803,18 @@
             },
             {
                 "component_data": {
+                    "name": "Cardboard Box"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 15
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "items/cardboard_box/cardboard_box.mdl",
@@ -3829,15 +3830,10 @@
         "components": [
             {
                 "component_data": {
-                    "parent": 100
+                    "detection_level": 0.0,
+                    "is_active": true
                 },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "name": "HackerCameraJump"
-                },
-                "component_name": "Name"
+                "component_name": "DetectionCamera"
             },
             {
                 "component_data": {
@@ -3862,12 +3858,64 @@
             },
             {
                 "component_data": {
+                    "name": "HackerCameraJump"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 100
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "children": [
+                        102
+                    ],
+                    "children_count": 1
+                },
+                "component_name": "Children"
+            },
+            {
+                "component_data": {
+                    "layer_name": "hacker"
+                },
+                "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "items/camera/camera_1.mdl",
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
+                    "center": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "range": {
+                        "x": 0.30000001192092896,
+                        "y": 0.30000001192092896,
+                        "z": 0.30000001192092896
+                    }
+                },
+                "component_name": "ColliderAABB"
+            },
+            {
+                "component_data": {
+                    "tag_position": {
+                        "x": 0.0,
+                        "y": 1.0,
+                        "z": 0.0
+                    }
+                },
+                "component_name": "Taggable"
             },
             {
                 "component_data": {
@@ -3894,24 +3942,12 @@
             },
             {
                 "component_data": {
-                    "layer_name": "hacker"
+                    "can_interact": true,
+                    "interaction": 1,
+                    "interaction_target": 68,
+                    "type": 2
                 },
-                "component_name": "ColliderTag"
-            },
-            {
-                "component_data": {
-                    "center": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    "range": {
-                        "x": 0.30000001192092896,
-                        "y": 0.30000001192092896,
-                        "z": 0.30000001192092896
-                    }
-                },
-                "component_name": "ColliderAABB"
+                "component_name": "Interactable"
             },
             {
                 "component_data": {
@@ -3924,45 +3960,13 @@
                     "target": 2
                 },
                 "component_name": "Highlight"
-            },
-            {
-                "component_data": {
-                    "can_interact": true,
-                    "interaction": 1,
-                    "interaction_target": 68,
-                    "type": 2
-                },
-                "component_name": "Interactable"
-            },
-            {
-                "component_data": {
-                    "tag_position": {
-                        "x": 0.0,
-                        "y": 1.0,
-                        "z": 0.0
-                    }
-                },
-                "component_name": "Taggable"
-            },
-            {
-                "component_data": {
-                    "detection_level": 0.0,
-                    "is_active": true
-                },
-                "component_name": "DetectionCamera"
             }
         ],
         "entity": 68,
-        "signature": "0000000000000000000000000000000101010010000100000010100000101011"
+        "signature": "0000000000000000000000000000000101010010000100000010100000111011"
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "name": "fancy light"
-                },
-                "component_name": "Name"
-            },
             {
                 "component_data": {
                     "orientation": {
@@ -3986,6 +3990,27 @@
             },
             {
                 "component_data": {
+                    "name": "fancy light"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "cast_shadow": false,
+                    "color": {
+                        "b": 0.036322809755802155,
+                        "g": 0.8989899158477783,
+                        "r": 0.8205655813217163
+                    },
+                    "cutoff": 12.5,
+                    "intensity": 150.0,
+                    "outer_cutoff": 5.0,
+                    "type": 0
+                },
+                "component_name": "Light"
+            },
+            {
+                "component_data": {
                     "billboard_z_offset": -4.800000190734863,
                     "color": {
                         "a": 1.0,
@@ -4006,21 +4031,6 @@
                     "use_camera_right": false
                 },
                 "component_name": "Billboard"
-            },
-            {
-                "component_data": {
-                    "cast_shadow": false,
-                    "color": {
-                        "b": 0.036322809755802155,
-                        "g": 0.8989899158477783,
-                        "r": 0.8205655813217163
-                    },
-                    "cutoff": 12.5,
-                    "intensity": 150.0,
-                    "outer_cutoff": 5.0,
-                    "type": 0
-                },
-                "component_name": "Light"
             }
         ],
         "entity": 69,
@@ -4028,18 +4038,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "parent": 47
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "name": "SpringArm"
-                },
-                "component_name": "Name"
-            },
             {
                 "component_data": {
                     "orientation": {
@@ -4063,6 +4061,18 @@
             },
             {
                 "component_data": {
+                    "name": "SpringArm"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 47
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "children": [
                         3
                     ],
@@ -4076,18 +4086,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "parent": 46
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "name": "Camera Floor"
-                },
-                "component_name": "Name"
-            },
             {
                 "component_data": {
                     "orientation": {
@@ -4108,6 +4106,18 @@
                     }
                 },
                 "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "name": "Camera Floor"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 46
+                },
+                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -4150,12 +4160,6 @@
         "components": [
             {
                 "component_data": {
-                    "name": "EnemyPathParent"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "orientation": {
                         "w": -0.2785762846469879,
                         "x": 0.0,
@@ -4174,6 +4178,12 @@
                     }
                 },
                 "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "name": "EnemyPathParent"
+                },
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -4215,25 +4225,6 @@
         "components": [
             {
                 "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 0.0
-                },
-                "component_name": "PathNode"
-            },
-            {
-                "component_data": {
-                    "parent": 73
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "name": "PathNode"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": 0.0,
@@ -4252,6 +4243,25 @@
                     }
                 },
                 "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "name": "PathNode"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 73
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "is_patrol_point": false,
+                    "patrol_time": 0.0
+                },
+                "component_name": "PathNode"
             }
         ],
         "entity": 74,
@@ -4261,25 +4271,6 @@
         "components": [
             {
                 "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 0.0
-                },
-                "component_name": "PathNode"
-            },
-            {
-                "component_data": {
-                    "parent": 73
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "name": "PathNode"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": 0.0,
@@ -4298,6 +4289,25 @@
                     }
                 },
                 "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "name": "PathNode"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 73
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "is_patrol_point": false,
+                    "patrol_time": 0.0
+                },
+                "component_name": "PathNode"
             }
         ],
         "entity": 75,
@@ -4307,25 +4317,6 @@
         "components": [
             {
                 "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 0.0
-                },
-                "component_name": "PathNode"
-            },
-            {
-                "component_data": {
-                    "parent": 73
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "name": "PathNode"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": 0.0,
@@ -4344,6 +4335,25 @@
                     }
                 },
                 "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "name": "PathNode"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 73
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "is_patrol_point": false,
+                    "patrol_time": 0.0
+                },
+                "component_name": "PathNode"
             }
         ],
         "entity": 76,
@@ -4353,25 +4363,6 @@
         "components": [
             {
                 "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 0.0
-                },
-                "component_name": "PathNode"
-            },
-            {
-                "component_data": {
-                    "parent": 73
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "name": "PathNode"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": 0.0,
@@ -4390,6 +4381,25 @@
                     }
                 },
                 "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "name": "PathNode"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 73
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "is_patrol_point": false,
+                    "patrol_time": 0.0
+                },
+                "component_name": "PathNode"
             }
         ],
         "entity": 77,
@@ -4399,25 +4409,6 @@
         "components": [
             {
                 "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 0.0
-                },
-                "component_name": "PathNode"
-            },
-            {
-                "component_data": {
-                    "parent": 73
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "name": "PathNode"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": 0.0,
@@ -4436,6 +4427,25 @@
                     }
                 },
                 "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "name": "PathNode"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 73
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "is_patrol_point": false,
+                    "patrol_time": 0.0
+                },
+                "component_name": "PathNode"
             }
         ],
         "entity": 78,
@@ -4445,16 +4455,24 @@
         "components": [
             {
                 "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 0.0
+                    "orientation": {
+                        "w": 1.0,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
                 },
-                "component_name": "PathNode"
-            },
-            {
-                "component_data": {
-                    "parent": 73
-                },
-                "component_name": "Parent"
+                "component_name": "Transform"
             },
             {
                 "component_data": {
@@ -4464,24 +4482,16 @@
             },
             {
                 "component_data": {
-                    "orientation": {
-                        "w": 1.0,
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    "position": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    "scale": {
-                        "x": 1.0,
-                        "y": 1.0,
-                        "z": 1.0
-                    }
+                    "parent": 73
                 },
-                "component_name": "Transform"
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "is_patrol_point": false,
+                    "patrol_time": 0.0
+                },
+                "component_name": "PathNode"
             }
         ],
         "entity": 79,
@@ -4491,25 +4501,6 @@
         "components": [
             {
                 "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 3.0
-                },
-                "component_name": "PathNode"
-            },
-            {
-                "component_data": {
-                    "parent": 73
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "name": "node"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": 0.0,
@@ -4528,19 +4519,12 @@
                     }
                 },
                 "component_name": "Transform"
-            }
-        ],
-        "entity": 80,
-        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
-    },
-    {
-        "components": [
+            },
             {
                 "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 3.0
+                    "name": "node"
                 },
-                "component_name": "PathNode"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -4550,10 +4534,17 @@
             },
             {
                 "component_data": {
-                    "name": "node"
+                    "is_patrol_point": false,
+                    "patrol_time": 3.0
                 },
-                "component_name": "Name"
-            },
+                "component_name": "PathNode"
+            }
+        ],
+        "entity": 80,
+        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
+    },
+    {
+        "components": [
             {
                 "component_data": {
                     "orientation": {
@@ -4574,19 +4565,12 @@
                     }
                 },
                 "component_name": "Transform"
-            }
-        ],
-        "entity": 81,
-        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
-    },
-    {
-        "components": [
+            },
             {
                 "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 3.0
+                    "name": "node"
                 },
-                "component_name": "PathNode"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -4596,10 +4580,17 @@
             },
             {
                 "component_data": {
-                    "name": "node"
+                    "is_patrol_point": false,
+                    "patrol_time": 3.0
                 },
-                "component_name": "Name"
-            },
+                "component_name": "PathNode"
+            }
+        ],
+        "entity": 81,
+        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
+    },
+    {
+        "components": [
             {
                 "component_data": {
                     "orientation": {
@@ -4620,19 +4611,12 @@
                     }
                 },
                 "component_name": "Transform"
-            }
-        ],
-        "entity": 82,
-        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
-    },
-    {
-        "components": [
+            },
             {
                 "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 3.0
+                    "name": "node"
                 },
-                "component_name": "PathNode"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -4642,10 +4626,17 @@
             },
             {
                 "component_data": {
-                    "name": "node"
+                    "is_patrol_point": false,
+                    "patrol_time": 3.0
                 },
-                "component_name": "Name"
-            },
+                "component_name": "PathNode"
+            }
+        ],
+        "entity": 82,
+        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
+    },
+    {
+        "components": [
             {
                 "component_data": {
                     "orientation": {
@@ -4666,19 +4657,12 @@
                     }
                 },
                 "component_name": "Transform"
-            }
-        ],
-        "entity": 83,
-        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
-    },
-    {
-        "components": [
+            },
             {
                 "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 3.0
+                    "name": "node"
                 },
-                "component_name": "PathNode"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -4688,10 +4672,17 @@
             },
             {
                 "component_data": {
-                    "name": "node"
+                    "is_patrol_point": false,
+                    "patrol_time": 3.0
                 },
-                "component_name": "Name"
-            },
+                "component_name": "PathNode"
+            }
+        ],
+        "entity": 83,
+        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
+    },
+    {
+        "components": [
             {
                 "component_data": {
                     "orientation": {
@@ -4712,19 +4703,12 @@
                     }
                 },
                 "component_name": "Transform"
-            }
-        ],
-        "entity": 84,
-        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
-    },
-    {
-        "components": [
+            },
             {
                 "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 3.0
+                    "name": "node"
                 },
-                "component_name": "PathNode"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -4734,10 +4718,17 @@
             },
             {
                 "component_data": {
-                    "name": "node"
+                    "is_patrol_point": false,
+                    "patrol_time": 3.0
                 },
-                "component_name": "Name"
-            },
+                "component_name": "PathNode"
+            }
+        ],
+        "entity": 84,
+        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
+    },
+    {
+        "components": [
             {
                 "component_data": {
                     "orientation": {
@@ -4758,19 +4749,12 @@
                     }
                 },
                 "component_name": "Transform"
-            }
-        ],
-        "entity": 85,
-        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
-    },
-    {
-        "components": [
+            },
             {
                 "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 3.0
+                    "name": "node"
                 },
-                "component_name": "PathNode"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -4780,10 +4764,17 @@
             },
             {
                 "component_data": {
-                    "name": "node"
+                    "is_patrol_point": false,
+                    "patrol_time": 3.0
                 },
-                "component_name": "Name"
-            },
+                "component_name": "PathNode"
+            }
+        ],
+        "entity": 85,
+        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
+    },
+    {
+        "components": [
             {
                 "component_data": {
                     "orientation": {
@@ -4804,19 +4795,12 @@
                     }
                 },
                 "component_name": "Transform"
-            }
-        ],
-        "entity": 86,
-        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
-    },
-    {
-        "components": [
+            },
             {
                 "component_data": {
-                    "is_patrol_point": true,
-                    "patrol_time": 3.0
+                    "name": "node"
                 },
-                "component_name": "PathNode"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -4826,10 +4810,17 @@
             },
             {
                 "component_data": {
-                    "name": "node_patrol"
+                    "is_patrol_point": false,
+                    "patrol_time": 3.0
                 },
-                "component_name": "Name"
-            },
+                "component_name": "PathNode"
+            }
+        ],
+        "entity": 86,
+        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
+    },
+    {
+        "components": [
             {
                 "component_data": {
                     "orientation": {
@@ -4850,19 +4841,12 @@
                     }
                 },
                 "component_name": "Transform"
-            }
-        ],
-        "entity": 87,
-        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
-    },
-    {
-        "components": [
+            },
             {
                 "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 3.0
+                    "name": "node_patrol"
                 },
-                "component_name": "PathNode"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -4872,10 +4856,17 @@
             },
             {
                 "component_data": {
-                    "name": "node"
+                    "is_patrol_point": true,
+                    "patrol_time": 3.0
                 },
-                "component_name": "Name"
-            },
+                "component_name": "PathNode"
+            }
+        ],
+        "entity": 87,
+        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
+    },
+    {
+        "components": [
             {
                 "component_data": {
                     "orientation": {
@@ -4896,19 +4887,12 @@
                     }
                 },
                 "component_name": "Transform"
-            }
-        ],
-        "entity": 88,
-        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
-    },
-    {
-        "components": [
+            },
             {
                 "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 3.0
+                    "name": "node"
                 },
-                "component_name": "PathNode"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -4918,10 +4902,17 @@
             },
             {
                 "component_data": {
-                    "name": "node"
+                    "is_patrol_point": false,
+                    "patrol_time": 3.0
                 },
-                "component_name": "Name"
-            },
+                "component_name": "PathNode"
+            }
+        ],
+        "entity": 88,
+        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
+    },
+    {
+        "components": [
             {
                 "component_data": {
                     "orientation": {
@@ -4942,19 +4933,12 @@
                     }
                 },
                 "component_name": "Transform"
-            }
-        ],
-        "entity": 89,
-        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
-    },
-    {
-        "components": [
+            },
             {
                 "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 3.0
+                    "name": "node"
                 },
-                "component_name": "PathNode"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -4964,10 +4948,17 @@
             },
             {
                 "component_data": {
-                    "name": "node"
+                    "is_patrol_point": false,
+                    "patrol_time": 3.0
                 },
-                "component_name": "Name"
-            },
+                "component_name": "PathNode"
+            }
+        ],
+        "entity": 89,
+        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
+    },
+    {
+        "components": [
             {
                 "component_data": {
                     "orientation": {
@@ -4988,19 +4979,12 @@
                     }
                 },
                 "component_name": "Transform"
-            }
-        ],
-        "entity": 90,
-        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
-    },
-    {
-        "components": [
+            },
             {
                 "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 3.0
+                    "name": "node"
                 },
-                "component_name": "PathNode"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -5010,10 +4994,17 @@
             },
             {
                 "component_data": {
-                    "name": "node"
+                    "is_patrol_point": false,
+                    "patrol_time": 3.0
                 },
-                "component_name": "Name"
-            },
+                "component_name": "PathNode"
+            }
+        ],
+        "entity": 90,
+        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
+    },
+    {
+        "components": [
             {
                 "component_data": {
                     "orientation": {
@@ -5034,19 +5025,12 @@
                     }
                 },
                 "component_name": "Transform"
-            }
-        ],
-        "entity": 91,
-        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
-    },
-    {
-        "components": [
+            },
             {
                 "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 3.0
+                    "name": "node"
                 },
-                "component_name": "PathNode"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -5056,10 +5040,17 @@
             },
             {
                 "component_data": {
-                    "name": "node"
+                    "is_patrol_point": false,
+                    "patrol_time": 3.0
                 },
-                "component_name": "Name"
-            },
+                "component_name": "PathNode"
+            }
+        ],
+        "entity": 91,
+        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
+    },
+    {
+        "components": [
             {
                 "component_data": {
                     "orientation": {
@@ -5080,19 +5071,12 @@
                     }
                 },
                 "component_name": "Transform"
-            }
-        ],
-        "entity": 92,
-        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
-    },
-    {
-        "components": [
+            },
             {
                 "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 3.0
+                    "name": "node"
                 },
-                "component_name": "PathNode"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -5102,10 +5086,17 @@
             },
             {
                 "component_data": {
-                    "name": "node"
+                    "is_patrol_point": false,
+                    "patrol_time": 3.0
                 },
-                "component_name": "Name"
-            },
+                "component_name": "PathNode"
+            }
+        ],
+        "entity": 92,
+        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
+    },
+    {
+        "components": [
             {
                 "component_data": {
                     "orientation": {
@@ -5126,19 +5117,12 @@
                     }
                 },
                 "component_name": "Transform"
-            }
-        ],
-        "entity": 93,
-        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
-    },
-    {
-        "components": [
+            },
             {
                 "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 3.0
+                    "name": "node"
                 },
-                "component_name": "PathNode"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -5148,10 +5132,17 @@
             },
             {
                 "component_data": {
-                    "name": "node"
+                    "is_patrol_point": false,
+                    "patrol_time": 3.0
                 },
-                "component_name": "Name"
-            },
+                "component_name": "PathNode"
+            }
+        ],
+        "entity": 93,
+        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
+    },
+    {
+        "components": [
             {
                 "component_data": {
                     "orientation": {
@@ -5172,19 +5163,12 @@
                     }
                 },
                 "component_name": "Transform"
-            }
-        ],
-        "entity": 94,
-        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
-    },
-    {
-        "components": [
+            },
             {
                 "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 3.0
+                    "name": "node"
                 },
-                "component_name": "PathNode"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -5194,10 +5178,17 @@
             },
             {
                 "component_data": {
-                    "name": "node"
+                    "is_patrol_point": false,
+                    "patrol_time": 3.0
                 },
-                "component_name": "Name"
-            },
+                "component_name": "PathNode"
+            }
+        ],
+        "entity": 94,
+        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
+    },
+    {
+        "components": [
             {
                 "component_data": {
                     "orientation": {
@@ -5218,19 +5209,12 @@
                     }
                 },
                 "component_name": "Transform"
-            }
-        ],
-        "entity": 95,
-        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
-    },
-    {
-        "components": [
+            },
             {
                 "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 3.0
+                    "name": "node"
                 },
-                "component_name": "PathNode"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -5240,10 +5224,17 @@
             },
             {
                 "component_data": {
-                    "name": "node"
+                    "is_patrol_point": false,
+                    "patrol_time": 3.0
                 },
-                "component_name": "Name"
-            },
+                "component_name": "PathNode"
+            }
+        ],
+        "entity": 95,
+        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
+    },
+    {
+        "components": [
             {
                 "component_data": {
                     "orientation": {
@@ -5264,19 +5255,12 @@
                     }
                 },
                 "component_name": "Transform"
-            }
-        ],
-        "entity": 96,
-        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
-    },
-    {
-        "components": [
+            },
             {
                 "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 3.0
+                    "name": "node"
                 },
-                "component_name": "PathNode"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -5286,10 +5270,17 @@
             },
             {
                 "component_data": {
-                    "name": "node"
+                    "is_patrol_point": false,
+                    "patrol_time": 3.0
                 },
-                "component_name": "Name"
-            },
+                "component_name": "PathNode"
+            }
+        ],
+        "entity": 96,
+        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
+    },
+    {
+        "components": [
             {
                 "component_data": {
                     "orientation": {
@@ -5310,19 +5301,12 @@
                     }
                 },
                 "component_name": "Transform"
-            }
-        ],
-        "entity": 97,
-        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
-    },
-    {
-        "components": [
+            },
             {
                 "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 3.0
+                    "name": "node"
                 },
-                "component_name": "PathNode"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -5332,10 +5316,17 @@
             },
             {
                 "component_data": {
-                    "name": "node"
+                    "is_patrol_point": false,
+                    "patrol_time": 3.0
                 },
-                "component_name": "Name"
-            },
+                "component_name": "PathNode"
+            }
+        ],
+        "entity": 97,
+        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
+    },
+    {
+        "components": [
             {
                 "component_data": {
                     "orientation": {
@@ -5356,19 +5347,12 @@
                     }
                 },
                 "component_name": "Transform"
-            }
-        ],
-        "entity": 98,
-        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
-    },
-    {
-        "components": [
+            },
             {
                 "component_data": {
-                    "is_patrol_point": false,
-                    "patrol_time": 3.0
+                    "name": "node"
                 },
-                "component_name": "PathNode"
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -5378,10 +5362,17 @@
             },
             {
                 "component_data": {
-                    "name": "node"
+                    "is_patrol_point": false,
+                    "patrol_time": 3.0
                 },
-                "component_name": "Name"
-            },
+                "component_name": "PathNode"
+            }
+        ],
+        "entity": 98,
+        "signature": "0000000000000000000000000000000000000100000000000000000000001011"
+    },
+    {
+        "components": [
             {
                 "component_data": {
                     "orientation": {
@@ -5402,6 +5393,25 @@
                     }
                 },
                 "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "name": "node"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 73
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "is_patrol_point": false,
+                    "patrol_time": 3.0
+                },
+                "component_name": "PathNode"
             }
         ],
         "entity": 99,
@@ -5411,30 +5421,30 @@
         "components": [
             {
                 "component_data": {
-                    "name": "CameraArm"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "orientation": {
-                        "w": 0.9690200090408325,
+                        "w": 0.9648527503013611,
                         "x": 0.0,
-                        "y": 0.246982142329216,
+                        "y": 0.26279115676879883,
                         "z": 0.0
                     },
                     "position": {
-                        "x": 7.310685157775879,
-                        "y": 5.9061198234558105,
-                        "z": 15.02741813659668
+                        "x": 9.861193656921387,
+                        "y": 5.906364917755127,
+                        "z": 13.528951644897461
                     },
                     "scale": {
-                        "x": 3.9999988079071045,
+                        "x": 3.9999752044677734,
                         "y": 4.0,
-                        "z": 3.9999988079071045
+                        "z": 3.9999752044677734
                     }
                 },
                 "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "name": "CameraArm"
+                },
+                "component_name": "Name"
             },
             {
                 "component_data": {
@@ -5462,18 +5472,6 @@
         "components": [
             {
                 "component_data": {
-                    "parent": 72
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "name": "CameraArmArm"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
                     "orientation": {
                         "w": 0.9690200090408325,
                         "x": 0.0,
@@ -5492,6 +5490,18 @@
                     }
                 },
                 "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "name": "CameraArmArm"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 72
+                },
+                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -5514,5 +5524,236 @@
         ],
         "entity": 100,
         "signature": "0000000000000000000000000000000000000000000000000000000000111011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 1.0,
+                        "x": 2.6867395501862894e-14,
+                        "y": 1.6391277313232422e-07,
+                        "z": -1.6391277313232422e-07
+                    },
+                    "position": {
+                        "x": -6.312131881713867e-05,
+                        "y": 2.384185791015625e-06,
+                        "z": -0.11413002014160156
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0000001192092896
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "name": "camera particles"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 68
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "children": [
+                        103,
+                        101
+                    ],
+                    "children_count": 2
+                },
+                "component_name": "Children"
+            }
+        ],
+        "entity": 102,
+        "signature": "0000000000000000000000000000000000000000000000000000000000011011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": -0.49999988079071045,
+                        "x": -0.49999797344207764,
+                        "y": 0.5000020265579224,
+                        "z": 0.5000001192092896
+                    },
+                    "position": {
+                        "x": 0.0170440673828125,
+                        "y": 0.049141883850097656,
+                        "z": -2.771862030029297
+                    },
+                    "scale": {
+                        "x": 0.9999945163726807,
+                        "y": 1.0000014305114746,
+                        "z": 0.9999982118606567
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "name": "mid"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 102
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "color_begin": [
+                        0.6470588445663452,
+                        0.11372549086809158,
+                        0.0,
+                        0.3490196168422699
+                    ],
+                    "color_end": [
+                        0.5960784554481506,
+                        0.14901961386203766,
+                        0.0,
+                        0.0
+                    ],
+                    "color_transition": 0,
+                    "is_billboard": false,
+                    "is_one_shot": false,
+                    "is_textured": true,
+                    "lifetime": 1.0,
+                    "one_shot_duration": 0.5,
+                    "position": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "position_variance": [
+                        1.2999999523162842,
+                        0.20000000298023224,
+                        0.8999999761581421
+                    ],
+                    "rate": 6.199999809265137,
+                    "rotation_begin": 0.0,
+                    "rotation_end": 0.0,
+                    "rotation_transition": 0,
+                    "size_begin": 9.0,
+                    "size_end": 9.0,
+                    "size_transition": 0,
+                    "texture_name": "glitch_ray.ktx2",
+                    "velocity_begin": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "velocity_end": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "velocity_transition": 0
+                },
+                "component_name": "ParticleEmitter"
+            }
+        ],
+        "entity": 103,
+        "signature": "0000000000000000000000000000000010000000000000000000000000001011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.7071084380149841,
+                        "x": 0.7071050405502319,
+                        "y": 0.00017098934040404856,
+                        "z": 0.00017082157137338072
+                    },
+                    "position": {
+                        "x": -0.0024297237396240234,
+                        "y": 0.049172401428222656,
+                        "z": -2.9362106323242188
+                    },
+                    "scale": {
+                        "x": 1.0000001192092896,
+                        "y": 0.9999710321426392,
+                        "z": 0.9999666213989258
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "name": "mid rotated"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 102
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "color_begin": [
+                        0.6470588445663452,
+                        0.11372549086809158,
+                        0.0,
+                        0.5215686559677124
+                    ],
+                    "color_end": [
+                        0.5960784554481506,
+                        0.14901961386203766,
+                        0.0,
+                        0.0
+                    ],
+                    "color_transition": 0,
+                    "is_billboard": false,
+                    "is_one_shot": false,
+                    "is_textured": true,
+                    "lifetime": 0.6000000238418579,
+                    "one_shot_duration": 0.5,
+                    "position": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "position_variance": [
+                        1.899999976158142,
+                        0.800000011920929,
+                        1.399999976158142
+                    ],
+                    "rate": 6.900000095367432,
+                    "rotation_begin": 0.0,
+                    "rotation_end": 0.0,
+                    "rotation_transition": 0,
+                    "size_begin": 9.0,
+                    "size_end": 9.0,
+                    "size_transition": 0,
+                    "texture_name": "glitch_ray.ktx2",
+                    "velocity_begin": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "velocity_end": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "velocity_transition": 0
+                },
+                "component_name": "ParticleEmitter"
+            }
+        ],
+        "entity": 101,
+        "signature": "0000000000000000000000000000000010000000000000000000000000001011"
     }
 ]
