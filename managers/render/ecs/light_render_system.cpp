@@ -32,7 +32,9 @@ void LightRenderSystem::update(World &world, float dt) {
 		auto &light = world.get_component<Light>(entity);
 		auto &transform = world.get_component<Transform>(entity);
 
-		render_scene.queue_light_draw(&light, &transform);
+		if (light.is_on) {
+			render_scene.queue_light_draw(&light, &transform);
+		}
 
 		if (!debug_draw_enabled) {
 			continue;
