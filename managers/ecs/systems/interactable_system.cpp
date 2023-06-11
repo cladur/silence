@@ -51,7 +51,8 @@ void InteractableSystem::update(World &world, float dt) {
 					break;
 				case HackerPlatform: {
 					auto &platform = world.get_component<Platform>(interactable.interaction_target);
-					AudioManager::get().play_one_shot_3d(electric_interaction_event, world.get_component<Transform>(entity));
+					AudioManager::get().play_one_shot_3d(
+							electric_interaction_event, world.get_component<Transform>(entity));
 					if (!platform.is_moving) {
 						platform.is_moving = true;
 					}
@@ -64,6 +65,10 @@ void InteractableSystem::update(World &world, float dt) {
 					//TODO: uncomment when explosion is no longer being tested
 					//interactable.can_interact = false;
 					break;
+				}
+				case LightSwitch: {
+					SPDLOG_INFO("Light switch triggered");
+					switch_light(world, interactable, entity);
 				}
 			}
 		}
@@ -120,4 +125,9 @@ void InteractableSystem::explosion(World &world, Interactable &interactable, Ent
 			}
 		}
 	}
+}
+
+void InteractableSystem::switch_light(World &world, Interactable &interactable, Entity entity) {
+	auto &light = world.get_component<Light>(interactable.interaction_target);
+	light.is_on = !light.is_on;
 }

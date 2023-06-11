@@ -12,6 +12,7 @@ public:
 	float cutoff = 12.5f;
 	float outer_cutoff = 5.0f;
 	bool cast_shadow = false;
+	bool is_on = true;
 	// Do not serialize this
 	glm::mat4 light_space; // required for dir light shadow
 	uint32_t shadow_map_id = 0;
@@ -27,6 +28,7 @@ public:
 		serialized_component["outer_cutoff"] = outer_cutoff;
 		serialized_component["type"] = type;
 		serialized_component["cast_shadow"] = cast_shadow;
+		serialized_component["is_on"] = is_on;
 		serialized_scene.push_back(nlohmann::json::object());
 		serialized_scene.back()["component_data"] = serialized_component;
 		serialized_scene.back()["component_name"] = "Light";
@@ -59,6 +61,12 @@ public:
 			cast_shadow = serialized_component["cast_shadow"];
 		} else {
 			cast_shadow = false;
+		}
+
+		if (serialized_component.contains("is_on")) {
+			is_on = serialized_component["is_on"];
+		} else {
+			is_on = true;
 		}
 	}
 };
