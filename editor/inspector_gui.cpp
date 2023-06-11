@@ -820,20 +820,6 @@ void Inspector::show_hacker_data() {
 
 		ImGui::TableNextRow();
 		ImGui::TableSetColumnIndex(0);
-		ImGui::Text("Real Camera Pivot");
-		ImGui::TableSetColumnIndex(1);
-		ImGui::InputInt("", (int *)&hacker_data.real_camera_pivot, 0, 0);
-
-		if (ImGui::BeginDragDropTarget()) {
-			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
-				Entity payload_entity = *(Entity *)payload->Data;
-				hacker_data.real_camera_pivot = payload_entity;
-			}
-			ImGui::EndDragDropTarget();
-		}
-
-		ImGui::TableNextRow();
-		ImGui::TableSetColumnIndex(0);
 		ImGui::Text("Scorpion camera transform");
 		ImGui::TableSetColumnIndex(1);
 		ImGui::InputInt("", (int *)&hacker_data.scorpion_camera_transform, 0, 0);
