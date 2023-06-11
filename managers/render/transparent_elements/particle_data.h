@@ -64,7 +64,8 @@ struct ParticleData {
 	ParticleData() = default;
 
 	ParticleData(ParticleEmitter &p, Transform &t, glm::vec3 pos) {
-		this->position = pos + t.get_global_position() +
+		glm::vec3 glob_pos = pos.x * t.get_global_right() + pos.y * t.get_global_up() + pos.z * t.get_global_forward();
+		this->position = glob_pos + t.get_global_position() +
 											(((float)(rand() % 1000) / 1000.0f - 0.5f) * p.position_variance.x * t.get_global_right()) +
 											(((float)(rand() % 1000) / 1000.0f - 0.5f) * p.position_variance.y * t.get_global_up()) +
 											(((float)(rand() % 1000) / 1000.0f - 0.5f) * p.position_variance.z * t.get_global_forward());
