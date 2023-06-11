@@ -130,7 +130,7 @@ void AgentSystem::update(World &world, float dt) {
 		auto camera_right = camera_pivot_tf.get_global_right();
 
 		glm::vec3 acc_direction = { 0, 0, 0 };
-		if (animation_timer >= cvar_agent_lock_time.get()) {
+		if (animation_timer >= cvar_agent_lock_time.get() && !is_climbing) {
 			acc_direction += input_manager.get_axis("agent_move_backward", "agent_move_forward") * camera_forward;
 			acc_direction += input_manager.get_axis("agent_move_left", "agent_move_right") * -camera_right;
 		}
@@ -272,7 +272,7 @@ void AgentSystem::update(World &world, float dt) {
 			// If the agent is on 40 degree slope or more, move him down
 			bool is_on_too_steep_slope =
 					glm::dot(info.normal, glm::vec3(0.0f, 1.0f, 0.0f)) < glm::cos(glm::radians(40.0f));
-			if (is_on_too_steep_slope || info.distance > 1.1f) {
+			if (is_on_too_steep_slope || info.distance > 1.0f) {
 				transform.position.y -= 8.0f * dt;
 				transform.set_changed(true);
 			} else if (world.has_component<Platform>(info.entity)) {
@@ -287,106 +287,138 @@ void AgentSystem::update(World &world, float dt) {
 		ui_kill_text->text = "";
 
 		if (!is_zooming) {
-			//Agent interaction
-			bool interaction_triggered = input_manager.is_action_just_pressed("agent_interact");
-			ColliderSphere sphere{};
-			sphere.radius = cvar_agent_interaction_range.get();
-			sphere.center = model_tf.get_global_position() + glm::vec3{ 0.0f, 1.0f, 0.0f };
-			auto colliders = PhysicsManager::get().overlap_sphere(world, sphere, "agent");
-			// dd.draw_sphere(sphere.center, sphere.radius);
-			if (!colliders.empty()) {
-				Entity closest_interactable;
-				float min_distance = cvar_agent_interaction_range.get() + 1.0f;
-				bool interactable_found = false;
-				for (Entity found_entity : colliders) {
-					if (world.has_component<Interactable>(found_entity)) {
-						auto &interactable = world.get_component<Interactable>(found_entity);
-						if ((interactable.type == InteractionType::Agent) && interactable.can_interact) {
-							auto &transform = world.get_component<Transform>(found_entity);
-							if ((glm::distance(sphere.center, transform.get_global_position())) < min_distance) {
-								Ray ray{};
-								ray.layer_name = "default";
-								ray.ignore_list.emplace_back(entity);
-								ray.origin = sphere.center;
-								ray.direction = transform.get_global_position() - sphere.center;
-								ray.length = 3.0f;
-								HitInfo info;
-								glm::vec3 end = ray.origin + ray.direction;
-								// dd.draw_arrow(ray.origin, end, { 1.0f, 0.0f, 0.0f });
-								CollisionSystem::ray_cast_layer(world, ray, info);
-								if (info.entity == found_entity) {
-									interactable_found = true;
-									closest_interactable = found_entity;
-									min_distance = glm::distance(sphere.center, transform.position);
+			//Agent Climbing
+			if (input_manager.is_action_just_pressed("agent_climb")) {
+				Ray ray{};
+				ray.origin =
+						transform.get_global_position() + glm::vec3(0.0f, 2.0f, 0.0f) + model_tf.get_global_forward();
+				ray.ignore_list.emplace_back(entity);
+				ray.layer_name = "default";
+				ray.direction = -transform.get_up();
+				glm::vec3 end = ray.origin + ray.direction;
+				HitInfo info;
+				dd.draw_arrow(ray.origin, end, { 1.0f, 0.0f, 0.0f });
+				if (CollisionSystem::ray_cast_layer(world, ray, info)) {
+					float obstacle_height = 2.0f - info.distance;
+					SPDLOG_INFO(obstacle_height);
+					SPDLOG_INFO(info.entity);
+					if (obstacle_height > 0.859f && obstacle_height < 0.865f) {
+						auto animation_handle =
+								resource_manager.get_animation_handle("agent/agent_ANIM_GLTF/agent_jump_up.anim");
+						if (animation_instance.animation_handle.id != animation_handle.id) {
+							animation_instance.ticks_per_second = 1000.f;
+							animation_timer = 0;
+							previous_velocity = { 0, 0, 0 };
+							velocity = { 0, 0, 0 };
+							is_climbing = true;
+							animation_manager.change_animation(
+									agent_data.model, "agent/agent_ANIM_GLTF/agent_jump_up.anim");
+						}
+					}
+				}
+			}
+			if (!is_climbing) {
+				//Agent interaction
+				bool interaction_triggered = input_manager.is_action_just_pressed("agent_interact");
+				ColliderSphere sphere{};
+				sphere.radius = cvar_agent_interaction_range.get();
+				sphere.center = model_tf.get_global_position() + glm::vec3{ 0.0f, 1.0f, 0.0f };
+				auto colliders = PhysicsManager::get().overlap_sphere(world, sphere, "agent");
+				// dd.draw_sphere(sphere.center, sphere.radius);
+				if (!colliders.empty()) {
+					Entity closest_interactable;
+					float min_distance = cvar_agent_interaction_range.get() + 1.0f;
+					bool interactable_found = false;
+					for (Entity found_entity : colliders) {
+						if (world.has_component<Interactable>(found_entity)) {
+							auto &interactable = world.get_component<Interactable>(found_entity);
+							if ((interactable.type == InteractionType::Agent) && interactable.can_interact) {
+								auto &transform = world.get_component<Transform>(found_entity);
+								if ((glm::distance(sphere.center, transform.get_global_position())) < min_distance) {
+									Ray ray{};
+									ray.layer_name = "default";
+									ray.ignore_list.emplace_back(entity);
+									ray.origin = sphere.center;
+									ray.direction = transform.get_global_position() - sphere.center;
+									ray.length = 3.0f;
+									HitInfo info;
+									glm::vec3 end = ray.origin + ray.direction;
+									// dd.draw_arrow(ray.origin, end, { 1.0f, 0.0f, 0.0f });
+									CollisionSystem::ray_cast_layer(world, ray, info);
+									if (info.entity == found_entity) {
+										interactable_found = true;
+										closest_interactable = found_entity;
+										min_distance = glm::distance(sphere.center, transform.position);
+									}
 								}
+							}
+						}
+					}
+
+					if (interactable_found) {
+						auto &interactable = world.get_component<Interactable>(closest_interactable);
+						if (world.has_component<Highlight>(closest_interactable)) {
+							auto &highlight = world.get_component<Highlight>(closest_interactable);
+							highlight.highlighted = true;
+						}
+						ui_interaction_text->text = "Press E to interact";
+						if (interaction_triggered) {
+							interactable.triggered = true;
+							auto animation_handle = resource_manager.get_animation_handle(
+									"agent/agent_ANIM_GLTF/agent_interaction.anim");
+							if (animation_instance.animation_handle.id != animation_handle.id) {
+								auto &transform = world.get_component<Transform>(closest_interactable);
+								glm::vec3 direction = model_tf.get_global_position() - transform.get_global_position();
+								direction.y = 0.0f;
+								direction = glm::normalize(direction);
+								//TODO: rotate model towards interactable
+								// model_tf.set_orientation(glm::quat(rotation_matrix));
+
+								animation_instance.ticks_per_second = 1000.f;
+								animation_timer = 0;
+								previous_velocity = { 0.0f, 0.0f, 0.0f };
+								velocity = { 0.0f, 0.0f, 0.0f };
+								animation_manager.change_animation(
+										agent_data.model, "agent/agent_ANIM_GLTF/agent_interaction.anim");
 							}
 						}
 					}
 				}
 
-				if (interactable_found) {
-					auto &interactable = world.get_component<Interactable>(closest_interactable);
-					if (world.has_component<Highlight>(closest_interactable)) {
-						auto &highlight = world.get_component<Highlight>(closest_interactable);
-						highlight.highlighted = true;
-					}
-					ui_interaction_text->text = "Press E to interact";
-					if (interaction_triggered) {
-						interactable.triggered = true;
-						auto animation_handle =
-								resource_manager.get_animation_handle("agent/agent_ANIM_GLTF/agent_interaction.anim");
-						if (animation_instance.animation_handle.id != animation_handle.id) {
-							auto &transform = world.get_component<Transform>(closest_interactable);
-							glm::vec3 direction = model_tf.get_global_position() - transform.get_global_position();
-							direction.y = 0.0f;
-							direction = glm::normalize(direction);
-							//TODO: rotate model towards interactable
-							// model_tf.set_orientation(glm::quat(rotation_matrix));
+				//Agent attack
+				//ray.origin = transform.get_global_position() + glm::vec3(0.0f, 1.0f, 0.0f);
+				//ray.ignore_list.emplace_back(entity);
+				ray.direction = model_tf.get_forward();
+				ray.origin = transform.get_global_position() + glm::vec3(0.0f, 1.0f, 0.0f);
+				ray.ignore_list.emplace_back(entity);
+				ray.length = 3.0f;
 
-							animation_instance.ticks_per_second = 1000.f;
-							animation_timer = 0;
-							previous_velocity = { 0.0f, 0.0f, 0.0f };
-							velocity = { 0.0f, 0.0f, 0.0f };
-							animation_manager.change_animation(
-									agent_data.model, "agent/agent_ANIM_GLTF/agent_interaction.anim");
-						}
-					}
-				}
-			}
-
-			//Agent attack
-			//ray.origin = transform.get_global_position() + glm::vec3(0.0f, 1.0f, 0.0f);
-			//ray.ignore_list.emplace_back(entity);
-			ray.direction = model_tf.get_forward();
-			ray.origin = transform.get_global_position() + glm::vec3(0.0f, 1.0f, 0.0f);
-			ray.ignore_list.emplace_back(entity);
-			ray.length = 3.0f;
-
-			end = ray.origin + ray.direction;
-			world.get_parent_scene()->get_render_scene().debug_draw.draw_arrow(ray.origin, end, { 255, 0, 0 });
-			if (CollisionSystem::ray_cast_layer(world, ray, info)) {
-				if (info.distance < cvar_agent_attack_range.get()) {
-					if (world.has_component<EnemyData>(info.entity)) {
-						auto &enemy = world.get_component<EnemyData>(info.entity);
-						auto &enemy_tf = world.get_component<Transform>(info.entity);
-						bool behind_enemy = glm::dot(enemy_tf.get_forward(), model_tf.get_forward()) >
-								glm::cos(glm::radians(cvar_agent_attack_angle.get()));
-						if (behind_enemy && enemy.state_machine.get_current_state() != "dying") {
-							//TODO: pull out knife or other indicator that agent can attack
-							ui_kill_text->text = "[LMB] Kill";
-							//auto &enemy_tf = world.get_component<Transform>(info.entity);
-							if (input_manager.is_action_just_pressed("mouse_left")) {
-								auto animation_handle =
-										resource_manager.get_animation_handle("agent/agent_ANIM_GLTF/agent_stab.anim");
-								if (animation_instance.animation_handle.id != animation_handle.id) {
-									animation_instance.ticks_per_second = 1000.f;
-									animation_timer = 0;
-									previous_velocity = { 0, 0, 0 };
-									velocity = { 0, 0, 0 };
-									animation_manager.change_animation(
-											agent_data.model, "agent/agent_ANIM_GLTF/agent_stab.anim");
+				end = ray.origin + ray.direction;
+				world.get_parent_scene()->get_render_scene().debug_draw.draw_arrow(ray.origin, end, { 255, 0, 0 });
+				if (CollisionSystem::ray_cast_layer(world, ray, info)) {
+					if (info.distance < cvar_agent_attack_range.get()) {
+						if (world.has_component<EnemyData>(info.entity)) {
+							auto &enemy = world.get_component<EnemyData>(info.entity);
+							auto &enemy_tf = world.get_component<Transform>(info.entity);
+							bool behind_enemy = glm::dot(enemy_tf.get_forward(), model_tf.get_forward()) >
+									glm::cos(glm::radians(cvar_agent_attack_angle.get()));
+							if (behind_enemy && enemy.state_machine.get_current_state() != "dying") {
+								//TODO: pull out knife or other indicator that agent can attack
+								ui_kill_text->text = "[LMB] Kill";
+								//auto &enemy_tf = world.get_component<Transform>(info.entity);
+								if (input_manager.is_action_just_pressed("mouse_left")) {
+									auto animation_handle = resource_manager.get_animation_handle(
+											"agent/agent_ANIM_GLTF/agent_stab.anim");
+									if (animation_instance.animation_handle.id != animation_handle.id) {
+										animation_instance.ticks_per_second = 1000.f;
+										animation_timer = 0;
+										previous_velocity = { 0, 0, 0 };
+										velocity = { 0, 0, 0 };
+										animation_manager.change_animation(
+												agent_data.model, "agent/agent_ANIM_GLTF/agent_stab.anim");
+									}
+									enemy.state_machine.set_state("dying");
 								}
-								enemy.state_machine.set_state("dying");
 							}
 						}
 					}
@@ -431,6 +463,16 @@ void AgentSystem::update(World &world, float dt) {
 
 		if (animation_timer < resource_manager.get_animation(animation_instance.animation_handle).get_duration()) {
 			animation_timer += (dt * 1000);
+			if (is_climbing &&
+					((animation_timer + 100.f) >
+							resource_manager.get_animation(animation_instance.animation_handle).get_duration())) {
+				//climbing animation should end here, otherwise it will start to loop
+				is_climbing = false;
+				animation_timer += 100.f;
+				glm::vec3 displacment = { 0.0f, 0.865f, 0.0f };
+				displacment += model_tf.get_global_forward();
+				transform.add_position(displacment);
+			}
 		}
 
 		AudioManager::get().set_3d_listener_attributes(SILENCE_FMOD_LISTENER_AGENT, camera_tf.get_global_position(),
