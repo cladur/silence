@@ -25,7 +25,6 @@ void PlatformSystem::update(World &world, float dt) {
 		auto &platform = world.get_component<Platform>(entity);
 
 		if (platform.first_frame) {
-			SPDLOG_INFO("#$@#$@# initializing platform");
 			platform.event_instance = AudioManager::get().create_event_instance("SFX/platform");
 			platform.first_frame = false;
 		}

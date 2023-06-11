@@ -1447,6 +1447,26 @@ void Inspector::show_detection_camera() {
 	auto &data = world->get_component<DetectionCamera>(selected_entity);
 	if (ImGui::CollapsingHeader("DetectionCamera", tree_flags)) {
 		remove_component_popup<DetectionCamera>();
+
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("Particles Parent", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Particle Parent");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::InputInt("", (int *)&data.particles_parent, 0, 0);
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
+				Entity payload_entity = *(Entity *)payload->Data;
+				data.particles_parent = payload_entity;
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+		ImGui::EndTable();
 	}
 }
 
