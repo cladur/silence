@@ -272,7 +272,7 @@ void AgentSystem::update(World &world, float dt) {
 			// If the agent is on 40 degree slope or more, move him down
 			bool is_on_too_steep_slope =
 					glm::dot(info.normal, glm::vec3(0.0f, 1.0f, 0.0f)) < glm::cos(glm::radians(40.0f));
-			if (is_on_too_steep_slope || info.distance > 1.0f) {
+			if (is_on_too_steep_slope || info.distance > 1.01f) {
 				transform.position.y -= 8.0f * dt;
 				transform.set_changed(true);
 			} else if (world.has_component<Platform>(info.entity)) {
@@ -302,7 +302,7 @@ void AgentSystem::update(World &world, float dt) {
 					float obstacle_height = 2.0f - info.distance;
 					SPDLOG_INFO(obstacle_height);
 					SPDLOG_INFO(info.entity);
-					if (obstacle_height > 0.859f && obstacle_height < 0.865f) {
+					if (obstacle_height > 0.855f && obstacle_height < 0.865f) {
 						auto animation_handle =
 								resource_manager.get_animation_handle("agent/agent_ANIM_GLTF/agent_jump_up.anim");
 						if (animation_instance.animation_handle.id != animation_handle.id) {
@@ -373,7 +373,6 @@ void AgentSystem::update(World &world, float dt) {
 								direction = glm::normalize(direction);
 								//TODO: rotate model towards interactable
 								// model_tf.set_orientation(glm::quat(rotation_matrix));
-
 								animation_instance.ticks_per_second = 1000.f;
 								animation_timer = 0;
 								previous_velocity = { 0.0f, 0.0f, 0.0f };
