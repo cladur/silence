@@ -9,6 +9,15 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/planes/asfalt.mdl",
+                    "scale_uv_with_transform": true
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": 0.0,
@@ -27,15 +36,6 @@
                     }
                 },
                 "component_name": "Transform"
-            },
-            {
-                "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "items/planes/asfalt.mdl",
-                    "scale_uv_with_transform": true
-                },
-                "component_name": "ModelInstance"
             }
         ],
         "entity": 2,
@@ -97,6 +97,14 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "enemy/enemy.skinmdl"
+                },
+                "component_name": "SkinnedModelInstance"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": -0.46828407049179077,
                         "x": 0.0,
@@ -118,12 +126,6 @@
             },
             {
                 "component_data": {
-                    "parent": 13
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "animation_name": "enemy/enemy_ANIM_GLTF/enemy_walk_with_gun.anim",
                     "ticks_per_second": 1000.0
                 },
@@ -131,11 +133,9 @@
             },
             {
                 "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "enemy/enemy.skinmdl"
+                    "parent": 13
                 },
-                "component_name": "SkinnedModelInstance"
+                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -168,6 +168,10 @@
                 "component_name": "EnemyPath"
             },
             {
+                "component_data": {},
+                "component_name": "EnemyData"
+            },
+            {
                 "component_data": {
                     "tag_position": {
                         "x": 0.0,
@@ -176,10 +180,6 @@
                     }
                 },
                 "component_name": "Taggable"
-            },
-            {
-                "component_data": {},
-                "component_name": "EnemyData"
             },
             {
                 "component_data": {
@@ -207,6 +207,14 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "agent/agent.skinmdl"
+                },
+                "component_name": "SkinnedModelInstance"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": -3.204225151876017e-08,
@@ -228,12 +236,6 @@
             },
             {
                 "component_data": {
-                    "parent": 46
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "animation_name": "agent/agent_ANIM_GLTF/agent_idle.anim",
                     "ticks_per_second": 1000.0
                 },
@@ -241,11 +243,9 @@
             },
             {
                 "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "agent/agent.skinmdl"
+                    "parent": 46
                 },
-                "component_name": "SkinnedModelInstance"
+                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -443,15 +443,6 @@
             },
             {
                 "component_data": {
-                    "camera": 3,
-                    "camera_pivot": 47,
-                    "model": 6,
-                    "spring_arm": 70
-                },
-                "component_name": "AgentData"
-            },
-            {
-                "component_data": {
                     "end": {
                         "x": 0.0,
                         "y": 1.2999999523162842,
@@ -465,6 +456,15 @@
                     }
                 },
                 "component_name": "ColliderCapsule"
+            },
+            {
+                "component_data": {
+                    "camera": 3,
+                    "camera_pivot": 47,
+                    "model": 6,
+                    "spring_arm": 70
+                },
+                "component_name": "AgentData"
             }
         ],
         "entity": 46,
@@ -635,24 +635,12 @@
             },
             {
                 "component_data": {
-                    "orientation": {
-                        "w": 0.999349057674408,
-                        "x": 0.0,
-                        "y": -0.036075033247470856,
-                        "z": 0.0
-                    },
-                    "position": {
-                        "x": 6.829051971435547,
-                        "y": -0.0965740755200386,
-                        "z": 23.91493797302246
-                    },
-                    "scale": {
-                        "x": 0.9999998807907104,
-                        "y": 1.0,
-                        "z": 0.9999998807907104
-                    }
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/contener/contener.mdl",
+                    "scale_uv_with_transform": true
                 },
-                "component_name": "Transform"
+                "component_name": "ModelInstance"
             },
             {
                 "component_data": {
@@ -672,12 +660,24 @@
             },
             {
                 "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "items/contener/contener.mdl",
-                    "scale_uv_with_transform": true
+                    "orientation": {
+                        "w": 0.999349057674408,
+                        "x": 0.0,
+                        "y": -0.036075033247470856,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 6.829051971435547,
+                        "y": -0.0965740755200386,
+                        "z": 23.91493797302246
+                    },
+                    "scale": {
+                        "x": 0.9999998807907104,
+                        "y": 1.0,
+                        "z": 0.9999998807907104
+                    }
                 },
-                "component_name": "ModelInstance"
+                "component_name": "Transform"
             },
             {
                 "component_data": {},
@@ -787,6 +787,14 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "scorpion/scorpion.skinmdl"
+                },
+                "component_name": "SkinnedModelInstance"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": 0.0,
@@ -808,12 +816,6 @@
             },
             {
                 "component_data": {
-                    "parent": 55
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "animation_name": "scorpion/scorpion_ANIM_GLTF/scorpion_idle.anim",
                     "ticks_per_second": 5000.0
                 },
@@ -821,11 +823,9 @@
             },
             {
                 "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "scorpion/scorpion.skinmdl"
+                    "parent": 55
                 },
-                "component_name": "SkinnedModelInstance"
+                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -980,6 +980,15 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "knife/knife.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 0.9398154020309448,
                         "x": 0.09057460725307465,
@@ -1001,15 +1010,6 @@
             },
             {
                 "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "knife/knife.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
                     "bone_name": "RightHand",
                     "holder": 6
                 },
@@ -1026,6 +1026,15 @@
                     "name": "Platform Switch 01"
                 },
                 "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/electric_box/electric_box.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
             },
             {
                 "component_data": {
@@ -1050,24 +1059,6 @@
             },
             {
                 "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "items/electric_box/electric_box.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "can_interact": true,
-                    "interaction": 2,
-                    "interaction_target": 61,
-                    "type": 2
-                },
-                "component_name": "Interactable"
-            },
-            {
-                "component_data": {
                     "layer_name": "hacker"
                 },
                 "component_name": "ColliderTag"
@@ -1086,6 +1077,15 @@
                     }
                 },
                 "component_name": "ColliderAABB"
+            },
+            {
+                "component_data": {
+                    "can_interact": true,
+                    "interaction": 2,
+                    "interaction_target": 61,
+                    "type": 2
+                },
+                "component_name": "Interactable"
             },
             {
                 "component_data": {
@@ -1123,6 +1123,15 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": 0.0,
@@ -1141,15 +1150,6 @@
                     }
                 },
                 "component_name": "Transform"
-            },
-            {
-                "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "placeholders/cube_1x1x1.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
             },
             {
                 "component_data": {},
@@ -1206,6 +1206,15 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "weapon/weapon.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 0.5674519538879395,
                         "x": 0.46721792221069336,
@@ -1233,15 +1242,6 @@
             },
             {
                 "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "weapon/weapon.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
                     "bone_name": "Gun",
                     "holder": 5
                 },
@@ -1261,33 +1261,6 @@
             },
             {
                 "component_data": {
-                    "orientation": {
-                        "w": 0.7071067094802856,
-                        "x": -0.7071068286895752,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    "position": {
-                        "x": 8.0,
-                        "y": 1.2147060632705688,
-                        "z": 39.229732513427734
-                    },
-                    "scale": {
-                        "x": 1.0,
-                        "y": 0.9999455213546753,
-                        "z": 0.9999455213546753
-                    }
-                },
-                "component_name": "Transform"
-            },
-            {
-                "component_data": {
-                    "parent": 16
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "items/electric_box_2/electric_box_2.mdl",
@@ -1297,12 +1270,30 @@
             },
             {
                 "component_data": {
-                    "can_interact": true,
-                    "interaction": 3,
-                    "interaction_target": 66,
-                    "type": 2
+                    "orientation": {
+                        "w": 0.7071067094802856,
+                        "x": -0.7071068286895752,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 8.0,
+                        "y": 1.2720491886138916,
+                        "z": 39.229732513427734
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 0.9999305605888367,
+                        "z": 0.9999305605888367
+                    }
                 },
-                "component_name": "Interactable"
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "parent": 16
+                },
+                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -1324,36 +1315,6 @@
                     }
                 },
                 "component_name": "ColliderAABB"
-            },
-            {
-                "component_data": {
-                    "tag_position": {
-                        "x": 0.0,
-                        "y": 0.699999988079071,
-                        "z": -0.11999999731779099
-                    }
-                },
-                "component_name": "Taggable"
-            },
-            {
-                "component_data": {
-                    "distraction_radius": 15.0,
-                    "distraction_time": 2.0,
-                    "explosion_radius": 4.0
-                },
-                "component_name": "ExplodingBox"
-            },
-            {
-                "component_data": {
-                    "highlight_color": {
-                        "b": 0.0,
-                        "g": 0.0,
-                        "r": 1.0
-                    },
-                    "highlighted": "twoja misja trwa",
-                    "target": 3
-                },
-                "component_name": "Highlight"
             },
             {
                 "component_data": {
@@ -1411,6 +1372,45 @@
                     ]
                 },
                 "component_name": "ParticleEmitter"
+            },
+            {
+                "component_data": {
+                    "can_interact": true,
+                    "interaction": 3,
+                    "interaction_target": 66,
+                    "type": 2
+                },
+                "component_name": "Interactable"
+            },
+            {
+                "component_data": {
+                    "distraction_radius": 15.0,
+                    "distraction_time": 2.0,
+                    "explosion_radius": 4.0
+                },
+                "component_name": "ExplodingBox"
+            },
+            {
+                "component_data": {
+                    "tag_position": {
+                        "x": 0.0,
+                        "y": 0.20000000298023224,
+                        "z": 0.699999988079071
+                    }
+                },
+                "component_name": "Taggable"
+            },
+            {
+                "component_data": {
+                    "highlight_color": {
+                        "b": 0.0,
+                        "g": 0.0,
+                        "r": 1.0
+                    },
+                    "highlighted": "twoja misja trwa",
+                    "target": 3
+                },
+                "component_name": "Highlight"
             }
         ],
         "entity": 66,
@@ -1423,6 +1423,15 @@
                     "name": "HackerCameraJump"
                 },
                 "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/camera/camera_1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
             },
             {
                 "component_data": {
@@ -1462,24 +1471,6 @@
             },
             {
                 "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "items/camera/camera_1.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "can_interact": true,
-                    "interaction": 1,
-                    "interaction_target": 68,
-                    "type": 2
-                },
-                "component_name": "Interactable"
-            },
-            {
-                "component_data": {
                     "layer_name": "hacker"
                 },
                 "component_name": "ColliderTag"
@@ -1501,13 +1492,12 @@
             },
             {
                 "component_data": {
-                    "tag_position": {
-                        "x": 0.0,
-                        "y": 1.0,
-                        "z": 0.0
-                    }
+                    "can_interact": true,
+                    "interaction": 1,
+                    "interaction_target": 68,
+                    "type": 2
                 },
-                "component_name": "Taggable"
+                "component_name": "Interactable"
             },
             {
                 "component_data": {
@@ -1531,6 +1521,16 @@
                     "use_camera_right": false
                 },
                 "component_name": "Billboard"
+            },
+            {
+                "component_data": {
+                    "tag_position": {
+                        "x": 0.0,
+                        "y": 1.0,
+                        "z": 0.0
+                    }
+                },
+                "component_name": "Taggable"
             },
             {
                 "component_data": {
@@ -1761,10 +1761,6 @@
                 "component_name": "Parent"
             },
             {
-                "component_data": null,
-                "component_name": "PathParent"
-            },
-            {
                 "component_data": {
                     "children": [
                         87,
@@ -1773,6 +1769,10 @@
                     "children_count": 2
                 },
                 "component_name": "Children"
+            },
+            {
+                "component_data": null,
+                "component_name": "PathParent"
             }
         ],
         "entity": 73,
@@ -2156,6 +2156,15 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/camera/camera_3.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 0.9648527503013611,
                         "x": 0.0,
@@ -2183,15 +2192,6 @@
                     "children_count": 1
                 },
                 "component_name": "Children"
-            },
-            {
-                "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "items/camera/camera_3.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
             }
         ],
         "entity": 72,
@@ -2204,6 +2204,15 @@
                     "name": "CameraArmArm"
                 },
                 "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/camera/camera_2.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
             },
             {
                 "component_data": {
@@ -2240,15 +2249,6 @@
                     "children_count": 1
                 },
                 "component_name": "Children"
-            },
-            {
-                "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "items/camera/camera_2.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
             }
         ],
         "entity": 100,
@@ -2505,6 +2505,15 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": 0.0,
@@ -2529,15 +2538,6 @@
                     "parent": 12
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "placeholders/cube_1x1x1.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
             },
             {
                 "component_data": {},
@@ -2590,6 +2590,15 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": 0.0,
@@ -2614,15 +2623,6 @@
                     "parent": 12
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "placeholders/cube_1x1x1.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
             },
             {
                 "component_data": {},
@@ -2675,6 +2675,15 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 0.7071071863174438,
                         "x": -1.8078723197298419e-12,
@@ -2699,15 +2708,6 @@
                     "parent": 12
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "placeholders/cube_1x1x1.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
             },
             {
                 "component_data": {},
@@ -2836,6 +2836,15 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 0.9926295280456543,
                         "x": 0.0,
@@ -2860,15 +2869,6 @@
                     "parent": 12
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "placeholders/cube_1x1x1.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
             },
             {
                 "component_data": {},
@@ -3014,6 +3014,15 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": 0.0,
@@ -3038,15 +3047,6 @@
                     "parent": 12
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "placeholders/cube_1x1x1.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
             },
             {
                 "component_data": {},
@@ -3099,6 +3099,15 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": -0.3826832175254822,
                         "x": 9.21588708899492e-23,
@@ -3123,15 +3132,6 @@
                     "parent": 12
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "placeholders/cube_1x1x1.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
             },
             {
                 "component_data": {},
@@ -3227,6 +3227,15 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 0.7072258591651917,
                         "x": 0.0,
@@ -3251,15 +3260,6 @@
                     "parent": 12
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "placeholders/cube_1x1x1.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
             },
             {
                 "component_data": {},
@@ -3312,6 +3312,15 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 0.7072251439094543,
                         "x": 0.0,
@@ -3336,15 +3345,6 @@
                     "parent": 12
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "placeholders/cube_1x1x1.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
             },
             {
                 "component_data": {},
@@ -3397,6 +3397,15 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 0.7071065902709961,
                         "x": 0.0,
@@ -3421,15 +3430,6 @@
                     "parent": 12
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "placeholders/cube_1x1x1.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
             },
             {
                 "component_data": {},
@@ -3482,6 +3482,15 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 0.70710688829422,
                         "x": -1.702869733672161e-22,
@@ -3506,15 +3515,6 @@
                     "parent": 12
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "placeholders/cube_1x1x1.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
             },
             {
                 "component_data": {},
@@ -3567,6 +3567,15 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 0.70710688829422,
                         "x": -1.7028699861076506e-22,
@@ -3591,15 +3600,6 @@
                     "parent": 12
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "placeholders/cube_1x1x1.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
             },
             {
                 "component_data": {},
@@ -3652,6 +3652,15 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/stairs/stairs.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 0.7072247266769409,
                         "x": 0.0,
@@ -3676,15 +3685,6 @@
                     "parent": 12
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "items/stairs/stairs.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
             }
         ],
         "entity": 22,
@@ -3697,6 +3697,15 @@
                     "name": "cube_1x1"
                 },
                 "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/stairs/stairs.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
             },
             {
                 "component_data": {
@@ -3724,15 +3733,6 @@
                     "parent": 12
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "items/stairs/stairs.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
             }
         ],
         "entity": 23,
@@ -3824,6 +3824,15 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 0.8185741901397705,
                         "x": 1.553711648227818e-08,
@@ -3848,15 +3857,6 @@
                     "parent": 12
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "placeholders/cube_1x1x1.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
             },
             {
                 "component_data": {},
@@ -3909,6 +3909,15 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 0.7233183979988098,
                         "x": 1.798672322195216e-08,
@@ -3933,15 +3942,6 @@
                     "parent": 12
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "placeholders/cube_1x1x1.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
             },
             {
                 "component_data": {},
@@ -3994,6 +3994,15 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/planes/paint.mdl",
+                    "scale_uv_with_transform": true
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 0.4998776614665985,
                         "x": -0.5001218914985657,
@@ -4018,15 +4027,6 @@
                     "parent": 12
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "items/planes/paint.mdl",
-                    "scale_uv_with_transform": true
-                },
-                "component_name": "ModelInstance"
             }
         ],
         "entity": 24,
@@ -4039,6 +4039,15 @@
                     "name": "cube_1x1"
                 },
                 "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/planes/paint.mdl",
+                    "scale_uv_with_transform": true
+                },
+                "component_name": "ModelInstance"
             },
             {
                 "component_data": {
@@ -4066,15 +4075,6 @@
                     "parent": 12
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "items/planes/paint.mdl",
-                    "scale_uv_with_transform": true
-                },
-                "component_name": "ModelInstance"
             }
         ],
         "entity": 25,
@@ -4087,6 +4087,15 @@
                     "name": "cube_1x1"
                 },
                 "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
             },
             {
                 "component_data": {
@@ -4114,15 +4123,6 @@
                     "parent": 12
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "placeholders/cube_1x1x1.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
             },
             {
                 "component_data": {},
@@ -4175,6 +4175,15 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 0.7437666654586792,
                         "x": 1.75271068769689e-08,
@@ -4199,15 +4208,6 @@
                     "parent": 12
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "placeholders/cube_1x1x1.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
             },
             {
                 "component_data": {},
@@ -4260,6 +4260,15 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": -0.3109215795993805,
                         "x": -2.2941847532820248e-08,
@@ -4284,15 +4293,6 @@
                     "parent": 12
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "placeholders/cube_1x1x1.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
             },
             {
                 "component_data": {},
@@ -4395,6 +4395,14 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "enemy/enemy.skinmdl"
+                },
+                "component_name": "SkinnedModelInstance"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 0.6335619688034058,
                         "x": 0.0,
@@ -4416,12 +4424,6 @@
             },
             {
                 "component_data": {
-                    "parent": 32
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "animation_name": "enemy/enemy_ANIM_GLTF/enemy_idle.anim",
                     "ticks_per_second": 1000.0
                 },
@@ -4429,11 +4431,9 @@
             },
             {
                 "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "enemy/enemy.skinmdl"
+                    "parent": 32
                 },
-                "component_name": "SkinnedModelInstance"
+                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -4466,6 +4466,10 @@
                 "component_name": "EnemyPath"
             },
             {
+                "component_data": {},
+                "component_name": "EnemyData"
+            },
+            {
                 "component_data": {
                     "tag_position": {
                         "x": 0.0,
@@ -4474,10 +4478,6 @@
                     }
                 },
                 "component_name": "Taggable"
-            },
-            {
-                "component_data": {},
-                "component_name": "EnemyData"
             },
             {
                 "component_data": {
@@ -4502,6 +4502,15 @@
                     "name": "Exploding Box"
                 },
                 "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/electric_box_2/electric_box_2.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
             },
             {
                 "component_data": {
@@ -4532,24 +4541,6 @@
             },
             {
                 "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "items/electric_box_2/electric_box_2.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "can_interact": true,
-                    "interaction": 3,
-                    "interaction_target": 35,
-                    "type": 2
-                },
-                "component_name": "Interactable"
-            },
-            {
-                "component_data": {
                     "layer_name": "hacker"
                 },
                 "component_name": "ColliderTag"
@@ -4568,36 +4559,6 @@
                     }
                 },
                 "component_name": "ColliderAABB"
-            },
-            {
-                "component_data": {
-                    "tag_position": {
-                        "x": 0.0,
-                        "y": 0.699999988079071,
-                        "z": -0.11999999731779099
-                    }
-                },
-                "component_name": "Taggable"
-            },
-            {
-                "component_data": {
-                    "distraction_radius": 20.0,
-                    "distraction_time": 2.0,
-                    "explosion_radius": 10.0
-                },
-                "component_name": "ExplodingBox"
-            },
-            {
-                "component_data": {
-                    "highlight_color": {
-                        "b": 0.0,
-                        "g": 0.0,
-                        "r": 1.0
-                    },
-                    "highlighted": "twoja misja trwa",
-                    "target": 3
-                },
-                "component_name": "Highlight"
             },
             {
                 "component_data": {
@@ -4655,6 +4616,45 @@
                     ]
                 },
                 "component_name": "ParticleEmitter"
+            },
+            {
+                "component_data": {
+                    "can_interact": true,
+                    "interaction": 3,
+                    "interaction_target": 35,
+                    "type": 2
+                },
+                "component_name": "Interactable"
+            },
+            {
+                "component_data": {
+                    "distraction_radius": 20.0,
+                    "distraction_time": 2.0,
+                    "explosion_radius": 10.0
+                },
+                "component_name": "ExplodingBox"
+            },
+            {
+                "component_data": {
+                    "tag_position": {
+                        "x": 0.0,
+                        "y": 0.20000000298023224,
+                        "z": 0.699999988079071
+                    }
+                },
+                "component_name": "Taggable"
+            },
+            {
+                "component_data": {
+                    "highlight_color": {
+                        "b": 0.0,
+                        "g": 0.0,
+                        "r": 1.0
+                    },
+                    "highlighted": "twoja misja trwa",
+                    "target": 3
+                },
+                "component_name": "Highlight"
             }
         ],
         "entity": 35,
@@ -4667,6 +4667,15 @@
                     "name": "cube_1x1"
                 },
                 "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/planes/paint.mdl",
+                    "scale_uv_with_transform": true
+                },
+                "component_name": "ModelInstance"
             },
             {
                 "component_data": {
@@ -4694,15 +4703,6 @@
                     "parent": 12
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "items/planes/paint.mdl",
-                    "scale_uv_with_transform": true
-                },
-                "component_name": "ModelInstance"
             }
         ],
         "entity": 36,
@@ -4715,6 +4715,15 @@
                     "name": "cube_1x1"
                 },
                 "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
             },
             {
                 "component_data": {
@@ -4742,15 +4751,6 @@
                     "parent": 12
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "placeholders/cube_1x1x1.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
             },
             {
                 "component_data": {},
@@ -4829,10 +4829,6 @@
                 "component_name": "Parent"
             },
             {
-                "component_data": null,
-                "component_name": "PathParent"
-            },
-            {
                 "component_data": {
                     "children": [
                         39
@@ -4840,6 +4836,10 @@
                     "children_count": 1
                 },
                 "component_name": "Children"
+            },
+            {
+                "component_data": null,
+                "component_name": "PathParent"
             }
         ],
         "entity": 38,
@@ -4895,6 +4895,15 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "weapon/weapon.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 0.4927337169647217,
                         "x": 0.5339432954788208,
@@ -4922,15 +4931,6 @@
             },
             {
                 "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "weapon/weapon.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
                     "bone_name": "Gun",
                     "holder": 34
                 },
@@ -4947,6 +4947,15 @@
                     "name": "cube_1x1"
                 },
                 "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
             },
             {
                 "component_data": {
@@ -4974,15 +4983,6 @@
                     "parent": 12
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "placeholders/cube_1x1x1.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
             },
             {
                 "component_data": {},
@@ -5035,6 +5035,15 @@
             },
             {
                 "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": -1.7354651025370602e-28,
@@ -5059,15 +5068,6 @@
                     "parent": 12
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "placeholders/cube_1x1x1.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
             },
             {
                 "component_data": {},
