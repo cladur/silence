@@ -4,7 +4,7 @@
 struct HackerData {
 	Entity model;
 	Entity camera_pivot;
-	Entity look_pivot;
+	Entity real_camera_pivot;
 	Entity scorpion_camera_transform;
 	Entity camera;
 
@@ -14,7 +14,7 @@ struct HackerData {
 
 		serialized_component["model"] = model;
 		serialized_component["camera_pivot"] = camera_pivot;
-		serialized_component["look_pivot"] = look_pivot;
+		serialized_component["real_camera_pivot"] = real_camera_pivot;
 		serialized_component["scorpion_camera_transform"] = scorpion_camera_transform;
 		serialized_component["camera"] = camera;
 
@@ -33,10 +33,10 @@ struct HackerData {
 			scorpion_camera_transform = -1;
 		}
 
-		if (serialized_component.contains("look_pivot")) {
-			look_pivot = serialized_component["look_pivot"];
+		if (serialized_component.contains("real_camera_pivot")) {
+			real_camera_pivot = serialized_component["real_camera_pivot"];
 		} else {
-			look_pivot = -1;
+			real_camera_pivot = -1;
 		}
 	}
 };
