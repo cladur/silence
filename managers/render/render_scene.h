@@ -72,14 +72,17 @@ struct RenderScene {
 	std::vector<SkinnedDrawCommand> skinned_draw_commands;
 
 	bool draw_skybox = false;
+	bool editor_mode = false;
 
 	void startup();
 	void draw_viewport(bool right_side = false);
-	void draw();
+	void draw(bool editor_mode = false);
 	void resize_framebuffer(uint32_t width, uint32_t height);
 
-	void queue_draw(ModelInstance *model_instance, Transform *transform, Entity entity, HighlightData highlight_data = {});
-	void queue_skinned_draw(SkinnedModelInstance *model_instance, Transform *transform, Entity entity, HighlightData highlight_data);
+	void queue_draw(
+			ModelInstance *model_instance, Transform *transform, Entity entity, HighlightData highlight_data = {});
+	void queue_skinned_draw(
+			SkinnedModelInstance *model_instance, Transform *transform, Entity entity, HighlightData highlight_data);
 	void queue_light_draw(Light *light, Transform *transform);
 
 	Entity get_entity_at_mouse_position(float x, float y) const;
