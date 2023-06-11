@@ -97,10 +97,6 @@ void DetectionCameraSystem::update(World &world, float dt) {
 
 		}
 
-		if (!dc.is_active) {
-			return;
-		}
-
 		bool tagged = tag.tagged;
 
 		if (tagged != dc.previous_frame_tag_state ) {
@@ -149,6 +145,17 @@ void DetectionCameraSystem::update(World &world, float dt) {
 				particle_2->color_begin = IDLE_COLOR_BEGIN;
 				particle_2->color_end = IDLE_COLOR_END;
 			}
+
+			if (!dc.is_active) {
+				particle_1->color_begin = glm::vec4(0.0f);
+				particle_1->color_end = glm::vec4(0.0f);
+				particle_2->color_begin = glm::vec4(0.0f);
+				particle_2->color_end = glm::vec4(0.0f);
+			}
+		}
+
+		if (!dc.is_active) {
+			return;
 		}
 
 		DebugDraw &debug_draw = world.get_parent_scene()->get_render_scene().debug_draw;

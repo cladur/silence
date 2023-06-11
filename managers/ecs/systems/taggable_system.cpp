@@ -42,7 +42,9 @@ void TaggableSystem::update(World &world, float dt) {
 			auto &sprite = ui.add_ui_image(ui_name, ui_tag_name);
 			sprite.is_screen_space = false;
 			sprite.is_billboard = true;
-			sprite.position = transform.get_global_position() + tag.tag_position;
+			glm::vec3 glob_pos = tag.tag_position.x * transform.get_right() + tag.tag_position.y * transform.get_up() +
+								 tag.tag_position.z * transform.get_forward();
+			sprite.position = transform.get_global_position() + glob_pos;
 			sprite.texture = tag_texture;
 			sprite.size = glm::vec2(0.25f);
 			sprite.display = true;
@@ -56,7 +58,10 @@ void TaggableSystem::update(World &world, float dt) {
 
 		auto &sprite = ui.get_ui_image(ui_name, tag_prefix + std::to_string(entity));
 
-		sprite.position = transform.get_global_position() + tag.tag_position;
+		glm::vec3 glob_pos = tag.tag_position.x * transform.get_right() + tag.tag_position.y * transform.get_up() +
+				tag.tag_position.z * transform.get_forward();
+
+		sprite.position = transform.get_global_position() + glob_pos;
 		if (!tag.tagged) {
 			float x = tag.tag_timer / tag.time_to_tag;
 			if (tag.tagging) {
