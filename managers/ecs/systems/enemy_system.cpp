@@ -60,7 +60,7 @@ void EnemySystem::update(World &world, float dt) {
 			if (ep.path_parent > 0) {
 				if (world.has_component<Children>(ep.path_parent)) {
 					auto &children = world.get_component<Children>(ep.path_parent);
-					if (children.children_count > 0) {
+					if (children.children_count > 1) {
 						ed.state_machine.set_state("patrolling");
 					} else {
 						ed.state_machine.set_state("stationary_patrolling");
