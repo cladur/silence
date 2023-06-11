@@ -12,6 +12,11 @@
 
 struct RenderScene;
 
+struct DecalDrawCommand {
+	Decal *decal;
+	Transform *transform;
+};
+
 struct DrawCommand {
 	ModelInstance *model_instance;
 	Transform *transform;
@@ -129,6 +134,7 @@ public:
 
 class ParticlePass : public RenderPass {
 	unsigned int vao, vbo, ebo, ssbo;
+
 public:
 	MaterialParticle material;
 	void startup() override;
@@ -142,6 +148,7 @@ class HighlightPass : public RenderPass {
 
 	std::vector<DrawCommand> xray_highlights;
 	std::vector<SkinnedDrawCommand> xray_skinned_highlights;
+
 public:
 	MaterialHighlight material;
 	void startup() override;
@@ -150,6 +157,13 @@ public:
 	void draw_xray(RenderScene &scene, bool right_side);
 	void sort_highlights(RenderScene &scene);
 	void clear();
+};
+
+class DecalPass : public RenderPass {
+public:
+	MaterialDecal material;
+	void startup() override;
+	void draw(RenderScene &scene) override;
 };
 
 #endif // SILENCE_RENDER_PASS_H

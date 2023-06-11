@@ -668,3 +668,27 @@ void MaterialHighlight::bind_mesh_resources(SkinnedMesh &mesh, HighlightData &hi
 	skinned_shader.set_int("is_highlighted", highlight_data.highlighted);
 	skinned_shader.set_vec3("highlight_color", highlight_data.highlight_color);
 }
+
+void MaterialDecal::startup() {
+	shader.load_from_files(shader_path("decal/decal.vert"), shader_path("decal/decal.frag"));
+}
+
+void MaterialDecal::bind_resources(RenderScene &scene) {
+	shader.use();
+	shader.set_mat4("projection", scene.projection);
+	shader.set_mat4("view", scene.view);
+	shader.set_mat4("view", scene.view);
+	shader.set_vec2("aspect_ratio", scene.render_extent);
+	shader.set_mat4("inv_view_proj", glm::inverse(scene.projection * scene.view));
+	shader.set_int("gDepth", 10);
+
+	glActiveTexture(GL_TEXTURE10);
+	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.depth_texture_id);
+}
+
+void MaterialDecal::bind_instance_resources(ModelInstance &instance, Transform &transform) {
+	//	shader.set_mat4("", transform.get)
+}
+
+void MaterialDecal::bind_decal_resources(struct Decal &decal, Transform &transform) {
+}

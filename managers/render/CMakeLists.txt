@@ -40,7 +40,7 @@ add_library(${RENDER_MANAGER_NAME} STATIC
         ecs/light_render_system.cpp ecs/light_render_system.h
         ecs/billboard_component.h
         ecs/billboard_system.h ecs/billboard_system.cpp
-        ecs/particle_render_system.cpp ecs/particle_render_system.h transparent_elements/particle_manager.cpp transparent_elements/particle_manager.h transparent_elements/particle_data.h)
+        ecs/particle_render_system.cpp ecs/particle_render_system.h transparent_elements/particle_manager.cpp transparent_elements/particle_manager.h transparent_elements/particle_data.h ecs/decal_system.cpp ecs/decal_system.h)
 
 # Include directories
 target_include_directories(${RENDER_MANAGER_NAME} PUBLIC ${MANAGER_DIR})

@@ -10,6 +10,7 @@
 #include "components/collider_obb.h"
 #include "components/collider_sphere.h"
 #include "components/collider_tag_component.h"
+#include "components/decal_component.h"
 #include "components/detection_camera_component.h"
 #include "components/enemy_data_component.h"
 #include "components/enemy_path_component.h"
@@ -25,7 +26,6 @@
 #include "components/rigidbody_component.h"
 #include "components/static_tag_component.h"
 #include "components/transform_component.h"
-
 
 #include "components/particle_emitter_component.h"
 #include "components/path_node_component.h"
@@ -53,7 +53,7 @@ concept Deserializable = requires(T t, nlohmann::json &j) {
 typedef std::variant<Children, Parent, Transform, RigidBody, FmodListener, Camera, ModelInstance, AnimationInstance,
 		SkinnedModelInstance, Name, ColliderTag, StaticTag, ColliderSphere, ColliderAABB, ColliderOBB, ColliderCapsule,
 		Light, AgentData, HackerData, EnemyPath, EnemyData, Interactable, Attachment, Platform, ExplodingBox, Billboard,
-		PathNode, PathParent, Taggable, FMODEmitter, Highlight, ParticleEmitter, DetectionCamera>
+		PathNode, PathParent, Taggable, FMODEmitter, Highlight, ParticleEmitter, DetectionCamera, Decal>
 		variant_type;
 
 template <typename T>
