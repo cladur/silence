@@ -73,7 +73,7 @@ bool HackerSystem::shoot_raycast(
 	}
 
 	if (!world.has_component<Interactable>(hit_entity)) {
-		SPDLOG_ERROR("Hacker raycast hit entity {} without interactable component", hit_entity);
+		// SPDLOG_ERROR("Hacker raycast hit entity {} without interactable component", hit_entity);
 		return false;
 	}
 

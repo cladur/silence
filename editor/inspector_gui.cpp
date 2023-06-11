@@ -45,6 +45,9 @@ void Inspector::show_components() {
 		return;
 	}
 
+	ImGui::Text("ID: %d", selected_entity);
+	ImGui::Spacing();
+
 	SHOW_COMPONENT(Name, show_name);
 	SHOW_COMPONENT(Transform, show_transform);
 	SHOW_COMPONENT(RigidBody, show_rigidbody);
@@ -734,6 +737,13 @@ void Inspector::show_light() {
 		ImGui::TableSetColumnIndex(1);
 		ImGui::SetNextItemWidth(-FLT_MIN);
 		ImGui::Checkbox("##Cast shadow", &light.cast_shadow);
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Is On");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		ImGui::Checkbox("##Is On", &light.is_on);
 
 		if (light.type == LightType::SPOT_LIGHT) {
 			ImGui::TableNextRow();
