@@ -725,9 +725,9 @@
                         "z": 0.0
                     },
                     "position": {
-                        "x": 2.2859466075897217,
-                        "y": 0.1302151083946228,
-                        "z": 1.1007850170135498
+                        "x": 2.9049549102783203,
+                        "y": 0.3631061911582947,
+                        "z": 1.7974860668182373
                     },
                     "scale": {
                         "x": 1.0,
@@ -4543,7 +4543,7 @@
                 "component_data": {
                     "can_interact": true,
                     "interaction": 3,
-                    "interaction_target": 66,
+                    "interaction_target": 35,
                     "type": 2
                 },
                 "component_name": "Interactable"

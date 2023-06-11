@@ -34,7 +34,7 @@ void InteractableSystem::update(World &world, float dt) {
 		auto &interactable = world.get_component<Interactable>(entity);
 		if (interactable.interaction == Exploding && *CVarSystem::get()->get_int_cvar("debug_draw.collision.draw")) {
 			auto box = world.get_component<ExplodingBox>(interactable.interaction_target);
-			auto center = world.get_component<Transform>(interactable.interaction_target).get_position();
+			auto center = world.get_component<Transform>(interactable.interaction_target).get_global_position();
 			draw_explosion_radius(world, center, box.explosion_radius, { 255, 0, 0 });
 			draw_explosion_radius(world, center, box.distraction_radius, { 255, 128, 0 });
 		}
@@ -99,12 +99,12 @@ void InteractableSystem::explosion(World &world, Interactable &interactable, Ent
 		smaller_radius = temp;
 	}
 	sphere.radius = larger_radius;
-	sphere.center = world.get_component<Transform>(interactable.interaction_target).get_position();
+	sphere.center = world.get_component<Transform>(interactable.interaction_target).get_global_position();
 	auto colliders = PhysicsManager::get().overlap_sphere(world, sphere, "default");
 	for (Entity entity : colliders) {
 		if (world.has_component<EnemyData>(entity)) {
 			auto enemy_data = world.get_component<EnemyData>(entity);
-			float distance = glm::distance(sphere.center, world.get_component<Transform>(entity).get_position());
+			float distance = glm::distance(sphere.center, world.get_component<Transform>(entity).get_global_position());
 			if (distance < smaller_radius) {
 				auto &enemy = world.get_component<EnemyData>(entity);
 				enemy.state_machine.set_state("dying");
@@ -116,9 +116,9 @@ void InteractableSystem::explosion(World &world, Interactable &interactable, Ent
 				if (enemy.state_machine.get_current_state() != "dying") {
 					enemy.state_machine.set_state("distracted");
 					enemy.distraction_cooldown = box.distraction_time;
-					auto target = t.position;
+					auto target = t.get_global_position();
 					// yeah, same as in prototype, they would float to the root of the box
-					target.y = enemy_transform.position.y;
+					target.y = enemy_transform.get_global_position().y;
 					enemy.distraction_target = target;
 				}
 				SPDLOG_INFO("{} is distracted", entity);
