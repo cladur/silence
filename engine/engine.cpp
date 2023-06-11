@@ -18,6 +18,8 @@
 #include "render/transparent_elements/ui_manager.h"
 #include <string>
 
+AutoCVarInt cvar_force_20_fps("engine.force_20_fps", "force 20 fps", 0, CVarFlags::EditCheckbox);
+
 void Engine::startup() {
 	// Managers
 	SPDLOG_INFO("Starting up engine systems...");
@@ -60,6 +62,14 @@ void Engine::run() {
 
 		{
 			ZoneScopedNC("Sleep", tracy::Color::Blue);
+			while (std::chrono::duration<float, std::chrono::seconds::period>(stop_time - start_time).count() <
+					target_frame_time) {
+				stop_time = std::chrono::high_resolution_clock::now();
+			}
+		}
+
+		if (cvar_force_20_fps.get()) {
+			float target_frame_time = 1.0f / 20.0f;
 			while (std::chrono::duration<float, std::chrono::seconds::period>(stop_time - start_time).count() <
 					target_frame_time) {
 				stop_time = std::chrono::high_resolution_clock::now();

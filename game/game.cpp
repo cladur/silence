@@ -448,7 +448,7 @@ void Game::custom_update(float dt) {
 	}
 
 	if (input_manager.is_action_just_pressed("reload_scene")) {
-		get_active_scene().load_from_file("resources/scenes/level_3.scn");
+		get_active_scene().load_from_file("resources/scenes/level_3_3.scn");
 		AnimationManager::get().animation_map.clear();
 	}
 

@@ -45,6 +45,9 @@ void Inspector::show_components() {
 		return;
 	}
 
+	ImGui::Text("ID: %d", selected_entity);
+	ImGui::Spacing();
+
 	SHOW_COMPONENT(Name, show_name);
 	SHOW_COMPONENT(Transform, show_transform);
 	SHOW_COMPONENT(RigidBody, show_rigidbody);
