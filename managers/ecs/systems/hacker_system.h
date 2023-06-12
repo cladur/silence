@@ -9,9 +9,6 @@
 class HackerSystem : public BaseSystem {
 private:
 	glm::vec3 previous_velocity;
-	glm::vec3 accelerate(
-			glm::vec3 accel_dir, glm::vec3 prev_velocity, float acceleration, float max_velocity, float dt);
-	glm::vec3 move_ground(glm::vec3 accel_dir, glm::vec3 pre_velocity, float dt);
 	bool jump_to_camera(World &world, HackerData &hacker_data, Entity camera_entity);
 	bool shoot_raycast(Transform &transform, World &world, HackerData &hacker_data, float dt, bool trigger,
 			glm::vec3 direction = glm::vec3(0.0f, 0.0f, -1.0f));
