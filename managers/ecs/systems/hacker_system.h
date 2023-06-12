@@ -19,6 +19,7 @@ private:
 
 	glm::quat starting_camera_pivot_orientation;
 	glm::quat starting_camera_orientation;
+	glm::quat before_jump_orientation;
 
 	float current_rotation_x_camera_pivot = 0.0f;
 	float current_rotation_x_camera = 0.0f;
