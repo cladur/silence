@@ -4,6 +4,7 @@
 #include "components/enemy_data_component.h"
 #include "components/platform_component.h"
 #include "components/transform_component.h"
+#include "cvars/cvars.h"
 #include "ecs/world.h"
 #include "engine/scene.h"
 
@@ -414,6 +415,10 @@ void AgentSystem::update(World &world, float dt) {
 				glm::vec3 displacement = { 0.0f, 0.66f, 0.0f };
 				displacement += model_tf.get_global_forward();
 				transform.add_position(displacement);
+				animation_instance.blend_time_ms = 0.0f;
+				//animation_manager.change_animation(agent_data.model, "agent/agent_ANIM_GLTF/agent_idle.anim");
+				//animation_instance.blend_time_ms = 700.0f;
+
 			}
 		}
 
