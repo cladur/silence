@@ -21,12 +21,12 @@
 #include <glm/geometric.hpp>
 #include <glm/gtx/string_cast.hpp>
 
-AutoCVarFloat cvar_agent_acc_ground("agent.acc_ground", "acceleration on ground", 0.55f, CVarFlags::EditFloatDrag);
+AutoCVarFloat cvar_agent_acc_ground("agent.acc_ground", "acceleration on ground", 32.0f, CVarFlags::EditFloatDrag);
 
 AutoCVarFloat cvar_agent_max_vel_ground(
-		"agent.max_vel_ground", "maximum velocity on ground", 2.0f, CVarFlags::EditFloatDrag);
+		"agent.max_vel_ground", "maximum velocity on ground", 4.0f, CVarFlags::EditFloatDrag);
 
-AutoCVarFloat cvar_friction_ground("agent.friction_ground", "friction on ground", 8.0f, CVarFlags::EditFloatDrag);
+AutoCVarFloat cvar_friction_ground("agent.friction_ground", "friction on ground", 9.0f, CVarFlags::EditFloatDrag);
 
 AutoCVarFloat cvar_agent_crouch_slowdown(
 		"agent.crouch_slowdown", "slowdown while crouching", 0.6f, CVarFlags::EditFloatDrag);
@@ -99,7 +99,7 @@ void AgentMovementSystem::update(World &world, float dt) {
 		glm::vec3 velocity = move_ground(acc_direction, previous_velocity, acceleration, dt);
 
 		//SPDLOG_INFO(animation_instance.ticks_per_second);
-		transform.add_position(glm::vec3(velocity.x, 0.0, velocity.z));
+		transform.add_position(glm::vec3(velocity.x, 0.0, velocity.z) * dt);
 
 		static glm::vec3 last_position = transform.position;
 
@@ -165,7 +165,7 @@ glm::vec3 AgentMovementSystem::accelerate(
 
 glm::vec3 AgentMovementSystem::move_ground(glm::vec3 accel_dir, glm::vec3 pre_velocity, float acceleration, float dt) {
 	float speed = glm::length(pre_velocity);
-	if (speed > 0) {
+	if (speed != 0) {
 		float drop = speed * cvar_friction_ground.get() * dt;
 		pre_velocity *= glm::max(speed - drop, 0.0f) / speed;
 	}

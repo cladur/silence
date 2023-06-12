@@ -31,7 +31,7 @@ AutoCVarFloat cvar_agent_lock_time("agent.lock_time", "minimal time of animation
 
 AutoCVarFloat cvar_agent_camera_back("agent.cam_back", "distance of camera from player", -1.5f);
 
-AutoCVarFloat cvar_agent_animation_speed("agent.animation_speed", "speed of animation", 20.0f);
+AutoCVarFloat cvar_agent_animation_speed("agent.animation_speed", "speed of animation", 32.0f);
 
 AutoCVarFloat cvar_camera_sensitivity("settings.camera_sensitivity", "camera sensitivity", 0.1f);
 

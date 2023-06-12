@@ -175,7 +175,7 @@ public:
 		while (frame_time > 0.0f) {
 			float delta_time = std::min(frame_time, fixed_dt);
 			for (auto &system : during_physics_systems) {
-				system->update(*this, fixed_dt);
+				system->update(*this, delta_time);
 			}
 			frame_time -= delta_time;
 		}
