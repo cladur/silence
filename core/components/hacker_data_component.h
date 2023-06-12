@@ -6,6 +6,7 @@ struct HackerData {
 	Entity camera_pivot;
 	Entity scorpion_camera_transform;
 	Entity camera;
+	bool is_on_camera = false;
 
 	void serialize_json(nlohmann::json &serialized_scene) {
 		nlohmann::json::object_t serialized_component;

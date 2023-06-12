@@ -3,6 +3,7 @@
 #include "components/exploding_box_component.h"
 #include "display/display_manager.h"
 #include "ecs/systems/detection_camera_system.h"
+#include "ecs/systems/hacker_movement_system.h"
 #include "ecs/systems/interactable_system.h"
 #include "ecs/systems/platform_system.h"
 #include "ecs/world.h"
@@ -40,7 +41,6 @@
 #include "render/ecs/particle_render_system.h"
 #include "render/ecs/render_system.h"
 #include "render/ecs/skinned_render_system.h"
-
 
 #define COLLISION_TEST_ENTITY 4
 
@@ -134,6 +134,7 @@ void Scene::register_game_systems() {
 	world.register_system<AgentSystem>();
 	world.register_system<AgentMovementSystem>(UpdateOrder::DuringPhysics);
 	world.register_system<HackerSystem>();
+	world.register_system<HackerMovementSystem>(UpdateOrder::DuringPhysics);
 	world.register_system<EnemySystem>(UpdateOrder::PostAnimation);
 	world.register_system<TaggableSystem>();
 	//world.register_system<EnemyPathing>();

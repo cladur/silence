@@ -18,23 +18,6 @@
 #include <glm/fwd.hpp>
 #include <glm/geometric.hpp>
 
-AutoCVarFloat cvar_hacker_acc_ground("hacker.acc_ground", "acceleration on ground ", 0.4f, CVarFlags::EditCheckbox);
-
-AutoCVarFloat cvar_hacker_minimal_animation_speed(
-		"hacker.minimal_animation_speed", "minimal walking animation speed ", 3500.0f, CVarFlags::EditCheckbox);
-
-AutoCVarFloat cvar_hacker_velocity_animation_speed_multiplier("hacker.velocity_animation_speed_multiplier",
-		"glm::length(velocity) * this", 400000.0f, CVarFlags::EditCheckbox);
-
-AutoCVarFloat cvar_hacker_idle_animation_tickrate(
-		"hacker.idle_animation_tickrate", "Idle animation tickrate", 1500.0f, CVarFlags::EditCheckbox);
-
-AutoCVarFloat cvar_hacker_max_vel_ground(
-		"hacker.max_vel_ground", "maximum velocity on ground ", 2.0f, CVarFlags::EditCheckbox);
-
-AutoCVarFloat cvar_hacker_friction_ground(
-		"hacker.friction_ground", "friction on ground", 8.0f, CVarFlags::EditCheckbox);
-
 AutoCVarFloat cvar_hacker_camera_sensitivity(
 		"settings.hacker_camera_sensitivity", "camera sensitivity", 0.1f, CVarFlags::EditCheckbox);
 
@@ -132,6 +115,7 @@ bool HackerSystem::jump_to_camera(World &world, HackerData &hacker_data, Entity 
 	camera_tf.set_orientation(new_camera_tf.get_global_orientation());
 
 	is_on_camera = true;
+	hacker_data.is_on_camera = true;
 	current_camera_entity = camera_entity;
 	starting_camera_orientation = world.get_component<Transform>(camera_entity).get_global_orientation();
 
@@ -155,6 +139,7 @@ void HackerSystem::go_back_to_scorpion(World &world, HackerData &hacker_data) {
 	current_rotation_y = 0.0f;
 	current_camera_entity = 0;
 	is_on_camera = false;
+	hacker_data.is_on_camera = false;
 }
 
 void HackerSystem::startup(World &world) {
@@ -209,7 +194,6 @@ void HackerSystem::update(World &world, float dt) {
 		auto &transform = world.get_component<Transform>(entity);
 		auto &hacker_data = world.get_component<HackerData>(entity);
 		auto &camera_pivot_tf = world.get_component<Transform>(hacker_data.camera_pivot);
-		auto &model_tf = world.get_component<Transform>(hacker_data.model);
 		auto &scorpion_camera_tf = world.get_component<Transform>(hacker_data.scorpion_camera_transform);
 		auto &camera_tf = world.get_component<Transform>(hacker_data.camera);
 		auto &animation_instance = world.get_component<AnimationInstance>(hacker_data.model);
@@ -247,26 +231,6 @@ void HackerSystem::update(World &world, float dt) {
 		camera_forward = glm::normalize(camera_forward);
 		auto camera_right = camera_pivot_tf.get_global_right();
 
-		glm::vec3 acc_direction = { 0, 0, 0 };
-		if (!is_on_camera) {
-			if (input_manager.is_action_pressed("hacker_move_forward")) {
-				acc_direction += camera_forward;
-			}
-			if (input_manager.is_action_pressed("hacker_move_backward")) {
-				acc_direction -= camera_forward;
-			}
-			if (input_manager.is_action_pressed("hacker_move_left")) {
-				acc_direction += camera_right;
-			}
-			if (input_manager.is_action_pressed("hacker_move_right")) {
-				acc_direction -= camera_right;
-			}
-		}
-
-		if (*CVarSystem::get()->get_int_cvar("debug_camera.use")) {
-			acc_direction = glm::vec3(0.0f);
-		}
-
 		// ZOOMING LOGIC
 		if (input_manager.is_action_pressed("control_camera")) {
 			is_zooming = true;
@@ -303,35 +267,6 @@ void HackerSystem::update(World &world, float dt) {
 		if (input_manager.is_action_just_pressed("back_from_camera")) {
 			go_back_to_scorpion(world, hacker_data);
 		}
-
-		if (glm::length(acc_direction) > 0.0f) {
-			acc_direction = glm::normalize(acc_direction);
-		}
-
-		glm::vec3 velocity = move_ground(acc_direction, previous_velocity, dt);
-		if (glm::dot(velocity, velocity) > physics_manager.get_epsilon()) {
-			if (animation_instance.animation_handle.id !=
-					resource_manager.get_animation_handle("scorpion/scorpion_ANIM_GLTF/scorpion_idle_walk.anim").id) {
-				animation_manager.change_animation(hacker_data.model, "scorpion/scorpion_ANIM_GLTF/scorpion_walk.anim");
-			}
-		} else {
-			if (animation_instance.animation_handle.id !=
-					resource_manager.get_animation_handle("scorpion/scorpion_ANIM_GLTF/scorpion_idle.anim").id) {
-				animation_manager.change_animation(hacker_data.model, "scorpion/scorpion_ANIM_GLTF/scorpion_idle.anim");
-			}
-		}
-		if (glm::length(velocity) == 0.0f) {
-			animation_instance.ticks_per_second = cvar_hacker_idle_animation_tickrate.get();
-		} else {
-			float minimal_speed = cvar_hacker_minimal_animation_speed.get();
-			float new_animation_speed = glm::length(velocity) * cvar_hacker_velocity_animation_speed_multiplier.get();
-			if (new_animation_speed < minimal_speed) {
-				new_animation_speed = minimal_speed;
-			}
-			animation_instance.ticks_per_second = new_animation_speed;
-		}
-
-		transform.add_position(glm::vec3(velocity.x, 0.0, velocity.z));
 
 		auto mouse_delta = glm::vec2(0.0f);
 		mouse_delta.x = input_manager.get_axis("hacker_look_left", "hacker_look_right");
@@ -392,20 +327,6 @@ void HackerSystem::update(World &world, float dt) {
 			shoot_raycast(camera_tf, world, hacker_data, dt, triggered, real_camera_forward);
 		}
 
-		static glm::vec3 last_position = transform.position;
-
-		// Lerp model_tf towards movement direction
-		glm::vec3 delta_position = transform.position - last_position;
-		delta_position.y = 0.0f;
-		if (glm::length2(delta_position) > 0.001f) {
-			glm::vec3 direction = glm::normalize(delta_position);
-			glm::vec3 forward =
-					glm::normalize(glm::vec3(model_tf.get_global_forward().x, 0.0f, model_tf.get_global_forward().z));
-			float angle = glm::acos(glm::clamp(glm::dot(forward, direction), -1.0f, 1.0f)) * 0.3f;
-			glm::vec3 axis = glm::cross(forward, direction);
-			model_tf.add_global_euler_rot(axis * angle);
-		}
-
 		Ray ray{};
 		ray.origin = transform.get_global_position() + glm::vec3(0.0f, 1.0f, 0.0f);
 		ray.ignore_list.emplace_back(entity);
@@ -428,42 +349,5 @@ void HackerSystem::update(World &world, float dt) {
 				}
 			}
 		}
-
-		//		AudioManager::get().set_3d_listener_attributes(
-		//				SILENCE_FMOD_LISTENER_HACKER,
-		//				transform.get_global_position(),
-		//				velocity,
-		//				transform.get_global_forward(),
-		//				transform.get_global_up()
-		//		);
-
-		last_position = transform.position;
-
-		if (glm::length(velocity) < 0.0001f) {
-			velocity = glm::vec3(0.0f);
-		}
-		previous_velocity = velocity;
 	}
-}
-
-glm::vec3 HackerSystem::accelerate(
-		glm::vec3 accel_dir, glm::vec3 prev_velocity, float acceleration, float max_velocity, float dt) {
-	float proj_vel = glm::dot(prev_velocity, accel_dir);
-	float accel_vel = acceleration * dt;
-
-	if (proj_vel + accel_vel > max_velocity) {
-		accel_vel = max_velocity - proj_vel;
-	}
-
-	return prev_velocity + accel_dir * accel_vel;
-}
-
-glm::vec3 HackerSystem::move_ground(glm::vec3 accel_dir, glm::vec3 pre_velocity, float dt) {
-	float speed = glm::length(pre_velocity);
-	if (speed != 0) {
-		float drop = speed * cvar_hacker_friction_ground.get() * dt;
-		pre_velocity *= glm::max(speed - drop, 0.0f) / speed;
-	}
-
-	return accelerate(accel_dir, pre_velocity, cvar_hacker_acc_ground.get(), cvar_hacker_max_vel_ground.get(), dt);
 }
