@@ -139,7 +139,8 @@ void AgentMovementSystem::update(World &world, float dt) {
 			} else if (is_on_too_steep_slope || info.distance > 1.01f) {
 				transform.position.y -= 8.0f * dt;
 				transform.set_changed(true);
-			} else if (world.has_component<Platform>(info.entity)) {
+			}
+			if (world.has_component<Platform>(info.entity)) {
 				auto &platform = world.get_component<Platform>(info.entity);
 				if (platform.is_moving) {
 					transform.add_position(platform.change_vector);

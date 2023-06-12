@@ -148,6 +148,10 @@ void AgentSystem::update(World &world, float dt) {
 			}
 		}
 
+		if(!is_climbing) {
+			animation_instance.blend_time_ms = 700.0f;
+		}
+
 		if (speed > 0.02f && !agent_data.locked_movement) {
 			if (is_crouching) {
 				if (animation_instance.animation_handle.id !=
@@ -380,11 +384,9 @@ void AgentSystem::update(World &world, float dt) {
 			tag_ray.direction = -camera_tf.get_global_forward();
 			tag_ray.ignore_list.emplace_back(entity);
 			tag_ray.layer_name = "hacker";
-			//tag_ray.ignore_layers.emplace_back("camera");
 
 			glm::vec3 end = tag_ray.origin + tag_ray.direction;
 			HitInfo info = {};
-			//dd.draw_arrow(tag_ray.origin, end, { 1.0f, 0.0f, 0.0f });
 			if (CollisionSystem::ray_cast_layer(world, tag_ray, info)) {
 				auto &name = world.get_component<Name>(info.entity);
 				if (world.has_component<Taggable>(info.entity)) {
@@ -416,9 +418,7 @@ void AgentSystem::update(World &world, float dt) {
 				displacement += model_tf.get_global_forward();
 				transform.add_position(displacement);
 				animation_instance.blend_time_ms = 0.0f;
-				//animation_manager.change_animation(agent_data.model, "agent/agent_ANIM_GLTF/agent_idle.anim");
-				//animation_instance.blend_time_ms = 700.0f;
-
+				animation_manager.change_animation(agent_data.model, "agent/agent_ANIM_GLTF/agent_idle.anim");
 			}
 		}
 
