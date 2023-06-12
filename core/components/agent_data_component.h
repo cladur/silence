@@ -7,6 +7,9 @@ struct AgentData {
 	Entity spring_arm;
 	Entity camera;
 
+	bool is_crouching = false;
+	bool locked_movement = false;
+
 	void serialize_json(nlohmann::json &serialized_scene) {
 		nlohmann::json::object_t serialized_component;
 		serialized_scene.push_back(nlohmann::json::object());

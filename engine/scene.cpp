@@ -19,6 +19,7 @@
 #include "audio/ecs/fmod_emitter_system.h"
 #include "components/fmod_emitter_component.h"
 #include "components/taggable_component.h"
+#include "ecs/systems/agent_movement_system.h"
 #include "ecs/systems/agent_system.h"
 #include "ecs/systems/collider_draw.h"
 #include "ecs/systems/enemy_path_draw_system.h"
@@ -39,6 +40,7 @@
 #include "render/ecs/particle_render_system.h"
 #include "render/ecs/render_system.h"
 #include "render/ecs/skinned_render_system.h"
+
 
 #define COLLISION_TEST_ENTITY 4
 
@@ -113,7 +115,7 @@ Scene::Scene() {
 	physics_manager.add_collision_layer("agent");
 	physics_manager.add_collision_layer("camera");
 	physics_manager.add_collision_layer("obstacle");
-	
+
 	physics_manager.set_layers_no_collision("default", "hacker");
 	physics_manager.set_layers_no_collision("agent", "hacker");
 
@@ -129,6 +131,7 @@ void Scene::register_game_systems() {
 
 	// Agents
 	world.register_system<AgentSystem>();
+	world.register_system<AgentMovementSystem>(UpdateOrder::DuringPhysics);
 	world.register_system<HackerSystem>();
 	world.register_system<EnemySystem>(UpdateOrder::PostAnimation);
 	world.register_system<TaggableSystem>();
@@ -142,6 +145,7 @@ void Scene::register_game_systems() {
 
 void Scene::update(float dt) {
 	ZoneScopedN("Scene::update");
+
 	for (Entity entity : entities) {
 		if (world.has_component<Camera>(entity) && world.has_component<Transform>(entity)) {
 			auto &camera = world.get_component<Camera>(entity);

@@ -13,6 +13,7 @@ add_library(${ECS_MANAGER_NAME} STATIC
         component_visitor.h
         systems/collider_draw.cpp systems/collider_draw.h
         systems/agent_system.cpp systems/agent_system.h
+        systems/agent_movement_system.cpp systems/agent_movement_system.h
         systems/hacker_system.cpp systems/hacker_system.h
         systems/enemy_pathing.cpp systems/enemy_pathing.h systems/enemy_path_draw_system.cpp systems/enemy_path_draw_system.h
         systems/interactable_system.cpp systems/interactable_system.h
