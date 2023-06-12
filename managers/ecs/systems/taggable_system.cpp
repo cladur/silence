@@ -62,31 +62,35 @@ void TaggableSystem::update(World &world, float dt) {
 				tag.tag_position.z * transform.get_forward();
 
 		sprite.position = transform.get_global_position() + glob_pos;
-		if (!tag.tagged) {
-			float x = tag.tag_timer / tag.time_to_tag;
-			if (tag.tagging) {
-				tag.tag_timer += dt;
-				if (tag.tag_timer >= tag.time_to_tag) {
-					AudioManager::get().play_one_shot_2d(on_tagged);
-					tag.tagged = true;
+
+		if (tag.enabled) {
+			if (!tag.tagged) {
+				float x = tag.tag_timer / tag.time_to_tag;
+				if (tag.tagging) {
+					tag.tag_timer += dt;
+					if (tag.tag_timer >= tag.time_to_tag) {
+						AudioManager::get().play_one_shot_2d(on_tagged);
+						tag.tagged = true;
+					}
+				} else {
+					tag.tag_timer -= dt;
+					tag.tag_timer = glm::max(tag.tag_timer, 0.0f);
 				}
-			} else {
-				tag.tag_timer -= dt;
-				tag.tag_timer = glm::max(tag.tag_timer, 0.0f);
-			}
 
-			if (world.has_component<Interactable>(entity)) {
-				color = glm::mix(non_tagged_color, interactive_color, x);
-			} else if (world.has_component<EnemyData>(entity)) {
-				color = glm::mix(non_tagged_color, enemy_color, x);
-			} else {
-				color = glm::mix(non_tagged_color, default_color, x);
-			}
+				if (world.has_component<Interactable>(entity)) {
+					color = glm::mix(non_tagged_color, interactive_color, x);
+				} else if (world.has_component<EnemyData>(entity)) {
+					color = glm::mix(non_tagged_color, enemy_color, x);
+				} else {
+					color = glm::mix(non_tagged_color, default_color, x);
+				}
 
-			sprite.color = color;
-			tag.tagging = false;
+
+				sprite.color = color;
+				tag.tagging = false;
+			}
+		} else {
+			sprite.color = glm::vec4(0.0f);
 		}
-
-
 	}
 }

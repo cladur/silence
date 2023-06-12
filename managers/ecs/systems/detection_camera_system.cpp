@@ -28,6 +28,9 @@ AutoCVarFloat cvar_enemy_camera_detection_vertical_angle(
 #define IDLE_LIFETIME 0.5f
 #define DETECTING_LIFETIME 5.0f
 
+#define IDLE_SIZE 4.5f
+#define TAGGED_SIZE 8.0f
+
 void DetectionCameraSystem::startup(World &world) {
 	Signature white_signature;
 	white_signature.set(world.get_component_type<DetectionCamera>());
@@ -84,6 +87,8 @@ void DetectionCameraSystem::update(World &world, float dt) {
 				particle_1->velocity_end = IDLE_VELOCITY;
 				particle_1->velocity_variance = IDLE_VELOCITY_VARIANCE;
 				particle_1->lifetime = IDLE_LIFETIME;
+				particle_1->size_begin = IDLE_SIZE;
+				particle_1->size_end = IDLE_SIZE;
 				particle_1->rate = 6.0f;
 
 				particle_2->color_begin = IDLE_COLOR_BEGIN;
@@ -92,6 +97,8 @@ void DetectionCameraSystem::update(World &world, float dt) {
 				particle_2->velocity_end = IDLE_VELOCITY;
 				particle_2->velocity_variance = IDLE_VELOCITY_VARIANCE;
 				particle_2->lifetime = IDLE_LIFETIME;
+				particle_2->size_begin = IDLE_SIZE;
+				particle_2->size_end = IDLE_SIZE;
 				particle_2->rate = 6.0f;
 			}
 
@@ -108,24 +115,32 @@ void DetectionCameraSystem::update(World &world, float dt) {
 					particle_1->velocity_end = TAGGED_VELOCITY;
 					particle_1->velocity_variance = TAGGED_VELOCITY_VARIANCE;
 					particle_1->lifetime = DETECTING_LIFETIME;
+					particle_1->size_begin = TAGGED_SIZE;
+					particle_1->size_end = TAGGED_SIZE;
 					particle_1->rate = 6.0f;
 
 					particle_2->velocity_begin = TAGGED_VELOCITY;
 					particle_2->velocity_end = TAGGED_VELOCITY;
 					particle_2->velocity_variance = TAGGED_VELOCITY_VARIANCE;
 					particle_2->lifetime = DETECTING_LIFETIME;
+					particle_2->size_begin = TAGGED_SIZE;
+					particle_2->size_end = TAGGED_SIZE;
 					particle_2->rate = 6.0f;
 				} else {
 					particle_1->velocity_begin = IDLE_VELOCITY;
 					particle_1->velocity_end = IDLE_VELOCITY;
 					particle_1->velocity_variance = IDLE_VELOCITY_VARIANCE;
 					particle_1->lifetime = IDLE_LIFETIME;
+					particle_1->size_begin = IDLE_SIZE;
+					particle_1->size_end = IDLE_SIZE;
 					particle_1->rate = 6.0f;
 
 					particle_2->velocity_begin = IDLE_VELOCITY;
 					particle_2->velocity_end = IDLE_VELOCITY;
 					particle_2->velocity_variance = IDLE_VELOCITY_VARIANCE;
 					particle_2->lifetime = IDLE_LIFETIME;
+					particle_2->size_begin = IDLE_SIZE;
+					particle_2->size_end = IDLE_SIZE;
 					particle_2->rate = 6.0f;
 				}
 			}
