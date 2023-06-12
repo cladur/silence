@@ -414,9 +414,20 @@ void AgentSystem::update(World &world, float dt) {
 				//climbing animation should end here, otherwise it will start to loop
 				is_climbing = false;
 				animation_timer += 100.f;
-				glm::vec3 displacement = { 0.0f, 0.66f, 0.0f };
-				displacement += model_tf.get_global_forward();
-				transform.add_position(displacement);
+
+				Ray ray{};
+						ray.origin = transform.get_global_position() + glm::vec3(0.0f, 1.4f, 0.0f) + model_tf.get_forward();
+				ray.ignore_list.emplace_back(entity);
+				ray.layer_name = "default";
+				ray.direction = -transform.get_up();
+				glm::vec3 end = ray.origin + ray.direction;
+				HitInfo info;
+				dd.draw_arrow(ray.origin, end, { 1.0f, 0.0f, 0.0f });
+				if (CollisionSystem::ray_cast_layer(world, ray, info)) { 
+					transform.set_position(info.point + glm::vec3{0.0f,0.2f,0.0f});
+				}
+
+
 				animation_instance.blend_time_ms = 0.0f;
 				animation_manager.change_animation(agent_data.model, "agent/agent_ANIM_GLTF/agent_idle.anim");
 			}
