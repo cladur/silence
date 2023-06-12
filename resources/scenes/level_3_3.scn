@@ -162,7 +162,7 @@
             {
                 "component_data": {
                     "path_parent": 73,
-                    "rotation_speed": 5.0,
+                    "rotation_speed": 8.0,
                     "speed": 1.0
                 },
                 "component_name": "EnemyPath"
@@ -4468,7 +4468,7 @@
             {
                 "component_data": {
                     "path_parent": 38,
-                    "rotation_speed": 5.0,
+                    "rotation_speed": 4.900000095367432,
                     "speed": 1.0
                 },
                 "component_name": "EnemyPath"
