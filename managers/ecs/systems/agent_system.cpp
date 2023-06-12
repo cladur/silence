@@ -240,7 +240,7 @@ void AgentSystem::update(World &world, float dt) {
 			if (input_manager.is_action_just_pressed("agent_climb")) {
 				Ray ray{};
 				ray.origin =
-						transform.get_global_position() + glm::vec3(0.0f, 1.4f, 0.0f) + model_tf.get_global_forward();
+						transform.get_global_position() + glm::vec3(0.0f, 1.4f, 0.0f) + model_tf.get_forward();
 				ray.ignore_list.emplace_back(entity);
 				ray.layer_name = "default";
 				ray.direction = -transform.get_up();
@@ -405,7 +405,7 @@ void AgentSystem::update(World &world, float dt) {
 				is_zooming = false;
 			}
 		}
-
+			
 		if (animation_timer < resource_manager.get_animation(animation_instance.animation_handle).get_duration()) {
 			animation_timer += (dt * 1000);
 			if (is_climbing &&
@@ -416,7 +416,7 @@ void AgentSystem::update(World &world, float dt) {
 				animation_timer += 100.f;
 
 				Ray ray{};
-						ray.origin = transform.get_global_position() + glm::vec3(0.0f, 1.4f, 0.0f) + model_tf.get_forward();
+				ray.origin = transform.get_global_position() + glm::vec3(0.0f, 1.4f, 0.0f) + model_tf.get_forward();
 				ray.ignore_list.emplace_back(entity);
 				ray.layer_name = "default";
 				ray.direction = -transform.get_up();
