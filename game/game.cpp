@@ -263,6 +263,9 @@ void input_setup() {
 	input_manager.add_key_to_action("agent_crouch", InputKey::C);
 	input_manager.add_key_to_action("agent_crouch", InputKey::LEFT_CONTROL);
 
+	input_manager.add_action("agent_climb");
+	input_manager.add_key_to_action("agent_climb", InputKey::SPACE);
+
 	//add actions to arrows
 	input_manager.add_action("hacker_move_forward");
 	input_manager.add_key_to_action("hacker_move_forward", InputKey::UP);
