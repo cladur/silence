@@ -8,6 +8,7 @@ class AgentSystem : public BaseSystem {
 private:
 	float animation_timer;
 	float default_fov;
+	float current_rotation_y_camera_pivot = 0.0f;
 	bool first_frame = true;
 	float camera_sens_modifier = 1.0f;
 	bool is_zooming = false;

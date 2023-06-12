@@ -114,6 +114,8 @@ void AgentSystem::update(World &world, float dt) {
 
 		if (first_frame) {
 			default_fov = camera.fov;
+			camera_pivot_tf.set_orientation(glm::quat(1, 0, 0, 0));
+			current_rotation_y_camera_pivot = 0;
 			first_frame = false;
 		}
 
@@ -184,8 +186,14 @@ void AgentSystem::update(World &world, float dt) {
 		if (*CVarSystem::get()->get_int_cvar("game.controlling_agent") &&
 				!*CVarSystem::get()->get_int_cvar("debug_camera.use")) {
 			glm::vec2 mouse_delta = input_manager.get_mouse_delta();
-			camera_pivot_tf.add_euler_rot(
-					glm::vec3(mouse_delta.y, 0.0f, 0.0f) * cvar_camera_sensitivity.get() * dt * camera_sens_modifier);
+			float rotation_y = mouse_delta.y * cvar_camera_sensitivity.get() * dt * camera_sens_modifier;
+			if(current_rotation_y_camera_pivot + rotation_y > -1.5f && current_rotation_y_camera_pivot + rotation_y < 1.5f) {
+				current_rotation_y_camera_pivot += rotation_y;
+				camera_pivot_tf.add_euler_rot(
+					glm::vec3(rotation_y, 0.0f, 0.0f));
+			}
+			
+			
 			camera_pivot_tf.add_global_euler_rot(
 					glm::vec3(0.0f, -mouse_delta.x, 0.0f) * cvar_camera_sensitivity.get() * dt * camera_sens_modifier);
 
