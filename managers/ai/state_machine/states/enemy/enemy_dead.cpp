@@ -38,6 +38,11 @@ void EnemyDead::update(World *world, uint32_t entity_id, float dt) {
 		UIManager::get().get_ui_slider(std::to_string(entity_id) + "_detection", "detection_slider").display = false;
 	}
 
+	if (world->has_component<Taggable>(entity_id)) {
+		auto &taggable = world->get_component<Taggable>(entity_id);
+		taggable.enabled = false;
+	}
+
 }
 
 void EnemyDead::exit() {
