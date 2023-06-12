@@ -84,6 +84,7 @@ Scene::Scene() {
 		world.register_component<Highlight>();
 		world.register_component<ParticleEmitter>();
 		world.register_component<DetectionCamera>();
+		world.register_component<Decal>();
 	}
 	// Components
 

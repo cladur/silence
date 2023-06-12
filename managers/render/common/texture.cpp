@@ -10,6 +10,7 @@ void Texture::load_from_asset(const std::string &path, bool pregenerated_mipmaps
 	ktxTexture2 *ktx_texture;
 	KTX_error_code result;
 	ktx_uint8_t *image;
+	name = path;
 
 	bool is_loaded = false;
 

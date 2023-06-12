@@ -1,4 +1,5 @@
 #include "material.h"
+#include "components/decal_component.h"
 #include "display/display_manager.h"
 #include "render/common/skinned_mesh.h"
 #include "render/render_scene.h"
@@ -677,18 +678,36 @@ void MaterialDecal::bind_resources(RenderScene &scene) {
 	shader.use();
 	shader.set_mat4("projection", scene.projection);
 	shader.set_mat4("view", scene.view);
-	shader.set_mat4("view", scene.view);
 	shader.set_vec2("aspect_ratio", scene.render_extent);
 	shader.set_mat4("inv_view_proj", glm::inverse(scene.projection * scene.view));
-	shader.set_int("gDepth", 10);
+	shader.set_int("gDepth", 1);
 
-	glActiveTexture(GL_TEXTURE10);
+	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.depth_texture_id);
 }
 
 void MaterialDecal::bind_instance_resources(ModelInstance &instance, Transform &transform) {
-	//	shader.set_mat4("", transform.get)
 }
 
-void MaterialDecal::bind_decal_resources(struct Decal &decal, Transform &transform) {
+void MaterialDecal::bind_decal_resources(Decal &decal, Transform &transform) {
+	ResourceManager &resource_manager = ResourceManager::get();
+	const glm::vec3 &center = transform.get_global_position();
+	const glm::vec3 &range = transform.get_global_scale();
+	const glm::quat &rotation = transform.get_global_orientation();
+
+	const glm::vec3 &local_up = rotation * glm::vec3(0.0f, 0.0f, 1.0f);
+	const glm::vec3 &dir = rotation * glm::vec3(0.0f, 1.0f, 0.0f);
+	//Todo: FIX THIS
+
+	const glm::mat4 &decal_view = glm::lookAt(center + dir * range.y, center, -glm::normalize(local_up));
+	const glm::mat4 &decal_projection = glm::ortho(-decal.projection_size, decal.projection_size,
+			-decal.projection_size, decal.projection_size, decal.projection_near, decal.projection_far);
+
+	const glm::mat4 &decal_view_proj = decal_projection * decal_view;
+	shader.set_mat4("decal_view_proj", decal_view_proj);
+	shader.set_mat4("decal_inv_view_proj", glm::inverse(decal_view_proj));
+	shader.set_int("decal_albedo", 0);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, resource_manager.get_texture(decal.albedo).id);
 }

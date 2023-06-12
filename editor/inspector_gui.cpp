@@ -78,6 +78,7 @@ void Inspector::show_components() {
 	SHOW_COMPONENT(Highlight, show_highlight);
 	SHOW_COMPONENT(ParticleEmitter, show_particle_emitter);
 	SHOW_COMPONENT(DetectionCamera, show_detection_camera);
+	SHOW_COMPONENT(Decal, show_decal);
 
 	for (int i = 0; i < remove_component_queue.size(); i++) {
 		auto [entity, component_to_remove] = remove_component_queue.front();
@@ -1440,6 +1441,99 @@ void Inspector::show_detection_camera() {
 	}
 }
 
+void Inspector::show_decal() {
+	auto &decal = world->get_component<Decal>(selected_entity);
+	auto &textures = resource_manager.get_textures();
+	if (ImGui::CollapsingHeader("Decal", tree_flags)) {
+		remove_component_popup<Decal>();
+		auto &selected_texture = resource_manager.get_texture(decal.albedo);
+		std::string name = selected_texture.name;
+		std::size_t last_slash_pos = name.find_last_of("/\\");
+
+		if (last_slash_pos != std::string::npos) {
+			name = name.substr(last_slash_pos + 1);
+			std::size_t dot_pos = name.find_last_of('.');
+			if (dot_pos != std::string::npos) {
+				name = name.substr(0, dot_pos);
+			}
+		}
+
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("Decal", 2);
+		ImGui::TableSetupColumn("##Decal", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Albedo");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		if (ImGui::BeginCombo("##Albedo", name.c_str())) {
+			for (const auto &texture : textures) {
+				bool is_selected = (decal.albedo.id == resource_manager.get_texture_handle(texture.name).id);
+
+				auto texture_handle = resource_manager.get_texture_handle(texture.name);
+				std::string texture_name = texture.name;
+				std::size_t texture_slash_pos = texture_name.find_last_of("/\\");
+				if (texture_slash_pos != std::string::npos) {
+					texture_name = texture_name.substr(texture_slash_pos + 1);
+					std::size_t texture_dot_pos = texture_name.find_last_of('.');
+					if (texture_dot_pos != std::string::npos) {
+						texture_name = texture_name.substr(0, texture_dot_pos);
+					}
+				}
+
+				if (ImGui::Selectable(texture_name.c_str(), is_selected)) {
+					decal.albedo = texture_handle;
+				}
+				if (is_selected) {
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+			ImGui::EndCombo();
+		}
+		ImGui::TableNextRow();
+
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Projection size");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		ImGui::DragFloat("##Projection size", &decal.projection_size, 5.0f, 10.0f, 200.0f);
+		ImGui::TableNextRow();
+
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Projection far");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		ImGui::DragFloat("##Projection far", &decal.projection_far, 1.0f, 10.0f, 100.0f);
+		ImGui::TableNextRow();
+
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Projection near");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		ImGui::DragFloat("##Projection near", &decal.projection_near, 0.001f, 0.001f, 1.0f);
+
+		ImGui::EndTable();
+
+		//		if (ImGui::BeginDragDropTarget()) {
+		//			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ANIMATION_PATH")) {
+		//				std::string payload_n = *(const std::string *)payload->Data;
+		//				std::string search_string = "\\";
+		//				std::string replace_string = "/";
+		//
+		//				size_t pos = payload_n.find(search_string);
+		//				while (pos != std::string::npos) {
+		//					payload_n.replace(pos, search_string.length(), replace_string);
+		//					pos = payload_n.find(search_string, pos + replace_string.length());
+		//				}
+		//				resource_manager.load_animation(payload_n.c_str());
+		//				animation_instance.animation_handle = resource_manager.get_animation_handle(payload_n);
+		//			}
+		//
+		//			ImGui::EndDragDropTarget();
+		//		}
+	}
+}
+
 bool Inspector::show_vec2(
 		const char *label, glm::vec2 &vec2, float speed, float reset_value, float min_value, float max_value) {
 	bool changed = false;
@@ -1618,6 +1712,7 @@ void Inspector::show_add_component() {
 			SHOW_ADD_COMPONENT(Highlight);
 			SHOW_ADD_COMPONENT(ParticleEmitter);
 			SHOW_ADD_COMPONENT(DetectionCamera);
+			SHOW_ADD_COMPONENT(Decal);
 
 			ImGui::EndPopup();
 		}

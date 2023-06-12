@@ -23,6 +23,10 @@ void DecalSystem::update(World &world, float dt) {
 		if (decal_debug_draw.get()) {
 			render_scene.debug_draw.draw_box(
 					transform.get_global_position(), transform.get_global_orientation(), transform.get_global_scale());
+			const glm::vec3 &position = transform.get_global_position();
+			const glm::vec3 &scale = transform.get_global_scale();
+			const glm::quat &rotation = transform.get_global_orientation();
+			render_scene.debug_draw.draw_arrow(position + rotation * glm::vec3(0.0f, scale.y * 0.5f, 0.0f), position);
 		}
 	}
 }

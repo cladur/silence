@@ -6,12 +6,18 @@
 struct Decal {
 	Handle<Texture> albedo;
 	Handle<Texture> normal;
+	float projection_size = 20.0f;
+	float projection_far = 30.0f;
+	float projection_near = 0.001f;
 
 	void serialize_json(nlohmann::json &serialized_scene) {
 		auto &rm = ResourceManager::get();
 		nlohmann::json::object_t serialized_component;
 		serialized_component["albedo"] = rm.get_texture_name(albedo);
 		serialized_component["normal"] = rm.get_texture_name(normal);
+		serialized_component["projection_size"] = projection_size;
+		serialized_component["projection_far"] = projection_far;
+		serialized_component["projection_near"] = projection_near;
 		serialized_scene.push_back(nlohmann::json::object());
 		serialized_scene.back()["component_data"] = serialized_component;
 		serialized_scene.back()["component_name"] = "Decal";
@@ -27,6 +33,9 @@ struct Decal {
 		if (!normal_name.empty()) {
 			normal = rm.load_texture(normal_name.c_str());
 		}
+		projection_size = serialized_component["projection_size"];
+		projection_far = serialized_component["projection_far"];
+		projection_near = serialized_component["projection_near"];
 	}
 };
 

@@ -109,6 +109,7 @@ void RenderScene::draw_viewport(bool right_side) {
 
 	g_buffer_pass.draw(*this);
 
+	decal_pass.draw(*this);
 	// HIGHLIGHT PASS
 	highlight_buffer.bind();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

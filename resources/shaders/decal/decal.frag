@@ -1,3 +1,4 @@
+#version 330 core
 layout (location = 2) out vec4 gAlbedo;
 
 in vec4 clip_pos;

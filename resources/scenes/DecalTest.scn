@@ -1,0 +1,87 @@
+[
+    {
+        "components": [
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
+                    "name": "Floor"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 1.0,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "scale": {
+                        "x": 10.0,
+                        "y": 1.0,
+                        "z": 10.0
+                    }
+                },
+                "component_name": "Transform"
+            }
+        ],
+        "entity": 1,
+        "signature": "0000000000000000000000000000000000000000000000000000000000100011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "Decal"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 1.0,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 0.0,
+                        "y": 0.9675952792167664,
+                        "z": 0.0
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "albedo": "smoke.ktx2",
+                    "normal": "lens_dirts/lens_dirt_2.ktx2",
+                    "projection_far": 30.0,
+                    "projection_near": 0.09799999743700027,
+                    "projection_size": 20.0
+                },
+                "component_name": "Decal"
+            }
+        ],
+        "entity": 2,
+        "signature": "0000000000000000000000000000001000000000000000000000000000000011"
+    }
+]
