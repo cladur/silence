@@ -8,6 +8,7 @@ class AgentSystem : public BaseSystem {
 private:
 	float animation_timer;
 	bool is_crouching;
+	bool is_climbing;
 	glm::vec3 previous_velocity;
 	float default_fov;
 	bool first_frame = true;
@@ -23,7 +24,6 @@ private:
 	glm::vec3 move_ground(glm::vec3 accel_dir, glm::vec3 pre_velocity, float dt);
 
 public:
-
 	void startup(World &world) override;
 	void update(World &world, float dt) override;
 };
