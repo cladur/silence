@@ -7,7 +7,6 @@
 #include "resource/resource_manager.h"
 #include <glm/gtx/quaternion.hpp>
 
-AutoCVarFloat cvar_blend_time_ms("animation.blend_time", "blend time in ms", 700.0f, CVarFlags::EditFloatDrag);
 
 AnimationManager &AnimationManager::get() {
 	static AnimationManager instance;
@@ -33,13 +32,13 @@ void AnimationManager::update_pose(AnimData &data, float dt) {
 		return;
 	}
 
-	if (data.has_changed && cvar_blend_time_ms.get() > 0.0f) {
+	if (data.has_changed && data.animation->blend_time_ms > 0.0f) {
 		Animation &next_animation = resource_manager.get_animation(data.animation->animation_handle);
 		current_time = fmod(current_time, next_animation.get_duration());
 		Pose next_pose;
 		next_animation.sample(data, next_pose);
 
-		float alpha = current_time / cvar_blend_time_ms.get();
+		float alpha = current_time / data.animation->blend_time_ms;
 		blend_poses(data.local_pose, next_pose, data.local_pose, std::min(calculate_uniform_s(alpha), 1.0f));
 
 		if (alpha >= 1.0f) {

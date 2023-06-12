@@ -4,6 +4,7 @@
 #include "components/enemy_data_component.h"
 #include "components/platform_component.h"
 #include "components/transform_component.h"
+#include "cvars/cvars.h"
 #include "ecs/world.h"
 #include "engine/scene.h"
 
@@ -147,6 +148,10 @@ void AgentSystem::update(World &world, float dt) {
 			}
 		}
 
+		if(!is_climbing) {
+			animation_instance.blend_time_ms = 700.0f;
+		}
+
 		if (speed > 0.02f && !agent_data.locked_movement) {
 			if (is_crouching) {
 				if (animation_instance.animation_handle.id !=
@@ -235,7 +240,7 @@ void AgentSystem::update(World &world, float dt) {
 			if (input_manager.is_action_just_pressed("agent_climb")) {
 				Ray ray{};
 				ray.origin =
-						transform.get_global_position() + glm::vec3(0.0f, 1.4f, 0.0f) + model_tf.get_global_forward();
+						transform.get_global_position() + glm::vec3(0.0f, 1.4f, 0.0f) + model_tf.get_forward();
 				ray.ignore_list.emplace_back(entity);
 				ray.layer_name = "default";
 				ray.direction = -transform.get_up();
@@ -379,11 +384,9 @@ void AgentSystem::update(World &world, float dt) {
 			tag_ray.direction = -camera_tf.get_global_forward();
 			tag_ray.ignore_list.emplace_back(entity);
 			tag_ray.layer_name = "hacker";
-			//tag_ray.ignore_layers.emplace_back("camera");
 
 			glm::vec3 end = tag_ray.origin + tag_ray.direction;
 			HitInfo info = {};
-			//dd.draw_arrow(tag_ray.origin, end, { 1.0f, 0.0f, 0.0f });
 			if (CollisionSystem::ray_cast_layer(world, tag_ray, info)) {
 				auto &name = world.get_component<Name>(info.entity);
 				if (world.has_component<Taggable>(info.entity)) {
@@ -402,7 +405,7 @@ void AgentSystem::update(World &world, float dt) {
 				is_zooming = false;
 			}
 		}
-
+			
 		if (animation_timer < resource_manager.get_animation(animation_instance.animation_handle).get_duration()) {
 			animation_timer += (dt * 1000);
 			if (is_climbing &&
@@ -411,9 +414,22 @@ void AgentSystem::update(World &world, float dt) {
 				//climbing animation should end here, otherwise it will start to loop
 				is_climbing = false;
 				animation_timer += 100.f;
-				glm::vec3 displacement = { 0.0f, 0.66f, 0.0f };
-				displacement += model_tf.get_global_forward();
-				transform.add_position(displacement);
+
+				Ray ray{};
+				ray.origin = transform.get_global_position() + glm::vec3(0.0f, 1.4f, 0.0f) + model_tf.get_forward();
+				ray.ignore_list.emplace_back(entity);
+				ray.layer_name = "default";
+				ray.direction = -transform.get_up();
+				glm::vec3 end = ray.origin + ray.direction;
+				HitInfo info;
+				dd.draw_arrow(ray.origin, end, { 1.0f, 0.0f, 0.0f });
+				if (CollisionSystem::ray_cast_layer(world, ray, info)) { 
+					transform.set_position(info.point + glm::vec3{0.0f,0.2f,0.0f});
+				}
+
+
+				animation_instance.blend_time_ms = 0.0f;
+				animation_manager.change_animation(agent_data.model, "agent/agent_ANIM_GLTF/agent_idle.anim");
 			}
 		}
 
