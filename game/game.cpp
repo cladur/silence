@@ -8,7 +8,9 @@
 #include "fmod_studio.hpp"
 #include "gameplay/gameplay_manager.h"
 #include "input/input_manager.h"
+#include "render/render_manager.h"
 #include "render/transparent_elements/ui_manager.h"
+
 
 #include "physics/physics_manager.h"
 
@@ -338,6 +340,8 @@ void handle_camera(DebugCamera &cam, float dt) {
 
 void Game::startup() {
 	Engine::startup();
+
+	RenderManager::get().editor_mode = true;
 
 	AdaptiveMusicManager::get().play();
 	GameplayManager::get().enable();

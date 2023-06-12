@@ -27,6 +27,7 @@ public:
 	// Render scenes
 	std::vector<RenderScene> render_scenes;
 	int displayed_scene = -1;
+	bool editor_mode = true;
 
 	static RenderManager &get();
 
@@ -38,7 +39,6 @@ public:
 	void draw_scene(RenderScene &render_scene);
 
 	void resize_framebuffer(uint32_t width, uint32_t height);
-
 };
 
 #endif // SILENCE_RENDER_MANAGER_H

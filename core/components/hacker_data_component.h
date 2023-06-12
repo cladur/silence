@@ -24,6 +24,7 @@ struct HackerData {
 		model = serialized_component["model"];
 		camera_pivot = serialized_component["camera_pivot"];
 		camera = serialized_component["camera"];
+
 		if (serialized_component.contains("scorpion_camera_transform")) {
 			scorpion_camera_transform = serialized_component["scorpion_camera_transform"];
 		} else {

@@ -187,6 +187,7 @@ Editor *Editor::get() {
 
 void Editor::startup() {
 	Engine::startup();
+	RenderManager::get().editor_mode = true;
 
 	// Additional setup
 	default_mappings();

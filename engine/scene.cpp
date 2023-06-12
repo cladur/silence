@@ -112,6 +112,8 @@ Scene::Scene() {
 	physics_manager.add_collision_layer("hacker");
 	physics_manager.add_collision_layer("agent");
 	physics_manager.add_collision_layer("camera");
+	physics_manager.add_collision_layer("obstacle");
+	
 	physics_manager.set_layers_no_collision("default", "hacker");
 	physics_manager.set_layers_no_collision("agent", "hacker");
 
