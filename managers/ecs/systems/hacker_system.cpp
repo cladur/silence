@@ -73,7 +73,7 @@ bool HackerSystem::shoot_raycast(
 		SPDLOG_ERROR("Hacker raycast hit entity {} without highlight component", hit_entity);
 	}
 
-	ui_text->text = "Press LMB to interact";
+	ui_text->text = "Press X to interact";
 
 	if (trigger) {
 		auto &interactable = world.get_component<Interactable>(hit_entity);
@@ -236,11 +236,11 @@ void HackerSystem::update(World &world, float dt) {
 		auto camera_right = camera_pivot_tf.get_global_right();
 
 		// ZOOMING LOGIC
-		if (input_manager.is_action_pressed("control_camera")) {
+		if (input_manager.is_action_pressed("hacker_zoom_camera")) {
 			is_zooming = true;
 			camera.fov = glm::mix(camera.fov, 30.0f, dt * 3.0f);
 			camera_sens_modifier = glm::mix(camera_sens_modifier, 0.3f, dt * 3.0f);
-			bool tag_trigger = input_manager.is_action_just_pressed("mouse_left");
+			bool tag_trigger = input_manager.is_action_just_pressed("hacker_interact");
 			Ray tag_ray = {};
 			tag_ray.origin = camera_tf.get_global_position();
 			tag_ray.direction = -camera_tf.get_global_forward();
@@ -268,7 +268,7 @@ void HackerSystem::update(World &world, float dt) {
 			}
 		}
 
-		if (input_manager.is_action_just_pressed("back_from_camera")) {
+		if (input_manager.is_action_just_pressed("hacker_exit_camera")) {
 			go_back_to_scorpion(world, hacker_data);
 		}
 
@@ -326,7 +326,7 @@ void HackerSystem::update(World &world, float dt) {
 		}
 
 		// for the UI sake we need to shoot the raycast every time to know if we're even hovering over anything.
-		bool triggered = input_manager.is_action_just_pressed("mouse_left");
+		bool triggered = input_manager.is_action_just_pressed("hacker_interact");
 		if (!is_zooming) {
 			shoot_raycast(camera_tf, world, hacker_data, dt, triggered, real_camera_forward);
 		}

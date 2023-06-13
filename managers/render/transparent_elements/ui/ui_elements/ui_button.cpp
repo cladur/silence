@@ -49,8 +49,8 @@ void UIButton::draw() {
 	if (text.empty()) {
 		return;
 	}
-	ui_manager.text_draw.draw_text(text, is_screen_space, position + glm::vec3(0.0f, 0.0f, 0.1f), text_color, text_scale,
-	 		font_name, centered_x, centered_y, glm::vec3(0.0f));
+	ui_manager.text_draw.draw_text(text, is_screen_space, position + glm::vec3(0.0f, 0.0f, 0.1f), text_color,
+			text_scale, font_name, centered_x, centered_y, glm::vec3(0.0f));
 }
 
 void UIButton::draw(glm::vec3 parent_position, glm::vec2 parent_size) {
@@ -83,7 +83,7 @@ void UIButton::draw(glm::vec3 parent_position, glm::vec2 parent_size) {
 		return;
 	}
 	ui_manager.text_draw.draw_text(text, is_screen_space, new_pos + glm::vec3(0.0f, 0.0f, 0.5f), text_color, text_scale,
-	 		font_name, centered_x, centered_y, glm::vec3(0.0f));
+			font_name, centered_x, centered_y, glm::vec3(0.0f));
 }
 
 bool UIButton::clicked() {

@@ -32,7 +32,7 @@ AutoCVarFloat cvar_agent_lock_time("agent.lock_time", "minimal time of animation
 
 AutoCVarFloat cvar_agent_camera_back("agent.cam_back", "distance of camera from player", -1.5f);
 
-AutoCVarFloat cvar_agent_animation_speed("agent.animation_speed", "speed of animation", 32.0f);
+AutoCVarFloat cvar_agent_animation_speed("agent.animation_speed", "speed of animation", 1.6f);
 
 AutoCVarFloat cvar_camera_sensitivity("settings.camera_sensitivity", "camera sensitivity", 0.1f);
 
@@ -152,7 +152,7 @@ void AgentSystem::update(World &world, float dt) {
 			animation_instance.blend_time_ms = 700.0f;
 		}
 
-		if (speed > 0.02f && !agent_data.locked_movement) {
+		if (speed > 0.01f && !agent_data.locked_movement) {
 			if (is_crouching) {
 				if (animation_instance.animation_handle.id !=
 						resource_manager.get_animation_handle("agent/agent_ANIM_GLTF/agent_crouch.anim").id) {
@@ -166,7 +166,10 @@ void AgentSystem::update(World &world, float dt) {
 				}
 			}
 			//TODO: works for current speed values, but should be replaced with animation accurate value
-			animation_instance.ticks_per_second = 500.f + (1000.f * speed * cvar_agent_animation_speed.get());
+			animation_instance.ticks_per_second = 500.f + (1000.f * cvar_agent_animation_speed.get());
+			if (is_crouching) {
+				animation_instance.ticks_per_second *= 0.63f;
+			}
 		} else if (animation_timer >=
 				resource_manager.get_animation(animation_instance.animation_handle).get_duration()) {
 			if (is_crouching) {
@@ -249,7 +252,7 @@ void AgentSystem::update(World &world, float dt) {
 					float obstacle_height = 1.4f - info.distance;
 					SPDLOG_INFO(obstacle_height);
 					SPDLOG_INFO(info.entity);
-					if (obstacle_height > 0.6f && obstacle_height < 0.7f) {
+					if (obstacle_height > 0.6f && obstacle_height < 0.8f) {
 						auto animation_handle =
 								resource_manager.get_animation_handle("agent/agent_ANIM_GLTF/agent_jump_up.anim");
 						if (animation_instance.animation_handle.id != animation_handle.id) {
@@ -375,7 +378,7 @@ void AgentSystem::update(World &world, float dt) {
 		}
 
 		// ZOOMING LOGIC
-		if (input_manager.is_action_pressed("control_camera")) {
+		if (input_manager.is_action_pressed("agent_zoom_camera")) {
 			is_zooming = true;
 			camera.fov = glm::mix(camera.fov, 30.0f, dt * 3.0f);
 			camera_sens_modifier = glm::mix(camera_sens_modifier, 0.3f, dt * 3.0f);
