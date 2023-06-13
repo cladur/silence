@@ -57,7 +57,7 @@ void main()
     vec3 ao_metallic_roughness = texture(ao_metallic_roughness_map, texture_coords).rgb;
     float roughness = ao_metallic_roughness.g;
     float metallic = ao_metallic_roughness.b;
-    vec3 normal = Normal;
+    vec3 normal = normalize(Normal);
     if (has_normal_map) {
         normal = getNormalFromMap(texture_coords);
     }

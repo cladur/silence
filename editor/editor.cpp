@@ -73,8 +73,8 @@ void default_mappings() {
 	input_manager.add_action("delete");
 	input_manager.add_key_to_action("delete", InputKey::DELETE);
 
-	input_manager.add_action("back_from_camera");
-	input_manager.add_key_to_action("back_from_camera", InputKey::TAB);
+	input_manager.add_action("hacker_exit_camera");
+	input_manager.add_key_to_action("hacker_exit_camera", InputKey::TAB);
 }
 
 void bootleg_unity_theme() {
@@ -187,6 +187,7 @@ Editor *Editor::get() {
 
 void Editor::startup() {
 	Engine::startup();
+	RenderManager::get().editor_mode = true;
 
 	// Additional setup
 	default_mappings();

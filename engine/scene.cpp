@@ -3,6 +3,7 @@
 #include "components/exploding_box_component.h"
 #include "display/display_manager.h"
 #include "ecs/systems/detection_camera_system.h"
+#include "ecs/systems/hacker_movement_system.h"
 #include "ecs/systems/interactable_system.h"
 #include "ecs/systems/platform_system.h"
 #include "ecs/world.h"
@@ -19,6 +20,7 @@
 #include "audio/ecs/fmod_emitter_system.h"
 #include "components/fmod_emitter_component.h"
 #include "components/taggable_component.h"
+#include "ecs/systems/agent_movement_system.h"
 #include "ecs/systems/agent_system.h"
 #include "ecs/systems/collider_draw.h"
 #include "ecs/systems/enemy_path_draw_system.h"
@@ -115,6 +117,9 @@ Scene::Scene() {
 	physics_manager.add_collision_layer("hacker");
 	physics_manager.add_collision_layer("agent");
 	physics_manager.add_collision_layer("camera");
+	physics_manager.add_collision_layer("obstacle");
+	physics_manager.add_collision_layer("taggable");
+
 	physics_manager.set_layers_no_collision("default", "hacker");
 	physics_manager.set_layers_no_collision("agent", "hacker");
 
@@ -130,7 +135,9 @@ void Scene::register_game_systems() {
 
 	// Agents
 	world.register_system<AgentSystem>();
+	world.register_system<AgentMovementSystem>(UpdateOrder::DuringPhysics);
 	world.register_system<HackerSystem>();
+	world.register_system<HackerMovementSystem>(UpdateOrder::DuringPhysics);
 	world.register_system<EnemySystem>(UpdateOrder::PostAnimation);
 	world.register_system<TaggableSystem>();
 	//world.register_system<EnemyPathing>();
@@ -143,6 +150,7 @@ void Scene::register_game_systems() {
 
 void Scene::update(float dt) {
 	ZoneScopedN("Scene::update");
+
 	for (Entity entity : entities) {
 		if (world.has_component<Camera>(entity) && world.has_component<Transform>(entity)) {
 			auto &camera = world.get_component<Camera>(entity);

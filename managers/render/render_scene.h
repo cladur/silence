@@ -75,10 +75,11 @@ struct RenderScene {
 	std::vector<DecalDrawCommand> decal_draw_commands;
 
 	bool draw_skybox = false;
+	bool editor_mode = false;
 
 	void startup();
 	void draw_viewport(bool right_side = false);
-	void draw();
+	void draw(bool editor_mode = false);
 	void resize_framebuffer(uint32_t width, uint32_t height);
 
 	void queue_draw(

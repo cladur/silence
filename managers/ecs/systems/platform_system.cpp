@@ -1,8 +1,9 @@
 #include "platform_system.h"
 #include "ecs/world.h"
+#include "fmod_errors.h"
 #include <audio/audio_manager.h>
 #include <glm/fwd.hpp>
-#include "fmod_errors.h"
+
 
 #define FMOD_CHECK(x)                                                                                                  \
 	do {                                                                                                               \
@@ -25,7 +26,6 @@ void PlatformSystem::update(World &world, float dt) {
 		auto &platform = world.get_component<Platform>(entity);
 
 		if (platform.first_frame) {
-			SPDLOG_INFO("#$@#$@# initializing platform");
 			platform.event_instance = AudioManager::get().create_event_instance("SFX/platform");
 			platform.first_frame = false;
 		}
@@ -48,7 +48,7 @@ void PlatformSystem::update(World &world, float dt) {
 			platform.event_instance->set3DAttributes(&attributes);
 		}
 
-		auto distance = glm::distance(platform_transform.get_global_position(), platform.ending_position);
+		auto distance = glm::distance(platform_transform.get_position(), platform.ending_position);
 
 		if (distance < 0.5f) {
 			FMOD_CHECK(platform.event_instance->keyOff());
@@ -69,9 +69,9 @@ void PlatformSystem::update(World &world, float dt) {
 			platform.is_playing = false;
 		} else {
 			float speed = platform.speed * dt;
-			next_position = { lerp(platform_transform.get_global_position().x, platform.ending_position.x, speed),
-				lerp(platform_transform.get_global_position().y, platform.ending_position.y, speed),
-				lerp(platform_transform.get_global_position().z, platform.ending_position.z, speed) };
+			next_position = { lerp(platform_transform.get_position().x, platform.ending_position.x, speed),
+				lerp(platform_transform.get_position().y, platform.ending_position.y, speed),
+				lerp(platform_transform.get_position().z, platform.ending_position.z, speed) };
 			platform_transform.set_position(next_position);
 		}
 		platform.change_vector = next_position - previous_position;

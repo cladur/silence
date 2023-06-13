@@ -228,14 +228,14 @@ inline void handle_detection_camera(World *world, uint32_t enemy_entity, Transfo
 	bool can_see_hacker = false;
 	float hacker_distance_ratio = glm::distance(global_position, hacker_pos) / cone_range;
 
-//	if (dd) {
-//		dd->draw_arrow(enemy_look_origin, enemy_look_origin + forward, cone_range, glm::vec3(0.0f, 1.0f, 0.0f));
-//		dd->draw_cone(enemy_look_origin, enemy_look_origin + forward, cone_range, glm::tan(glm::radians(cone_angle / 2.0f)) * cone_range, glm::vec3(1.0f, 0.0f, 0.0f));
-//	}
+	//	if (dd) {
+	//		dd->draw_arrow(enemy_look_origin, enemy_look_origin + forward, cone_range, glm::vec3(0.0f, 1.0f, 0.0f));
+	//		dd->draw_cone(enemy_look_origin, enemy_look_origin + forward, cone_range, glm::tan(glm::radians(cone_angle
+	/// 2.0f)) * cone_range, glm::vec3(1.0f, 0.0f, 0.0f));
+	//	}
 
 	// AGENT CONE DETECTION LOGIC
 	if (glm::distance(global_position, agent_pos) < cone_range) {
-
 		auto angle = glm::acos(glm::dot(agent_dir, forward));
 		if (angle < glm::radians(cone_angle) / 2.0f) {
 			Ray ray{};
@@ -278,7 +278,7 @@ inline void handle_detection_camera(World *world, uint32_t enemy_entity, Transfo
 
 	// HACKER CONE DETECTION LOGIC
 	if (glm::distance(global_position, hacker_pos) < cone_range) {
-		auto angle = glm::acos(glm::dot(agent_dir, forward));
+		auto angle = glm::acos(glm::dot(hacker_dir, forward));
 		if (angle < glm::radians(cone_angle) / 2.0f) {
 			Ray ray{};
 			ray.origin = enemy_look_origin + hacker_dir;
@@ -301,8 +301,7 @@ inline void handle_detection_camera(World *world, uint32_t enemy_entity, Transfo
 
 			// RAY BOTTOM
 
-			hacker_pos =
-					GameplayManager::get().get_hacker_position(world->get_parent_scene()) + agent_target_bottom_offset;
+			hacker_pos = GameplayManager::get().get_hacker_position(world->get_parent_scene());
 			hacker_dir = glm::normalize(hacker_pos - enemy_look_origin);
 			ray.direction = hacker_dir;
 			ray.ignore_list.push_back(enemy_entity);
@@ -344,7 +343,7 @@ inline void handle_detection_camera(World *world, uint32_t enemy_entity, Transfo
 			}
 		}
 
-		if(!detection_camera.is_playing) {
+		if (!detection_camera.is_playing) {
 			AudioManager::get().play_local(detection_camera.detection_event);
 			detection_camera.is_playing = true;
 		}
@@ -356,7 +355,6 @@ inline void handle_detection_camera(World *world, uint32_t enemy_entity, Transfo
 
 		detection_camera.detection_level += detection_change;
 	} else {
-
 		if (detection_camera.is_playing) {
 			AudioManager::get().stop_local(detection_camera.detection_event);
 			detection_camera.is_playing = false;

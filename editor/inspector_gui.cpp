@@ -45,6 +45,9 @@ void Inspector::show_components() {
 		return;
 	}
 
+	ImGui::Text("ID: %d", selected_entity);
+	ImGui::Spacing();
+
 	SHOW_COMPONENT(Name, show_name);
 	SHOW_COMPONENT(Transform, show_transform);
 	SHOW_COMPONENT(RigidBody, show_rigidbody);
@@ -736,6 +739,13 @@ void Inspector::show_light() {
 		ImGui::SetNextItemWidth(-FLT_MIN);
 		ImGui::Checkbox("##Cast shadow", &light.cast_shadow);
 
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Is On");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		ImGui::Checkbox("##Is On", &light.is_on);
+
 		if (light.type == LightType::SPOT_LIGHT) {
 			ImGui::TableNextRow();
 			ImGui::TableSetColumnIndex(0);
@@ -1023,16 +1033,74 @@ void Inspector::show_interactable() {
 			ImGui::EndCombo();
 		}
 
+		show_checkbox("Single use", interactable.single_use);
+
 		ImGui::TableNextRow();
 		ImGui::TableSetColumnIndex(0);
-		ImGui::Text("Interaction target");
+		ImGui::Text("Interaction target 1");
 		ImGui::TableSetColumnIndex(1);
-		ImGui::Text("%s", fmt::format("{}", interactable.interaction_target).c_str());
+		ImGui::Text("%s", fmt::format("{}", interactable.interaction_targets[0]).c_str());
 
 		if (ImGui::BeginDragDropTarget()) {
 			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
 				Entity payload_entity = *(Entity *)payload->Data;
-				interactable.interaction_target = payload_entity;
+				interactable.interaction_targets[0] = payload_entity;
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Interaction target 2");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::Text("%s", fmt::format("{}", interactable.interaction_targets[1]).c_str());
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
+				Entity payload_entity = *(Entity *)payload->Data;
+				interactable.interaction_targets[1] = payload_entity;
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Interaction target 3");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::Text("%s", fmt::format("{}", interactable.interaction_targets[2]).c_str());
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
+				Entity payload_entity = *(Entity *)payload->Data;
+				interactable.interaction_targets[2] = payload_entity;
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Interaction target 4");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::Text("%s", fmt::format("{}", interactable.interaction_targets[3]).c_str());
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
+				Entity payload_entity = *(Entity *)payload->Data;
+				interactable.interaction_targets[3] = payload_entity;
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Interaction target 5");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::Text("%s", fmt::format("{}", interactable.interaction_targets[4]).c_str());
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
+				Entity payload_entity = *(Entity *)payload->Data;
+				interactable.interaction_targets[4] = payload_entity;
 			}
 			ImGui::EndDragDropTarget();
 		}
@@ -1062,6 +1130,8 @@ void Inspector::show_platform() {
 		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
 
 		bool changed = false;
+
+		show_checkbox("Is door", platform.is_door);
 
 		changed |= show_vec3("Starting position", platform.starting_position);
 		changed |= show_vec3("Ending position", platform.ending_position);
@@ -1438,6 +1508,26 @@ void Inspector::show_detection_camera() {
 	auto &data = world->get_component<DetectionCamera>(selected_entity);
 	if (ImGui::CollapsingHeader("DetectionCamera", tree_flags)) {
 		remove_component_popup<DetectionCamera>();
+
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("Particles Parent", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Particle Parent");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::InputInt("", (int *)&data.particles_parent, 0, 0);
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
+				Entity payload_entity = *(Entity *)payload->Data;
+				data.particles_parent = payload_entity;
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+		ImGui::EndTable();
 	}
 }
 

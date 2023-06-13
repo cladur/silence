@@ -49,7 +49,7 @@ void Frustum::create_frustum_from_camera(const Camera &camera, const Transform &
 void Frustum::create_frustum_from_light(const Light &light, const Transform &transform, float aspect_ratio) {
 	float far = *CVarSystem::get()->get_float_cvar("render.draw_distance.far");
 	float near = *CVarSystem::get()->get_float_cvar("render.draw_distance.near");
-	float fov = glm::radians(light.cutoff + light.outer_cutoff);
+	float fov = glm::radians(90.0f);
 	glm::vec3 position = transform.get_global_position();
 	glm::vec3 front = -transform.get_global_forward();
 	glm::vec3 up = transform.get_global_up();

@@ -8,8 +8,10 @@
 
 AutoCVarInt cvar_use_ao("render.use_ao", "use ambient occlusion", 1, CVarFlags::EditCheckbox);
 AutoCVarInt cvar_use_fog("render.use_fog", "use simple linear fog", 1, CVarFlags::EditCheckbox);
-AutoCVarFloat cvar_fog_min("render.fog_min", "fog min distance", 20.0f, CVarFlags::EditFloatDrag);
+AutoCVarFloat cvar_fog_min("render.fog_min", "fog min distance", 40.0f, CVarFlags::EditFloatDrag);
 AutoCVarFloat cvar_fog_max("render.fog_max", "fog max distance", 300.0f, CVarFlags::EditFloatDrag);
+AutoCVarFloat cvar_ambient_strength(
+		"render.ambient_strength", "how much light from skymap to use", 1.0f, CVarFlags::EditFloatDrag);
 
 void MaterialPBR::startup() {
 	shader.load_from_files(shader_path("pbr.vert"), shader_path("pbr.frag"));
@@ -27,6 +29,8 @@ void MaterialPBR::bind_resources(RenderScene &scene) {
 	shader.set_int("irradiance_map", 5);
 	shader.set_int("prefilter_map", 6);
 	shader.set_int("brdf_lut", 7);
+
+	shader.set_float("ambient_strength", cvar_ambient_strength.get());
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.position_texture_id);

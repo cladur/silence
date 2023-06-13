@@ -166,14 +166,18 @@ public:
 		}
 
 		float fixed_dt = 1 / 50.0f;
-		static float physics_time_accumulator = 0.0f;
-		physics_time_accumulator += dt;
 
-		while (physics_time_accumulator > fixed_dt) {
-			physics_time_accumulator -= fixed_dt;
+		float frame_time = dt;
+
+		// Semi-fixed timestep
+		// Physics will be updated either with fixed_dt or dt, whichever is smaller
+		// In case of fixed_dt, the update will be called multiple times
+		while (frame_time > 0.0f) {
+			float delta_time = std::min(frame_time, fixed_dt);
 			for (auto &system : during_physics_systems) {
-				system->update(*this, fixed_dt);
+				system->update(*this, delta_time);
 			}
+			frame_time -= delta_time;
 		}
 
 		for (auto &system : post_physics_systems) {

@@ -10,6 +10,7 @@ struct Taggable {
 	float tag_timer = 0.0f;
 	float time_to_tag = 1.0f;
 	bool fist_frame = true;
+	bool enabled = true;
 
 	void serialize_json(nlohmann::json &serialized_scene) {
 		nlohmann::json::object_t serialized_component;

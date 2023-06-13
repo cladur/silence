@@ -17,6 +17,8 @@ uniform sampler2D brdf_lut;
 uniform mat4 view;
 uniform vec3 camPos;
 
+uniform float ambient_strength;
+
 const float PI = 3.14159265359;
 // ----------------------------------------------------------------------------
 float DistributionGGX(vec3 N, vec3 H, float roughness)
@@ -108,6 +110,6 @@ void main()
 
     // vec3 color = ambient + Lo;
 
-    Diffuse = vec4(kD * irradiance, 0.0);
-    Specular = vec4(specular, 0.0);
+    Diffuse = vec4(kD * irradiance, 0.0) * ambient_strength;
+    Specular = vec4(specular, 0.0) * ambient_strength;
 }

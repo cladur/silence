@@ -8,6 +8,7 @@
 #include "fmod_studio.hpp"
 #include "gameplay/gameplay_manager.h"
 #include "input/input_manager.h"
+#include "render/render_manager.h"
 #include "render/transparent_elements/ui_manager.h"
 
 #include "physics/physics_manager.h"
@@ -245,6 +246,13 @@ void input_setup() {
 	input_manager.add_action("control_camera");
 	input_manager.add_key_to_action("control_camera", InputKey::MOUSE_RIGHT);
 
+	input_manager.add_action("agent_zoom_camera");
+	input_manager.add_key_to_action("agent_zoom_camera", InputKey::MOUSE_RIGHT);
+
+	input_manager.add_action("hacker_zoom_camera");
+	input_manager.add_key_to_action("hacker_zoom_camera", InputKey::GAMEPAD_LEFT_TRIGGER);
+	input_manager.add_key_to_action("hacker_zoom_camera", InputKey::GAMEPAD_RIGHT_TRIGGER);
+
 	input_manager.add_action("agent_move_forward");
 	input_manager.add_key_to_action("agent_move_forward", InputKey::W);
 
@@ -260,6 +268,9 @@ void input_setup() {
 	input_manager.add_action("agent_crouch");
 	input_manager.add_key_to_action("agent_crouch", InputKey::C);
 	input_manager.add_key_to_action("agent_crouch", InputKey::LEFT_CONTROL);
+
+	input_manager.add_action("agent_climb");
+	input_manager.add_key_to_action("agent_climb", InputKey::SPACE);
 
 	//add actions to arrows
 	input_manager.add_action("hacker_move_forward");
@@ -311,8 +322,12 @@ void input_setup() {
 	input_manager.add_action("reload_scene");
 	input_manager.add_key_to_action("reload_scene", InputKey::F4);
 
-	input_manager.add_action("back_from_camera");
-	input_manager.add_key_to_action("back_from_camera", InputKey::TAB);
+	input_manager.add_action("hacker_exit_camera");
+	input_manager.add_key_to_action("hacker_exit_camera", InputKey::TAB);
+	input_manager.add_key_to_action("hacker_exit_camera", InputKey::GAMEPAD_BUTTON_B);
+
+	input_manager.add_action("hacker_interact");
+	input_manager.add_key_to_action("hacker_interact", InputKey::GAMEPAD_BUTTON_X);
 }
 
 void handle_camera(DebugCamera &cam, float dt) {
@@ -335,6 +350,8 @@ void handle_camera(DebugCamera &cam, float dt) {
 
 void Game::startup() {
 	Engine::startup();
+
+	RenderManager::get().editor_mode = false;
 
 	AdaptiveMusicManager::get().play();
 	GameplayManager::get().enable();
@@ -381,6 +398,9 @@ void Game::custom_update(float dt) {
 		input_manager.add_key_to_action("agent_move_left", InputKey::A);
 		input_manager.add_key_to_action("agent_move_right", InputKey::D);
 
+		input_manager.remove_key_from_action("hacker_zoom_camera", InputKey::MOUSE_RIGHT);
+		input_manager.add_key_to_action("agent_zoom_camera", InputKey::MOUSE_RIGHT);
+
 		cvar_controlling_agent.set(1);
 	}
 	if (input_manager.is_action_just_pressed("control_hacker")) {
@@ -393,6 +413,9 @@ void Game::custom_update(float dt) {
 		input_manager.add_key_to_action("hacker_move_backward", InputKey::S);
 		input_manager.add_key_to_action("hacker_move_left", InputKey::A);
 		input_manager.add_key_to_action("hacker_move_right", InputKey::D);
+
+		input_manager.remove_key_from_action("agent_zoom_camera", InputKey::MOUSE_RIGHT);
+		input_manager.add_key_to_action("hacker_zoom_camera", InputKey::MOUSE_RIGHT);
 
 		cvar_controlling_agent.set(0);
 	}
@@ -448,7 +471,7 @@ void Game::custom_update(float dt) {
 	}
 
 	if (input_manager.is_action_just_pressed("reload_scene")) {
-		get_active_scene().load_from_file("resources/scenes/level_3.scn");
+		get_active_scene().load_from_file("resources/scenes/level_3_5.scn");
 		AnimationManager::get().animation_map.clear();
 	}
 

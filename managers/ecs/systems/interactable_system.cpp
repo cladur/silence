@@ -33,8 +33,8 @@ void InteractableSystem::update(World &world, float dt) {
 	for (auto const &entity : entities) {
 		auto &interactable = world.get_component<Interactable>(entity);
 		if (interactable.interaction == Exploding && *CVarSystem::get()->get_int_cvar("debug_draw.collision.draw")) {
-			auto box = world.get_component<ExplodingBox>(interactable.interaction_target);
-			auto center = world.get_component<Transform>(interactable.interaction_target).get_position();
+			auto box = world.get_component<ExplodingBox>(interactable.interaction_targets[0]);
+			auto center = world.get_component<Transform>(interactable.interaction_targets[0]).get_global_position();
 			draw_explosion_radius(world, center, box.explosion_radius, { 255, 0, 0 });
 			draw_explosion_radius(world, center, box.distraction_radius, { 255, 128, 0 });
 		}
@@ -50,12 +50,19 @@ void InteractableSystem::update(World &world, float dt) {
 					interactable.triggered = false;
 					break;
 				case HackerPlatform: {
-					auto &platform = world.get_component<Platform>(interactable.interaction_target);
-					AudioManager::get().play_one_shot_3d(electric_interaction_event, world.get_component<Transform>(entity));
-					if (!platform.is_moving) {
-						platform.is_moving = true;
+					for (unsigned int current_target : interactable.interaction_targets) {
+						if (current_target == 0) {
+							break;
+						}
+						auto &platform = world.get_component<Platform>(current_target);
+						AudioManager::get().play_one_shot_3d(
+								electric_interaction_event, world.get_component<Transform>(entity));
+						if (!platform.is_moving) {
+							platform.is_moving = true;
+						}
+						SPDLOG_INFO("{}", "Hacker platform triggered");
 					}
-					SPDLOG_INFO("{}", "Hacker platform triggered");
+
 					break;
 				}
 				case Exploding: {
@@ -65,6 +72,19 @@ void InteractableSystem::update(World &world, float dt) {
 					//interactable.can_interact = false;
 					break;
 				}
+				case LightSwitch: {
+					for (unsigned int current_target : interactable.interaction_targets) {
+						if (current_target == 0) {
+							break;
+						}
+						SPDLOG_INFO("Light switch triggered");
+						switch_light(world, interactable, current_target, entity);
+					}
+				}
+			}
+
+			if (interactable.single_use) {
+				interactable.can_interact = false;
 			}
 		}
 	}
@@ -76,8 +96,8 @@ void InteractableSystem::no_interaction(World &world, Interactable &interactable
 }
 
 void InteractableSystem::explosion(World &world, Interactable &interactable, Entity entity) {
-	auto &box = world.get_component<ExplodingBox>(interactable.interaction_target);
-	auto &t = world.get_component<Transform>(interactable.interaction_target);
+	auto &box = world.get_component<ExplodingBox>(interactable.interaction_targets[0]);
+	auto &t = world.get_component<Transform>(interactable.interaction_targets[0]);
 
 	if (world.has_component<ParticleEmitter>(entity)) {
 		world.get_component<ParticleEmitter>(entity).trigger_oneshot();
@@ -94,12 +114,12 @@ void InteractableSystem::explosion(World &world, Interactable &interactable, Ent
 		smaller_radius = temp;
 	}
 	sphere.radius = larger_radius;
-	sphere.center = world.get_component<Transform>(interactable.interaction_target).get_position();
+	sphere.center = world.get_component<Transform>(interactable.interaction_targets[0]).get_global_position();
 	auto colliders = PhysicsManager::get().overlap_sphere(world, sphere, "default");
 	for (Entity entity : colliders) {
 		if (world.has_component<EnemyData>(entity)) {
 			auto enemy_data = world.get_component<EnemyData>(entity);
-			float distance = glm::distance(sphere.center, world.get_component<Transform>(entity).get_position());
+			float distance = glm::distance(sphere.center, world.get_component<Transform>(entity).get_global_position());
 			if (distance < smaller_radius) {
 				auto &enemy = world.get_component<EnemyData>(entity);
 				enemy.state_machine.set_state("dying");
@@ -111,13 +131,18 @@ void InteractableSystem::explosion(World &world, Interactable &interactable, Ent
 				if (enemy.state_machine.get_current_state() != "dying") {
 					enemy.state_machine.set_state("distracted");
 					enemy.distraction_cooldown = box.distraction_time;
-					auto target = t.position;
+					auto target = t.get_global_position();
 					// yeah, same as in prototype, they would float to the root of the box
-					target.y = enemy_transform.position.y;
+					target.y = enemy_transform.get_global_position().y;
 					enemy.distraction_target = target;
 				}
 				SPDLOG_INFO("{} is distracted", entity);
 			}
 		}
 	}
+}
+
+void InteractableSystem::switch_light(World &world, Interactable &interactable, int light_index, Entity entity) {
+	auto &light = world.get_component<Light>(interactable.interaction_targets[light_index]);
+	light.is_on = !light.is_on;
 }

@@ -42,7 +42,9 @@ void TaggableSystem::update(World &world, float dt) {
 			auto &sprite = ui.add_ui_image(ui_name, ui_tag_name);
 			sprite.is_screen_space = false;
 			sprite.is_billboard = true;
-			sprite.position = transform.get_global_position() + tag.tag_position;
+			glm::vec3 glob_pos = tag.tag_position.x * transform.get_right() + tag.tag_position.y * transform.get_up() +
+								 tag.tag_position.z * transform.get_forward();
+			sprite.position = transform.get_global_position() + glob_pos;
 			sprite.texture = tag_texture;
 			sprite.size = glm::vec2(0.25f);
 			sprite.display = true;
@@ -56,32 +58,39 @@ void TaggableSystem::update(World &world, float dt) {
 
 		auto &sprite = ui.get_ui_image(ui_name, tag_prefix + std::to_string(entity));
 
-		sprite.position = transform.get_global_position() + tag.tag_position;
-		if (!tag.tagged) {
-			float x = tag.tag_timer / tag.time_to_tag;
-			if (tag.tagging) {
-				tag.tag_timer += dt;
-				if (tag.tag_timer >= tag.time_to_tag) {
-					AudioManager::get().play_one_shot_2d(on_tagged);
-					tag.tagged = true;
+		glm::vec3 glob_pos = tag.tag_position.x * transform.get_right() + tag.tag_position.y * transform.get_up() +
+				tag.tag_position.z * transform.get_forward();
+
+		sprite.position = transform.get_global_position() + glob_pos;
+
+		if (tag.enabled) {
+			if (!tag.tagged) {
+				float x = tag.tag_timer / tag.time_to_tag;
+				if (tag.tagging) {
+					tag.tag_timer += dt;
+					if (tag.tag_timer >= tag.time_to_tag) {
+						AudioManager::get().play_one_shot_2d(on_tagged);
+						tag.tagged = true;
+					}
+				} else {
+					tag.tag_timer -= dt;
+					tag.tag_timer = glm::max(tag.tag_timer, 0.0f);
 				}
-			} else {
-				tag.tag_timer -= dt;
-				tag.tag_timer = glm::max(tag.tag_timer, 0.0f);
-			}
 
-			if (world.has_component<Interactable>(entity)) {
-				color = glm::mix(non_tagged_color, interactive_color, x);
-			} else if (world.has_component<EnemyData>(entity)) {
-				color = glm::mix(non_tagged_color, enemy_color, x);
-			} else {
-				color = glm::mix(non_tagged_color, default_color, x);
-			}
+				if (world.has_component<Interactable>(entity)) {
+					color = glm::mix(non_tagged_color, interactive_color, x);
+				} else if (world.has_component<EnemyData>(entity)) {
+					color = glm::mix(non_tagged_color, enemy_color, x);
+				} else {
+					color = glm::mix(non_tagged_color, default_color, x);
+				}
 
-			sprite.color = color;
-			tag.tagging = false;
+
+				sprite.color = color;
+				tag.tagging = false;
+			}
+		} else {
+			sprite.color = glm::vec4(0.0f);
 		}
-
-
 	}
 }

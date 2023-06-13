@@ -48,7 +48,7 @@ void RenderScene::startup() {
 	ssao_buffer.startup(render_extent.x, render_extent.y);
 	pbr_buffer.startup(render_extent.x, render_extent.y);
 	bloom_buffer.startup(render_extent.x, render_extent.y, 5);
-	shadow_buffer.startup(2048, 2048, 0.0001f, 25.0f);
+	shadow_buffer.startup(1024, 1024, 0.0001f, 25.0f);
 	combination_buffer.startup(render_extent.x, render_extent.y);
 	skybox_buffer.startup(render_extent.x, render_extent.y);
 	mouse_pick_framebuffer.startup(render_extent.x, render_extent.y);
@@ -252,14 +252,16 @@ void RenderScene::draw_viewport(bool right_side) {
 
 	debug_draw.draw();
 
-	mouse_pick_framebuffer.bind();
-	glad_glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	mouse_pick_pass.draw(*this);
-	debug_draw.draw_mouse_pick();
+	if (editor_mode) {
+		mouse_pick_framebuffer.bind();
+		glad_glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		mouse_pick_pass.draw(*this);
+		debug_draw.draw_mouse_pick();
+	}
 }
 
-void RenderScene::draw() {
+void RenderScene::draw(bool editor_mode) {
 	ZoneScopedN("RenderScene::draw");
 	static bool was_splitscreen = cvar_splitscreen.get();
 	static bool was_debug_camera = cvar_debug_camera_use.get();

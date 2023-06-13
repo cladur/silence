@@ -82,7 +82,7 @@ void EnemyPatrolling::update(World *world, uint32_t entity_id, float dt) {
 
 	// smoothly rotate the entity to face the next node
 	if (enemy_path.is_rotating) {
-		float new_dt = dt * 1.2f;
+		float new_dt = dt * enemy_path.rotation_speed;
 		enemy_utils::look_at(enemy_path, transform, target_position, new_dt);
 	}
 
