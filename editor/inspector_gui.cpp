@@ -1032,7 +1032,7 @@ void Inspector::show_interactable() {
 			ImGui::EndCombo();
 		}
 
-		show_checkbox("Single use", &interactable.single_use);
+		show_checkbox("Single use", interactable.single_use);
 
 		ImGui::TableNextRow();
 		ImGui::TableSetColumnIndex(0);

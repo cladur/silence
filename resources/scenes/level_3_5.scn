@@ -118,24 +118,16 @@
             },
             {
                 "component_data": {
-                    "path_parent": 73,
-                    "rotation_speed": 8.0,
-                    "speed": 1.0
+                    "animation_name": "enemy/enemy_ANIM_GLTF/enemy_walk_with_gun.anim",
+                    "ticks_per_second": 1000.0
                 },
-                "component_name": "EnemyPath"
+                "component_name": "AnimationInstance"
             },
             {
                 "component_data": {
                     "parent": 13
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "animation_name": "enemy/enemy_ANIM_GLTF/enemy_walk_with_gun.anim",
-                    "ticks_per_second": 1000.0
-                },
-                "component_name": "AnimationInstance"
             },
             {
                 "component_data": {
@@ -169,15 +161,11 @@
             },
             {
                 "component_data": {
-                    "highlight_color": {
-                        "b": 0.0,
-                        "g": 0.0,
-                        "r": 1.0
-                    },
-                    "highlighted": "twoja misja trwa",
-                    "target": 2
+                    "path_parent": 73,
+                    "rotation_speed": 8.0,
+                    "speed": 1.0
                 },
-                "component_name": "Highlight"
+                "component_name": "EnemyPath"
             },
             {
                 "component_data": {},
@@ -192,6 +180,18 @@
                     }
                 },
                 "component_name": "Taggable"
+            },
+            {
+                "component_data": {
+                    "highlight_color": {
+                        "b": 0.0,
+                        "g": 0.0,
+                        "r": 1.0
+                    },
+                    "highlighted": "twoja misja trwa",
+                    "target": 2
+                },
+                "component_name": "Highlight"
             }
         ],
         "entity": 5,
@@ -228,16 +228,16 @@
             },
             {
                 "component_data": {
-                    "parent": 46
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "animation_name": "agent/agent_ANIM_GLTF/agent_idle.anim",
                     "ticks_per_second": 1000.0
                 },
                 "component_name": "AnimationInstance"
+            },
+            {
+                "component_data": {
+                    "parent": 46
+                },
+                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -559,10 +559,6 @@
     {
         "components": [
             {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
-            {
                 "component_data": {
                     "name": "Floor"
                 },
@@ -594,6 +590,10 @@
                     "parent": 49
                 },
                 "component_name": "Parent"
+            },
+            {
+                "component_data": {},
+                "component_name": "StaticTag"
             },
             {
                 "component_data": {
@@ -666,10 +666,6 @@
     {
         "components": [
             {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
-            {
                 "component_data": {
                     "name": "Container"
                 },
@@ -720,6 +716,10 @@
                     "scale_uv_with_transform": true
                 },
                 "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {},
+                "component_name": "StaticTag"
             },
             {
                 "component_data": {
@@ -787,12 +787,6 @@
             },
             {
                 "component_data": {
-                    "layer_name": "default"
-                },
-                "component_name": "ColliderTag"
-            },
-            {
-                "component_data": {
                     "center": {
                         "x": 0.0,
                         "y": 0.4000000059604645,
@@ -801,6 +795,12 @@
                     "radius": 0.4000000059604645
                 },
                 "component_name": "ColliderSphere"
+            },
+            {
+                "component_data": {
+                    "layer_name": "default"
+                },
+                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -846,16 +846,16 @@
             },
             {
                 "component_data": {
-                    "parent": 55
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "animation_name": "scorpion/scorpion_ANIM_GLTF/scorpion_idle.anim",
                     "ticks_per_second": 5000.0
                 },
                 "component_name": "AnimationInstance"
+            },
+            {
+                "component_data": {
+                    "parent": 55
+                },
+                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -1018,6 +1018,13 @@
             },
             {
                 "component_data": {
+                    "bone_name": "RightHand",
+                    "holder": 6
+                },
+                "component_name": "Attachment"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 0.9398154020309448,
                         "x": 0.09057460725307465,
@@ -1045,13 +1052,6 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "bone_name": "RightHand",
-                    "holder": 6
-                },
-                "component_name": "Attachment"
             }
         ],
         "entity": 59,
@@ -1059,10 +1059,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
             {
                 "component_data": {
                     "name": "Platform Switch 01"
@@ -1100,6 +1096,10 @@
                 "component_name": "ModelInstance"
             },
             {
+                "component_data": {},
+                "component_name": "StaticTag"
+            },
+            {
                 "component_data": {
                     "layer_name": "taggable"
                 },
@@ -1122,18 +1122,6 @@
             },
             {
                 "component_data": {
-                    "highlight_color": {
-                        "b": 0.0,
-                        "g": 1.0,
-                        "r": 0.0
-                    },
-                    "highlighted": "twoja misja trwa",
-                    "target": 3
-                },
-                "component_name": "Highlight"
-            },
-            {
-                "component_data": {
                     "can_interact": true,
                     "interaction": 2,
                     "interaction_target": 61,
@@ -1141,6 +1129,7 @@
                     "interaction_target_3": 0,
                     "interaction_target_4": 0,
                     "interaction_target_5": 0,
+                    "single_use": false,
                     "type": 2
                 },
                 "component_name": "Interactable"
@@ -1154,6 +1143,18 @@
                     }
                 },
                 "component_name": "Taggable"
+            },
+            {
+                "component_data": {
+                    "highlight_color": {
+                        "b": 0.0,
+                        "g": 1.0,
+                        "r": 0.0
+                    },
+                    "highlighted": "twoja misja trwa",
+                    "target": 3
+                },
+                "component_name": "Highlight"
             }
         ],
         "entity": 60,
@@ -1161,10 +1162,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
             {
                 "component_data": {
                     "name": "Platform 01"
@@ -1200,6 +1197,10 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {},
+                "component_name": "StaticTag"
             },
             {
                 "component_data": {
@@ -1253,6 +1254,13 @@
             },
             {
                 "component_data": {
+                    "bone_name": "Gun",
+                    "holder": 5
+                },
+                "component_name": "Attachment"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 0.5674519538879395,
                         "x": 0.46721792221069336,
@@ -1286,13 +1294,6 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "bone_name": "Gun",
-                    "holder": 5
-                },
-                "component_name": "Attachment"
             }
         ],
         "entity": 64,
@@ -1301,8 +1302,12 @@
     {
         "components": [
             {
-                "component_data": {},
-                "component_name": "StaticTag"
+                "component_data": {
+                    "distraction_radius": 15.0,
+                    "distraction_time": 2.0,
+                    "explosion_radius": 4.0
+                },
+                "component_name": "ExplodingBox"
             },
             {
                 "component_data": {
@@ -1347,6 +1352,10 @@
                 "component_name": "ModelInstance"
             },
             {
+                "component_data": {},
+                "component_name": "StaticTag"
+            },
+            {
                 "component_data": {
                     "layer_name": "taggable"
                 },
@@ -1369,26 +1378,6 @@
             },
             {
                 "component_data": {
-                    "distraction_radius": 15.0,
-                    "distraction_time": 2.0,
-                    "explosion_radius": 4.0
-                },
-                "component_name": "ExplodingBox"
-            },
-            {
-                "component_data": {
-                    "highlight_color": {
-                        "b": 0.0,
-                        "g": 0.0,
-                        "r": 1.0
-                    },
-                    "highlighted": "twoja misja trwa",
-                    "target": 3
-                },
-                "component_name": "Highlight"
-            },
-            {
-                "component_data": {
                     "can_interact": true,
                     "interaction": 3,
                     "interaction_target": 66,
@@ -1396,6 +1385,7 @@
                     "interaction_target_3": 0,
                     "interaction_target_4": 0,
                     "interaction_target_5": 0,
+                    "single_use": false,
                     "type": 2
                 },
                 "component_name": "Interactable"
@@ -1409,6 +1399,18 @@
                     }
                 },
                 "component_name": "Taggable"
+            },
+            {
+                "component_data": {
+                    "highlight_color": {
+                        "b": 0.0,
+                        "g": 0.0,
+                        "r": 1.0
+                    },
+                    "highlighted": "twoja misja trwa",
+                    "target": 3
+                },
+                "component_name": "Highlight"
             },
             {
                 "component_data": {
@@ -1548,18 +1550,6 @@
             },
             {
                 "component_data": {
-                    "highlight_color": {
-                        "b": 0.0,
-                        "g": 0.43529412150382996,
-                        "r": 1.0
-                    },
-                    "highlighted": "twoja misja trwa",
-                    "target": 2
-                },
-                "component_name": "Highlight"
-            },
-            {
-                "component_data": {
                     "can_interact": true,
                     "interaction": 1,
                     "interaction_target": 68,
@@ -1567,6 +1557,7 @@
                     "interaction_target_3": 0,
                     "interaction_target_4": 0,
                     "interaction_target_5": 0,
+                    "single_use": false,
                     "type": 2
                 },
                 "component_name": "Interactable"
@@ -1603,6 +1594,18 @@
                     }
                 },
                 "component_name": "Taggable"
+            },
+            {
+                "component_data": {
+                    "highlight_color": {
+                        "b": 0.0,
+                        "g": 0.43529412150382996,
+                        "r": 1.0
+                    },
+                    "highlighted": "twoja misja trwa",
+                    "target": 2
+                },
+                "component_name": "Highlight"
             },
             {
                 "component_data": {
@@ -1800,10 +1803,6 @@
                 "component_name": "Name"
             },
             {
-                "component_data": null,
-                "component_name": "PathParent"
-            },
-            {
                 "component_data": {
                     "children": [
                         87,
@@ -1839,6 +1838,10 @@
                     "parent": 13
                 },
                 "component_name": "Parent"
+            },
+            {
+                "component_data": null,
+                "component_name": "PathParent"
             }
         ],
         "entity": 73,
@@ -2564,10 +2567,6 @@
     {
         "components": [
             {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
-            {
                 "component_data": {
                     "name": "cube_1x1"
                 },
@@ -2610,6 +2609,10 @@
                 "component_name": "ModelInstance"
             },
             {
+                "component_data": {},
+                "component_name": "StaticTag"
+            },
+            {
                 "component_data": {
                     "layer_name": "default"
                 },
@@ -2648,10 +2651,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -2695,6 +2694,10 @@
                 "component_name": "ModelInstance"
             },
             {
+                "component_data": {},
+                "component_name": "StaticTag"
+            },
+            {
                 "component_data": {
                     "layer_name": "obstacle"
                 },
@@ -2733,10 +2736,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -2780,6 +2779,10 @@
                 "component_name": "ModelInstance"
             },
             {
+                "component_data": {},
+                "component_name": "StaticTag"
+            },
+            {
                 "component_data": {
                     "layer_name": "default"
                 },
@@ -2819,10 +2822,6 @@
     {
         "components": [
             {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
-            {
                 "component_data": {
                     "name": "cube_1x1"
                 },
@@ -2854,6 +2853,10 @@
                     "parent": 12
                 },
                 "component_name": "Parent"
+            },
+            {
+                "component_data": {},
+                "component_name": "StaticTag"
             },
             {
                 "component_data": {
@@ -2895,10 +2898,6 @@
     {
         "components": [
             {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
-            {
                 "component_data": {
                     "name": "cube_1x1"
                 },
@@ -2939,6 +2938,10 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {},
+                "component_name": "StaticTag"
             },
             {
                 "component_data": {
@@ -3074,10 +3077,6 @@
     {
         "components": [
             {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
-            {
                 "component_data": {
                     "name": "cube_1x1"
                 },
@@ -3120,6 +3119,10 @@
                 "component_name": "ModelInstance"
             },
             {
+                "component_data": {},
+                "component_name": "StaticTag"
+            },
+            {
                 "component_data": {
                     "layer_name": "obstacle"
                 },
@@ -3158,10 +3161,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -3203,6 +3202,10 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {},
+                "component_name": "StaticTag"
             },
             {
                 "component_data": {
@@ -3288,10 +3291,6 @@
     {
         "components": [
             {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
-            {
                 "component_data": {
                     "name": "cube_1x1"
                 },
@@ -3334,6 +3333,10 @@
                 "component_name": "ModelInstance"
             },
             {
+                "component_data": {},
+                "component_name": "StaticTag"
+            },
+            {
                 "component_data": {
                     "layer_name": "obstacle"
                 },
@@ -3372,10 +3375,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -3419,6 +3418,10 @@
                 "component_name": "ModelInstance"
             },
             {
+                "component_data": {},
+                "component_name": "StaticTag"
+            },
+            {
                 "component_data": {
                     "layer_name": "obstacle"
                 },
@@ -3457,10 +3460,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -3504,6 +3503,10 @@
                 "component_name": "ModelInstance"
             },
             {
+                "component_data": {},
+                "component_name": "StaticTag"
+            },
+            {
                 "component_data": {
                     "layer_name": "obstacle"
                 },
@@ -3542,10 +3545,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -3589,6 +3588,10 @@
                 "component_name": "ModelInstance"
             },
             {
+                "component_data": {},
+                "component_name": "StaticTag"
+            },
+            {
                 "component_data": {
                     "layer_name": "obstacle"
                 },
@@ -3627,10 +3630,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -3672,6 +3671,10 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {},
+                "component_name": "StaticTag"
             },
             {
                 "component_data": {
@@ -3809,10 +3812,6 @@
     {
         "components": [
             {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
-            {
                 "component_data": {
                     "name": "Stairs"
                 },
@@ -3844,6 +3843,10 @@
                     "parent": 49
                 },
                 "component_name": "Parent"
+            },
+            {
+                "component_data": {},
+                "component_name": "StaticTag"
             },
             {
                 "component_data": {
@@ -3884,10 +3887,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -3931,6 +3930,10 @@
                 "component_name": "ModelInstance"
             },
             {
+                "component_data": {},
+                "component_name": "StaticTag"
+            },
+            {
                 "component_data": {
                     "layer_name": "obstacle"
                 },
@@ -3969,10 +3972,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -4014,6 +4013,10 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {},
+                "component_name": "StaticTag"
             },
             {
                 "component_data": {
@@ -4151,10 +4154,6 @@
     {
         "components": [
             {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
-            {
                 "component_data": {
                     "name": "cube_1x1"
                 },
@@ -4197,6 +4196,10 @@
                 "component_name": "ModelInstance"
             },
             {
+                "component_data": {},
+                "component_name": "StaticTag"
+            },
+            {
                 "component_data": {
                     "layer_name": "default"
                 },
@@ -4235,10 +4238,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -4282,6 +4281,10 @@
                 "component_name": "ModelInstance"
             },
             {
+                "component_data": {},
+                "component_name": "StaticTag"
+            },
+            {
                 "component_data": {
                     "layer_name": "default"
                 },
@@ -4320,10 +4323,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -4365,6 +4364,10 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {},
+                "component_name": "StaticTag"
             },
             {
                 "component_data": {
@@ -4484,24 +4487,16 @@
             },
             {
                 "component_data": {
-                    "path_parent": 38,
-                    "rotation_speed": 4.900000095367432,
-                    "speed": 1.0
+                    "animation_name": "enemy/enemy_ANIM_GLTF/enemy_idle.anim",
+                    "ticks_per_second": 1000.0
                 },
-                "component_name": "EnemyPath"
+                "component_name": "AnimationInstance"
             },
             {
                 "component_data": {
                     "parent": 32
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "animation_name": "enemy/enemy_ANIM_GLTF/enemy_idle.anim",
-                    "ticks_per_second": 1000.0
-                },
-                "component_name": "AnimationInstance"
             },
             {
                 "component_data": {
@@ -4535,15 +4530,11 @@
             },
             {
                 "component_data": {
-                    "highlight_color": {
-                        "b": 0.0,
-                        "g": 0.0,
-                        "r": 1.0
-                    },
-                    "highlighted": "twoja misja trwa",
-                    "target": 2
+                    "path_parent": 38,
+                    "rotation_speed": 4.900000095367432,
+                    "speed": 1.0
                 },
-                "component_name": "Highlight"
+                "component_name": "EnemyPath"
             },
             {
                 "component_data": {},
@@ -4558,6 +4549,18 @@
                     }
                 },
                 "component_name": "Taggable"
+            },
+            {
+                "component_data": {
+                    "highlight_color": {
+                        "b": 0.0,
+                        "g": 0.0,
+                        "r": 1.0
+                    },
+                    "highlighted": "twoja misja trwa",
+                    "target": 2
+                },
+                "component_name": "Highlight"
             }
         ],
         "entity": 34,
@@ -4565,6 +4568,14 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "distraction_radius": 20.0,
+                    "distraction_time": 2.0,
+                    "explosion_radius": 10.0
+                },
+                "component_name": "ExplodingBox"
+            },
             {
                 "component_data": {
                     "name": "Exploding Box"
@@ -4630,26 +4641,6 @@
             },
             {
                 "component_data": {
-                    "distraction_radius": 20.0,
-                    "distraction_time": 2.0,
-                    "explosion_radius": 10.0
-                },
-                "component_name": "ExplodingBox"
-            },
-            {
-                "component_data": {
-                    "highlight_color": {
-                        "b": 0.0,
-                        "g": 0.0,
-                        "r": 1.0
-                    },
-                    "highlighted": "twoja misja trwa",
-                    "target": 3
-                },
-                "component_name": "Highlight"
-            },
-            {
-                "component_data": {
                     "can_interact": true,
                     "interaction": 3,
                     "interaction_target": 35,
@@ -4657,6 +4648,7 @@
                     "interaction_target_3": 0,
                     "interaction_target_4": 0,
                     "interaction_target_5": 0,
+                    "single_use": false,
                     "type": 2
                 },
                 "component_name": "Interactable"
@@ -4670,6 +4662,18 @@
                     }
                 },
                 "component_name": "Taggable"
+            },
+            {
+                "component_data": {
+                    "highlight_color": {
+                        "b": 0.0,
+                        "g": 0.0,
+                        "r": 1.0
+                    },
+                    "highlighted": "twoja misja trwa",
+                    "target": 3
+                },
+                "component_name": "Highlight"
             },
             {
                 "component_data": {
@@ -4783,10 +4787,6 @@
     {
         "components": [
             {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
-            {
                 "component_data": {
                     "name": "cube_1x1"
                 },
@@ -4827,6 +4827,10 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {},
+                "component_name": "StaticTag"
             },
             {
                 "component_data": {
@@ -4874,10 +4878,6 @@
                 "component_name": "Name"
             },
             {
-                "component_data": null,
-                "component_name": "PathParent"
-            },
-            {
                 "component_data": {
                     "children": [
                         39
@@ -4912,6 +4912,10 @@
                     "parent": 32
                 },
                 "component_name": "Parent"
+            },
+            {
+                "component_data": null,
+                "component_name": "PathParent"
             }
         ],
         "entity": 38,
@@ -4967,6 +4971,13 @@
             },
             {
                 "component_data": {
+                    "bone_name": "Gun",
+                    "holder": 34
+                },
+                "component_name": "Attachment"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 0.4927337169647217,
                         "x": 0.5339432954788208,
@@ -5000,13 +5011,6 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "bone_name": "Gun",
-                    "holder": 34
-                },
-                "component_name": "Attachment"
             }
         ],
         "entity": 33,
@@ -5014,10 +5018,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -5061,6 +5061,10 @@
                 "component_name": "ModelInstance"
             },
             {
+                "component_data": {},
+                "component_name": "StaticTag"
+            },
+            {
                 "component_data": {
                     "layer_name": "default"
                 },
@@ -5099,10 +5103,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -5146,6 +5146,10 @@
                 "component_name": "ModelInstance"
             },
             {
+                "component_data": {},
+                "component_name": "StaticTag"
+            },
+            {
                 "component_data": {
                     "layer_name": "default"
                 },
@@ -5185,10 +5189,6 @@
     {
         "components": [
             {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
-            {
                 "component_data": {
                     "name": "Test Jump"
                 },
@@ -5223,6 +5223,10 @@
                     "scale_uv_with_transform": true
                 },
                 "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {},
+                "component_name": "StaticTag"
             },
             {
                 "component_data": {
@@ -5533,6 +5537,13 @@
             },
             {
                 "component_data": {
+                    "bone_name": "Gun",
+                    "holder": 5
+                },
+                "component_name": "Attachment"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 0.6704654693603516,
                         "x": 0.741365909576416,
@@ -5573,13 +5584,6 @@
                     "type": 2
                 },
                 "component_name": "Light"
-            },
-            {
-                "component_data": {
-                    "bone_name": "Gun",
-                    "holder": 5
-                },
-                "component_name": "Attachment"
             }
         ],
         "entity": 82,
@@ -5587,10 +5591,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -5632,6 +5632,10 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {},
+                "component_name": "StaticTag"
             },
             {
                 "component_data": {
@@ -5783,10 +5787,6 @@
     {
         "components": [
             {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
-            {
                 "component_data": {
                     "name": "Test Jump 2"
                 },
@@ -5821,6 +5821,10 @@
                     "scale_uv_with_transform": true
                 },
                 "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {},
+                "component_name": "StaticTag"
             },
             {
                 "component_data": {
@@ -5861,10 +5865,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
             {
                 "component_data": {
                     "name": "First Agent Button"
@@ -5908,6 +5908,10 @@
                 "component_name": "ModelInstance"
             },
             {
+                "component_data": {},
+                "component_name": "StaticTag"
+            },
+            {
                 "component_data": {
                     "layer_name": "default"
                 },
@@ -5930,6 +5934,20 @@
             },
             {
                 "component_data": {
+                    "can_interact": true,
+                    "interaction": 2,
+                    "interaction_target": 91,
+                    "interaction_target_2": 92,
+                    "interaction_target_3": 90,
+                    "interaction_target_4": 80,
+                    "interaction_target_5": 0,
+                    "single_use": true,
+                    "type": 1
+                },
+                "component_name": "Interactable"
+            },
+            {
+                "component_data": {
                     "highlight_color": {
                         "b": 1.0,
                         "g": 1.0,
@@ -5939,19 +5957,6 @@
                     "target": 3
                 },
                 "component_name": "Highlight"
-            },
-            {
-                "component_data": {
-                    "can_interact": true,
-                    "interaction": 2,
-                    "interaction_target": 91,
-                    "interaction_target_2": 92,
-                    "interaction_target_3": 90,
-                    "interaction_target_4": 80,
-                    "interaction_target_5": 0,
-                    "type": 1
-                },
-                "component_name": "Interactable"
             }
         ],
         "entity": 52,
@@ -6015,10 +6020,6 @@
     {
         "components": [
             {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
-            {
                 "component_data": {
                     "name": "Start_Blockade"
                 },
@@ -6077,6 +6078,10 @@
                 "component_name": "ModelInstance"
             },
             {
+                "component_data": {},
+                "component_name": "StaticTag"
+            },
+            {
                 "component_data": {
                     "layer_name": "obstacle"
                 },
@@ -6120,10 +6125,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
             {
                 "component_data": {
                     "name": "Start_Blockade2"
@@ -6183,6 +6184,10 @@
                 "component_name": "ModelInstance"
             },
             {
+                "component_data": {},
+                "component_name": "StaticTag"
+            },
+            {
                 "component_data": {
                     "layer_name": "obstacle"
                 },
@@ -6226,10 +6231,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
             {
                 "component_data": {
                     "name": "Start_Blockade3"
@@ -6289,6 +6290,10 @@
                 "component_name": "ModelInstance"
             },
             {
+                "component_data": {},
+                "component_name": "StaticTag"
+            },
+            {
                 "component_data": {
                     "layer_name": "obstacle"
                 },
@@ -6332,10 +6337,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
             {
                 "component_data": {
                     "name": "Start_Blockade4"
@@ -6395,6 +6396,10 @@
                 "component_name": "ModelInstance"
             },
             {
+                "component_data": {},
+                "component_name": "StaticTag"
+            },
+            {
                 "component_data": {
                     "layer_name": "obstacle"
                 },
@@ -6439,10 +6444,6 @@
     {
         "components": [
             {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
-            {
                 "component_data": {
                     "name": "Wall"
                 },
@@ -6485,6 +6486,10 @@
                 "component_name": "ModelInstance"
             },
             {
+                "component_data": {},
+                "component_name": "StaticTag"
+            },
+            {
                 "component_data": {
                     "layer_name": "obstacle"
                 },
@@ -6511,10 +6516,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
             {
                 "component_data": {
                     "name": "Wall2"
@@ -6558,6 +6559,10 @@
                 "component_name": "ModelInstance"
             },
             {
+                "component_data": {},
+                "component_name": "StaticTag"
+            },
+            {
                 "component_data": {
                     "layer_name": "obstacle"
                 },
@@ -6584,10 +6589,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
             {
                 "component_data": {
                     "name": "Wall3"
@@ -6631,6 +6632,10 @@
                 "component_name": "ModelInstance"
             },
             {
+                "component_data": {},
+                "component_name": "StaticTag"
+            },
+            {
                 "component_data": {
                     "layer_name": "obstacle"
                 },
@@ -6657,10 +6662,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
             {
                 "component_data": {
                     "name": "Wall4"
@@ -6702,6 +6703,10 @@
                     "scale_uv_with_transform": true
                 },
                 "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {},
+                "component_name": "StaticTag"
             },
             {
                 "component_data": {
