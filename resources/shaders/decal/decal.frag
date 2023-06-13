@@ -1,12 +1,12 @@
 #version 330 core
-layout (location = 2) out vec4 gAlbedo;
+layout (location = 0) out vec4 gAlbedo;
 
 in vec4 clip_pos;
 
-uniform mat4 inv_view_proj;
 uniform sampler2D gDepth;
 uniform sampler2D decal_albedo;
 
+uniform mat4 inv_view_proj;
 uniform mat4 decal_view_proj;
 uniform vec2 aspect_ratio;
 

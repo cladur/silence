@@ -54,6 +54,7 @@ void RenderScene::startup() {
 	mouse_pick_framebuffer.startup(render_extent.x, render_extent.y);
 	particle_buffer.startup(render_extent.x, render_extent.y);
 	highlight_buffer.startup(render_extent.x, render_extent.y);
+	decal_buffer.startup(render_extent.x, render_extent.y, g_buffer);
 
 	debug_draw.startup();
 	transparent_pass.startup();
@@ -109,7 +110,16 @@ void RenderScene::draw_viewport(bool right_side) {
 
 	g_buffer_pass.draw(*this);
 
+	decal_buffer.bind();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glEnable(GL_DEPTH_TEST);
+	glDisable(GL_BLEND);
+	glDepthMask(GL_FALSE);
+	glDisable(GL_CULL_FACE);
 	decal_pass.draw(*this);
+	glEnable(GL_CULL_FACE);
+	glDepthMask(GL_TRUE);
+
 	// HIGHLIGHT PASS
 	highlight_buffer.bind();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

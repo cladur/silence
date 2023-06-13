@@ -90,8 +90,8 @@ void GBuffer::startup(uint32_t width, uint32_t height) {
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, GL_TEXTURE_2D, depth_texture_id, 0);
 
 	// - tell OpenGL which color attachments we'll use (of this framebuffer) for rendering
-	uint32_t attachments[5] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2,
-		GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4};
+	uint32_t attachments[5] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3,
+		GL_COLOR_ATTACHMENT4 };
 	glDrawBuffers(5, attachments);
 
 	glGenRenderbuffers(1, &rbo_id);
@@ -552,6 +552,38 @@ void HighlightBuffer::resize(uint32_t width, uint32_t height) {
 	glBindTexture(GL_TEXTURE_2D, depth_texture_id);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
 
+	glBindRenderbuffer(GL_RENDERBUFFER, rbo_id);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+}
+
+void DecalBuffer::startup(uint32_t width, uint32_t height, GBuffer &g_buffer) {
+	glGenFramebuffers(1, &framebuffer_id);
+	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer_id);
+
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, g_buffer.albedo_texture_id, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, g_buffer.normal_texture_id, 0);
+
+	// - tell OpenGL which color attachments we'll use (of this framebuffer) for rendering
+	uint32_t attachments[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+	glDrawBuffers(2, attachments);
+
+	glGenRenderbuffers(1, &rbo_id);
+	glBindRenderbuffer(GL_RENDERBUFFER, rbo_id);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo_id);
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+		SPDLOG_ERROR("ERROR::FRAMEBUFFER:: Framebuffer is not complete!");
+	}
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void DecalBuffer::bind() {
+	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer_id);
+}
+
+void DecalBuffer::resize(uint32_t width, uint32_t height) {
 	glBindRenderbuffer(GL_RENDERBUFFER, rbo_id);
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
 }

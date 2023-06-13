@@ -821,6 +821,6 @@ void DecalPass::draw(RenderScene &scene) {
 		Transform &transform = *cmd.transform;
 		material.bind_decal_resources(decal, transform);
 
-		utils::render_quad();
+		utils::render_cube();
 	}
 }

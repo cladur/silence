@@ -1496,7 +1496,7 @@ void Inspector::show_decal() {
 		ImGui::Text("Projection size");
 		ImGui::TableSetColumnIndex(1);
 		ImGui::SetNextItemWidth(-FLT_MIN);
-		ImGui::DragFloat("##Projection size", &decal.projection_size, 5.0f, 10.0f, 200.0f);
+		ImGui::DragFloat("##Projection size", &decal.projection_size, 1.0f, 1.0f, 100.0f);
 		ImGui::TableNextRow();
 
 		ImGui::TableSetColumnIndex(0);

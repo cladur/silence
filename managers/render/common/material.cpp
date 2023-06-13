@@ -678,7 +678,6 @@ void MaterialDecal::bind_resources(RenderScene &scene) {
 	shader.use();
 	shader.set_mat4("projection", scene.projection);
 	shader.set_mat4("view", scene.view);
-	shader.set_vec2("aspect_ratio", scene.render_extent);
 	shader.set_mat4("inv_view_proj", glm::inverse(scene.projection * scene.view));
 	shader.set_int("gDepth", 1);
 
@@ -696,18 +695,28 @@ void MaterialDecal::bind_decal_resources(Decal &decal, Transform &transform) {
 	const glm::quat &rotation = transform.get_global_orientation();
 
 	const glm::vec3 &local_up = rotation * glm::vec3(0.0f, 0.0f, 1.0f);
-	const glm::vec3 &dir = rotation * glm::vec3(0.0f, 1.0f, 0.0f);
+	const glm::vec3 &dir = rotation * glm::vec3(0.0f, range.y * 0.5f, 0.0f);
 	//Todo: FIX THIS
 
-	const glm::mat4 &decal_view = glm::lookAt(center + dir * range.y, center, -glm::normalize(local_up));
+	const glm::mat4 &decal_view = glm::lookAt(center + dir, center, glm::normalize(local_up));
 	const glm::mat4 &decal_projection = glm::ortho(-decal.projection_size, decal.projection_size,
 			-decal.projection_size, decal.projection_size, decal.projection_near, decal.projection_far);
 
 	const glm::mat4 &decal_view_proj = decal_projection * decal_view;
 	shader.set_mat4("decal_view_proj", decal_view_proj);
 	shader.set_mat4("decal_inv_view_proj", glm::inverse(decal_view_proj));
-	shader.set_int("decal_albedo", 0);
 
+	const Texture &albedo = resource_manager.get_texture(decal.albedo);
+	glm::vec2 aspect_ratio;
+	if (albedo.width > albedo.height) {
+		aspect_ratio.x = 1.0f;
+		aspect_ratio.y = float(albedo.width) / float(albedo.height);
+	} else {
+		aspect_ratio.x = float(albedo.height) / float(albedo.width);
+		aspect_ratio.y = 1.0f;
+	}
+	shader.set_vec2("aspect_ratio", aspect_ratio);
+	shader.set_int("decal_albedo", 0);
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, resource_manager.get_texture(decal.albedo).id);
+	glBindTexture(GL_TEXTURE_2D, albedo.id);
 }

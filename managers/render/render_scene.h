@@ -53,6 +53,7 @@ struct RenderScene {
 	SkyboxBuffer skybox_buffer;
 	ParticleBuffer particle_buffer;
 	HighlightBuffer highlight_buffer;
+	DecalBuffer decal_buffer;
 
 	// render extent that does not change whether we're in splitscreen or not
 	glm::vec2 full_render_extent;
