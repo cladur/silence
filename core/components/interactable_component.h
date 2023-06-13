@@ -13,6 +13,7 @@ struct Interactable {
 
 	bool triggered = false;
 	bool can_interact = true;
+	bool single_use = false;
 
 	void serialize_json(nlohmann::json &serialized_scene) {
 		nlohmann::json::object_t serialized_component;
@@ -26,6 +27,7 @@ struct Interactable {
 		serialized_component["interaction_target_3"] = interaction_targets[2];
 		serialized_component["interaction_target_4"] = interaction_targets[3];
 		serialized_component["interaction_target_5"] = interaction_targets[4];
+		serialized_component["single_use"] = single_use;
 
 		serialized_scene.back()["component_data"] = serialized_component;
 		serialized_scene.back()["component_name"] = "Interactable";
@@ -63,6 +65,12 @@ struct Interactable {
 			interaction_targets[4] = serialized_component["interaction_target_5"];
 		} else {
 			interaction_targets[4] = 0;
+		}
+
+		if (serialized_component.contains("single_use")) {
+			single_use = serialized_component["single_use"];
+		} else {
+			single_use = false;
 		}
 
 		triggered = false;

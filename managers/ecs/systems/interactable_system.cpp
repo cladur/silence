@@ -82,6 +82,10 @@ void InteractableSystem::update(World &world, float dt) {
 					}
 				}
 			}
+
+			if (interactable.single_use) {
+				interactable.can_interact = false;
+			}
 		}
 	}
 }
