@@ -11,6 +11,8 @@ struct Interactable {
 
 	std::array<Entity, 5> interaction_targets = {};
 
+	uint32_t cable_parent = 0;
+
 	bool triggered = false;
 	bool can_interact = true;
 	bool single_use = false;
@@ -28,6 +30,8 @@ struct Interactable {
 		serialized_component["interaction_target_4"] = interaction_targets[3];
 		serialized_component["interaction_target_5"] = interaction_targets[4];
 		serialized_component["single_use"] = single_use;
+
+		serialized_component["cable_parent"] = cable_parent;
 
 		serialized_scene.back()["component_data"] = serialized_component;
 		serialized_scene.back()["component_name"] = "Interactable";
@@ -71,6 +75,12 @@ struct Interactable {
 			single_use = serialized_component["single_use"];
 		} else {
 			single_use = false;
+		}
+
+		if (serialized_component.contains("cable_parent")) {
+			cable_parent = serialized_component["cable_parent"];
+		} else {
+			cable_parent = 0;
 		}
 
 		triggered = false;

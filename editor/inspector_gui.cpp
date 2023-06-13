@@ -81,6 +81,7 @@ void Inspector::show_components() {
 	SHOW_COMPONENT(Highlight, show_highlight);
 	SHOW_COMPONENT(ParticleEmitter, show_particle_emitter);
 	SHOW_COMPONENT(DetectionCamera, show_detection_camera);
+	SHOW_COMPONENT(CableParent, show_cable_parent);
 
 	for (int i = 0; i < remove_component_queue.size(); i++) {
 		auto [entity, component_to_remove] = remove_component_queue.front();
@@ -1104,6 +1105,20 @@ void Inspector::show_interactable() {
 			ImGui::EndDragDropTarget();
 		}
 
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Cable Parent");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::Text("%s", fmt::format("{}", interactable.cable_parent).c_str());
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
+				Entity payload_entity = *(Entity *)payload->Data;
+				interactable.cable_parent = payload_entity;
+			}
+			ImGui::EndDragDropTarget();
+		}
+
 		ImGui::EndTable();
 	}
 }
@@ -1530,6 +1545,47 @@ void Inspector::show_detection_camera() {
 	}
 }
 
+void Inspector::show_cable_parent() {
+	auto &data = world->get_component<CableParent>(selected_entity);
+	if (ImGui::CollapsingHeader("CableParent", tree_flags)) {
+		remove_component_popup<CableParent>();
+
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("Cable Parent", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("On Color");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		ImGui::ColorPicker3("##On Color", (float *)&data.on_color);
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Off Color");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		ImGui::ColorPicker3("##Off Color", (float *)&data.off_color);
+
+		show_checkbox("Highlighted when OFF", data.highlighted_on_off);
+
+		if (ImGui::BeginCombo("##Inital State", magic_enum::enum_name(data.state).data())) {
+			for (auto type : magic_enum::enum_values<CableState>()) {
+				bool is_selected = (data.state == type);
+				if (ImGui::Selectable(magic_enum::enum_name(type).data(), is_selected)) {
+					data.state = type;
+				}
+				if (is_selected) {
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+			ImGui::EndCombo();
+		}
+		ImGui::EndTable();
+	}
+}
+
 bool Inspector::show_vec2(
 		const char *label, glm::vec2 &vec2, float speed, float reset_value, float min_value, float max_value) {
 	bool changed = false;
@@ -1708,6 +1764,7 @@ void Inspector::show_add_component() {
 			SHOW_ADD_COMPONENT(Highlight);
 			SHOW_ADD_COMPONENT(ParticleEmitter);
 			SHOW_ADD_COMPONENT(DetectionCamera);
+			SHOW_ADD_COMPONENT(CableParent);
 
 			ImGui::EndPopup();
 		}
@@ -1717,3 +1774,4 @@ void Inspector::show_add_component() {
 void Inspector::set_active_entity(Entity entity) {
 	selected_entity = entity;
 }
+

@@ -22,6 +22,7 @@
 #include "components/taggable_component.h"
 #include "ecs/systems/agent_movement_system.h"
 #include "ecs/systems/agent_system.h"
+#include "ecs/systems/cable_system.h"
 #include "ecs/systems/collider_draw.h"
 #include "ecs/systems/enemy_path_draw_system.h"
 #include "ecs/systems/enemy_pathing.h"
@@ -85,6 +86,7 @@ Scene::Scene() {
 		world.register_component<Highlight>();
 		world.register_component<ParticleEmitter>();
 		world.register_component<DetectionCamera>();
+		world.register_component<CableParent>();
 	}
 	// Components
 
@@ -107,6 +109,7 @@ Scene::Scene() {
 		world.register_system<IsolatedEntitiesSystem>(UpdateOrder::PrePreAnimation);
 		world.register_system<RootParentSystem>(UpdateOrder::PrePreAnimation);
 		world.register_system<AttachmentSystem>(UpdateOrder::PostAnimation);
+		world.register_system<CableSystem>();
 	}
 
 	auto &physics_manager = PhysicsManager::get();
