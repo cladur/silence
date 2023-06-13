@@ -148,7 +148,7 @@ void AgentSystem::update(World &world, float dt) {
 			}
 		}
 
-		if(!is_climbing) {
+		if (!is_climbing) {
 			animation_instance.blend_time_ms = 700.0f;
 		}
 
@@ -192,13 +192,12 @@ void AgentSystem::update(World &world, float dt) {
 				!*CVarSystem::get()->get_int_cvar("debug_camera.use")) {
 			glm::vec2 mouse_delta = input_manager.get_mouse_delta();
 			float rotation_y = mouse_delta.y * cvar_camera_sensitivity.get() * dt * camera_sens_modifier;
-			if(current_rotation_y_camera_pivot + rotation_y > -1.5f && current_rotation_y_camera_pivot + rotation_y < 1.5f) {
+			if (current_rotation_y_camera_pivot + rotation_y > -1.5f &&
+					current_rotation_y_camera_pivot + rotation_y < 1.5f) {
 				current_rotation_y_camera_pivot += rotation_y;
-				camera_pivot_tf.add_euler_rot(
-					glm::vec3(rotation_y, 0.0f, 0.0f));
+				camera_pivot_tf.add_euler_rot(glm::vec3(rotation_y, 0.0f, 0.0f));
 			}
-			
-			
+
 			camera_pivot_tf.add_global_euler_rot(
 					glm::vec3(0.0f, -mouse_delta.x, 0.0f) * cvar_camera_sensitivity.get() * dt * camera_sens_modifier);
 
@@ -239,8 +238,7 @@ void AgentSystem::update(World &world, float dt) {
 			//Agent Climbing
 			if (input_manager.is_action_just_pressed("agent_climb")) {
 				Ray ray{};
-				ray.origin =
-						transform.get_global_position() + glm::vec3(0.0f, 1.4f, 0.0f) + model_tf.get_forward();
+				ray.origin = transform.get_global_position() + glm::vec3(0.0f, 1.4f, 0.0f) + model_tf.get_forward();
 				ray.ignore_list.emplace_back(entity);
 				ray.layer_name = "default";
 				ray.direction = -transform.get_up();
@@ -316,11 +314,14 @@ void AgentSystem::update(World &world, float dt) {
 									"agent/agent_ANIM_GLTF/agent_interaction.anim");
 							if (animation_instance.animation_handle.id != animation_handle.id) {
 								auto &transform = world.get_component<Transform>(closest_interactable);
-								glm::vec3 direction = model_tf.get_global_position() - transform.get_global_position();
+								auto model_position = model_tf.get_global_position();
+								glm::vec3 direction = model_position - transform.get_global_position();
 								direction.y = 0.0f;
 								direction = glm::normalize(direction);
+								//auto rotation_matrix = glm::mat3(view_matrix);
 								//TODO: rotate model towards interactable
-								// model_tf.set_orientation(glm::quat(rotation_matrix));
+								//model_tf.set_orientation(glm::quat(rotation_matrix));
+
 								animation_instance.ticks_per_second = 1000.f;
 								animation_timer = 0;
 								agent_data.locked_movement = true;
@@ -405,7 +406,7 @@ void AgentSystem::update(World &world, float dt) {
 				is_zooming = false;
 			}
 		}
-			
+
 		if (animation_timer < resource_manager.get_animation(animation_instance.animation_handle).get_duration()) {
 			animation_timer += (dt * 1000);
 			if (is_climbing &&
@@ -423,10 +424,9 @@ void AgentSystem::update(World &world, float dt) {
 				glm::vec3 end = ray.origin + ray.direction;
 				HitInfo info;
 				dd.draw_arrow(ray.origin, end, { 1.0f, 0.0f, 0.0f });
-				if (CollisionSystem::ray_cast_layer(world, ray, info)) { 
-					transform.set_position(info.point + glm::vec3{0.0f,0.2f,0.0f});
+				if (CollisionSystem::ray_cast_layer(world, ray, info)) {
+					transform.set_position(info.point + glm::vec3{ 0.0f, 0.2f, 0.0f });
 				}
-
 
 				animation_instance.blend_time_ms = 0.0f;
 				animation_manager.change_animation(agent_data.model, "agent/agent_ANIM_GLTF/agent_idle.anim");

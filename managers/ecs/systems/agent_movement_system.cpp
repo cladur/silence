@@ -74,7 +74,7 @@ void AgentMovementSystem::update(World &world, float dt) {
 		auto &is_crouching = agent_data.is_crouching;
 
 		if (agent_data.locked_movement) {
-			previous_velocity = {0.0f, 0.0f, 0.0f};
+			previous_velocity = { 0.0f, 0.0f, 0.0f };
 			continue;
 		}
 

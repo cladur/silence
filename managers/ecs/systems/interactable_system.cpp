@@ -33,8 +33,8 @@ void InteractableSystem::update(World &world, float dt) {
 	for (auto const &entity : entities) {
 		auto &interactable = world.get_component<Interactable>(entity);
 		if (interactable.interaction == Exploding && *CVarSystem::get()->get_int_cvar("debug_draw.collision.draw")) {
-			auto box = world.get_component<ExplodingBox>(interactable.interaction_target);
-			auto center = world.get_component<Transform>(interactable.interaction_target).get_global_position();
+			auto box = world.get_component<ExplodingBox>(interactable.interaction_targets[0]);
+			auto center = world.get_component<Transform>(interactable.interaction_targets[0]).get_global_position();
 			draw_explosion_radius(world, center, box.explosion_radius, { 255, 0, 0 });
 			draw_explosion_radius(world, center, box.distraction_radius, { 255, 128, 0 });
 		}
@@ -50,13 +50,19 @@ void InteractableSystem::update(World &world, float dt) {
 					interactable.triggered = false;
 					break;
 				case HackerPlatform: {
-					auto &platform = world.get_component<Platform>(interactable.interaction_target);
-					AudioManager::get().play_one_shot_3d(
-							electric_interaction_event, world.get_component<Transform>(entity));
-					if (!platform.is_moving) {
-						platform.is_moving = true;
+					for (unsigned int current_target : interactable.interaction_targets) {
+						if (current_target == 0) {
+							break;
+						}
+						auto &platform = world.get_component<Platform>(current_target);
+						AudioManager::get().play_one_shot_3d(
+								electric_interaction_event, world.get_component<Transform>(entity));
+						if (!platform.is_moving) {
+							platform.is_moving = true;
+						}
+						SPDLOG_INFO("{}", "Hacker platform triggered");
 					}
-					SPDLOG_INFO("{}", "Hacker platform triggered");
+
 					break;
 				}
 				case Exploding: {
@@ -67,8 +73,13 @@ void InteractableSystem::update(World &world, float dt) {
 					break;
 				}
 				case LightSwitch: {
-					SPDLOG_INFO("Light switch triggered");
-					switch_light(world, interactable, entity);
+					for (unsigned int current_target : interactable.interaction_targets) {
+						if (current_target == 0) {
+							break;
+						}
+						SPDLOG_INFO("Light switch triggered");
+						switch_light(world, interactable, current_target, entity);
+					}
 				}
 			}
 		}
@@ -81,8 +92,8 @@ void InteractableSystem::no_interaction(World &world, Interactable &interactable
 }
 
 void InteractableSystem::explosion(World &world, Interactable &interactable, Entity entity) {
-	auto &box = world.get_component<ExplodingBox>(interactable.interaction_target);
-	auto &t = world.get_component<Transform>(interactable.interaction_target);
+	auto &box = world.get_component<ExplodingBox>(interactable.interaction_targets[0]);
+	auto &t = world.get_component<Transform>(interactable.interaction_targets[0]);
 
 	if (world.has_component<ParticleEmitter>(entity)) {
 		world.get_component<ParticleEmitter>(entity).trigger_oneshot();
@@ -99,7 +110,7 @@ void InteractableSystem::explosion(World &world, Interactable &interactable, Ent
 		smaller_radius = temp;
 	}
 	sphere.radius = larger_radius;
-	sphere.center = world.get_component<Transform>(interactable.interaction_target).get_global_position();
+	sphere.center = world.get_component<Transform>(interactable.interaction_targets[0]).get_global_position();
 	auto colliders = PhysicsManager::get().overlap_sphere(world, sphere, "default");
 	for (Entity entity : colliders) {
 		if (world.has_component<EnemyData>(entity)) {
@@ -127,7 +138,7 @@ void InteractableSystem::explosion(World &world, Interactable &interactable, Ent
 	}
 }
 
-void InteractableSystem::switch_light(World &world, Interactable &interactable, Entity entity) {
-	auto &light = world.get_component<Light>(interactable.interaction_target);
+void InteractableSystem::switch_light(World &world, Interactable &interactable, int light_index, Entity entity) {
+	auto &light = world.get_component<Light>(interactable.interaction_targets[light_index]);
 	light.is_on = !light.is_on;
 }
