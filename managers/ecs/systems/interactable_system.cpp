@@ -60,7 +60,19 @@ void InteractableSystem::update(World &world, float dt) {
 						if (!platform.is_moving) {
 							platform.is_moving = true;
 						}
-						SPDLOG_INFO("{}", "Hacker platform triggered");
+						//SPDLOG_INFO("{}", "Hacker platform triggered");
+					}
+
+					if(interactable.cable_parent > 0) {
+						auto &cable = world.get_component<CableParent>(interactable.cable_parent);
+						// switch to the other state
+						if (cable.state == CableState::ON) {
+							SPDLOG_INFO("changing cable state to off");
+							cable.state = CableState::OFF;
+						} else {
+							SPDLOG_INFO("changing cable state to on");
+							cable.state = CableState::ON;
+						}
 					}
 
 					break;
@@ -145,4 +157,8 @@ void InteractableSystem::explosion(World &world, Interactable &interactable, Ent
 void InteractableSystem::switch_light(World &world, Interactable &interactable, int light_index, Entity entity) {
 	auto &light = world.get_component<Light>(interactable.interaction_targets[light_index]);
 	light.is_on = !light.is_on;
+	if(interactable.cable_parent != 0) {
+		auto &cable = world.get_component<CableParent>(interactable.cable_parent);
+		cable.state = light.is_on ? CableState::ON : CableState::OFF;
+	}
 }
