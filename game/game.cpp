@@ -11,7 +11,6 @@
 #include "render/render_manager.h"
 #include "render/transparent_elements/ui_manager.h"
 
-
 #include "physics/physics_manager.h"
 
 AutoCVarInt cvar_controlling_agent("game.controlling_agent", "Controlling agent", 1, CVarFlags::EditCheckbox);
@@ -341,7 +340,7 @@ void handle_camera(DebugCamera &cam, float dt) {
 void Game::startup() {
 	Engine::startup();
 
-	RenderManager::get().editor_mode = true;
+	RenderManager::get().editor_mode = false;
 
 	AdaptiveMusicManager::get().play();
 	GameplayManager::get().enable();

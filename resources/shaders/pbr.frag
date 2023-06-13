@@ -108,6 +108,8 @@ void main()
 
     // vec3 color = ambient + Lo;
 
-    Diffuse = vec4(kD * irradiance, 0.0);
-    Specular = vec4(specular, 0.0);
+    float multiplier = 0.1;
+
+    Diffuse = vec4(kD * irradiance, 0.0) * multiplier;
+    Specular = vec4(specular, 0.0) * multiplier;
 }

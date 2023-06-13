@@ -1034,14 +1034,70 @@ void Inspector::show_interactable() {
 
 		ImGui::TableNextRow();
 		ImGui::TableSetColumnIndex(0);
-		ImGui::Text("Interaction target");
+		ImGui::Text("Interaction target 1");
 		ImGui::TableSetColumnIndex(1);
-		ImGui::Text("%s", fmt::format("{}", interactable.interaction_target).c_str());
+		ImGui::Text("%s", fmt::format("{}", interactable.interaction_targets[0]).c_str());
 
 		if (ImGui::BeginDragDropTarget()) {
 			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
 				Entity payload_entity = *(Entity *)payload->Data;
-				interactable.interaction_target = payload_entity;
+				interactable.interaction_targets[0] = payload_entity;
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Interaction target 2");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::Text("%s", fmt::format("{}", interactable.interaction_targets[1]).c_str());
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
+				Entity payload_entity = *(Entity *)payload->Data;
+				interactable.interaction_targets[1] = payload_entity;
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Interaction target 3");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::Text("%s", fmt::format("{}", interactable.interaction_targets[2]).c_str());
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
+				Entity payload_entity = *(Entity *)payload->Data;
+				interactable.interaction_targets[2] = payload_entity;
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Interaction target 4");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::Text("%s", fmt::format("{}", interactable.interaction_targets[3]).c_str());
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
+				Entity payload_entity = *(Entity *)payload->Data;
+				interactable.interaction_targets[3] = payload_entity;
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Interaction target 5");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::Text("%s", fmt::format("{}", interactable.interaction_targets[4]).c_str());
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
+				Entity payload_entity = *(Entity *)payload->Data;
+				interactable.interaction_targets[4] = payload_entity;
 			}
 			ImGui::EndDragDropTarget();
 		}
@@ -1071,6 +1127,8 @@ void Inspector::show_platform() {
 		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
 
 		bool changed = false;
+
+		show_checkbox("Is door", platform.is_door);
 
 		changed |= show_vec3("Starting position", platform.starting_position);
 		changed |= show_vec3("Ending position", platform.ending_position);

@@ -72,7 +72,7 @@ void AOBlurPass::draw(RenderScene &scene) {
 void SkyboxPass::startup() {
 	material.startup();
 	skybox.startup();
-	skybox.load_from_directory(asset_path("cubemaps/venice_sunset"));
+	skybox.load_from_directory(asset_path("cubemaps/night_dark"));
 }
 
 void SkyboxPass::draw(RenderScene &scene) {
@@ -349,6 +349,7 @@ void ShadowPass::startup() {
 }
 
 void ShadowPass::draw(RenderScene &scene) {
+	ZoneScopedN("ShadowPass::draw");
 	ResourceManager &resource_manager = ResourceManager::get();
 
 	material.bind_skinned_resources(scene);
@@ -557,15 +558,9 @@ void ParticlePass::draw(RenderScene &scene, bool right_camera) {
 				ssbo_data[i].colors[j] = particle.color;
 
 				if (particle_pair_data.second.is_billboard) {
-					glm::vec3 new_right = glm::normalize (
-								glm::cross (
-									glm::normalize (
-											scene.camera_pos - entity_pos
-									),
-									glm::vec3(0,1,0)
-								)
-							);
-					glm::vec3 new_up = glm::vec3(0,1,0);
+					glm::vec3 new_right = glm::normalize(
+							glm::cross(glm::normalize(scene.camera_pos - entity_pos), glm::vec3(0, 1, 0)));
+					glm::vec3 new_up = glm::vec3(0, 1, 0);
 
 					ssbo_data[i].right[j] = glm::vec4(new_right, 0.0f);
 					ssbo_data[i].up[j] = glm::vec4(new_up, 0.0f);
@@ -573,7 +568,8 @@ void ParticlePass::draw(RenderScene &scene, bool right_camera) {
 					if (glm::length(particle.velocity_begin + particle.velocity_end) > 0.1f) {
 						glm::vec3 direction = glm::normalize(particle.velocity_begin + particle.velocity_end);
 						// calculate right and up to match the velocity direction calculated above
-						glm::vec3 right =  glm::vec4(particle_pair_data.second.non_billboard_right, 1.0f);//glm::normalize(glm::cross(direction, glm::vec3(0.0f, 1.0f, 0.0f)));
+						glm::vec3 right = glm::vec4(particle_pair_data.second.non_billboard_right,
+								1.0f); //glm::normalize(glm::cross(direction, glm::vec3(0.0f, 1.0f, 0.0f)));
 						glm::vec3 up = direction;
 						ssbo_data[i].right[j] = glm::vec4(right, 1.0f);
 						ssbo_data[i].up[j] = glm::vec4(up, 1.0f);
@@ -612,7 +608,7 @@ void ParticlePass::draw(RenderScene &scene, bool right_camera) {
 			vertices[2] = pm.default_particle_vertices[2];
 			vertices[3] = pm.default_particle_vertices[3];
 
-			float tex_ratio = (float) tex.width / (float) tex.height;
+			float tex_ratio = (float)tex.width / (float)tex.height;
 
 			vertices[0].position.x *= tex_ratio;
 			vertices[1].position.x *= tex_ratio;
@@ -642,8 +638,8 @@ void ParticlePass::draw(RenderScene &scene, bool right_camera) {
 		material.shader.set_vec3("entity_center", entity_pos);
 		material.shader.set_int("billboard", particle_pair_data.second.is_billboard);
 
-//		material.shader.set_vec3("non_billboard_right", particle_pair_data.second.non_billboard_right);
-//		material.shader.set_vec3("non_billboard_up", particle_pair_data.second.non_billboard_up);
+		//		material.shader.set_vec3("non_billboard_right", particle_pair_data.second.non_billboard_right);
+		//		material.shader.set_vec3("non_billboard_up", particle_pair_data.second.non_billboard_up);
 
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
 		glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeof(ssbo_data[i]), &ssbo_data[i]);

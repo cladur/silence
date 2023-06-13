@@ -3,6 +3,7 @@
 #include "components/hacker_data_component.h"
 #include "ecs/world.h"
 #include "input/input_manager.h"
+#include "managers/physics/ecs/collision_system.h"
 #include "physics/physics_manager.h"
 
 AutoCVarFloat cvar_hacker_acc_ground("hacker.acc_ground", "acceleration on ground ", 0.4f, CVarFlags::EditCheckbox);
@@ -113,11 +114,43 @@ void HackerMovementSystem::update(World &world, float dt) {
 			model_tf.add_global_euler_rot(axis * angle);
 		}
 
-		last_position = transform.position;
+		Ray ray{};
+		ray.origin = transform.get_global_position() + glm::vec3(0.0f, 1.0f, 0.0f);
+		ray.ignore_list.emplace_back(entity);
+		ray.layer_name = "default";
+		ray.direction = -transform.get_up();
+		glm::vec3 end = ray.origin + ray.direction;
+		HitInfo info;
+		if (CollisionSystem::ray_cast_layer(world, ray, info)) {
+			auto cvar_system = CVarSystem::get();
+			// If the agent(hacker) is not on the ground, move him down
+			// If the agent(hacker) is on 40 degree slope or more, move him down
+			bool is_on_too_steep_slope = glm::dot(info.normal, glm::vec3(0.0f, 1.0f, 0.0f)) <
+					glm::cos(glm::radians(*cvar_system->get_float_cvar("slope.too_steep")));
+
+			bool under_floor = info.distance < 1.0f;
+			bool in_snappable_range = info.distance < 1.0f + *cvar_system->get_float_cvar("slope.max_snap_length");
+
+			// If the agent is close enough to the floor, snap him to it
+			if (in_snappable_range || under_floor) {
+				transform.position.y = info.point.y + *cvar_system->get_float_cvar("slope.snap_offset");
+				transform.set_changed(true);
+			} else if (is_on_too_steep_slope || info.distance > 1.01f) {
+				transform.position.y -= 8.0f * dt;
+				transform.set_changed(true);
+			}
+			if (world.has_component<Platform>(info.entity)) {
+				auto &platform = world.get_component<Platform>(info.entity);
+				if (platform.is_moving) {
+					transform.add_position(platform.change_vector);
+				}
+			}
+		}
 
 		if (glm::length(velocity) < 0.0001f) {
 			velocity = glm::vec3(0.0f);
 		}
+		last_position = transform.position;
 		previous_velocity = velocity;
 	}
 }
