@@ -21,7 +21,5 @@ thirdparty/fmod/api
 thirdparty/fmod/plugins
 
 # Asset files
-*.tx
-*.mesh
 resources/assets_tmp
 *.blend1
