@@ -249,6 +249,7 @@ void HackerSystem::update(World &world, float dt) {
 
 		// ZOOMING LOGIC
 		if (input_manager.is_action_pressed("hacker_zoom_camera")) {
+			ui_text->text = "";
 			is_zooming = true;
 			camera.fov = glm::mix(camera.fov, 30.0f, dt * 3.0f);
 			camera_sens_modifier = glm::mix(camera_sens_modifier, 0.3f, dt * 3.0f);
