@@ -26,6 +26,7 @@ private:
 
 	std::string ui_name;
 	UIText *ui_text;
+	UIText *main_text;
 
 	bool is_on_camera = false;
 	Entity current_camera_entity = 0;
