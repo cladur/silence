@@ -28,10 +28,10 @@ AutoCVarFloat cvar_hacker_camera_max_rotation_y(
 		"hacker.hacker_camera_max_rotation_y", "camera max rotation Y in degrees", 30.0f, CVarFlags::EditCheckbox);
 
 AutoCVarFloat cvar_hacker_max_rotation_x(
-		"hacker.hacker_max_rotation_x", "max rotation X in degrees", 70.0f, CVarFlags::EditCheckbox);
+		"hacker.hacker_max_rotation_x", "max rotation X in degrees", 25.0f, CVarFlags::EditCheckbox);
 
 AutoCVarFloat cvar_hacker_min_rotation_x(
-		"hacker.hacker_min_rotation_x", "min rotation X in degrees", -25.0f, CVarFlags::EditCheckbox);
+		"hacker.hacker_min_rotation_x", "min rotation X in degrees", -55.0f, CVarFlags::EditCheckbox);
 
 AutoCVarInt cvar_hacker_on_keyboard(
 		"settings.hacker_on_keyboard", "Control hacker with keyboard + mouse", 0, CVarFlags::EditCheckbox);
@@ -289,17 +289,47 @@ void HackerSystem::update(World &world, float dt) {
 
 		mouse_delta *= camera_sens_modifier;
 		float camera_sensitivity = cvar_hacker_camera_sensitivity.get();
+
 		if (!is_on_camera) {
-			current_rotation_x_camera_pivot += mouse_delta.y * camera_sensitivity * dt;
+			auto starting_rotation_x_camera_pivot = current_rotation_x_camera_pivot;
 			float max_rotation_x = cvar_hacker_max_rotation_x.get() * 0.017f;
 			float min_rotation_x = cvar_hacker_min_rotation_x.get() * 0.017f;
 
-			if (current_rotation_x_camera_pivot < max_rotation_x && current_rotation_x_camera_pivot > min_rotation_x) {
+			current_rotation_x_camera_pivot -= mouse_delta.y * camera_sensitivity * dt;
+
+			if (current_rotation_x_camera_pivot < max_rotation_x && current_rotation_x_camera_pivot > min_rotation_x &&
+					current_rotation_x_camera == 0.0f) {
 				camera_pivot_tf.add_euler_rot(glm::vec3(mouse_delta.y, 0.0f, 0.0f) * camera_sensitivity * dt);
 				camera_tf.set_orientation(scorpion_camera_tf.get_global_orientation());
-			} else {
-				camera_tf.add_euler_rot(glm::vec3(-mouse_delta.y, 0.0f, 0.0f) * camera_sensitivity * dt);
+				current_rotation_x_camera_pivot =
+						glm::clamp(current_rotation_x_camera_pivot, min_rotation_x, max_rotation_x);
+			} else if (current_rotation_x_camera_pivot > 0.0f) {
+				current_rotation_x_camera_pivot += mouse_delta.y * camera_sensitivity * dt;
+				auto starting_rotation = current_rotation_x_camera;
+				current_rotation_x_camera -= mouse_delta.y * camera_sensitivity * dt;
+				float max_rotation_x_camera = max_rotation_x * 2.0f;
+				float min_rotation_x_camera = 0.0f;
+
+				if (current_rotation_x_camera < max_rotation_x_camera) {
+					camera_tf.add_euler_rot(glm::vec3(-mouse_delta.y, 0.0f, 0.0f) * camera_sensitivity * dt);
+				} else {
+					current_rotation_x_camera = max_rotation_x_camera;
+					auto difference = starting_rotation - current_rotation_x_camera;
+					camera_tf.add_euler_rot(glm::vec3(-difference, 0.0f, 0.0f) * camera_sensitivity * dt);
+				}
+
 				camera_tf.add_global_euler_rot(glm::vec3(0.0f, -mouse_delta.x, 0.0f) * camera_sensitivity * dt);
+
+				if (starting_rotation * current_rotation_x_camera < 0.0f || abs(current_rotation_x_camera) < 0.01f) {
+					current_rotation_x_camera = 0.0f;
+				}
+			} else if (current_rotation_x_camera_pivot < 0.0f) {
+				if (current_rotation_x_camera_pivot < min_rotation_x) {
+					current_rotation_x_camera_pivot = min_rotation_x;
+					auto difference = starting_rotation_x_camera_pivot - current_rotation_x_camera_pivot;
+					camera_pivot_tf.add_euler_rot(glm::vec3(difference, 0.0f, 0.0f));
+					camera_tf.set_orientation(scorpion_camera_tf.get_global_orientation());
+				}
 			}
 
 			camera_pivot_tf.add_global_euler_rot(glm::vec3(0.0f, -mouse_delta.x, 0.0f) * camera_sensitivity * dt);
