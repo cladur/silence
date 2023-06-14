@@ -80,8 +80,7 @@ void InteractableSystem::update(World &world, float dt) {
 				case Exploding: {
 					SPDLOG_INFO("Explosion triggered");
 					explosion(world, interactable, entity);
-					//TODO: uncomment when explosion is no longer being tested
-					//interactable.can_interact = false;
+					interactable.can_interact = false;
 					break;
 				}
 				case LightSwitch: {

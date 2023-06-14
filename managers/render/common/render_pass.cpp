@@ -16,7 +16,12 @@ AutoCVarFloat cvar_gamma("render.gamma", "gamma", 1.85f, CVarFlags::EditFloatDra
 AutoCVarFloat cvar_dirt_strength("render.dirt_strength", "dirt strength", 0.075f, CVarFlags::EditFloatDrag);
 
 AutoCVarFloat cvar_smooth(
-		"render.particle_smooth", "particle smooth measured in 1/100th of a unit", 0.005f, CVarFlags::EditFloatDrag);
+		"render.particle_smooth", "particle smooth measured in 1/100th of a unit", 0.003f, CVarFlags::EditFloatDrag);
+AutoCVarFloat cvar_particle_distance_compensation(
+		"render.particle_distance_compensation", "particle distance compensation", 0.05f, CVarFlags::EditFloatDrag);
+
+AutoCVarFloat cvar_max_distance_compensation(
+		"render.max_distance_compensation", "max distance compensation", 3.0f, CVarFlags::EditFloatDrag);
 
 void PBRPass::startup() {
 	material.startup();
@@ -551,9 +556,19 @@ void ParticlePass::draw(RenderScene &scene, bool right_camera) {
 		j = 0;
 		for (auto &particle : particle_pair_data.first) {
 			if (particle.active) {
+
+				float distance_to_camera = 1.0f + glm::distance(cam_pos, particle.position);
+				float distance_compensation = distance_to_camera * cvar_particle_distance_compensation.get();
+				if (distance_compensation > cvar_max_distance_compensation.get()) {
+					distance_compensation = cvar_max_distance_compensation.get();
+				}
+				if (distance_compensation < 1.0f) {
+					distance_compensation = 1.0f;
+				}
+
 				glm::mat4 rot = glm::mat4(1.0f);
 				rot = glm::rotate(rot, glm::radians(particle.rotation), glm::vec3(0.0f, 0.0f, 1.0f));
-				ssbo_data[i].position[j] = glm::vec4(particle.position, particle.size);
+				ssbo_data[i].position[j] = glm::vec4(particle.position, particle.size * distance_compensation);
 				ssbo_data[i].rotation[j] = rot;
 				ssbo_data[i].colors[j] = particle.color;
 

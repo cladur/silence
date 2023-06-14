@@ -87,8 +87,9 @@ struct ParticleData {
 		size_transition_type = p.size_transition;
 		lifetime = p.lifetime;
 		life_left = p.lifetime;
-		rotation_begin = p.rotation_begin;
-		rotation_end = p.rotation_end;
+		float begin_rotation = rand() % 1000 / 1000.0f * p.rotation_variance;
+		rotation_begin = p.rotation_begin + begin_rotation;
+		rotation_end = p.rotation_end + begin_rotation;
 		rotation_transition_type = p.rotation_transition;
 		this->active = true;
 	}

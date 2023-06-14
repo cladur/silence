@@ -1461,6 +1461,7 @@ void Inspector::show_particle_emitter() {
 		ImGui::TableSetColumnIndex(0);
 		show_float("Start Rotation", ps.rotation_begin);
 		show_float("End Rotation", ps.rotation_end);
+		show_float("Rotation Variance", ps.rotation_variance);
 		ImGui::TableNextRow();
 		ImGui::TableSetColumnIndex(0);
 		ImGui::Text("Rotation Transition");
