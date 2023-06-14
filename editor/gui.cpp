@@ -113,11 +113,10 @@ void Editor::imgui_menu_bar() {
 						EditorScene &active_scene = get_active_scene();
 						bool is_prefab = active_scene.type == SceneType::Prefab;
 						if (!is_prefab) {
-							nlohmann::json entity_json;
+							nlohmann::json prefab_json;
 							std::ifstream file(out_path);
-							file >> entity_json;
-							entity_json.back()["entity"] = 0;
-							active_scene.world.deserialize_entity_json(entity_json.back(), active_scene.entities);
+							file >> prefab_json;
+							active_scene.world.deserialize_prefab(prefab_json, active_scene.entities);
 							file.close();
 						} else {
 							SPDLOG_WARN("Can't load prototype into archetype scene");
@@ -281,8 +280,8 @@ void Editor::imgui_scene(EditorScene &scene) {
 	ImGui::SetCursorPos(cursor_pos);
 
 	// ADD ENTITY BUTTON
-	bool add_entity_button = !(scene.type == SceneType::Prefab) || scene.entities.empty();
-	if (add_entity_button && ImGui::Button(ICON_MD_ADD, ImVec2(20, 20))) {
+	//bool add_entity_button = !(scene.type == SceneType::Prefab) || scene.entities.empty();
+	if (ImGui::Button(ICON_MD_ADD, ImVec2(20, 20))) {
 		ImGui::OpenPopup("Add Entity");
 	}
 
@@ -427,11 +426,10 @@ void Editor::imgui_viewport(EditorScene &scene, uint32_t scene_index) {
 		if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_PREFAB_PATH")) {
 			const std::string payload_n = *(const std::string *)payload->Data;
 			if (scene.type == SceneType::GameScene) {
-				nlohmann::json serialized_prototype;
+				nlohmann::json prefab_json;
 				std::ifstream file(payload_n);
-				file >> serialized_prototype;
-				serialized_prototype.back()["entity"] = 0;
-				scene.world.deserialize_entity_json(serialized_prototype.back(), scene.entities);
+				file >> prefab_json;
+				scene.world.deserialize_prefab(prefab_json, scene.entities);
 				file.close();
 			} else {
 				SPDLOG_WARN("Can't add prefab to scene type other than GameScene");
@@ -713,7 +711,6 @@ void Editor::imgui_content_browser() {
 		if (ImGui::BeginDragDropSource()) {
 			if (extension == ".pfb") {
 				drag_and_drop_path = entry.path().string();
-				SPDLOG_INFO("{}", drag_and_drop_path);
 				// Set payload to carry the index of our item (could be anything)
 				ImGui::SetDragDropPayload("DND_PREFAB_PATH", &drag_and_drop_path, sizeof(std::string));
 
