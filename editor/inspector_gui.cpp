@@ -1033,6 +1033,16 @@ void Inspector::show_interactable() {
 			ImGui::EndCombo();
 		}
 
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Interaction Text");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		char text[256];
+		strcpy_s(text, interactable.interaction_text.c_str());
+		ImGui::InputText("##Interaction Text", text, 256);
+		interactable.interaction_text = text;
+
 		show_checkbox("Single use", interactable.single_use);
 
 		ImGui::TableNextRow();
@@ -1282,7 +1292,8 @@ void Inspector::show_fmod_emitter() {
 		ImGui::Text("Event Name");
 		ImGui::TableSetColumnIndex(1);
 		ImGui::SetNextItemWidth(-FLT_MIN);
-		static char event_name[256];
+		char event_name[256];
+		strcpy_s(event_name, emitter.event_path.c_str());
 		ImGui::InputText("##EventName", event_name, 256);
 
 		ImGui::TableNextRow();

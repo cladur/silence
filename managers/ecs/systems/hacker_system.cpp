@@ -36,6 +36,9 @@ AutoCVarFloat cvar_hacker_min_rotation_x(
 AutoCVarInt cvar_hacker_on_keyboard(
 		"settings.hacker_on_keyboard", "Control hacker with keyboard + mouse", 0, CVarFlags::EditCheckbox);
 
+AutoCVarFloat cvar_viewspace_offset(
+		"hacker.viewspace_offset", "offset from viewspace", 0.5f, CVarFlags::EditFloatDrag);
+
 bool HackerSystem::shoot_raycast(
 		Transform &transform, World &world, HackerData &hacker_data, float dt, bool trigger, glm::vec3 direction) {
 	Ray ray;
@@ -67,7 +70,16 @@ bool HackerSystem::shoot_raycast(
 	}
 
 	auto &interactable = world.get_component<Interactable>(hit_entity);
-	ui_text->text = "Press X to interact";
+	auto &hit_transform = world.get_component<Transform>(hit_entity);
+
+	glm::vec4 view_pos_non_normalized = world.get_parent_scene()->get_render_scene().view * glm::vec4(hit_transform.get_global_position(), 1.0f);
+	glm::vec2 render_extent = world.get_parent_scene()->get_render_scene().render_extent;
+	glm::vec3 view_pos = glm::vec3(view_pos_non_normalized) / view_pos_non_normalized.w;
+
+	std::cout << log10(1.0f + abs(view_pos.z)) << std::endl;
+	ui_text->position.x = 100.0f * (1.0f + log10(1.0f + abs(view_pos.z)) / 11.5f) + (0.75f * render_extent.x * view_pos.x / abs(view_pos.z));
+	ui_text->position.y = 50.0f * (1.0f + log10(1.0f + abs(view_pos.z)) / 11.5f) + (0.75f * render_extent.y * view_pos.y / abs(view_pos.z));
+	ui_text->text = interactable.interaction_text;
 
 	if (world.has_component<Highlight>(hit_entity)) {
 		auto &highlight = world.get_component<Highlight>(hit_entity);
@@ -184,7 +196,7 @@ void HackerSystem::startup(World &world) {
 	ui_text->text = "";
 	ui_text->is_screen_space = true;
 	ui_text->size = glm::vec2(0.5f);
-	ui_text->position = glm::vec3(150.0f, 3.0f, 0.0f);
+	ui_text->position = default_text_pos;
 	ui_text->centered_y = true;
 	ui.add_to_root(ui_name, "text", "root_anchor");
 }

@@ -8,13 +8,14 @@
 #include "ecs/world.h"
 #include "enemy_system.h"
 #include "engine/scene.h"
+#include "fmod_errors.h"
 #include "physics/ecs/physics_system.h"
 #include "physics/physics_manager.h"
 #include <audio/audio_manager.h>
+#include <render/transparent_elements/ui_manager.h>
 #include <spdlog/spdlog.h>
 #include <glm/fwd.hpp>
 #include <glm/geometric.hpp>
-#include "fmod_errors.h"
 
 #define FMOD_CHECK(x)                                                                                                  \
 	do {                                                                                                               \
