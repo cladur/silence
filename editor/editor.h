@@ -67,6 +67,7 @@ public:
 	void imgui_content_browser();
 	void imgui_settings();
 	void imgui_layers_settings();
+	void remove_entity_and_children(World &world, EditorScene &editor_scene, Entity entity);
 };
 
 #endif //SILENCE_EDITOR_H

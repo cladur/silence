@@ -28,6 +28,7 @@ struct DetectionCamera {
 		serialized_component["is_active"] = is_active;
 		serialized_component["particles_parent"] = particles_parent;
 		serialized_component["camera_light"] = camera_light;
+		serialized_component["camera_model"] = camera_light;
 
 		serialized_scene.back()["component_data"] = serialized_component;
 		serialized_scene.back()["component_name"] = "DetectionCamera";
@@ -56,6 +57,12 @@ struct DetectionCamera {
 			camera_light = serialized_component["camera_light"];
 		} else {
 			camera_light = 0;
+		}
+
+		if (serialized_component.contains("camera_model")) {
+			camera_model = serialized_component["camera_model"];
+		} else {
+			camera_model = 0;
 		}
 	}
 };

@@ -242,6 +242,10 @@ void Editor::display_entity(EditorScene &scene, Entity entity, const std::string
 			scene.entity_deletion_queue.push(entity);
 		}
 
+		if (ImGui::MenuItem("Remove Entity and Children")) {
+			remove_entity_recursive(entity);
+		}
+
 		ImGui::EndPopup();
 	}
 
@@ -264,6 +268,26 @@ void Editor::display_entity(EditorScene &scene, Entity entity, const std::string
 		}
 
 		ImGui::TreePop();
+	}
+}
+
+void Editor::remove_entity_and_children(World &world, EditorScene &editor_scene, Entity entity) {
+	std::vector<Entity> entities_to_delete;
+
+	entities_to_delete.push_back(entity);
+
+	while (!entities_to_delete.empty()) {
+		Entity current_entity = entities_to_delete.back();
+		entities_to_delete.pop_back();
+
+		if (world.has_component<Children>(current_entity)) {
+			auto children = world.get_component<Children>(current_entity);
+			for (int i = 0; i < children.children_count; i++) {
+				entities_to_delete.push_back(children.children[i]);
+			}
+		}
+
+		editor_scene.entity_deletion_queue.push(current_entity);
 	}
 }
 

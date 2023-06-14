@@ -2,21 +2,14 @@
     {
         "components": [
             {
+                "component_data": {},
+                "component_name": "StaticTag"
+            },
+            {
                 "component_data": {
                     "name": "DetectionCamera"
                 },
                 "component_name": "Name"
-            },
-            {
-                "component_data": {
-                    "children": [
-                        3,
-                        4,
-                        5
-                    ],
-                    "children_count": 3
-                },
-                "component_name": "Children"
             },
             {
                 "component_data": {
@@ -28,7 +21,7 @@
                     },
                     "position": {
                         "x": 0.0,
-                        "y": 8.785416603088379,
+                        "y": 0.0,
                         "z": 0.0
                     },
                     "scale": {
@@ -38,6 +31,50 @@
                     }
                 },
                 "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "children": [
+                        3,
+                        4,
+                        5,
+                        2,
+                        9
+                    ],
+                    "children_count": 5
+                },
+                "component_name": "Children"
+            },
+            {
+                "component_data": {
+                    "layer_name": "taggable"
+                },
+                "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {
+                    "camera_light": 0,
+                    "camera_model": 0,
+                    "detection_level": 0.0,
+                    "is_active": true,
+                    "particles_parent": 0
+                },
+                "component_name": "DetectionCamera"
+            },
+            {
+                "component_data": {
+                    "center": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "range": {
+                        "x": 0.30000001192092896,
+                        "y": 0.30000001192092896,
+                        "z": 0.30000001192092896
+                    }
+                },
+                "component_name": "ColliderAABB"
             },
             {
                 "component_data": {
@@ -56,16 +93,42 @@
             },
             {
                 "component_data": {
-                    "camera_light": 0,
-                    "detection_level": 0.0,
-                    "is_active": true,
-                    "particles_parent": 0
+                    "billboard_z_offset": -0.10000000149011612,
+                    "color": {
+                        "a": 0.7843137383460999,
+                        "b": 0.0,
+                        "g": 0.0,
+                        "r": 1.0
+                    },
+                    "position_offset": {
+                        "x": 0.0,
+                        "y": -0.15000000596046448,
+                        "z": 0.0
+                    },
+                    "scale": {
+                        "x": 0.20000000298023224,
+                        "y": 0.20000000298023224
+                    },
+                    "texture": "dot.ktx2",
+                    "use_camera_right": false
                 },
-                "component_name": "DetectionCamera"
+                "component_name": "Billboard"
+            },
+            {
+                "component_data": {
+                    "highlight_color": {
+                        "b": 0.0,
+                        "g": 0.43529412150382996,
+                        "r": 1.0
+                    },
+                    "highlighted": "twoja misja trwa",
+                    "target": 2
+                },
+                "component_name": "Highlight"
             }
         ],
         "entity": 1,
-        "signature": "0000000000000000000000000000000100000000000100000000000000010011"
+        "signature": "0000000000000000000000000000000101000010000100000010110000010011"
     },
     {
         "components": [
@@ -174,8 +237,8 @@
             {
                 "component_data": {
                     "orientation": {
-                        "w": 0.9848077893257141,
-                        "x": -0.1736481785774231,
+                        "w": 0.976296067237854,
+                        "x": -0.2164396345615387,
                         "y": 0.0,
                         "z": 0.0
                     },
@@ -210,5 +273,301 @@
         ],
         "entity": 5,
         "signature": "0000000000000000000000000000000000000000000000000000000000101011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "CameraParticles"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.6714163422584534,
+                        "x": 0.22344808280467987,
+                        "y": 0.6662590503692627,
+                        "z": 0.23530817031860352
+                    },
+                    "position": {
+                        "x": 0.0,
+                        "y": -0.06889906525611877,
+                        "z": 0.04494312405586243
+                    },
+                    "scale": {
+                        "x": 0.9999997019767761,
+                        "y": 0.9999960660934448,
+                        "z": 0.9999964833259583
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "parent": 1
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "children": [
+                        6,
+                        7
+                    ],
+                    "children_count": 2
+                },
+                "component_name": "Children"
+            }
+        ],
+        "entity": 2,
+        "signature": "0000000000000000000000000000000000000000000000000000000000011011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "FirstEmitter"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 1.0,
+                        "x": 2.2898349882893854e-16,
+                        "y": -1.5366822481155396e-08,
+                        "z": -1.4901161193847656e-08
+                    },
+                    "position": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "parent": 2
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "color_begin": [
+                        0.6470588445663452,
+                        0.21176470816135406,
+                        0.0,
+                        0.6509804129600525
+                    ],
+                    "color_end": [
+                        0.5960784554481506,
+                        0.14901961386203766,
+                        0.0,
+                        0.0
+                    ],
+                    "color_transition": 0,
+                    "is_billboard": false,
+                    "is_one_shot": false,
+                    "is_textured": true,
+                    "lifetime": 3.0,
+                    "one_shot_duration": 0.5,
+                    "position": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "position_variance": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "rate": 15.0,
+                    "rotation_begin": 0.0,
+                    "rotation_end": 0.0,
+                    "rotation_transition": 0,
+                    "size_begin": 3.0,
+                    "size_end": 6.0,
+                    "size_transition": 0,
+                    "texture_name": "glitch_ray_half.ktx2",
+                    "velocity_begin": [
+                        0.0,
+                        -0.5,
+                        0.0
+                    ],
+                    "velocity_end": [
+                        0.0,
+                        -0.20000000298023224,
+                        0.0
+                    ],
+                    "velocity_transition": 0,
+                    "velocity_variance": [
+                        0.5,
+                        0.0,
+                        0.5
+                    ]
+                },
+                "component_name": "ParticleEmitter"
+            }
+        ],
+        "entity": 6,
+        "signature": "0000000000000000000000000000000010000000000000000000000000001011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "SecondEmitter"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.7071068286895752,
+                        "x": 0.0,
+                        "y": 0.7071067690849304,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "parent": 2
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "color_begin": [
+                        0.6470588445663452,
+                        0.21176470816135406,
+                        0.0,
+                        0.6509804129600525
+                    ],
+                    "color_end": [
+                        0.5960784554481506,
+                        0.14901961386203766,
+                        0.0,
+                        0.0
+                    ],
+                    "color_transition": 0,
+                    "is_billboard": false,
+                    "is_one_shot": false,
+                    "is_textured": true,
+                    "lifetime": 3.0,
+                    "one_shot_duration": 0.5,
+                    "position": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "position_variance": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "rate": 15.0,
+                    "rotation_begin": 0.0,
+                    "rotation_end": 0.0,
+                    "rotation_transition": 0,
+                    "size_begin": 3.0,
+                    "size_end": 6.0,
+                    "size_transition": 0,
+                    "texture_name": "glitch_ray_half.ktx2",
+                    "velocity_begin": [
+                        0.0,
+                        -0.5,
+                        0.0
+                    ],
+                    "velocity_end": [
+                        0.0,
+                        -0.20000000298023224,
+                        0.0
+                    ],
+                    "velocity_transition": 0,
+                    "velocity_variance": [
+                        0.5,
+                        0.0,
+                        0.5
+                    ]
+                },
+                "component_name": "ParticleEmitter"
+            }
+        ],
+        "entity": 7,
+        "signature": "0000000000000000000000000000000010000000000000000000000000001011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "CameraLight"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.856878399848938,
+                        "x": -0.5154037475585938,
+                        "y": 0.008627037517726421,
+                        "z": 0.006629515439271927
+                    },
+                    "position": {
+                        "x": 0.005754217505455017,
+                        "y": -0.0688791275024414,
+                        "z": -0.24928322434425354
+                    },
+                    "scale": {
+                        "x": 0.9999897480010986,
+                        "y": 0.9999984502792358,
+                        "z": 0.9999988079071045
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "parent": 1
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "cast_shadow": true,
+                    "color": {
+                        "b": 0.0,
+                        "g": 0.21176470816135406,
+                        "r": 0.6470588445663452
+                    },
+                    "cutoff": 20.0,
+                    "intensity": 300.0,
+                    "is_on": true,
+                    "outer_cutoff": 10.0,
+                    "type": 2
+                },
+                "component_name": "Light"
+            }
+        ],
+        "entity": 9,
+        "signature": "0000000000000000000000000000000000000000000000010000000000001011"
     }
 ]
