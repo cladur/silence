@@ -75,24 +75,19 @@ bool HackerSystem::shoot_raycast(
 
 	ui_text->text = "Press X to interact";
 
-	if (trigger) {
-		auto &interactable = world.get_component<Interactable>(hit_entity);
+	auto &interactable = world.get_component<Interactable>(hit_entity);
+	if (!interactable.can_interact || !(interactable.type == InteractionType::Hacker)) {
+		ui_text->text = "";
+	}
 
-		if (!(interactable.type == InteractionType::Hacker)) {
-			SPDLOG_WARN("Entity {} is not a hacker interactable", hit_entity);
-			return false;
-		}
-
-		if (!interactable.can_interact) {
-			SPDLOG_WARN("Entity {} cannot be interacted with", hit_entity);
-			return false;
-		}
+	if (trigger && interactable.can_interact && (interactable.type == InteractionType::Hacker)) {
 
 		if (interactable.interaction == Interaction::HackerCameraJump) {
 			jump_to_camera(world, hacker_data, hit_entity);
 		}
 
 		interactable.triggered = true;
+		AudioManager::get().play_one_shot_2d(hacker_data.hack_sound);
 	}
 
 	return true;
@@ -112,6 +107,8 @@ bool HackerSystem::jump_to_camera(World &world, HackerData &hacker_data, Entity 
 	camera_billboard.color = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
 
 	new_camera_tf.set_orientation(detection_camera.starting_orientation);
+
+	AudioManager::get().play_one_shot_2d(hacker_data.hack_sound);
 
 	camera_tf.set_position(new_camera_tf.get_global_position() + -(new_camera_tf.get_forward()));
 	camera_tf.set_orientation(new_camera_tf.get_global_orientation());
@@ -135,6 +132,8 @@ void HackerSystem::go_back_to_scorpion(World &world, HackerData &hacker_data) {
 
 	detection_camera.is_active = true;
 	camera_billboard.color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+
+	AudioManager::get().play_one_shot_2d(hacker_data.hack_sound);
 
 	world.get_component<Transform>(current_camera_entity).set_orientation(starting_camera_orientation);
 	//starting_camera_orientation = glm::quat(1, 0, 0, 0);
