@@ -4,9 +4,11 @@
 #include "fmod_studio.hpp"
 struct DetectionCamera {
 	float detection_level = 0.0f;
+	float friendly_time_left = 0.0f;
 	DetectionTarget detection_target = DetectionTarget::NONE;
 	bool first_frame = true;
 	bool is_active = true;
+	bool is_detecting = false;
 	glm::quat starting_orientation{};
 
 	bool is_playing = false;
@@ -28,7 +30,7 @@ struct DetectionCamera {
 		serialized_component["is_active"] = is_active;
 		serialized_component["particles_parent"] = particles_parent;
 		serialized_component["camera_light"] = camera_light;
-		serialized_component["camera_model"] = camera_light;
+		serialized_component["camera_model"] = camera_model;
 
 		serialized_scene.back()["component_data"] = serialized_component;
 		serialized_scene.back()["component_name"] = "DetectionCamera";

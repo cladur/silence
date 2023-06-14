@@ -2,6 +2,7 @@
 #include "components/interactable_component.h"
 #include "components/light_component.h"
 #include "components/transform_component.h"
+#include "cvars/cvars.h"
 #include "ecs/world.h"
 #include "engine/scene.h"
 
@@ -42,7 +43,7 @@ bool HackerSystem::shoot_raycast(
 	ray.origin = transform.get_global_position();
 	ray.direction = direction;
 	ray.layer_name = "hacker";
-	ray.ignore_list.emplace_back(current_camera_model_entity);
+	ray.ignore_list.emplace_back(current_camera_entity);
 	glm::vec3 end = ray.origin + direction * 10.0f;
 	HitInfo info;
 	bool hit = CollisionSystem::ray_cast_layer(world, ray, info);
@@ -101,7 +102,6 @@ bool HackerSystem::shoot_raycast(
 bool HackerSystem::jump_to_camera(World &world, HackerData &hacker_data, Entity camera_entity) {
 	auto &detection_camera = world.get_component<DetectionCamera>(camera_entity);
 	auto camera_model_entity = detection_camera.camera_model;
-	auto &camera_billboard = world.get_component<Billboard>(camera_entity);
 	auto &camera_tf = world.get_component<Transform>(hacker_data.camera);
 	auto &new_camera_tf = world.get_component<Transform>(camera_model_entity);
 
@@ -110,7 +110,6 @@ bool HackerSystem::jump_to_camera(World &world, HackerData &hacker_data, Entity 
 	detection_camera.is_active = false;
 	detection_camera.detection_level = 0.0f;
 	detection_camera.detection_target = DetectionTarget::NONE;
-	camera_billboard.color = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
 
 	new_camera_tf.set_orientation(detection_camera.starting_orientation);
 
@@ -121,7 +120,7 @@ bool HackerSystem::jump_to_camera(World &world, HackerData &hacker_data, Entity 
 	hacker_data.is_on_camera = true;
 	current_camera_entity = camera_entity;
 	current_camera_model_entity = camera_model_entity;
-	starting_camera_orientation = world.get_component<Transform>(camera_entity).get_global_orientation();
+	starting_camera_orientation = world.get_component<Transform>(camera_model_entity).get_global_orientation();
 
 	return true;
 }
@@ -132,16 +131,12 @@ void HackerSystem::go_back_to_scorpion(World &world, HackerData &hacker_data) {
 	}
 
 	auto &detection_camera = world.get_component<DetectionCamera>(current_camera_entity);
-	auto &camera_billboard = world.get_component<Billboard>(current_camera_entity);
 	auto &camera_tf = world.get_component<Transform>(hacker_data.camera);
 
-	detection_camera.is_active = true;
-	camera_billboard.color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+	detection_camera.friendly_time_left = *CVarSystem::get()->get_float_cvar("enemy_camera.friendly_time");
+	world.get_component<Transform>(detection_camera.camera_model)
+			.set_orientation(detection_camera.starting_orientation);
 
-	world.get_component<Transform>(current_camera_model_entity).set_orientation(starting_camera_orientation);
-	//starting_camera_orientation = glm::quat(1, 0, 0, 0);
-	//current_rotation_x = 0.0f;
-	//current_rotation_y = 0.0f;
 	camera_tf.set_orientation(before_jump_orientation);
 	current_camera_entity = 0;
 	current_camera_model_entity = 0;

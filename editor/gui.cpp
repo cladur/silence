@@ -243,7 +243,7 @@ void Editor::display_entity(EditorScene &scene, Entity entity, const std::string
 		}
 
 		if (ImGui::MenuItem("Remove Entity and Children")) {
-			remove_entity_recursive(entity);
+			remove_entity_and_children(scene, entity);
 		}
 
 		ImGui::EndPopup();
@@ -271,7 +271,8 @@ void Editor::display_entity(EditorScene &scene, Entity entity, const std::string
 	}
 }
 
-void Editor::remove_entity_and_children(World &world, EditorScene &editor_scene, Entity entity) {
+void Editor::remove_entity_and_children(EditorScene &editor_scene, Entity entity) {
+	auto &world = editor_scene.world;
 	std::vector<Entity> entities_to_delete;
 
 	entities_to_delete.push_back(entity);
@@ -376,10 +377,10 @@ void Editor::imgui_scene(EditorScene &scene) {
 			World &world = scene.world;
 			std::ifstream file(prot_path);
 			if (file.is_open()) {
-				nlohmann::json prototype_json;
-				file >> prototype_json;
-				world.deserialize_entity_json(prototype_json, scene.entities);
-				SPDLOG_INFO("Added prototype");
+				nlohmann::json prefab_json;
+				file >> prefab_json;
+				world.deserialize_prefab(prefab_json, scene.entities);
+				file.close();
 			} else {
 				SPDLOG_ERROR("Failed to open {} prototype file", prot_path);
 			}
@@ -809,12 +810,10 @@ void Editor::imgui_content_browser() {
 						EditorScene &active_scene = get_active_scene();
 						bool is_prefab = active_scene.type == SceneType::Prefab;
 						if (!is_prefab) {
-							nlohmann::json entity_json;
+							nlohmann::json prefab_json;
 							std::ifstream file(entry.path());
-							file >> entity_json;
-							entity_json.back()["entity"] = 0;
-							SPDLOG_WARN(entity_json.dump(1));
-							active_scene.world.deserialize_entity_json(entity_json.back(), active_scene.entities);
+							file >> prefab_json;
+							active_scene.world.deserialize_prefab(prefab_json, active_scene.entities);
 							file.close();
 						} else {
 							SPDLOG_WARN("Can't load prototype into archetype scene");
