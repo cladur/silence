@@ -46,7 +46,7 @@ public:
 		if (serialized_component.contains("highlight_power")) {
 			highlight_power = serialized_component["highlight_power"];
 		} else {
-			highlight_power = 0.3f;
+			highlight_power = 0.03f;
 		}
 	}
 };
