@@ -143,7 +143,7 @@ void Scene::register_game_systems() {
 	//world.register_system<EnemyPathing>();
 	world.register_system<InteractableSystem>();
 	world.register_system<PlatformSystem>();
-	world.register_system<FMODEmitterSystem>();
+	world.register_system<FMODEmitterSystem>(UpdateOrder::PrePreAnimation);
 	world.register_system<HighlightSystem>(UpdateOrder::PrePreAnimation);
 	world.register_system<DetectionCameraSystem>();
 

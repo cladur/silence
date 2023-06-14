@@ -17,6 +17,8 @@ struct Interactable {
 	bool can_interact = true;
 	bool single_use = false;
 
+	bool first_frame = true;
+
 	void serialize_json(nlohmann::json &serialized_scene) {
 		nlohmann::json::object_t serialized_component;
 		serialized_scene.push_back(nlohmann::json::object());

@@ -14,6 +14,16 @@
 #include <spdlog/spdlog.h>
 #include <glm/fwd.hpp>
 #include <glm/geometric.hpp>
+#include "fmod_errors.h"
+
+#define FMOD_CHECK(x)                                                                                                  \
+	do {                                                                                                               \
+		FMOD_RESULT result = x;                                                                                        \
+		if (result != FMOD_OK) {                                                                                       \
+			SPDLOG_ERROR("Audio Manager: FMOD error! {} {}", result, FMOD_ErrorString(result));                        \
+			abort();                                                                                                   \
+		}                                                                                                              \
+	} while (false)
 
 void draw_explosion_radius(World &world, glm::vec3 centre, float radius, glm::vec3 color) {
 	auto &dd = world.get_parent_scene()->get_render_scene().debug_draw;
@@ -37,6 +47,16 @@ void InteractableSystem::update(World &world, float dt) {
 			auto center = world.get_component<Transform>(interactable.interaction_targets[0]).get_global_position();
 			draw_explosion_radius(world, center, box.explosion_radius, { 255, 0, 0 });
 			draw_explosion_radius(world, center, box.distraction_radius, { 255, 128, 0 });
+		}
+
+		if (interactable.first_frame) {
+			if (interactable.interaction == Interaction::Exploding) {
+				if (world.has_component<FMODEmitter>(entity)) {
+					auto &sound = world.get_component<FMODEmitter>(entity);
+					FMOD_CHECK(sound.event_instance->setParameterByName("buzz_volume", 0.1f));
+					FMOD_CHECK(sound.event_instance->setParameterByName("electricity_volume", 1.0f));
+				}
+			}
 		}
 
 		if (interactable.triggered) {
@@ -115,6 +135,12 @@ void InteractableSystem::explosion(World &world, Interactable &interactable, Ent
 	}
 
 	AudioManager::get().play_one_shot_3d(explostion_event, world.get_component<Transform>(entity));
+
+	if (world.has_component<FMODEmitter>(entity)) {
+		auto &sound = world.get_component<FMODEmitter>(entity);
+		sound.event_instance->setParameterByName("buzz_volume", 0.0f);
+		sound.event_instance->setParameterByName("electricity_volume", 0.0f);
+	}
 
 	ColliderSphere sphere;
 	float larger_radius = box.distraction_radius;
