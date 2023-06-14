@@ -13,9 +13,11 @@ class GameplayManager {
 	uint32_t enemies_near_player = 0;
 	std::vector<uint32_t> enemy_entities;
 	std::vector<float> detection_levels;
+
 public:
 	static GameplayManager &get();
 
+	bool first_start = true;
 	void startup(Scene *scene);
 	void shutdown();
 	void update(World &world, float dt);
@@ -35,7 +37,6 @@ public:
 	uint32_t get_hacker_camera(Scene *scene) const;
 	float get_highest_detection() const;
 	uint32_t get_enemies_near_player() const;
-
 };
 
 #endif //SILENCE_GAMEPLAY_MANAGER_H

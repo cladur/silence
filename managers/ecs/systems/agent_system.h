@@ -18,6 +18,7 @@ private:
 	UIText *ui_kill_text;
 
 public:
+	~AgentSystem();
 	void startup(World &world) override;
 	void update(World &world, float dt) override;
 };

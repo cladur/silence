@@ -89,28 +89,7 @@ Scene::Scene() {
 		world.register_component<CableParent>();
 	}
 	// Components
-
-	ZoneNamedNC(Zone3, "Scene::Scene()::Systems", tracy::Color::Orange, true);
-	{
-		// Systems
-		world.register_system<AnimationSystem>(UpdateOrder::DuringAnimation);
-
-		// Render stuff
-		world.register_system<RenderSystem>(UpdateOrder::PostPhysics);
-		world.register_system<SkinnedRenderSystem>(UpdateOrder::PostPhysics);
-		world.register_system<ColliderDrawSystem>(UpdateOrder::PostPhysics);
-		world.register_system<FrustumDrawSystem>(UpdateOrder::PostPhysics);
-		world.register_system<LightRenderSystem>(UpdateOrder::PostPhysics);
-		world.register_system<EnemyPathDraw>(UpdateOrder::PostPhysics);
-		world.register_system<BillboardSystem>(UpdateOrder::PostPhysics);
-		world.register_system<ParticleRenderSystem>(UpdateOrder::PostPhysics);
-
-		// Transform
-		world.register_system<IsolatedEntitiesSystem>(UpdateOrder::PrePreAnimation);
-		world.register_system<RootParentSystem>(UpdateOrder::PrePreAnimation);
-		world.register_system<AttachmentSystem>(UpdateOrder::PostAnimation);
-		world.register_system<CableSystem>();
-	}
+	{ register_main_systems(); }
 
 	auto &physics_manager = PhysicsManager::get();
 	physics_manager.add_collision_layer("default");
@@ -126,6 +105,26 @@ Scene::Scene() {
 	physics_manager.set_layers_no_collision("camera", "default");
 	physics_manager.set_layers_no_collision("camera", "hacker");
 	physics_manager.set_layers_no_collision("camera", "agent");
+}
+
+void Scene::register_main_systems() {
+	// Systems
+	world.register_system<AnimationSystem>(UpdateOrder::DuringAnimation);
+
+	// Render stuff
+	world.register_system<RenderSystem>(UpdateOrder::PostPhysics);
+	world.register_system<SkinnedRenderSystem>(UpdateOrder::PostPhysics);
+	world.register_system<ColliderDrawSystem>(UpdateOrder::PostPhysics);
+	world.register_system<FrustumDrawSystem>(UpdateOrder::PostPhysics);
+	world.register_system<LightRenderSystem>(UpdateOrder::PostPhysics);
+	world.register_system<EnemyPathDraw>(UpdateOrder::PostPhysics);
+	world.register_system<BillboardSystem>(UpdateOrder::PostPhysics);
+	world.register_system<ParticleRenderSystem>(UpdateOrder::PostPhysics);
+
+	// Transform
+	world.register_system<IsolatedEntitiesSystem>(UpdateOrder::PrePreAnimation);
+	world.register_system<RootParentSystem>(UpdateOrder::PrePreAnimation);
+	world.register_system<AttachmentSystem>(UpdateOrder::PostAnimation);
 }
 
 void Scene::register_game_systems() {

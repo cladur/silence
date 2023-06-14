@@ -1541,6 +1541,20 @@ void Inspector::show_detection_camera() {
 			ImGui::EndDragDropTarget();
 		}
 
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Camera Light");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::InputInt("", (int *)&data.camera_light, 0, 0);
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
+				Entity payload_entity = *(Entity *)payload->Data;
+				data.camera_light = payload_entity;
+			}
+			ImGui::EndDragDropTarget();
+		}
+
 		ImGui::EndTable();
 	}
 }

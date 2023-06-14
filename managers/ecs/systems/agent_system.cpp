@@ -45,45 +45,47 @@ void AgentSystem::startup(World &world) {
 
 	world.set_system_component_whitelist<AgentSystem>(whitelist);
 
-	ui_name = "agent_ui";
-
 	auto &rm = ResourceManager::get();
 	auto dot_tex = rm.load_texture(asset_path("dot.ktx2").c_str());
 
-	auto &ui = UIManager::get();
-	ui.create_ui_scene(ui_name);
-	ui.activate_ui_scene(ui_name);
+	if (GameplayManager::get().first_start) {
+		ui_name = "agent_ui";
 
-	// anchor at the center of hacker's half of screen
-	auto &root_anchor = ui.add_ui_anchor(ui_name, "root_anchor");
-	root_anchor.is_screen_space = true;
-	root_anchor.x = 0.25;
-	root_anchor.y = 0.5f;
-	root_anchor.display = true;
-	ui.add_as_root(ui_name, "root_anchor");
+		auto &ui = UIManager::get();
+		ui.create_ui_scene(ui_name);
+		ui.activate_ui_scene(ui_name);
 
-	auto &dot = ui.add_ui_image(ui_name, "dot");
-	dot.texture = dot_tex;
-	dot.size = glm::vec2(2.0f);
-	dot.color = glm::vec4(1.0f, 1.0f, 1.0f, 0.6f);
+		// anchor at the center of hacker's half of screen
+		auto &root_anchor = ui.add_ui_anchor(ui_name, "root_anchor");
+		root_anchor.is_screen_space = true;
+		root_anchor.x = 0.25;
+		root_anchor.y = 0.5f;
+		root_anchor.display = true;
+		ui.add_as_root(ui_name, "root_anchor");
 
-	ui.add_to_root(ui_name, "dot", "root_anchor");
+		auto &dot = ui.add_ui_image(ui_name, "dot");
+		dot.texture = dot_tex;
+		dot.size = glm::vec2(2.0f);
+		dot.color = glm::vec4(1.0f, 1.0f, 1.0f, 0.6f);
 
-	ui_interaction_text = &ui.add_ui_text(ui_name, "interaction_text");
-	ui_interaction_text->text = "";
-	ui_interaction_text->is_screen_space = true;
-	ui_interaction_text->size = glm::vec2(0.5f);
-	ui_interaction_text->position = glm::vec3(150.0f, 3.0f, 0.0f);
-	ui_interaction_text->centered_y = true;
-	ui.add_to_root(ui_name, "interaction_text", "root_anchor");
+		ui.add_to_root(ui_name, "dot", "root_anchor");
 
-	ui_kill_text = &ui.add_ui_text(ui_name, "kill_text");
-	ui_kill_text->text = "";
-	ui_kill_text->is_screen_space = true;
-	ui_kill_text->size = glm::vec2(0.5f);
-	ui_kill_text->position = glm::vec3(-150.0f, 3.0f, 0.0f);
-	ui_kill_text->centered_y = true;
-	ui.add_to_root(ui_name, "kill_text", "root_anchor");
+		ui_interaction_text = &ui.add_ui_text(ui_name, "interaction_text");
+		ui_interaction_text->text = "";
+		ui_interaction_text->is_screen_space = true;
+		ui_interaction_text->size = glm::vec2(0.5f);
+		ui_interaction_text->position = glm::vec3(150.0f, 3.0f, 0.0f);
+		ui_interaction_text->centered_y = true;
+		ui.add_to_root(ui_name, "interaction_text", "root_anchor");
+
+		ui_kill_text = &ui.add_ui_text(ui_name, "kill_text");
+		ui_kill_text->text = "";
+		ui_kill_text->is_screen_space = true;
+		ui_kill_text->size = glm::vec2(0.5f);
+		ui_kill_text->position = glm::vec3(-150.0f, 3.0f, 0.0f);
+		ui_kill_text->centered_y = true;
+		ui.add_to_root(ui_name, "kill_text", "root_anchor");
+	}
 }
 
 void AgentSystem::update(World &world, float dt) {
@@ -441,4 +443,8 @@ void AgentSystem::update(World &world, float dt) {
 
 		last_position = transform.position;
 	}
+}
+
+AgentSystem::~AgentSystem() {
+	UIManager::get().delete_ui_scene(ui_name);
 }

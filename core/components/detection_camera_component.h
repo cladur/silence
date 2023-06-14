@@ -15,6 +15,8 @@ struct DetectionCamera {
 	uint32_t particles_parent = 0;
 	bool previous_frame_tag_state = false;
 
+	Entity camera_light = 0;
+
 	DetectionCamera() = default;
 
 	void serialize_json(nlohmann::json &serialized_scene) {
@@ -24,6 +26,7 @@ struct DetectionCamera {
 		serialized_component["detection_level"] = detection_level;
 		serialized_component["is_active"] = is_active;
 		serialized_component["particles_parent"] = particles_parent;
+		serialized_component["camera_light"] = camera_light;
 
 		serialized_scene.back()["component_data"] = serialized_component;
 		serialized_scene.back()["component_name"] = "DetectionCamera";
@@ -46,6 +49,12 @@ struct DetectionCamera {
 			particles_parent = serialized_component["particles_parent"];
 		} else {
 			particles_parent = 0;
+		}
+
+		if (serialized_component.contains("camera_light")) {
+			camera_light = serialized_component["camera_light"];
+		} else {
+			camera_light = 0;
 		}
 	}
 };
