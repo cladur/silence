@@ -1348,6 +1348,9 @@ void Inspector::show_highlight() {
 		ImGui::TableSetColumnIndex(1);
 		ImGui::ColorEdit3("##Color", &highlighted.highlight_color[0]);
 
+		show_float("Power", highlighted.highlight_power);
+		highlighted.highlight_power = glm::clamp(highlighted.highlight_power, 0.0f, 1.0f);
+
 		ImGui::TableNextRow();
 		ImGui::TableSetColumnIndex(0);
 		ImGui::Text("Highlight Type");

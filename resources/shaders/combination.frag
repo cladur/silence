@@ -63,13 +63,14 @@ void main()
     color = mix(color, particles, particles.a);
 
     if (length(highlights.rgb) > 0.0) {
-        float highlight_power = clamp(((length(color.rgb) + 0.05) / 3.0), 0.0, 1.0);
-        if (highlights.a < 0.9) {
+        float highlight_power = 0.0;
+        if (highlights.a < 0.0) {
+            highlight_power = clamp(-highlights.a, 0.0, 1.0);
             if (depth.r + 0.8 > highlights_depth.r) {
                 highlight_power = 0.0;
             }
-            highlight_power *= 4.0; // highlight xray entities a bit more
-            clamp(highlight_power, 0.0, 1.0);
+        } else {
+            highlight_power = clamp(highlights.a, 0.0, 1.0);
         }
         color = mix(color, highlights, highlight_power);
     }
