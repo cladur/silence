@@ -1,7 +1,6 @@
 #include "gameplay_manager.h"
 #include <engine/scene.h>
 
-
 AutoCVarFloat cv_enemy_near_player_radius(
 		"gameplay.enemy_near_radius", "radius that checks for enemies near player", 15.0f, CVarFlags::EditCheckbox);
 
@@ -99,4 +98,20 @@ uint32_t GameplayManager::get_agent_camera(Scene *scene) const {
 
 uint32_t GameplayManager::get_hacker_camera(Scene *scene) const {
 	return scene->world.get_component<HackerData>(hacker_entity).camera;
+}
+
+void GameplayManager::set_agent_system(std::shared_ptr<AgentSystem> system) {
+	agent_system = system;
+}
+
+void GameplayManager::set_hacker_system(std::shared_ptr<HackerSystem> system) {
+	hacker_system = system;
+}
+
+std::shared_ptr<AgentSystem> GameplayManager::get_agent_system() {
+	return agent_system;
+}
+
+std::shared_ptr<HackerSystem> GameplayManager::get_hacker_system() {
+	return hacker_system;
 }

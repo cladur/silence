@@ -125,7 +125,7 @@ public:
 	}
 
 	// System methods
-	template <typename T> void register_system(UpdateOrder priority = UpdateOrder::PreAnimation) {
+	template <typename T> std::shared_ptr<T> register_system(UpdateOrder priority = UpdateOrder::PreAnimation) {
 		auto system = system_manager->register_system<T>();
 		system->startup(*this);
 
@@ -149,6 +149,7 @@ public:
 				post_physics_systems.emplace_back(system);
 				break;
 		}
+		return system;
 	}
 
 	void update(float dt) {

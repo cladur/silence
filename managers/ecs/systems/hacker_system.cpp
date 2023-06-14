@@ -332,3 +332,24 @@ void HackerSystem::update(World &world, float dt) {
 		}
 	}
 }
+
+void HackerSystem::reset() {
+	current_rotation_x = 0.0f;
+	current_rotation_y = 0.0f;
+
+	starting_camera_pivot_orientation = glm::quat();
+	starting_camera_orientation = glm::quat();
+	before_jump_orientation = glm::quat();
+
+	current_rotation_x_camera_pivot = 0.0f;
+	current_rotation_x_camera = 0.0f;
+
+	is_on_camera = false;
+	current_camera_entity = 0;
+
+	bool first_frame = true;
+	camera_sens_modifier = 1.0f;
+	is_zooming = false;
+
+	old_camera_pivot_tf = Transform();
+}
