@@ -670,6 +670,5 @@ void MaterialHighlight::bind_instance_resources(SkinnedModelInstance &instance, 
 
 void MaterialHighlight::bind_mesh_resources(SkinnedMesh &mesh, HighlightData &highlight_data) {
 	skinned_shader.set_int("is_highlighted", highlight_data.highlighted);
-	std::cout << glm::to_string(highlight_data.highlight_color) << ", " << highlight_data.highlight_power << std::endl;
 	skinned_shader.set_vec4("highlight_color", glm::vec4(highlight_data.highlight_color, highlight_data.highlight_power));
 }
