@@ -40,6 +40,7 @@ private:
 public:
 	void startup(World &world) override;
 	void update(World &world, float dt) override;
+	void reset();
 };
 
 #endif //SILENCE_HACKER_SYSTEM_H

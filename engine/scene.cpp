@@ -109,7 +109,7 @@ Scene::Scene() {
 
 void Scene::register_main_systems() {
 	// Systems
-	world.register_system<AnimationSystem>(UpdateOrder::DuringAnimation);
+	world.register_system<AnimationSystem>(UpdateOrder::PrePreAnimation);
 
 	// Render stuff
 	world.register_system<RenderSystem>(UpdateOrder::PostPhysics);
@@ -133,9 +133,9 @@ void Scene::register_game_systems() {
 	world.register_system<CollisionSystem>();
 
 	// Agents
-	world.register_system<AgentSystem>();
+	auto agent_system = world.register_system<AgentSystem>();
 	world.register_system<AgentMovementSystem>(UpdateOrder::DuringPhysics);
-	world.register_system<HackerSystem>();
+	auto hacker_system = world.register_system<HackerSystem>();
 	world.register_system<HackerMovementSystem>(UpdateOrder::DuringPhysics);
 	world.register_system<EnemySystem>(UpdateOrder::PostAnimation);
 	world.register_system<TaggableSystem>();
@@ -145,6 +145,9 @@ void Scene::register_game_systems() {
 	world.register_system<FMODEmitterSystem>();
 	world.register_system<HighlightSystem>(UpdateOrder::PrePreAnimation);
 	world.register_system<DetectionCameraSystem>();
+
+	GameplayManager::get().set_agent_system(agent_system);
+	GameplayManager::get().set_hacker_system(hacker_system);
 }
 
 void Scene::update(float dt) {
