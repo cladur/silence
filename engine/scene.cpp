@@ -125,6 +125,7 @@ void Scene::register_main_systems() {
 	world.register_system<IsolatedEntitiesSystem>(UpdateOrder::PrePreAnimation);
 	world.register_system<RootParentSystem>(UpdateOrder::PrePreAnimation);
 	world.register_system<AttachmentSystem>(UpdateOrder::PostAnimation);
+	world.register_system<CableSystem>(UpdateOrder::PreAnimation);
 }
 
 void Scene::register_game_systems() {

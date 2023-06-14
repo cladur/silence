@@ -20,10 +20,10 @@ void CableSystem::update(World &world, float dt) {
 		if (children.children_count > 0) {
 			for (auto &child : children.children) {
 				if (world.has_component<Highlight>(child)) {
-
 					auto &highlight = world.get_component<Highlight>(child);
+
 					highlight.highlighted = true;
-					highlight.highlight_color = cable.state == CableState::ON ? cable.on_color : cable.off_color;
+					highlight.highlight_color = (cable.state == CableState::ON) ? cable.on_color : cable.off_color;
 
 					if (cable.state == CableState::OFF && !cable.highlighted_on_off) {
 						highlight.highlighted = false;
