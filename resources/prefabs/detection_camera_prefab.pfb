@@ -9,16 +9,6 @@
             },
             {
                 "component_data": {
-                    "camera_light": 0,
-                    "camera_model": 0,
-                    "detection_level": 0.0,
-                    "is_active": true,
-                    "particles_parent": 0
-                },
-                "component_name": "DetectionCamera"
-            },
-            {
-                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": 0.0,
@@ -40,54 +30,16 @@
             },
             {
                 "component_data": {
-                    "children": [
-                        3,
-                        4,
-                        5
-                    ],
-                    "children_count": 3
-                },
-                "component_name": "Children"
-            },
-            {
-                "component_data": {
-                    "center": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
+                    "highlight_color": {
+                        "b": 0.0,
+                        "g": 0.43529412150382996,
+                        "r": 1.0
                     },
-                    "range": {
-                        "x": 0.30000001192092896,
-                        "y": 0.30000001192092896,
-                        "z": 0.30000001192092896
-                    }
+                    "highlight_power": 0.029999999329447746,
+                    "highlighted": "twoja misja trwa",
+                    "target": 2
                 },
-                "component_name": "ColliderAABB"
-            },
-            {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
-            {
-                "component_data": {
-                    "layer_name": "taggable"
-                },
-                "component_name": "ColliderTag"
-            },
-            {
-                "component_data": {
-                    "cable_parent": 0,
-                    "can_interact": true,
-                    "interaction": 1,
-                    "interaction_target": 0,
-                    "interaction_target_2": 0,
-                    "interaction_target_3": 0,
-                    "interaction_target_4": 0,
-                    "interaction_target_5": 0,
-                    "single_use": false,
-                    "type": 2
-                },
-                "component_name": "Interactable"
+                "component_name": "Highlight"
             },
             {
                 "component_data": {
@@ -114,22 +66,90 @@
             },
             {
                 "component_data": {
-                    "highlight_color": {
-                        "b": 0.0,
-                        "g": 0.43529412150382996,
-                        "r": 1.0
-                    },
-                    "highlighted": "twoja misja trwa",
-                    "target": 2
+                    "layer_name": "taggable"
                 },
-                "component_name": "Highlight"
+                "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {
+                    "children": [
+                        3,
+                        4,
+                        5
+                    ],
+                    "children_count": 3
+                },
+                "component_name": "Children"
+            },
+            {
+                "component_data": {},
+                "component_name": "StaticTag"
+            },
+            {
+                "component_data": {
+                    "center": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "range": {
+                        "x": 0.30000001192092896,
+                        "y": 0.30000001192092896,
+                        "z": 0.30000001192092896
+                    }
+                },
+                "component_name": "ColliderAABB"
+            },
+            {
+                "component_data": {
+                    "cable_parent": 0,
+                    "can_interact": true,
+                    "interaction": 1,
+                    "interaction_target": 0,
+                    "interaction_target_2": 0,
+                    "interaction_target_3": 0,
+                    "interaction_target_4": 0,
+                    "interaction_target_5": 0,
+                    "single_use": false,
+                    "type": 2
+                },
+                "component_name": "Interactable"
+            },
+            {
+                "component_data": {
+                    "tag_position": {
+                        "x": 0.0,
+                        "y": 1.0,
+                        "z": 0.0
+                    }
+                },
+                "component_name": "Taggable"
+            },
+            {
+                "component_data": {
+                    "camera_light": 0,
+                    "camera_model": 0,
+                    "detection_level": 0.0,
+                    "is_active": true,
+                    "particles_parent": 0
+                },
+                "component_name": "DetectionCamera"
             }
         ],
         "entity": 1,
-        "signature": "0000000000000000000000000000000101000010000100000010110000010011"
+        "signature": "0000000000000000000000000000000101010010000100000010110000010011"
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/camera/camera_2.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            },
             {
                 "component_data": {
                     "name": "CameraPart1"
@@ -162,15 +182,6 @@
                     "parent": 1
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "items/camera/camera_2.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
             }
         ],
         "entity": 3,
@@ -178,6 +189,15 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "in_shadow_pass": false,
+                    "material_type": 0,
+                    "model_name": "items/camera/camera_3.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            },
             {
                 "component_data": {
                     "name": "CameraPart2"
@@ -210,15 +230,6 @@
                     "parent": 1
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "in_shadow_pass": false,
-                    "material_type": 0,
-                    "model_name": "items/camera/camera_3.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
             }
         ],
         "entity": 4,
@@ -226,6 +237,15 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/camera/camera_1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            },
             {
                 "component_data": {
                     "name": "MainCameraPart"
@@ -267,15 +287,6 @@
                     "children_count": 1
                 },
                 "component_name": "Children"
-            },
-            {
-                "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "items/camera/camera_1.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
             }
         ],
         "entity": 5,
