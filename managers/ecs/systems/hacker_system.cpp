@@ -66,18 +66,20 @@ bool HackerSystem::shoot_raycast(
 		return false;
 	}
 
+	auto &interactable = world.get_component<Interactable>(hit_entity);
+	ui_text->text = "Press X to interact";
+
 	if (world.has_component<Highlight>(hit_entity)) {
 		auto &highlight = world.get_component<Highlight>(hit_entity);
 		highlight.highlighted = true;
+
+		if (!interactable.can_interact || !(interactable.type == InteractionType::Hacker)) {
+			ui_text->text = "";
+			highlight.highlighted = false;
+		}
+
 	} else {
 		SPDLOG_ERROR("Hacker raycast hit entity {} without highlight component", hit_entity);
-	}
-
-	ui_text->text = "Press X to interact";
-
-	auto &interactable = world.get_component<Interactable>(hit_entity);
-	if (!interactable.can_interact || !(interactable.type == InteractionType::Hacker)) {
-		ui_text->text = "";
 	}
 
 	if (trigger && interactable.can_interact && (interactable.type == InteractionType::Hacker)) {
