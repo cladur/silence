@@ -21,6 +21,8 @@ public:
 	~AgentSystem();
 	void startup(World &world) override;
 	void update(World &world, float dt) override;
+
+	void reset();
 };
 
 #endif //SILENCE_AGENT_SYSTEM_H

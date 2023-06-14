@@ -18,15 +18,10 @@ public:
 	template <typename T> std::shared_ptr<T> register_system() {
 		const char *type_name = typeid(T).name();
 
-		//assert(systems.find(type_name) == systems.end() && "Registering system more than once.");
+		assert(systems.find(type_name) == systems.end() && "Registering system more than once.");
 		auto system = std::make_shared<T>();
 
 		if (systems.find(type_name) == systems.end()) {
-			auto current_system = systems[type_name];
-			current_system.reset();
-			systems[type_name] = system;
-		} else {
-			// Create a pointer to the system and return it, so it can be used externally
 			systems.insert({ type_name, system });
 		}
 

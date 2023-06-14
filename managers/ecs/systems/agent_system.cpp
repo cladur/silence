@@ -448,3 +448,11 @@ void AgentSystem::update(World &world, float dt) {
 AgentSystem::~AgentSystem() {
 	UIManager::get().delete_ui_scene(ui_name);
 }
+
+void AgentSystem::reset() {
+	animation_timer = 0.0f;
+	current_rotation_y_camera_pivot = 0.0f;
+	first_frame = true;
+	camera_sens_modifier = 1.0f;
+	is_zooming = false;
+}
