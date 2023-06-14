@@ -185,13 +185,20 @@ void HackerSystem::startup(World &world) {
 	ui_text->centered_y = true;
 	ui.add_to_root(ui_name, "text", "root_anchor");
 
+	auto &main_anchor = ui.add_ui_anchor(ui_name, "main_anchor");
+	main_anchor.is_screen_space = true;
+	main_anchor.x = 0.5f;
+	main_anchor.y = 0.95f;
+	main_anchor.display = true;
+	ui.add_as_root(ui_name, "main_anchor");
+
 	main_text = &ui.add_ui_text(ui_name, "main_text");
 	main_text->text = "";
-	main_text->is_screen_space = true;
-	main_text->size = glm::vec2(0.5f);
-	main_text->position = glm::vec3(300.0f, -100.0f, 0.0f);
+	//main_text->is_screen_space = true;
+	main_text->size = glm::vec2(1.0f);
+	main_text->position = glm::vec3(0.0f, 0.0f, 0.0f);
 	main_text->centered_y = true;
-	ui.add_to_root(ui_name, "main_text", "root_anchor");
+	ui.add_to_root(ui_name, "main_text", "main_anchor");
 }
 
 void HackerSystem::update(World &world, float dt) {
@@ -243,11 +250,15 @@ void HackerSystem::update(World &world, float dt) {
 
 		static int counter = 0;
 		static bool text_set = false;
-		if (counter++ % 20 && !text_set) {
+		if (counter++ % 20) {
 			if (transform.position.z > 9.5f) {
-				main_text->text = "Twoja misja trwa...";
-				SPDLOG_CRITICAL("JES");
-				text_set = true;
+				if (!text_set) {
+					main_text->text = "Twoja misja trwa...";
+					text_set = true;
+					counter = 0;
+				} else if (counter > 300) {
+					main_text->text = "";
+				}
 			}
 		}
 
