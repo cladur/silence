@@ -1519,7 +1519,7 @@ void Inspector::show_particle_emitter() {
 }
 
 void Inspector::show_detection_camera() {
-	auto &data = world->get_component<DetectionCamera>(selected_entity);
+	auto &detection_camera = world->get_component<DetectionCamera>(selected_entity);
 	if (ImGui::CollapsingHeader("DetectionCamera", tree_flags)) {
 		remove_component_popup<DetectionCamera>();
 
@@ -1531,12 +1531,12 @@ void Inspector::show_detection_camera() {
 		ImGui::TableSetColumnIndex(0);
 		ImGui::Text("Particle Parent");
 		ImGui::TableSetColumnIndex(1);
-		ImGui::InputInt("", (int *)&data.particles_parent, 0, 0);
+		ImGui::InputInt("", (int *)&detection_camera.particles_parent, 0, 0);
 
 		if (ImGui::BeginDragDropTarget()) {
 			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
 				Entity payload_entity = *(Entity *)payload->Data;
-				data.particles_parent = payload_entity;
+				detection_camera.particles_parent = payload_entity;
 			}
 			ImGui::EndDragDropTarget();
 		}
@@ -1545,12 +1545,26 @@ void Inspector::show_detection_camera() {
 		ImGui::TableSetColumnIndex(0);
 		ImGui::Text("Camera Light");
 		ImGui::TableSetColumnIndex(1);
-		ImGui::InputInt("", (int *)&data.camera_light, 0, 0);
+		ImGui::InputInt("", (int *)&detection_camera.camera_light, 0, 0);
 
 		if (ImGui::BeginDragDropTarget()) {
 			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
 				Entity payload_entity = *(Entity *)payload->Data;
-				data.camera_light = payload_entity;
+				detection_camera.camera_light = payload_entity;
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Camera Model");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::InputInt("", (int *)&detection_camera.camera_model, 0, 0);
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
+				Entity payload_entity = *(Entity *)payload->Data;
+				detection_camera.camera_model = payload_entity;
 			}
 			ImGui::EndDragDropTarget();
 		}

@@ -12,10 +12,11 @@ struct DetectionCamera {
 	bool is_playing = false;
 	FMOD::Studio::EventInstance *detection_event = nullptr;
 
-	uint32_t particles_parent = 0;
 	bool previous_frame_tag_state = false;
 
+	Entity particles_parent = 0;
 	Entity camera_light = 0;
+	Entity camera_model = 0;
 
 	DetectionCamera() = default;
 

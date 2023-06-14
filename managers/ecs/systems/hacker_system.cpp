@@ -101,8 +101,9 @@ bool HackerSystem::shoot_raycast(
 bool HackerSystem::jump_to_camera(World &world, HackerData &hacker_data, Entity camera_entity) {
 	auto &detection_camera = world.get_component<DetectionCamera>(camera_entity);
 	auto &camera_billboard = world.get_component<Billboard>(camera_entity);
+	auto camera_model_entity = detection_camera.camera_model;
 	auto &camera_tf = world.get_component<Transform>(hacker_data.camera);
-	auto &new_camera_tf = world.get_component<Transform>(camera_entity);
+	auto &new_camera_tf = world.get_component<Transform>(camera_model_entity);
 
 	before_jump_orientation = camera_tf.get_global_orientation();
 
@@ -118,7 +119,7 @@ bool HackerSystem::jump_to_camera(World &world, HackerData &hacker_data, Entity 
 
 	is_on_camera = true;
 	hacker_data.is_on_camera = true;
-	current_camera_entity = camera_entity;
+	current_camera_entity = camera_model_entity;
 	starting_camera_orientation = world.get_component<Transform>(camera_entity).get_global_orientation();
 
 	return true;
@@ -290,6 +291,7 @@ void HackerSystem::update(World &world, float dt) {
 		mouse_delta *= camera_sens_modifier;
 		float camera_sensitivity = cvar_hacker_camera_sensitivity.get();
 
+		// CAMERA ROTATION LOGIC
 		if (!is_on_camera) {
 			auto starting_rotation_x_camera_pivot = current_rotation_x_camera_pivot;
 			float max_rotation_x = cvar_hacker_max_rotation_x.get() * 0.017f;
