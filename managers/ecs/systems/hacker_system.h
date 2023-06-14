@@ -29,6 +29,7 @@ private:
 
 	bool is_on_camera = false;
 	Entity current_camera_entity = 0;
+	Entity current_camera_model_entity = 0;
 
 	float default_fov;
 	bool first_frame = true;

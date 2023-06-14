@@ -297,17 +297,17 @@ void World::deserialize_prefab(nlohmann::json &json, std::vector<Entity> &entiti
 		prefab_id_to_entity_id_map[serialized_entity] = new_entity_id;
 	}
 
-	update_children(entity_ids[0], prefab_id_to_entity_id_map);
-
-	for (int i = 1; i < entity_ids.size() - 1; i++) {
-		update_parent(entity_ids[i], prefab_id_to_entity_id_map);
-		update_children(entity_ids[i], prefab_id_to_entity_id_map);
+	for (auto entity_id : entity_ids) {
+		update_parent(entity_id, prefab_id_to_entity_id_map);
+		update_children(entity_id, prefab_id_to_entity_id_map);
 	}
-
-	update_parent(entity_ids.back(), prefab_id_to_entity_id_map);
 }
 
 void World::update_children(Entity entity, const std::unordered_map<int, int> &id_map) {
+	if (!has_component<Children>(entity)) {
+		return;
+	}
+
 	auto &children = get_component<Children>(entity);
 	for (auto &child : children.children) {
 		if (child == 0) {
@@ -319,6 +319,10 @@ void World::update_children(Entity entity, const std::unordered_map<int, int> &i
 	SPDLOG_INFO("Children: {}", children.children[0]);
 }
 void World::update_parent(Entity entity, const std::unordered_map<int, int> &id_map) {
+	if (!has_component<Parent>(entity)) {
+		return;
+	}
+
 	auto &parent = get_component<Parent>(entity);
 	if (parent.parent != 0) {
 		Entity new_id = id_map.at(parent.parent);
