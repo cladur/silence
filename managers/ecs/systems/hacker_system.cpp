@@ -76,7 +76,6 @@ bool HackerSystem::shoot_raycast(
 	glm::vec2 render_extent = world.get_parent_scene()->get_render_scene().render_extent;
 	glm::vec3 view_pos = glm::vec3(view_pos_non_normalized) / view_pos_non_normalized.w;
 
-	std::cout << log10(1.0f + abs(view_pos.z)) << std::endl;
 	ui_text->position.x = 100.0f * (1.0f + log10(1.0f + abs(view_pos.z)) / 11.5f) + (0.75f * render_extent.x * view_pos.x / abs(view_pos.z));
 	ui_text->position.y = 50.0f * (1.0f + log10(1.0f + abs(view_pos.z)) / 11.5f) + (0.75f * render_extent.y * view_pos.y / abs(view_pos.z));
 	ui_text->text = interactable.interaction_text;
