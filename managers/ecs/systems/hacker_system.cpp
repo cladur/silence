@@ -402,9 +402,9 @@ void HackerSystem::update(World &world, float dt) {
 
 		// for the UI sake we need to shoot the raycast every time to know if we're even hovering over anything.
 		bool triggered = input_manager.is_action_just_pressed("hacker_interact");
-		if (!is_zooming) {
-			shoot_raycast(camera_tf, world, hacker_data, dt, triggered, real_camera_forward);
-		}
+		
+		shoot_raycast(camera_tf, world, hacker_data, dt, triggered, real_camera_forward);
+		
 	}
 }
 
