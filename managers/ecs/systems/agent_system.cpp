@@ -41,8 +41,6 @@ AutoCVarFloat cvar_agent_camera_height_lerp("agent.cam_height_lerp", "strength o
 
 AutoCVarFloat cvar_agent_camera_height_offset("agent.cam_height_offset", "offset of camera height", 0.25f);
 
-AutoCVarFloat dupa("dupa.dupa", "offset of camera height", 10.0f);
-
 void AgentSystem::startup(World &world) {
 	Signature blacklist;
 	Signature whitelist;
@@ -138,6 +136,10 @@ void AgentSystem::update(World &world, float dt) {
 			highlight.highlighted = true;
 		}
 
+		if (animation_timer >= cvar_agent_lock_time.get()) {
+			agent_data.locked_movement = false;
+		}
+
 		//TODO: replace hard coded values with one derived from collider
 		if (input_manager.is_action_just_pressed("agent_crouch")) {
 			if (!is_crouching) {
@@ -163,7 +165,7 @@ void AgentSystem::update(World &world, float dt) {
 
 		// Lerp agent towards target_orientation if he's interacting
 		if (is_interacting) {
-			model_tf.set_orientation(glm::slerp(model_tf.get_orientation(), target_orientation, dupa.get() * dt));
+			model_tf.set_orientation(glm::slerp(model_tf.get_orientation(), target_orientation, 10.0f * dt));
 		}
 
 		// Move camera pivot towards the target
