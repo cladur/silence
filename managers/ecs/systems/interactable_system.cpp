@@ -51,6 +51,8 @@ void InteractableSystem::update(World &world, float dt) {
 		}
 
 		if (interactable.first_frame) {
+			interactable.first_frame = false;
+
 			if (interactable.interaction == Interaction::Exploding) {
 				if (world.has_component<FMODEmitter>(entity)) {
 					auto &sound = world.get_component<FMODEmitter>(entity);
@@ -58,10 +60,37 @@ void InteractableSystem::update(World &world, float dt) {
 					FMOD_CHECK(sound.event_instance->setParameterByName("electricity_volume", 1.0f));
 				}
 			}
+
+			if (interactable.lever != 0) {
+				auto &lever_transform = world.get_component<Transform>(interactable.lever);
+				if (!interactable.is_on) {
+					lever_transform.add_euler_rot(glm::vec3(glm::radians(-170.0f), 0.0f, 0.0f));
+				} else {
+					lever_transform.add_euler_rot(glm::vec3(glm::radians(-10.0f), 0.0f, 0.0f));
+				}
+			}
+
+			if (interactable.cable_parent != 0) {
+				auto &cable = world.get_component<CableParent>(interactable.cable_parent);
+				cable.state = interactable.is_on ? CableState::ON : CableState::OFF;
+			}
+		}
+
+		if (interactable.is_rotating) {
+			float target_angle = interactable.is_on ? -10.0f : -170.0f;
+			auto &lever_transform = world.get_component<Transform>(interactable.lever);
+
+			interactable.is_rotating =
+					!lever_transform.lerp_rotation_towards(target_angle, glm::vec3(1.0f, 0.0f, 0.0f), dt);
 		}
 
 		if (interactable.triggered) {
 			interactable.triggered = false;
+
+			if (interactable.lever != 0) {
+				interactable.is_on = !interactable.is_on;
+				interactable.is_rotating = true;
+			}
 
 			switch (interactable.interaction) {
 				case Interaction::NoInteraction:
@@ -84,7 +113,7 @@ void InteractableSystem::update(World &world, float dt) {
 						//SPDLOG_INFO("{}", "Hacker platform triggered");
 					}
 
-					if(interactable.cable_parent > 0) {
+					if (interactable.cable_parent > 0) {
 						auto &cable = world.get_component<CableParent>(interactable.cable_parent);
 						// switch to the other state
 						if (cable.state == CableState::ON) {
@@ -181,7 +210,7 @@ void InteractableSystem::explosion(World &world, Interactable &interactable, Ent
 void InteractableSystem::switch_light(World &world, Interactable &interactable, int light_index, Entity entity) {
 	auto &light = world.get_component<Light>(interactable.interaction_targets[light_index]);
 	light.is_on = !light.is_on;
-	if(interactable.cable_parent != 0) {
+	if (interactable.cable_parent != 0) {
 		auto &cable = world.get_component<CableParent>(interactable.cable_parent);
 		cable.state = light.is_on ? CableState::ON : CableState::OFF;
 	}

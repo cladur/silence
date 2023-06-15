@@ -1143,6 +1143,22 @@ void Inspector::show_interactable() {
 			ImGui::EndDragDropTarget();
 		}
 
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Lever model");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::Text("%s", fmt::format("{}", interactable.lever).c_str());
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
+				Entity payload_entity = *(Entity *)payload->Data;
+				interactable.lever = payload_entity;
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+		show_checkbox("is_on", interactable.is_on);
+
 		ImGui::EndTable();
 	}
 }

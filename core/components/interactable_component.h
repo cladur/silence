@@ -10,14 +10,17 @@ struct Interactable {
 	Interaction interaction = NoInteraction;
 
 	std::array<Entity, 5> interaction_targets = {};
-
 	Entity cable_parent = 0;
+	Entity lever = 0;
 
 	bool triggered = false;
 	bool can_interact = true;
 	bool single_use = false;
 
-	std::string interaction_text = "";
+	bool is_on = false;
+	bool is_rotating = false;
+
+	std::string interaction_text;
 
 	bool first_frame = true;
 
@@ -33,11 +36,14 @@ struct Interactable {
 		serialized_component["interaction_target_3"] = interaction_targets[2];
 		serialized_component["interaction_target_4"] = interaction_targets[3];
 		serialized_component["interaction_target_5"] = interaction_targets[4];
+
 		serialized_component["single_use"] = single_use;
+		serialized_component["is_on"] = is_on;
 
 		serialized_component["interaction_text"] = interaction_text;
 
 		serialized_component["cable_parent"] = cable_parent;
+		serialized_component["lever"] = lever;
 
 		serialized_scene.back()["component_data"] = serialized_component;
 		serialized_scene.back()["component_name"] = "Interactable";
@@ -87,6 +93,18 @@ struct Interactable {
 			cable_parent = serialized_component["cable_parent"];
 		} else {
 			cable_parent = 0;
+		}
+
+		if (serialized_component.contains("lever")) {
+			lever = serialized_component["lever"];
+		} else {
+			lever = 0;
+		}
+
+		if (serialized_component.contains("is_on")) {
+			is_on = serialized_component["is_on"];
+		} else {
+			is_on = false;
 		}
 
 		if (serialized_component.contains("interaction_text")) {
