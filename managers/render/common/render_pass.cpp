@@ -18,10 +18,10 @@ AutoCVarFloat cvar_dirt_strength("render.dirt_strength", "dirt strength", 0.075f
 AutoCVarFloat cvar_smooth(
 		"render.particle_smooth", "particle smooth measured in 1/100th of a unit", 0.003f, CVarFlags::EditFloatDrag);
 AutoCVarFloat cvar_particle_distance_compensation(
-		"render.particle_distance_compensation", "particle distance compensation", 0.05f, CVarFlags::EditFloatDrag);
+		"render.particle_distance_compensation", "particle distance compensation", 0.07f, CVarFlags::EditFloatDrag);
 
 AutoCVarFloat cvar_max_distance_compensation(
-		"render.max_distance_compensation", "max distance compensation", 3.0f, CVarFlags::EditFloatDrag);
+		"render.max_distance_compensation", "max distance compensation", 2.3f, CVarFlags::EditFloatDrag);
 
 void PBRPass::startup() {
 	material.startup();

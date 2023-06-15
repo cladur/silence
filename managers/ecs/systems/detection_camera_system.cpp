@@ -29,17 +29,17 @@ AutoCVarFloat cvar_enemy_camera_detection_vertical_angle(
 
 #define FRIENDLY_COLOR glm::vec4(0.0f, 1.0f, 0.0f, 0.8f)
 
-#define IDLE_START_VELOCITY glm::vec3(0.0f, -0.6f, 0.0f)
-#define IDLE_END_VELOCITY glm::vec3(0.0f, -0.2f, 0.0f)
-#define IDLE_LIFETIME 3.0f
-#define IDLE_VELOCITY_VARIANCE glm::vec3(0.5f, 0.0f, 0.5f)
-#define IDLE_RATE 15.0f
+#define IDLE_VELOCITY glm::vec3(0.0f, -5.0f, 0.0f)
+#define TAGGED_VELOCITY glm::vec3(0.0f, -12.0f, 0.0f)
 
-#define DETECTING_START_VELOCITY glm::vec3(0.0f, -3.0f, 0.0f)
-#define DETECTING_END_VELOCITY glm::vec3(0.0f, -1.0f, 0.0f)
-#define DETECTING_LIFETIME 1.0f
-#define DETECTING_VELOCITY_VARIANCE glm::vec3(2.5f, 0.0f, 2.5f)
-#define DETECTING_RATE 45.0f
+#define IDLE_VELOCITY_VARIANCE glm::vec3(5.0f, 0.0f, 5.0f)
+#define TAGGED_VELOCITY_VARIANCE glm::vec3(9.0f, 0.0f, 9.0f)
+
+#define IDLE_LIFETIME 0.5f
+#define DETECTING_LIFETIME 5.0f
+
+#define IDLE_SIZE 4.5f
+#define TAGGED_SIZE 6.0f
 
 void DetectionCameraSystem::startup(World &world) {
 	Signature white_signature;
@@ -91,6 +91,61 @@ void DetectionCameraSystem::update(World &world, float dt) {
 			detection_camera.starting_orientation =
 					world.get_component<Transform>(detection_camera.camera_model).get_orientation();
 			detection_camera.detection_event = AudioManager::get().create_event_instance("SFX/camera_detecting");
+
+			// particles setup
+			particle_1->color_begin = IDLE_COLOR_BEGIN;
+			particle_1->color_end = IDLE_COLOR_END;
+			particle_1->velocity_begin = IDLE_VELOCITY;
+			particle_1->velocity_end = IDLE_VELOCITY;
+			particle_1->velocity_variance = IDLE_VELOCITY_VARIANCE;
+			particle_1->lifetime = IDLE_LIFETIME;
+			particle_1->size_begin = IDLE_SIZE;
+			particle_1->size_end = IDLE_SIZE;
+			particle_1->rate = 6.0f;
+
+			particle_2->color_begin = IDLE_COLOR_BEGIN;
+			particle_2->color_end = IDLE_COLOR_END;
+			particle_2->velocity_begin = IDLE_VELOCITY;
+			particle_2->velocity_end = IDLE_VELOCITY;
+			particle_2->velocity_variance = IDLE_VELOCITY_VARIANCE;
+			particle_2->lifetime = IDLE_LIFETIME;
+			particle_2->size_begin = IDLE_SIZE;
+			particle_2->size_end = IDLE_SIZE;
+			particle_2->rate = 6.0f;
+		}
+
+		if (tag.tagged) {
+			particle_1->velocity_begin = TAGGED_VELOCITY;
+			particle_1->velocity_end = TAGGED_VELOCITY;
+			particle_1->velocity_variance = TAGGED_VELOCITY_VARIANCE;
+			particle_1->lifetime = DETECTING_LIFETIME;
+			particle_1->size_begin = TAGGED_SIZE;
+			particle_1->size_end = TAGGED_SIZE;
+			particle_1->rate = 6.0f;
+
+			particle_2->velocity_begin = TAGGED_VELOCITY;
+			particle_2->velocity_end = TAGGED_VELOCITY;
+			particle_2->velocity_variance = TAGGED_VELOCITY_VARIANCE;
+			particle_2->lifetime = DETECTING_LIFETIME;
+			particle_2->size_begin = TAGGED_SIZE;
+			particle_2->size_end = TAGGED_SIZE;
+			particle_2->rate = 6.0f;
+		} else {
+			particle_1->velocity_begin = IDLE_VELOCITY;
+			particle_1->velocity_end = IDLE_VELOCITY;
+			particle_1->velocity_variance = IDLE_VELOCITY_VARIANCE;
+			particle_1->lifetime = IDLE_LIFETIME;
+			particle_1->size_begin = IDLE_SIZE;
+			particle_1->size_end = IDLE_SIZE;
+			particle_1->rate = 6.0f;
+
+			particle_2->velocity_begin = IDLE_VELOCITY;
+			particle_2->velocity_end = IDLE_VELOCITY;
+			particle_2->velocity_variance = IDLE_VELOCITY_VARIANCE;
+			particle_2->lifetime = IDLE_LIFETIME;
+			particle_2->size_begin = IDLE_SIZE;
+			particle_2->size_end = IDLE_SIZE;
+			particle_2->rate = 6.0f;
 		}
 
 		if (detection_camera.is_detecting) {
@@ -98,38 +153,18 @@ void DetectionCameraSystem::update(World &world, float dt) {
 
 			particle_1->color_begin = DETECTING_COLOR_BEGIN;
 			particle_1->color_end = DETECTING_COLOR_END;
-			particle_1->velocity_begin = DETECTING_START_VELOCITY;
-			particle_1->velocity_end = DETECTING_END_VELOCITY;
-			particle_1->lifetime = DETECTING_LIFETIME;
-			particle_1->velocity_variance = DETECTING_VELOCITY_VARIANCE;
-			particle_1->rate = DETECTING_RATE;
 
 			particle_2->color_begin = DETECTING_COLOR_BEGIN;
 			particle_2->color_end = DETECTING_COLOR_END;
-			particle_2->velocity_begin = DETECTING_START_VELOCITY;
-			particle_2->velocity_end = DETECTING_END_VELOCITY;
-			particle_2->lifetime = DETECTING_LIFETIME;
-			particle_2->velocity_variance = DETECTING_VELOCITY_VARIANCE;
-			particle_2->rate = DETECTING_RATE;
 
 		} else {
 			light.color = IDLE_COLOR;
 
 			particle_1->color_begin = IDLE_COLOR_BEGIN;
 			particle_1->color_end = IDLE_COLOR_END;
-			particle_1->velocity_begin = IDLE_START_VELOCITY;
-			particle_1->velocity_end = IDLE_END_VELOCITY;
-			particle_1->lifetime = IDLE_LIFETIME;
-			particle_1->velocity_variance = IDLE_VELOCITY_VARIANCE;
-			particle_1->rate = IDLE_RATE;
 
 			particle_2->color_begin = IDLE_COLOR_BEGIN;
 			particle_2->color_end = IDLE_COLOR_END;
-			particle_2->velocity_begin = IDLE_START_VELOCITY;
-			particle_2->velocity_end = IDLE_END_VELOCITY;
-			particle_2->lifetime = IDLE_LIFETIME;
-			particle_2->velocity_variance = IDLE_VELOCITY_VARIANCE;
-			particle_2->rate = IDLE_RATE;
 		}
 
 		if (!detection_camera.is_active) {

@@ -358,8 +358,15 @@ void AgentSystem::update(World &world, float dt) {
 									glm::cos(glm::radians(cvar_agent_attack_angle.get()));
 							if (behind_enemy && enemy.state_machine.get_current_state() != "dying") {
 								//TODO: pull out knife or other indicator that agent can attack
+
+								glm::vec4 view_pos_non_normalized = world.get_parent_scene()->get_render_scene().view * glm::vec4(enemy_tf.get_global_position() + glm::vec3(0.0f, 1.2f, 0.0f), 1.0f);
+								glm::vec2 render_extent = world.get_parent_scene()->get_render_scene().render_extent;
+								glm::vec3 view_pos = glm::vec3(view_pos_non_normalized) / view_pos_non_normalized.w;
+
+								ui_kill_text->position.x = 150.0f + (0.75f * render_extent.x * view_pos.x / abs(view_pos.z));
+								ui_kill_text->position.y = 100.0f + (0.75f * render_extent.y * view_pos.y / abs(view_pos.z));
 								ui_kill_text->text = "[LMB] Kill";
-								//auto &enemy_tf = world.get_component<Transform>(info.entity);
+
 								if (input_manager.is_action_just_pressed("mouse_left")) {
 									auto animation_handle = resource_manager.get_animation_handle(
 											"agent/agent_ANIM_GLTF/agent_stab.anim");

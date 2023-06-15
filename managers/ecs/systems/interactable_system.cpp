@@ -88,10 +88,8 @@ void InteractableSystem::update(World &world, float dt) {
 						auto &cable = world.get_component<CableParent>(interactable.cable_parent);
 						// switch to the other state
 						if (cable.state == CableState::ON) {
-							SPDLOG_INFO("changing cable state to off");
 							cable.state = CableState::OFF;
 						} else {
-							SPDLOG_INFO("changing cable state to on");
 							cable.state = CableState::ON;
 						}
 					}
