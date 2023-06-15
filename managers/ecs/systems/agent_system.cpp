@@ -118,7 +118,7 @@ void AgentSystem::update(World &world, float dt) {
 		auto &is_crouching = agent_data.is_crouching;
 		auto &is_climbing = agent_data.is_climbing;
 
-		static glm::quat target_orientation = glm::quat();
+		static glm::quat target_orientation = glm::quat(); // Used when lerping towards interactable thing
 		static bool is_interacting = false;
 
 		static glm::vec3 last_position = transform.position;

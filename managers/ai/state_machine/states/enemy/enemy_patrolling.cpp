@@ -9,7 +9,6 @@
 #include "managers/render/render_scene.h"
 #include <animation/animation_manager.h>
 
-
 void EnemyPatrolling::startup(StateMachine *machine, std::string name) {
 	SPDLOG_INFO("EnemyPatrolling::startup");
 	this->name = name;
@@ -84,8 +83,13 @@ void EnemyPatrolling::update(World *world, uint32_t entity_id, float dt) {
 
 	// smoothly rotate the entity to face the next node
 	if (enemy_path.is_rotating) {
-		float new_dt = dt * enemy_path.rotation_speed;
-		enemy_utils::look_at(enemy_path, transform, target_position, new_dt);
+		glm::vec3 direction = transform.get_global_position() - target_position;
+		direction.y = 0.0f;
+		direction = glm::normalize(direction);
+
+		glm::quat target_orientation = glm::quatLookAt(direction, glm::vec3(0.0f, 1.0f, 0.0f));
+
+		transform.set_orientation(glm::slerp(transform.get_orientation(), target_orientation, 5.0f * dt));
 	}
 
 	// if the entity is facing the next node, stop rotating

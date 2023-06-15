@@ -19,21 +19,6 @@ static glm::vec3 enemy_look_offset = glm::vec3(0.0f, 1.0f, 0.0f);
 static glm::vec3 agent_target_top_offset = glm::vec3(0.0f, 1.2f, 0.0f);
 static glm::vec3 agent_target_bottom_offset = glm::vec3(0.0f, 0.2f, 0.0f);
 
-inline void look_at(EnemyPath &path, Transform &t, glm::vec3 &target, float &dt) {
-	if (path.first_rotation_frame) {
-		auto current_no_y = glm::vec3(t.position.x, 0.0f, t.position.z);
-		auto target_no_y = glm::vec3(target.x, 0.0f, target.z);
-
-		glm::vec3 direction = glm::normalize(target_no_y - current_no_y);
-		glm::vec3 forward = glm::normalize(glm::vec3(t.get_global_forward().x, 0.0f, t.get_global_forward().z));
-		float angle = glm::acos(glm::dot(forward, direction));
-		glm::vec3 axis = glm::cross(forward, direction);
-		path.rotation_end = (angle * axis);
-		path.first_rotation_frame = false;
-	}
-	t.add_global_euler_rot(path.rotation_end * dt * path.rotation_speed);
-}
-
 inline void handle_detection(World *world, uint32_t enemy_entity, Transform &transform, glm::vec3 forward,
 		EnemyData &enemy_data, float &dt, DebugDraw *dd = nullptr) {
 	// cvar stuff
@@ -142,23 +127,23 @@ inline void handle_detection(World *world, uint32_t enemy_entity, Transform &tra
 	}
 
 	// AGENT SPHERE DETECTION LOGIC
-//	if (glm::distance(transform.position, agent_pos) < sphere_radus) {
-//		Ray ray{};
-//		ray.origin = enemy_look_origin;
-//		ray.direction = agent_dir;
-//		ray.ignore_list.push_back(enemy_entity);
-//		glm::vec3 ray_end = ray.origin + ray.direction * sphere_radus;
-//
-//		HitInfo hit_info;
-//
-//		if (CollisionSystem::ray_cast_layer(*world, ray, hit_info)) {
-//			// only if agent is crouching then he can get to the enemy
-//			if (hit_info.entity == GameplayManager::get().get_agent_entity() &&
-//					!GameplayManager::get().get_agent_crouch()) {
-//				can_see_player = true;
-//			}
-//		}
-//	}
+	//	if (glm::distance(transform.position, agent_pos) < sphere_radus) {
+	//		Ray ray{};
+	//		ray.origin = enemy_look_origin;
+	//		ray.direction = agent_dir;
+	//		ray.ignore_list.push_back(enemy_entity);
+	//		glm::vec3 ray_end = ray.origin + ray.direction * sphere_radus;
+	//
+	//		HitInfo hit_info;
+	//
+	//		if (CollisionSystem::ray_cast_layer(*world, ray, hit_info)) {
+	//			// only if agent is crouching then he can get to the enemy
+	//			if (hit_info.entity == GameplayManager::get().get_agent_entity() &&
+	//					!GameplayManager::get().get_agent_crouch()) {
+	//				can_see_player = true;
+	//			}
+	//		}
+	//	}
 
 	if (can_see_player || can_see_hacker) {
 		// if noone was detected past frame, play sound
