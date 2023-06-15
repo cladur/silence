@@ -47,7 +47,7 @@ void RenderScene::startup() {
 	ssao_buffer.startup(render_extent.x, render_extent.y);
 	pbr_buffer.startup(render_extent.x, render_extent.y);
 	bloom_buffer.startup(render_extent.x, render_extent.y, 5);
-	shadow_buffer.startup(2048, 2048, 0.0001f, 25.0f);
+	shadow_buffer.startup(1024, 1024, 0.0001f, 25.0f);
 	combination_buffer.startup(render_extent.x, render_extent.y);
 	skybox_buffer.startup(render_extent.x, render_extent.y);
 	mouse_pick_framebuffer.startup(render_extent.x, render_extent.y);
@@ -85,12 +85,6 @@ void RenderScene::startup() {
 
 void RenderScene::draw_viewport(bool right_side) {
 	ZoneScopedN("RenderScene::draw_viewport");
-	glViewport(0, 0, (int)shadow_buffer.shadow_width, (int)shadow_buffer.shadow_height);
-	shadow_buffer.bind();
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_FRONT);
-	shadow_pass.draw(*this);
 
 	glDepthMask(GL_TRUE);
 	glViewport(0, 0, (int)render_extent.x, (int)render_extent.y);
@@ -292,6 +286,14 @@ void RenderScene::draw(bool editor_mode) {
 	transparent_pass.sort_objects(*this);
 
 	highlight_pass.sort_highlights(*this);
+
+	// Draw shadow maps
+	glViewport(0, 0, (int)shadow_buffer.shadow_width, (int)shadow_buffer.shadow_height);
+	shadow_buffer.bind();
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_FRONT);
+	shadow_pass.draw(*this);
 
 	if (cvar_splitscreen.get() && !cvar_debug_camera_use.get()) {
 		draw_viewport(false); // agent

@@ -24,6 +24,8 @@ DisplayManager::Status DisplayManager::startup(const std::string &window_name, b
 
 	glfwMakeContextCurrent(window);
 
+	glfwSwapInterval(0); // Disable vsync
+
 	if (!window) {
 		glfwTerminate();
 		return Status::FailedToCreateWindow;
