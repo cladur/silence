@@ -11,7 +11,7 @@ struct Interactable {
 
 	std::array<Entity, 5> interaction_targets = {};
 
-	uint32_t cable_parent = 0;
+	Entity cable_parent = 0;
 
 	bool triggered = false;
 	bool can_interact = true;

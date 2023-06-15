@@ -3,14 +3,6 @@
         "components": [
             {
                 "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "enemy/enemy.skinmdl"
-                },
-                "component_name": "SkinnedModelInstance"
-            },
-            {
-                "component_data": {
                     "name": "Enemy"
                 },
                 "component_name": "Name"
@@ -38,29 +30,32 @@
             },
             {
                 "component_data": {
+                    "animation_name": "enemy/enemy_ANIM_GLTF/enemy_idle.anim",
+                    "ticks_per_second": 1000.0
+                },
+                "component_name": "AnimationInstance"
+            },
+            {
+                "component_data": {
                     "parent": 5
                 },
                 "component_name": "Parent"
             },
             {
                 "component_data": {
-                    "highlight_color": {
-                        "b": 0.0,
-                        "g": 0.0,
-                        "r": 1.0
-                    },
-                    "highlight_power": 0.30000001192092896,
-                    "highlighted": "twoja misja trwa",
-                    "target": 2
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "enemy/enemy.skinmdl"
                 },
-                "component_name": "Highlight"
+                "component_name": "SkinnedModelInstance"
             },
             {
                 "component_data": {
-                    "animation_name": "enemy/enemy_ANIM_GLTF/enemy_idle.anim",
-                    "ticks_per_second": 1000.0
+                    "path_parent": 2,
+                    "rotation_speed": 4.599999904632568,
+                    "speed": 1.0
                 },
-                "component_name": "AnimationInstance"
+                "component_name": "EnemyPath"
             },
             {
                 "component_data": {
@@ -85,14 +80,6 @@
                 "component_name": "ColliderCapsule"
             },
             {
-                "component_data": {
-                    "path_parent": 0,
-                    "rotation_speed": 4.599999904632568,
-                    "speed": 1.0
-                },
-                "component_name": "EnemyPath"
-            },
-            {
                 "component_data": {},
                 "component_name": "EnemyData"
             },
@@ -105,6 +92,19 @@
                     }
                 },
                 "component_name": "Taggable"
+            },
+            {
+                "component_data": {
+                    "highlight_color": {
+                        "b": 0.0,
+                        "g": 0.0,
+                        "r": 1.0
+                    },
+                    "highlight_power": 0.30000001192092896,
+                    "highlighted": "twoja misja trwa",
+                    "target": 2
+                },
+                "component_name": "Highlight"
             }
         ],
         "entity": 1,

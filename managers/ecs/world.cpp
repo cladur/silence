@@ -6,6 +6,7 @@
 #include "component_visitor.h"
 #include "components/children_component.h"
 #include "components/parent_component.h"
+#include "ecs/component_visitor.h"
 #include "resource/resource_manager.h"
 #include "serialization.h"
 #include <spdlog/spdlog.h>
@@ -284,7 +285,7 @@ void World::deserialize_prefab(nlohmann::json &json, std::vector<Entity> &entiti
 		return;
 	}
 
-	std::unordered_map<int, int> prefab_id_to_entity_id_map;
+	std::unordered_map<Entity, Entity> prefab_id_to_entity_id_map;
 	std::vector<Entity> entity_ids;
 	entity_ids.resize(number_of_entities);
 	int i = 0;
@@ -300,10 +301,11 @@ void World::deserialize_prefab(nlohmann::json &json, std::vector<Entity> &entiti
 	for (auto entity_id : entity_ids) {
 		update_parent(entity_id, prefab_id_to_entity_id_map);
 		update_children(entity_id, prefab_id_to_entity_id_map);
+		ComponentVisitor::update_ids(*this, entity_id, prefab_id_to_entity_id_map);
 	}
 }
 
-void World::update_children(Entity entity, const std::unordered_map<int, int> &id_map) {
+void World::update_children(Entity entity, const std::unordered_map<Entity, Entity> &id_map) {
 	if (!has_component<Children>(entity)) {
 		return;
 	}
@@ -318,7 +320,7 @@ void World::update_children(Entity entity, const std::unordered_map<int, int> &i
 	}
 	SPDLOG_INFO("Children: {}", children.children[0]);
 }
-void World::update_parent(Entity entity, const std::unordered_map<int, int> &id_map) {
+void World::update_parent(Entity entity, const std::unordered_map<Entity, Entity> &id_map) {
 	if (!has_component<Parent>(entity)) {
 		return;
 	}

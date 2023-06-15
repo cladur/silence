@@ -4,7 +4,7 @@
 struct EnemyPath {
 	//std::vector<glm::vec3> path;
 	//std::vector<std::pair<float, bool>> patrol_points;
-	uint32_t path_parent;
+	Entity path_parent;
 	int next_position = 0;
 	float speed = 1.0f;
 	float rotation_speed = 1.0f;
@@ -35,8 +35,7 @@ struct EnemyPath {
 		rotation_speed = serialized_component["rotation_speed"];
 		if (serialized_component.contains("path_parent")) {
 			path_parent = serialized_component["path_parent"];
-		}
-		else {
+		} else {
 			path_parent = 0;
 		}
 
@@ -49,23 +48,22 @@ struct EnemyPath {
 			std::string is_patrol_point = "patrol_points_" + std::to_string(i);
 			std::string patrol_time = "patrol_times_" + std::to_string(i);
 
-			if (serialized_component.contains(pos_x) && serialized_component.contains(pos_y) && serialized_component.contains(pos_z)) {
-				//path.emplace_back(serialized_component[pos_x], serialized_component[pos_y], serialized_component[pos_z]);
+			if (serialized_component.contains(pos_x) && serialized_component.contains(pos_y) &&
+					serialized_component.contains(pos_z)) {
+				//path.emplace_back(serialized_component[pos_x], serialized_component[pos_y],
+				//serialized_component[pos_z]);
 				if (serialized_component.contains(is_patrol_point) && serialized_component.contains(patrol_time)) {
-					//this->patrol_points.emplace_back(serialized_component[is_patrol_point], serialized_component[patrol_time]);
-				}
-				else {
+					//this->patrol_points.emplace_back(serialized_component[is_patrol_point],
+					//serialized_component[patrol_time]);
+				} else {
 					//this->patrol_points.emplace_back(0.0f, false);
 				}
-			}
-			else {
+			} else {
 				break;
 			}
 
 			i++;
 		}
-
-
 	}
 };
 
