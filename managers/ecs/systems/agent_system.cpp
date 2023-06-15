@@ -348,11 +348,11 @@ void AgentSystem::update(World &world, float dt) {
 
 						ui_interaction_text->position.x = 100.0f + (0.25f * render_extent.x * view_pos.x / abs(view_pos.z));
 						ui_interaction_text->position.y = 50.0f + (0.25f * render_extent.y * view_pos.y / abs(view_pos.z));
-						ui_interaction_text->text = "[Space] Jump";
+
 						if (ui_interaction_text->position.x > render_extent.x / 2.0f - 100.f) {
 							ui_interaction_text->position.x = render_extent.x / 2.0f - 100.0f;
 						}
-						ui_interaction_text->text = "Press E to interact";
+						ui_interaction_text->text = interactable.interaction_text;
 						if (interaction_triggered) {
 							interactable.triggered = true;
 							auto animation_handle = resource_manager.get_animation_handle(
