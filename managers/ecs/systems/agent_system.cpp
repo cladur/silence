@@ -136,7 +136,7 @@ void AgentSystem::update(World &world, float dt) {
 			highlight.highlighted = true;
 		}
 
-		if (animation_timer >= cvar_agent_lock_time.get()) {
+		if (animation_timer >= cvar_agent_lock_time.get() && !is_climbing) {
 			agent_data.locked_movement = false;
 		}
 
