@@ -10,6 +10,12 @@ struct FMODEmitter {
 	bool first_frame = true;
 	FMOD::Studio::EventInstance *event_instance = nullptr;
 
+	~FMODEmitter() {
+		if (event_instance) {
+			event_instance->release();
+		}
+	}
+
 	void serialize_json(nlohmann::json &serialized_scene) {
 		nlohmann::json::object_t serialized_component;
 		serialized_component["event_path"] = event_path;

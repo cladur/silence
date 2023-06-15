@@ -3,6 +3,16 @@
 #include <audio/audio_manager.h>
 #include <components/fmod_emitter_component.h>
 #include "engine/scene.h"
+#include "fmod_errors.h"
+
+#define FMOD_CHECK(x)                                                                                                  \
+	do {                                                                                                               \
+		FMOD_RESULT result = x;                                                                                        \
+		if (result != FMOD_OK) {                                                                                       \
+			SPDLOG_ERROR("Audio Manager: FMOD error! {} {}", result, FMOD_ErrorString(result));                        \
+			abort();                                                                                                   \
+		}                                                                                                              \
+	} while (false)
 
 void FMODEmitterSystem::startup(World &world) {
 	Signature whitelist;
@@ -22,10 +32,9 @@ void FMODEmitterSystem::update(World &world, float dt) {
 			if (emitter.is_3d) {
 				auto &transform = world.get_component<Transform>(entity);
 				FMOD_3D_ATTRIBUTES attributes = AudioManager::to_3d_attributes(transform);
-				emitter.event_instance->set3DAttributes(&attributes);
+				FMOD_CHECK(emitter.event_instance->set3DAttributes(&attributes));
 			}
-			emitter.event_instance->start();
-			emitter.event_instance->release();
+			FMOD_CHECK(emitter.event_instance->start());
 			emitter.first_frame = false;
 		}
 

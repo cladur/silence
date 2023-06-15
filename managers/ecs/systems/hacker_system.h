@@ -24,6 +24,7 @@ private:
 	float current_rotation_x_camera_pivot = 0.0f;
 	float current_rotation_x_camera = 0.0f;
 
+	glm::vec3 default_text_pos = glm::vec3(150.0f, 3.0f, 0.0f);
 	std::string ui_name;
 	UIText *ui_text;
 	UIText *main_text;
