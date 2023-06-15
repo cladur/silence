@@ -17,6 +17,10 @@ struct Interactable {
 	bool can_interact = true;
 	bool single_use = false;
 
+	std::string interaction_text = "";
+
+	bool first_frame = true;
+
 	void serialize_json(nlohmann::json &serialized_scene) {
 		nlohmann::json::object_t serialized_component;
 		serialized_scene.push_back(nlohmann::json::object());
@@ -30,6 +34,8 @@ struct Interactable {
 		serialized_component["interaction_target_4"] = interaction_targets[3];
 		serialized_component["interaction_target_5"] = interaction_targets[4];
 		serialized_component["single_use"] = single_use;
+
+		serialized_component["interaction_text"] = interaction_text;
 
 		serialized_component["cable_parent"] = cable_parent;
 
@@ -81,6 +87,12 @@ struct Interactable {
 			cable_parent = serialized_component["cable_parent"];
 		} else {
 			cable_parent = 0;
+		}
+
+		if (serialized_component.contains("interaction_text")) {
+			interaction_text = serialized_component["interaction_text"];
+		} else {
+			interaction_text = "";
 		}
 
 		triggered = false;

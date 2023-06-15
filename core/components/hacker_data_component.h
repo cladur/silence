@@ -1,12 +1,14 @@
 #ifndef SILENCE_HACKER_DATA_COMPONENT_H
 #define SILENCE_HACKER_DATA_COMPONENT_H
 
+#include "audio/event_reference.h"
 struct HackerData {
 	Entity model;
 	Entity camera_pivot;
 	Entity scorpion_camera_transform;
 	Entity camera;
 	bool is_on_camera = false;
+	EventReference hack_sound = EventReference("Hacker/hack");
 
 	void serialize_json(nlohmann::json &serialized_scene) {
 		nlohmann::json::object_t serialized_component;

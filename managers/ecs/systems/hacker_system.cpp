@@ -2,7 +2,6 @@
 #include "components/interactable_component.h"
 #include "components/light_component.h"
 #include "components/transform_component.h"
-#include "cvars/cvars.h"
 #include "ecs/world.h"
 #include "engine/scene.h"
 
@@ -37,6 +36,9 @@ AutoCVarFloat cvar_hacker_min_rotation_x(
 AutoCVarInt cvar_hacker_on_keyboard(
 		"settings.hacker_on_keyboard", "Control hacker with keyboard + mouse", 0, CVarFlags::EditCheckbox);
 
+AutoCVarFloat cvar_viewspace_offset(
+		"hacker.viewspace_offset", "offset from viewspace", 0.5f, CVarFlags::EditFloatDrag);
+
 bool HackerSystem::shoot_raycast(
 		Transform &transform, World &world, HackerData &hacker_data, float dt, bool trigger, glm::vec3 direction) {
 	Ray ray;
@@ -67,33 +69,38 @@ bool HackerSystem::shoot_raycast(
 		return false;
 	}
 
+	auto &interactable = world.get_component<Interactable>(hit_entity);
+	auto &hit_transform = world.get_component<Transform>(hit_entity);
+
+	glm::vec4 view_pos_non_normalized = world.get_parent_scene()->get_render_scene().view * glm::vec4(hit_transform.get_global_position(), 1.0f);
+	glm::vec2 render_extent = world.get_parent_scene()->get_render_scene().render_extent;
+	glm::vec3 view_pos = glm::vec3(view_pos_non_normalized) / view_pos_non_normalized.w;
+
+	ui_text->position.x = 100.0f * (1.0f + log10(1.0f + abs(view_pos.z)) / 11.5f) + (0.75f * render_extent.x * view_pos.x / abs(view_pos.z));
+	ui_text->position.y = 50.0f * (1.0f + log10(1.0f + abs(view_pos.z)) / 11.5f) + (0.75f * render_extent.y * view_pos.y / abs(view_pos.z));
+	ui_text->text = interactable.interaction_text;
+
 	if (world.has_component<Highlight>(hit_entity)) {
 		auto &highlight = world.get_component<Highlight>(hit_entity);
 		highlight.highlighted = true;
+
+		if (!interactable.can_interact || !(interactable.type == InteractionType::Hacker)) {
+			ui_text->text = "";
+			highlight.highlighted = false;
+		}
+
 	} else {
 		SPDLOG_ERROR("Hacker raycast hit entity {} without highlight component", hit_entity);
 	}
 
-	ui_text->text = "Press X to interact";
-
-	if (trigger) {
-		auto &interactable = world.get_component<Interactable>(hit_entity);
-
-		if (!(interactable.type == InteractionType::Hacker)) {
-			SPDLOG_WARN("Entity {} is not a hacker interactable", hit_entity);
-			return false;
-		}
-
-		if (!interactable.can_interact) {
-			SPDLOG_WARN("Entity {} cannot be interacted with", hit_entity);
-			return false;
-		}
+	if (trigger && interactable.can_interact && (interactable.type == InteractionType::Hacker)) {
 
 		if (interactable.interaction == Interaction::HackerCameraJump) {
 			jump_to_camera(world, hacker_data, hit_entity);
 		}
 
 		interactable.triggered = true;
+		AudioManager::get().play_one_shot_2d(hacker_data.hack_sound);
 	}
 
 	return true;
@@ -113,6 +120,8 @@ bool HackerSystem::jump_to_camera(World &world, HackerData &hacker_data, Entity 
 
 	new_camera_tf.set_orientation(detection_camera.starting_orientation);
 
+	AudioManager::get().play_one_shot_2d(hacker_data.hack_sound);
+
 	camera_tf.set_position(new_camera_tf.get_global_position() + -(new_camera_tf.get_forward()));
 	camera_tf.set_orientation(new_camera_tf.get_global_orientation());
 
@@ -131,12 +140,19 @@ void HackerSystem::go_back_to_scorpion(World &world, HackerData &hacker_data) {
 	}
 
 	auto &detection_camera = world.get_component<DetectionCamera>(current_camera_entity);
+	auto &camera_billboard = world.get_component<Billboard>(current_camera_entity);
 	auto &camera_tf = world.get_component<Transform>(hacker_data.camera);
 
 	detection_camera.friendly_time_left = *CVarSystem::get()->get_float_cvar("enemy_camera.friendly_time");
 	world.get_component<Transform>(detection_camera.camera_model)
 			.set_orientation(detection_camera.starting_orientation);
 
+	AudioManager::get().play_one_shot_2d(hacker_data.hack_sound);
+
+	world.get_component<Transform>(current_camera_entity).set_orientation(starting_camera_orientation);
+	//starting_camera_orientation = glm::quat(1, 0, 0, 0);
+	//current_rotation_x = 0.0f;
+	//current_rotation_y = 0.0f;
 	camera_tf.set_orientation(before_jump_orientation);
 	current_camera_entity = 0;
 	current_camera_model_entity = 0;
@@ -181,7 +197,7 @@ void HackerSystem::startup(World &world) {
 	ui_text->text = "";
 	ui_text->is_screen_space = true;
 	ui_text->size = glm::vec2(0.5f);
-	ui_text->position = glm::vec3(150.0f, 3.0f, 0.0f);
+	ui_text->position = default_text_pos;
 	ui_text->centered_y = true;
 	ui.add_to_root(ui_name, "text", "root_anchor");
 
@@ -264,6 +280,7 @@ void HackerSystem::update(World &world, float dt) {
 
 		// ZOOMING LOGIC
 		if (input_manager.is_action_pressed("hacker_zoom_camera")) {
+			ui_text->text = "";
 			is_zooming = true;
 			camera.fov = glm::mix(camera.fov, 30.0f, dt * 3.0f);
 			camera_sens_modifier = glm::mix(camera_sens_modifier, 0.3f, dt * 3.0f);
