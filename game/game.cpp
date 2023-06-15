@@ -475,7 +475,7 @@ void Game::custom_update(float dt) {
 		AnimationManager::get().animation_map.clear();
 		GameplayManager::get().get_agent_system()->reset();
 		GameplayManager::get().get_hacker_system()->reset();
-		get_active_scene().load_from_file("resources/scenes/level_3_6.scn");
+		get_active_scene().load_from_file("resources/scenes/level_3_7.scn");
 	}
 
 	AudioManager::get().update(get_active_scene());

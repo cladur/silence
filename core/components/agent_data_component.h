@@ -4,6 +4,7 @@
 struct AgentData {
 	Entity model;
 	Entity camera_pivot;
+	Entity camera_pivot_target;
 	Entity spring_arm;
 	Entity camera;
 
@@ -17,6 +18,7 @@ struct AgentData {
 
 		serialized_component["model"] = model;
 		serialized_component["camera_pivot"] = camera_pivot;
+		serialized_component["camera_pivot_target"] = camera_pivot_target;
 		serialized_component["spring_arm"] = spring_arm;
 		serialized_component["camera"] = camera;
 
@@ -27,6 +29,11 @@ struct AgentData {
 	void deserialize_json(nlohmann::json &serialized_component) {
 		model = serialized_component["model"];
 		camera_pivot = serialized_component["camera_pivot"];
+		if (serialized_component.contains("camera_pivot_target")) {
+			camera_pivot_target = serialized_component["camera_pivot_target"];
+		} else {
+			camera_pivot_target = 0;
+		}
 		if (serialized_component.contains("spring_arm")) {
 			spring_arm = serialized_component["spring_arm"];
 		} else {

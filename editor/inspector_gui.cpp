@@ -889,6 +889,20 @@ void Inspector::show_agent_data() {
 
 		ImGui::TableNextRow();
 		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Camera Pivot Target");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::InputInt("", (int *)&agent_data.camera_pivot_target, 0, 0);
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
+				Entity payload_entity = *(Entity *)payload->Data;
+				agent_data.camera_pivot_target = payload_entity;
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
 		ImGui::Text("Spring Arm");
 		ImGui::TableSetColumnIndex(1);
 		ImGui::InputInt("", (int *)&agent_data.spring_arm, 0, 0);
@@ -1817,4 +1831,3 @@ void Inspector::show_add_component() {
 void Inspector::set_active_entity(Entity entity) {
 	selected_entity = entity;
 }
-

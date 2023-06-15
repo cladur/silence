@@ -20,6 +20,7 @@
 #include <spdlog/spdlog.h>
 #include <glm/fwd.hpp>
 #include <glm/geometric.hpp>
+#include <glm/gtx/compatibility.hpp>
 #include <glm/gtx/string_cast.hpp>
 
 AutoCVarFloat cvar_agent_interaction_range("agent.interaction_range", "range of interaction", 1.0f);
@@ -35,6 +36,12 @@ AutoCVarFloat cvar_agent_camera_back("agent.cam_back", "distance of camera from 
 AutoCVarFloat cvar_agent_animation_speed("agent.animation_speed", "speed of animation", 1.6f);
 
 AutoCVarFloat cvar_camera_sensitivity("settings.camera_sensitivity", "camera sensitivity", 0.1f);
+
+AutoCVarFloat cvar_agent_camera_height_lerp("agent.cam_height_lerp", "strength of camera height lerp", 5.0f);
+
+AutoCVarFloat cvar_agent_camera_height_offset("agent.cam_height_offset", "offset of camera height", 0.25f);
+
+AutoCVarFloat dupa("dupa.dupa", "offset of camera height", 10.0f);
 
 void AgentSystem::startup(World &world) {
 	Signature blacklist;
@@ -99,6 +106,7 @@ void AgentSystem::update(World &world, float dt) {
 		auto &agent_data = world.get_component<AgentData>(entity);
 		auto &capsule_collider = world.get_component<ColliderCapsule>(entity);
 		auto &camera_pivot_tf = world.get_component<Transform>(agent_data.camera_pivot);
+		auto &camera_pivot_target_tf = world.get_component<Transform>(agent_data.camera_pivot_target);
 		auto &model_tf = world.get_component<Transform>(agent_data.model);
 		auto &camera_tf = world.get_component<Transform>(agent_data.camera);
 		auto &spring_arm_tf = world.get_component<Transform>(agent_data.spring_arm);
@@ -109,6 +117,9 @@ void AgentSystem::update(World &world, float dt) {
 
 		auto &is_crouching = agent_data.is_crouching;
 		auto &is_climbing = agent_data.is_climbing;
+
+		static glm::quat target_orientation = glm::quat();
+		static bool is_interacting = false;
 
 		static glm::vec3 last_position = transform.position;
 		glm::vec3 velocity = transform.position - last_position;
@@ -149,6 +160,22 @@ void AgentSystem::update(World &world, float dt) {
 				}
 			}
 		}
+
+		// Lerp agent towards target_orientation if he's interacting
+		if (is_interacting) {
+			model_tf.set_orientation(glm::slerp(model_tf.get_orientation(), target_orientation, dupa.get() * dt));
+		}
+
+		// Move camera pivot towards the target
+		float camera_pivot_height = camera_pivot_tf.get_global_position().y;
+		float target_height = camera_pivot_target_tf.get_global_position().y + cvar_agent_camera_height_offset.get();
+
+		camera_pivot_tf.set_position(transform.get_global_position());
+
+		camera_pivot_tf.position.y =
+				glm::lerp(camera_pivot_height, target_height, cvar_agent_camera_height_lerp.get() * dt);
+		// camera_pivot_tf.set_position(
+		// 		glm::mix(camera_pivot_tf.get_global_position(), camera_pivot_target_tf.get_global_position(), 0.1f));
 
 		if (!is_climbing) {
 			animation_instance.blend_time_ms = 700.0f;
@@ -265,7 +292,6 @@ void AgentSystem::update(World &world, float dt) {
 				glm::vec3 view_pos = glm::vec3(view_pos_non_normalized) / view_pos_non_normalized.w;
 
 				if (obstacle_height > 0.6f && obstacle_height < 0.8f) {
-
 					ui_interaction_text->position.x = 50.0f + (0.15f * render_extent.x * view_pos.x / abs(view_pos.z));
 					ui_interaction_text->position.y = 25.0f + (0.15f * render_extent.y * view_pos.y / abs(view_pos.z));
 					ui_interaction_text->text = "[Space] Jump";
@@ -274,8 +300,7 @@ void AgentSystem::update(World &world, float dt) {
 					}
 
 					if (input_manager.is_action_just_pressed("agent_climb")) {
-
-					dd.draw_arrow(ray.origin, end, { 1.0f, 0.0f, 0.0f });
+						dd.draw_arrow(ray.origin, end, { 1.0f, 0.0f, 0.0f });
 
 						auto animation_handle =
 								resource_manager.get_animation_handle("agent/agent_ANIM_GLTF/agent_jump_up.anim");
@@ -347,8 +372,10 @@ void AgentSystem::update(World &world, float dt) {
 
 						glm::vec3 view_pos = glm::vec3(view_pos_non_normalized) / view_pos_non_normalized.w;
 
-						ui_interaction_text->position.x = 100.0f + (0.25f * render_extent.x * view_pos.x / abs(view_pos.z));
-						ui_interaction_text->position.y = 50.0f + (0.25f * render_extent.y * view_pos.y / abs(view_pos.z));
+						ui_interaction_text->position.x =
+								100.0f + (0.25f * render_extent.x * view_pos.x / abs(view_pos.z));
+						ui_interaction_text->position.y =
+								50.0f + (0.25f * render_extent.y * view_pos.y / abs(view_pos.z));
 
 						if (ui_interaction_text->position.x > render_extent.x / 2.0f - 100.f) {
 							ui_interaction_text->position.x = render_extent.x / 2.0f - 100.0f;
@@ -359,14 +386,14 @@ void AgentSystem::update(World &world, float dt) {
 							auto animation_handle = resource_manager.get_animation_handle(
 									"agent/agent_ANIM_GLTF/agent_interaction.anim");
 							if (animation_instance.animation_handle.id != animation_handle.id) {
-								auto &transform = world.get_component<Transform>(closest_interactable);
+								auto &interactable_tf = world.get_component<Transform>(closest_interactable);
 								auto model_position = model_tf.get_global_position();
-								glm::vec3 direction = model_position - transform.get_global_position();
+								glm::vec3 direction = model_position - interactable_tf.get_global_position();
 								direction.y = 0.0f;
 								direction = glm::normalize(direction);
-								//auto rotation_matrix = glm::mat3(view_matrix);
-								//TODO: rotate model towards interactable
-								//model_tf.set_orientation(glm::quat(rotation_matrix));
+
+								target_orientation = glm::quatLookAt(direction, glm::vec3(0.0f, 1.0f, 0.0f));
+								is_interacting = true;
 
 								animation_instance.ticks_per_second = 1000.f;
 								animation_timer = 0;
@@ -400,12 +427,15 @@ void AgentSystem::update(World &world, float dt) {
 							if (behind_enemy && enemy.state_machine.get_current_state() != "dying") {
 								//TODO: pull out knife or other indicator that agent can attack
 
-								glm::vec4 view_pos_non_normalized = world.get_parent_scene()->get_render_scene().view * glm::vec4(enemy_tf.get_global_position() + glm::vec3(0.0f, 1.2f, 0.0f), 1.0f);
+								glm::vec4 view_pos_non_normalized = world.get_parent_scene()->get_render_scene().view *
+										glm::vec4(enemy_tf.get_global_position() + glm::vec3(0.0f, 1.2f, 0.0f), 1.0f);
 								glm::vec2 render_extent = world.get_parent_scene()->get_render_scene().render_extent;
 								glm::vec3 view_pos = glm::vec3(view_pos_non_normalized) / view_pos_non_normalized.w;
 
-								ui_kill_text->position.x = 150.0f + (0.75f * render_extent.x * view_pos.x / abs(view_pos.z));
-								ui_kill_text->position.y = 100.0f + (0.75f * render_extent.y * view_pos.y / abs(view_pos.z));
+								ui_kill_text->position.x =
+										150.0f + (0.75f * render_extent.x * view_pos.x / abs(view_pos.z));
+								ui_kill_text->position.y =
+										100.0f + (0.75f * render_extent.y * view_pos.y / abs(view_pos.z));
 								ui_kill_text->text = "[LMB] Kill";
 
 								if (input_manager.is_action_just_pressed("mouse_left")) {
@@ -463,11 +493,11 @@ void AgentSystem::update(World &world, float dt) {
 		if (animation_timer < resource_manager.get_animation(animation_instance.animation_handle).get_duration()) {
 			animation_timer += (dt * 1000);
 			if (is_climbing &&
-					((animation_timer + 100.f) >
+					((animation_timer + 500.0f) >
 							resource_manager.get_animation(animation_instance.animation_handle).get_duration())) {
 				//climbing animation should end here, otherwise it will start to loop
 				is_climbing = false;
-				animation_timer += 100.f;
+				animation_timer += 500.0f;
 
 				Ray ray{};
 				ray.origin = transform.get_global_position() + glm::vec3(0.0f, 1.4f, 0.0f) + model_tf.get_forward();
@@ -484,6 +514,8 @@ void AgentSystem::update(World &world, float dt) {
 				animation_instance.blend_time_ms = 0.0f;
 				animation_manager.change_animation(agent_data.model, "agent/agent_ANIM_GLTF/agent_idle.anim");
 			}
+		} else {
+			is_interacting = false;
 		}
 
 		AudioManager::get().set_3d_listener_attributes(SILENCE_FMOD_LISTENER_AGENT, camera_tf.get_global_position(),
