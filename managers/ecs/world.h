@@ -42,8 +42,8 @@ private:
 	std::vector<std::shared_ptr<BaseSystem>> during_physics_systems;
 	std::vector<std::shared_ptr<BaseSystem>> post_physics_systems;
 
-	void update_children(Entity entity, const std::unordered_map<int, int> &id_map);
-	void update_parent(Entity entity, const std::unordered_map<int, int> &id_map);
+	void update_children(Entity entity, const std::unordered_map<Entity, Entity> &id_map);
+	void update_parent(Entity entity, const std::unordered_map<Entity, Entity> &id_map);
 
 public:
 	Scene *parent_scene;
