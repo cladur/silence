@@ -18,6 +18,10 @@ struct RenderScene {
 	glm::mat4 view;
 	glm::vec3 camera_pos;
 
+	glm::mat4 left_projection;
+	glm::mat4 left_view;
+	glm::vec3 left_camera_pos;
+
 	DebugCamera debug_camera;
 	Transform left_camera_transform;
 	Camera left_camera_params;

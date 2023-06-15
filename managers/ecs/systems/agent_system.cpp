@@ -74,7 +74,7 @@ void AgentSystem::startup(World &world) {
 		ui_interaction_text->text = "";
 		ui_interaction_text->is_screen_space = true;
 		ui_interaction_text->size = glm::vec2(0.5f);
-		ui_interaction_text->position = glm::vec3(150.0f, 3.0f, 0.0f);
+		ui_interaction_text->position = default_interaction_text_position;
 		ui_interaction_text->centered_y = true;
 		ui.add_to_root(ui_name, "interaction_text", "root_anchor");
 
@@ -241,20 +241,42 @@ void AgentSystem::update(World &world, float dt) {
 
 		if (!is_zooming) {
 			//Agent Climbing
-			if (input_manager.is_action_just_pressed("agent_climb")) {
-				Ray ray{};
-				ray.origin = transform.get_global_position() + glm::vec3(0.0f, 1.4f, 0.0f) + model_tf.get_forward();
-				ray.ignore_list.emplace_back(entity);
-				ray.layer_name = "default";
-				ray.direction = -transform.get_up();
-				glm::vec3 end = ray.origin + ray.direction;
-				HitInfo info;
-				dd.draw_arrow(ray.origin, end, { 1.0f, 0.0f, 0.0f });
-				if (CollisionSystem::ray_cast_layer(world, ray, info)) {
-					float obstacle_height = 1.4f - info.distance;
-					SPDLOG_INFO(obstacle_height);
-					SPDLOG_INFO(info.entity);
-					if (obstacle_height > 0.6f && obstacle_height < 0.8f) {
+
+			// need to test if its possible to climb for the ui sake
+			Ray ray{};
+			ray.origin = transform.get_global_position() + glm::vec3(0.0f, 1.4f, 0.0f) + model_tf.get_forward();
+			ray.ignore_list.emplace_back(entity);
+			ray.layer_name = "default";
+			ray.direction = -transform.get_up();
+			glm::vec3 end = ray.origin + ray.direction;
+			HitInfo info;
+			if (CollisionSystem::ray_cast_layer(world, ray, info)) {
+				float obstacle_height = 1.4f - info.distance;
+				auto &hit_transform = world.get_component<Transform>(info.entity);
+
+				dd.draw_sphere(hit_transform.get_global_position(), 0.1f, glm::vec3(1.0f, 0.0f, 0.0f));
+
+				glm::vec4 view_pos_non_normalized = world.get_parent_scene()->get_render_scene().left_view *
+						glm::vec4(hit_transform.get_global_position(), 1.0f);
+
+				glm::vec2 render_extent = world.get_parent_scene()->get_render_scene().render_extent;
+
+				glm::vec3 view_pos = glm::vec3(view_pos_non_normalized) / view_pos_non_normalized.w;
+
+				if (obstacle_height > 0.6f && obstacle_height < 0.8f) {
+
+					std::cout << render_extent.x << " " << render_extent.y << std::endl;
+					ui_interaction_text->position.x = 50.0f + (0.15f * render_extent.x * view_pos.x / abs(view_pos.z));
+					ui_interaction_text->position.y = 25.0f + (0.15f * render_extent.y * view_pos.y / abs(view_pos.z));
+					ui_interaction_text->text = "[Space] Jump";
+					if (ui_interaction_text->position.x > render_extent.x / 2.0f - 100.f) {
+						ui_interaction_text->position.x = render_extent.x / 2.0f - 100.0f;
+					}
+
+					if (input_manager.is_action_just_pressed("agent_climb")) {
+
+					dd.draw_arrow(ray.origin, end, { 1.0f, 0.0f, 0.0f });
+
 						auto animation_handle =
 								resource_manager.get_animation_handle("agent/agent_ANIM_GLTF/agent_jump_up.anim");
 						if (animation_instance.animation_handle.id != animation_handle.id) {
@@ -267,7 +289,11 @@ void AgentSystem::update(World &world, float dt) {
 						}
 					}
 				}
+			} else {
+				ui_interaction_text->position = default_interaction_text_position;
+				ui_interaction_text->text = "";
 			}
+
 			if (!is_climbing) {
 				//Agent interaction
 				bool interaction_triggered = input_manager.is_action_just_pressed("agent_interact");

@@ -123,6 +123,11 @@ void RenderScene::draw_viewport(bool right_side) {
 				cvar_draw_distance_far.get());
 		view = glm::inverse(camera_transform.get_global_model_matrix());
 		camera_pos = camera_transform.get_global_position();
+		if (!right_side) {
+			left_projection = projection;
+			left_view = view;
+			left_camera_pos = camera_pos;
+		}
 	}
 
 	g_buffer_pass.draw(*this);

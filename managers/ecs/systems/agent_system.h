@@ -15,6 +15,7 @@ private:
 
 	std::string ui_name;
 	UIText *ui_interaction_text;
+	glm::vec3 default_interaction_text_position = glm::vec3(150.0f, 3.0f, 0.0f);
 	UIText *ui_kill_text;
 
 public:
