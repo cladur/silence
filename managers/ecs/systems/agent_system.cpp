@@ -246,6 +246,7 @@ void AgentSystem::update(World &world, float dt) {
 			Ray ray{};
 			ray.origin = transform.get_global_position() + glm::vec3(0.0f, 1.4f, 0.0f) + model_tf.get_forward();
 			ray.ignore_list.emplace_back(entity);
+			ray.ignore_list.emplace_back(GameplayManager::get().get_hacker_entity());
 			ray.layer_name = "default";
 			ray.direction = -transform.get_up();
 			glm::vec3 end = ray.origin + ray.direction;
