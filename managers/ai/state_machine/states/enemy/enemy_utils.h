@@ -228,12 +228,6 @@ inline void handle_detection_camera(World *world, uint32_t enemy_entity, Transfo
 	bool can_see_hacker = false;
 	float hacker_distance_ratio = glm::distance(global_position, hacker_pos) / cone_range;
 
-	//	if (dd) {
-	//		dd->draw_arrow(enemy_look_origin, enemy_look_origin + forward, cone_range, glm::vec3(0.0f, 1.0f, 0.0f));
-	//		dd->draw_cone(enemy_look_origin, enemy_look_origin + forward, cone_range, glm::tan(glm::radians(cone_angle
-	/// 2.0f)) * cone_range, glm::vec3(1.0f, 0.0f, 0.0f));
-	//	}
-
 	// AGENT CONE DETECTION LOGIC
 	if (glm::distance(global_position, agent_pos) < cone_range) {
 		auto angle = glm::acos(glm::dot(agent_dir, forward));
@@ -316,6 +310,7 @@ inline void handle_detection_camera(World *world, uint32_t enemy_entity, Transfo
 	}
 
 	if (can_see_player || can_see_hacker) {
+		detection_camera.is_detecting = true;
 		// if noone was detected past frame, play sound
 		if (detection_camera.detection_target == DetectionTarget::NONE) {
 			AudioManager::get().play_one_shot_2d(EventReference("SFX/Enemies/first_time_detect"));
@@ -355,6 +350,8 @@ inline void handle_detection_camera(World *world, uint32_t enemy_entity, Transfo
 
 		detection_camera.detection_level += detection_change;
 	} else {
+		detection_camera.is_detecting = false;
+
 		if (detection_camera.is_playing) {
 			AudioManager::get().stop_local(detection_camera.detection_event);
 			detection_camera.is_playing = false;

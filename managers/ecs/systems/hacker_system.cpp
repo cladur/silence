@@ -28,10 +28,10 @@ AutoCVarFloat cvar_hacker_camera_max_rotation_y(
 		"hacker.hacker_camera_max_rotation_y", "camera max rotation Y in degrees", 30.0f, CVarFlags::EditCheckbox);
 
 AutoCVarFloat cvar_hacker_max_rotation_x(
-		"hacker.hacker_max_rotation_x", "max rotation X in degrees", 70.0f, CVarFlags::EditCheckbox);
+		"hacker.hacker_max_rotation_x", "max rotation X in degrees", 25.0f, CVarFlags::EditCheckbox);
 
 AutoCVarFloat cvar_hacker_min_rotation_x(
-		"hacker.hacker_min_rotation_x", "min rotation X in degrees", -25.0f, CVarFlags::EditCheckbox);
+		"hacker.hacker_min_rotation_x", "min rotation X in degrees", -55.0f, CVarFlags::EditCheckbox);
 
 AutoCVarInt cvar_hacker_on_keyboard(
 		"settings.hacker_on_keyboard", "Control hacker with keyboard + mouse", 0, CVarFlags::EditCheckbox);
@@ -108,16 +108,15 @@ bool HackerSystem::shoot_raycast(
 
 bool HackerSystem::jump_to_camera(World &world, HackerData &hacker_data, Entity camera_entity) {
 	auto &detection_camera = world.get_component<DetectionCamera>(camera_entity);
-	auto &camera_billboard = world.get_component<Billboard>(camera_entity);
+	auto camera_model_entity = detection_camera.camera_model;
 	auto &camera_tf = world.get_component<Transform>(hacker_data.camera);
-	auto &new_camera_tf = world.get_component<Transform>(camera_entity);
+	auto &new_camera_tf = world.get_component<Transform>(camera_model_entity);
 
 	before_jump_orientation = camera_tf.get_global_orientation();
 
 	detection_camera.is_active = false;
 	detection_camera.detection_level = 0.0f;
 	detection_camera.detection_target = DetectionTarget::NONE;
-	camera_billboard.color = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
 
 	new_camera_tf.set_orientation(detection_camera.starting_orientation);
 
@@ -129,7 +128,8 @@ bool HackerSystem::jump_to_camera(World &world, HackerData &hacker_data, Entity 
 	is_on_camera = true;
 	hacker_data.is_on_camera = true;
 	current_camera_entity = camera_entity;
-	starting_camera_orientation = world.get_component<Transform>(camera_entity).get_global_orientation();
+	current_camera_model_entity = camera_model_entity;
+	starting_camera_orientation = world.get_component<Transform>(camera_model_entity).get_global_orientation();
 
 	return true;
 }
@@ -143,8 +143,9 @@ void HackerSystem::go_back_to_scorpion(World &world, HackerData &hacker_data) {
 	auto &camera_billboard = world.get_component<Billboard>(current_camera_entity);
 	auto &camera_tf = world.get_component<Transform>(hacker_data.camera);
 
-	detection_camera.is_active = true;
-	camera_billboard.color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+	detection_camera.friendly_time_left = *CVarSystem::get()->get_float_cvar("enemy_camera.friendly_time");
+	world.get_component<Transform>(detection_camera.camera_model)
+			.set_orientation(detection_camera.starting_orientation);
 
 	AudioManager::get().play_one_shot_2d(hacker_data.hack_sound);
 
@@ -154,6 +155,7 @@ void HackerSystem::go_back_to_scorpion(World &world, HackerData &hacker_data) {
 	//current_rotation_y = 0.0f;
 	camera_tf.set_orientation(before_jump_orientation);
 	current_camera_entity = 0;
+	current_camera_model_entity = 0;
 	is_on_camera = false;
 	hacker_data.is_on_camera = false;
 }
@@ -198,6 +200,21 @@ void HackerSystem::startup(World &world) {
 	ui_text->position = default_text_pos;
 	ui_text->centered_y = true;
 	ui.add_to_root(ui_name, "text", "root_anchor");
+
+	auto &main_anchor = ui.add_ui_anchor(ui_name, "main_anchor");
+	main_anchor.is_screen_space = true;
+	main_anchor.x = 0.5f;
+	main_anchor.y = 0.95f;
+	main_anchor.display = true;
+	ui.add_as_root(ui_name, "main_anchor");
+
+	main_text = &ui.add_ui_text(ui_name, "main_text");
+	main_text->text = "";
+	//main_text->is_screen_space = true;
+	main_text->size = glm::vec2(1.0f);
+	main_text->position = glm::vec3(0.0f, 0.0f, 0.0f);
+	main_text->centered_y = true;
+	ui.add_to_root(ui_name, "main_text", "main_anchor");
 }
 
 void HackerSystem::update(World &world, float dt) {
@@ -218,7 +235,7 @@ void HackerSystem::update(World &world, float dt) {
 		Transform *camera_model_tf = nullptr;
 
 		if (is_on_camera) {
-			camera_model_tf = &world.get_component<Transform>(current_camera_entity);
+			camera_model_tf = &world.get_component<Transform>(current_camera_model_entity);
 		}
 
 		if (first_frame) {
@@ -246,6 +263,20 @@ void HackerSystem::update(World &world, float dt) {
 		camera_forward.y = 0.0f;
 		camera_forward = glm::normalize(camera_forward);
 		auto camera_right = camera_pivot_tf.get_global_right();
+
+		static int counter = 0;
+		static bool text_set = false;
+		if (counter++ % 20) {
+			if (transform.position.z > 9.5f) {
+				if (!text_set) {
+					main_text->text = "Twoja misja trwa...";
+					text_set = true;
+					counter = 0;
+				} else if (counter > 300) {
+					main_text->text = "";
+				}
+			}
+		}
 
 		// ZOOMING LOGIC
 		if (input_manager.is_action_pressed("hacker_zoom_camera")) {
@@ -302,17 +333,48 @@ void HackerSystem::update(World &world, float dt) {
 
 		mouse_delta *= camera_sens_modifier;
 		float camera_sensitivity = cvar_hacker_camera_sensitivity.get();
+
+		// CAMERA ROTATION LOGIC
 		if (!is_on_camera) {
-			current_rotation_x_camera_pivot += mouse_delta.y * camera_sensitivity * dt;
+			auto starting_rotation_x_camera_pivot = current_rotation_x_camera_pivot;
 			float max_rotation_x = cvar_hacker_max_rotation_x.get() * 0.017f;
 			float min_rotation_x = cvar_hacker_min_rotation_x.get() * 0.017f;
 
-			if (current_rotation_x_camera_pivot < max_rotation_x && current_rotation_x_camera_pivot > min_rotation_x) {
+			current_rotation_x_camera_pivot -= mouse_delta.y * camera_sensitivity * dt;
+
+			if (current_rotation_x_camera_pivot < max_rotation_x && current_rotation_x_camera_pivot > min_rotation_x &&
+					current_rotation_x_camera == 0.0f) {
 				camera_pivot_tf.add_euler_rot(glm::vec3(mouse_delta.y, 0.0f, 0.0f) * camera_sensitivity * dt);
 				camera_tf.set_orientation(scorpion_camera_tf.get_global_orientation());
-			} else {
-				camera_tf.add_euler_rot(glm::vec3(-mouse_delta.y, 0.0f, 0.0f) * camera_sensitivity * dt);
+				current_rotation_x_camera_pivot =
+						glm::clamp(current_rotation_x_camera_pivot, min_rotation_x, max_rotation_x);
+			} else if (current_rotation_x_camera_pivot > 0.0f) {
+				current_rotation_x_camera_pivot += mouse_delta.y * camera_sensitivity * dt;
+				auto starting_rotation = current_rotation_x_camera;
+				current_rotation_x_camera -= mouse_delta.y * camera_sensitivity * dt;
+				float max_rotation_x_camera = max_rotation_x * 2.0f;
+				float min_rotation_x_camera = 0.0f;
+
+				if (current_rotation_x_camera < max_rotation_x_camera) {
+					camera_tf.add_euler_rot(glm::vec3(-mouse_delta.y, 0.0f, 0.0f) * camera_sensitivity * dt);
+				} else {
+					current_rotation_x_camera = max_rotation_x_camera;
+					auto difference = starting_rotation - current_rotation_x_camera;
+					camera_tf.add_euler_rot(glm::vec3(-difference, 0.0f, 0.0f) * camera_sensitivity * dt);
+				}
+
 				camera_tf.add_global_euler_rot(glm::vec3(0.0f, -mouse_delta.x, 0.0f) * camera_sensitivity * dt);
+
+				if (starting_rotation * current_rotation_x_camera < 0.0f || abs(current_rotation_x_camera) < 0.01f) {
+					current_rotation_x_camera = 0.0f;
+				}
+			} else if (current_rotation_x_camera_pivot < 0.0f) {
+				if (current_rotation_x_camera_pivot < min_rotation_x) {
+					current_rotation_x_camera_pivot = min_rotation_x;
+					auto difference = starting_rotation_x_camera_pivot - current_rotation_x_camera_pivot;
+					camera_pivot_tf.add_euler_rot(glm::vec3(difference, 0.0f, 0.0f));
+					camera_tf.set_orientation(scorpion_camera_tf.get_global_orientation());
+				}
 			}
 
 			camera_pivot_tf.add_global_euler_rot(glm::vec3(0.0f, -mouse_delta.x, 0.0f) * camera_sensitivity * dt);
@@ -359,6 +421,7 @@ void HackerSystem::reset() {
 
 	is_on_camera = false;
 	current_camera_entity = 0;
+	current_camera_model_entity = 0;
 
 	bool first_frame = true;
 	camera_sens_modifier = 1.0f;

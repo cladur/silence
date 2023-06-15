@@ -27,9 +27,11 @@ private:
 	glm::vec3 default_text_pos = glm::vec3(150.0f, 3.0f, 0.0f);
 	std::string ui_name;
 	UIText *ui_text;
+	UIText *main_text;
 
 	bool is_on_camera = false;
 	Entity current_camera_entity = 0;
+	Entity current_camera_model_entity = 0;
 
 	float default_fov;
 	bool first_frame = true;
