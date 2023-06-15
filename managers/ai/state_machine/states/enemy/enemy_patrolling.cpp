@@ -3,11 +3,12 @@
 #include "components/enemy_data_component.h"
 #include "components/enemy_path_component.h"
 #include "components/transform_component.h"
+#include "enemy_utils.h"
 #include "engine/scene.h"
 #include "managers/ecs/world.h"
 #include "managers/render/render_scene.h"
 #include <animation/animation_manager.h>
-#include "enemy_utils.h"
+
 
 void EnemyPatrolling::startup(StateMachine *machine, std::string name) {
 	SPDLOG_INFO("EnemyPatrolling::startup");
@@ -42,8 +43,9 @@ void EnemyPatrolling::update(World *world, uint32_t entity_id, float dt) {
 		animation_manager.change_animation(entity_id, "enemy/enemy_ANIM_GLTF/enemy_walk_with_gun.anim");
 	}
 
-	glm::vec3 current_position = transform.position;
-	glm::vec3 target_position = world->get_component<Transform>(path.children[enemy_path.next_position]).get_global_position();
+	glm::vec3 current_position = transform.get_global_position();
+	glm::vec3 target_position =
+			world->get_component<Transform>(path.children[enemy_path.next_position]).get_global_position();
 
 	// get index of previous node
 	int idx = ((enemy_path.next_position - 1) % (int)path.children_count == -1)
