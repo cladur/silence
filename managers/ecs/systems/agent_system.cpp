@@ -337,6 +337,21 @@ void AgentSystem::update(World &world, float dt) {
 							auto &highlight = world.get_component<Highlight>(closest_interactable);
 							highlight.highlighted = true;
 						}
+						auto &hit_transform = world.get_component<Transform>(closest_interactable);
+
+						glm::vec4 view_pos_non_normalized = world.get_parent_scene()->get_render_scene().left_view *
+								glm::vec4(hit_transform.get_global_position(), 1.0f);
+
+						glm::vec2 render_extent = world.get_parent_scene()->get_render_scene().render_extent;
+
+						glm::vec3 view_pos = glm::vec3(view_pos_non_normalized) / view_pos_non_normalized.w;
+
+						ui_interaction_text->position.x = 100.0f + (0.25f * render_extent.x * view_pos.x / abs(view_pos.z));
+						ui_interaction_text->position.y = 50.0f + (0.25f * render_extent.y * view_pos.y / abs(view_pos.z));
+						ui_interaction_text->text = "[Space] Jump";
+						if (ui_interaction_text->position.x > render_extent.x / 2.0f - 100.f) {
+							ui_interaction_text->position.x = render_extent.x / 2.0f - 100.0f;
+						}
 						ui_interaction_text->text = "Press E to interact";
 						if (interaction_triggered) {
 							interactable.triggered = true;
