@@ -265,7 +265,6 @@ void AgentSystem::update(World &world, float dt) {
 
 				if (obstacle_height > 0.6f && obstacle_height < 0.8f) {
 
-					std::cout << render_extent.x << " " << render_extent.y << std::endl;
 					ui_interaction_text->position.x = 50.0f + (0.15f * render_extent.x * view_pos.x / abs(view_pos.z));
 					ui_interaction_text->position.y = 25.0f + (0.15f * render_extent.y * view_pos.y / abs(view_pos.z));
 					ui_interaction_text->text = "[Space] Jump";
