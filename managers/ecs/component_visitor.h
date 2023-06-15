@@ -9,76 +9,44 @@
 
 class ComponentVisitor {
 private:
+	static Entity update_id(Entity old_entity, std::unordered_map<Entity, Entity> id_map) {
+		if (id_map.find(old_entity) != id_map.end()) {
+			return id_map[old_entity];
+		}
+		return old_entity;
+	}
+
 	static void update_interactable_ids(Interactable &interactable, std::unordered_map<Entity, Entity> id_map) {
 		for (auto &target : interactable.interaction_targets) {
-			if (id_map.find(target) != id_map.end()) {
-				target = id_map[target];
-			}
+			target = update_id(target, id_map);
 		}
-		if (id_map.find(interactable.cable_parent) != id_map.end()) {
-			interactable.cable_parent = id_map[interactable.cable_parent];
-		}
+		interactable.cable_parent = update_id(interactable.cable_parent, id_map);
 	}
 
 	static void update_enemy_path_ids(EnemyPath &enemy_path, std::unordered_map<Entity, Entity> id_map) {
-		if (id_map.find(enemy_path.path_parent) != id_map.end()) {
-			enemy_path.path_parent = id_map[enemy_path.path_parent];
-		}
+		enemy_path.path_parent = update_id(enemy_path.path_parent, std::move(id_map));
 	}
 
 	static void update_agent_data_ids(AgentData &agent_data, std::unordered_map<Entity, Entity> id_map) {
-		if (id_map.find(agent_data.model) != id_map.end()) {
-			agent_data.model = id_map[agent_data.model];
-		}
-
-		if (id_map.find(agent_data.camera) != id_map.end()) {
-			agent_data.camera = id_map[agent_data.camera];
-		}
-
-		if (id_map.find(agent_data.camera_pivot) != id_map.end()) {
-			agent_data.camera_pivot = id_map[agent_data.camera_pivot];
-		}
-
-		if (id_map.find(agent_data.camera_pivot_target) != id_map.end()) {
-			agent_data.camera_pivot_target = id_map[agent_data.camera_pivot_target];
-		}
-
-		if (id_map.find(agent_data.spring_arm) != id_map.end()) {
-			agent_data.spring_arm = id_map[agent_data.spring_arm];
-		}
+		agent_data.model = update_id(agent_data.model, id_map);
+		agent_data.camera = update_id(agent_data.camera, id_map);
+		agent_data.camera_pivot = update_id(agent_data.camera_pivot, id_map);
+		agent_data.camera_pivot_target = update_id(agent_data.camera_pivot_target, id_map);
+		agent_data.spring_arm = update_id(agent_data.spring_arm, id_map);
 	}
 
 	static void update_hacker_data_ids(HackerData &hacker_data, std::unordered_map<Entity, Entity> id_map) {
-		if (id_map.find(hacker_data.model) != id_map.end()) {
-			hacker_data.model = id_map[hacker_data.model];
-		}
-
-		if (id_map.find(hacker_data.camera) != id_map.end()) {
-			hacker_data.camera = id_map[hacker_data.camera];
-		}
-
-		if (id_map.find(hacker_data.camera_pivot) != id_map.end()) {
-			hacker_data.camera_pivot = id_map[hacker_data.camera_pivot];
-		}
-
-		if (id_map.find(hacker_data.scorpion_camera_transform) != id_map.end()) {
-			hacker_data.scorpion_camera_transform = id_map[hacker_data.scorpion_camera_transform];
-		}
+		hacker_data.model = update_id(hacker_data.model, id_map);
+		hacker_data.camera = update_id(hacker_data.camera, id_map);
+		hacker_data.camera_pivot = update_id(hacker_data.camera_pivot, id_map);
+		hacker_data.scorpion_camera_transform = update_id(hacker_data.scorpion_camera_transform, id_map);
 	}
 
 	static void update_detection_camera_ids(
 			DetectionCamera &detection_camera, std::unordered_map<Entity, Entity> id_map) {
-		if (id_map.find(detection_camera.particles_parent) != id_map.end()) {
-			detection_camera.particles_parent = id_map[detection_camera.particles_parent];
-		}
-
-		if (id_map.find(detection_camera.camera_light) != id_map.end()) {
-			detection_camera.camera_light = id_map[detection_camera.camera_light];
-		}
-
-		if (id_map.find(detection_camera.camera_model) != id_map.end()) {
-			detection_camera.camera_model = id_map[detection_camera.camera_model];
-		}
+		detection_camera.particles_parent = update_id(detection_camera.particles_parent, id_map);
+		detection_camera.camera_light = update_id(detection_camera.camera_light, id_map);
+		detection_camera.camera_model = update_id(detection_camera.camera_model, id_map);
 	}
 
 public:
