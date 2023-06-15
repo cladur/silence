@@ -60,6 +60,9 @@ public:
 
 	float get_action_strength(const std::string &action_name);
 	float get_axis(const std::string &negative_action, const std::string &positive_action);
+
+	float get_action_strength(const std::string &action_name, int gamepad_id);
+	float get_axis(const std::string &negative_action, const std::string &positive_action, int gamepad_id);
 };
 
 #endif //SILENCE_INPUT_MANAGER_H

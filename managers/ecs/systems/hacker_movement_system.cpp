@@ -53,18 +53,8 @@ void HackerMovementSystem::update(World &world, float dt) {
 
 		glm::vec3 acc_direction = { 0, 0, 0 };
 		if (!is_on_camera) {
-			if (input_manager.is_action_pressed("hacker_move_forward")) {
-				acc_direction += camera_forward;
-			}
-			if (input_manager.is_action_pressed("hacker_move_backward")) {
-				acc_direction -= camera_forward;
-			}
-			if (input_manager.is_action_pressed("hacker_move_left")) {
-				acc_direction += camera_right;
-			}
-			if (input_manager.is_action_pressed("hacker_move_right")) {
-				acc_direction -= camera_right;
-			}
+			acc_direction += input_manager.get_axis("hacker_move_backward", "hacker_move_forward") * camera_forward;
+			acc_direction += input_manager.get_axis("hacker_move_left", "hacker_move_right") * -camera_right;
 		}
 
 		if (*CVarSystem::get()->get_int_cvar("debug_camera.use")) {

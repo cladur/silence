@@ -336,3 +336,28 @@ float InputManager::get_axis(const std::string &negative_action, const std::stri
 	float positive = get_action_strength(positive_action);
 	return positive - negative;
 }
+float InputManager::get_action_strength(const std::string &action_name, int gamepad_id) {
+	if (!is_action_valid(action_name)) {
+		return 0.f;
+	}
+
+	auto action = actions[action_name];
+	float strength = 0.f;
+	for (auto &key : action.keys) { // NOLINT(readability-use-anyofallof)
+		if (key == InputKey::UNKNOWN) {
+			continue;
+		}
+		if (gamepad_states[gamepad_id][key] > strength) {
+			strength = gamepad_states[gamepad_id][key];
+		}
+	}
+
+	return strength;
+}
+
+float InputManager::get_axis(const std::string &negative_action, const std::string &positive_action, int gamepad_id) {
+	float negative = get_action_strength(negative_action, gamepad_id);
+	float positive = get_action_strength(positive_action, gamepad_id);
+	return positive - negative;
+	
+}
