@@ -36,7 +36,9 @@ AutoCVarFloat cvar_enemy_camera_detection_vertical_angle(
 #define TAGGED_VELOCITY_VARIANCE glm::vec3(9.0f, 0.0f, 9.0f)
 
 #define IDLE_LIFETIME 0.5f
-#define DETECTING_LIFETIME 5.0f
+#define TAGGED_LIFETIME 5.0f
+
+#define DETECTING_LIFETIME 2.5f
 
 #define IDLE_SIZE 4.5f
 #define TAGGED_SIZE 6.0f
@@ -118,7 +120,7 @@ void DetectionCameraSystem::update(World &world, float dt) {
 			particle_1->velocity_begin = TAGGED_VELOCITY;
 			particle_1->velocity_end = TAGGED_VELOCITY;
 			particle_1->velocity_variance = TAGGED_VELOCITY_VARIANCE;
-			particle_1->lifetime = DETECTING_LIFETIME;
+			particle_1->lifetime = TAGGED_LIFETIME;
 			particle_1->size_begin = TAGGED_SIZE;
 			particle_1->size_end = TAGGED_SIZE;
 			particle_1->rate = 6.0f;
@@ -126,7 +128,7 @@ void DetectionCameraSystem::update(World &world, float dt) {
 			particle_2->velocity_begin = TAGGED_VELOCITY;
 			particle_2->velocity_end = TAGGED_VELOCITY;
 			particle_2->velocity_variance = TAGGED_VELOCITY_VARIANCE;
-			particle_2->lifetime = DETECTING_LIFETIME;
+			particle_2->lifetime = TAGGED_LIFETIME;
 			particle_2->size_begin = TAGGED_SIZE;
 			particle_2->size_end = TAGGED_SIZE;
 			particle_2->rate = 6.0f;
@@ -153,18 +155,26 @@ void DetectionCameraSystem::update(World &world, float dt) {
 
 			particle_1->color_begin = DETECTING_COLOR_BEGIN;
 			particle_1->color_end = DETECTING_COLOR_END;
+			particle_1->lifetime = tag.tagged == true ? TAGGED_LIFETIME : DETECTING_LIFETIME;
+			particle_1->velocity_begin = TAGGED_VELOCITY;
+			particle_1->velocity_end = TAGGED_VELOCITY;
 
 			particle_2->color_begin = DETECTING_COLOR_BEGIN;
 			particle_2->color_end = DETECTING_COLOR_END;
+			particle_2->lifetime = tag.tagged == true ? TAGGED_LIFETIME : DETECTING_LIFETIME;
+			particle_2->velocity_begin = TAGGED_VELOCITY;
+			particle_2->velocity_end = TAGGED_VELOCITY;
 
 		} else {
 			light.color = IDLE_COLOR;
 
 			particle_1->color_begin = IDLE_COLOR_BEGIN;
 			particle_1->color_end = IDLE_COLOR_END;
+			particle_1->lifetime = tag.tagged == true ? TAGGED_LIFETIME : IDLE_LIFETIME;
 
 			particle_2->color_begin = IDLE_COLOR_BEGIN;
 			particle_2->color_end = IDLE_COLOR_END;
+			particle_2->lifetime = tag.tagged == true ? TAGGED_LIFETIME : IDLE_LIFETIME;
 		}
 
 		if (!detection_camera.is_active) {
