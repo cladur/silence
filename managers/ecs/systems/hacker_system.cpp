@@ -149,10 +149,6 @@ void HackerSystem::go_back_to_scorpion(World &world, HackerData &hacker_data) {
 
 	AudioManager::get().play_one_shot_2d(hacker_data.hack_sound);
 
-	world.get_component<Transform>(current_camera_entity).set_orientation(starting_camera_orientation);
-	//starting_camera_orientation = glm::quat(1, 0, 0, 0);
-	//current_rotation_x = 0.0f;
-	//current_rotation_y = 0.0f;
 	camera_tf.set_orientation(before_jump_orientation);
 	current_camera_entity = 0;
 	current_camera_model_entity = 0;
