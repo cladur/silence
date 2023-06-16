@@ -112,6 +112,7 @@ void AgentSystem::update(World &world, float dt) {
 		auto &camera = world.get_component<Camera>(agent_data.camera);
 
 		auto &dd = world.get_parent_scene()->get_render_scene().debug_draw;
+		auto &audio = AudioManager::get();
 
 		auto &is_crouching = agent_data.is_crouching;
 		auto &is_climbing = agent_data.is_climbing;
@@ -128,6 +129,7 @@ void AgentSystem::update(World &world, float dt) {
 			default_fov = camera.fov;
 			camera_pivot_tf.set_orientation(glm::quat(1, 0, 0, 0));
 			current_rotation_y_camera_pivot = 0;
+			footsteps_event = EventReference("Agent/footstep");
 			first_frame = false;
 		}
 
@@ -201,6 +203,33 @@ void AgentSystem::update(World &world, float dt) {
 			if (is_crouching) {
 				animation_instance.ticks_per_second *= 0.63f;
 			}
+
+
+			// FOOTSTEP SOUNDS LOGIC
+			const glm::mat4 &left_foot_bone_matrix = animation_manager.get_bone_transform(agent_data.model, left_foot_bone);
+			const glm::mat4 &right_foot_bone_matrix = animation_manager.get_bone_transform(agent_data.model, right_foot_bone);
+
+			// get positions from both matrices
+			auto left_foot_position = glm::vec3(left_foot_bone_matrix[3]);
+			auto right_foot_position = glm::vec3(right_foot_bone_matrix[3]);
+
+			std::cout << right_foot_position.y << std::endl;
+
+			if (right_foot_position.y < footstep_right_down_threshold && right_foot_can_play) {
+				audio.play_one_shot_3d(footsteps_event, transform);
+				right_foot_can_play = false;
+			} else if (left_foot_position.y < footstep_left_down_threshold && left_foot_can_play) {
+				audio.play_one_shot_3d(footsteps_event, transform);
+				left_foot_can_play = false;
+			} else {
+				if (left_foot_position.y > footstep_up_threshold) {
+					left_foot_can_play = true;
+				}
+				if (right_foot_position.y > footstep_up_threshold) {
+					right_foot_can_play = true;
+				}
+			}
+
 		} else if (animation_timer >=
 				resource_manager.get_animation(animation_instance.animation_handle).get_duration()) {
 			if (is_crouching) {
@@ -218,6 +247,9 @@ void AgentSystem::update(World &world, float dt) {
 			animation_instance.ticks_per_second = 1000.f;
 
 			agent_data.locked_movement = false;
+		} else {
+			left_foot_can_play = false;
+			right_foot_can_play = true;
 		}
 
 		//Camera
