@@ -13,6 +13,8 @@
 		}                                                                                                              \
 	} while (false)
 
+AutoCVarInt cvar_enable_audio("audio.enabled", "is audio enabled", 0, CVarFlags::EditCheckbox);
+
 AudioManager &AudioManager::get() {
 	static AudioManager instance;
 	return instance;
@@ -26,12 +28,19 @@ void AudioManager::startup() {
 
 	event_paths = get_all_event_paths();
 
+	system->getBus("bus:/", &master_bus);
+
 	SPDLOG_INFO("Audio Manager: Initialized audio manager");
 }
 
 void AudioManager::update(Scene &scene) {
 	ZoneScopedNC("AudioManager::update", 0xcacaca);
 	FMOD_CHECK(system->update());
+	if (!cvar_enable_audio.get()) {
+		master_bus->setVolume(0.0f);
+	} else {
+		master_bus->setVolume(1.0f);
+	}
 	this->scene = &scene;
 	auto &gm = GameplayManager::get();
 	auto &agent_tf = scene.world.get_component<Transform>(gm.get_agent_camera(&scene));

@@ -29,6 +29,7 @@ class AudioManager {
 
 	Scene *scene = nullptr;
 
+	FMOD::Studio::Bus *master_bus = nullptr;
 public:
 	std::string path_to_banks = "resources/fmod_banks/Desktop/";
 	std::string bank_postfix = ".bank";
