@@ -93,6 +93,7 @@ void AgentSystem::startup(World &world) {
 
 		footsteps_event = EventReference("Agent/footstep");
 		jump_event = EventReference("Agent/jump");
+		stab_event = EventReference("Agent/stab");
 	}
 }
 
@@ -489,6 +490,11 @@ void AgentSystem::update(World &world, float dt) {
 												agent_data.model, "agent/agent_ANIM_GLTF/agent_stab.anim");
 									}
 									enemy.state_machine.set_state("dying");
+
+									Transform stab_sound_tf = transform;
+									stab_sound_tf.position.y += 1.0f;
+									stab_sound_tf.position += transform.get_forward() * 1.0f;
+									audio.play_one_shot_3d(stab_event, stab_sound_tf);
 								}
 							}
 						}

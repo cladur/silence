@@ -26,6 +26,7 @@ private:
 	float time_per_step = 0.30555; // calculated as 21 * (1 / 72). Thats what i counted from looking at a recording of our animation
 
 	EventReference jump_event;
+	EventReference stab_event;
 
 	EventReference footsteps_event;
 	std::string left_foot_bone = "heel.02.L";
