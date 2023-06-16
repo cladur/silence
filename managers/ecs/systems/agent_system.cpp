@@ -213,8 +213,6 @@ void AgentSystem::update(World &world, float dt) {
 			auto left_foot_position = glm::vec3(left_foot_bone_matrix[3]);
 			auto right_foot_position = glm::vec3(right_foot_bone_matrix[3]);
 
-			std::cout << right_foot_position.y << std::endl;
-
 			if (right_foot_position.y < footstep_right_down_threshold && right_foot_can_play) {
 				audio.play_one_shot_3d(footsteps_event, transform);
 				right_foot_can_play = false;
