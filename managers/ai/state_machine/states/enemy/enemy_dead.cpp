@@ -20,12 +20,16 @@ void EnemyDead::enter() {
 }
 
 void EnemyDead::update(World *world, uint32_t entity_id, float dt) {
+	auto &enemy_data = world->get_component<EnemyData>(entity_id);
+	if (enemy_data.is_dead) {
+		return;
+	}
+	// all of this happens only once. dead enemy does not need any logic.
 	auto &transform = world->get_component<Transform>(entity_id);
 	AnimationManager &animation_manager = AnimationManager::get();
 	ResourceManager &res = ResourceManager::get();
 	auto &anim = world->get_component<AnimationInstance>(entity_id);
 	auto &enemy_path = world->get_component<EnemyPath>(entity_id);
-	auto &enemy_data = world->get_component<EnemyData>(entity_id);
 	auto &dd = world->get_parent_scene()->get_render_scene().debug_draw;
 
 	enemy_data.detection_level = 0.0f;
@@ -43,6 +47,9 @@ void EnemyDead::update(World *world, uint32_t entity_id, float dt) {
 		taggable.enabled = false;
 	}
 
+	AudioManager::get().play_one_shot_3d(enemy_data.death_event, transform);
+
+	enemy_data.is_dead = true;
 }
 
 void EnemyDead::exit() {

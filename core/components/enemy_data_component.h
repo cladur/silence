@@ -26,11 +26,14 @@ struct EnemyData {
 	bool right_foot_can_play = false;
 
 	EventReference footsteps_event;
+	EventReference death_event;
 
 	glm::vec3 distraction_target = glm::vec3(0.0f);
 	float distraction_cooldown = 0.0f;
 
 	DetectionTarget detection_target = DetectionTarget::NONE;
+
+	bool is_dead = false;
 
 	void serialize_json(nlohmann::json &serialized_scene) {
 		nlohmann::json::object_t serialized_component;
