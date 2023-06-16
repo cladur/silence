@@ -2,23 +2,29 @@
 #define SILENCE_INTERACTABLE_COMPONENT_H
 
 #include <array>
-enum InteractionType { None, Agent, Hacker };
-enum Interaction { NoInteraction, HackerCameraJump, HackerPlatform, Exploding, LightSwitch };
+enum class InteractionType { None, Agent, Hacker };
+enum class Interaction { NoInteraction, HackerCameraJump, HackerPlatform, Exploding, LightSwitch, TemporalLightSwitch };
 
 struct Interactable {
-	InteractionType type = None;
-	Interaction interaction = NoInteraction;
+	InteractionType type = InteractionType::None;
+	Interaction interaction = Interaction::NoInteraction;
 
 	std::array<Entity, 5> interaction_targets = {};
 	Entity cable_parent = 0;
 	Entity lever = 0;
 
+	Entity enemy_entity = 0;
+	Entity enemy_entity2 = 0;
+
 	bool triggered = false;
 	bool can_interact = true;
 	bool single_use = false;
+	bool is_powering_up = false;
 
 	bool is_on = false;
 	bool is_rotating = false;
+
+	float temporal_switch_time = 0.0f;
 
 	std::string interaction_text;
 
@@ -36,6 +42,8 @@ struct Interactable {
 		serialized_component["interaction_target_3"] = interaction_targets[2];
 		serialized_component["interaction_target_4"] = interaction_targets[3];
 		serialized_component["interaction_target_5"] = interaction_targets[4];
+		serialized_component["enemy_entity"] = enemy_entity;
+		serialized_component["enemy_entity2"] = enemy_entity2;
 
 		serialized_component["single_use"] = single_use;
 		serialized_component["is_on"] = is_on;
@@ -111,6 +119,18 @@ struct Interactable {
 			interaction_text = serialized_component["interaction_text"];
 		} else {
 			interaction_text = "";
+		}
+
+		if (serialized_component.contains("enemy_entity")) {
+			enemy_entity = serialized_component["enemy_entity"];
+		} else {
+			enemy_entity = 0;
+		}
+
+		if (serialized_component.contains("enemy_entity2")) {
+			enemy_entity2 = serialized_component["enemy_entity2"];
+		} else {
+			enemy_entity2 = 0;
 		}
 
 		triggered = false;

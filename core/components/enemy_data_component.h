@@ -19,6 +19,7 @@ struct EnemyData {
 	EnemyDistracted distracted_state;
 	//UISlider detection_slider;
 	bool first_frame = true;
+	bool is_blinded = false;
 	float detection_level = 0.0f;
 
 	glm::vec3 distraction_target = glm::vec3(0.0f);
