@@ -90,6 +90,10 @@ void AgentSystem::startup(World &world) {
 		ui_kill_text->position = glm::vec3(-150.0f, 3.0f, 0.0f);
 		ui_kill_text->centered_y = true;
 		ui.add_to_root(ui_name, "kill_text", "root_anchor");
+
+		footsteps_event = EventReference("Agent/footstep");
+		jump_event = EventReference("Agent/jump");
+		stab_event = EventReference("Agent/stab");
 	}
 }
 
@@ -112,6 +116,7 @@ void AgentSystem::update(World &world, float dt) {
 		auto &camera = world.get_component<Camera>(agent_data.camera);
 
 		auto &dd = world.get_parent_scene()->get_render_scene().debug_draw;
+		auto &audio = AudioManager::get();
 
 		auto &is_crouching = agent_data.is_crouching;
 		auto &is_climbing = agent_data.is_climbing;
@@ -201,6 +206,34 @@ void AgentSystem::update(World &world, float dt) {
 			if (is_crouching) {
 				animation_instance.ticks_per_second *= 0.63f;
 			}
+
+
+			// FOOTSTEP SOUNDS LOGIC
+			const glm::mat4 &left_foot_bone_matrix = animation_manager.get_bone_transform(agent_data.model, left_foot_bone);
+			const glm::mat4 &right_foot_bone_matrix = animation_manager.get_bone_transform(agent_data.model, right_foot_bone);
+
+			// get positions from both matrices
+			auto left_foot_position = glm::vec3(left_foot_bone_matrix[3]);
+			auto right_foot_position = glm::vec3(right_foot_bone_matrix[3]);
+
+			static std::vector<std::pair<std::string, float>> event_params;
+			event_params.resize(1);
+			event_params[0] = {"agent_crouch", is_crouching ? 0.0f : 1.0f};
+			if (right_foot_position.y < footstep_right_down_threshold && right_foot_can_play) {
+				audio.play_one_shot_3d_with_params(footsteps_event, transform, nullptr, event_params);
+				right_foot_can_play = false;
+			} else if (left_foot_position.y < footstep_left_down_threshold && left_foot_can_play) {
+				audio.play_one_shot_3d_with_params(footsteps_event, transform, nullptr, event_params);
+				left_foot_can_play = false;
+			} else {
+				if (left_foot_position.y > footstep_up_threshold) {
+					left_foot_can_play = true;
+				}
+				if (right_foot_position.y > footstep_up_threshold) {
+					right_foot_can_play = true;
+				}
+			}
+
 		} else if (animation_timer >=
 				resource_manager.get_animation(animation_instance.animation_handle).get_duration()) {
 			if (is_crouching) {
@@ -208,6 +241,8 @@ void AgentSystem::update(World &world, float dt) {
 						resource_manager.get_animation_handle("agent/agent_ANIM_GLTF/agent_crouch_idle.anim").id) {
 					animation_manager.change_animation(
 							agent_data.model, "agent/agent_ANIM_GLTF/agent_crouch_idle.anim");
+
+
 				}
 			} else {
 				if (animation_instance.animation_handle.id !=
@@ -218,6 +253,9 @@ void AgentSystem::update(World &world, float dt) {
 			animation_instance.ticks_per_second = 1000.f;
 
 			agent_data.locked_movement = false;
+		} else {
+			left_foot_can_play = false;
+			right_foot_can_play = true;
 		}
 
 		//Camera
@@ -303,6 +341,7 @@ void AgentSystem::update(World &world, float dt) {
 
 					if (input_manager.is_action_just_pressed("agent_climb")) {
 						dd.draw_arrow(ray.origin, end, { 1.0f, 0.0f, 0.0f });
+						audio.play_one_shot_3d(jump_event, transform);
 
 						auto animation_handle =
 								resource_manager.get_animation_handle("agent/agent_ANIM_GLTF/agent_jump_up.anim");
@@ -451,6 +490,11 @@ void AgentSystem::update(World &world, float dt) {
 												agent_data.model, "agent/agent_ANIM_GLTF/agent_stab.anim");
 									}
 									enemy.state_machine.set_state("dying");
+
+									Transform stab_sound_tf = transform;
+									stab_sound_tf.position.y += 1.0f;
+									stab_sound_tf.position += transform.get_forward() * 1.0f;
+									audio.play_one_shot_3d(stab_event, stab_sound_tf);
 								}
 							}
 						}

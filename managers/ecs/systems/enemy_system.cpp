@@ -98,6 +98,9 @@ void EnemySystem::update(World &world, float dt) {
 			tag.display = false;
 			ui.add_as_root(std::to_string(entity) + "_detection", "tag");
 
+			ed.footsteps_event = EventReference("Agent/footstep");
+			ed.death_event = EventReference("SFX/Enemies/death");
+
 			ed.first_frame = false;
 		}
 
