@@ -12,7 +12,7 @@ private:
 
 	void no_interaction(World &world, Interactable &interactable, Entity entity);
 	void explosion(World &world, Interactable &interactable, Entity entity);
-	void switch_light(World &world, Interactable &interactable, int light_index, Entity entity);
+	void switch_light(World &world, Entity light_entity);
 
 public:
 	void startup(World &world) override;

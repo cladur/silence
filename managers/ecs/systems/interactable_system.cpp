@@ -92,6 +92,16 @@ void InteractableSystem::update(World &world, float dt) {
 				interactable.is_rotating = true;
 			}
 
+			if (interactable.cable_parent > 0) {
+				auto &cable = world.get_component<CableParent>(interactable.cable_parent);
+				// switch to the other state
+				if (cable.state == CableState::ON) {
+					cable.state = CableState::OFF;
+				} else {
+					cable.state = CableState::ON;
+				}
+			}
+
 			switch (interactable.interaction) {
 				case Interaction::NoInteraction:
 					no_interaction(world, interactable, entity);
@@ -112,17 +122,6 @@ void InteractableSystem::update(World &world, float dt) {
 						}
 						//SPDLOG_INFO("{}", "Hacker platform triggered");
 					}
-
-					if (interactable.cable_parent > 0) {
-						auto &cable = world.get_component<CableParent>(interactable.cable_parent);
-						// switch to the other state
-						if (cable.state == CableState::ON) {
-							cable.state = CableState::OFF;
-						} else {
-							cable.state = CableState::ON;
-						}
-					}
-
 					break;
 				}
 				case Exploding: {
@@ -132,12 +131,12 @@ void InteractableSystem::update(World &world, float dt) {
 					break;
 				}
 				case LightSwitch: {
-					for (unsigned int current_target : interactable.interaction_targets) {
-						if (current_target == 0) {
+					for (Entity current_light_entity : interactable.interaction_targets) {
+						if (current_light_entity == 0) {
 							break;
 						}
 						SPDLOG_INFO("Light switch triggered");
-						switch_light(world, interactable, current_target, entity);
+						switch_light(world, current_light_entity);
 					}
 				}
 			}
@@ -207,11 +206,7 @@ void InteractableSystem::explosion(World &world, Interactable &interactable, Ent
 	}
 }
 
-void InteractableSystem::switch_light(World &world, Interactable &interactable, int light_index, Entity entity) {
-	auto &light = world.get_component<Light>(interactable.interaction_targets[light_index]);
+void InteractableSystem::switch_light(World &world, Entity light_entity) {
+	auto &light = world.get_component<Light>(light_entity);
 	light.is_on = !light.is_on;
-	if (interactable.cable_parent != 0) {
-		auto &cable = world.get_component<CableParent>(interactable.cable_parent);
-		cable.state = light.is_on ? CableState::ON : CableState::OFF;
-	}
 }
