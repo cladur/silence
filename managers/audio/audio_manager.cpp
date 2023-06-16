@@ -282,3 +282,29 @@ void AudioManager::stop_local(FMOD::Studio::EventInstance *instance) {
 	event_instances.erase(std::remove(event_instances.begin(), event_instances.end(), instance),
 			event_instances.end());
 }
+
+void AudioManager::play_one_shot_3d_with_params(const EventReference &event_ref, Transform &transform,
+		RigidBody *rigid_body, std::vector<std::pair<std::string, float>> params) {
+	FMOD::Studio::EventInstance *instance = create_event_instance(event_ref.path);
+	if (instance == nullptr) {
+		return;
+	}
+
+	FMOD_3D_ATTRIBUTES attributes;
+	attributes.position = to_fmod_vector(transform.get_global_position());
+	attributes.forward = to_fmod_vector(transform.get_forward());
+	attributes.up = to_fmod_vector(transform.get_up());
+	if (rigid_body != nullptr) {
+		attributes.velocity = to_fmod_vector(rigid_body->velocity);
+	} else {
+		attributes.velocity = {0, 0, 0};
+	}
+	FMOD_CHECK(instance->set3DAttributes(&attributes));
+
+	for (auto &param : params) {
+		FMOD_CHECK(instance->setParameterByName(param.first.c_str(), param.second));
+	}
+
+	FMOD_CHECK(instance->start());
+	FMOD_CHECK(instance->release());
+}

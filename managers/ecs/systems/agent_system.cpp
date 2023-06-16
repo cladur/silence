@@ -215,11 +215,14 @@ void AgentSystem::update(World &world, float dt) {
 			auto left_foot_position = glm::vec3(left_foot_bone_matrix[3]);
 			auto right_foot_position = glm::vec3(right_foot_bone_matrix[3]);
 
+			static std::vector<std::pair<std::string, float>> event_params;
+			event_params.resize(1);
+			event_params[0] = {"agent_crouch", is_crouching ? 0.0f : 1.0f};
 			if (right_foot_position.y < footstep_right_down_threshold && right_foot_can_play) {
-				audio.play_one_shot_3d(footsteps_event, transform);
+				audio.play_one_shot_3d_with_params(footsteps_event, transform, nullptr, event_params);
 				right_foot_can_play = false;
 			} else if (left_foot_position.y < footstep_left_down_threshold && left_foot_can_play) {
-				audio.play_one_shot_3d(footsteps_event, transform);
+				audio.play_one_shot_3d_with_params(footsteps_event, transform, nullptr, event_params);
 				left_foot_can_play = false;
 			} else {
 				if (left_foot_position.y > footstep_up_threshold) {
@@ -237,6 +240,8 @@ void AgentSystem::update(World &world, float dt) {
 						resource_manager.get_animation_handle("agent/agent_ANIM_GLTF/agent_crouch_idle.anim").id) {
 					animation_manager.change_animation(
 							agent_data.model, "agent/agent_ANIM_GLTF/agent_crouch_idle.anim");
+
+
 				}
 			} else {
 				if (animation_instance.animation_handle.id !=

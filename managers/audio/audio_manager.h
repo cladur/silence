@@ -68,6 +68,12 @@ public:
 
 	void play_one_shot_3d(const EventReference &event_ref, Transform &transform, RigidBody *rigid_body = nullptr);
 
+	void play_one_shot_3d_with_params(
+			const EventReference &event_ref,
+			Transform &transform,
+			RigidBody *rigid_body = nullptr,
+			std::vector<std::pair<std::string, float>> params = {});
+
 	static FMOD_3D_ATTRIBUTES to_3d_attributes(Transform &transform, RigidBody *rigid_body = nullptr);
 
 	FMOD_GUID path_to_guid(const std::string &path);
