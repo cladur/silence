@@ -25,6 +25,8 @@ private:
 	float first_step_offset = 0.125f;
 	float time_per_step = 0.30555; // calculated as 21 * (1 / 72). Thats what i counted from looking at a recording of our animation
 
+	EventReference jump_event;
+
 	EventReference footsteps_event;
 	std::string left_foot_bone = "heel.02.L";
 	std::string right_foot_bone = "heel.02.R";

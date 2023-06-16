@@ -90,6 +90,9 @@ void AgentSystem::startup(World &world) {
 		ui_kill_text->position = glm::vec3(-150.0f, 3.0f, 0.0f);
 		ui_kill_text->centered_y = true;
 		ui.add_to_root(ui_name, "kill_text", "root_anchor");
+
+		footsteps_event = EventReference("Agent/footstep");
+		jump_event = EventReference("Agent/jump");
 	}
 }
 
@@ -129,7 +132,6 @@ void AgentSystem::update(World &world, float dt) {
 			default_fov = camera.fov;
 			camera_pivot_tf.set_orientation(glm::quat(1, 0, 0, 0));
 			current_rotation_y_camera_pivot = 0;
-			footsteps_event = EventReference("Agent/footstep");
 			first_frame = false;
 		}
 
@@ -333,6 +335,7 @@ void AgentSystem::update(World &world, float dt) {
 
 					if (input_manager.is_action_just_pressed("agent_climb")) {
 						dd.draw_arrow(ray.origin, end, { 1.0f, 0.0f, 0.0f });
+						audio.play_one_shot_3d(jump_event, transform);
 
 						auto animation_handle =
 								resource_manager.get_animation_handle("agent/agent_ANIM_GLTF/agent_jump_up.anim");
