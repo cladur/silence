@@ -8,6 +8,7 @@
 #include "ai/state_machine/states/enemy/enemy_looking.h"
 #include "ai/state_machine/states/enemy/enemy_patrolling.h"
 #include "ai/state_machine/states/enemy/enemy_stationary_patrolling.h"
+#include "audio/event_reference.h"
 
 struct EnemyData {
 	StateMachine state_machine;
@@ -20,6 +21,11 @@ struct EnemyData {
 	//UISlider detection_slider;
 	bool first_frame = true;
 	float detection_level = 0.0f;
+
+	bool left_foot_can_play = false;
+	bool right_foot_can_play = false;
+
+	EventReference footsteps_event;
 
 	glm::vec3 distraction_target = glm::vec3(0.0f);
 	float distraction_cooldown = 0.0f;

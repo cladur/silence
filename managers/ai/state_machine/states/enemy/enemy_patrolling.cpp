@@ -59,7 +59,7 @@ void EnemyPatrolling::update(World *world, uint32_t entity_id, float dt) {
 	// move the entity towards the next node
 	if (glm::distance(current_position, target_position) > 0.1f) {
 		transform.add_position(glm::normalize(target_position - current_position) * enemy_path.speed * dt);
-
+		enemy_utils::handle_footsteps(entity_id, transform, enemy_data, dt);
 		// if the point is a patrol point, switch state
 	} else if (next_node.is_patrol_point) {
 		enemy_path.patrol_cooldown = next_node.patrol_time;
