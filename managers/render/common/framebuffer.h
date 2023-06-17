@@ -141,14 +141,4 @@ public:
 	void resize(uint32_t width, uint32_t height);
 };
 
-class DecalBuffer {
-public:
-	uint32_t framebuffer_id;
-	uint32_t rbo_id;
-
-	void startup(uint32_t width, uint32_t height, GBuffer &g_buffer);
-	void bind();
-	void resize(uint32_t width, uint32_t height);
-};
-
 #endif // SILENCE_FRAMEBUFFER_H

@@ -3,15 +3,6 @@
         "components": [
             {
                 "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "placeholders/cube_1x1x1.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
                     "name": "Floor"
                 },
                 "component_name": "Name"
@@ -36,6 +27,15 @@
                     }
                 },
                 "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
             }
         ],
         "entity": 1,
@@ -59,24 +59,24 @@
                     },
                     "position": {
                         "x": 0.0,
-                        "y": 0.9675952792167664,
+                        "y": 1.0820589065551758,
                         "z": 0.0
                     },
                     "scale": {
-                        "x": 1.0,
+                        "x": 5.0,
                         "y": 1.0,
-                        "z": 1.0
+                        "z": 5.0
                     }
                 },
                 "component_name": "Transform"
             },
             {
                 "component_data": {
-                    "albedo": "smoke.ktx2",
+                    "albedo": "missing.ktx2",
                     "normal": "lens_dirts/lens_dirt_2.ktx2",
-                    "projection_far": 30.0,
-                    "projection_near": 0.09799999743700027,
-                    "projection_size": 20.0
+                    "projection_far": 1.0,
+                    "projection_near": 0.0010000000474974513,
+                    "projection_size": 0.5
                 },
                 "component_name": "Decal"
             }

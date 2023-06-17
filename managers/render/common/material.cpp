@@ -680,9 +680,9 @@ void MaterialDecal::startup() {
 
 void MaterialDecal::bind_resources(RenderScene &scene) {
 	shader.use();
-	shader.set_mat4("projection", scene.projection);
-	shader.set_mat4("view", scene.view);
-	shader.set_mat4("inv_view_proj", glm::inverse(scene.projection * scene.view));
+	const glm::mat4 &view_proj = scene.projection * scene.view;
+	shader.set_mat4("view_proj", view_proj);
+	shader.set_mat4("inv_view_proj", glm::inverse(view_proj));
 	shader.set_int("gDepth", 1);
 
 	glActiveTexture(GL_TEXTURE1);
@@ -695,16 +695,14 @@ void MaterialDecal::bind_instance_resources(ModelInstance &instance, Transform &
 void MaterialDecal::bind_decal_resources(Decal &decal, Transform &transform) {
 	ResourceManager &resource_manager = ResourceManager::get();
 	const glm::vec3 &center = transform.get_global_position();
-	const glm::vec3 &range = transform.get_global_scale();
+	const glm::vec3 &scale = transform.get_global_scale() * 0.5f;
 	const glm::quat &rotation = transform.get_global_orientation();
 
 	const glm::vec3 &local_up = rotation * glm::vec3(0.0f, 0.0f, 1.0f);
-	const glm::vec3 &dir = rotation * glm::vec3(0.0f, range.y * 0.5f, 0.0f);
-	//Todo: FIX THIS
+	const glm::vec3 &projector_offset = rotation * glm::vec3(0.0f, scale.y, 0.0f);
 
-	const glm::mat4 &decal_view = glm::lookAt(center + dir, center, glm::normalize(local_up));
-	const glm::mat4 &decal_projection = glm::ortho(-decal.projection_size, decal.projection_size,
-			-decal.projection_size, decal.projection_size, decal.projection_near, decal.projection_far);
+	const glm::mat4 &decal_view = glm::lookAt(center + projector_offset, center, glm::normalize(local_up));
+	const glm::mat4 &decal_projection = glm::ortho(-scale.x, scale.x, -scale.z, scale.z, 0.0f, scale.y * 2.0f);
 
 	const glm::mat4 &decal_view_proj = decal_projection * decal_view;
 	shader.set_mat4("decal_view_proj", decal_view_proj);

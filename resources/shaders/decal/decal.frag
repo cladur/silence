@@ -1,5 +1,5 @@
 #version 330 core
-layout (location = 0) out vec4 gAlbedo;
+layout (location = 2) out vec4 gAlbedo;
 
 in vec4 clip_pos;
 
@@ -9,6 +9,7 @@ uniform sampler2D decal_albedo;
 uniform mat4 inv_view_proj;
 uniform mat4 decal_view_proj;
 uniform vec2 aspect_ratio;
+uniform vec2 pixel_size;
 
 vec3 world_position_from_depth(vec2 screen_pos, float ndc_depth)
 {
@@ -31,9 +32,9 @@ vec3 world_position_from_depth(vec2 screen_pos, float ndc_depth)
 void main()
 {
     vec2 screen_pos = clip_pos.xy / clip_pos.w;
-    vec2 tex_coords = screen_pos * 0.5 + 0.5;
+    vec2 depth_uv = screen_pos * 0.5 + 0.5;
 
-    float depth = texture(gDepth, tex_coords).x;
+    float depth = texture(gDepth, depth_uv).x;
     vec3 world_pos = world_position_from_depth(screen_pos, depth);
 
     vec4 ndc_pos = decal_view_proj * vec4(world_pos, 1.0);
@@ -46,10 +47,10 @@ void main()
         discard;
     }
 
-    vec2 decal_tex_coord = ndc_pos.xy * 0.5 + 0.5;
-    decal_tex_coord.x = 1.0 - decal_tex_coord.x;
+    vec2 decal_uv = ndc_pos.xy * 0.5 + 0.5;
+    decal_uv.x = 1.0 - decal_uv.x;
 
-    vec4 albedo = texture(decal_albedo, decal_tex_coord);
+    vec4 albedo = texture(decal_albedo, decal_uv);
 
     if (albedo.a < 0.1)
     {

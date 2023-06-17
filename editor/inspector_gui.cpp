@@ -1580,47 +1580,26 @@ void Inspector::show_decal() {
 			}
 			ImGui::EndCombo();
 		}
-		ImGui::TableNextRow();
-
-		ImGui::TableSetColumnIndex(0);
-		ImGui::Text("Projection size");
-		ImGui::TableSetColumnIndex(1);
-		ImGui::SetNextItemWidth(-FLT_MIN);
-		ImGui::DragFloat("##Projection size", &decal.projection_size, 1.0f, 1.0f, 100.0f);
-		ImGui::TableNextRow();
-
-		ImGui::TableSetColumnIndex(0);
-		ImGui::Text("Projection far");
-		ImGui::TableSetColumnIndex(1);
-		ImGui::SetNextItemWidth(-FLT_MIN);
-		ImGui::DragFloat("##Projection far", &decal.projection_far, 1.0f, 10.0f, 100.0f);
-		ImGui::TableNextRow();
-
-		ImGui::TableSetColumnIndex(0);
-		ImGui::Text("Projection near");
-		ImGui::TableSetColumnIndex(1);
-		ImGui::SetNextItemWidth(-FLT_MIN);
-		ImGui::DragFloat("##Projection near", &decal.projection_near, 0.001f, 0.001f, 1.0f);
-
 		ImGui::EndTable();
 
-		//		if (ImGui::BeginDragDropTarget()) {
-		//			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ANIMATION_PATH")) {
-		//				std::string payload_n = *(const std::string *)payload->Data;
-		//				std::string search_string = "\\";
-		//				std::string replace_string = "/";
-		//
-		//				size_t pos = payload_n.find(search_string);
-		//				while (pos != std::string::npos) {
-		//					payload_n.replace(pos, search_string.length(), replace_string);
-		//					pos = payload_n.find(search_string, pos + replace_string.length());
-		//				}
-		//				resource_manager.load_animation(payload_n.c_str());
-		//				animation_instance.animation_handle = resource_manager.get_animation_handle(payload_n);
-		//			}
-		//
-		//			ImGui::EndDragDropTarget();
-		//		}
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_TEXTURE_PATH")) {
+				std::string payload_n = *(const std::string *)payload->Data;
+				std::string search_string = "\\";
+				std::string replace_string = "/";
+
+				size_t pos = payload_n.find(search_string);
+				while (pos != std::string::npos) {
+					payload_n.replace(pos, search_string.length(), replace_string);
+					pos = payload_n.find(search_string, pos + replace_string.length());
+				}
+				resource_manager.load_texture(payload_n.c_str());
+				auto texture_handle = resource_manager.get_texture_handle(payload_n);
+				decal.albedo = texture_handle;
+			}
+
+			ImGui::EndDragDropTarget();
+		}
 	}
 }
 
