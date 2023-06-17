@@ -8,6 +8,8 @@ __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
 }
 #endif
 
+#include <random>
+
 int main() {
 	auto start = std::chrono::high_resolution_clock::now();
 

@@ -21,6 +21,7 @@ class GameplayManager {
 	std::shared_ptr<HackerSystem> hacker_system = nullptr;
 
 public:
+	static std::default_random_engine random_generator;
 	static GameplayManager &get();
 
 	bool first_start = true;

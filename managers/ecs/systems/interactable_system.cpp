@@ -43,6 +43,23 @@ void InteractableSystem::startup(World &world) {
 	electric_interaction_event = EventReference("SFX/Interactions/electric_interaction");
 }
 
+void InteractableSystem::rotate_handle(World &world, float &dt, Interactable &interactable) {
+	float target_angle = interactable.is_on ? -10.0f : -170.0f;
+	auto &lever_transform = world.get_component<Transform>(interactable.lever);
+
+	interactable.is_rotating = !lever_transform.lerp_rotation_towards(target_angle, glm::vec3(1.0f, 0.0f, 0.0f), dt);
+}
+
+void InteractableSystem::switch_lights(World &world, Interactable &interactable) {
+	for (Entity light_entity : interactable.interaction_targets) {
+		if (light_entity == 0) {
+			break;
+		}
+		auto &light = world.get_component<Light>(light_entity);
+		light.is_on = !light.is_on;
+	}
+}
+
 void InteractableSystem::update(World &world, float dt) {
 	for (auto const &entity : entities) {
 		auto &interactable = world.get_component<Interactable>(entity);
@@ -81,11 +98,7 @@ void InteractableSystem::update(World &world, float dt) {
 		}
 
 		if (interactable.is_rotating) {
-			float target_angle = interactable.is_on ? -10.0f : -170.0f;
-			auto &lever_transform = world.get_component<Transform>(interactable.lever);
-
-			interactable.is_rotating =
-					!lever_transform.lerp_rotation_towards(target_angle, glm::vec3(1.0f, 0.0f, 0.0f), dt);
+			rotate_handle(world, dt, interactable);
 		}
 
 		if (interactable.is_powering_up) {
@@ -107,13 +120,7 @@ void InteractableSystem::update(World &world, float dt) {
 				interactable.is_rotating = true;
 				interactable.is_powering_up = false;
 
-				for (Entity light_entity : interactable.interaction_targets) {
-					if (light_entity == 0) {
-						break;
-					}
-					auto &light = world.get_component<Light>(light_entity);
-					light.is_on = !light.is_on;
-				}
+				switch_lights(world, interactable);
 
 				if (interactable.enemy_entity != 0) {
 					auto &enemy = world.get_component<EnemyData>(interactable.enemy_entity);
@@ -271,9 +278,18 @@ void InteractableSystem::explosion(World &world, Interactable &interactable, Ent
 	}
 }
 
+void InteractableSystem::switch_rotator(World &world, Entity &light_entity) {
+	if (world.has_component<Rotator>(light_entity)) {
+		auto &rotator = world.get_component<Rotator>(light_entity);
+		rotator.is_rotating = !rotator.is_rotating;
+	}
+}
+
 void InteractableSystem::switch_light(World &world, Entity light_entity) {
 	auto &light = world.get_component<Light>(light_entity);
 	light.is_on = !light.is_on;
+
+	switch_rotator(world, light_entity);
 }
 
 void InteractableSystem::switch_light_temporal(World &world, const std::vector<Entity> &light_entities,
@@ -288,6 +304,8 @@ void InteractableSystem::switch_light_temporal(World &world, const std::vector<E
 		}
 		auto &light = world.get_component<Light>(light_entity);
 		light.is_on = !light.is_on;
+
+		switch_rotator(world, light_entity);
 	}
 	for (Entity enemy_entity : enemy_entities) {
 		if (enemy_entity == 0) {
