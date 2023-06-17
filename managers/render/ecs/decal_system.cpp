@@ -24,7 +24,7 @@ void DecalSystem::update(World &world, float dt) {
 			const glm::vec3 &scale = transform.get_global_scale();
 			const glm::vec3 &position = transform.get_global_position();
 			const glm::quat &rotation = transform.get_global_orientation();
-			render_scene.debug_draw.draw_box(position, rotation, scale);
+			render_scene.debug_draw.draw_box(position, rotation, scale, glm::vec4(1.0f, 1.0f, 0.0f, 1.0f), entity);
 			const glm::vec3 &offset = rotation * glm::vec3(0.0f, scale.y * 0.5f, 0.0f);
 			render_scene.debug_draw.draw_arrow(position + offset, position - offset);
 		}

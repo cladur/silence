@@ -681,12 +681,17 @@ void MaterialDecal::startup() {
 void MaterialDecal::bind_resources(RenderScene &scene) {
 	shader.use();
 	const glm::mat4 &view_proj = scene.projection * scene.view;
+	shader.set_mat4("view", scene.view);
 	shader.set_mat4("view_proj", view_proj);
 	shader.set_mat4("inv_view_proj", glm::inverse(view_proj));
 	shader.set_int("gDepth", 1);
+	shader.set_int("gPosition", 2);
 
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.depth_texture_id);
+
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.position_texture_id);
 }
 
 void MaterialDecal::bind_instance_resources(ModelInstance &instance, Transform &transform) {
