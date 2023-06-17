@@ -349,8 +349,8 @@ void AgentSystem::update(World &world, float dt) {
 				glm::vec3 view_pos = glm::vec3(view_pos_non_normalized) / view_pos_non_normalized.w;
 
 				if (obstacle_height > 0.6f && obstacle_height < 0.8f) {
-					interaction_sprite->position.x = 50.0f + (0.15f * render_extent.x * view_pos.x / abs(view_pos.z));
-					interaction_sprite->position.y = 25.0f + (0.15f * render_extent.y * view_pos.y / abs(view_pos.z));
+					interaction_sprite->position.x = 75.0f + (0.15f * render_extent.x * view_pos.x / abs(view_pos.z));
+					interaction_sprite->position.y = 50.0f + (0.15f * render_extent.y * view_pos.y / abs(view_pos.z));
 					interaction_sprite->display = true;
 					ui_button_hint->text = "Space";
 					ui_button_hint->size = glm::vec2(0.3f);
@@ -430,8 +430,8 @@ void AgentSystem::update(World &world, float dt) {
 
 						glm::vec3 view_pos = glm::vec3(view_pos_non_normalized) / view_pos_non_normalized.w;
 
-						interaction_sprite->position.x = 50.0f + (0.15f * render_extent.x * view_pos.x / abs(view_pos.z));
-						interaction_sprite->position.y = 25.0f + (0.15f * render_extent.y * view_pos.y / abs(view_pos.z));
+						interaction_sprite->position.x = 75.0f + (0.15f * render_extent.x * view_pos.x / abs(view_pos.z));
+						interaction_sprite->position.y = 50.0f + (0.15f * render_extent.y * view_pos.y / abs(view_pos.z));
 						interaction_sprite->display = true;
 
 						// take interactable.interaction_text and splt it by space
@@ -455,8 +455,8 @@ void AgentSystem::update(World &world, float dt) {
 						float size = 0.6f - (words[0].size() / 10.0f);
 						ui_button_hint->size = glm::vec2(size);
 
-						if (interaction_sprite->position.x > render_extent.x / 2.0f - 100.f) {
-							interaction_sprite->position.x = render_extent.x / 2.0f - 100.0f;
+						if (interaction_sprite->position.x > render_extent.x / 2.0f - 125.f) {
+							interaction_sprite->position.x = render_extent.x / 2.0f - 125.0f;
 						}
 
 						if (interaction_triggered) {
@@ -510,15 +510,15 @@ void AgentSystem::update(World &world, float dt) {
 								glm::vec2 render_extent = world.get_parent_scene()->get_render_scene().render_extent;
 								glm::vec3 view_pos = glm::vec3(view_pos_non_normalized) / view_pos_non_normalized.w;
 
-								interaction_sprite->position.x = 50.0f + (0.15f * render_extent.x * view_pos.x / abs(view_pos.z));
-								interaction_sprite->position.y = 25.0f + (0.15f * render_extent.y * view_pos.y / abs(view_pos.z));
+								interaction_sprite->position.x = 75.0f + (0.15f * render_extent.x * view_pos.x / abs(view_pos.z));
+								interaction_sprite->position.y = 50.0f + (0.15f * render_extent.y * view_pos.y / abs(view_pos.z));
 								interaction_sprite->display = true;
 								ui_button_hint->text = "LMB";
 								ui_button_hint->size = glm::vec2(0.4f);
 								ui_interaction_text->text = "Kill";
 								interaction_sprite->color = glm::vec4(1.0f, 0.4f, 0.4f, 0.6f);
-								if (interaction_sprite->position.x > render_extent.x / 2.0f - 100.f) {
-									interaction_sprite->position.x = render_extent.x / 2.0f - 100.0f;
+								if (interaction_sprite->position.x > render_extent.x / 2.0f - 125.f) {
+									interaction_sprite->position.x = render_extent.x / 2.0f - 125.0f;
 								}
 
 								if (input_manager.is_action_just_pressed("mouse_left")) {
