@@ -12,7 +12,9 @@ private:
 
 	void no_interaction(World &world, Interactable &interactable, Entity entity);
 	void explosion(World &world, Interactable &interactable, Entity entity);
-	void switch_light(World &world, Interactable &interactable, int light_index, Entity entity);
+	void switch_light(World &world, Entity light_entity);
+	void switch_light_temporal(World &world, const std::vector<Entity> &light_entities, Interactable &interactable,
+			float dt, const std::vector<Entity> &enemy_entities = {});
 
 public:
 	void startup(World &world) override;
