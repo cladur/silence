@@ -1,10 +1,11 @@
 #ifndef SILENCE_AGENT_SYSTEM_H
 #define SILENCE_AGENT_SYSTEM_H
 
-#include "base_system.h"
-#include <render/transparent_elements/ui/ui_elements/ui_text.h>
-#include "fmod_studio.hpp"
 #include "audio/event_reference.h"
+#include "base_system.h"
+#include "fmod_studio.hpp"
+#include "render/transparent_elements/ui/ui_elements/ui_image.h"
+#include <render/transparent_elements/ui/ui_elements/ui_text.h>
 
 class AgentSystem : public BaseSystem {
 private:
@@ -18,7 +19,9 @@ private:
 	std::string ui_name;
 	UIText *ui_interaction_text;
 	glm::vec3 default_interaction_text_position = glm::vec3(150.0f, 3.0f, 0.0f);
-	UIText *ui_kill_text;
+	UIText *ui_button_hint;
+
+	UIImage *interaction_sprite;
 
 	float current_step_time = 0.0f;
 	bool first_step = true;

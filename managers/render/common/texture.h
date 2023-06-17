@@ -13,7 +13,7 @@ struct Texture {
 	static std::map<std::string, ktxTexture2 *> ktx_textures;
 	//static std::set<std::string> ktx_paths;
 
-	void load_from_asset(const std::string &path, bool pregenerated_mipmaps = false);
+	void load_from_asset(const std::string &path, bool pregenerated_mipmaps = false, bool repeat = true);
 };
 
 #endif // SILENCE_TEXTURE_H
