@@ -1707,7 +1707,8 @@ void Inspector::show_rotator() {
 		ImGui::BeginTable("Rotator", 2);
 		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
 
-		show_vec3("Rotation", rotator.rotation_speed, 0.1f, 0.0f, -90.0f, 90.0f);
+		show_float("Rotation X", rotator.rotation_x);
+		show_float("Rotation Y", rotator.rotation_y);
 
 		ImGui::EndTable();
 	}
