@@ -1,14 +1,12 @@
 #ifndef SILENCE_CABLE_PARENT_COMPONENT_H
 #define SILENCE_CABLE_PARENT_COMPONENT_H
 
-enum class CableState {
-	OFF,
-	ON
-};
+enum class CableState { OFF, ON };
 
 struct CableParent {
 	glm::vec3 on_color, off_color;
 	CableState state = CableState::OFF;
+	float color_value = -1.0f;
 	bool highlighted_on_off = true;
 
 	void serialize_json(nlohmann::json &serialized_scene) {

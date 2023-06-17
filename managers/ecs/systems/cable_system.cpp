@@ -1,6 +1,7 @@
 #include "cable_system.h"
 #include "ecs/world.h"
 #include "engine/scene.h"
+#include <glm/common.hpp>
 
 void CableSystem::startup(World &world) {
 	Signature whitelist;
@@ -23,10 +24,14 @@ void CableSystem::update(World &world, float dt) {
 					auto &highlight = world.get_component<Highlight>(child);
 
 					highlight.highlighted = true;
-					highlight.highlight_color = (cable.state == CableState::ON) ? cable.on_color : cable.off_color;
+					if (cable.color_value != -1.0f) {
+						highlight.highlight_color = glm::mix(cable.off_color, cable.on_color, cable.color_value);
+					} else {
+						highlight.highlight_color = (cable.state == CableState::ON) ? cable.on_color : cable.off_color;
 
-					if (cable.state == CableState::OFF && !cable.highlighted_on_off) {
-						highlight.highlighted = false;
+						if (cable.state == CableState::OFF && !cable.highlighted_on_off) {
+							highlight.highlighted = false;
+						}
 					}
 				}
 			}

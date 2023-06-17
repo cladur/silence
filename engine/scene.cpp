@@ -101,10 +101,12 @@ Scene::Scene() {
 
 	physics_manager.set_layers_no_collision("default", "hacker");
 	physics_manager.set_layers_no_collision("agent", "hacker");
+	physics_manager.set_layers_no_collision("camera", "hacker");
 
 	physics_manager.set_layers_no_collision("camera", "default");
-	physics_manager.set_layers_no_collision("camera", "hacker");
 	physics_manager.set_layers_no_collision("camera", "agent");
+	physics_manager.set_layers_no_collision("camera", "taggable");
+	physics_manager.set_layers_no_collision("camera", "obstacle");
 }
 
 void Scene::register_main_systems() {

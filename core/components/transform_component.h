@@ -205,6 +205,19 @@ public:
 		this->changed = true;
 	}
 
+	// Returns true if the rotation is finished
+	[[nodiscard]] bool lerp_rotation_towards(float target_angle, glm::vec3 axis, float dt) {
+		glm::quat target_quat = glm::angleAxis(glm::radians(target_angle), axis);
+		set_orientation(glm::slerp(orientation, target_quat, dt * 5.0f));
+
+		if (glm::length(orientation - target_quat) < 0.01f) {
+			orientation = target_quat;
+			return true;
+		}
+
+		return false;
+	}
+
 	void set_orientation(const glm::quat &new_orientation) {
 		this->orientation = glm::normalize(new_orientation);
 		this->changed = true;

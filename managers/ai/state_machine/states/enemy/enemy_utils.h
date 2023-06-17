@@ -38,20 +38,24 @@ inline void handle_detection(World *world, uint32_t enemy_entity, Transform &tra
 	float crouch_mod = *cvar->get_float_cvar("enemy.crouch_detection_modifier");
 	float hacker_mod = *cvar->get_float_cvar("enemy.hacker_detection_modifier");
 
-	auto enemy_look_origin = transform.position + enemy_look_offset;
+	bool is_blinded = enemy_data.is_blinded;
+
+	glm::vec3 current_global_position = transform.get_global_position();
+
+	auto enemy_look_origin = current_global_position + enemy_look_offset;
 
 	auto agent_pos = GameplayManager::get().get_agent_position(world->get_parent_scene()) + agent_target_top_offset;
 	bool can_see_player = false;
 	auto agent_dir = glm::normalize(agent_pos - enemy_look_origin);
-	float agent_distance_ratio = glm::distance(transform.position, agent_pos) / cone_range;
+	float agent_distance_ratio = glm::distance(current_global_position, agent_pos) / cone_range;
 
 	auto hacker_pos = GameplayManager::get().get_hacker_position(world->get_parent_scene()) + agent_target_top_offset;
 	auto hacker_dir = glm::normalize(hacker_pos - enemy_look_origin);
 	bool can_see_hacker = false;
-	float hacker_distance_ratio = glm::distance(transform.position, hacker_pos) / cone_range;
+	float hacker_distance_ratio = glm::distance(current_global_position, hacker_pos) / cone_range;
 
 	// AGENT CONE DETECTION LOGIC
-	if (glm::distance(transform.position, agent_pos) < cone_range) {
+	if (!is_blinded && glm::distance(current_global_position, agent_pos) < cone_range) {
 		auto angle = glm::acos(glm::dot(agent_dir, forward));
 		if (angle < glm::radians(cone_angle) / 2.0f) {
 			Ray ray{};
@@ -93,7 +97,7 @@ inline void handle_detection(World *world, uint32_t enemy_entity, Transform &tra
 	}
 
 	// HACKER CONE DETECTION LOGIC
-	if (glm::distance(transform.position, hacker_pos) < cone_range) {
+	if (!is_blinded && glm::distance(current_global_position, hacker_pos) < cone_range) {
 		auto angle = glm::acos(glm::dot(hacker_dir, forward));
 		if (angle < glm::radians(cone_angle) / 2.0f) {
 			Ray ray{};

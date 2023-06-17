@@ -20,6 +20,7 @@ struct EnemyData {
 	EnemyDistracted distracted_state;
 	//UISlider detection_slider;
 	bool first_frame = true;
+	bool is_blinded = false;
 	float detection_level = 0.0f;
 
 	bool left_foot_can_play = false;
