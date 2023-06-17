@@ -26,22 +26,22 @@ void LightSwitcherSystem::calculate_next_switch(LightSwitcher &light_switcher) {
 	std::uniform_real_distribution<float> distribution(
 			-light_switcher.switch_time_variance, light_switcher.switch_time_variance);
 	float random_value = distribution(GameplayManager::random_generator);
-
 	float next_switch_time = light_switcher.switch_time + random_value;
-	light_switcher.time_to_switch = next_switch_time;
 
-	SPDLOG_INFO("Random value: {}", random_value);
-	SPDLOG_INFO("next_switch_time: {}", next_switch_time);
-	SPDLOG_INFO("light_switcher.time_to_switch: {}", light_switcher.time_to_switch);
+	light_switcher.time_to_switch = next_switch_time;
 }
 
 void LightSwitcherSystem::update(World &world, float dt) {
 	ZoneScopedN("LightSwitcherSystem::update");
 	for (auto const &entity : entities) {
 		auto &light_switcher = world.get_component<LightSwitcher>(entity);
+		auto &light = world.get_component<Light>(entity);
 
 		if (!light_switcher.is_waiting) {
 			calculate_next_switch(light_switcher);
+			if (!light.is_on) {
+				light_switcher.time_to_switch /= 3.0f;
+			}
 		}
 
 		light_switcher.current_switch_time += dt;
