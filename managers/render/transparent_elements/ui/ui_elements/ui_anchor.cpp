@@ -30,6 +30,9 @@ void UIAnchor::draw() {
 	}
 
 	for (auto &child : children) {
+		if (child->display == false) {
+			continue;
+		}
 		child->display = display;
 		child->parent_position = position;
 		child->draw(position, size);
