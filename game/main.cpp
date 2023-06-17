@@ -8,6 +8,8 @@ __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
 }
 #endif
 
+#include <random>
+
 int main() {
 	auto start = std::chrono::high_resolution_clock::now();
 
@@ -16,7 +18,7 @@ int main() {
 
 	game.create_scene("Main");
 	game.scenes[0]->register_game_systems();
-	game.scenes[0]->load_from_file("resources/scenes/level_3_7.scn");
+	game.scenes[0]->load_from_file("resources/scenes/level_test_7.scn");
 	game.set_active_scene("Main");
 
 	auto end = std::chrono::high_resolution_clock::now();

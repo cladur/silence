@@ -6,6 +6,11 @@ struct LightSwitcher {
 	float switch_time = 0.0f;
 	float switch_time_variance = 0.0f;
 
+	bool is_waiting = false;
+	float time_to_switch = 0.0f;
+	float current_time = 0.0f;
+	float current_switch_time = 0.0f;
+
 	void serialize_json(nlohmann::json &serialized_scene) {
 		nlohmann::json::object_t serialized_component;
 		serialized_component["switch_time"] = switch_time;
