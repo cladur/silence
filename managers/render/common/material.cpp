@@ -392,7 +392,6 @@ void MaterialTransparent::bind_object_resources(RenderScene &scene, TransparentO
 		shader.set_int("is_sprite", 0);
 
 	} else if (object.type == TransparentType::SPRITE) {
-		//t = SpriteManager::get()->get_sprite_texture(object.texture_name);
 		t = rm.get_texture(rm.get_texture_handle(object.texture_name));
 		shader.set_int("is_sprite", 1);
 	}

@@ -32,7 +32,7 @@ void Engine::startup() {
 	UIManager::get();
 	ParticleManager::get().startup();
 
-	FontManager::get().load_font("resources/fonts/PoltawskiNowy.ttf", 48, "PoltawskiNowy");
+	FontManager::get().load_font("resources/fonts/MODENINE.TTF", 48, "F25");
 }
 
 void Engine::shutdown() {

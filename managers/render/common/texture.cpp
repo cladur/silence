@@ -5,7 +5,7 @@
 
 std::map<std::string, ktxTexture2 *> Texture::ktx_textures;
 
-void Texture::load_from_asset(const std::string &path, bool pregenerated_mipmaps) {
+void Texture::load_from_asset(const std::string &path, bool pregenerated_mipmaps, bool repeat) {
 	ZoneNamedNC(Zone1, "Texture::load_from_asset", tracy::Color::AntiqueWhite, true);
 	ktxTexture2 *ktx_texture;
 	KTX_error_code result;
@@ -135,8 +135,14 @@ void Texture::load_from_asset(const std::string &path, bool pregenerated_mipmaps
 				glTexImage2D(GL_TEXTURE_2D, 0, format, ktx_texture->baseWidth, ktx_texture->baseHeight, 0, format,
 						GL_UNSIGNED_BYTE, data);
 			}
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+			if (repeat) {
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+			} else {
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			}
+
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			glGenerateMipmap(GL_TEXTURE_2D);

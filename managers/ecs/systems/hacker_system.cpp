@@ -36,7 +36,8 @@ AutoCVarFloat cvar_hacker_min_rotation_x(
 AutoCVarInt cvar_hacker_on_keyboard(
 		"settings.hacker_on_keyboard", "Control hacker with keyboard + mouse", 0, CVarFlags::EditCheckbox);
 
-AutoCVarFloat cvar_viewspace_offset("hacker.viewspace_offset", "offset from viewspace", 0.5f, CVarFlags::EditFloatDrag);
+AutoCVarFloat cvar_viewspace_offset(
+		"hacker.viewspace_offset", "offset from viewspace", 0.5f, CVarFlags::EditFloatDrag);
 
 bool HackerSystem::shoot_raycast(
 		Transform &transform, World &world, HackerData &hacker_data, float dt, bool trigger, glm::vec3 direction) {
@@ -49,7 +50,8 @@ bool HackerSystem::shoot_raycast(
 	HitInfo info;
 	bool hit = CollisionSystem::ray_cast_layer(world, ray, info);
 
-	ui_text->text = "";
+	ui_interaction_text->text = "";
+	interaction_sprite->display = false;
 
 	if (!hit) {
 		//SPDLOG_ERROR("NO HIT");
@@ -71,31 +73,67 @@ bool HackerSystem::shoot_raycast(
 	auto &interactable = world.get_component<Interactable>(hit_entity);
 	auto &hit_transform = world.get_component<Transform>(hit_entity);
 
-	glm::vec4 view_pos_non_normalized =
-			world.get_parent_scene()->get_render_scene().view * glm::vec4(hit_transform.get_global_position(), 1.0f);
+	glm::vec4 view_pos_non_normalized = world.get_parent_scene()->get_render_scene().view * glm::vec4(hit_transform.get_global_position(), 1.0f);
 	glm::vec2 render_extent = world.get_parent_scene()->get_render_scene().render_extent;
 	glm::vec3 view_pos = glm::vec3(view_pos_non_normalized) / view_pos_non_normalized.w;
 
-	ui_text->position.x = 100.0f * (1.0f + log10(1.0f + abs(view_pos.z)) / 11.5f) +
-			(0.75f * render_extent.x * view_pos.x / abs(view_pos.z));
-	ui_text->position.y = 50.0f * (1.0f + log10(1.0f + abs(view_pos.z)) / 11.5f) +
-			(0.75f * render_extent.y * view_pos.y / abs(view_pos.z));
-	ui_text->text = interactable.interaction_text;
+	interaction_sprite->position.x = 110.0f + (0.75f * render_extent.x * view_pos.x / abs(view_pos.z));
+	interaction_sprite->position.y = 60.0f + (0.75f * render_extent.y * view_pos.y / abs(view_pos.z));
+	interaction_sprite->display = true;
+
+	// take interactable.interaction_text and splt it by space
+
+	std::istringstream iss(interactable.interaction_text);
+	std::vector<std::string> words;
+	std::string word;
+
+	while (std::getline(iss, word, ' ')) {
+		words.push_back(word);
+	}
+
+	if (words.size() != 1)
+	{
+		ui_button_hint->text = words[0];
+		if (words.size() > 2) {
+			for (int i = 1; i < words.size(); i++) {
+				ui_interaction_text->text += " " + words[i];
+			}
+		} else {
+			ui_interaction_text->text = words[1];
+		}
+	} else {
+		ui_button_hint->text = "";
+		ui_interaction_text->text = words[0];
+	}
+	float size = 0.6f - (words[0].size() / 10.0f);
+	ui_button_hint->size = glm::vec2(size);
+
+	if (interaction_sprite->position.x > render_extent.x / 2.0f - 125.f) {
+		interaction_sprite->position.x = render_extent.x / 2.0f - 125.0f;
+	}
 
 	if (world.has_component<Highlight>(hit_entity)) {
 		auto &highlight = world.get_component<Highlight>(hit_entity);
 		highlight.highlighted = true;
 
 		if (!interactable.can_interact || !(interactable.type == InteractionType::Hacker)) {
-			ui_text->text = "";
+			ui_button_hint->text = "";
+			ui_interaction_text->text = "";
 			highlight.highlighted = false;
+			interaction_sprite->display = false;
 		}
 
 	} else {
+		if (!interactable.can_interact || !(interactable.type == InteractionType::Hacker)) {
+			ui_button_hint->text = "";
+			ui_interaction_text->text = "";
+			interaction_sprite->display = false;
+		}
 		SPDLOG_ERROR("Hacker raycast hit entity {} without highlight component", hit_entity);
 	}
 
 	if (trigger && interactable.can_interact && (interactable.type == InteractionType::Hacker)) {
+
 		if (interactable.interaction == Interaction::HackerCameraJump) {
 			jump_to_camera(world, hacker_data, hit_entity);
 		}
@@ -190,13 +228,36 @@ void HackerSystem::startup(World &world) {
 	crosshair.size = glm::vec2(50.0f);
 	ui.add_to_root(ui_name, "crosshair", "root_anchor");
 
-	ui_text = &ui.add_ui_text(ui_name, "text");
-	ui_text->text = "";
-	ui_text->is_screen_space = true;
-	ui_text->size = glm::vec2(0.5f);
-	ui_text->position = default_text_pos;
-	ui_text->centered_y = true;
-	ui.add_to_root(ui_name, "text", "root_anchor");
+	interaction_sprite = &ui.add_ui_image(ui_name, "interaction_sprite");
+	interaction_sprite->texture = rm.load_texture(asset_path("interaction.ktx2").c_str(), false);
+	interaction_sprite->size = glm::vec2(256.0f);
+	interaction_sprite->color = glm::vec4(1.0f, 1.0f, 1.0f, 0.4f);
+	interaction_sprite->is_screen_space = true;
+	interaction_sprite->position = glm::vec3(0.0f, 0.0f, 0.0f);
+	interaction_sprite->display = false;
+	ui.add_to_root(ui_name, "interaction_sprite", "root_anchor");
+
+	ui_interaction_text = &ui.add_ui_text(ui_name, "interaction_text");
+	ui_interaction_text->text = "";
+	ui_interaction_text->is_screen_space = true;
+	ui_interaction_text->size = glm::vec2(0.5f);
+	ui_interaction_text->position = glm::vec3(10.0f, 16.0f, 0.0f);
+	ui_interaction_text->color = glm::vec4(1.0f, 1.0f, 1.0f, 0.6f);
+	ui_interaction_text->centered_y = true;
+	ui_interaction_text->centered_x = true;
+
+	interaction_sprite->add_child(*ui_interaction_text);
+
+	ui_button_hint = &ui.add_ui_text(ui_name, "button_hint");
+	ui_button_hint->text = "";
+	ui_button_hint->is_screen_space = true;
+	ui_button_hint->size = glm::vec2(0.5f);
+	ui_button_hint->position = glm::vec3(-96.0f, 1.0f, 0.0f);
+	ui_button_hint->color = glm::vec4(1.0f, 1.0f, 1.0f, 0.6f);
+	ui_button_hint->centered_y = true;
+	ui_button_hint->centered_x = true;
+
+	interaction_sprite->add_child(*ui_button_hint);
 
 	auto &main_anchor = ui.add_ui_anchor(ui_name, "main_anchor");
 	main_anchor.is_screen_space = true;
@@ -277,7 +338,8 @@ void HackerSystem::update(World &world, float dt) {
 
 		// ZOOMING LOGIC
 		if (input_manager.is_action_pressed("hacker_zoom_camera")) {
-			ui_text->text = "";
+			ui_interaction_text->text = "";
+			interaction_sprite->display = false;
 			is_zooming = true;
 			camera.fov = glm::mix(camera.fov, 30.0f, dt * 3.0f);
 			camera_sens_modifier = glm::mix(camera_sens_modifier, 0.3f, dt * 3.0f);
@@ -399,8 +461,9 @@ void HackerSystem::update(World &world, float dt) {
 
 		// for the UI sake we need to shoot the raycast every time to know if we're even hovering over anything.
 		bool triggered = input_manager.is_action_just_pressed("hacker_interact");
-
+		
 		shoot_raycast(camera_tf, world, hacker_data, dt, triggered, real_camera_forward);
+		
 	}
 }
 
