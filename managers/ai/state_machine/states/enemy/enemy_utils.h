@@ -8,6 +8,7 @@
 #include "managers/gameplay/gameplay_manager.h"
 #include "managers/physics/ecs/collision_system.h"
 #include "managers/physics/physics_manager.h"
+#include <animation/animation_manager.h>
 #include <audio/audio_manager.h>
 #include <render/debug/debug_draw.h>
 #include <render/transparent_elements/ui_manager.h>
@@ -15,9 +16,14 @@
 #include <glm/vec3.hpp>
 
 namespace enemy_utils {
-static glm::vec3 enemy_look_offset = glm::vec3(0.0f, 1.0f, 0.0f);
-static glm::vec3 agent_target_top_offset = glm::vec3(0.0f, 1.2f, 0.0f);
-static glm::vec3 agent_target_bottom_offset = glm::vec3(0.0f, 0.2f, 0.0f);
+static const glm::vec3 enemy_look_offset = glm::vec3(0.0f, 1.0f, 0.0f);
+static const glm::vec3 agent_target_top_offset = glm::vec3(0.0f, 1.2f, 0.0f);
+static const glm::vec3 agent_target_bottom_offset = glm::vec3(0.0f, 0.2f, 0.0f);
+static const float footstep_left_down_threshold = 0.007f;
+static const float footstep_right_down_threshold = 0.009f;
+static const float footstep_up_threshold = 0.1f;
+static std::string left_foot_bone = "heel.02.L";
+static std::string right_foot_bone = "heel.02.R";
 
 inline void handle_detection(World *world, uint32_t enemy_entity, Transform &transform, glm::vec3 forward,
 		EnemyData &enemy_data, float &dt, DebugDraw *dd = nullptr) {
@@ -403,6 +409,32 @@ inline void handle_highlight(uint32_t entity, World *world) {
 		auto &tag = world->get_component<Taggable>(entity);
 		if (tag.tagged) {
 			h.highlighted = true;
+		}
+	}
+}
+
+inline void handle_footsteps(uint32_t entity, Transform &transform, EnemyData &enemy_data, float dt) {
+	auto &audio = AudioManager::get();
+	auto &animation_manager = AnimationManager::get();
+
+	const glm::mat4 &left_foot_bone_matrix = animation_manager.get_bone_transform(entity, left_foot_bone);
+	const glm::mat4 &right_foot_bone_matrix = animation_manager.get_bone_transform(entity, right_foot_bone);
+
+	// get positions from both matrices
+	auto left_foot_position = glm::vec3(left_foot_bone_matrix[3]);
+	auto right_foot_position = glm::vec3(right_foot_bone_matrix[3]);
+	if (right_foot_position.y < footstep_right_down_threshold && enemy_data.right_foot_can_play) {
+		audio.play_one_shot_3d(enemy_data.footsteps_event, transform);
+		enemy_data.right_foot_can_play = false;
+	} else if (left_foot_position.y < footstep_left_down_threshold && enemy_data.left_foot_can_play) {
+		audio.play_one_shot_3d(enemy_data.footsteps_event, transform);
+		enemy_data.left_foot_can_play = false;
+	} else {
+		if (left_foot_position.y > footstep_up_threshold) {
+			enemy_data.left_foot_can_play = true;
+		}
+		if (right_foot_position.y > footstep_up_threshold) {
+			enemy_data.right_foot_can_play = true;
 		}
 	}
 }

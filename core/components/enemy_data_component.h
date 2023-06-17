@@ -8,6 +8,7 @@
 #include "ai/state_machine/states/enemy/enemy_looking.h"
 #include "ai/state_machine/states/enemy/enemy_patrolling.h"
 #include "ai/state_machine/states/enemy/enemy_stationary_patrolling.h"
+#include "audio/event_reference.h"
 
 struct EnemyData {
 	StateMachine state_machine;
@@ -22,10 +23,18 @@ struct EnemyData {
 	bool is_blinded = false;
 	float detection_level = 0.0f;
 
+	bool left_foot_can_play = false;
+	bool right_foot_can_play = false;
+
+	EventReference footsteps_event;
+	EventReference death_event;
+
 	glm::vec3 distraction_target = glm::vec3(0.0f);
 	float distraction_cooldown = 0.0f;
 
 	DetectionTarget detection_target = DetectionTarget::NONE;
+
+	bool is_dead = false;
 
 	void serialize_json(nlohmann::json &serialized_scene) {
 		nlohmann::json::object_t serialized_component;

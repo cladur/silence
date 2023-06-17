@@ -41,6 +41,8 @@ void EnemyDistracted::update(World *world, uint32_t entity_id, float dt) {
 
 		transform.add_position(glm::normalize(target - current_pos) * enemy_path.speed * dt);
 
+		enemy_utils::handle_footsteps(entity_id, transform, enemy_data, dt);
+
 	} else {
 		// idle animation if idle
 		if (anim.animation_handle.id != res.get_animation_handle("enemy/enemy_ANIM_GLTF/enemy_idle.anim").id) {
