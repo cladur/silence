@@ -8,7 +8,7 @@ class LightSwitcherSystem : public BaseSystem {
 public:
 	void startup(World &world) override;
 	void update(World &world, float dt) override;
-	void calculate_next_switch(LightSwitcher &light_switcher);
+	void calculate_next_switch(LightSwitcher &light_switcher, bool light_is_on);
 	void switch_light(World &world, const Entity &entity, LightSwitcher &light_switcher);
 };
 

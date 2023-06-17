@@ -1729,8 +1729,10 @@ void Inspector::show_light_switcher() {
 		ImGui::BeginTable("Light switcher", 2);
 		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
 
-		show_float("Switch time", light_switcher.switch_time);
-		show_float("Switch time variance", light_switcher.switch_time_variance);
+		show_float("Turn on time", light_switcher.turn_on_time);
+		show_float("Turn off time", light_switcher.turn_off_time);
+		show_float("Turn on variance", light_switcher.turn_on_variance);
+		show_float("Turn off variance", light_switcher.turn_off_variance);
 
 		ImGui::EndTable();
 	}
