@@ -10,10 +10,12 @@
 #include "components/highlight_component.h"
 #include "components/interactable_component.h"
 #include "components/light_component.h"
+#include "components/light_switcher_component.h"
 #include "components/path_node_component.h"
 #include "components/path_parent_component.h"
 #include "components/platform_component.h"
 #include "components/rigidbody_component.h"
+#include "components/rotator_component.h"
 #include "physics/physics_manager.h"
 #include "render/ecs/model_instance.h"
 #include <imgui.h>
@@ -82,6 +84,8 @@ void Inspector::show_components() {
 	SHOW_COMPONENT(ParticleEmitter, show_particle_emitter);
 	SHOW_COMPONENT(DetectionCamera, show_detection_camera);
 	SHOW_COMPONENT(CableParent, show_cable_parent);
+	SHOW_COMPONENT(Rotator, show_rotator);
+	SHOW_COMPONENT(LightSwitcher, show_light_switcher);
 
 	for (int i = 0; i < remove_component_queue.size(); i++) {
 		auto [entity, component_to_remove] = remove_component_queue.front();
@@ -1687,6 +1691,51 @@ void Inspector::show_cable_parent() {
 	}
 }
 
+void Inspector::show_rotator() {
+	auto &rotator = world->get_component<Rotator>(selected_entity);
+
+	if (ImGui::CollapsingHeader("Rotator", tree_flags)) {
+		if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+			ImGui::OpenPopup("RotatorContextMenu");
+		}
+		if (ImGui::BeginPopup("RotatorContextMenu")) {
+			remove_component_menu_item<Rotator>();
+			ImGui::EndPopup();
+		}
+
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("Rotator", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+
+		show_vec3("Rotation", rotator.rotation_speed, 0.1f, 0.0f, -90.0f, 90.0f);
+
+		ImGui::EndTable();
+	}
+}
+
+void Inspector::show_light_switcher() {
+	auto &light_switcher = world->get_component<LightSwitcher>(selected_entity);
+
+	if (ImGui::CollapsingHeader("Light switcher", tree_flags)) {
+		if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+			ImGui::OpenPopup("LightSwitcherContextMenu");
+		}
+		if (ImGui::BeginPopup("LightSwitcherContextMenu")) {
+			remove_component_menu_item<LightSwitcher>();
+			ImGui::EndPopup();
+		}
+
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("Light switcher", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+
+		show_float("Switch time", light_switcher.switch_time);
+		show_float("Switch time variance", light_switcher.switch_time_variance);
+
+		ImGui::EndTable();
+	}
+}
+
 bool Inspector::show_vec2(
 		const char *label, glm::vec2 &vec2, float speed, float reset_value, float min_value, float max_value) {
 	bool changed = false;
@@ -1866,6 +1915,8 @@ void Inspector::show_add_component() {
 			SHOW_ADD_COMPONENT(ParticleEmitter);
 			SHOW_ADD_COMPONENT(DetectionCamera);
 			SHOW_ADD_COMPONENT(CableParent);
+			SHOW_ADD_COMPONENT(Rotator);
+			SHOW_ADD_COMPONENT(LightSwitcher);
 
 			ImGui::EndPopup();
 		}

@@ -5,7 +5,9 @@
 #include "ecs/systems/detection_camera_system.h"
 #include "ecs/systems/hacker_movement_system.h"
 #include "ecs/systems/interactable_system.h"
+#include "ecs/systems/light_switcher_system.h"
 #include "ecs/systems/platform_system.h"
+#include "ecs/systems/rotator_system.h"
 #include "ecs/world.h"
 #include "editor/editor.h"
 #include "managers/animation/ecs/animation_instance.h"
@@ -87,6 +89,8 @@ Scene::Scene() {
 		world.register_component<ParticleEmitter>();
 		world.register_component<DetectionCamera>();
 		world.register_component<CableParent>();
+		world.register_component<Rotator>();
+		world.register_component<LightSwitcher>();
 	}
 	// Components
 	{ register_main_systems(); }
@@ -148,6 +152,9 @@ void Scene::register_game_systems() {
 	world.register_system<FMODEmitterSystem>(UpdateOrder::PrePreAnimation);
 	world.register_system<HighlightSystem>(UpdateOrder::PrePreAnimation);
 	world.register_system<DetectionCameraSystem>();
+
+	world.register_system<LightSwitcherSystem>();
+	world.register_system<RotatorSystem>();
 
 	GameplayManager::get().set_agent_system(agent_system);
 	GameplayManager::get().set_hacker_system(hacker_system);
