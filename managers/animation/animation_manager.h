@@ -22,7 +22,7 @@ public:
 	AnimationManager(const AnimationManager &) = delete;
 
 	void update_pose(AnimData &data, float dt);
-	void change_animation(Entity entity, const std::string &new_animation_name);
+	void change_animation(Entity entity, const std::string &new_animation_name, float dt = 0.0f);
 
 	void local_to_model(AnimData &data);
 

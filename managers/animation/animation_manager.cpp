@@ -7,7 +7,6 @@
 #include "resource/resource_manager.h"
 #include <glm/gtx/quaternion.hpp>
 
-
 AnimationManager &AnimationManager::get() {
 	static AnimationManager instance;
 	return instance;
@@ -94,7 +93,7 @@ void AnimationManager::model_to_final(AnimData &data) {
 	}
 }
 
-void AnimationManager::change_animation(Entity entity, const std::string &new_animation_name) {
+void AnimationManager::change_animation(Entity entity, const std::string &new_animation_name, float dt) {
 	const auto &item = animation_map.find(entity);
 	if (item == animation_map.end()) {
 		SPDLOG_WARN("Entity {} not found in map.", entity);
@@ -104,6 +103,9 @@ void AnimationManager::change_animation(Entity entity, const std::string &new_an
 	ResourceManager &resource_manager = ResourceManager::get();
 
 	AnimData &entity_data = item->second;
+	if (dt > 0.0f) {
+		update_pose(entity_data, dt);
+	}
 	entity_data.animation->animation_handle = resource_manager.get_animation_handle(new_animation_name);
 	entity_data.animation->current_time = 0.0f;
 	entity_data.has_changed = true;
