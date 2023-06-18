@@ -127,7 +127,6 @@ void RenderScene::draw_viewport(bool right_side) {
 
 	g_buffer_pass.draw(*this);
 
-	glEnable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
 	glDepthMask(GL_FALSE);
 	decal_pass.draw(*this);
@@ -299,8 +298,9 @@ void RenderScene::draw(bool editor_mode) {
 	shadow_buffer.bind();
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
-	glCullFace(GL_FRONT);
+	glCullFace(GL_BACK);
 	shadow_pass.draw(*this);
+	glCullFace(GL_FRONT);
 
 	if (cvar_splitscreen.get() && !cvar_debug_camera_use.get()) {
 		draw_viewport(false); // agent

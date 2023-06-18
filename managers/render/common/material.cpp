@@ -10,6 +10,8 @@ AutoCVarInt cvar_use_ao("render.use_ao", "use ambient occlusion", 1, CVarFlags::
 AutoCVarInt cvar_use_fog("render.use_fog", "use simple linear fog", 1, CVarFlags::EditCheckbox);
 AutoCVarFloat cvar_fog_min("render.fog_min", "fog min distance", 40.0f, CVarFlags::EditFloatDrag);
 AutoCVarFloat cvar_fog_max("render.fog_max", "fog max distance", 300.0f, CVarFlags::EditFloatDrag);
+AutoCVarFloat cvar_bias_min("render.light_bias_min", "Spot light bias min", 0.00000001f, CVarFlags::EditFloatDrag);
+AutoCVarFloat cvar_bias_max("render.light_bias_max", "Spot light bias max", 0.0000000001f, CVarFlags::EditFloatDrag);
 AutoCVarFloat cvar_ambient_strength(
 		"render.ambient_strength", "how much light from skymap to use", 1.0f, CVarFlags::EditFloatDrag);
 
@@ -134,6 +136,7 @@ void MaterialLight::bind_light_resources(Light &light, Transform &transform) {
 				glActiveTexture(GL_TEXTURE4);
 				glBindTexture(GL_TEXTURE_2D, light.shadow_map_id);
 				shader.set_mat4("light_space", light.light_space);
+				shader.set_vec2("spot_bias", glm::vec2(cvar_bias_min.get(), cvar_bias_max.get()));
 			}
 			break;
 		default:
@@ -670,7 +673,8 @@ void MaterialHighlight::bind_instance_resources(SkinnedModelInstance &instance, 
 
 void MaterialHighlight::bind_mesh_resources(SkinnedMesh &mesh, HighlightData &highlight_data) {
 	skinned_shader.set_int("is_highlighted", highlight_data.highlighted);
-	skinned_shader.set_vec4("highlight_color", glm::vec4(highlight_data.highlight_color, highlight_data.highlight_power));
+	skinned_shader.set_vec4(
+			"highlight_color", glm::vec4(highlight_data.highlight_color, highlight_data.highlight_power));
 }
 
 void MaterialDecal::startup() {

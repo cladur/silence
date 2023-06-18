@@ -199,10 +199,6 @@ void AgentSystem::update(World &world, float dt) {
 		// camera_pivot_tf.set_position(
 		// 		glm::mix(camera_pivot_tf.get_global_position(), camera_pivot_target_tf.get_global_position(), 0.1f));
 
-		if (!is_climbing) {
-			animation_instance.blend_time_ms = 700.0f;
-		}
-
 		if (speed > 0.01f && !agent_data.locked_movement) {
 			if (is_crouching) {
 				if (animation_instance.animation_handle.id !=
@@ -222,10 +218,11 @@ void AgentSystem::update(World &world, float dt) {
 				animation_instance.ticks_per_second *= 0.63f;
 			}
 
-
 			// FOOTSTEP SOUNDS LOGIC
-			const glm::mat4 &left_foot_bone_matrix = animation_manager.get_bone_transform(agent_data.model, left_foot_bone);
-			const glm::mat4 &right_foot_bone_matrix = animation_manager.get_bone_transform(agent_data.model, right_foot_bone);
+			const glm::mat4 &left_foot_bone_matrix =
+					animation_manager.get_bone_transform(agent_data.model, left_foot_bone);
+			const glm::mat4 &right_foot_bone_matrix =
+					animation_manager.get_bone_transform(agent_data.model, right_foot_bone);
 
 			// get positions from both matrices
 			auto left_foot_position = glm::vec3(left_foot_bone_matrix[3]);
@@ -233,7 +230,7 @@ void AgentSystem::update(World &world, float dt) {
 
 			static std::vector<std::pair<std::string, float>> event_params;
 			event_params.resize(1);
-			event_params[0] = {"agent_crouch", is_crouching ? 0.0f : 1.0f};
+			event_params[0] = { "agent_crouch", is_crouching ? 0.0f : 1.0f };
 			if (right_foot_position.y < footstep_right_down_threshold && right_foot_can_play) {
 				audio.play_one_shot_3d_with_params(footsteps_event, transform, nullptr, event_params);
 				right_foot_can_play = false;
@@ -256,8 +253,6 @@ void AgentSystem::update(World &world, float dt) {
 						resource_manager.get_animation_handle("agent/agent_ANIM_GLTF/agent_crouch_idle.anim").id) {
 					animation_manager.change_animation(
 							agent_data.model, "agent/agent_ANIM_GLTF/agent_crouch_idle.anim");
-
-
 				}
 			} else {
 				if (animation_instance.animation_handle.id !=
@@ -348,7 +343,7 @@ void AgentSystem::update(World &world, float dt) {
 
 				glm::vec3 view_pos = glm::vec3(view_pos_non_normalized) / view_pos_non_normalized.w;
 
-				if (obstacle_height > 0.6f && obstacle_height < 0.8f) {
+				if (obstacle_height > 0.5f && obstacle_height < 0.7f) {
 					interaction_sprite->position.x = 75.0f + (0.15f * render_extent.x * view_pos.x / abs(view_pos.z));
 					interaction_sprite->position.y = 50.0f + (0.15f * render_extent.y * view_pos.y / abs(view_pos.z));
 					interaction_sprite->display = true;
@@ -430,8 +425,10 @@ void AgentSystem::update(World &world, float dt) {
 
 						glm::vec3 view_pos = glm::vec3(view_pos_non_normalized) / view_pos_non_normalized.w;
 
-						interaction_sprite->position.x = 75.0f + (0.15f * render_extent.x * view_pos.x / abs(view_pos.z));
-						interaction_sprite->position.y = 50.0f + (0.15f * render_extent.y * view_pos.y / abs(view_pos.z));
+						interaction_sprite->position.x =
+								75.0f + (0.15f * render_extent.x * view_pos.x / abs(view_pos.z));
+						interaction_sprite->position.y =
+								50.0f + (0.15f * render_extent.y * view_pos.y / abs(view_pos.z));
 						interaction_sprite->display = true;
 
 						// take interactable.interaction_text and splt it by space
@@ -444,8 +441,7 @@ void AgentSystem::update(World &world, float dt) {
 							words.push_back(word);
 						}
 
-						if (words.size() != 1)
-						{
+						if (words.size() != 1) {
 							ui_button_hint->text = words[0];
 							ui_interaction_text->text = words[1];
 						} else {
@@ -510,8 +506,10 @@ void AgentSystem::update(World &world, float dt) {
 								glm::vec2 render_extent = world.get_parent_scene()->get_render_scene().render_extent;
 								glm::vec3 view_pos = glm::vec3(view_pos_non_normalized) / view_pos_non_normalized.w;
 
-								interaction_sprite->position.x = 75.0f + (0.15f * render_extent.x * view_pos.x / abs(view_pos.z));
-								interaction_sprite->position.y = 50.0f + (0.15f * render_extent.y * view_pos.y / abs(view_pos.z));
+								interaction_sprite->position.x =
+										75.0f + (0.15f * render_extent.x * view_pos.x / abs(view_pos.z));
+								interaction_sprite->position.y =
+										50.0f + (0.15f * render_extent.y * view_pos.y / abs(view_pos.z));
 								interaction_sprite->display = true;
 								ui_button_hint->text = "LMB";
 								ui_button_hint->size = glm::vec2(0.4f);
@@ -579,13 +577,16 @@ void AgentSystem::update(World &world, float dt) {
 		}
 
 		if (animation_timer < resource_manager.get_animation(animation_instance.animation_handle).get_duration()) {
-			animation_timer += (dt * 1000);
+			animation_timer += (dt * 1000.0f);
 			if (is_climbing &&
-					((animation_timer + 500.0f) >
+					((animation_instance.current_time + 3.0f * animation_instance.ticks_per_second * dt) >
 							resource_manager.get_animation(animation_instance.animation_handle).get_duration())) {
 				//climbing animation should end here, otherwise it will start to loop
 				is_climbing = false;
-				animation_timer += 500.0f;
+				animation_timer = animation_instance.current_time + 3.0f * animation_instance.ticks_per_second * dt;
+				animation_instance.current_time =
+						resource_manager.get_animation(animation_instance.animation_handle).get_duration() -
+						animation_instance.ticks_per_second * dt - 1.0f;
 
 				Ray ray{};
 				ray.origin = transform.get_global_position() + glm::vec3(0.0f, 1.4f, 0.0f) + model_tf.get_forward();
@@ -597,10 +598,12 @@ void AgentSystem::update(World &world, float dt) {
 				dd.draw_arrow(ray.origin, end, { 1.0f, 0.0f, 0.0f });
 				if (CollisionSystem::ray_cast_layer(world, ray, info)) {
 					transform.set_position(info.point + glm::vec3{ 0.0f, 0.2f, 0.0f });
+					transform.update_global_model_matrix();
+					world.get_component<Transform>(agent_data.model)
+							.update_global_model_matrix(transform.get_global_model_matrix());
 				}
 
-				animation_instance.blend_time_ms = 0.0f;
-				animation_manager.change_animation(agent_data.model, "agent/agent_ANIM_GLTF/agent_idle.anim");
+				animation_manager.change_animation(agent_data.model, "agent/agent_ANIM_GLTF/agent_idle.anim", dt);
 			}
 		} else {
 			is_interacting = false;
