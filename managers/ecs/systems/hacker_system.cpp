@@ -36,8 +36,7 @@ AutoCVarFloat cvar_hacker_min_rotation_x(
 AutoCVarInt cvar_hacker_on_keyboard(
 		"settings.hacker_on_keyboard", "Control hacker with keyboard + mouse", 0, CVarFlags::EditCheckbox);
 
-AutoCVarFloat cvar_viewspace_offset(
-		"hacker.viewspace_offset", "offset from viewspace", 0.5f, CVarFlags::EditFloatDrag);
+AutoCVarFloat cvar_viewspace_offset("hacker.viewspace_offset", "offset from viewspace", 0.5f, CVarFlags::EditFloatDrag);
 
 bool HackerSystem::shoot_raycast(
 		Transform &transform, World &world, HackerData &hacker_data, float dt, bool trigger, glm::vec3 direction) {
@@ -73,7 +72,8 @@ bool HackerSystem::shoot_raycast(
 	auto &interactable = world.get_component<Interactable>(hit_entity);
 	auto &hit_transform = world.get_component<Transform>(hit_entity);
 
-	glm::vec4 view_pos_non_normalized = world.get_parent_scene()->get_render_scene().view * glm::vec4(hit_transform.get_global_position(), 1.0f);
+	glm::vec4 view_pos_non_normalized =
+			world.get_parent_scene()->get_render_scene().view * glm::vec4(hit_transform.get_global_position(), 1.0f);
 	glm::vec2 render_extent = world.get_parent_scene()->get_render_scene().render_extent;
 	glm::vec3 view_pos = glm::vec3(view_pos_non_normalized) / view_pos_non_normalized.w;
 
@@ -91,8 +91,7 @@ bool HackerSystem::shoot_raycast(
 		words.push_back(word);
 	}
 
-	if (words.size() != 1)
-	{
+	if (words.size() != 1) {
 		ui_button_hint->text = words[0];
 		if (words.size() > 2) {
 			for (int i = 1; i < words.size(); i++) {
@@ -133,7 +132,6 @@ bool HackerSystem::shoot_raycast(
 	}
 
 	if (trigger && interactable.can_interact && (interactable.type == InteractionType::Hacker)) {
-
 		if (interactable.interaction == Interaction::HackerCameraJump) {
 			jump_to_camera(world, hacker_data, hit_entity);
 		}
@@ -316,8 +314,6 @@ void HackerSystem::update(World &world, float dt) {
 		glm::vec3 camera_forward = -camera_tf.get_global_forward();
 		glm::vec3 real_camera_forward = camera_forward;
 
-		dd.draw_line(camera_tf.get_global_position(), camera_tf.get_global_position() + real_camera_forward * 100.0f);
-
 		camera_forward.y = 0.0f;
 		camera_forward = glm::normalize(camera_forward);
 		auto camera_right = camera_pivot_tf.get_global_right();
@@ -461,9 +457,8 @@ void HackerSystem::update(World &world, float dt) {
 
 		// for the UI sake we need to shoot the raycast every time to know if we're even hovering over anything.
 		bool triggered = input_manager.is_action_just_pressed("hacker_interact");
-		
+
 		shoot_raycast(camera_tf, world, hacker_data, dt, triggered, real_camera_forward);
-		
 	}
 }
 
