@@ -33,7 +33,7 @@ inline void handle_detection(World *world, uint32_t enemy_entity, Transform &tra
 	float cone_angle = *cvar->get_float_cvar("enemy.detection_angle");
 	float min_speed = *cvar->get_float_cvar("enemy.min_detection_speed");
 	float max_speed = *cvar->get_float_cvar("enemy.max_detection_speed");
-	float sphere_radus = *cvar->get_float_cvar("enemy.sphere_detection_radius");
+	float sphere_radius = *cvar->get_float_cvar("enemy.sphere_detection_radius");
 	float decrease_rate = *cvar->get_float_cvar("enemy.detection_decrease_speed");
 	float crouch_mod = *cvar->get_float_cvar("enemy.crouch_detection_modifier");
 	float hacker_mod = *cvar->get_float_cvar("enemy.hacker_detection_modifier");
@@ -49,7 +49,7 @@ inline void handle_detection(World *world, uint32_t enemy_entity, Transform &tra
 	auto agent_dir = glm::normalize(agent_pos - enemy_look_origin);
 	float agent_distance_ratio = glm::distance(current_global_position, agent_pos) / cone_range;
 
-	auto hacker_pos = GameplayManager::get().get_hacker_position(world->get_parent_scene()) + agent_target_top_offset;
+	auto hacker_pos = GameplayManager::get().get_hacker_position(world->get_parent_scene());
 	auto hacker_dir = glm::normalize(hacker_pos - enemy_look_origin);
 	bool can_see_hacker = false;
 	float hacker_distance_ratio = glm::distance(current_global_position, hacker_pos) / cone_range;
@@ -79,8 +79,7 @@ inline void handle_detection(World *world, uint32_t enemy_entity, Transform &tra
 
 			// RAY BOTTOM
 
-			agent_pos =
-					GameplayManager::get().get_agent_position(world->get_parent_scene()) + agent_target_bottom_offset;
+			agent_pos = GameplayManager::get().get_agent_position(world->get_parent_scene()) + agent_target_bottom_offset;
 			agent_dir = glm::normalize(agent_pos - enemy_look_origin);
 			ray.direction = agent_dir;
 			ray_end = ray.origin + ray.direction * cone_range;
@@ -137,23 +136,40 @@ inline void handle_detection(World *world, uint32_t enemy_entity, Transform &tra
 	}
 
 	// AGENT SPHERE DETECTION LOGIC
-	//	if (glm::distance(transform.position, agent_pos) < sphere_radus) {
-	//		Ray ray{};
-	//		ray.origin = enemy_look_origin;
-	//		ray.direction = agent_dir;
-	//		ray.ignore_list.push_back(enemy_entity);
-	//		glm::vec3 ray_end = ray.origin + ray.direction * sphere_radus;
-	//
-	//		HitInfo hit_info;
-	//
-	//		if (CollisionSystem::ray_cast_layer(*world, ray, hit_info)) {
-	//			// only if agent is crouching then he can get to the enemy
-	//			if (hit_info.entity == GameplayManager::get().get_agent_entity() &&
-	//					!GameplayManager::get().get_agent_crouch()) {
-	//				can_see_player = true;
-	//			}
-	//		}
-	//	}
+	if (glm::distance(transform.position + transform.get_global_forward() * 1.5f, agent_pos) < sphere_radius) {
+		Ray ray{};
+		ray.origin = enemy_look_origin;
+		ray.direction = glm::normalize(agent_pos - ray.origin);
+		ray.ignore_list.push_back(enemy_entity);
+
+		HitInfo hit_info;
+
+		dd->draw_sphere(transform.position + transform.get_global_forward() * 1.5f, sphere_radius, glm::vec3(1.0f, 0.0f, 0.0f));
+
+		if (CollisionSystem::ray_cast_layer(*world, ray, hit_info)) {
+			if (hit_info.entity == GameplayManager::get().get_agent_entity()) {
+				can_see_player = true;
+			}
+		}
+	}
+
+	// HACKER SPHERE DETECTION LOGIC
+	if (glm::distance(transform.position + transform.get_global_forward() * 1.5f, hacker_pos) < sphere_radius) {
+		Ray ray{};
+		ray.origin = enemy_look_origin;
+		ray.direction = glm::normalize(hacker_pos - ray.origin);
+		ray.ignore_list.push_back(enemy_entity);
+
+		HitInfo hit_info;
+
+		dd->draw_sphere(transform.position + transform.get_global_forward() * 1.5f, sphere_radius, glm::vec3(1.0f, 0.0f, 0.0f));
+
+		if (CollisionSystem::ray_cast_layer(*world, ray, hit_info)) {
+			if (hit_info.entity == GameplayManager::get().get_hacker_entity()) {
+				can_see_hacker = true;
+			}
+		}
+	}
 
 	if (can_see_player || can_see_hacker) {
 		// if noone was detected past frame, play sound
