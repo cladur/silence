@@ -16,18 +16,19 @@ private:
 		return old_entity;
 	}
 
-	static void update_interactable_ids(Interactable &interactable, const std::unordered_map<Entity, Entity>& id_map) {
+	static void update_interactable_ids(Interactable &interactable, const std::unordered_map<Entity, Entity> &id_map) {
 		for (auto &target : interactable.interaction_targets) {
 			target = update_id(target, id_map);
 		}
 		interactable.cable_parent = update_id(interactable.cable_parent, id_map);
+		interactable.lever = update_id(interactable.lever, id_map);
 	}
 
-	static void update_enemy_path_ids(EnemyPath &enemy_path, const std::unordered_map<Entity, Entity>& id_map) {
+	static void update_enemy_path_ids(EnemyPath &enemy_path, const std::unordered_map<Entity, Entity> &id_map) {
 		enemy_path.path_parent = update_id(enemy_path.path_parent, id_map);
 	}
 
-	static void update_agent_data_ids(AgentData &agent_data, const std::unordered_map<Entity, Entity>& id_map) {
+	static void update_agent_data_ids(AgentData &agent_data, const std::unordered_map<Entity, Entity> &id_map) {
 		agent_data.model = update_id(agent_data.model, id_map);
 		agent_data.camera = update_id(agent_data.camera, id_map);
 		agent_data.camera_pivot = update_id(agent_data.camera_pivot, id_map);
@@ -35,7 +36,7 @@ private:
 		agent_data.spring_arm = update_id(agent_data.spring_arm, id_map);
 	}
 
-	static void update_hacker_data_ids(HackerData &hacker_data, const std::unordered_map<Entity, Entity>& id_map) {
+	static void update_hacker_data_ids(HackerData &hacker_data, const std::unordered_map<Entity, Entity> &id_map) {
 		hacker_data.model = update_id(hacker_data.model, id_map);
 		hacker_data.camera = update_id(hacker_data.camera, id_map);
 		hacker_data.camera_pivot = update_id(hacker_data.camera_pivot, id_map);
@@ -43,7 +44,7 @@ private:
 	}
 
 	static void update_detection_camera_ids(
-			DetectionCamera &detection_camera, const std::unordered_map<Entity, Entity>& id_map) {
+			DetectionCamera &detection_camera, const std::unordered_map<Entity, Entity> &id_map) {
 		detection_camera.particles_parent = update_id(detection_camera.particles_parent, id_map);
 		detection_camera.camera_light = update_id(detection_camera.camera_light, id_map);
 		detection_camera.camera_model = update_id(detection_camera.camera_model, id_map);
@@ -62,7 +63,7 @@ public:
 				variant);
 	}
 
-	static void update_ids(World &world, Entity entity, const std::unordered_map<Entity, Entity>& id_map) {
+	static void update_ids(World &world, Entity entity, const std::unordered_map<Entity, Entity> &id_map) {
 		if (world.has_component<Interactable>(entity)) {
 			auto &interactable = world.get_component<Interactable>(entity);
 			update_interactable_ids(interactable, id_map);
