@@ -5,6 +5,7 @@
 
 class EnemyDistracted : public State {
 	bool first_frame = true;
+	bool cooldown_extended = false;
 public:
 	EnemyDistracted() = default;
 	void startup(StateMachine *machine, std::string name);
