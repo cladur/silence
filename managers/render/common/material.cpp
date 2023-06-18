@@ -680,18 +680,17 @@ void MaterialDecal::startup() {
 
 void MaterialDecal::bind_resources(RenderScene &scene) {
 	shader.use();
-	const glm::mat4 &view_proj = scene.projection * scene.view;
+	shader.set_mat4("inv_view", glm::inverse(scene.view));
+	shader.set_mat4("projection", scene.projection);
 	shader.set_mat4("view", scene.view);
-	shader.set_mat4("view_proj", view_proj);
-	shader.set_mat4("inv_view_proj", glm::inverse(view_proj));
-	shader.set_int("gDepth", 1);
-	shader.set_int("gPosition", 2);
 
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.depth_texture_id);
-
-	glActiveTexture(GL_TEXTURE2);
+	shader.set_int("source_position", 0);
+	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.position_texture_id);
+
+	shader.set_int("source_normal", 1);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.normal_texture_id);
 }
 
 void MaterialDecal::bind_instance_resources(ModelInstance &instance, Transform &transform) {
@@ -714,6 +713,7 @@ void MaterialDecal::bind_decal_resources(Decal &decal, Transform &transform) {
 	shader.set_mat4("decal_inv_view_proj", glm::inverse(decal_view_proj));
 
 	const Texture &albedo = resource_manager.get_texture(decal.albedo);
+	const Texture &normal = resource_manager.get_texture(decal.normal);
 	glm::vec2 aspect_ratio;
 	if (albedo.width > albedo.height) {
 		aspect_ratio.x = 1.0f;
@@ -723,7 +723,11 @@ void MaterialDecal::bind_decal_resources(Decal &decal, Transform &transform) {
 		aspect_ratio.y = 1.0f;
 	}
 	shader.set_vec2("aspect_ratio", aspect_ratio);
-	shader.set_int("decal_albedo", 0);
-	glActiveTexture(GL_TEXTURE0);
+	shader.set_vec4("color", decal.color);
+	shader.set_int("decal_albedo", 2);
+	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, albedo.id);
+	shader.set_int("decal_normal", 3);
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, normal.id);
 }

@@ -112,9 +112,7 @@ void RenderScene::draw_viewport(bool right_side) {
 	glEnable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
 	glDepthMask(GL_FALSE);
-	glDisable(GL_CULL_FACE);
 	decal_pass.draw(*this);
-	glEnable(GL_CULL_FACE);
 	glDepthMask(GL_TRUE);
 
 	// HIGHLIGHT PASS

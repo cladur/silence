@@ -32,7 +32,7 @@
                 "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
-                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "model_name": "items/wooden_box/wooden_box.mdl",
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
@@ -72,11 +72,8 @@
             },
             {
                 "component_data": {
-                    "albedo": "missing.ktx2",
-                    "normal": "lens_dirts/lens_dirt_2.ktx2",
-                    "projection_far": 1.0,
-                    "projection_near": 0.0010000000474974513,
-                    "projection_size": 0.5
+                    "albedo": "Decal_test/Decal_14_glossiness-1K.ktx2",
+                    "normal": "Decal_test/Decal_14_normal-1K.ktx2"
                 },
                 "component_name": "Decal"
             }

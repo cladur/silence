@@ -1536,15 +1536,25 @@ void Inspector::show_decal() {
 	auto &textures = resource_manager.get_textures();
 	if (ImGui::CollapsingHeader("Decal", tree_flags)) {
 		remove_component_popup<Decal>();
-		auto &selected_texture = resource_manager.get_texture(decal.albedo);
-		std::string name = selected_texture.name;
-		std::size_t last_slash_pos = name.find_last_of("/\\");
+		auto &selected_albedo = resource_manager.get_texture(decal.albedo);
+		std::string albedo_name = selected_albedo.name;
+		auto &selected_normal = resource_manager.get_texture(decal.normal);
+		std::string normal_name = selected_normal.name;
+		std::size_t last_slash_pos = albedo_name.find_last_of("/\\");
 
 		if (last_slash_pos != std::string::npos) {
-			name = name.substr(last_slash_pos + 1);
-			std::size_t dot_pos = name.find_last_of('.');
+			albedo_name = albedo_name.substr(last_slash_pos + 1);
+			std::size_t dot_pos = albedo_name.find_last_of('.');
 			if (dot_pos != std::string::npos) {
-				name = name.substr(0, dot_pos);
+				albedo_name = albedo_name.substr(0, dot_pos);
+			}
+		}
+		last_slash_pos = normal_name.find_last_of("/\\");
+		if (last_slash_pos != std::string::npos) {
+			normal_name = normal_name.substr(last_slash_pos + 1);
+			std::size_t dot_pos = normal_name.find_last_of('.');
+			if (dot_pos != std::string::npos) {
+				normal_name = normal_name.substr(0, dot_pos);
 			}
 		}
 
@@ -1556,7 +1566,7 @@ void Inspector::show_decal() {
 		ImGui::Text("Albedo");
 		ImGui::TableSetColumnIndex(1);
 		ImGui::SetNextItemWidth(-FLT_MIN);
-		if (ImGui::BeginCombo("##Albedo", name.c_str())) {
+		if (ImGui::BeginCombo("##Albedo", albedo_name.c_str())) {
 			for (const auto &texture : textures) {
 				bool is_selected = (decal.albedo.id == resource_manager.get_texture_handle(texture.name).id);
 
@@ -1580,7 +1590,6 @@ void Inspector::show_decal() {
 			}
 			ImGui::EndCombo();
 		}
-		ImGui::EndTable();
 
 		if (ImGui::BeginDragDropTarget()) {
 			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_TEXTURE_PATH")) {
@@ -1600,6 +1609,62 @@ void Inspector::show_decal() {
 
 			ImGui::EndDragDropTarget();
 		}
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Normal");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		if (ImGui::BeginCombo("##Normal", normal_name.c_str())) {
+			for (const auto &texture : textures) {
+				bool is_selected = (decal.normal.id == resource_manager.get_texture_handle(texture.name).id);
+
+				auto texture_handle = resource_manager.get_texture_handle(texture.name);
+				std::string texture_name = texture.name;
+				std::size_t texture_slash_pos = texture_name.find_last_of("/\\");
+				if (texture_slash_pos != std::string::npos) {
+					texture_name = texture_name.substr(texture_slash_pos + 1);
+					std::size_t texture_dot_pos = texture_name.find_last_of('.');
+					if (texture_dot_pos != std::string::npos) {
+						texture_name = texture_name.substr(0, texture_dot_pos);
+					}
+				}
+
+				if (ImGui::Selectable(texture_name.c_str(), is_selected)) {
+					decal.normal = texture_handle;
+				}
+				if (is_selected) {
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+			ImGui::EndCombo();
+		}
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_TEXTURE_PATH")) {
+				std::string payload_n = *(const std::string *)payload->Data;
+				std::string search_string = "\\";
+				std::string replace_string = "/";
+
+				size_t pos = payload_n.find(search_string);
+				while (pos != std::string::npos) {
+					payload_n.replace(pos, search_string.length(), replace_string);
+					pos = payload_n.find(search_string, pos + replace_string.length());
+				}
+				resource_manager.load_texture(payload_n.c_str());
+				auto texture_handle = resource_manager.get_texture_handle(payload_n);
+				decal.normal = texture_handle;
+			}
+
+			ImGui::EndDragDropTarget();
+		}
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Color");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		ImGui::ColorPicker4("##Color", (float *)&decal.color);
+		ImGui::EndTable();
 	}
 }
 
