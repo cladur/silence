@@ -15,9 +15,9 @@
 
 AutoCVarFloat music_detection_level("music.detection_level", "detection level volume" , 0.0f);
 AutoCVarInt music_enemy_near_count("music.enemy_near_count", "number of enemies near" , 1);
-AutoCVarInt music_is_sprinting("music.is_sprinting", "is sprinting" , 0);
-AutoCVarInt music_is_crounching("music.is_crounching", "is crounching" , 0);
-AutoCVarInt enable_music("music.enabled", "is music enabled" , 0);
+AutoCVarInt music_is_sprinting("music.is_sprinting", "is sprinting" , 0, CVarFlags::EditCheckbox);
+AutoCVarInt music_is_crounching("music.is_crounching", "is crounching" , 0, CVarFlags::EditCheckbox);
+AutoCVarInt enable_music("music.enabled", "is music enabled" , 0, CVarFlags::EditCheckbox);
 
 void AdaptiveMusicManager::startup(std::string name_of_event) {
 	event_ref = EventReference(name_of_event);

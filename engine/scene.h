@@ -22,6 +22,7 @@ struct Scene {
 
 	Scene();
 	void register_game_systems();
+	void register_main_systems();
 	virtual void update(float dt);
 	[[nodiscard]] RenderScene &get_render_scene() const;
 

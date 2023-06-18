@@ -3,11 +3,11 @@
 #include "components/enemy_data_component.h"
 #include "components/enemy_path_component.h"
 #include "components/transform_component.h"
+#include "enemy_utils.h"
 #include "engine/scene.h"
 #include "managers/ecs/world.h"
 #include "managers/render/render_scene.h"
 #include <animation/animation_manager.h>
-#include "enemy_utils.h"
 
 void EnemyDistracted::startup(StateMachine *machine, std::string name) {
 	SPDLOG_INFO("EnemyDistracted::startup");
@@ -34,13 +34,14 @@ void EnemyDistracted::update(World *world, uint32_t entity_id, float dt) {
 
 	// move the entity towards the distraction target but keep it a bit away from it
 	if (glm::distance(current_pos, target) > 1.0f) {
-
 		// walking animation if walking
 		if (anim.animation_handle.id != res.get_animation_handle("enemy/enemy_ANIM_GLTF/enemy_walk_with_gun.anim").id) {
 			animation_manager.change_animation(entity_id, "enemy/enemy_ANIM_GLTF/enemy_walk_with_gun.anim");
 		}
 
 		transform.add_position(glm::normalize(target - current_pos) * enemy_path.speed * dt);
+
+		enemy_utils::handle_footsteps(entity_id, transform, enemy_data, dt);
 
 	} else {
 		// idle animation if idle
@@ -53,14 +54,17 @@ void EnemyDistracted::update(World *world, uint32_t entity_id, float dt) {
 
 	// smoothly rotate the entity to face the next node
 	if (enemy_path.is_rotating) {
-		float fast_dt = dt * 3.0f;
-		enemy_utils::look_at(enemy_path, transform, target, fast_dt);
+		glm::vec3 direction = transform.get_global_position() - target;
+		direction.y = 0.0f;
+		direction = glm::normalize(direction);
+
+		glm::quat target_orientation = glm::quatLookAt(direction, glm::vec3(0.0f, 1.0f, 0.0f));
+
+		transform.set_orientation(glm::slerp(transform.get_orientation(), target_orientation, 10.0f * dt));
 	}
 
 	// if the entity is facing the next node, stop rotating
-	if (glm::dot(
-				glm::normalize(target - transform.position),
-				glm::normalize(transform.get_global_forward())) > 0.99f) {
+	if (glm::dot(glm::normalize(target - transform.position), glm::normalize(transform.get_global_forward())) > 0.99f) {
 		enemy_path.is_rotating = false;
 	} else {
 		if (!enemy_path.is_rotating) {

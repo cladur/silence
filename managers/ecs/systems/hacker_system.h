@@ -5,6 +5,7 @@
 #include "components/hacker_data_component.h"
 #include "components/transform_component.h"
 #include <render/transparent_elements/ui/ui_elements/ui_text.h>
+#include <render/transparent_elements/ui/ui_elements/ui_image.h>
 
 class HackerSystem : public BaseSystem {
 private:
@@ -25,10 +26,15 @@ private:
 	float current_rotation_x_camera = 0.0f;
 
 	std::string ui_name;
-	UIText *ui_text;
+	UIText *ui_interaction_text;
+	UIText *ui_button_hint;
+	UIImage *interaction_sprite;
+
+	UIText *main_text;
 
 	bool is_on_camera = false;
 	Entity current_camera_entity = 0;
+	Entity current_camera_model_entity = 0;
 
 	float default_fov;
 	bool first_frame = true;
@@ -40,6 +46,7 @@ private:
 public:
 	void startup(World &world) override;
 	void update(World &world, float dt) override;
+	void reset();
 };
 
 #endif //SILENCE_HACKER_SYSTEM_H

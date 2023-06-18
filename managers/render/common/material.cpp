@@ -393,7 +393,6 @@ void MaterialTransparent::bind_object_resources(RenderScene &scene, TransparentO
 		shader.set_int("is_sprite", 0);
 
 	} else if (object.type == TransparentType::SPRITE) {
-		//t = SpriteManager::get()->get_sprite_texture(object.texture_name);
 		t = rm.get_texture(rm.get_texture_handle(object.texture_name));
 		shader.set_int("is_sprite", 1);
 	}
@@ -651,7 +650,7 @@ void MaterialHighlight::bind_skinned_resources(RenderScene &scene) {
 
 void MaterialHighlight::bind_mesh_resources(Mesh &mesh, HighlightData &highlight_data) {
 	shader.set_int("is_highlighted", highlight_data.highlighted);
-	shader.set_vec3("highlight_color", highlight_data.highlight_color);
+	shader.set_vec4("highlight_color", glm::vec4(highlight_data.highlight_color, highlight_data.highlight_power));
 }
 
 void MaterialHighlight::bind_instance_resources(SkinnedModelInstance &instance, Transform &transform) {
@@ -671,7 +670,7 @@ void MaterialHighlight::bind_instance_resources(SkinnedModelInstance &instance, 
 
 void MaterialHighlight::bind_mesh_resources(SkinnedMesh &mesh, HighlightData &highlight_data) {
 	skinned_shader.set_int("is_highlighted", highlight_data.highlighted);
-	skinned_shader.set_vec3("highlight_color", highlight_data.highlight_color);
+	skinned_shader.set_vec4("highlight_color", glm::vec4(highlight_data.highlight_color, highlight_data.highlight_power));
 }
 
 void MaterialDecal::startup() {

@@ -21,6 +21,9 @@ private:
 	std::unordered_map<InputKey, float> previous_key_state{};
 	std::unordered_map<InputKey, float> key_state{};
 
+	std::vector<std::unordered_map<InputKey, float>> previous_gamepad_states{};
+	std::vector<std::unordered_map<InputKey, float>> gamepad_states{};
+
 	struct GamepadInfo {
 		std::string name;
 	};
@@ -48,11 +51,18 @@ public:
 	bool is_action_just_released(const std::string &action_name);
 	bool is_action_pressed(const std::string &action_name);
 
+	bool is_action_just_pressed(const std::string &action_name, int gamepad_id);
+	bool is_action_just_released(const std::string &action_name, int gamepad_id);
+	bool is_action_pressed(const std::string &action_name, int gamepad_id);
+
 	glm::vec2 get_mouse_position();
 	glm::vec2 get_mouse_delta();
 
 	float get_action_strength(const std::string &action_name);
 	float get_axis(const std::string &negative_action, const std::string &positive_action);
+
+	float get_action_strength(const std::string &action_name, int gamepad_id);
+	float get_axis(const std::string &negative_action, const std::string &positive_action, int gamepad_id);
 };
 
 #endif //SILENCE_INPUT_MANAGER_H

@@ -8,7 +8,7 @@ in vec3 ViewPos;
 in vec3 Normal;
 
 uniform int is_highlighted;
-uniform vec3 highlight_color;
+uniform vec4 highlight_color;
 uniform int agent_hacker_pov; // 0 - agent, 1 - hacker
 uniform int highlight_target; // 0 - agent, 1 - hacker, 2 - enemy, 3 - other
 
@@ -23,23 +23,23 @@ void main() {
         switch (highlight_target) {
             case 0:
                 if (agent_hacker_pov != 0) {
-                    color = vec4(highlight_color, 1.0f);
+                    color = highlight_color;
                 }
                 break;
             case 1:
                 if (agent_hacker_pov != 1) {
-                    color = vec4(highlight_color, 1.0f);
+                    color = highlight_color;
                 }
                 break;
             case 2:
-                color = vec4(highlight_color, 1.0f);
+                color = highlight_color;
                 break;
             case 3:
-                color = vec4(highlight_color, 1.0f);
+                color = highlight_color;
                 break;
         }
         if (is_xray == 1) {
-            color.a = 0.5;
+            color.a *= -1.0;
         }
     } else {
         color = vec4(0.0f);

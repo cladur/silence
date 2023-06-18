@@ -118,16 +118,38 @@
             },
             {
                 "component_data": {
-                    "animation_name": "enemy/enemy_ANIM_GLTF/enemy_walk_with_gun.anim",
-                    "ticks_per_second": 1000.0
+                    "path_parent": 73,
+                    "rotation_speed": 4.599999904632568,
+                    "speed": 1.0
                 },
-                "component_name": "AnimationInstance"
+                "component_name": "EnemyPath"
+            },
+            {
+                "component_data": {
+                    "tag_position": {
+                        "x": 0.0,
+                        "y": 2.0,
+                        "z": 0.0
+                    }
+                },
+                "component_name": "Taggable"
             },
             {
                 "component_data": {
                     "parent": 13
                 },
                 "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "animation_name": "enemy/enemy_ANIM_GLTF/enemy_walk_with_gun.anim",
+                    "ticks_per_second": 1000.0
+                },
+                "component_name": "AnimationInstance"
+            },
+            {
+                "component_data": {},
+                "component_name": "EnemyData"
             },
             {
                 "component_data": {
@@ -161,33 +183,12 @@
             },
             {
                 "component_data": {
-                    "path_parent": 73,
-                    "rotation_speed": 8.0,
-                    "speed": 1.0
-                },
-                "component_name": "EnemyPath"
-            },
-            {
-                "component_data": {},
-                "component_name": "EnemyData"
-            },
-            {
-                "component_data": {
-                    "tag_position": {
-                        "x": 0.0,
-                        "y": 2.0,
-                        "z": 0.0
-                    }
-                },
-                "component_name": "Taggable"
-            },
-            {
-                "component_data": {
                     "highlight_color": {
                         "b": 0.0,
                         "g": 0.0,
                         "r": 1.0
                     },
+                    "highlight_power": 0.30000001192092896,
                     "highlighted": "twoja misja trwa",
                     "target": 2
                 },
@@ -228,16 +229,16 @@
             },
             {
                 "component_data": {
+                    "parent": 46
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "animation_name": "agent/agent_ANIM_GLTF/agent_idle.anim",
                     "ticks_per_second": 1000.0
                 },
                 "component_name": "AnimationInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 46
-                },
-                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -254,6 +255,7 @@
                         "g": 1.0,
                         "r": 0.4313725531101227
                     },
+                    "highlight_power": 0.30000001192092896,
                     "highlighted": "twoja misja trwa",
                     "target": 0
                 },
@@ -270,22 +272,6 @@
                     "name": "Start"
                 },
                 "component_name": "Name"
-            },
-            {
-                "component_data": {
-                    "children": [
-                        80,
-                        90,
-                        91,
-                        92,
-                        93,
-                        95,
-                        96,
-                        97
-                    ],
-                    "children_count": 8
-                },
-                "component_name": "Children"
             },
             {
                 "component_data": {
@@ -307,6 +293,22 @@
                     }
                 },
                 "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "children": [
+                        80,
+                        90,
+                        91,
+                        92,
+                        93,
+                        95,
+                        96,
+                        97
+                    ],
+                    "children_count": 8
+                },
+                "component_name": "Children"
             }
         ],
         "entity": 7,
@@ -319,6 +321,27 @@
                     "name": "Environment"
                 },
                 "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 1.0,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": -13.447293281555176,
+                        "y": -0.0002457320806570351,
+                        "z": 3.215507984161377
+                    },
+                    "scale": {
+                        "x": 0.9999995231628418,
+                        "y": 1.0,
+                        "z": 0.9999995231628418
+                    }
+                },
+                "component_name": "Transform"
             },
             {
                 "component_data": {
@@ -355,27 +378,6 @@
                     "children_count": 28
                 },
                 "component_name": "Children"
-            },
-            {
-                "component_data": {
-                    "orientation": {
-                        "w": 1.0,
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    "position": {
-                        "x": -13.447293281555176,
-                        "y": -0.0002457320806570351,
-                        "z": 3.215507984161377
-                    },
-                    "scale": {
-                        "x": 0.9999995231628418,
-                        "y": 1.0,
-                        "z": 0.9999995231628418
-                    }
-                },
-                "component_name": "Transform"
             }
         ],
         "entity": 12,
@@ -388,25 +390,6 @@
                     "name": "Lights"
                 },
                 "component_name": "Name"
-            },
-            {
-                "component_data": {
-                    "children": [
-                        45,
-                        104,
-                        62,
-                        63,
-                        65,
-                        69,
-                        84,
-                        85,
-                        67,
-                        81,
-                        88
-                    ],
-                    "children_count": 11
-                },
-                "component_name": "Children"
             },
             {
                 "component_data": {
@@ -428,6 +411,25 @@
                     }
                 },
                 "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "children": [
+                        45,
+                        104,
+                        62,
+                        63,
+                        65,
+                        69,
+                        84,
+                        85,
+                        67,
+                        81,
+                        88
+                    ],
+                    "children_count": 11
+                },
+                "component_name": "Children"
             }
         ],
         "entity": 42,
@@ -443,6 +445,27 @@
             },
             {
                 "component_data": {
+                    "orientation": {
+                        "w": 1.0,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 1.1318988800048828,
+                        "y": 0.270626962184906,
+                        "z": 0.563689112663269
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
                     "children": [
                         6,
                         47,
@@ -454,24 +477,12 @@
             },
             {
                 "component_data": {
-                    "orientation": {
-                        "w": 1.0,
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    "position": {
-                        "x": 0.0,
-                        "y": 0.20000000298023224,
-                        "z": 0.0
-                    },
-                    "scale": {
-                        "x": 1.0,
-                        "y": 1.0,
-                        "z": 1.0
-                    }
+                    "camera": 3,
+                    "camera_pivot": 47,
+                    "model": 6,
+                    "spring_arm": 70
                 },
-                "component_name": "Transform"
+                "component_name": "AgentData"
             },
             {
                 "component_data": {
@@ -494,15 +505,6 @@
                     }
                 },
                 "component_name": "ColliderCapsule"
-            },
-            {
-                "component_data": {
-                    "camera": 3,
-                    "camera_pivot": 47,
-                    "model": 6,
-                    "spring_arm": 70
-                },
-                "component_name": "AgentData"
             }
         ],
         "entity": 46,
@@ -515,15 +517,6 @@
                     "name": "CameraPivot"
                 },
                 "component_name": "Name"
-            },
-            {
-                "component_data": {
-                    "children": [
-                        70
-                    ],
-                    "children_count": 1
-                },
-                "component_name": "Children"
             },
             {
                 "component_data": {
@@ -551,6 +544,15 @@
                     "parent": 46
                 },
                 "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "children": [
+                        70
+                    ],
+                    "children_count": 1
+                },
+                "component_name": "Children"
             }
         ],
         "entity": 47,
@@ -630,16 +632,6 @@
             },
             {
                 "component_data": {
-                    "children": [
-                        48,
-                        26
-                    ],
-                    "children_count": 2
-                },
-                "component_name": "Children"
-            },
-            {
-                "component_data": {
                     "orientation": {
                         "w": 0.0,
                         "x": 0.0,
@@ -658,6 +650,16 @@
                     }
                 },
                 "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "children": [
+                        48,
+                        26
+                    ],
+                    "children_count": 2
+                },
+                "component_name": "Children"
             }
         ],
         "entity": 49,
@@ -756,16 +758,6 @@
             },
             {
                 "component_data": {
-                    "children": [
-                        56,
-                        57
-                    ],
-                    "children_count": 2
-                },
-                "component_name": "Children"
-            },
-            {
-                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": 0.0,
@@ -773,9 +765,9 @@
                         "z": 0.0
                     },
                     "position": {
-                        "x": 2.0,
-                        "y": 0.20000000298023224,
-                        "z": 4.0
+                        "x": 3.5926015377044678,
+                        "y": 0.2686598300933838,
+                        "z": -0.01083076000213623
                     },
                     "scale": {
                         "x": 1.0,
@@ -784,6 +776,25 @@
                     }
                 },
                 "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "camera": 54,
+                    "camera_pivot": 57,
+                    "model": 56,
+                    "scorpion_camera_transform": 58
+                },
+                "component_name": "HackerData"
+            },
+            {
+                "component_data": {
+                    "children": [
+                        56,
+                        57
+                    ],
+                    "children_count": 2
+                },
+                "component_name": "Children"
             },
             {
                 "component_data": {
@@ -801,15 +812,6 @@
                     "layer_name": "default"
                 },
                 "component_name": "ColliderTag"
-            },
-            {
-                "component_data": {
-                    "camera": 54,
-                    "camera_pivot": 57,
-                    "model": 56,
-                    "scorpion_camera_transform": 58
-                },
-                "component_name": "HackerData"
             }
         ],
         "entity": 55,
@@ -846,16 +848,16 @@
             },
             {
                 "component_data": {
+                    "parent": 55
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "animation_name": "scorpion/scorpion_ANIM_GLTF/scorpion_idle.anim",
                     "ticks_per_second": 5000.0
                 },
                 "component_name": "AnimationInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 55
-                },
-                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -872,6 +874,7 @@
                         "g": 1.0,
                         "r": 0.0
                     },
+                    "highlight_power": 0.30000001192092896,
                     "highlighted": "twoja misja trwa",
                     "target": 1
                 },
@@ -888,15 +891,6 @@
                     "name": "CameraPivot"
                 },
                 "component_name": "Name"
-            },
-            {
-                "component_data": {
-                    "children": [
-                        58
-                    ],
-                    "children_count": 1
-                },
-                "component_name": "Children"
             },
             {
                 "component_data": {
@@ -924,6 +918,15 @@
                     "parent": 55
                 },
                 "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "children": [
+                        58
+                    ],
+                    "children_count": 1
+                },
+                "component_name": "Children"
             }
         ],
         "entity": 57,
@@ -1018,13 +1021,6 @@
             },
             {
                 "component_data": {
-                    "bone_name": "RightHand",
-                    "holder": 6
-                },
-                "component_name": "Attachment"
-            },
-            {
-                "component_data": {
                     "orientation": {
                         "w": 0.9398154020309448,
                         "x": 0.09057460725307465,
@@ -1052,6 +1048,13 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
+                    "bone_name": "RightHand",
+                    "holder": 6
+                },
+                "component_name": "Attachment"
             }
         ],
         "entity": 59,
@@ -1085,6 +1088,16 @@
                     }
                 },
                 "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "tag_position": {
+                        "x": 0.0,
+                        "y": 0.11999999731779099,
+                        "z": 0.4000000059604645
+                    }
+                },
+                "component_name": "Taggable"
             },
             {
                 "component_data": {
@@ -1122,6 +1135,7 @@
             },
             {
                 "component_data": {
+                    "cable_parent": 110,
                     "can_interact": true,
                     "interaction": 2,
                     "interaction_target": 61,
@@ -1129,20 +1143,11 @@
                     "interaction_target_3": 0,
                     "interaction_target_4": 0,
                     "interaction_target_5": 0,
+                    "interaction_text": "[X] Use",
                     "single_use": false,
                     "type": 2
                 },
                 "component_name": "Interactable"
-            },
-            {
-                "component_data": {
-                    "tag_position": {
-                        "x": 0.0,
-                        "y": 0.11999999731779099,
-                        "z": 0.4000000059604645
-                    }
-                },
-                "component_name": "Taggable"
             },
             {
                 "component_data": {
@@ -1151,6 +1156,7 @@
                         "g": 1.0,
                         "r": 0.0
                     },
+                    "highlight_power": 0.029999999329447746,
                     "highlighted": "twoja misja trwa",
                     "target": 3
                 },
@@ -1199,6 +1205,23 @@
                 "component_name": "ModelInstance"
             },
             {
+                "component_data": {
+                    "first_position": {
+                        "x": 16.84600067138672,
+                        "y": 3.816999912261963,
+                        "z": 28.645000457763672
+                    },
+                    "is_door": false,
+                    "second_position": {
+                        "x": 16.845670700073242,
+                        "y": 0.0,
+                        "z": 28.644546508789063
+                    },
+                    "speed": 1.0
+                },
+                "component_name": "Platform"
+            },
+            {
                 "component_data": {},
                 "component_name": "StaticTag"
             },
@@ -1222,23 +1245,6 @@
                     }
                 },
                 "component_name": "ColliderAABB"
-            },
-            {
-                "component_data": {
-                    "first_position": {
-                        "x": 16.84600067138672,
-                        "y": 3.816999912261963,
-                        "z": 28.645000457763672
-                    },
-                    "is_door": false,
-                    "second_position": {
-                        "x": 16.845670700073242,
-                        "y": 0.0,
-                        "z": 28.644546508789063
-                    },
-                    "speed": 1.0
-                },
-                "component_name": "Platform"
             }
         ],
         "entity": 61,
@@ -1251,13 +1257,6 @@
                     "name": "Gun"
                 },
                 "component_name": "Name"
-            },
-            {
-                "component_data": {
-                    "bone_name": "Gun",
-                    "holder": 5
-                },
-                "component_name": "Attachment"
             },
             {
                 "component_data": {
@@ -1294,6 +1293,13 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
+                    "bone_name": "Gun",
+                    "holder": 5
+                },
+                "component_name": "Attachment"
             }
         ],
         "entity": 64,
@@ -1303,17 +1309,16 @@
         "components": [
             {
                 "component_data": {
-                    "distraction_radius": 15.0,
-                    "distraction_time": 2.0,
-                    "explosion_radius": 4.0
-                },
-                "component_name": "ExplodingBox"
-            },
-            {
-                "component_data": {
                     "name": "Exploding Box"
                 },
                 "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "event_path": "SFX/electricity/electric_hum",
+                    "is_3d": true
+                },
+                "component_name": "FMODEmitter"
             },
             {
                 "component_data": {
@@ -1330,11 +1335,21 @@
                     },
                     "scale": {
                         "x": 1.0,
-                        "y": 0.9999455213546753,
-                        "z": 0.9999455213546753
+                        "y": 0.9999454617500305,
+                        "z": 0.9999454617500305
                     }
                 },
                 "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "tag_position": {
+                        "x": 0.0,
+                        "y": 0.20000000298023224,
+                        "z": 0.800000011920929
+                    }
+                },
+                "component_name": "Taggable"
             },
             {
                 "component_data": {
@@ -1350,6 +1365,24 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
+                    "children": [
+                        113,
+                        114
+                    ],
+                    "children_count": 2
+                },
+                "component_name": "Children"
+            },
+            {
+                "component_data": {
+                    "distraction_radius": 15.0,
+                    "distraction_time": 2.0,
+                    "explosion_radius": 4.0
+                },
+                "component_name": "ExplodingBox"
             },
             {
                 "component_data": {},
@@ -1378,6 +1411,7 @@
             },
             {
                 "component_data": {
+                    "cable_parent": 0,
                     "can_interact": true,
                     "interaction": 3,
                     "interaction_target": 66,
@@ -1385,20 +1419,11 @@
                     "interaction_target_3": 0,
                     "interaction_target_4": 0,
                     "interaction_target_5": 0,
+                    "interaction_text": "[X] Explode",
                     "single_use": false,
                     "type": 2
                 },
                 "component_name": "Interactable"
-            },
-            {
-                "component_data": {
-                    "tag_position": {
-                        "x": 0.0,
-                        "y": 0.20000000298023224,
-                        "z": 0.800000011920929
-                    }
-                },
-                "component_name": "Taggable"
             },
             {
                 "component_data": {
@@ -1407,6 +1432,7 @@
                         "g": 0.0,
                         "r": 1.0
                     },
+                    "highlight_power": 0.029999999329447746,
                     "highlighted": "twoja misja trwa",
                     "target": 3
                 },
@@ -1434,18 +1460,19 @@
                     "one_shot_duration": 0.10000000149011612,
                     "position": [
                         0.0,
-                        0.4000000059604645,
-                        -0.5
+                        0.699999988079071,
+                        0.0
                     ],
                     "position_variance": [
-                        0.4000000059604645,
-                        0.20000000298023224,
-                        0.4000000059604645
+                        1.0,
+                        2.299999952316284,
+                        0.800000011920929
                     ],
-                    "rate": 33.599998474121094,
+                    "rate": 38.0,
                     "rotation_begin": 0.0,
                     "rotation_end": 0.0,
                     "rotation_transition": 0,
+                    "rotation_variance": 0.0,
                     "size_begin": 4.5,
                     "size_end": 7.800000190734863,
                     "size_transition": 0,
@@ -1471,153 +1498,7 @@
             }
         ],
         "entity": 66,
-        "signature": "0000000000000000000000000000000011010000100100000010110000101011"
-    },
-    {
-        "components": [
-            {
-                "component_data": {
-                    "name": "HackerCameraJump"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
-                    "children": [
-                        102,
-                        89
-                    ],
-                    "children_count": 2
-                },
-                "component_name": "Children"
-            },
-            {
-                "component_data": {
-                    "orientation": {
-                        "w": 0.6562402844429016,
-                        "x": -0.22281520068645477,
-                        "y": 0.6826289892196655,
-                        "z": 0.2317751795053482
-                    },
-                    "position": {
-                        "x": 16.879180908203125,
-                        "y": 0.04834270477294922,
-                        "z": 11.558149337768555
-                    },
-                    "scale": {
-                        "x": 1.0000340938568115,
-                        "y": 1.0000005960464478,
-                        "z": 1.0000253915786743
-                    }
-                },
-                "component_name": "Transform"
-            },
-            {
-                "component_data": {
-                    "parent": 100
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "items/camera/camera_1.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "layer_name": "taggable"
-                },
-                "component_name": "ColliderTag"
-            },
-            {
-                "component_data": {
-                    "center": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    "range": {
-                        "x": 0.30000001192092896,
-                        "y": 0.30000001192092896,
-                        "z": 0.30000001192092896
-                    }
-                },
-                "component_name": "ColliderAABB"
-            },
-            {
-                "component_data": {
-                    "can_interact": true,
-                    "interaction": 1,
-                    "interaction_target": 68,
-                    "interaction_target_2": 0,
-                    "interaction_target_3": 0,
-                    "interaction_target_4": 0,
-                    "interaction_target_5": 0,
-                    "single_use": false,
-                    "type": 2
-                },
-                "component_name": "Interactable"
-            },
-            {
-                "component_data": {
-                    "billboard_z_offset": -0.20000000298023224,
-                    "color": {
-                        "a": 0.6666666865348816,
-                        "b": 0.0,
-                        "g": 0.0,
-                        "r": 1.0
-                    },
-                    "position_offset": {
-                        "x": 0.0,
-                        "y": -0.20000000298023224,
-                        "z": 0.0
-                    },
-                    "scale": {
-                        "x": 0.30000001192092896,
-                        "y": 0.30000001192092896
-                    },
-                    "texture": "dot.ktx2",
-                    "use_camera_right": false
-                },
-                "component_name": "Billboard"
-            },
-            {
-                "component_data": {
-                    "tag_position": {
-                        "x": 0.0,
-                        "y": 1.0,
-                        "z": 0.0
-                    }
-                },
-                "component_name": "Taggable"
-            },
-            {
-                "component_data": {
-                    "highlight_color": {
-                        "b": 0.0,
-                        "g": 0.43529412150382996,
-                        "r": 1.0
-                    },
-                    "highlighted": "twoja misja trwa",
-                    "target": 2
-                },
-                "component_name": "Highlight"
-            },
-            {
-                "component_data": {
-                    "detection_level": 0.0,
-                    "is_active": true,
-                    "particles_parent": 102
-                },
-                "component_name": "DetectionCamera"
-            }
-        ],
-        "entity": 68,
-        "signature": "0000000000000000000000000000000101010010000100000010100000111011"
+        "signature": "0000000000000000000000000000000011110000100100000010110000111011"
     },
     {
         "components": [
@@ -1684,15 +1565,6 @@
             },
             {
                 "component_data": {
-                    "children": [
-                        3
-                    ],
-                    "children_count": 1
-                },
-                "component_name": "Children"
-            },
-            {
-                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": -4.598850633641405e-09,
@@ -1717,6 +1589,15 @@
                     "parent": 47
                 },
                 "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "children": [
+                        3
+                    ],
+                    "children_count": 1
+                },
+                "component_name": "Children"
             }
         ],
         "entity": 70,
@@ -1724,6 +1605,33 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "center": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "orientation": {
+                        "0": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                        },
+                        "1": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                        }
+                    },
+                    "range": {
+                        "x": 2.0999999046325684,
+                        "y": 0.10000000149011612,
+                        "z": 2.0
+                    }
+                },
+                "component_name": "ColliderOBB"
+            },
             {
                 "component_data": {
                     "name": "Camera Floor"
@@ -1762,33 +1670,6 @@
                     "layer_name": "camera"
                 },
                 "component_name": "ColliderTag"
-            },
-            {
-                "component_data": {
-                    "center": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    "orientation": {
-                        "0": {
-                            "x": 0.0,
-                            "y": 0.0,
-                            "z": 0.0
-                        },
-                        "1": {
-                            "x": 0.0,
-                            "y": 0.0,
-                            "z": 0.0
-                        }
-                    },
-                    "range": {
-                        "x": 2.0999999046325684,
-                        "y": 0.10000000149011612,
-                        "z": 2.0
-                    }
-                },
-                "component_name": "ColliderOBB"
             }
         ],
         "entity": 71,
@@ -1801,16 +1682,6 @@
                     "name": "EnemyPathParent"
                 },
                 "component_name": "Name"
-            },
-            {
-                "component_data": {
-                    "children": [
-                        87,
-                        86
-                    ],
-                    "children_count": 2
-                },
-                "component_name": "Children"
             },
             {
                 "component_data": {
@@ -1838,6 +1709,16 @@
                     "parent": 13
                 },
                 "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "children": [
+                        87,
+                        86
+                    ],
+                    "children_count": 2
+                },
+                "component_name": "Children"
             },
             {
                 "component_data": null,
@@ -2219,353 +2100,31 @@
         "components": [
             {
                 "component_data": {
-                    "name": "CameraArm"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
-                    "children": [
-                        100
-                    ],
-                    "children_count": 1
-                },
-                "component_name": "Children"
-            },
-            {
-                "component_data": {
-                    "orientation": {
-                        "w": 0.9648527503013611,
+                    "center": {
                         "x": 0.0,
-                        "y": 0.26279115676879883,
-                        "z": 0.0
-                    },
-                    "position": {
-                        "x": 9.861193656921387,
-                        "y": 5.906364917755127,
-                        "z": 13.528951644897461
-                    },
-                    "scale": {
-                        "x": 3.9999752044677734,
-                        "y": 4.0,
-                        "z": 3.9999752044677734
-                    }
-                },
-                "component_name": "Transform"
-            },
-            {
-                "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "items/camera/camera_3.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
-            }
-        ],
-        "entity": 72,
-        "signature": "0000000000000000000000000000000000000000000000000000000000110011"
-    },
-    {
-        "components": [
-            {
-                "component_data": {
-                    "name": "CameraArmArm"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
-                    "children": [
-                        68
-                    ],
-                    "children_count": 1
-                },
-                "component_name": "Children"
-            },
-            {
-                "component_data": {
-                    "orientation": {
-                        "w": 0.9690200090408325,
-                        "x": 0.0,
-                        "y": -0.24698211252689362,
-                        "z": 0.0
-                    },
-                    "position": {
-                        "x": -1.1324882507324219e-06,
-                        "y": 0.008328914642333984,
-                        "z": 3.814697265625e-06
-                    },
-                    "scale": {
-                        "x": 0.5000004172325134,
                         "y": 0.5,
-                        "z": 0.5000001192092896
-                    }
-                },
-                "component_name": "Transform"
-            },
-            {
-                "component_data": {
-                    "parent": 72
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "items/camera/camera_2.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
-            }
-        ],
-        "entity": 100,
-        "signature": "0000000000000000000000000000000000000000000000000000000000111011"
-    },
-    {
-        "components": [
-            {
-                "component_data": {
-                    "name": "camera particles"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
-                    "children": [
-                        103,
-                        101
-                    ],
-                    "children_count": 2
-                },
-                "component_name": "Children"
-            },
-            {
-                "component_data": {
+                        "z": 0.0
+                    },
                     "orientation": {
-                        "w": 1.0,
-                        "x": 2.6867395501862894e-14,
-                        "y": 1.6391277313232422e-07,
-                        "z": -1.6391277313232422e-07
+                        "0": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                        },
+                        "1": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                        }
                     },
-                    "position": {
-                        "x": -6.312131881713867e-05,
-                        "y": 2.384185791015625e-06,
-                        "z": -0.11413002014160156
-                    },
-                    "scale": {
-                        "x": 1.0,
-                        "y": 1.0,
-                        "z": 1.0000001192092896
+                    "range": {
+                        "x": 0.5,
+                        "y": 0.5,
+                        "z": 0.5
                     }
                 },
-                "component_name": "Transform"
+                "component_name": "ColliderOBB"
             },
-            {
-                "component_data": {
-                    "parent": 68
-                },
-                "component_name": "Parent"
-            }
-        ],
-        "entity": 102,
-        "signature": "0000000000000000000000000000000000000000000000000000000000011011"
-    },
-    {
-        "components": [
-            {
-                "component_data": {
-                    "name": "mid"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
-                    "orientation": {
-                        "w": 0.5000723004341125,
-                        "x": 0.5001047849655151,
-                        "y": -0.49992355704307556,
-                        "z": -0.49989932775497437
-                    },
-                    "position": {
-                        "x": 0.017063140869140625,
-                        "y": 0.04914283752441406,
-                        "z": -0.04366111755371094
-                    },
-                    "scale": {
-                        "x": 0.9999420046806335,
-                        "y": 0.9999405145645142,
-                        "z": 0.9999767541885376
-                    }
-                },
-                "component_name": "Transform"
-            },
-            {
-                "component_data": {
-                    "parent": 102
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "color_begin": [
-                        0.6470588445663452,
-                        0.21176470816135406,
-                        0.0,
-                        0.6509804129600525
-                    ],
-                    "color_end": [
-                        0.5960784554481506,
-                        0.14901961386203766,
-                        0.0,
-                        0.0
-                    ],
-                    "color_transition": 0,
-                    "is_billboard": false,
-                    "is_one_shot": false,
-                    "is_textured": true,
-                    "lifetime": 0.699999988079071,
-                    "one_shot_duration": 0.5,
-                    "position": [
-                        0.0,
-                        0.0,
-                        0.0
-                    ],
-                    "position_variance": [
-                        0.4000000059604645,
-                        0.10000000149011612,
-                        0.30000001192092896
-                    ],
-                    "rate": 11.600000381469727,
-                    "rotation_begin": 0.0,
-                    "rotation_end": 0.0,
-                    "rotation_transition": 0,
-                    "size_begin": 9.0,
-                    "size_end": 9.0,
-                    "size_transition": 0,
-                    "texture_name": "glitch_ray_half.ktx2",
-                    "velocity_begin": [
-                        0.0,
-                        -29.899999618530273,
-                        0.0
-                    ],
-                    "velocity_end": [
-                        0.0,
-                        -26.700000762939453,
-                        0.0
-                    ],
-                    "velocity_transition": 0,
-                    "velocity_variance": [
-                        8.0,
-                        0.0,
-                        8.0
-                    ]
-                },
-                "component_name": "ParticleEmitter"
-            }
-        ],
-        "entity": 103,
-        "signature": "0000000000000000000000000000000010000000000000000000000000001011"
-    },
-    {
-        "components": [
-            {
-                "component_data": {
-                    "name": "mid rotated"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
-                    "orientation": {
-                        "w": 0.70710688829422,
-                        "x": 0.7071062922477722,
-                        "y": 0.0005098828114569187,
-                        "z": 0.0005192953976802528
-                    },
-                    "position": {
-                        "x": -0.03726387023925781,
-                        "y": 0.04913806915283203,
-                        "z": -0.05007743835449219
-                    },
-                    "scale": {
-                        "x": 0.9999775886535645,
-                        "y": 0.9998748302459717,
-                        "z": 0.9998864531517029
-                    }
-                },
-                "component_name": "Transform"
-            },
-            {
-                "component_data": {
-                    "parent": 102
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "color_begin": [
-                        0.6470588445663452,
-                        0.250980406999588,
-                        0.0,
-                        0.6274510025978088
-                    ],
-                    "color_end": [
-                        0.5960784554481506,
-                        0.14901961386203766,
-                        0.0,
-                        0.0
-                    ],
-                    "color_transition": 0,
-                    "is_billboard": false,
-                    "is_one_shot": false,
-                    "is_textured": true,
-                    "lifetime": 7.5,
-                    "one_shot_duration": 0.5,
-                    "position": [
-                        0.0,
-                        0.0,
-                        0.0
-                    ],
-                    "position_variance": [
-                        0.0,
-                        0.0,
-                        0.0
-                    ],
-                    "rate": 10.699999809265137,
-                    "rotation_begin": 0.0,
-                    "rotation_end": 0.0,
-                    "rotation_transition": 0,
-                    "size_begin": 9.0,
-                    "size_end": 9.0,
-                    "size_transition": 0,
-                    "texture_name": "glitch_ray_half.ktx2",
-                    "velocity_begin": [
-                        0.0,
-                        -20.899999618530273,
-                        0.0
-                    ],
-                    "velocity_end": [
-                        0.0,
-                        -18.899999618530273,
-                        0.0
-                    ],
-                    "velocity_transition": 0,
-                    "velocity_variance": [
-                        8.0,
-                        0.0,
-                        8.0
-                    ]
-                },
-                "component_name": "ParticleEmitter"
-            }
-        ],
-        "entity": 101,
-        "signature": "0000000000000000000000000000000010000000000000000000000000001011"
-    },
-    {
-        "components": [
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -2617,7 +2176,13 @@
                     "layer_name": "default"
                 },
                 "component_name": "ColliderTag"
-            },
+            }
+        ],
+        "entity": 1,
+        "signature": "0000000000000000000000000000000000000000000000001000110000101011"
+    },
+    {
+        "components": [
             {
                 "component_data": {
                     "center": {
@@ -2644,13 +2209,7 @@
                     }
                 },
                 "component_name": "ColliderOBB"
-            }
-        ],
-        "entity": 1,
-        "signature": "0000000000000000000000000000000000000000000000001000110000101011"
-    },
-    {
-        "components": [
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -2702,7 +2261,13 @@
                     "layer_name": "obstacle"
                 },
                 "component_name": "ColliderTag"
-            },
+            }
+        ],
+        "entity": 4,
+        "signature": "0000000000000000000000000000000000000000000000001000110000101011"
+    },
+    {
+        "components": [
             {
                 "component_data": {
                     "center": {
@@ -2729,13 +2294,7 @@
                     }
                 },
                 "component_name": "ColliderOBB"
-            }
-        ],
-        "entity": 4,
-        "signature": "0000000000000000000000000000000000000000000000001000110000101011"
-    },
-    {
-        "components": [
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -2787,7 +2346,13 @@
                     "layer_name": "default"
                 },
                 "component_name": "ColliderTag"
-            },
+            }
+        ],
+        "entity": 8,
+        "signature": "0000000000000000000000000000000000000000000000001000110000101011"
+    },
+    {
+        "components": [
             {
                 "component_data": {
                     "center": {
@@ -2814,13 +2379,7 @@
                     }
                 },
                 "component_name": "ColliderOBB"
-            }
-        ],
-        "entity": 8,
-        "signature": "0000000000000000000000000000000000000000000000001000110000101011"
-    },
-    {
-        "components": [
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -2863,7 +2422,13 @@
                     "layer_name": "default"
                 },
                 "component_name": "ColliderTag"
-            },
+            }
+        ],
+        "entity": 9,
+        "signature": "0000000000000000000000000000000000000000000000001000110000001011"
+    },
+    {
+        "components": [
             {
                 "component_data": {
                     "center": {
@@ -2890,13 +2455,7 @@
                     }
                 },
                 "component_name": "ColliderOBB"
-            }
-        ],
-        "entity": 9,
-        "signature": "0000000000000000000000000000000000000000000000001000110000001011"
-    },
-    {
-        "components": [
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -2948,33 +2507,6 @@
                     "layer_name": "obstacle"
                 },
                 "component_name": "ColliderTag"
-            },
-            {
-                "component_data": {
-                    "center": {
-                        "x": 0.0,
-                        "y": 0.5,
-                        "z": 0.0
-                    },
-                    "orientation": {
-                        "0": {
-                            "x": 0.0,
-                            "y": 0.0,
-                            "z": 0.0
-                        },
-                        "1": {
-                            "x": 0.0,
-                            "y": 0.0,
-                            "z": 0.0
-                        }
-                    },
-                    "range": {
-                        "x": 0.5,
-                        "y": 0.5,
-                        "z": 0.5
-                    }
-                },
-                "component_name": "ColliderOBB"
             }
         ],
         "entity": 10,
@@ -2987,16 +2519,6 @@
                     "name": "Enemies"
                 },
                 "component_name": "Name"
-            },
-            {
-                "component_data": {
-                    "children": [
-                        13,
-                        32
-                    ],
-                    "children_count": 2
-                },
-                "component_name": "Children"
             },
             {
                 "component_data": {
@@ -3018,6 +2540,16 @@
                     }
                 },
                 "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "children": [
+                        13,
+                        32
+                    ],
+                    "children_count": 2
+                },
+                "component_name": "Children"
             }
         ],
         "entity": 11,
@@ -3030,18 +2562,6 @@
                     "name": "First"
                 },
                 "component_name": "Name"
-            },
-            {
-                "component_data": {
-                    "children": [
-                        5,
-                        73,
-                        64,
-                        82
-                    ],
-                    "children_count": 4
-                },
-                "component_name": "Children"
             },
             {
                 "component_data": {
@@ -3069,6 +2589,18 @@
                     "parent": 11
                 },
                 "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "children": [
+                        5,
+                        73,
+                        64,
+                        82
+                    ],
+                    "children_count": 4
+                },
+                "component_name": "Children"
             }
         ],
         "entity": 13,
@@ -3076,6 +2608,33 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "center": {
+                        "x": 0.0,
+                        "y": 0.5,
+                        "z": 0.0
+                    },
+                    "orientation": {
+                        "0": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                        },
+                        "1": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                        }
+                    },
+                    "range": {
+                        "x": 0.5,
+                        "y": 0.5,
+                        "z": 0.5
+                    }
+                },
+                "component_name": "ColliderOBB"
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -3127,7 +2686,13 @@
                     "layer_name": "obstacle"
                 },
                 "component_name": "ColliderTag"
-            },
+            }
+        ],
+        "entity": 14,
+        "signature": "0000000000000000000000000000000000000000000000001000110000101011"
+    },
+    {
+        "components": [
             {
                 "component_data": {
                     "center": {
@@ -3154,13 +2719,7 @@
                     }
                 },
                 "component_name": "ColliderOBB"
-            }
-        ],
-        "entity": 14,
-        "signature": "0000000000000000000000000000000000000000000000001000110000101011"
-    },
-    {
-        "components": [
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -3212,7 +2771,57 @@
                     "layer_name": "obstacle"
                 },
                 "component_name": "ColliderTag"
+            }
+        ],
+        "entity": 15,
+        "signature": "0000000000000000000000000000000000000000000000001000110000101011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "Interactables"
+                },
+                "component_name": "Name"
             },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.0,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "children": [
+                        66,
+                        35,
+                        52
+                    ],
+                    "children_count": 3
+                },
+                "component_name": "Children"
+            }
+        ],
+        "entity": 16,
+        "signature": "0000000000000000000000000000000000000000000000000000000000010011"
+    },
+    {
+        "components": [
             {
                 "component_data": {
                     "center": {
@@ -3239,57 +2848,7 @@
                     }
                 },
                 "component_name": "ColliderOBB"
-            }
-        ],
-        "entity": 15,
-        "signature": "0000000000000000000000000000000000000000000000001000110000101011"
-    },
-    {
-        "components": [
-            {
-                "component_data": {
-                    "name": "Interactables"
-                },
-                "component_name": "Name"
             },
-            {
-                "component_data": {
-                    "children": [
-                        66,
-                        35,
-                        52
-                    ],
-                    "children_count": 3
-                },
-                "component_name": "Children"
-            },
-            {
-                "component_data": {
-                    "orientation": {
-                        "w": 0.0,
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    "position": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    "scale": {
-                        "x": 1.0,
-                        "y": 1.0,
-                        "z": 1.0
-                    }
-                },
-                "component_name": "Transform"
-            }
-        ],
-        "entity": 16,
-        "signature": "0000000000000000000000000000000000000000000000000000000000010011"
-    },
-    {
-        "components": [
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -3341,7 +2900,13 @@
                     "layer_name": "obstacle"
                 },
                 "component_name": "ColliderTag"
-            },
+            }
+        ],
+        "entity": 17,
+        "signature": "0000000000000000000000000000000000000000000000001000110000101011"
+    },
+    {
+        "components": [
             {
                 "component_data": {
                     "center": {
@@ -3368,13 +2933,7 @@
                     }
                 },
                 "component_name": "ColliderOBB"
-            }
-        ],
-        "entity": 17,
-        "signature": "0000000000000000000000000000000000000000000000001000110000101011"
-    },
-    {
-        "components": [
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -3426,7 +2985,13 @@
                     "layer_name": "obstacle"
                 },
                 "component_name": "ColliderTag"
-            },
+            }
+        ],
+        "entity": 18,
+        "signature": "0000000000000000000000000000000000000000000000001000110000101011"
+    },
+    {
+        "components": [
             {
                 "component_data": {
                     "center": {
@@ -3453,13 +3018,7 @@
                     }
                 },
                 "component_name": "ColliderOBB"
-            }
-        ],
-        "entity": 18,
-        "signature": "0000000000000000000000000000000000000000000000001000110000101011"
-    },
-    {
-        "components": [
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -3511,7 +3070,13 @@
                     "layer_name": "obstacle"
                 },
                 "component_name": "ColliderTag"
-            },
+            }
+        ],
+        "entity": 19,
+        "signature": "0000000000000000000000000000000000000000000000001000110000101011"
+    },
+    {
+        "components": [
             {
                 "component_data": {
                     "center": {
@@ -3538,13 +3103,7 @@
                     }
                 },
                 "component_name": "ColliderOBB"
-            }
-        ],
-        "entity": 19,
-        "signature": "0000000000000000000000000000000000000000000000001000110000101011"
-    },
-    {
-        "components": [
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -3596,7 +3155,13 @@
                     "layer_name": "obstacle"
                 },
                 "component_name": "ColliderTag"
-            },
+            }
+        ],
+        "entity": 20,
+        "signature": "0000000000000000000000000000000000000000000000001000110000101011"
+    },
+    {
+        "components": [
             {
                 "component_data": {
                     "center": {
@@ -3623,13 +3188,7 @@
                     }
                 },
                 "component_name": "ColliderOBB"
-            }
-        ],
-        "entity": 20,
-        "signature": "0000000000000000000000000000000000000000000000001000110000101011"
-    },
-    {
-        "components": [
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -3681,33 +3240,6 @@
                     "layer_name": "default"
                 },
                 "component_name": "ColliderTag"
-            },
-            {
-                "component_data": {
-                    "center": {
-                        "x": 0.0,
-                        "y": 0.5,
-                        "z": 0.0
-                    },
-                    "orientation": {
-                        "0": {
-                            "x": 0.0,
-                            "y": 0.0,
-                            "z": 0.0
-                        },
-                        "1": {
-                            "x": 0.0,
-                            "y": 0.0,
-                            "z": 0.0
-                        }
-                    },
-                    "range": {
-                        "x": 0.5,
-                        "y": 0.5,
-                        "z": 0.5
-                    }
-                },
-                "component_name": "ColliderOBB"
             }
         ],
         "entity": 21,
@@ -3813,6 +3345,33 @@
         "components": [
             {
                 "component_data": {
+                    "center": {
+                        "x": 0.0,
+                        "y": 0.5,
+                        "z": 0.0
+                    },
+                    "orientation": {
+                        "0": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                        },
+                        "1": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                        }
+                    },
+                    "range": {
+                        "x": 0.5,
+                        "y": 0.5,
+                        "z": 0.5
+                    }
+                },
+                "component_name": "ColliderOBB"
+            },
+            {
+                "component_data": {
                     "name": "Stairs"
                 },
                 "component_name": "Name"
@@ -3853,7 +3412,13 @@
                     "layer_name": "default"
                 },
                 "component_name": "ColliderTag"
-            },
+            }
+        ],
+        "entity": 26,
+        "signature": "0000000000000000000000000000000000000000000000001000110000001011"
+    },
+    {
+        "components": [
             {
                 "component_data": {
                     "center": {
@@ -3880,13 +3445,7 @@
                     }
                 },
                 "component_name": "ColliderOBB"
-            }
-        ],
-        "entity": 26,
-        "signature": "0000000000000000000000000000000000000000000000001000110000001011"
-    },
-    {
-        "components": [
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -3938,7 +3497,13 @@
                     "layer_name": "obstacle"
                 },
                 "component_name": "ColliderTag"
-            },
+            }
+        ],
+        "entity": 27,
+        "signature": "0000000000000000000000000000000000000000000000001000110000101011"
+    },
+    {
+        "components": [
             {
                 "component_data": {
                     "center": {
@@ -3965,13 +3530,7 @@
                     }
                 },
                 "component_name": "ColliderOBB"
-            }
-        ],
-        "entity": 27,
-        "signature": "0000000000000000000000000000000000000000000000001000110000101011"
-    },
-    {
-        "components": [
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -4023,33 +3582,6 @@
                     "layer_name": "obstacle"
                 },
                 "component_name": "ColliderTag"
-            },
-            {
-                "component_data": {
-                    "center": {
-                        "x": 0.0,
-                        "y": 0.5,
-                        "z": 0.0
-                    },
-                    "orientation": {
-                        "0": {
-                            "x": 0.0,
-                            "y": 0.0,
-                            "z": 0.0
-                        },
-                        "1": {
-                            "x": 0.0,
-                            "y": 0.0,
-                            "z": 0.0
-                        }
-                    },
-                    "range": {
-                        "x": 0.5,
-                        "y": 0.5,
-                        "z": 0.5
-                    }
-                },
-                "component_name": "ColliderOBB"
             }
         ],
         "entity": 28,
@@ -4155,6 +3687,33 @@
         "components": [
             {
                 "component_data": {
+                    "center": {
+                        "x": 0.0,
+                        "y": 0.5,
+                        "z": 0.0
+                    },
+                    "orientation": {
+                        "0": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                        },
+                        "1": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                        }
+                    },
+                    "range": {
+                        "x": 0.5,
+                        "y": 0.5,
+                        "z": 0.5
+                    }
+                },
+                "component_name": "ColliderOBB"
+            },
+            {
+                "component_data": {
                     "name": "cube_1x1"
                 },
                 "component_name": "Name"
@@ -4204,7 +3763,13 @@
                     "layer_name": "default"
                 },
                 "component_name": "ColliderTag"
-            },
+            }
+        ],
+        "entity": 29,
+        "signature": "0000000000000000000000000000000000000000000000001000110000101011"
+    },
+    {
+        "components": [
             {
                 "component_data": {
                     "center": {
@@ -4231,13 +3796,7 @@
                     }
                 },
                 "component_name": "ColliderOBB"
-            }
-        ],
-        "entity": 29,
-        "signature": "0000000000000000000000000000000000000000000000001000110000101011"
-    },
-    {
-        "components": [
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -4289,7 +3848,13 @@
                     "layer_name": "default"
                 },
                 "component_name": "ColliderTag"
-            },
+            }
+        ],
+        "entity": 30,
+        "signature": "0000000000000000000000000000000000000000000000001000110000101011"
+    },
+    {
+        "components": [
             {
                 "component_data": {
                     "center": {
@@ -4316,13 +3881,7 @@
                     }
                 },
                 "component_name": "ColliderOBB"
-            }
-        ],
-        "entity": 30,
-        "signature": "0000000000000000000000000000000000000000000000001000110000101011"
-    },
-    {
-        "components": [
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -4374,33 +3933,6 @@
                     "layer_name": "default"
                 },
                 "component_name": "ColliderTag"
-            },
-            {
-                "component_data": {
-                    "center": {
-                        "x": 0.0,
-                        "y": 0.5,
-                        "z": 0.0
-                    },
-                    "orientation": {
-                        "0": {
-                            "x": 0.0,
-                            "y": 0.0,
-                            "z": 0.0
-                        },
-                        "1": {
-                            "x": 0.0,
-                            "y": 0.0,
-                            "z": 0.0
-                        }
-                    },
-                    "range": {
-                        "x": 0.5,
-                        "y": 0.5,
-                        "z": 0.5
-                    }
-                },
-                "component_name": "ColliderOBB"
             }
         ],
         "entity": 31,
@@ -4413,17 +3945,6 @@
                     "name": "Second"
                 },
                 "component_name": "Name"
-            },
-            {
-                "component_data": {
-                    "children": [
-                        34,
-                        38,
-                        33
-                    ],
-                    "children_count": 3
-                },
-                "component_name": "Children"
             },
             {
                 "component_data": {
@@ -4451,6 +3972,17 @@
                     "parent": 11
                 },
                 "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "children": [
+                        34,
+                        38,
+                        33
+                    ],
+                    "children_count": 3
+                },
+                "component_name": "Children"
             }
         ],
         "entity": 32,
@@ -4487,16 +4019,38 @@
             },
             {
                 "component_data": {
-                    "animation_name": "enemy/enemy_ANIM_GLTF/enemy_idle.anim",
-                    "ticks_per_second": 1000.0
+                    "path_parent": 38,
+                    "rotation_speed": 5.0,
+                    "speed": 1.0
                 },
-                "component_name": "AnimationInstance"
+                "component_name": "EnemyPath"
+            },
+            {
+                "component_data": {
+                    "tag_position": {
+                        "x": 0.0,
+                        "y": 2.0,
+                        "z": 0.0
+                    }
+                },
+                "component_name": "Taggable"
             },
             {
                 "component_data": {
                     "parent": 32
                 },
                 "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "animation_name": "enemy/enemy_ANIM_GLTF/enemy_idle.anim",
+                    "ticks_per_second": 1000.0
+                },
+                "component_name": "AnimationInstance"
+            },
+            {
+                "component_data": {},
+                "component_name": "EnemyData"
             },
             {
                 "component_data": {
@@ -4530,33 +4084,12 @@
             },
             {
                 "component_data": {
-                    "path_parent": 38,
-                    "rotation_speed": 4.900000095367432,
-                    "speed": 1.0
-                },
-                "component_name": "EnemyPath"
-            },
-            {
-                "component_data": {},
-                "component_name": "EnemyData"
-            },
-            {
-                "component_data": {
-                    "tag_position": {
-                        "x": 0.0,
-                        "y": 2.0,
-                        "z": 0.0
-                    }
-                },
-                "component_name": "Taggable"
-            },
-            {
-                "component_data": {
                     "highlight_color": {
                         "b": 0.0,
                         "g": 0.0,
                         "r": 1.0
                     },
+                    "highlight_power": 0.30000001192092896,
                     "highlighted": "twoja misja trwa",
                     "target": 2
                 },
@@ -4570,17 +4103,16 @@
         "components": [
             {
                 "component_data": {
-                    "distraction_radius": 20.0,
-                    "distraction_time": 2.0,
-                    "explosion_radius": 10.0
-                },
-                "component_name": "ExplodingBox"
-            },
-            {
-                "component_data": {
                     "name": "Exploding Box"
                 },
                 "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "event_path": "SFX/electricity/electric_hum",
+                    "is_3d": true
+                },
+                "component_name": "FMODEmitter"
             },
             {
                 "component_data": {
@@ -4605,6 +4137,16 @@
             },
             {
                 "component_data": {
+                    "tag_position": {
+                        "x": 0.0,
+                        "y": 0.699999988079071,
+                        "z": -0.11999999731779099
+                    }
+                },
+                "component_name": "Taggable"
+            },
+            {
+                "component_data": {
                     "parent": 16
                 },
                 "component_name": "Parent"
@@ -4617,6 +4159,24 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
+                    "children": [
+                        115,
+                        116
+                    ],
+                    "children_count": 2
+                },
+                "component_name": "Children"
+            },
+            {
+                "component_data": {
+                    "distraction_radius": 20.0,
+                    "distraction_time": 2.0,
+                    "explosion_radius": 10.0
+                },
+                "component_name": "ExplodingBox"
             },
             {
                 "component_data": {
@@ -4641,6 +4201,7 @@
             },
             {
                 "component_data": {
+                    "cable_parent": 0,
                     "can_interact": true,
                     "interaction": 3,
                     "interaction_target": 35,
@@ -4648,20 +4209,11 @@
                     "interaction_target_3": 0,
                     "interaction_target_4": 0,
                     "interaction_target_5": 0,
+                    "interaction_text": "[X] Explode",
                     "single_use": false,
                     "type": 2
                 },
                 "component_name": "Interactable"
-            },
-            {
-                "component_data": {
-                    "tag_position": {
-                        "x": 0.0,
-                        "y": 0.699999988079071,
-                        "z": -0.11999999731779099
-                    }
-                },
-                "component_name": "Taggable"
             },
             {
                 "component_data": {
@@ -4670,6 +4222,7 @@
                         "g": 0.0,
                         "r": 1.0
                     },
+                    "highlight_power": 0.029999999329447746,
                     "highlighted": "twoja misja trwa",
                     "target": 3
                 },
@@ -4709,6 +4262,7 @@
                     "rotation_begin": 0.0,
                     "rotation_end": 0.0,
                     "rotation_transition": 0,
+                    "rotation_variance": 0.0,
                     "size_begin": 4.5,
                     "size_end": 7.800000190734863,
                     "size_transition": 0,
@@ -4734,7 +4288,7 @@
             }
         ],
         "entity": 35,
-        "signature": "0000000000000000000000000000000011010000100100000010100000101011"
+        "signature": "0000000000000000000000000000000011110000100100000010100000111011"
     },
     {
         "components": [
@@ -4788,6 +4342,33 @@
         "components": [
             {
                 "component_data": {
+                    "center": {
+                        "x": 0.0,
+                        "y": 0.5,
+                        "z": 0.0
+                    },
+                    "orientation": {
+                        "0": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                        },
+                        "1": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                        }
+                    },
+                    "range": {
+                        "x": 0.5,
+                        "y": 0.5,
+                        "z": 0.5
+                    }
+                },
+                "component_name": "ColliderOBB"
+            },
+            {
+                "component_data": {
                     "name": "cube_1x1"
                 },
                 "component_name": "Name"
@@ -4837,33 +4418,6 @@
                     "layer_name": "obstacle"
                 },
                 "component_name": "ColliderTag"
-            },
-            {
-                "component_data": {
-                    "center": {
-                        "x": 0.0,
-                        "y": 0.5,
-                        "z": 0.0
-                    },
-                    "orientation": {
-                        "0": {
-                            "x": 0.0,
-                            "y": 0.0,
-                            "z": 0.0
-                        },
-                        "1": {
-                            "x": 0.0,
-                            "y": 0.0,
-                            "z": 0.0
-                        }
-                    },
-                    "range": {
-                        "x": 0.5,
-                        "y": 0.5,
-                        "z": 0.5
-                    }
-                },
-                "component_name": "ColliderOBB"
             }
         ],
         "entity": 37,
@@ -4876,15 +4430,6 @@
                     "name": "Enemy Path Parent"
                 },
                 "component_name": "Name"
-            },
-            {
-                "component_data": {
-                    "children": [
-                        39
-                    ],
-                    "children_count": 1
-                },
-                "component_name": "Children"
             },
             {
                 "component_data": {
@@ -4912,6 +4457,15 @@
                     "parent": 32
                 },
                 "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "children": [
+                        39
+                    ],
+                    "children_count": 1
+                },
+                "component_name": "Children"
             },
             {
                 "component_data": null,
@@ -4971,13 +4525,6 @@
             },
             {
                 "component_data": {
-                    "bone_name": "Gun",
-                    "holder": 34
-                },
-                "component_name": "Attachment"
-            },
-            {
-                "component_data": {
                     "orientation": {
                         "w": 0.4927337169647217,
                         "x": 0.5339432954788208,
@@ -5011,6 +4558,13 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
+                    "bone_name": "Gun",
+                    "holder": 34
+                },
+                "component_name": "Attachment"
             }
         ],
         "entity": 33,
@@ -5018,6 +4572,33 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "center": {
+                        "x": 0.0,
+                        "y": 0.5,
+                        "z": 0.0
+                    },
+                    "orientation": {
+                        "0": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                        },
+                        "1": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                        }
+                    },
+                    "range": {
+                        "x": 0.5,
+                        "y": 0.5,
+                        "z": 0.5
+                    }
+                },
+                "component_name": "ColliderOBB"
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -5069,7 +4650,13 @@
                     "layer_name": "default"
                 },
                 "component_name": "ColliderTag"
-            },
+            }
+        ],
+        "entity": 40,
+        "signature": "0000000000000000000000000000000000000000000000001000110000101011"
+    },
+    {
+        "components": [
             {
                 "component_data": {
                     "center": {
@@ -5096,13 +4683,7 @@
                     }
                 },
                 "component_name": "ColliderOBB"
-            }
-        ],
-        "entity": 40,
-        "signature": "0000000000000000000000000000000000000000000000001000110000101011"
-    },
-    {
-        "components": [
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -5154,7 +4735,13 @@
                     "layer_name": "default"
                 },
                 "component_name": "ColliderTag"
-            },
+            }
+        ],
+        "entity": 41,
+        "signature": "0000000000000000000000000000000000000000000000001000110000101011"
+    },
+    {
+        "components": [
             {
                 "component_data": {
                     "center": {
@@ -5181,13 +4768,7 @@
                     }
                 },
                 "component_name": "ColliderOBB"
-            }
-        ],
-        "entity": 41,
-        "signature": "0000000000000000000000000000000000000000000000001000110000101011"
-    },
-    {
-        "components": [
+            },
             {
                 "component_data": {
                     "name": "Test Jump"
@@ -5233,33 +4814,6 @@
                     "layer_name": "obstacle"
                 },
                 "component_name": "ColliderTag"
-            },
-            {
-                "component_data": {
-                    "center": {
-                        "x": 0.0,
-                        "y": 0.5,
-                        "z": 0.0
-                    },
-                    "orientation": {
-                        "0": {
-                            "x": 0.0,
-                            "y": 0.0,
-                            "z": 0.0
-                        },
-                        "1": {
-                            "x": 0.0,
-                            "y": 0.0,
-                            "z": 0.0
-                        }
-                    },
-                    "range": {
-                        "x": 0.5,
-                        "y": 0.5,
-                        "z": 0.5
-                    }
-                },
-                "component_name": "ColliderOBB"
             }
         ],
         "entity": 43,
@@ -5537,13 +5091,6 @@
             },
             {
                 "component_data": {
-                    "bone_name": "Gun",
-                    "holder": 5
-                },
-                "component_name": "Attachment"
-            },
-            {
-                "component_data": {
                     "orientation": {
                         "w": 0.6704654693603516,
                         "x": 0.741365909576416,
@@ -5584,6 +5131,13 @@
                     "type": 2
                 },
                 "component_name": "Light"
+            },
+            {
+                "component_data": {
+                    "bone_name": "Gun",
+                    "holder": 5
+                },
+                "component_name": "Attachment"
             }
         ],
         "entity": 82,
@@ -5591,6 +5145,33 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "center": {
+                        "x": 0.0,
+                        "y": 0.5,
+                        "z": 0.0
+                    },
+                    "orientation": {
+                        "0": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                        },
+                        "1": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                        }
+                    },
+                    "range": {
+                        "x": 0.5,
+                        "y": 0.5,
+                        "z": 0.5
+                    }
+                },
+                "component_name": "ColliderOBB"
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -5642,33 +5223,6 @@
                     "layer_name": "obstacle"
                 },
                 "component_name": "ColliderTag"
-            },
-            {
-                "component_data": {
-                    "center": {
-                        "x": 0.0,
-                        "y": 0.5,
-                        "z": 0.0
-                    },
-                    "orientation": {
-                        "0": {
-                            "x": 0.0,
-                            "y": 0.0,
-                            "z": 0.0
-                        },
-                        "1": {
-                            "x": 0.0,
-                            "y": 0.0,
-                            "z": 0.0
-                        }
-                    },
-                    "range": {
-                        "x": 0.5,
-                        "y": 0.5,
-                        "z": 0.5
-                    }
-                },
-                "component_name": "ColliderOBB"
             }
         ],
         "entity": 83,
@@ -5788,6 +5342,33 @@
         "components": [
             {
                 "component_data": {
+                    "center": {
+                        "x": 0.0,
+                        "y": 0.5,
+                        "z": 0.0
+                    },
+                    "orientation": {
+                        "0": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                        },
+                        "1": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                        }
+                    },
+                    "range": {
+                        "x": 0.5,
+                        "y": 0.5,
+                        "z": 0.5
+                    }
+                },
+                "component_name": "ColliderOBB"
+            },
+            {
+                "component_data": {
                     "name": "Test Jump 2"
                 },
                 "component_name": "Name"
@@ -5831,33 +5412,6 @@
                     "layer_name": "obstacle"
                 },
                 "component_name": "ColliderTag"
-            },
-            {
-                "component_data": {
-                    "center": {
-                        "x": 0.0,
-                        "y": 0.5,
-                        "z": 0.0
-                    },
-                    "orientation": {
-                        "0": {
-                            "x": 0.0,
-                            "y": 0.0,
-                            "z": 0.0
-                        },
-                        "1": {
-                            "x": 0.0,
-                            "y": 0.0,
-                            "z": 0.0
-                        }
-                    },
-                    "range": {
-                        "x": 0.5,
-                        "y": 0.5,
-                        "z": 0.5
-                    }
-                },
-                "component_name": "ColliderOBB"
             }
         ],
         "entity": 51,
@@ -5894,6 +5448,16 @@
             },
             {
                 "component_data": {
+                    "tag_position": {
+                        "x": 0.0,
+                        "y": 0.12999999523162842,
+                        "z": 0.4000000059604645
+                    }
+                },
+                "component_name": "Taggable"
+            },
+            {
+                "component_data": {
                     "parent": 16
                 },
                 "component_name": "Parent"
@@ -5913,7 +5477,7 @@
             },
             {
                 "component_data": {
-                    "layer_name": "default"
+                    "layer_name": "taggable"
                 },
                 "component_name": "ColliderTag"
             },
@@ -5934,6 +5498,7 @@
             },
             {
                 "component_data": {
+                    "cable_parent": 105,
                     "can_interact": true,
                     "interaction": 2,
                     "interaction_target": 91,
@@ -5941,6 +5506,7 @@
                     "interaction_target_3": 90,
                     "interaction_target_4": 80,
                     "interaction_target_5": 0,
+                    "interaction_text": "[E] Use",
                     "single_use": true,
                     "type": 1
                 },
@@ -5953,6 +5519,7 @@
                         "g": 1.0,
                         "r": 0.7843137383460999
                     },
+                    "highlight_power": 0.029999999329447746,
                     "highlighted": "twoja misja trwa",
                     "target": 3
                 },
@@ -5960,7 +5527,7 @@
             }
         ],
         "entity": 52,
-        "signature": "0000000000000000000000000000000001000000000100000010110000101011"
+        "signature": "0000000000000000000000000000000001010000000100000010110000101011"
     },
     {
         "components": [
@@ -6078,6 +5645,23 @@
                 "component_name": "ModelInstance"
             },
             {
+                "component_data": {
+                    "first_position": {
+                        "x": 17.70347785949707,
+                        "y": 0.11789000034332275,
+                        "z": -7.314205169677734
+                    },
+                    "is_door": true,
+                    "second_position": {
+                        "x": 21.702999114990234,
+                        "y": -3.881999969482422,
+                        "z": -7.314205169677734
+                    },
+                    "speed": 1.0
+                },
+                "component_name": "Platform"
+            },
+            {
                 "component_data": {},
                 "component_name": "StaticTag"
             },
@@ -6101,23 +5685,6 @@
                     }
                 },
                 "component_name": "ColliderAABB"
-            },
-            {
-                "component_data": {
-                    "first_position": {
-                        "x": 17.70347785949707,
-                        "y": 0.11789000034332275,
-                        "z": -7.314205169677734
-                    },
-                    "is_door": true,
-                    "second_position": {
-                        "x": 21.702999114990234,
-                        "y": -3.881999969482422,
-                        "z": -7.314205169677734
-                    },
-                    "speed": 1.0
-                },
-                "component_name": "Platform"
             }
         ],
         "entity": 80,
@@ -6184,6 +5751,23 @@
                 "component_name": "ModelInstance"
             },
             {
+                "component_data": {
+                    "first_position": {
+                        "x": 16.702999114990234,
+                        "y": 0.11800000071525574,
+                        "z": -7.314205169677734
+                    },
+                    "is_door": true,
+                    "second_position": {
+                        "x": 13.70300006866455,
+                        "y": -2.881999969482422,
+                        "z": -7.314205169677734
+                    },
+                    "speed": 1.0
+                },
+                "component_name": "Platform"
+            },
+            {
                 "component_data": {},
                 "component_name": "StaticTag"
             },
@@ -6207,23 +5791,6 @@
                     }
                 },
                 "component_name": "ColliderAABB"
-            },
-            {
-                "component_data": {
-                    "first_position": {
-                        "x": 16.702999114990234,
-                        "y": 0.11800000071525574,
-                        "z": -7.314205169677734
-                    },
-                    "is_door": true,
-                    "second_position": {
-                        "x": 13.70300006866455,
-                        "y": -2.881999969482422,
-                        "z": -7.314205169677734
-                    },
-                    "speed": 1.0
-                },
-                "component_name": "Platform"
             }
         ],
         "entity": 90,
@@ -6290,6 +5857,23 @@
                 "component_name": "ModelInstance"
             },
             {
+                "component_data": {
+                    "first_position": {
+                        "x": 17.70347785949707,
+                        "y": 1.1180000305175781,
+                        "z": -7.314205169677734
+                    },
+                    "is_door": true,
+                    "second_position": {
+                        "x": 18.702999114990234,
+                        "y": 2.118000030517578,
+                        "z": -7.314205169677734
+                    },
+                    "speed": 1.0
+                },
+                "component_name": "Platform"
+            },
+            {
                 "component_data": {},
                 "component_name": "StaticTag"
             },
@@ -6313,23 +5897,6 @@
                     }
                 },
                 "component_name": "ColliderAABB"
-            },
-            {
-                "component_data": {
-                    "first_position": {
-                        "x": 17.70347785949707,
-                        "y": 1.1180000305175781,
-                        "z": -7.314205169677734
-                    },
-                    "is_door": true,
-                    "second_position": {
-                        "x": 18.702999114990234,
-                        "y": 2.118000030517578,
-                        "z": -7.314205169677734
-                    },
-                    "speed": 1.0
-                },
-                "component_name": "Platform"
             }
         ],
         "entity": 91,
@@ -6396,6 +5963,23 @@
                 "component_name": "ModelInstance"
             },
             {
+                "component_data": {
+                    "first_position": {
+                        "x": 16.702999114990234,
+                        "y": 1.1180000305175781,
+                        "z": -7.314205169677734
+                    },
+                    "is_door": true,
+                    "second_position": {
+                        "x": 14.70300006866455,
+                        "y": 3.118000030517578,
+                        "z": -7.314000129699707
+                    },
+                    "speed": 1.0
+                },
+                "component_name": "Platform"
+            },
+            {
                 "component_data": {},
                 "component_name": "StaticTag"
             },
@@ -6419,23 +6003,6 @@
                     }
                 },
                 "component_name": "ColliderAABB"
-            },
-            {
-                "component_data": {
-                    "first_position": {
-                        "x": 16.702999114990234,
-                        "y": 1.1180000305175781,
-                        "z": -7.314205169677734
-                    },
-                    "is_door": true,
-                    "second_position": {
-                        "x": 14.70300006866455,
-                        "y": 3.118000030517578,
-                        "z": -7.314000129699707
-                    },
-                    "speed": 1.0
-                },
-                "component_name": "Platform"
             }
         ],
         "entity": 92,
@@ -6847,61 +6414,6 @@
         "components": [
             {
                 "component_data": {
-                    "name": "Camera_1_Light"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
-                    "orientation": {
-                        "w": 0.15033236145973206,
-                        "x": -0.04358939081430435,
-                        "y": 0.0935497134923935,
-                        "z": 0.9832337498664856
-                    },
-                    "position": {
-                        "x": -1.1444091796875e-05,
-                        "y": -1.621246337890625e-05,
-                        "z": -0.00012969970703125
-                    },
-                    "scale": {
-                        "x": 0.4999876320362091,
-                        "y": 0.5000002384185791,
-                        "z": 0.49998927116394043
-                    }
-                },
-                "component_name": "Transform"
-            },
-            {
-                "component_data": {
-                    "parent": 68
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "cast_shadow": false,
-                    "color": {
-                        "b": 0.2151898741722107,
-                        "g": 0.2151898741722107,
-                        "r": 1.0
-                    },
-                    "cutoff": 25.0,
-                    "intensity": 400.0,
-                    "is_on": true,
-                    "outer_cutoff": 15.0,
-                    "type": 2
-                },
-                "component_name": "Light"
-            }
-        ],
-        "entity": 89,
-        "signature": "0000000000000000000000000000000000000000000000010000000000001011"
-    },
-    {
-        "components": [
-            {
-                "component_data": {
                     "name": "Rain"
                 },
                 "component_name": "Name"
@@ -6961,6 +6473,7 @@
                     "rotation_begin": 0.0,
                     "rotation_end": 0.0,
                     "rotation_transition": 0,
+                    "rotation_variance": 0.0,
                     "size_begin": 3.0,
                     "size_end": 10.0,
                     "size_transition": 0,
@@ -7138,5 +6651,1537 @@
         ],
         "entity": 104,
         "signature": "0000000000000000000000000000000000000000000000010000000000001011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "Cables"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.0,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "children": [
+                        105,
+                        110
+                    ],
+                    "children_count": 2
+                },
+                "component_name": "Children"
+            }
+        ],
+        "entity": 50,
+        "signature": "0000000000000000000000000000000000000000000000000000000000010011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "CablesFirstDoors"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 1.0,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": -4.638383865356445,
+                        "y": 3.5109071731567383,
+                        "z": 9.581851959228516
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "parent": 50
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "children": [
+                        106,
+                        107,
+                        108,
+                        109
+                    ],
+                    "children_count": 4
+                },
+                "component_name": "Children"
+            },
+            {
+                "component_data": {
+                    "highlighted_on_off": true,
+                    "off_color": {
+                        "b": 0.040219925343990326,
+                        "g": 0.040219925343990326,
+                        "r": 0.9652777910232544
+                    },
+                    "on_color": {
+                        "b": 0.0625,
+                        "g": 1.0,
+                        "r": 0.5240384340286255
+                    },
+                    "state": 0
+                },
+                "component_name": "CableParent"
+            }
+        ],
+        "entity": 105,
+        "signature": "0000000000000000000000000000001000000000000000000000000000011011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "cable1"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 1.0,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 0.01253509521484375,
+                        "y": -0.02845025062561035,
+                        "z": 0.0
+                    },
+                    "scale": {
+                        "x": 0.05000000074505806,
+                        "y": 1.7300000190734863,
+                        "z": 0.05000000074505806
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "parent": 105
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
+                    "highlight_color": {
+                        "b": 0.040219925343990326,
+                        "g": 0.040219925343990326,
+                        "r": 0.9652777910232544
+                    },
+                    "highlight_power": 1.0,
+                    "highlighted": "twoja misja trwa",
+                    "target": 3
+                },
+                "component_name": "Highlight"
+            }
+        ],
+        "entity": 106,
+        "signature": "0000000000000000000000000000000001000000000000000000000000101011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "cable2"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.70722895860672,
+                        "x": -0.7069845795631409,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 0.01253509521484375,
+                        "y": 1.6764893531799316,
+                        "z": 0.0
+                    },
+                    "scale": {
+                        "x": 0.05000000074505806,
+                        "y": 0.12099999934434891,
+                        "z": 0.04999999329447746
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "parent": 105
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
+                    "highlight_color": {
+                        "b": 0.040219925343990326,
+                        "g": 0.040219925343990326,
+                        "r": 0.9652777910232544
+                    },
+                    "highlight_power": 1.0,
+                    "highlighted": "twoja misja trwa",
+                    "target": 3
+                },
+                "component_name": "Highlight"
+            }
+        ],
+        "entity": 107,
+        "signature": "0000000000000000000000000000000001000000000000000000000000101011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "cable3"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.5001723766326904,
+                        "x": -0.5000001788139343,
+                        "y": -0.4999999403953552,
+                        "z": -0.49982744455337524
+                    },
+                    "position": {
+                        "x": 0.01253509521484375,
+                        "y": 1.6764893531799316,
+                        "z": -0.09336662292480469
+                    },
+                    "scale": {
+                        "x": 0.04999997466802597,
+                        "y": 5.781000137329102,
+                        "z": 0.049999989569187164
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "parent": 105
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
+                    "highlight_color": {
+                        "b": 0.040219925343990326,
+                        "g": 0.040219925343990326,
+                        "r": 0.9652777910232544
+                    },
+                    "highlight_power": 1.0,
+                    "highlighted": "twoja misja trwa",
+                    "target": 3
+                },
+                "component_name": "Highlight"
+            }
+        ],
+        "entity": 108,
+        "signature": "0000000000000000000000000000000001000000000000000000000000101011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "cable4"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": -0.00023861270165070891,
+                        "x": 0.7071081399917603,
+                        "y": -1.2360032997094095e-07,
+                        "z": 0.7071053981781006
+                    },
+                    "position": {
+                        "x": 5.772625923156738,
+                        "y": 1.6764893531799316,
+                        "z": -0.09336662292480469
+                    },
+                    "scale": {
+                        "x": 0.05000026524066925,
+                        "y": 3.0810000896453857,
+                        "z": 0.05000027269124985
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "parent": 105
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
+                    "highlight_color": {
+                        "b": 0.040219925343990326,
+                        "g": 0.040219925343990326,
+                        "r": 0.9652777910232544
+                    },
+                    "highlight_power": 1.0,
+                    "highlighted": "twoja misja trwa",
+                    "target": 3
+                },
+                "component_name": "Highlight"
+            }
+        ],
+        "entity": 109,
+        "signature": "0000000000000000000000000000000001000000000000000000000000101011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "CablesFirstPlatform"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 1.0,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 14.168113708496094,
+                        "y": 2.7031803131103516,
+                        "z": 22.146814346313477
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "parent": 50
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "children": [
+                        111,
+                        112
+                    ],
+                    "children_count": 2
+                },
+                "component_name": "Children"
+            },
+            {
+                "component_data": {
+                    "highlighted_on_off": true,
+                    "off_color": {
+                        "b": 0.0,
+                        "g": 0.0,
+                        "r": 1.0
+                    },
+                    "on_color": {
+                        "b": 0.0,
+                        "g": 1.0,
+                        "r": 0.2769230604171753
+                    },
+                    "state": 0
+                },
+                "component_name": "CableParent"
+            }
+        ],
+        "entity": 110,
+        "signature": "0000000000000000000000000000001000000000000000000000000000011011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "cable1"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 1.0,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 1.9300079345703125,
+                        "y": -0.6422078609466553,
+                        "z": -0.393218994140625
+                    },
+                    "scale": {
+                        "x": 1.9600000381469727,
+                        "y": 0.10000000149011612,
+                        "z": 0.10000000149011612
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "parent": 110
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
+                    "highlight_color": {
+                        "b": 0.0,
+                        "g": 0.0,
+                        "r": 1.0
+                    },
+                    "highlight_power": 1.0,
+                    "highlighted": "twoja misja trwa",
+                    "target": 3
+                },
+                "component_name": "Highlight"
+            }
+        ],
+        "entity": 111,
+        "signature": "0000000000000000000000000000000001000000000000000000000000101011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "cable1"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.7072795033454895,
+                        "x": 0.0,
+                        "y": -0.7069340348243713,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 2.8277969360351563,
+                        "y": -0.6422078609466553,
+                        "z": 2.1481876373291016
+                    },
+                    "scale": {
+                        "x": 5.159999847412109,
+                        "y": 0.10000000149011612,
+                        "z": 0.10000001639127731
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "parent": 110
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "placeholders/cube_1x1x1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
+                    "highlight_color": {
+                        "b": 0.0,
+                        "g": 0.0,
+                        "r": 1.0
+                    },
+                    "highlight_power": 1.0,
+                    "highlighted": "twoja misja trwa",
+                    "target": 3
+                },
+                "component_name": "Highlight"
+            }
+        ],
+        "entity": 112,
+        "signature": "0000000000000000000000000000000001000000000000000000000000101011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "electricity_particles"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 1.0,
+                        "x": 1.6165286340422136e-12,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 0.09317207336425781,
+                        "y": 0.6190452575683594,
+                        "z": 0.12501025199890137
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 0.9999728202819824,
+                        "z": 0.9999728202819824
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "parent": 66
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "color_begin": [
+                        0.48235294222831726,
+                        0.5490196347236633,
+                        0.8784313797950745,
+                        1.0
+                    ],
+                    "color_end": [
+                        0.6666666865348816,
+                        0.23137255012989044,
+                        0.5137255191802979,
+                        0.0
+                    ],
+                    "color_transition": 0,
+                    "is_billboard": true,
+                    "is_one_shot": false,
+                    "is_textured": true,
+                    "lifetime": 0.20000000298023224,
+                    "one_shot_duration": 0.5,
+                    "position": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "position_variance": [
+                        0.30000001192092896,
+                        0.0,
+                        0.5
+                    ],
+                    "rate": 1.2999999523162842,
+                    "rotation_begin": 0.0,
+                    "rotation_end": 0.0,
+                    "rotation_transition": 0,
+                    "rotation_variance": 121.0999984741211,
+                    "size_begin": 1.2000000476837158,
+                    "size_end": 1.2000000476837158,
+                    "size_transition": 0,
+                    "texture_name": "electricity.ktx2",
+                    "velocity_begin": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "velocity_end": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "velocity_transition": 0,
+                    "velocity_variance": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
+                },
+                "component_name": "ParticleEmitter"
+            }
+        ],
+        "entity": 113,
+        "signature": "0000000000000000000000000000000010000000000000000000000000001011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "electricity_particles2"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 1.0,
+                        "x": 1.9362920555127117e-12,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 0.046497344970703125,
+                        "y": 0.5957908630371094,
+                        "z": -0.01290583610534668
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 0.9999674558639526,
+                        "z": 0.9999674558639526
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "parent": 66
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "color_begin": [
+                        0.250980406999588,
+                        0.364705890417099,
+                        0.8313725590705872,
+                        1.0
+                    ],
+                    "color_end": [
+                        0.4313725531101227,
+                        0.2705882489681244,
+                        0.35686275362968445,
+                        0.0
+                    ],
+                    "color_transition": 0,
+                    "is_billboard": true,
+                    "is_one_shot": false,
+                    "is_textured": true,
+                    "lifetime": 0.10000000149011612,
+                    "one_shot_duration": 0.5,
+                    "position": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "position_variance": [
+                        0.20000000298023224,
+                        0.0,
+                        0.30000001192092896
+                    ],
+                    "rate": 1.7999999523162842,
+                    "rotation_begin": 0.0,
+                    "rotation_end": 0.0,
+                    "rotation_transition": 0,
+                    "rotation_variance": 121.0999984741211,
+                    "size_begin": 1.7000000476837158,
+                    "size_end": 1.7000000476837158,
+                    "size_transition": 0,
+                    "texture_name": "electricity.ktx2",
+                    "velocity_begin": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "velocity_end": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "velocity_transition": 0,
+                    "velocity_variance": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
+                },
+                "component_name": "ParticleEmitter"
+            }
+        ],
+        "entity": 114,
+        "signature": "0000000000000000000000000000000010000000000000000000000000001011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "electricity_particles"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 1.0,
+                        "x": 5.684341886080802e-14,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 0.10746002197265625,
+                        "y": 0.5936813354492188,
+                        "z": 0.22523725032806396
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "parent": 35
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "color_begin": [
+                        0.48235294222831726,
+                        0.5490196347236633,
+                        0.8784313797950745,
+                        1.0
+                    ],
+                    "color_end": [
+                        0.6666666865348816,
+                        0.23137255012989044,
+                        0.5137255191802979,
+                        0.0
+                    ],
+                    "color_transition": 0,
+                    "is_billboard": true,
+                    "is_one_shot": false,
+                    "is_textured": true,
+                    "lifetime": 0.20000000298023224,
+                    "one_shot_duration": 0.5,
+                    "position": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "position_variance": [
+                        0.30000001192092896,
+                        0.0,
+                        0.5
+                    ],
+                    "rate": 1.7999999523162842,
+                    "rotation_begin": 0.0,
+                    "rotation_end": 0.0,
+                    "rotation_transition": 0,
+                    "rotation_variance": 121.0999984741211,
+                    "size_begin": 1.2000000476837158,
+                    "size_end": 1.2000000476837158,
+                    "size_transition": 0,
+                    "texture_name": "electricity.ktx2",
+                    "velocity_begin": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "velocity_end": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "velocity_transition": 0,
+                    "velocity_variance": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
+                },
+                "component_name": "ParticleEmitter"
+            }
+        ],
+        "entity": 115,
+        "signature": "0000000000000000000000000000000010000000000000000000000000001011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "electricity_particles2"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 1.0,
+                        "x": 5.684341886080802e-14,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 2.288818359375e-05,
+                        "y": 0.389556884765625,
+                        "z": -8.821487426757813e-06
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "parent": 35
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "color_begin": [
+                        0.250980406999588,
+                        0.364705890417099,
+                        0.8313725590705872,
+                        1.0
+                    ],
+                    "color_end": [
+                        0.4313725531101227,
+                        0.2705882489681244,
+                        0.35686275362968445,
+                        0.0
+                    ],
+                    "color_transition": 0,
+                    "is_billboard": true,
+                    "is_one_shot": false,
+                    "is_textured": true,
+                    "lifetime": 0.10000000149011612,
+                    "one_shot_duration": 0.5,
+                    "position": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "position_variance": [
+                        0.20000000298023224,
+                        0.0,
+                        0.30000001192092896
+                    ],
+                    "rate": 1.7999999523162842,
+                    "rotation_begin": 0.0,
+                    "rotation_end": 0.0,
+                    "rotation_transition": 0,
+                    "rotation_variance": 121.0999984741211,
+                    "size_begin": 1.7000000476837158,
+                    "size_end": 1.7000000476837158,
+                    "size_transition": 0,
+                    "texture_name": "electricity.ktx2",
+                    "velocity_begin": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "velocity_end": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "velocity_transition": 0,
+                    "velocity_variance": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
+                },
+                "component_name": "ParticleEmitter"
+            }
+        ],
+        "entity": 116,
+        "signature": "0000000000000000000000000000000010000000000000000000000000001011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "DetectionCamera"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.70710688829422,
+                        "x": 0.0,
+                        "y": 0.7071066498756409,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 44.79890823364258,
+                        "y": 6.00738525390625,
+                        "z": 35.611572265625
+                    },
+                    "scale": {
+                        "x": 1.4399738311767578,
+                        "y": 1.440000057220459,
+                        "z": 1.4399737119674683
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "tag_position": {
+                        "x": 0.0,
+                        "y": 1.0,
+                        "z": 0.0
+                    }
+                },
+                "component_name": "Taggable"
+            },
+            {
+                "component_data": {
+                    "children": [
+                        122,
+                        123,
+                        124
+                    ],
+                    "children_count": 3
+                },
+                "component_name": "Children"
+            },
+            {
+                "component_data": {
+                    "camera_light": 128,
+                    "camera_model": 124,
+                    "detection_level": 0.0,
+                    "is_active": true,
+                    "particles_parent": 125
+                },
+                "component_name": "DetectionCamera"
+            },
+            {
+                "component_data": {},
+                "component_name": "StaticTag"
+            },
+            {
+                "component_data": {
+                    "layer_name": "taggable"
+                },
+                "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {
+                    "center": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "range": {
+                        "x": 0.30000001192092896,
+                        "y": 0.30000001192092896,
+                        "z": 0.30000001192092896
+                    }
+                },
+                "component_name": "ColliderAABB"
+            },
+            {
+                "component_data": {
+                    "cable_parent": 0,
+                    "can_interact": true,
+                    "interaction": 1,
+                    "interaction_target": 0,
+                    "interaction_target_2": 0,
+                    "interaction_target_3": 0,
+                    "interaction_target_4": 0,
+                    "interaction_target_5": 0,
+                    "interaction_text": "",
+                    "single_use": false,
+                    "type": 2
+                },
+                "component_name": "Interactable"
+            },
+            {
+                "component_data": {
+                    "billboard_z_offset": -0.10000000149011612,
+                    "color": {
+                        "a": 0.7843137383460999,
+                        "b": 0.0,
+                        "g": 0.0,
+                        "r": 1.0
+                    },
+                    "position_offset": {
+                        "x": 0.0,
+                        "y": -0.15000000596046448,
+                        "z": 0.0
+                    },
+                    "scale": {
+                        "x": 0.20000000298023224,
+                        "y": 0.20000000298023224
+                    },
+                    "texture": "dot.ktx2",
+                    "use_camera_right": false
+                },
+                "component_name": "Billboard"
+            },
+            {
+                "component_data": {
+                    "highlight_color": {
+                        "b": 0.0,
+                        "g": 0.43529412150382996,
+                        "r": 1.0
+                    },
+                    "highlight_power": 0.029999999329447746,
+                    "highlighted": "twoja misja trwa",
+                    "target": 2
+                },
+                "component_name": "Highlight"
+            }
+        ],
+        "entity": 121,
+        "signature": "0000000000000000000000000000000101010010000100000010110000010011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "CameraPart1"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 1.0,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 0.0,
+                        "y": -0.04800891876220703,
+                        "z": 0.0
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "parent": 121
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/camera/camera_2.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            }
+        ],
+        "entity": 122,
+        "signature": "0000000000000000000000000000000000000000000000000000000000101011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "CameraPart2"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 1.0,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 0.0,
+                        "y": -0.04132270812988281,
+                        "z": 0.0
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "parent": 121
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": false,
+                    "material_type": 0,
+                    "model_name": "items/camera/camera_3.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            }
+        ],
+        "entity": 123,
+        "signature": "0000000000000000000000000000000000000000000000000000000000101011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "MainCameraPart"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.9238796234130859,
+                        "x": -0.3826834559440613,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 0.0,
+                        "y": 0.0016193389892578125,
+                        "z": 0.0
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 0.9999998807907104,
+                        "z": 0.9999998807907104
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "parent": 121
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/camera/camera_1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
+                    "children": [
+                        128
+                    ],
+                    "children_count": 1
+                },
+                "component_name": "Children"
+            }
+        ],
+        "entity": 124,
+        "signature": "0000000000000000000000000000000000000000000000000000000000111011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "CameraParticles"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.489565908908844,
+                        "x": 0.5817438960075378,
+                        "y": 0.40587297081947327,
+                        "z": 0.5071158409118652
+                    },
+                    "position": {
+                        "x": -0.012113730423152447,
+                        "y": -0.259742796421051,
+                        "z": 0.13780216872692108
+                    },
+                    "scale": {
+                        "x": 1.0000011920928955,
+                        "y": 0.9999971985816956,
+                        "z": 1.0000066757202148
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "parent": 128
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "children": [
+                        126,
+                        127
+                    ],
+                    "children_count": 2
+                },
+                "component_name": "Children"
+            }
+        ],
+        "entity": 125,
+        "signature": "0000000000000000000000000000000000000000000000000000000000011011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "FirstEmitter"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 1.0,
+                        "x": 2.2898349882893854e-16,
+                        "y": -1.5366822481155396e-08,
+                        "z": -1.4901161193847656e-08
+                    },
+                    "position": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "parent": 125
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "color_begin": [
+                        0.6470588445663452,
+                        0.21176470816135406,
+                        0.0,
+                        0.6509804129600525
+                    ],
+                    "color_end": [
+                        0.5960784554481506,
+                        0.14901961386203766,
+                        0.0,
+                        0.0
+                    ],
+                    "color_transition": 0,
+                    "is_billboard": false,
+                    "is_one_shot": false,
+                    "is_textured": true,
+                    "lifetime": 3.0,
+                    "one_shot_duration": 0.5,
+                    "position": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "position_variance": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "rate": 15.0,
+                    "rotation_begin": 0.0,
+                    "rotation_end": 0.0,
+                    "rotation_transition": 0,
+                    "rotation_variance": 0.0,
+                    "size_begin": 3.0,
+                    "size_end": 10.0,
+                    "size_transition": 0,
+                    "texture_name": "glitch_ray_half.ktx2",
+                    "velocity_begin": [
+                        0.0,
+                        -0.5,
+                        0.0
+                    ],
+                    "velocity_end": [
+                        0.0,
+                        -0.20000000298023224,
+                        0.0
+                    ],
+                    "velocity_transition": 0,
+                    "velocity_variance": [
+                        0.5,
+                        0.0,
+                        0.5
+                    ]
+                },
+                "component_name": "ParticleEmitter"
+            }
+        ],
+        "entity": 126,
+        "signature": "0000000000000000000000000000000010000000000000000000000000001011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "SecondEmitter"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.7071068286895752,
+                        "x": 0.0,
+                        "y": 0.7071067690849304,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "parent": 125
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "color_begin": [
+                        0.6470588445663452,
+                        0.21176470816135406,
+                        0.0,
+                        0.6509804129600525
+                    ],
+                    "color_end": [
+                        0.5960784554481506,
+                        0.14901961386203766,
+                        0.0,
+                        0.0
+                    ],
+                    "color_transition": 0,
+                    "is_billboard": false,
+                    "is_one_shot": false,
+                    "is_textured": true,
+                    "lifetime": 3.0,
+                    "one_shot_duration": 0.5,
+                    "position": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "position_variance": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "rate": 15.0,
+                    "rotation_begin": 0.0,
+                    "rotation_end": 0.0,
+                    "rotation_transition": 0,
+                    "rotation_variance": 0.0,
+                    "size_begin": 3.0,
+                    "size_end": 10.0,
+                    "size_transition": 0,
+                    "texture_name": "glitch_ray_half.ktx2",
+                    "velocity_begin": [
+                        0.0,
+                        -0.5,
+                        0.0
+                    ],
+                    "velocity_end": [
+                        0.0,
+                        -0.20000000298023224,
+                        0.0
+                    ],
+                    "velocity_transition": 0,
+                    "velocity_variance": [
+                        0.5,
+                        0.0,
+                        0.5
+                    ]
+                },
+                "component_name": "ParticleEmitter"
+            }
+        ],
+        "entity": 127,
+        "signature": "0000000000000000000000000000000010000000000000000000000000001011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "CameraLight"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.9935718774795532,
+                        "x": -0.11320321261882782,
+                        "y": 1.693901197086234e-08,
+                        "z": -1.532011424387747e-07
+                    },
+                    "position": {
+                        "x": 0.005754217505455017,
+                        "y": 0.04145834967494011,
+                        "z": -0.2557213008403778
+                    },
+                    "scale": {
+                        "x": 0.9999897480010986,
+                        "y": 0.9999985694885254,
+                        "z": 0.9999988675117493
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "parent": 124
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "children": [
+                        125
+                    ],
+                    "children_count": 1
+                },
+                "component_name": "Children"
+            },
+            {
+                "component_data": {
+                    "cast_shadow": true,
+                    "color": {
+                        "b": 0.0,
+                        "g": 0.21176470816135406,
+                        "r": 0.6470588445663452
+                    },
+                    "cutoff": 20.0,
+                    "intensity": 300.0,
+                    "is_on": true,
+                    "outer_cutoff": 10.0,
+                    "type": 2
+                },
+                "component_name": "Light"
+            }
+        ],
+        "entity": 128,
+        "signature": "0000000000000000000000000000000000000000000000010000000000011011"
     }
 ]

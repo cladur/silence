@@ -8,6 +8,7 @@
 #include "managers/gameplay/gameplay_manager.h"
 #include "managers/physics/ecs/collision_system.h"
 #include "managers/physics/physics_manager.h"
+#include <animation/animation_manager.h>
 #include <audio/audio_manager.h>
 #include <render/debug/debug_draw.h>
 #include <render/transparent_elements/ui_manager.h>
@@ -15,24 +16,14 @@
 #include <glm/vec3.hpp>
 
 namespace enemy_utils {
-static glm::vec3 enemy_look_offset = glm::vec3(0.0f, 1.0f, 0.0f);
-static glm::vec3 agent_target_top_offset = glm::vec3(0.0f, 1.2f, 0.0f);
-static glm::vec3 agent_target_bottom_offset = glm::vec3(0.0f, 0.2f, 0.0f);
-
-inline void look_at(EnemyPath &path, Transform &t, glm::vec3 &target, float &dt) {
-	if (path.first_rotation_frame) {
-		auto current_no_y = glm::vec3(t.position.x, 0.0f, t.position.z);
-		auto target_no_y = glm::vec3(target.x, 0.0f, target.z);
-
-		glm::vec3 direction = glm::normalize(target_no_y - current_no_y);
-		glm::vec3 forward = glm::normalize(glm::vec3(t.get_global_forward().x, 0.0f, t.get_global_forward().z));
-		float angle = glm::acos(glm::dot(forward, direction));
-		glm::vec3 axis = glm::cross(forward, direction);
-		path.rotation_end = (angle * axis);
-		path.first_rotation_frame = false;
-	}
-	t.add_global_euler_rot(path.rotation_end * dt * path.rotation_speed);
-}
+static const glm::vec3 enemy_look_offset = glm::vec3(0.0f, 1.0f, 0.0f);
+static const glm::vec3 agent_target_top_offset = glm::vec3(0.0f, 1.2f, 0.0f);
+static const glm::vec3 agent_target_bottom_offset = glm::vec3(0.0f, 0.2f, 0.0f);
+static const float footstep_left_down_threshold = 0.007f;
+static const float footstep_right_down_threshold = 0.009f;
+static const float footstep_up_threshold = 0.1f;
+static std::string left_foot_bone = "heel.02.L";
+static std::string right_foot_bone = "heel.02.R";
 
 inline void handle_detection(World *world, uint32_t enemy_entity, Transform &transform, glm::vec3 forward,
 		EnemyData &enemy_data, float &dt, DebugDraw *dd = nullptr) {
@@ -47,20 +38,24 @@ inline void handle_detection(World *world, uint32_t enemy_entity, Transform &tra
 	float crouch_mod = *cvar->get_float_cvar("enemy.crouch_detection_modifier");
 	float hacker_mod = *cvar->get_float_cvar("enemy.hacker_detection_modifier");
 
-	auto enemy_look_origin = transform.position + enemy_look_offset;
+	bool is_blinded = enemy_data.is_blinded;
+
+	glm::vec3 current_global_position = transform.get_global_position();
+
+	auto enemy_look_origin = current_global_position + enemy_look_offset;
 
 	auto agent_pos = GameplayManager::get().get_agent_position(world->get_parent_scene()) + agent_target_top_offset;
 	bool can_see_player = false;
 	auto agent_dir = glm::normalize(agent_pos - enemy_look_origin);
-	float agent_distance_ratio = glm::distance(transform.position, agent_pos) / cone_range;
+	float agent_distance_ratio = glm::distance(current_global_position, agent_pos) / cone_range;
 
 	auto hacker_pos = GameplayManager::get().get_hacker_position(world->get_parent_scene()) + agent_target_top_offset;
 	auto hacker_dir = glm::normalize(hacker_pos - enemy_look_origin);
 	bool can_see_hacker = false;
-	float hacker_distance_ratio = glm::distance(transform.position, hacker_pos) / cone_range;
+	float hacker_distance_ratio = glm::distance(current_global_position, hacker_pos) / cone_range;
 
 	// AGENT CONE DETECTION LOGIC
-	if (glm::distance(transform.position, agent_pos) < cone_range) {
+	if (!is_blinded && glm::distance(current_global_position, agent_pos) < cone_range) {
 		auto angle = glm::acos(glm::dot(agent_dir, forward));
 		if (angle < glm::radians(cone_angle) / 2.0f) {
 			Ray ray{};
@@ -102,7 +97,7 @@ inline void handle_detection(World *world, uint32_t enemy_entity, Transform &tra
 	}
 
 	// HACKER CONE DETECTION LOGIC
-	if (glm::distance(transform.position, hacker_pos) < cone_range) {
+	if (!is_blinded && glm::distance(current_global_position, hacker_pos) < cone_range) {
 		auto angle = glm::acos(glm::dot(hacker_dir, forward));
 		if (angle < glm::radians(cone_angle) / 2.0f) {
 			Ray ray{};
@@ -142,23 +137,23 @@ inline void handle_detection(World *world, uint32_t enemy_entity, Transform &tra
 	}
 
 	// AGENT SPHERE DETECTION LOGIC
-	if (glm::distance(transform.position, agent_pos) < sphere_radus) {
-		Ray ray{};
-		ray.origin = enemy_look_origin;
-		ray.direction = agent_dir;
-		ray.ignore_list.push_back(enemy_entity);
-		glm::vec3 ray_end = ray.origin + ray.direction * sphere_radus;
-
-		HitInfo hit_info;
-
-		if (CollisionSystem::ray_cast_layer(*world, ray, hit_info)) {
-			// only if agent is crouching then he can get to the enemy
-			if (hit_info.entity == GameplayManager::get().get_agent_entity() &&
-					!GameplayManager::get().get_agent_crouch()) {
-				can_see_player = true;
-			}
-		}
-	}
+	//	if (glm::distance(transform.position, agent_pos) < sphere_radus) {
+	//		Ray ray{};
+	//		ray.origin = enemy_look_origin;
+	//		ray.direction = agent_dir;
+	//		ray.ignore_list.push_back(enemy_entity);
+	//		glm::vec3 ray_end = ray.origin + ray.direction * sphere_radus;
+	//
+	//		HitInfo hit_info;
+	//
+	//		if (CollisionSystem::ray_cast_layer(*world, ray, hit_info)) {
+	//			// only if agent is crouching then he can get to the enemy
+	//			if (hit_info.entity == GameplayManager::get().get_agent_entity() &&
+	//					!GameplayManager::get().get_agent_crouch()) {
+	//				can_see_player = true;
+	//			}
+	//		}
+	//	}
 
 	if (can_see_player || can_see_hacker) {
 		// if noone was detected past frame, play sound
@@ -227,12 +222,6 @@ inline void handle_detection_camera(World *world, uint32_t enemy_entity, Transfo
 	auto hacker_dir = glm::normalize(hacker_pos - enemy_look_origin);
 	bool can_see_hacker = false;
 	float hacker_distance_ratio = glm::distance(global_position, hacker_pos) / cone_range;
-
-	//	if (dd) {
-	//		dd->draw_arrow(enemy_look_origin, enemy_look_origin + forward, cone_range, glm::vec3(0.0f, 1.0f, 0.0f));
-	//		dd->draw_cone(enemy_look_origin, enemy_look_origin + forward, cone_range, glm::tan(glm::radians(cone_angle
-	/// 2.0f)) * cone_range, glm::vec3(1.0f, 0.0f, 0.0f));
-	//	}
 
 	// AGENT CONE DETECTION LOGIC
 	if (glm::distance(global_position, agent_pos) < cone_range) {
@@ -316,6 +305,7 @@ inline void handle_detection_camera(World *world, uint32_t enemy_entity, Transfo
 	}
 
 	if (can_see_player || can_see_hacker) {
+		detection_camera.is_detecting = true;
 		// if noone was detected past frame, play sound
 		if (detection_camera.detection_target == DetectionTarget::NONE) {
 			AudioManager::get().play_one_shot_2d(EventReference("SFX/Enemies/first_time_detect"));
@@ -355,6 +345,8 @@ inline void handle_detection_camera(World *world, uint32_t enemy_entity, Transfo
 
 		detection_camera.detection_level += detection_change;
 	} else {
+		detection_camera.is_detecting = false;
+
 		if (detection_camera.is_playing) {
 			AudioManager::get().stop_local(detection_camera.detection_event);
 			detection_camera.is_playing = false;
@@ -417,6 +409,32 @@ inline void handle_highlight(uint32_t entity, World *world) {
 		auto &tag = world->get_component<Taggable>(entity);
 		if (tag.tagged) {
 			h.highlighted = true;
+		}
+	}
+}
+
+inline void handle_footsteps(uint32_t entity, Transform &transform, EnemyData &enemy_data, float dt) {
+	auto &audio = AudioManager::get();
+	auto &animation_manager = AnimationManager::get();
+
+	const glm::mat4 &left_foot_bone_matrix = animation_manager.get_bone_transform(entity, left_foot_bone);
+	const glm::mat4 &right_foot_bone_matrix = animation_manager.get_bone_transform(entity, right_foot_bone);
+
+	// get positions from both matrices
+	auto left_foot_position = glm::vec3(left_foot_bone_matrix[3]);
+	auto right_foot_position = glm::vec3(right_foot_bone_matrix[3]);
+	if (right_foot_position.y < footstep_right_down_threshold && enemy_data.right_foot_can_play) {
+		audio.play_one_shot_3d(enemy_data.footsteps_event, transform);
+		enemy_data.right_foot_can_play = false;
+	} else if (left_foot_position.y < footstep_left_down_threshold && enemy_data.left_foot_can_play) {
+		audio.play_one_shot_3d(enemy_data.footsteps_event, transform);
+		enemy_data.left_foot_can_play = false;
+	} else {
+		if (left_foot_position.y > footstep_up_threshold) {
+			enemy_data.left_foot_can_play = true;
+		}
+		if (right_foot_position.y > footstep_up_threshold) {
+			enemy_data.right_foot_can_play = true;
 		}
 	}
 }

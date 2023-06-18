@@ -629,6 +629,8 @@ bool CollisionSystem::ray_cast_layer(World &world, const Ray &ray, HitInfo &resu
 	std::vector<Entity> entities = world.get_parent_scene()->entities;
 
 	bool does_hit = false;
+	bool result_set = false;
+
 	for (auto entity : entities) {
 		if (!world.has_component<ColliderTag>(entity) || !world.has_component<Transform>(entity)) {
 			continue;
@@ -684,7 +686,8 @@ bool CollisionSystem::ray_cast_layer(World &world, const Ray &ray, HitInfo &resu
 
 		if (info.distance < result.distance) {
 			result = info;
+			result_set = true;
 		}
 	}
-	return does_hit;
+	return does_hit && result_set;
 }

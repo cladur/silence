@@ -1,12 +1,15 @@
 #include "gameplay_manager.h"
 #include <engine/scene.h>
 
-AutoCVarFloat cv_enemy_near_player_radius("gameplay.enemy_near_radius", "radius that checks for enemies near player", 15.0f, CVarFlags::EditCheckbox);
+AutoCVarFloat cv_enemy_near_player_radius(
+		"gameplay.enemy_near_radius", "radius that checks for enemies near player", 15.0f, CVarFlags::EditCheckbox);
 
 GameplayManager &GameplayManager::get() {
 	static GameplayManager instance;
 	return instance;
 }
+
+std::default_random_engine GameplayManager::random_generator;
 
 void GameplayManager::startup(Scene *scene) {
 	World &world = scene->world;
@@ -27,9 +30,14 @@ void GameplayManager::update(World &world, float dt) {
 	if (disabled) {
 		return;
 	}
-	//world.get_parent_scene()->get_render_scene().debug_draw.draw_sphere(get_agent_position(world.get_parent_scene()), cv_enemy_near_player_radius.get(), glm::vec3(1.0f, 1.0f, 0.0f), 32);
+	//world.get_parent_scene()->get_render_scene().debug_draw.draw_sphere(get_agent_position(world.get_parent_scene()),
+	//cv_enemy_near_player_radius.get(), glm::vec3(1.0f, 1.0f, 0.0f), 32);
 	// calculate highest detection level
-	highest_detection = *std::max_element(detection_levels.begin(), detection_levels.end());
+	if (!detection_levels.empty()) {
+		highest_detection = *std::max_element(detection_levels.begin(), detection_levels.end());
+	} else {
+		highest_detection = 0.0f;
+	}
 
 	detection_levels.clear();
 
@@ -37,7 +45,8 @@ void GameplayManager::update(World &world, float dt) {
 	enemies_near_player = 0;
 	for (auto &entity : enemy_entities) {
 		auto &player_transform = world.get_component<Transform>(agent_entity);
-		auto &enemy_transform = world.get_component<Transform>(entity);;
+		auto &enemy_transform = world.get_component<Transform>(entity);
+		;
 		if (glm::distance(player_transform.position, enemy_transform.position) < cv_enemy_near_player_radius.get()) {
 			enemies_near_player++;
 		}
@@ -95,4 +104,20 @@ uint32_t GameplayManager::get_agent_camera(Scene *scene) const {
 
 uint32_t GameplayManager::get_hacker_camera(Scene *scene) const {
 	return scene->world.get_component<HackerData>(hacker_entity).camera;
+}
+
+void GameplayManager::set_agent_system(std::shared_ptr<AgentSystem> system) {
+	agent_system = system;
+}
+
+void GameplayManager::set_hacker_system(std::shared_ptr<HackerSystem> system) {
+	hacker_system = system;
+}
+
+std::shared_ptr<AgentSystem> GameplayManager::get_agent_system() {
+	return agent_system;
+}
+
+std::shared_ptr<HackerSystem> GameplayManager::get_hacker_system() {
+	return hacker_system;
 }

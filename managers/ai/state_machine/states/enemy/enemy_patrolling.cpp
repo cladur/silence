@@ -3,11 +3,11 @@
 #include "components/enemy_data_component.h"
 #include "components/enemy_path_component.h"
 #include "components/transform_component.h"
+#include "enemy_utils.h"
 #include "engine/scene.h"
 #include "managers/ecs/world.h"
 #include "managers/render/render_scene.h"
 #include <animation/animation_manager.h>
-#include "enemy_utils.h"
 
 void EnemyPatrolling::startup(StateMachine *machine, std::string name) {
 	SPDLOG_INFO("EnemyPatrolling::startup");
@@ -42,8 +42,9 @@ void EnemyPatrolling::update(World *world, uint32_t entity_id, float dt) {
 		animation_manager.change_animation(entity_id, "enemy/enemy_ANIM_GLTF/enemy_walk_with_gun.anim");
 	}
 
-	glm::vec3 current_position = transform.position;
-	glm::vec3 target_position = world->get_component<Transform>(path.children[enemy_path.next_position]).get_global_position();
+	glm::vec3 current_position = transform.get_global_position();
+	glm::vec3 target_position =
+			world->get_component<Transform>(path.children[enemy_path.next_position]).get_global_position();
 
 	// get index of previous node
 	int idx = ((enemy_path.next_position - 1) % (int)path.children_count == -1)
@@ -58,7 +59,7 @@ void EnemyPatrolling::update(World *world, uint32_t entity_id, float dt) {
 	// move the entity towards the next node
 	if (glm::distance(current_position, target_position) > 0.1f) {
 		transform.add_position(glm::normalize(target_position - current_position) * enemy_path.speed * dt);
-
+		enemy_utils::handle_footsteps(entity_id, transform, enemy_data, dt);
 		// if the point is a patrol point, switch state
 	} else if (next_node.is_patrol_point) {
 		enemy_path.patrol_cooldown = next_node.patrol_time;
@@ -82,8 +83,13 @@ void EnemyPatrolling::update(World *world, uint32_t entity_id, float dt) {
 
 	// smoothly rotate the entity to face the next node
 	if (enemy_path.is_rotating) {
-		float new_dt = dt * enemy_path.rotation_speed;
-		enemy_utils::look_at(enemy_path, transform, target_position, new_dt);
+		glm::vec3 direction = transform.get_global_position() - target_position;
+		direction.y = 0.0f;
+		direction = glm::normalize(direction);
+
+		glm::quat target_orientation = glm::quatLookAt(direction, glm::vec3(0.0f, 1.0f, 0.0f));
+
+		transform.set_orientation(glm::slerp(transform.get_orientation(), target_orientation, 5.0f * dt));
 	}
 
 	// if the entity is facing the next node, stop rotating

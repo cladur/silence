@@ -26,6 +26,7 @@ void RenderSystem::update(World &world, float dt) {
 			highlight.highlighted = hc.highlighted;
 			highlight.highlight_color = hc.highlight_color;
 			highlight.target = hc.target;
+			highlight.highlight_power = hc.highlight_power;
 		}
 
 		world.get_parent_scene()->get_render_scene().queue_draw(&model_instance, &transform, entity, highlight);

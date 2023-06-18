@@ -48,6 +48,9 @@ private:
 	void show_highlight();
 	void show_particle_emitter();
 	void show_detection_camera();
+	void show_cable_parent();
+	void show_rotator();
+	void show_light_switcher();
 	void show_decal();
 
 	static bool show_vec2(const char *label, glm::vec2 &vec2, float speed = 0.1f, float reset_value = 0.0f,

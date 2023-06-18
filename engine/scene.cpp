@@ -5,7 +5,9 @@
 #include "ecs/systems/detection_camera_system.h"
 #include "ecs/systems/hacker_movement_system.h"
 #include "ecs/systems/interactable_system.h"
+#include "ecs/systems/light_switcher_system.h"
 #include "ecs/systems/platform_system.h"
+#include "ecs/systems/rotator_system.h"
 #include "ecs/world.h"
 #include "editor/editor.h"
 #include "managers/animation/ecs/animation_instance.h"
@@ -22,6 +24,7 @@
 #include "components/taggable_component.h"
 #include "ecs/systems/agent_movement_system.h"
 #include "ecs/systems/agent_system.h"
+#include "ecs/systems/cable_system.h"
 #include "ecs/systems/collider_draw.h"
 #include "ecs/systems/enemy_path_draw_system.h"
 #include "ecs/systems/enemy_pathing.h"
@@ -86,31 +89,13 @@ Scene::Scene() {
 		world.register_component<Highlight>();
 		world.register_component<ParticleEmitter>();
 		world.register_component<DetectionCamera>();
+		world.register_component<CableParent>();
+		world.register_component<Rotator>();
+		world.register_component<LightSwitcher>();
 		world.register_component<Decal>();
 	}
 	// Components
-
-	ZoneNamedNC(Zone3, "Scene::Scene()::Systems", tracy::Color::Orange, true);
-	{
-		// Systems
-		world.register_system<AnimationSystem>(UpdateOrder::DuringAnimation);
-
-		// Render stuff
-		world.register_system<RenderSystem>(UpdateOrder::PostPhysics);
-		world.register_system<SkinnedRenderSystem>(UpdateOrder::PostPhysics);
-		world.register_system<ColliderDrawSystem>(UpdateOrder::PostPhysics);
-		world.register_system<FrustumDrawSystem>(UpdateOrder::PostPhysics);
-		world.register_system<LightRenderSystem>(UpdateOrder::PostPhysics);
-		world.register_system<EnemyPathDraw>(UpdateOrder::PostPhysics);
-		world.register_system<BillboardSystem>(UpdateOrder::PostPhysics);
-		world.register_system<ParticleRenderSystem>(UpdateOrder::PostPhysics);
-		world.register_system<DecalSystem>(UpdateOrder::PostPhysics);
-
-		// Transform
-		world.register_system<IsolatedEntitiesSystem>(UpdateOrder::PrePreAnimation);
-		world.register_system<RootParentSystem>(UpdateOrder::PrePreAnimation);
-		world.register_system<AttachmentSystem>(UpdateOrder::PostAnimation);
-	}
+	{ register_main_systems(); }
 
 	auto &physics_manager = PhysicsManager::get();
 	physics_manager.add_collision_layer("default");
@@ -122,10 +107,34 @@ Scene::Scene() {
 
 	physics_manager.set_layers_no_collision("default", "hacker");
 	physics_manager.set_layers_no_collision("agent", "hacker");
+	physics_manager.set_layers_no_collision("camera", "hacker");
 
 	physics_manager.set_layers_no_collision("camera", "default");
-	physics_manager.set_layers_no_collision("camera", "hacker");
 	physics_manager.set_layers_no_collision("camera", "agent");
+	physics_manager.set_layers_no_collision("camera", "taggable");
+	physics_manager.set_layers_no_collision("camera", "obstacle");
+}
+
+void Scene::register_main_systems() {
+	// Systems
+	world.register_system<AnimationSystem>(UpdateOrder::PrePreAnimation);
+
+	// Render stuff
+	world.register_system<RenderSystem>(UpdateOrder::PostPhysics);
+	world.register_system<SkinnedRenderSystem>(UpdateOrder::PostPhysics);
+	world.register_system<ColliderDrawSystem>(UpdateOrder::PostPhysics);
+	world.register_system<FrustumDrawSystem>(UpdateOrder::PostPhysics);
+	world.register_system<LightRenderSystem>(UpdateOrder::PostPhysics);
+	world.register_system<EnemyPathDraw>(UpdateOrder::PostPhysics);
+	world.register_system<BillboardSystem>(UpdateOrder::PostPhysics);
+	world.register_system<ParticleRenderSystem>(UpdateOrder::PostPhysics);
+	world.register_system<DecalSystem>(UpdateOrder::PostPhysics);
+
+	// Transform
+	world.register_system<IsolatedEntitiesSystem>(UpdateOrder::PrePreAnimation);
+	world.register_system<RootParentSystem>(UpdateOrder::PrePreAnimation);
+	world.register_system<AttachmentSystem>(UpdateOrder::PostAnimation);
+	world.register_system<CableSystem>(UpdateOrder::PreAnimation);
 }
 
 void Scene::register_game_systems() {
@@ -134,18 +143,24 @@ void Scene::register_game_systems() {
 	world.register_system<CollisionSystem>();
 
 	// Agents
-	world.register_system<AgentSystem>();
+	auto agent_system = world.register_system<AgentSystem>();
 	world.register_system<AgentMovementSystem>(UpdateOrder::DuringPhysics);
-	world.register_system<HackerSystem>();
+	auto hacker_system = world.register_system<HackerSystem>();
 	world.register_system<HackerMovementSystem>(UpdateOrder::DuringPhysics);
 	world.register_system<EnemySystem>(UpdateOrder::PostAnimation);
 	world.register_system<TaggableSystem>();
 	//world.register_system<EnemyPathing>();
 	world.register_system<InteractableSystem>();
 	world.register_system<PlatformSystem>();
-	world.register_system<FMODEmitterSystem>();
+	world.register_system<FMODEmitterSystem>(UpdateOrder::PrePreAnimation);
 	world.register_system<HighlightSystem>(UpdateOrder::PrePreAnimation);
 	world.register_system<DetectionCameraSystem>();
+
+	world.register_system<LightSwitcherSystem>();
+	world.register_system<RotatorSystem>();
+
+	GameplayManager::get().set_agent_system(agent_system);
+	GameplayManager::get().set_hacker_system(hacker_system);
 }
 
 void Scene::update(float dt) {

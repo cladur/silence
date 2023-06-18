@@ -9,6 +9,7 @@ void IsolatedEntitiesSystem::startup(World &world) {
 	Signature whitelist;
 	blacklist.set(world.get_component_type<Children>());
 	blacklist.set(world.get_component_type<Parent>());
+	blacklist.set(world.get_component_type<Attachment>());
 	whitelist.set(world.get_component_type<Transform>());
 
 	world.set_system_component_blacklist<IsolatedEntitiesSystem>(blacklist);

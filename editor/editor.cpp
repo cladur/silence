@@ -353,6 +353,10 @@ void Editor::create_scene(const std::string &name, SceneType type, const std::st
 	// Create RenderScene for scene
 	RenderManager &render_manager = RenderManager::get();
 	scene->render_scene_idx = render_manager.create_render_scene();
+	if (type == SceneType::Prefab) {
+		render_manager.render_scenes[scene->render_scene_idx].skybox_pass.skybox.load_from_directory(
+				asset_path("cubemaps/venice_sunset"));
+	}
 
 	Entity entity;
 

@@ -5,6 +5,7 @@
 #include "input/input_manager.h"
 #include "managers/physics/ecs/collision_system.h"
 #include "physics/physics_manager.h"
+#include <audio/audio_manager.h>
 
 AutoCVarFloat cvar_hacker_acc_ground("hacker.acc_ground", "acceleration on ground ", 0.4f, CVarFlags::EditCheckbox);
 
@@ -30,6 +31,8 @@ void HackerMovementSystem::startup(World &world) {
 	whitelist.set(world.get_component_type<HackerData>());
 
 	world.set_system_component_whitelist<HackerMovementSystem>(whitelist);
+
+	step_event = EventReference("Hacker/step");
 }
 
 void HackerMovementSystem::update(World &world, float dt) {
@@ -53,18 +56,8 @@ void HackerMovementSystem::update(World &world, float dt) {
 
 		glm::vec3 acc_direction = { 0, 0, 0 };
 		if (!is_on_camera) {
-			if (input_manager.is_action_pressed("hacker_move_forward")) {
-				acc_direction += camera_forward;
-			}
-			if (input_manager.is_action_pressed("hacker_move_backward")) {
-				acc_direction -= camera_forward;
-			}
-			if (input_manager.is_action_pressed("hacker_move_left")) {
-				acc_direction += camera_right;
-			}
-			if (input_manager.is_action_pressed("hacker_move_right")) {
-				acc_direction -= camera_right;
-			}
+			acc_direction += input_manager.get_axis("hacker_move_backward", "hacker_move_forward") * camera_forward;
+			acc_direction += input_manager.get_axis("hacker_move_left", "hacker_move_right") * -camera_right;
 		}
 
 		if (*CVarSystem::get()->get_int_cvar("debug_camera.use")) {
@@ -78,8 +71,16 @@ void HackerMovementSystem::update(World &world, float dt) {
 		glm::vec3 velocity = move_ground(acc_direction, previous_velocity, dt);
 		if (glm::dot(velocity, velocity) > physics_manager.get_epsilon()) {
 			if (animation_instance.animation_handle.id !=
-					resource_manager.get_animation_handle("scorpion/scorpion_ANIM_GLTF/scorpion_idle_walk.anim").id) {
+					resource_manager.get_animation_handle("scorpion/scorpion_ANIM_GLTF/scorpion_walk.anim").id) {
 				animation_manager.change_animation(hacker_data.model, "scorpion/scorpion_ANIM_GLTF/scorpion_walk.anim");
+			}
+
+			if (glm::dot(velocity, velocity) > 0.001f) {
+				if (current_time >= time_per_step) {
+					AudioManager::get().play_one_shot_3d(step_event, transform);
+					current_time = 0.0f;
+				}
+				current_time += dt;
 			}
 		} else {
 			if (animation_instance.animation_handle.id !=

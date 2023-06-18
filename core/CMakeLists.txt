@@ -47,7 +47,8 @@ add_library(${CORE_LIB_NAME} STATIC
         components/taggable_component.h
         components/fmod_emitter_component.h
         components/particle_emitter_component.h
-        components/decal_component.h)
+        components/decal_component.h
+        components/cable_parent_component.h)
 
 target_include_directories(${CORE_LIB_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 

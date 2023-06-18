@@ -18,7 +18,7 @@ AutoCVarInt cvar_debug_camera_use("debug_camera.use", "Use debug camera", 1, CVa
 
 // SSAO Params
 AutoCVarInt cvar_ssao("render.ssao", "Use SSAO", 1, CVarFlags::EditCheckbox);
-AutoCVarFloat cvar_ssao_radius("render.ssao.radius", "SSAO radius", 0.5f);
+AutoCVarFloat cvar_ssao_radius("render.ssao.radius", "SSAO radius", 0.24f);
 AutoCVarFloat cvar_ssao_bias("render.ssao.bias", "SSAO bias", 0.04f);
 AutoCVarInt cvar_ao_blur("render.ssao_blur", "Should SSAO be blurred", 1, CVarFlags::EditCheckbox);
 
@@ -63,16 +63,29 @@ void RenderScene::startup() {
 	debug_camera.pitch = -20.0f;
 	debug_camera.update_camera_vectors();
 	UIManager::get().set_render_scene(this);
+	auto &ui = UIManager::get();
+
+	ui.create_ui_scene("frame_scene");
+	ui.activate_ui_scene("frame_scene");
+	auto &anchor = ui.add_ui_anchor("frame_scene", "anchor");
+	anchor.is_screen_space = true;
+	anchor.is_billboard = false;
+	anchor.x = 0.05f;
+	anchor.y = 0.95f;
+	anchor.display = true;
+	ui.add_as_root("frame_scene", "anchor");
+	auto &fps = ui.add_ui_text("frame_scene", "fps");
+	fps.is_screen_space = true;
+	fps.is_billboard = false;
+	fps.text = "FPS: 0 (0 ms)";
+	fps.position = glm::vec3(0.25f, 0.75f, 0.0f);
+	fps.size = glm::vec2(1.0f, 1.0f);
+	fps.display = true;
+	ui.add_to_root("frame_scene", "fps", "anchor");
 }
 
 void RenderScene::draw_viewport(bool right_side) {
 	ZoneScopedN("RenderScene::draw_viewport");
-	glViewport(0, 0, (int)shadow_buffer.shadow_width, (int)shadow_buffer.shadow_height);
-	shadow_buffer.bind();
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_FRONT);
-	shadow_pass.draw(*this);
 
 	glDepthMask(GL_TRUE);
 	glViewport(0, 0, (int)render_extent.x, (int)render_extent.y);
@@ -105,6 +118,11 @@ void RenderScene::draw_viewport(bool right_side) {
 				cvar_draw_distance_far.get());
 		view = glm::inverse(camera_transform.get_global_model_matrix());
 		camera_pos = camera_transform.get_global_position();
+		if (!right_side) {
+			left_projection = projection;
+			left_view = view;
+			left_camera_pos = camera_pos;
+		}
 	}
 
 	g_buffer_pass.draw(*this);
@@ -276,6 +294,14 @@ void RenderScene::draw(bool editor_mode) {
 
 	highlight_pass.sort_highlights(*this);
 
+	// Draw shadow maps
+	glViewport(0, 0, (int)shadow_buffer.shadow_width, (int)shadow_buffer.shadow_height);
+	shadow_buffer.bind();
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_FRONT);
+	shadow_pass.draw(*this);
+
 	if (cvar_splitscreen.get() && !cvar_debug_camera_use.get()) {
 		draw_viewport(false); // agent
 		{
@@ -310,6 +336,9 @@ void RenderScene::draw(bool editor_mode) {
 					GL_COLOR_BUFFER_BIT, GL_NEAREST);
 		}
 	}
+
+	auto &fps = UIManager::get().get_ui_text("frame_scene", "fps");
+	fps.text = std::to_string((int)ImGui::GetIO().Framerate);
 
 	highlight_pass.clear();
 

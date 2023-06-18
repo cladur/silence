@@ -29,7 +29,10 @@ add_library(${ECS_MANAGER_NAME} STATIC
         systems/highlight_system.h
         systems/highlight_system.cpp
         systems/detection_camera_system.h
-        systems/detection_camera_system.cpp)
+        systems/detection_camera_system.cpp systems/cable_system.cpp systems/cable_system.h
+        systems/rotator_system.cpp systems/rotator_system.h
+        systems/light_switcher_system.cpp systems/light_switcher_system.h
+        )
 
 target_include_directories(${ECS_MANAGER_NAME} PUBLIC ${MANAGER_DIR})
 

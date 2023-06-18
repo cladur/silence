@@ -42,6 +42,9 @@ private:
 	std::vector<std::shared_ptr<BaseSystem>> during_physics_systems;
 	std::vector<std::shared_ptr<BaseSystem>> post_physics_systems;
 
+	void update_children(Entity entity, const std::unordered_map<Entity, Entity> &id_map);
+	void update_parent(Entity entity, const std::unordered_map<Entity, Entity> &id_map);
+
 public:
 	Scene *parent_scene;
 
@@ -122,7 +125,7 @@ public:
 	}
 
 	// System methods
-	template <typename T> void register_system(UpdateOrder priority = UpdateOrder::PreAnimation) {
+	template <typename T> std::shared_ptr<T> register_system(UpdateOrder priority = UpdateOrder::PreAnimation) {
 		auto system = system_manager->register_system<T>();
 		system->startup(*this);
 
@@ -146,6 +149,7 @@ public:
 				post_physics_systems.emplace_back(system);
 				break;
 		}
+		return system;
 	}
 
 	void update(float dt) {
@@ -217,8 +221,9 @@ public:
 	bool has_child(Entity parent, Entity child);
 	bool reparent(Entity new_parent, Entity child, bool keep_transform = false);
 	void serialize_entity_json(nlohmann::json &json, Entity entity, bool is_archetype = false);
-	void deserialize_entity_json(nlohmann::json &json, std::vector<Entity> &entities);
+	Entity deserialize_entity_json(nlohmann::json &json, std::vector<Entity> &entities);
 	void deserialize_entities_json(nlohmann::json &json, std::vector<Entity> &entities);
+	void deserialize_prefab(nlohmann::json &json, std::vector<Entity> &entities);
 	void print_components();
 
 	void add_component(Entity entity, int component_id);

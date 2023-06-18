@@ -164,6 +164,7 @@ enum class HighlightTarget { AGENT, HACKER, ENEMY, OTHER };
 struct HighlightData {
 	bool highlighted = false;
 	glm::vec3 highlight_color = glm::vec3(0.0f);
+	float highlight_power = 1.0f;
 	HighlightTarget target = HighlightTarget::OTHER;
 };
 

@@ -26,6 +26,7 @@ public:
 	float size_begin, size_end;
 	TransitionType size_transition = TransitionType::LINEAR;
 	float rotation_begin, rotation_end;
+	float rotation_variance = 0.0f;
 	TransitionType rotation_transition = TransitionType::LINEAR;
 	float rate = 5.0f; // particles per second
 	float lifetime = 0.0f;
@@ -55,6 +56,7 @@ public:
 		serialized_component["size_transition"] = static_cast<int>(size_transition);
 		serialized_component["rotation_begin"] = rotation_begin;
 		serialized_component["rotation_end"] = rotation_end;
+		serialized_component["rotation_variance"] = rotation_variance;
 		serialized_component["rotation_transition"] = static_cast<int>(rotation_transition);
 		serialized_component["rate"] = rate;
 		serialized_component["lifetime"] = lifetime;
@@ -98,6 +100,9 @@ public:
 		}
 		if (serialized_component.find("velocity_variance") != serialized_component.end()) {
 			velocity_variance = glm::vec3(serialized_component["velocity_variance"][0], serialized_component["velocity_variance"][1], serialized_component["velocity_variance"][2]);
+		}
+		if (serialized_component.find("rotation_variance") != serialized_component.end()) {
+			rotation_variance = serialized_component["rotation_variance"];
 		}
 	}
 

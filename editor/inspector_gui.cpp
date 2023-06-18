@@ -10,10 +10,12 @@
 #include "components/highlight_component.h"
 #include "components/interactable_component.h"
 #include "components/light_component.h"
+#include "components/light_switcher_component.h"
 #include "components/path_node_component.h"
 #include "components/path_parent_component.h"
 #include "components/platform_component.h"
 #include "components/rigidbody_component.h"
+#include "components/rotator_component.h"
 #include "physics/physics_manager.h"
 #include "render/ecs/model_instance.h"
 #include <imgui.h>
@@ -82,6 +84,9 @@ void Inspector::show_components() {
 	SHOW_COMPONENT(ParticleEmitter, show_particle_emitter);
 	SHOW_COMPONENT(DetectionCamera, show_detection_camera);
 	SHOW_COMPONENT(Decal, show_decal);
+	SHOW_COMPONENT(CableParent, show_cable_parent);
+	SHOW_COMPONENT(Rotator, show_rotator);
+	SHOW_COMPONENT(LightSwitcher, show_light_switcher);
 
 	for (int i = 0; i < remove_component_queue.size(); i++) {
 		auto [entity, component_to_remove] = remove_component_queue.front();
@@ -889,6 +894,20 @@ void Inspector::show_agent_data() {
 
 		ImGui::TableNextRow();
 		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Camera Pivot Target");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::InputInt("", (int *)&agent_data.camera_pivot_target, 0, 0);
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
+				Entity payload_entity = *(Entity *)payload->Data;
+				agent_data.camera_pivot_target = payload_entity;
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
 		ImGui::Text("Spring Arm");
 		ImGui::TableSetColumnIndex(1);
 		ImGui::InputInt("", (int *)&agent_data.spring_arm, 0, 0);
@@ -1033,6 +1052,16 @@ void Inspector::show_interactable() {
 			ImGui::EndCombo();
 		}
 
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Interaction Text");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		char text[256];
+		strcpy_s(text, interactable.interaction_text.c_str());
+		ImGui::InputText("##Interaction Text", text, 256);
+		interactable.interaction_text = text;
+
 		show_checkbox("Single use", interactable.single_use);
 
 		ImGui::TableNextRow();
@@ -1104,6 +1133,64 @@ void Inspector::show_interactable() {
 			}
 			ImGui::EndDragDropTarget();
 		}
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Cable Parent");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::Text("%s", fmt::format("{}", interactable.cable_parent).c_str());
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
+				Entity payload_entity = *(Entity *)payload->Data;
+				interactable.cable_parent = payload_entity;
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Lever model");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::Text("%s", fmt::format("{}", interactable.lever).c_str());
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
+				Entity payload_entity = *(Entity *)payload->Data;
+				interactable.lever = payload_entity;
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Enemy 1");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::Text("%s", fmt::format("{}", interactable.enemy_entity).c_str());
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
+				Entity payload_entity = *(Entity *)payload->Data;
+				interactable.enemy_entity = payload_entity;
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Enemy 2");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::Text("%s", fmt::format("{}", interactable.enemy_entity2).c_str());
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
+				Entity payload_entity = *(Entity *)payload->Data;
+				interactable.enemy_entity2 = payload_entity;
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+		show_checkbox("is_on", interactable.is_on);
 
 		ImGui::EndTable();
 	}
@@ -1268,7 +1355,8 @@ void Inspector::show_fmod_emitter() {
 		ImGui::Text("Event Name");
 		ImGui::TableSetColumnIndex(1);
 		ImGui::SetNextItemWidth(-FLT_MIN);
-		static char event_name[256];
+		char event_name[256];
+		strcpy_s(event_name, emitter.event_path.c_str());
 		ImGui::InputText("##EventName", event_name, 256);
 
 		ImGui::TableNextRow();
@@ -1333,6 +1421,9 @@ void Inspector::show_highlight() {
 		ImGui::Text("Color");
 		ImGui::TableSetColumnIndex(1);
 		ImGui::ColorEdit3("##Color", &highlighted.highlight_color[0]);
+
+		show_float("Power", highlighted.highlight_power);
+		highlighted.highlight_power = glm::clamp(highlighted.highlight_power, 0.0f, 1.0f);
 
 		ImGui::TableNextRow();
 		ImGui::TableSetColumnIndex(0);
@@ -1444,6 +1535,7 @@ void Inspector::show_particle_emitter() {
 		ImGui::TableSetColumnIndex(0);
 		show_float("Start Rotation", ps.rotation_begin);
 		show_float("End Rotation", ps.rotation_end);
+		show_float("Rotation Variance", ps.rotation_variance);
 		ImGui::TableNextRow();
 		ImGui::TableSetColumnIndex(0);
 		ImGui::Text("Rotation Transition");
@@ -1505,7 +1597,7 @@ void Inspector::show_particle_emitter() {
 }
 
 void Inspector::show_detection_camera() {
-	auto &data = world->get_component<DetectionCamera>(selected_entity);
+	auto &detection_camera = world->get_component<DetectionCamera>(selected_entity);
 	if (ImGui::CollapsingHeader("DetectionCamera", tree_flags)) {
 		remove_component_popup<DetectionCamera>();
 
@@ -1517,15 +1609,132 @@ void Inspector::show_detection_camera() {
 		ImGui::TableSetColumnIndex(0);
 		ImGui::Text("Particle Parent");
 		ImGui::TableSetColumnIndex(1);
-		ImGui::InputInt("", (int *)&data.particles_parent, 0, 0);
+		ImGui::InputInt("", (int *)&detection_camera.particles_parent, 0, 0);
 
 		if (ImGui::BeginDragDropTarget()) {
 			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
 				Entity payload_entity = *(Entity *)payload->Data;
-				data.particles_parent = payload_entity;
+				detection_camera.particles_parent = payload_entity;
 			}
 			ImGui::EndDragDropTarget();
 		}
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Camera Light");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::InputInt("", (int *)&detection_camera.camera_light, 0, 0);
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
+				Entity payload_entity = *(Entity *)payload->Data;
+				detection_camera.camera_light = payload_entity;
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Camera Model");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::InputInt("", (int *)&detection_camera.camera_model, 0, 0);
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
+				Entity payload_entity = *(Entity *)payload->Data;
+				detection_camera.camera_model = payload_entity;
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+		ImGui::EndTable();
+	}
+}
+
+void Inspector::show_cable_parent() {
+	auto &data = world->get_component<CableParent>(selected_entity);
+	if (ImGui::CollapsingHeader("CableParent", tree_flags)) {
+		remove_component_popup<CableParent>();
+
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("Cable Parent", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("On Color");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		ImGui::ColorPicker3("##On Color", (float *)&data.on_color);
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Off Color");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		ImGui::ColorPicker3("##Off Color", (float *)&data.off_color);
+
+		show_checkbox("Highlighted when OFF", data.highlighted_on_off);
+
+		if (ImGui::BeginCombo("##Inital State", magic_enum::enum_name(data.state).data())) {
+			for (auto type : magic_enum::enum_values<CableState>()) {
+				bool is_selected = (data.state == type);
+				if (ImGui::Selectable(magic_enum::enum_name(type).data(), is_selected)) {
+					data.state = type;
+				}
+				if (is_selected) {
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+			ImGui::EndCombo();
+		}
+		ImGui::EndTable();
+	}
+}
+
+void Inspector::show_rotator() {
+	auto &rotator = world->get_component<Rotator>(selected_entity);
+
+	if (ImGui::CollapsingHeader("Rotator", tree_flags)) {
+		if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+			ImGui::OpenPopup("RotatorContextMenu");
+		}
+		if (ImGui::BeginPopup("RotatorContextMenu")) {
+			remove_component_menu_item<Rotator>();
+			ImGui::EndPopup();
+		}
+
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("Rotator", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+
+		show_float("Rotation X", rotator.rotation_x);
+		show_float("Rotation Y", rotator.rotation_y);
+
+		ImGui::EndTable();
+	}
+}
+
+void Inspector::show_light_switcher() {
+	auto &light_switcher = world->get_component<LightSwitcher>(selected_entity);
+
+	if (ImGui::CollapsingHeader("Light switcher", tree_flags)) {
+		if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+			ImGui::OpenPopup("LightSwitcherContextMenu");
+		}
+		if (ImGui::BeginPopup("LightSwitcherContextMenu")) {
+			remove_component_menu_item<LightSwitcher>();
+			ImGui::EndPopup();
+		}
+
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("Light switcher", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+
+		show_float("Turn on time", light_switcher.turn_on_time);
+		show_float("Turn off time", light_switcher.turn_off_time);
+		show_float("Turn on variance", light_switcher.turn_on_variance);
+		show_float("Turn off variance", light_switcher.turn_off_variance);
 
 		ImGui::EndTable();
 	}
@@ -1846,6 +2055,9 @@ void Inspector::show_add_component() {
 			SHOW_ADD_COMPONENT(Highlight);
 			SHOW_ADD_COMPONENT(ParticleEmitter);
 			SHOW_ADD_COMPONENT(DetectionCamera);
+			SHOW_ADD_COMPONENT(CableParent);
+			SHOW_ADD_COMPONENT(Rotator);
+			SHOW_ADD_COMPONENT(LightSwitcher);
 			SHOW_ADD_COMPONENT(Decal);
 
 			ImGui::EndPopup();

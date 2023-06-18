@@ -88,6 +88,10 @@ void AgentMovementSystem::update(World &world, float dt) {
 		acc_direction += input_manager.get_axis("agent_move_backward", "agent_move_forward") * camera_forward;
 		acc_direction += input_manager.get_axis("agent_move_left", "agent_move_right") * -camera_right;
 
+		if (*CVarSystem::get()->get_int_cvar("debug_camera.use")) {
+			acc_direction = glm::vec3(0.0f, 0.0f, 0.0f);
+		}
+
 		if (glm::length(acc_direction) > 1) {
 			acc_direction = glm::normalize(acc_direction);
 		}
