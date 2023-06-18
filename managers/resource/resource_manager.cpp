@@ -101,6 +101,10 @@ std::string ResourceManager::get_texture_name(Handle<Texture> handle) {
 	return "";
 }
 
+std::vector<Texture> &ResourceManager::get_textures() {
+	return textures;
+}
+
 Model &ResourceManager::get_model(Handle<Model> handle) {
 	return models[handle.id];
 }

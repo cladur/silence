@@ -90,8 +90,8 @@ void GBuffer::startup(uint32_t width, uint32_t height) {
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, GL_TEXTURE_2D, depth_texture_id, 0);
 
 	// - tell OpenGL which color attachments we'll use (of this framebuffer) for rendering
-	uint32_t attachments[5] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2,
-		GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4};
+	uint32_t attachments[5] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3,
+		GL_COLOR_ATTACHMENT4 };
 	glDrawBuffers(5, attachments);
 
 	glGenRenderbuffers(1, &rbo_id);

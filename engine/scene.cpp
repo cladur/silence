@@ -39,6 +39,7 @@
 #include "managers/physics/ecs/physics_system.h"
 #include "render/ecs/billboard_component.h"
 #include "render/ecs/billboard_system.h"
+#include "render/ecs/decal_system.h"
 #include "render/ecs/frustum_draw_system.h"
 #include "render/ecs/light_render_system.h"
 #include "render/ecs/particle_render_system.h"
@@ -91,6 +92,7 @@ Scene::Scene() {
 		world.register_component<CableParent>();
 		world.register_component<Rotator>();
 		world.register_component<LightSwitcher>();
+		world.register_component<Decal>();
 	}
 	// Components
 	{ register_main_systems(); }
@@ -126,6 +128,7 @@ void Scene::register_main_systems() {
 	world.register_system<EnemyPathDraw>(UpdateOrder::PostPhysics);
 	world.register_system<BillboardSystem>(UpdateOrder::PostPhysics);
 	world.register_system<ParticleRenderSystem>(UpdateOrder::PostPhysics);
+	world.register_system<DecalSystem>(UpdateOrder::PostPhysics);
 
 	// Transform
 	world.register_system<IsolatedEntitiesSystem>(UpdateOrder::PrePreAnimation);

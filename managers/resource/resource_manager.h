@@ -41,6 +41,7 @@ public:
 	Texture &get_texture(Handle<Texture> handle);
 	Handle<Texture> get_texture_handle(std::string name);
 	std::string get_texture_name(Handle<Texture> handle);
+	std::vector<Texture> &get_textures();
 
 	Handle<Animation> load_animation(const char *path);
 	Animation &get_animation(Handle<Animation> handle);

@@ -38,6 +38,7 @@ void RenderScene::startup() {
 	mouse_pick_pass.startup();
 	particle_pass.startup();
 	highlight_pass.startup();
+	decal_pass.startup();
 
 	// Size of the viewport doesn't matter here, it will be resized either way
 	render_extent = glm::vec2(100, 100);
@@ -125,6 +126,12 @@ void RenderScene::draw_viewport(bool right_side) {
 	}
 
 	g_buffer_pass.draw(*this);
+
+	glEnable(GL_DEPTH_TEST);
+	glDisable(GL_BLEND);
+	glDepthMask(GL_FALSE);
+	decal_pass.draw(*this);
+	glDepthMask(GL_TRUE);
 
 	// HIGHLIGHT PASS
 	highlight_buffer.bind();
@@ -354,6 +361,7 @@ void RenderScene::draw(bool editor_mode) {
 	skinned_draw_commands.clear();
 #endif
 	light_draw_commands.clear();
+	decal_draw_commands.clear();
 	debug_draw.vertices.clear();
 	debug_draw.mouse_pick_vertices.clear();
 }
@@ -422,4 +430,12 @@ Entity RenderScene::get_entity_at_mouse_position(float x, float y) const {
 	glReadPixels(x, y, 1, 1, GL_RED_INTEGER, GL_UNSIGNED_INT, &entity);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	return entity;
+}
+
+void RenderScene::queue_decal_draw(Decal *decal, Transform *transform) {
+	DecalDrawCommand draw_command = {};
+	draw_command.decal = decal;
+	draw_command.transform = transform;
+
+	decal_draw_commands.push_back(draw_command);
 }

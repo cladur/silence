@@ -10,6 +10,7 @@
 #include "components/collider_obb.h"
 #include "components/collider_sphere.h"
 #include "components/collider_tag_component.h"
+#include "components/decal_component.h"
 #include "components/detection_camera_component.h"
 #include "components/enemy_data_component.h"
 #include "components/enemy_path_component.h"
@@ -58,7 +59,7 @@ typedef std::variant<Children, Parent, Transform, RigidBody, FmodListener, Camer
 		SkinnedModelInstance, Name, ColliderTag, StaticTag, ColliderSphere, ColliderAABB, ColliderOBB, ColliderCapsule,
 		Light, AgentData, HackerData, EnemyPath, EnemyData, Interactable, Attachment, Platform, ExplodingBox, Billboard,
 		PathNode, PathParent, Taggable, FMODEmitter, Highlight, ParticleEmitter, DetectionCamera, CableParent, Rotator,
-		LightSwitcher>
+		LightSwitcher, Decal>
 		variant_type;
 
 template <typename T>

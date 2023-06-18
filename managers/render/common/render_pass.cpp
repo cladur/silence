@@ -824,3 +824,19 @@ void HighlightPass::clear() {
 	normal_skinned_highlights.clear();
 	xray_skinned_highlights.clear();
 }
+
+void DecalPass::startup() {
+	material.startup();
+}
+
+void DecalPass::draw(RenderScene &scene) {
+	ZoneScopedN("DecalPass::draw");
+	material.bind_resources(scene);
+	for (auto &cmd : scene.decal_draw_commands) {
+		Decal &decal = *cmd.decal;
+		Transform &transform = *cmd.transform;
+		material.bind_decal_resources(decal, transform);
+
+		utils::render_cube();
+	}
+}

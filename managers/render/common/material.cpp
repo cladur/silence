@@ -1,4 +1,5 @@
 #include "material.h"
+#include "components/decal_component.h"
 #include "display/display_manager.h"
 #include "render/common/skinned_mesh.h"
 #include "render/render_scene.h"
@@ -670,4 +671,62 @@ void MaterialHighlight::bind_instance_resources(SkinnedModelInstance &instance, 
 void MaterialHighlight::bind_mesh_resources(SkinnedMesh &mesh, HighlightData &highlight_data) {
 	skinned_shader.set_int("is_highlighted", highlight_data.highlighted);
 	skinned_shader.set_vec4("highlight_color", glm::vec4(highlight_data.highlight_color, highlight_data.highlight_power));
+}
+
+void MaterialDecal::startup() {
+	shader.load_from_files(shader_path("decal/decal.vert"), shader_path("decal/decal.frag"));
+}
+
+void MaterialDecal::bind_resources(RenderScene &scene) {
+	shader.use();
+	shader.set_mat4("inv_view", glm::inverse(scene.view));
+	shader.set_mat4("projection", scene.projection);
+	shader.set_mat4("view", scene.view);
+
+	shader.set_int("source_position", 0);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.position_texture_id);
+
+	shader.set_int("source_normal", 1);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.normal_texture_id);
+}
+
+void MaterialDecal::bind_instance_resources(ModelInstance &instance, Transform &transform) {
+}
+
+void MaterialDecal::bind_decal_resources(Decal &decal, Transform &transform) {
+	ResourceManager &resource_manager = ResourceManager::get();
+	const glm::vec3 &center = transform.get_global_position();
+	const glm::vec3 &scale = transform.get_global_scale() * 0.5f;
+	const glm::quat &rotation = transform.get_global_orientation();
+
+	const glm::vec3 &local_up = rotation * glm::vec3(0.0f, 0.0f, 1.0f);
+	const glm::vec3 &projector_offset = rotation * glm::vec3(0.0f, scale.y, 0.0f);
+
+	const glm::mat4 &decal_view = glm::lookAt(center + projector_offset, center, glm::normalize(local_up));
+	const glm::mat4 &decal_projection = glm::ortho(-scale.x, scale.x, -scale.z, scale.z, 0.0f, scale.y * 2.0f);
+
+	const glm::mat4 &decal_view_proj = decal_projection * decal_view;
+	shader.set_mat4("decal_view_proj", decal_view_proj);
+	shader.set_mat4("decal_inv_view_proj", glm::inverse(decal_view_proj));
+
+	const Texture &albedo = resource_manager.get_texture(decal.albedo);
+	const Texture &normal = resource_manager.get_texture(decal.normal);
+	glm::vec2 aspect_ratio;
+	if (albedo.width > albedo.height) {
+		aspect_ratio.x = 1.0f;
+		aspect_ratio.y = float(albedo.width) / float(albedo.height);
+	} else {
+		aspect_ratio.x = float(albedo.height) / float(albedo.width);
+		aspect_ratio.y = 1.0f;
+	}
+	shader.set_vec2("aspect_ratio", aspect_ratio);
+	shader.set_vec4("color", decal.color);
+	shader.set_int("decal_albedo", 2);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, albedo.id);
+	shader.set_int("decal_normal", 3);
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, normal.id);
 }

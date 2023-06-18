@@ -159,12 +159,7 @@ public:
 	void bind_instance_resources(ModelInstance &instance, Transform &transform) override;
 };
 
-enum class HighlightTarget {
-	AGENT,
-	HACKER,
-	ENEMY,
-	OTHER
-};
+enum class HighlightTarget { AGENT, HACKER, ENEMY, OTHER };
 
 struct HighlightData {
 	bool highlighted = false;
@@ -183,6 +178,14 @@ public:
 	void bind_mesh_resources(Mesh &mesh, HighlightData &highlight_data);
 	void bind_instance_resources(SkinnedModelInstance &instance, Transform &transform);
 	void bind_mesh_resources(SkinnedMesh &mesh, HighlightData &highlight_data);
+};
+
+class MaterialDecal : public Material {
+public:
+	void startup() override;
+	void bind_resources(RenderScene &scene) override;
+	void bind_instance_resources(ModelInstance &instance, Transform &transform) override;
+	void bind_decal_resources(struct Decal &decal, Transform &transform);
 };
 
 #endif // SILENCE_MATERIAL_H
