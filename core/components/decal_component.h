@@ -6,7 +6,7 @@
 struct Decal {
 	Handle<Texture> albedo;
 	Handle<Texture> normal;
-	glm::vec4 color;
+	glm::vec4 color = glm::vec4(1.0f);
 
 	void serialize_json(nlohmann::json &serialized_scene) {
 		auto &rm = ResourceManager::get();
