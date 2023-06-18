@@ -579,11 +579,11 @@ void AgentSystem::update(World &world, float dt) {
 		if (animation_timer < resource_manager.get_animation(animation_instance.animation_handle).get_duration()) {
 			animation_timer += (dt * 1000.0f);
 			if (is_climbing &&
-					((animation_instance.current_time + 3.0f * animation_instance.ticks_per_second * dt) >
+					((animation_instance.current_time + 6.0f * animation_instance.ticks_per_second * dt) >
 							resource_manager.get_animation(animation_instance.animation_handle).get_duration())) {
 				//climbing animation should end here, otherwise it will start to loop
 				is_climbing = false;
-				animation_timer = animation_instance.current_time + 3.0f * animation_instance.ticks_per_second * dt;
+				animation_timer = animation_instance.current_time + 6.0f * animation_instance.ticks_per_second * dt;
 				animation_instance.current_time =
 						resource_manager.get_animation(animation_instance.animation_handle).get_duration() -
 						animation_instance.ticks_per_second * dt - 1.0f;
