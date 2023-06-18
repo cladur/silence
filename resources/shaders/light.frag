@@ -23,7 +23,7 @@ uniform bool cast_shadow;
 uniform mat4 light_space;
 
 uniform vec2 screen_dimensions;
-
+uniform vec2 spot_bias;
 uniform mat4 view;
 uniform vec3 camPos;
 
@@ -129,7 +129,7 @@ float ShadowCalculation(vec3 normal, vec3 light_dir)
     float shadow = 0.0f;
     float bias;
     if (type == 2) {
-        bias = max(0.0000025f * (1.0f - dot(normal, light_dir)), 0.0000005f);
+        bias = max(spot_bias.x * (1.0f - dot(normal, light_dir)), spot_bias.y);
     } else if (type == 1) {
         bias = max(0.025f * (1.0f - dot(normal, light_dir)), 0.005f);
     }
