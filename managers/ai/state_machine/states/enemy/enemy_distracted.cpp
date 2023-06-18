@@ -9,6 +9,9 @@
 #include "managers/render/render_scene.h"
 #include <animation/animation_manager.h>
 
+AutoCVarFloat cvar_enemy_distraction_cooldown_extension("enemy.enemy.distraction_cooldown_extension", "extends the cooldown of the enemy when distracted", 3.0f, CVarFlags::EditFloatDrag);
+AutoCVarFloat cvar_behind_distraction_sphere_radius("enemy.behind_distraction_sphere_radius", "radius of the sphere behind the distraction target", 2.0f, CVarFlags::EditFloatDrag);
+
 void EnemyDistracted::startup(StateMachine *machine, std::string name) {
 	SPDLOG_INFO("EnemyDistracted::startup");
 	this->name = name;
@@ -18,6 +21,7 @@ void EnemyDistracted::startup(StateMachine *machine, std::string name) {
 void EnemyDistracted::enter() {
 	SPDLOG_INFO("EnemyDistracted::enter");
 	first_frame = true;
+	cooldown_extended = false;
 }
 
 void EnemyDistracted::update(World *world, uint32_t entity_id, float dt) {
@@ -78,6 +82,16 @@ void EnemyDistracted::update(World *world, uint32_t entity_id, float dt) {
 	enemy_utils::update_detection_slider(entity_id, transform, enemy_data);
 
 	enemy_utils::handle_highlight(entity_id, world);
+
+	auto agent_pos = GameplayManager::get().get_agent_position(world->get_parent_scene()) + glm::vec3(0.0f, 1.2f, 0.0f);
+
+	if (glm::distance(transform.position - transform.get_global_forward() * 1.5f, agent_pos) < cvar_behind_distraction_sphere_radius.get()) {
+		if (!cooldown_extended) {
+			cooldown_extended = true;
+			SPDLOG_INFO("cooldown increased to {} from {}", enemy_data.distraction_cooldown, enemy_data.distraction_cooldown + cvar_enemy_distraction_cooldown_extension.get());
+			enemy_data.distraction_cooldown += cvar_enemy_distraction_cooldown_extension.get();
+		}
+	}
 
 	if (enemy_data.distraction_cooldown <= 0.0f) {
 		// find the closes node to the entity
