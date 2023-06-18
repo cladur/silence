@@ -10,7 +10,9 @@ void EntityManager::shutdown() {
 }
 
 Entity EntityManager::create_entity() {
-	assert(living_entities_count < MAX_ENTITIES && "Too many entities alive");
+	if (living_entities_count < MAX_ENTITIES) {
+		SPDLOG_WARN("Too many entities alive ({}).", living_entities_count);
+	}
 
 	// Take id of first entity and then remove it from the queue
 	Entity created_entity = available_entities.front();
