@@ -123,7 +123,7 @@ void MainMenuSystem::init_ui(MainMenu &menu) {
 
 	menu.title_text = &ui.add_ui_text(ui_name, "title_text");
 	menu.title_text->position = glm::vec3(0.0f, 0.0f, 0.0f);
-	menu.title_text->size = glm::vec2(1.0f);
+	menu.title_text->size = glm::vec2(1.2f);
 	menu.title_text->centered_x = true;
 	menu.title_text->centered_y = true;
 	menu.title_text->text = "Silence";
@@ -167,7 +167,7 @@ void MainMenuSystem::init_ui(MainMenu &menu) {
 		menu.volume_meter[i]->position = glm::vec3(-200.0f + 40.0f * i, 0.0f, 0.0f);
 		menu.volume_meter[i]->size = glm::vec2(25.0f, 25.0f);
 
-		ui.add_to_root(ui_name, "options_root", "square_" + std::to_string(i));
+		ui.add_to_root(ui_name, "square_" + std::to_string(i), "options_root");
 	}
 
 	menu.plus_button = &ui.add_ui_button(ui_name, "plus_button", "", "");

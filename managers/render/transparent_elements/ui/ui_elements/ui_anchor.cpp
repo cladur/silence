@@ -13,9 +13,9 @@ UIAnchor::UIAnchor(float x, float y) : x(x), y(y) {
 
 void UIAnchor::draw() {
 	if (!display) {
-		for (auto &child : children) {
-			child->display = false;
-		}
+//		for (auto &child : children) {
+//			child->display = false;
+//		}
 		return;
 	}
 
