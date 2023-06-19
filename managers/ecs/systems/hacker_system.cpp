@@ -151,6 +151,10 @@ bool HackerSystem::jump_to_camera(World &world, HackerData &hacker_data, Entity 
 
 	before_jump_orientation = camera_tf.get_global_orientation();
 
+	if (detection_camera.friendly_time_left != 0.0f) {
+		return false;
+	}
+
 	detection_camera.is_active = false;
 	detection_camera.detection_level = 0.0f;
 	detection_camera.detection_target = DetectionTarget::NONE;
@@ -187,6 +191,10 @@ void HackerSystem::go_back_to_scorpion(World &world, HackerData &hacker_data) {
 	AudioManager::get().play_one_shot_2d(hacker_data.hack_sound);
 
 	camera_tf.set_orientation(before_jump_orientation);
+
+	current_rotation_x = 0.0f;
+	current_rotation_y = 0.0f;
+
 	current_camera_entity = 0;
 	current_camera_model_entity = 0;
 	is_on_camera = false;

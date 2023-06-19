@@ -1,4 +1,6 @@
 #include "entity_manager.h"
+#include <algorithm>
+#include <glm/common.hpp>
 
 void EntityManager::startup() {
 	for (Entity entity = 1; entity < MAX_ENTITIES; ++entity) {
@@ -10,7 +12,7 @@ void EntityManager::shutdown() {
 }
 
 Entity EntityManager::create_entity() {
-	if (living_entities_count < MAX_ENTITIES) {
+	if (living_entities_count > MAX_ENTITIES) {
 		SPDLOG_WARN("Too many entities alive ({}).", living_entities_count);
 	}
 
@@ -44,7 +46,9 @@ void EntityManager::destroy_entity(Entity entity) {
 
 	// Push it back to queue
 	available_entities.push_back(entity);
-	living_entities_count--;
+	if (living_entities_count > 0) {
+		living_entities_count--;
+	}
 }
 
 void EntityManager::set_entity_signature(Entity entity, Signature signature) {
