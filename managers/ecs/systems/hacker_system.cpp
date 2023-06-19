@@ -343,10 +343,10 @@ void HackerSystem::update(World &world, float dt) {
 		// ZOOMING LOGIC
 		bool zoom_triggered = false;
 		if(hacker_data.gamepad >= 0) {
-			zoom_triggered = input_manager.is_action_just_pressed("hacker_zoom_camera", hacker_data.gamepad);
+			zoom_triggered = input_manager.is_action_pressed("hacker_zoom_camera", hacker_data.gamepad);
 		}
 		else {
-			zoom_triggered = input_manager.is_action_just_pressed("hacker_zoom_camera");
+			zoom_triggered = input_manager.is_action_pressed("hacker_zoom_camera");
 		}
 		if (zoom_triggered) {
 			ui_interaction_text->text = "";

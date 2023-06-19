@@ -584,10 +584,10 @@ void AgentSystem::update(World &world, float dt) {
 		// ZOOMING LOGIC
 		bool zoom_triggered = false;
 		if(agent_data.gamepad > -1) {
-			zoom_triggered = input_manager.is_action_just_pressed("agent_zoom_camera", agent_data.gamepad);
+			zoom_triggered = input_manager.is_action_pressed("agent_zoom_camera", agent_data.gamepad);
 		}
 		else {
-			zoom_triggered = input_manager.is_action_just_pressed("agent_zoom_camera");
+			zoom_triggered = input_manager.is_action_pressed("agent_zoom_camera");
 		}
 		if (zoom_triggered) {
 			is_zooming = true;
