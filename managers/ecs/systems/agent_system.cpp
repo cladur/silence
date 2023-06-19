@@ -22,6 +22,7 @@
 #include <glm/geometric.hpp>
 #include <glm/gtx/compatibility.hpp>
 #include <glm/gtx/string_cast.hpp>
+#include <string>
 
 AutoCVarFloat cvar_agent_interaction_range("agent.interaction_range", "range of interaction", 1.0f);
 
@@ -143,6 +144,20 @@ void AgentSystem::update(World &world, float dt) {
 		glm::vec3 velocity = transform.position - last_position;
 		velocity.y = 0.0f;
 		const float speed = glm::length(velocity);
+
+		std::string climb_button;
+		std::string interact_button;
+		std::string attack_button;
+		if (agent_data.gamepad >=0) {
+			climb_button = "A";
+			interact_button = "X";
+			attack_button = "X";
+		}
+		else {
+			climb_button = "Space";
+			interact_button = "E";
+			attack_button = "LMB";
+		}
 
 		if (first_frame) {
 			default_fov = camera.fov;
@@ -364,8 +379,11 @@ void AgentSystem::update(World &world, float dt) {
 					interaction_sprite->position.x = 75.0f + (0.15f * render_extent.x * view_pos.x / abs(view_pos.z));
 					interaction_sprite->position.y = 50.0f + (0.15f * render_extent.y * view_pos.y / abs(view_pos.z));
 					interaction_sprite->display = true;
-					ui_button_hint->text = "Space";
-					ui_button_hint->size = glm::vec2(0.3f);
+					ui_button_hint->text = climb_button;
+					if(agent_data.gamepad < 0) {
+						ui_button_hint->size = glm::vec2(0.3f);
+					}
+					
 					ui_interaction_text->text = "Jump";
 					if (interaction_sprite->position.x > render_extent.x / 2.0f - 100.f) {
 						interaction_sprite->position.x = render_extent.x / 2.0f - 100.0f;
@@ -472,7 +490,7 @@ void AgentSystem::update(World &world, float dt) {
 						}
 
 						if (words.size() != 1) {
-							ui_button_hint->text = words[0];
+							ui_button_hint->text = interact_button;
 							ui_interaction_text->text = words[1];
 						} else {
 							ui_button_hint->text = "";
@@ -541,8 +559,10 @@ void AgentSystem::update(World &world, float dt) {
 								interaction_sprite->position.y =
 										50.0f + (0.15f * render_extent.y * view_pos.y / abs(view_pos.z));
 								interaction_sprite->display = true;
-								ui_button_hint->text = "LMB";
-								ui_button_hint->size = glm::vec2(0.4f);
+								ui_button_hint->text = attack_button;
+								if(agent_data.gamepad < 0) {
+									ui_button_hint->size = glm::vec2(0.4f);
+								}
 								ui_interaction_text->text = "Kill";
 								interaction_sprite->color = glm::vec4(1.0f, 0.4f, 0.4f, 0.6f);
 								if (interaction_sprite->position.x > render_extent.x / 2.0f - 125.f) {

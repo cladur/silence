@@ -242,7 +242,7 @@ void input_setup() {
 
 	input_manager.add_action("agent_interact");
 	input_manager.add_key_to_action("agent_interact", InputKey::E);
-	input_manager.add_key_to_action("agent_interact", InputKey::GAMEPAD_BUTTON_A);
+	input_manager.add_key_to_action("agent_interact", InputKey::GAMEPAD_BUTTON_X);
 
 	input_manager.add_action("agent_attack");
 	input_manager.add_key_to_action("agent_attack", InputKey::MOUSE_LEFT);
