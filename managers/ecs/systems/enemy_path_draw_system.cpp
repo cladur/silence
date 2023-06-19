@@ -2,7 +2,7 @@
 #include "ecs/world.h"
 #include "engine/scene.h"
 #include <components/enemy_path_component.h>
-
+AutoCVarInt cvar_ai_draw("debug_draw.ai", "draw enemy path", 0, CVarFlags::EditCheckbox);
 void EnemyPathDraw::startup(World &world) {
 	Signature whitelist;
 
@@ -14,6 +14,10 @@ void EnemyPathDraw::startup(World &world) {
 
 void EnemyPathDraw::update(World &world, float dt) {
 	ZoneScopedN("EnemyPathDraw::update");
+	if (!cvar_ai_draw.get()) {
+		return;
+	}
+	
 	auto &r_s = world.get_parent_scene()->get_render_scene();
 	for (const Entity entity : entities) {
 		auto &children = world.get_component<Children>(entity);
