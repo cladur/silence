@@ -272,6 +272,41 @@ Scene *World::get_parent_scene() {
 	return parent_scene;
 }
 
+void World::update_name(std::vector<Entity> &entities, Entity &new_entity_id) {
+	std::string entity_name;
+	int name_counter = 0;
+
+	if (has_component<Name>(new_entity_id)) {
+		auto &name = get_component<Name>(new_entity_id);
+		name.name = name.name + std::to_string(name_counter);
+		entity_name = get_component<Name>(new_entity_id).name;
+	}
+
+	bool good_name = false;
+
+	while (!good_name) {
+		good_name = true;
+		for (auto entity : entities) {
+			if (entity == new_entity_id) {
+				continue;
+			}
+
+			if (has_component<Name>(entity)) {
+				if (get_component<Name>(entity).name == entity_name) {
+					good_name = false;
+					auto &name = get_component<Name>(new_entity_id);
+					// remove all integers from the end of the name
+					name.name.erase(
+							std::find_if(name.name.rbegin(), name.name.rend(), [](int ch) { return !std::isdigit(ch); })
+									.base(),
+							name.name.end());
+					name.name = name.name + std::to_string(++name_counter);
+					break;
+				}
+			}
+		}
+	}
+}
 void World::deserialize_prefab(nlohmann::json &json, std::vector<Entity> &entities) {
 	int number_of_entities = json.size();
 
@@ -289,11 +324,12 @@ void World::deserialize_prefab(nlohmann::json &json, std::vector<Entity> &entiti
 	std::vector<Entity> entity_ids;
 	entity_ids.resize(number_of_entities);
 	int i = 0;
+	Entity new_entity_id = 0;
 
 	for (auto entity_json : json) {
 		Entity serialized_entity = entity_json["entity"];
 		entity_json["entity"] = 0;
-		auto new_entity_id = deserialize_entity_json(entity_json, entities);
+		new_entity_id = deserialize_entity_json(entity_json, entities);
 		entity_ids[i++] = new_entity_id;
 		prefab_id_to_entity_id_map[serialized_entity] = new_entity_id;
 	}
@@ -302,6 +338,7 @@ void World::deserialize_prefab(nlohmann::json &json, std::vector<Entity> &entiti
 		update_parent(entity_id, prefab_id_to_entity_id_map);
 		update_children(entity_id, prefab_id_to_entity_id_map);
 		ComponentVisitor::update_ids(*this, entity_id, prefab_id_to_entity_id_map);
+		update_name(entities, new_entity_id);
 	}
 }
 
