@@ -7,6 +7,11 @@
 struct Scene;
 class World;
 
+enum class GameState {
+	MAIN_MENU,
+	GAME,
+};
+
 class GameplayManager {
 	bool disabled = true;
 	uint32_t agent_entity = 0;
@@ -21,6 +26,8 @@ class GameplayManager {
 	std::shared_ptr<HackerSystem> hacker_system = nullptr;
 
 public:
+	GameState game_state = GameState::MAIN_MENU;
+
 	static std::default_random_engine random_generator;
 	static GameplayManager &get();
 
@@ -50,6 +57,8 @@ public:
 	uint32_t get_hacker_camera(Scene *scene) const;
 	float get_highest_detection() const;
 	uint32_t get_enemies_near_player() const;
+
+	uint32_t get_menu_camera(Scene *scene) const;
 };
 
 #endif //SILENCE_GAMEPLAY_MANAGER_H

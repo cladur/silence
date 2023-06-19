@@ -16,6 +16,7 @@
 #include "components/platform_component.h"
 #include "components/rigidbody_component.h"
 #include "components/rotator_component.h"
+#include "components/main_menu_component.h"
 #include "physics/physics_manager.h"
 #include "render/ecs/model_instance.h"
 #include <imgui.h>
@@ -87,6 +88,7 @@ void Inspector::show_components() {
 	SHOW_COMPONENT(CableParent, show_cable_parent);
 	SHOW_COMPONENT(Rotator, show_rotator);
 	SHOW_COMPONENT(LightSwitcher, show_light_switcher);
+	SHOW_COMPONENT(MainMenu, show_main_menu);
 
 	for (int i = 0; i < remove_component_queue.size(); i++) {
 		auto [entity, component_to_remove] = remove_component_queue.front();
@@ -1732,9 +1734,13 @@ void Inspector::show_light_switcher() {
 		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
 
 		show_float("Turn on time", light_switcher.turn_on_time);
+		light_switcher.turn_on_time = glm::max(light_switcher.turn_on_time, 0.0f);
 		show_float("Turn off time", light_switcher.turn_off_time);
+		light_switcher.turn_off_time = glm::max(light_switcher.turn_off_time, 0.0f);
 		show_float("Turn on variance", light_switcher.turn_on_variance);
+		light_switcher.turn_on_variance = glm::max(light_switcher.turn_on_variance, 0.0f);
 		show_float("Turn off variance", light_switcher.turn_off_variance);
+		light_switcher.turn_off_variance = glm::max(light_switcher.turn_off_variance, 0.0f);
 
 		ImGui::EndTable();
 	}
@@ -1875,6 +1881,12 @@ void Inspector::show_decal() {
 		ImGui::ColorPicker4("##Color", (float *)&decal.color);
 		ImGui::EndTable();
 	}
+}
+
+void Inspector::show_main_menu() {
+	ImGui::CollapsingHeader("Main Menu Component");
+
+	remove_component_popup<MainMenu>();
 }
 
 bool Inspector::show_vec2(
@@ -2059,6 +2071,7 @@ void Inspector::show_add_component() {
 			SHOW_ADD_COMPONENT(Rotator);
 			SHOW_ADD_COMPONENT(LightSwitcher);
 			SHOW_ADD_COMPONENT(Decal);
+			SHOW_ADD_COMPONENT(MainMenu);
 
 			ImGui::EndPopup();
 		}
@@ -2068,3 +2081,5 @@ void Inspector::show_add_component() {
 void Inspector::set_active_entity(Entity entity) {
 	selected_entity = entity;
 }
+
+

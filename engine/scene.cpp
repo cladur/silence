@@ -21,6 +21,7 @@
 #include "audio/audio_manager.h"
 #include "audio/ecs/fmod_emitter_system.h"
 #include "components/fmod_emitter_component.h"
+#include "components/main_menu_component.h"
 #include "components/taggable_component.h"
 #include "ecs/systems/agent_movement_system.h"
 #include "ecs/systems/agent_system.h"
@@ -30,6 +31,7 @@
 #include "ecs/systems/enemy_pathing.h"
 #include "ecs/systems/enemy_system.h"
 #include "ecs/systems/hacker_system.h"
+#include "ecs/systems/main_menu_system.h"
 #include "ecs/systems/highlight_system.h"
 #include "ecs/systems/isolated_entities_system.h"
 #include "ecs/systems/root_parent_system.h"
@@ -93,6 +95,7 @@ Scene::Scene() {
 		world.register_component<Rotator>();
 		world.register_component<LightSwitcher>();
 		world.register_component<Decal>();
+		world.register_component<MainMenu>();
 	}
 	// Components
 	{ register_main_systems(); }
@@ -135,6 +138,9 @@ void Scene::register_main_systems() {
 	world.register_system<RootParentSystem>(UpdateOrder::PrePreAnimation);
 	world.register_system<AttachmentSystem>(UpdateOrder::PostAnimation);
 	world.register_system<CableSystem>(UpdateOrder::PreAnimation);
+
+	world.register_system<LightSwitcherSystem>();
+	world.register_system<RotatorSystem>();
 }
 
 void Scene::register_game_systems() {
@@ -156,8 +162,7 @@ void Scene::register_game_systems() {
 	world.register_system<HighlightSystem>(UpdateOrder::PrePreAnimation);
 	world.register_system<DetectionCameraSystem>();
 
-	world.register_system<LightSwitcherSystem>();
-	world.register_system<RotatorSystem>();
+	world.register_system<MainMenuSystem>(UpdateOrder::PrePreAnimation);
 
 	GameplayManager::get().set_agent_system(agent_system);
 	GameplayManager::get().set_hacker_system(hacker_system);

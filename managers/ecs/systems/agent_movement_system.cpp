@@ -51,6 +51,9 @@ void AgentMovementSystem::startup(World &world) {
 
 void AgentMovementSystem::update(World &world, float dt) {
 	ZoneScopedN("AgentMovementSystem::update");
+	if (GameplayManager::get().game_state == GameState::MAIN_MENU) {
+		return;
+	}
 	InputManager &input_manager = InputManager::get();
 	AnimationManager &animation_manager = AnimationManager::get();
 	ResourceManager &resource_manager = ResourceManager::get();

@@ -121,3 +121,4 @@ std::shared_ptr<AgentSystem> GameplayManager::get_agent_system() {
 std::shared_ptr<HackerSystem> GameplayManager::get_hacker_system() {
 	return hacker_system;
 }
+

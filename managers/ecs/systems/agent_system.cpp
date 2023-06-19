@@ -54,6 +54,9 @@ void AgentSystem::startup(World &world) {
 	auto dot_tex = rm.load_texture(asset_path("dot.ktx2").c_str());
 
 	if (GameplayManager::get().first_start) {
+		if (GameplayManager::get().game_state == GameState::MAIN_MENU) {
+			return;
+		}
 		ui_name = "agent_ui";
 
 		auto &ui = UIManager::get();
@@ -82,6 +85,7 @@ void AgentSystem::startup(World &world) {
 		interaction_sprite->is_screen_space = true;
 		interaction_sprite->position = glm::vec3(0.0f, 0.0f, 0.0f);
 		interaction_sprite->display = false;
+
 		ui.add_to_root(ui_name, "interaction_sprite", "root_anchor");
 
 		ui_interaction_text = &ui.add_ui_text(ui_name, "interaction_text");
@@ -114,6 +118,9 @@ void AgentSystem::startup(World &world) {
 
 void AgentSystem::update(World &world, float dt) {
 	ZoneScopedN("AgentSystem::update");
+	if (GameplayManager::get().game_state == GameState::MAIN_MENU) {
+		return;
+	}
 	InputManager &input_manager = InputManager::get();
 	AnimationManager &animation_manager = AnimationManager::get();
 	ResourceManager &resource_manager = ResourceManager::get();

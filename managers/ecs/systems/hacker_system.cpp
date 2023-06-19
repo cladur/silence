@@ -12,6 +12,7 @@
 #include "input/input_manager.h"
 #include "resource/resource_manager.h"
 #include <audio/audio_manager.h>
+#include <gameplay/gameplay_manager.h>
 #include <render/transparent_elements/ui_manager.h>
 #include <spdlog/spdlog.h>
 #include <glm/common.hpp>
@@ -214,6 +215,10 @@ void HackerSystem::startup(World &world) {
 
 	ui_name = "hacker_ui";
 
+	if (GameplayManager::get().game_state == GameState::MAIN_MENU) {
+		return;
+	}
+
 	auto &rm = ResourceManager::get();
 	auto crosshair_tex = rm.load_texture(asset_path("crosshair.ktx2").c_str());
 
@@ -283,6 +288,9 @@ void HackerSystem::startup(World &world) {
 
 void HackerSystem::update(World &world, float dt) {
 	ZoneScopedN("HackerSystem::update");
+	if (GameplayManager::get().game_state == GameState::MAIN_MENU) {
+		return;
+	}
 	InputManager &input_manager = InputManager::get();
 	AnimationManager &animation_manager = AnimationManager::get();
 	ResourceManager &resource_manager = ResourceManager::get();

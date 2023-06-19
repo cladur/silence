@@ -74,6 +74,7 @@ Handle<Texture> ResourceManager::load_texture(const char *path, bool repeat) {
 	handle.id = textures.size() - 1;
 
 	name_to_texture[name] = handle;
+	SPDLOG_INFO("Loaded texture {}", name);
 	return handle;
 }
 

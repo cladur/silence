@@ -275,7 +275,7 @@ void RenderScene::draw_viewport(bool right_side) {
 
 void RenderScene::draw(bool editor_mode) {
 	ZoneScopedN("RenderScene::draw");
-	static bool was_splitscreen = cvar_splitscreen.get();
+	static bool was_splitscreen = !cvar_splitscreen.get(); // need to trigger refresh at the start
 	static bool was_debug_camera = cvar_debug_camera_use.get();
 	if (was_splitscreen != cvar_splitscreen.get() || was_debug_camera != cvar_debug_camera_use.get()) {
 		was_splitscreen = cvar_splitscreen.get();
