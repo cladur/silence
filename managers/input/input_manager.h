@@ -24,13 +24,7 @@ private:
 	std::vector<std::unordered_map<InputKey, float>> previous_gamepad_states{};
 	std::vector<std::unordered_map<InputKey, float>> gamepad_states{};
 
-	struct GamepadInfo {
-		std::string name;
-	};
-
-	std::unordered_map<int, GamepadInfo> gamepads;
-
-	void poll_stick_axis(GLFWgamepadstate &state, int glfw_axis, InputKey positive_key, InputKey negative_key);
+	void poll_stick_axis(GLFWgamepadstate &state, int glfw_axis, InputKey positive_key, InputKey negative_key, int gamepad_id);
 	bool is_action_valid(const std::string &action_name);
 	void poll_gamepads();
 
@@ -39,6 +33,8 @@ public:
 
 	void startup();
 	void shutdown();
+
+	static bool is_gamepad_connected(int gamepad_id);
 
 	void add_action(const std::string &action_name);
 	void remove_action(const std::string &action_name);

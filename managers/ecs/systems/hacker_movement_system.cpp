@@ -56,8 +56,14 @@ void HackerMovementSystem::update(World &world, float dt) {
 
 		glm::vec3 acc_direction = { 0, 0, 0 };
 		if (!is_on_camera) {
+
+			if(hacker_data.gamepad >= 0) {
+			acc_direction += input_manager.get_axis("hacker_move_backward", "hacker_move_forward", hacker_data.gamepad) * camera_forward;
+			acc_direction += input_manager.get_axis("hacker_move_left", "hacker_move_right", hacker_data.gamepad) * -camera_right;
+			} else {
 			acc_direction += input_manager.get_axis("hacker_move_backward", "hacker_move_forward") * camera_forward;
 			acc_direction += input_manager.get_axis("hacker_move_left", "hacker_move_right") * -camera_right;
+			}
 		}
 
 		if (*CVarSystem::get()->get_int_cvar("debug_camera.use")) {
@@ -124,15 +130,15 @@ void HackerMovementSystem::update(World &world, float dt) {
 		HitInfo info;
 		if (CollisionSystem::ray_cast_layer(world, ray, info)) {
 			auto cvar_system = CVarSystem::get();
-			// If the agent(hacker) is not on the ground, move him down
-			// If the agent(hacker) is on 40 degree slope or more, move him down
+			// If the hacker is not on the ground, move him down
+			// If the hacker is on 40 degree slope or more, move him down
 			bool is_on_too_steep_slope = glm::dot(info.normal, glm::vec3(0.0f, 1.0f, 0.0f)) <
 					glm::cos(glm::radians(*cvar_system->get_float_cvar("slope.too_steep")));
 
 			bool under_floor = info.distance < 1.0f;
 			bool in_snappable_range = info.distance < 1.0f + *cvar_system->get_float_cvar("slope.max_snap_length");
 
-			// If the agent is close enough to the floor, snap him to it
+			// If the hacker is close enough to the floor, snap him to it
 			if (in_snappable_range || under_floor) {
 				transform.position.y = info.point.y + *cvar_system->get_float_cvar("slope.snap_offset");
 				transform.set_changed(true);
