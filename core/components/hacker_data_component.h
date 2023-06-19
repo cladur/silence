@@ -7,6 +7,8 @@ struct HackerData {
 	Entity camera_pivot;
 	Entity scorpion_camera_transform;
 	Entity camera;
+	int gamepad = -1;
+
 	bool is_on_camera = false;
 	EventReference hack_sound = EventReference("Hacker/hack");
 

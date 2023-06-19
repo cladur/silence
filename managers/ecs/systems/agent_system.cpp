@@ -161,7 +161,15 @@ void AgentSystem::update(World &world, float dt) {
 		}
 
 		//TODO: replace hard coded values with one derived from collider
-		if (input_manager.is_action_just_pressed("agent_crouch")) {
+		bool crouch_triggered = false;
+		if(agent_data.gamepad > -1) {
+			crouch_triggered = input_manager.is_action_just_pressed("agent_crouch", agent_data.gamepad);
+		}
+		else {
+			crouch_triggered = input_manager.is_action_just_pressed("agent_crouch");
+		}
+
+		if (crouch_triggered) {
 			if (!is_crouching) {
 				is_crouching = true;
 				GameplayManager::get().set_agent_crouch(is_crouching);
@@ -272,7 +280,16 @@ void AgentSystem::update(World &world, float dt) {
 		float def_cam_z = cvar_agent_camera_back.get();
 		if (*CVarSystem::get()->get_int_cvar("game.controlling_agent") &&
 				!*CVarSystem::get()->get_int_cvar("debug_camera.use")) {
-			glm::vec2 mouse_delta = input_manager.get_mouse_delta();
+			auto mouse_delta = glm::vec2(0.0f);
+			if(agent_data.gamepad >= 0) {
+				mouse_delta.x = input_manager.get_axis("agent_look_left", "agent_look_right",agent_data.gamepad);
+				mouse_delta.y = input_manager.get_axis("agent_look_up", "agent_look_down", agent_data.gamepad);
+				mouse_delta *= 20.0;
+			}
+			else {
+				mouse_delta = input_manager.get_mouse_delta();
+			}
+
 			float rotation_y = mouse_delta.y * cvar_camera_sensitivity.get() * dt * camera_sens_modifier;
 			if (current_rotation_y_camera_pivot + rotation_y > -1.5f &&
 					current_rotation_y_camera_pivot + rotation_y < 1.5f) {
@@ -354,7 +371,14 @@ void AgentSystem::update(World &world, float dt) {
 						interaction_sprite->position.x = render_extent.x / 2.0f - 100.0f;
 					}
 
-					if (input_manager.is_action_just_pressed("agent_climb")) {
+					bool climb_triggered = false;
+					if(agent_data.gamepad > -1) {
+						climb_triggered = input_manager.is_action_just_pressed("agent_climb", agent_data.gamepad);
+					}
+					else {
+						climb_triggered = input_manager.is_action_just_pressed("agent_climb");
+					}
+					if (climb_triggered) {
 						dd.draw_arrow(ray.origin, end, { 1.0f, 0.0f, 0.0f });
 						audio.play_one_shot_3d(jump_event, transform);
 
@@ -374,7 +398,13 @@ void AgentSystem::update(World &world, float dt) {
 
 			if (!is_climbing) {
 				//Agent interaction
-				bool interaction_triggered = input_manager.is_action_just_pressed("agent_interact");
+				bool interaction_triggered = false;
+					if(agent_data.gamepad > -1) {
+						interaction_triggered = input_manager.is_action_just_pressed("agent_interact", agent_data.gamepad);
+					}
+					else {
+						interaction_triggered = input_manager.is_action_just_pressed("agent_interact");
+					}
 				ColliderSphere sphere{};
 				sphere.radius = cvar_agent_interaction_range.get();
 				sphere.center = model_tf.get_global_position() + glm::vec3{ 0.0f, 1.0f, 0.0f };
@@ -519,7 +549,15 @@ void AgentSystem::update(World &world, float dt) {
 									interaction_sprite->position.x = render_extent.x / 2.0f - 125.0f;
 								}
 
-								if (input_manager.is_action_just_pressed("mouse_left")) {
+
+								bool attack_triggered = false;
+								if(agent_data.gamepad > -1) {
+									attack_triggered = input_manager.is_action_just_pressed("agent_attack", agent_data.gamepad);
+								}
+								else {
+									attack_triggered = input_manager.is_action_just_pressed("agent_attack");
+								}
+								if (attack_triggered) {
 									auto animation_handle = resource_manager.get_animation_handle(
 											"agent/agent_ANIM_GLTF/agent_stab.anim");
 									if (animation_instance.animation_handle.id != animation_handle.id) {
@@ -544,11 +582,17 @@ void AgentSystem::update(World &world, float dt) {
 		}
 
 		// ZOOMING LOGIC
-		if (input_manager.is_action_pressed("agent_zoom_camera")) {
+		bool zoom_triggered = false;
+		if(agent_data.gamepad > -1) {
+			zoom_triggered = input_manager.is_action_just_pressed("agent_zoom_camera", agent_data.gamepad);
+		}
+		else {
+			zoom_triggered = input_manager.is_action_just_pressed("agent_zoom_camera");
+		}
+		if (zoom_triggered) {
 			is_zooming = true;
 			camera.fov = glm::mix(camera.fov, 30.0f, dt * 3.0f);
 			camera_sens_modifier = glm::mix(camera_sens_modifier, 0.3f, dt * 3.0f);
-			bool tag_trigger = input_manager.is_action_just_pressed("mouse_left");
 			Ray tag_ray = {};
 			tag_ray.origin = camera_tf.get_global_position();
 			tag_ray.direction = -camera_tf.get_global_forward();
