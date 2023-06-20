@@ -14,6 +14,8 @@ struct Texture {
 	static std::map<std::string, ktxTexture2 *> ktx_textures;
 	//static std::set<std::string> ktx_paths;
 
+	static GLenum get_supported_compressed_format();
+
 	void load_from_asset(const std::string &path, bool pregenerated_mipmaps = false, bool repeat = true);
 };
 

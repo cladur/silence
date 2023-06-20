@@ -5,6 +5,36 @@
 
 std::map<std::string, ktxTexture2 *> Texture::ktx_textures;
 
+GLenum Texture::get_supported_compressed_format() {
+	static bool first_time = true;
+	static bool bc7_supported = false;
+	static bool s3tc_supported = false;
+
+	if (first_time) {
+		ZoneNamedNC(Zone2, "Texture::load_from_asset::check_supported_extensions", tracy::Color::AntiqueWhite1, true);
+		int number_of_extensions;
+		glGetIntegerv(GL_NUM_EXTENSIONS, &number_of_extensions);
+		for (int i = 0; i < number_of_extensions; i++) {
+			const char *ccc = (const char *)glGetStringi(GL_EXTENSIONS, i);
+			if ((strcmp(ccc, "GL_EXT_texture_compression_bptc") == 0) ||
+					(strcmp(ccc, "GL_ARB_texture_compression_bptc") == 0)) {
+				bc7_supported = true;
+			} else if (strcmp(ccc, "GL_EXT_texture_compression_s3tc") == 0) {
+				s3tc_supported = true;
+			}
+		}
+		first_time = false;
+	}
+
+	if (bc7_supported) {
+		return GL_COMPRESSED_RGBA_BPTC_UNORM;
+	} else if (s3tc_supported) {
+		return GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+	} else {
+		return GL_RGBA;
+	}
+}
+
 void Texture::load_from_asset(const std::string &path, bool pregenerated_mipmaps, bool repeat) {
 	ZoneNamedNC(Zone1, "Texture::load_from_asset", tracy::Color::AntiqueWhite, true);
 	ktxTexture2 *ktx_texture;
@@ -31,40 +61,17 @@ void Texture::load_from_asset(const std::string &path, bool pregenerated_mipmaps
 
 	// TODO: Support different formats (vkFormat -> GL format)
 	ktx_texture_transcode_fmt_e tf = KTX_TTF_RGBA32;
-	GLenum format = GL_RGBA;
-
 	bool is_compressed = false;
-	bool bc7_supported = false;
-	bool s3tc_supported = false;
 
-	int number_of_extensions;
-	glGetIntegerv(GL_NUM_EXTENSIONS, &number_of_extensions);
-	for (int i = 0; i < number_of_extensions; i++) {
-		const char *ccc = (const char *)glGetStringi(GL_EXTENSIONS, i);
-		if ((strcmp(ccc, "GL_EXT_texture_compression_bptc") == 0) ||
-				(strcmp(ccc, "GL_ARB_texture_compression_bptc") == 0)) {
-			bc7_supported = true;
-		} else if (strcmp(ccc, "GL_EXT_texture_compression_s3tc") == 0) {
-			s3tc_supported = true;
-		}
-	}
+	GLenum format = get_supported_compressed_format();
 
-	if (bc7_supported) {
+	if (format == GL_COMPRESSED_RGBA_BPTC_UNORM) {
 		is_compressed = true;
 		tf = KTX_TTF_BC7_RGBA;
-		format = GL_COMPRESSED_RGBA_BPTC_UNORM;
-	} else if (s3tc_supported) {
+	} else if (format == GL_COMPRESSED_RGBA_S3TC_DXT5_EXT) {
 		is_compressed = true;
 		tf = KTX_TTF_BC3_RGBA;
-		format = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
 	}
-
-	tf = KTX_TTF_BC7_RGBA;
-	format = GL_COMPRESSED_RGBA_BPTC_UNORM;
-
-	// TODO: Check for ETC2 support?
-	// tf = KTX_TTF_ETC2_RGBA;
-	// format = GL_COMPRESSED_RGBA8_ETC2_EAC;
 
 	{
 		ZoneNamedNC(Zone2, "Texture::load_from_asset::ktxTexture2_TranscodeBasis", tracy::Color::AntiqueWhite1, true);
@@ -96,6 +103,13 @@ void Texture::load_from_asset(const std::string &path, bool pregenerated_mipmaps
 					unsigned int width = ktx_texture->baseWidth * std::pow(0.5, level);
 					unsigned int height = ktx_texture->baseHeight * std::pow(0.5, level);
 
+					if (width == 0) {
+						width = 1;
+					}
+					if (height == 0) {
+						height = 1;
+					}
+
 					void *data = ktx_texture->pData + offset;
 
 					if (is_compressed) {
@@ -105,12 +119,6 @@ void Texture::load_from_asset(const std::string &path, bool pregenerated_mipmaps
 						glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, format, width, height, 0, format,
 								GL_UNSIGNED_BYTE, data);
 					}
-
-					// Generate mipmaps if there's only one level
-					// or "generate" them to allocate the space for them if they are pregenerated
-					if ((ktx_texture->numLevels == 1 || pregenerated_mipmaps) && level == 0) {
-						glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
-					}
 				}
 			}
 			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -118,24 +126,43 @@ void Texture::load_from_asset(const std::string &path, bool pregenerated_mipmaps
 			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_BASE_LEVEL, 0);
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_LEVEL, ktx_texture->numLevels - 1);
+
+			// Generate mipmaps if there's only one level
+			if (ktx_texture->numLevels == 1) {
+				glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+			}
 		} else {
 			glGenTextures(1, &id);
 			glBindTexture(GL_TEXTURE_2D, id);
 
-			ktx_size_t offset = 0;
-			result = ktxTexture_GetImageOffset(reinterpret_cast<ktxTexture *>(ktx_texture), 0, 0, 0, &offset);
+			for (unsigned int level = 0; level < ktx_texture->numLevels; level++) {
+				ktx_size_t offset = 0;
+				result = ktxTexture_GetImageOffset(reinterpret_cast<ktxTexture *>(ktx_texture), level, 0, 0, &offset);
 
-			ktx_size_t size = ktxTexture_GetImageSize(reinterpret_cast<ktxTexture *>(ktx_texture), 0);
+				ktx_size_t size = ktxTexture_GetImageSize(reinterpret_cast<ktxTexture *>(ktx_texture), level);
 
-			void *data = ktx_texture->pData + offset;
+				void *data = ktx_texture->pData + offset;
 
-			if (is_compressed) {
-				glCompressedTexImage2D(
-						GL_TEXTURE_2D, 0, format, ktx_texture->baseWidth, ktx_texture->baseHeight, 0, size, data);
-			} else {
-				glTexImage2D(GL_TEXTURE_2D, 0, format, ktx_texture->baseWidth, ktx_texture->baseHeight, 0, format,
-						GL_UNSIGNED_BYTE, data);
+				GLsizei width = ktx_texture->baseWidth >> level;
+				GLsizei height = ktx_texture->baseHeight >> level;
+
+				if (width == 0) {
+					width = 1;
+				}
+				if (height == 0) {
+					height = 1;
+				}
+
+				if (is_compressed) {
+					glCompressedTexImage2D(GL_TEXTURE_2D, level, format, width, height, 0, size, data);
+				} else {
+					glTexImage2D(GL_TEXTURE_2D, level, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+				}
 			}
+
 			if (repeat) {
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -146,11 +173,20 @@ void Texture::load_from_asset(const std::string &path, bool pregenerated_mipmaps
 
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glGenerateMipmap(GL_TEXTURE_2D);
+
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, ktx_texture->numLevels - 1);
+
+			// Generate mipmaps if there's only one level
+			if (ktx_texture->numLevels == 1) {
+				glGenerateMipmap(GL_TEXTURE_2D);
+			}
 		}
 	}
 
 	width = ktx_texture->baseWidth;
 	height = ktx_texture->baseHeight;
 	channels = 4;
+
+	ktxTexture_Destroy(reinterpret_cast<ktxTexture *>(ktx_texture));
 }

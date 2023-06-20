@@ -66,7 +66,8 @@ bool convert_image(const fs::path &input, const fs::path &output) {
 		hq_params = "--encode uastc --uastc_quality 2 --uastc_rdo_l 1.0 --uastc_rdo_d 32768 --zcmp 16";
 	}
 
-	auto result = system(fmt::format("toktx --t2 {} {} {}", params, output.string(), input.string()).c_str());
+	auto result =
+			system(fmt::format("toktx --t2 --genmipmap {} {} {}", params, output.string(), input.string()).c_str());
 
 	SPDLOG_INFO("Converted image {} ", input.string());
 
@@ -1062,177 +1063,177 @@ int main(int argc, char *argv[]) {
 		fs::create_directory(cubemap_dir);
 	}
 
-	 ConverterState conv_state;
-	 conv_state.asset_path = path;
-	 conv_state.export_path = export_dir;
+	ConverterState conv_state;
+	conv_state.asset_path = path;
+	conv_state.export_path = export_dir;
 
-	 SPDLOG_INFO("Loading asset asset_dir at {}", asset_dir.string());
-	 SPDLOG_INFO("Saving baked assets to {}", export_dir.string());
+	SPDLOG_INFO("Loading asset asset_dir at {}", asset_dir.string());
+	SPDLOG_INFO("Saving baked assets to {}", export_dir.string());
 
-	 std::vector<std::future<void>> futures = {};
+	std::vector<std::future<void>> futures = {};
 
-	 for (auto &p : fs::recursive_directory_iterator(asset_dir)) {
-	 	SPDLOG_INFO("File: {}", p.path().string());
+	for (auto &p : fs::recursive_directory_iterator(asset_dir)) {
+		SPDLOG_INFO("File: {}", p.path().string());
 
-	 	auto relative = p.path().lexically_proximate(asset_dir);
-	 	auto export_path = export_dir / relative;
+		auto relative = p.path().lexically_proximate(asset_dir);
+		auto export_path = export_dir / relative;
 
-	 	if (!fs::is_directory(export_path.parent_path())) {
-	 		fs::create_directory(export_path.parent_path());
-	 	}
+		if (!fs::is_directory(export_path.parent_path())) {
+			fs::create_directory(export_path.parent_path());
+		}
 
-	 	if (p.path().extension() == ".png" || p.path().extension() == ".jpg" || p.path().extension() == ".jpeg") {
-	 		SPDLOG_INFO("found a texture");
+		if (p.path().extension() == ".png" || p.path().extension() == ".jpg" || p.path().extension() == ".jpeg") {
+			SPDLOG_INFO("found a texture");
 
-	 		auto new_path = p.path();
-	 		new_path.replace_extension(".ktx2");
+			auto new_path = p.path();
+			new_path.replace_extension(".ktx2");
 
-	 		auto folder = export_path.parent_path() / new_path.filename().string();
+			auto folder = export_path.parent_path() / new_path.filename().string();
 
-	 		futures.push_back(std::async([p, folder]() { convert_image(p.path(), folder); }));
-	 	}
-	 	if (p.path().extension() == ".gltf") {
-	 		SPDLOG_INFO("found a glTF model");
+			futures.push_back(std::async([p, folder]() { convert_image(p.path(), folder); }));
+		}
+		if (p.path().extension() == ".gltf") {
+			SPDLOG_INFO("found a glTF model");
 
-	 		using namespace tg;
-	 		Model model;
-	 		std::string err;
-	 		std::string warn;
+			using namespace tg;
+			Model model;
+			std::string err;
+			std::string warn;
 
-	 		TinyGLTF loader;
+			TinyGLTF loader;
 
-	 		bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, p.path().generic_string());
+			bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, p.path().generic_string());
 
-	 		if (!warn.empty()) {
-	 			SPDLOG_WARN("Warn: %s\n", warn.c_str());
-	 		}
+			if (!warn.empty()) {
+				SPDLOG_WARN("Warn: %s\n", warn.c_str());
+			}
 
-	 		if (!err.empty()) {
-	 			SPDLOG_ERROR("Err: %s\n", err.c_str());
-	 			continue;
-	 		}
+			if (!err.empty()) {
+				SPDLOG_ERROR("Err: %s\n", err.c_str());
+				continue;
+			}
 
-	 		if (!ret) {
-	 			SPDLOG_ERROR("Failed to load gltf file: {} - {} - {}", p.path().string(), err, warn);
-	 			continue;
-	 		}
+			if (!ret) {
+				SPDLOG_ERROR("Failed to load gltf file: {} - {} - {}", p.path().string(), err, warn);
+				continue;
+			}
 
-	 		auto folder = export_path.parent_path() / (p.path().stem().string() + "_GLTF");
-	 		fs::create_directory(folder);
+			auto folder = export_path.parent_path() / (p.path().stem().string() + "_GLTF");
+			fs::create_directory(folder);
 
-	 		extract_gltf_meshes(model, p.path(), folder, conv_state);
-	 		extract_gltf_materials(model, p.path(), folder, conv_state);
-	 		extract_gltf_nodes(model, p.path(), folder, conv_state);
-	 	}
-	 }
+			extract_gltf_meshes(model, p.path(), folder, conv_state);
+			extract_gltf_materials(model, p.path(), folder, conv_state);
+			extract_gltf_nodes(model, p.path(), folder, conv_state);
+		}
+	}
 
-	 for (auto &p : fs::recursive_directory_iterator(skinned_meshes_dir)) {
-	 	SPDLOG_INFO("File: {}", p.path().string());
+	for (auto &p : fs::recursive_directory_iterator(skinned_meshes_dir)) {
+		SPDLOG_INFO("File: {}", p.path().string());
 
-	 	auto relative = p.path().lexically_proximate(skinned_meshes_dir);
-	 	auto export_path = export_dir / relative;
+		auto relative = p.path().lexically_proximate(skinned_meshes_dir);
+		auto export_path = export_dir / relative;
 
-	 	if (!fs::is_directory(export_path.parent_path())) {
-	 		fs::create_directory(export_path.parent_path());
-	 	}
+		if (!fs::is_directory(export_path.parent_path())) {
+			fs::create_directory(export_path.parent_path());
+		}
 
-	 	if (p.path().extension() == ".png" || p.path().extension() == ".jpg" || p.path().extension() == ".jpeg") {
-	 		SPDLOG_INFO("found a texture");
+		if (p.path().extension() == ".png" || p.path().extension() == ".jpg" || p.path().extension() == ".jpeg") {
+			SPDLOG_INFO("found a texture");
 
-	 		auto new_path = p.path();
-	 		new_path.replace_extension(".ktx2");
+			auto new_path = p.path();
+			new_path.replace_extension(".ktx2");
 
-	 		auto folder = export_path.parent_path() / new_path.filename().string();
+			auto folder = export_path.parent_path() / new_path.filename().string();
 
-	 		futures.push_back(std::async([p, folder]() { convert_image(p.path(), folder); }));
-	 	}
+			futures.push_back(std::async([p, folder]() { convert_image(p.path(), folder); }));
+		}
 
-	 	if (p.path().extension() == ".gltf") {
-	 		SPDLOG_INFO("found a glTF model");
+		if (p.path().extension() == ".gltf") {
+			SPDLOG_INFO("found a glTF model");
 
-	 		using namespace tg;
-	 		Model model;
-	 		std::string err;
-	 		std::string warn;
+			using namespace tg;
+			Model model;
+			std::string err;
+			std::string warn;
 
-	 		TinyGLTF loader;
+			TinyGLTF loader;
 
-	 		bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, p.path().generic_string());
+			bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, p.path().generic_string());
 
-	 		if (!warn.empty()) {
-	 			SPDLOG_WARN("Warn: %s\n", warn.c_str());
-	 		}
+			if (!warn.empty()) {
+				SPDLOG_WARN("Warn: %s\n", warn.c_str());
+			}
 
-	 		if (!err.empty()) {
-	 			SPDLOG_ERROR("Err: %s\n", err.c_str());
-	 			continue;
-	 		}
+			if (!err.empty()) {
+				SPDLOG_ERROR("Err: %s\n", err.c_str());
+				continue;
+			}
 
-	 		if (!ret) {
-	 			SPDLOG_ERROR("Failed to load gltf file: {} - {} - {}", p.path().string(), err, warn);
-	 			continue;
-	 		}
+			if (!ret) {
+				SPDLOG_ERROR("Failed to load gltf file: {} - {} - {}", p.path().string(), err, warn);
+				continue;
+			}
 
-	 		auto folder = export_path.parent_path() / (p.path().stem().string() + "_GLTF");
-	 		fs::create_directory(folder);
+			auto folder = export_path.parent_path() / (p.path().stem().string() + "_GLTF");
+			fs::create_directory(folder);
 
-	 		extract_gltf_skinned_meshes(model, p.path(), folder, conv_state);
-	 		extract_gltf_materials(model, p.path(), folder, conv_state);
-	 		extract_gltf_skinned_nodes(model, p.path(), folder, conv_state);
-	 	}
-	 }
+			extract_gltf_skinned_meshes(model, p.path(), folder, conv_state);
+			extract_gltf_materials(model, p.path(), folder, conv_state);
+			extract_gltf_skinned_nodes(model, p.path(), folder, conv_state);
+		}
+	}
 
-	 for (auto &p : fs::recursive_directory_iterator(animations_dir)) {
-	 	SPDLOG_INFO("File: {}", p.path().string());
+	for (auto &p : fs::recursive_directory_iterator(animations_dir)) {
+		SPDLOG_INFO("File: {}", p.path().string());
 
-	 	auto relative = p.path().lexically_proximate(animations_dir);
-	 	auto export_path = export_dir / relative;
+		auto relative = p.path().lexically_proximate(animations_dir);
+		auto export_path = export_dir / relative;
 
-	 	if (!fs::is_directory(export_path.parent_path())) {
-	 		fs::create_directory(export_path.parent_path());
-	 	}
+		if (!fs::is_directory(export_path.parent_path())) {
+			fs::create_directory(export_path.parent_path());
+		}
 
-	 	if (p.path().extension() == ".gltf") {
-	 		SPDLOG_INFO("found a glTF model");
+		if (p.path().extension() == ".gltf") {
+			SPDLOG_INFO("found a glTF model");
 
-	 		using namespace tg;
-	 		Model model;
-	 		std::string err;
-	 		std::string warn;
+			using namespace tg;
+			Model model;
+			std::string err;
+			std::string warn;
 
-	 		TinyGLTF loader;
+			TinyGLTF loader;
 
-	 		bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, p.path().generic_string());
+			bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, p.path().generic_string());
 
-	 		if (!warn.empty()) {
-	 			SPDLOG_WARN("Warn: %s\n", warn.c_str());
-	 		}
+			if (!warn.empty()) {
+				SPDLOG_WARN("Warn: %s\n", warn.c_str());
+			}
 
-	 		if (!err.empty()) {
-	 			SPDLOG_ERROR("Err: %s\n", err.c_str());
-	 			continue;
-	 		}
+			if (!err.empty()) {
+				SPDLOG_ERROR("Err: %s\n", err.c_str());
+				continue;
+			}
 
-	 		if (!ret) {
-	 			SPDLOG_ERROR("Failed to load gltf file: {} - {} - {}", p.path().string(), err, warn);
-	 			continue;
-	 		}
+			if (!ret) {
+				SPDLOG_ERROR("Failed to load gltf file: {} - {} - {}", p.path().string(), err, warn);
+				continue;
+			}
 
-	 		if (model.animations.empty()) {
-	 			SPDLOG_ERROR("Model does not have any animations: {}", p.path().string());
-	 			continue;
-	 		}
+			if (model.animations.empty()) {
+				SPDLOG_ERROR("Model does not have any animations: {}", p.path().string());
+				continue;
+			}
 
-	 		// Read animations
-	 		for (Animation &animation : model.animations) {
-	 			auto folder = export_path.parent_path() / (p.path().stem().string() + "_ANIM_GLTF");
+			// Read animations
+			for (Animation &animation : model.animations) {
+				auto folder = export_path.parent_path() / (p.path().stem().string() + "_ANIM_GLTF");
 
-	 			fs::create_directory(folder);
+				fs::create_directory(folder);
 
-	 			extract_gltf_animations(model, p.path().stem().string(), animation, p.path(), folder, conv_state);
-	 		}
-	 	}
-	 }
+				extract_gltf_animations(model, p.path().stem().string(), animation, p.path(), folder, conv_state);
+			}
+		}
+	}
 
 	for (auto &p : fs::directory_iterator(cubemap_dir)) {
 		SPDLOG_INFO("Loading cubemap at {}", p.path().string());
@@ -1261,7 +1262,8 @@ int main(int argc, char *argv[]) {
 		auto input = fmt::format(
 				"{} {} {} {} {} {}", px.string(), nx.string(), py.string(), ny.string(), pz.string(), nz.string());
 
-		auto result = system(fmt::format("toktx --encode uastc --cubemap {} {}", output.string(), input).c_str());
+		auto result =
+				system(fmt::format("toktx --encode uastc --genmipmap --cubemap {} {}", output.string(), input).c_str());
 	}
 
 	//convert skyboxes
@@ -1288,7 +1290,8 @@ int main(int argc, char *argv[]) {
 		std::string input = fmt::format(
 				"{} {} {} {} {} {}", px.string(), nx.string(), py.string(), ny.string(), pz.string(), nz.string());
 
-		auto result = system(fmt::format("toktx --encode uastc --cubemap {} {}", output.string(), input).c_str());
+		auto result =
+				system(fmt::format("toktx --encode uastc --genmipmap --cubemap {} {}", output.string(), input).c_str());
 
 		// Create prefilter map texture
 		output = p.path() / "prefilter_map.ktx2";
@@ -1322,10 +1325,11 @@ int main(int argc, char *argv[]) {
 
 		auto brdf_input = tmp_dir / "brdf_lut.png";
 
-		result = system(fmt::format("toktx --encode uastc {} {}", output.string(), brdf_input.string()).c_str());
+		result = system(
+				fmt::format("toktx --encode uastc --genmipmap {} {}", output.string(), brdf_input.string()).c_str());
 	}
 
-	 for (auto &f : futures) {
-	 	f.wait();
-	 }
+	for (auto &f : futures) {
+		f.wait();
+	}
 }
