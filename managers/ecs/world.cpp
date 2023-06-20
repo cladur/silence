@@ -338,7 +338,7 @@ void World::deserialize_prefab(nlohmann::json &json, std::vector<Entity> &entiti
 		update_parent(entity_id, prefab_id_to_entity_id_map);
 		update_children(entity_id, prefab_id_to_entity_id_map);
 		ComponentVisitor::update_ids(*this, entity_id, prefab_id_to_entity_id_map);
-		update_name(entities, new_entity_id);
+		//update_name(entities, new_entity_id);
 	}
 }
 
