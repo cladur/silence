@@ -8,6 +8,8 @@ struct AgentData {
 	Entity spring_arm;
 	Entity camera;
 
+	int gamepad = -1;
+
 	bool is_crouching = false;
 	bool is_climbing = false;
 	bool locked_movement = false;

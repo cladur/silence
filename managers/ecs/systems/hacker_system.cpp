@@ -105,6 +105,7 @@ bool HackerSystem::shoot_raycast(
 		ui_button_hint->text = "";
 		ui_interaction_text->text = words[0];
 	}
+
 	float size = 0.6f - (words[0].size() / 10.0f);
 	ui_button_hint->size = glm::vec2(size);
 
@@ -349,13 +350,18 @@ void HackerSystem::update(World &world, float dt) {
 		}
 
 		// ZOOMING LOGIC
-		if (input_manager.is_action_pressed("hacker_zoom_camera")) {
+		bool zoom_triggered = false;
+		if (hacker_data.gamepad >= 0) {
+			zoom_triggered = input_manager.is_action_pressed("hacker_zoom_camera", hacker_data.gamepad);
+		} else {
+			zoom_triggered = input_manager.is_action_pressed("hacker_zoom_camera");
+		}
+		if (zoom_triggered) {
 			ui_interaction_text->text = "";
 			interaction_sprite->display = false;
 			is_zooming = true;
 			camera.fov = glm::mix(camera.fov, 30.0f, dt * 3.0f);
 			camera_sens_modifier = glm::mix(camera_sens_modifier, 0.3f, dt * 3.0f);
-			bool tag_trigger = input_manager.is_action_just_pressed("hacker_interact");
 			Ray tag_ray = {};
 			tag_ray.origin = camera_tf.get_global_position();
 			tag_ray.direction = -camera_tf.get_global_forward();
@@ -383,13 +389,25 @@ void HackerSystem::update(World &world, float dt) {
 			}
 		}
 
-		if (input_manager.is_action_just_pressed("hacker_exit_camera")) {
+		bool exit_triggered = false;
+		if (hacker_data.gamepad >= 0) {
+			exit_triggered = input_manager.is_action_just_pressed("hacker_exit_camera", hacker_data.gamepad);
+		} else {
+			exit_triggered = input_manager.is_action_just_pressed("hacker_exit_camera");
+		}
+
+		if (exit_triggered) {
 			go_back_to_scorpion(world, hacker_data);
 		}
 
 		auto mouse_delta = glm::vec2(0.0f);
-		mouse_delta.x = input_manager.get_axis("hacker_look_left", "hacker_look_right");
-		mouse_delta.y = input_manager.get_axis("hacker_look_up", "hacker_look_down");
+		if (hacker_data.gamepad >= 0) {
+			mouse_delta.x = input_manager.get_axis("hacker_look_left", "hacker_look_right", hacker_data.gamepad);
+			mouse_delta.y = input_manager.get_axis("hacker_look_up", "hacker_look_down", hacker_data.gamepad);
+		} else {
+			mouse_delta.x = input_manager.get_axis("hacker_look_left", "hacker_look_right");
+			mouse_delta.y = input_manager.get_axis("hacker_look_up", "hacker_look_down");
+		}
 		mouse_delta *= 20.0;
 
 		if (!*CVarSystem::get()->get_int_cvar("game.controlling_agent")) {
@@ -472,7 +490,12 @@ void HackerSystem::update(World &world, float dt) {
 		}
 
 		// for the UI sake we need to shoot the raycast every time to know if we're even hovering over anything.
-		bool triggered = input_manager.is_action_just_pressed("hacker_interact");
+		bool triggered = false;
+		if (hacker_data.gamepad >= 0) {
+			triggered = input_manager.is_action_just_pressed("hacker_interact", hacker_data.gamepad);
+		} else {
+			triggered = input_manager.is_action_just_pressed("hacker_interact");
+		}
 
 		shoot_raycast(camera_tf, world, hacker_data, dt, triggered, real_camera_forward);
 	}

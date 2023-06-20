@@ -3,6 +3,16 @@
         "components": [
             {
                 "component_data": {
+                    "camera_light": 9,
+                    "camera_model": 5,
+                    "detection_level": 0.0,
+                    "is_active": true,
+                    "particles_parent": 2
+                },
+                "component_name": "DetectionCamera"
+            },
+            {
+                "component_data": {
                     "name": "DetectionCamera"
                 },
                 "component_name": "Name"
@@ -30,19 +40,6 @@
             },
             {
                 "component_data": {
-                    "highlight_color": {
-                        "b": 0.0,
-                        "g": 0.43529412150382996,
-                        "r": 1.0
-                    },
-                    "highlight_power": 0.029999999329447746,
-                    "highlighted": "twoja misja trwa",
-                    "target": 2
-                },
-                "component_name": "Highlight"
-            },
-            {
-                "component_data": {
                     "children": [
                         3,
                         4,
@@ -53,31 +50,18 @@
                 "component_name": "Children"
             },
             {
-                "component_data": {},
-                "component_name": "StaticTag"
+                "component_data": {
+                    "tag_position": {
+                        "x": 0.0,
+                        "y": 1.0,
+                        "z": 0.0
+                    }
+                },
+                "component_name": "Taggable"
             },
             {
-                "component_data": {
-                    "billboard_z_offset": -0.10000000149011612,
-                    "color": {
-                        "a": 0.7843137383460999,
-                        "b": 0.0,
-                        "g": 0.0,
-                        "r": 1.0
-                    },
-                    "position_offset": {
-                        "x": 0.0,
-                        "y": -0.15000000596046448,
-                        "z": 0.0
-                    },
-                    "scale": {
-                        "x": 0.20000000298023224,
-                        "y": 0.20000000298023224
-                    },
-                    "texture": "dot.ktx2",
-                    "use_camera_right": false
-                },
-                "component_name": "Billboard"
+                "component_data": {},
+                "component_name": "StaticTag"
             },
             {
                 "component_data": {
@@ -93,9 +77,9 @@
                         "z": 0.0
                     },
                     "range": {
-                        "x": 0.30000001192092896,
-                        "y": 0.30000001192092896,
-                        "z": 0.30000001192092896
+                        "x": 0.5,
+                        "y": 0.5,
+                        "z": 0.5
                     }
                 },
                 "component_name": "ColliderAABB"
@@ -122,23 +106,39 @@
             },
             {
                 "component_data": {
-                    "tag_position": {
+                    "billboard_z_offset": -0.10000000149011612,
+                    "color": {
+                        "a": 0.7843137383460999,
+                        "b": 0.0,
+                        "g": 0.0,
+                        "r": 1.0
+                    },
+                    "position_offset": {
                         "x": 0.0,
-                        "y": 1.0,
+                        "y": -0.15000000596046448,
                         "z": 0.0
-                    }
+                    },
+                    "scale": {
+                        "x": 0.20000000298023224,
+                        "y": 0.20000000298023224
+                    },
+                    "texture": "dot.ktx2",
+                    "use_camera_right": false
                 },
-                "component_name": "Taggable"
+                "component_name": "Billboard"
             },
             {
                 "component_data": {
-                    "camera_light": 9,
-                    "camera_model": 5,
-                    "detection_level": 0.0,
-                    "is_active": true,
-                    "particles_parent": 2
+                    "highlight_color": {
+                        "b": 0.0,
+                        "g": 0.43529412150382996,
+                        "r": 1.0
+                    },
+                    "highlight_power": 0.029999999329447746,
+                    "highlighted": "twoja misja trwa",
+                    "target": 2
                 },
-                "component_name": "DetectionCamera"
+                "component_name": "Highlight"
             }
         ],
         "entity": 1,
@@ -146,6 +146,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 1
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "CameraPart1"
@@ -181,12 +187,6 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 1
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 3,
@@ -194,6 +194,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 1
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "CameraPart2"
@@ -229,12 +235,6 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 1
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 4,
@@ -242,6 +242,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 1
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "MainCameraPart"
@@ -271,27 +277,21 @@
             },
             {
                 "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "items/camera/camera_1.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 1
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "children": [
                         9
                     ],
                     "children_count": 1
                 },
                 "component_name": "Children"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/camera/camera_1.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
             }
         ],
         "entity": 5,
@@ -299,6 +299,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 9
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "CameraParticles"
@@ -328,12 +334,6 @@
             },
             {
                 "component_data": {
-                    "parent": 9
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "children": [
                         6,
                         7
@@ -348,6 +348,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 2
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "FirstEmitter"
@@ -374,12 +380,6 @@
                     }
                 },
                 "component_name": "Transform"
-            },
-            {
-                "component_data": {
-                    "parent": 2
-                },
-                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -447,6 +447,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 2
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "SecondEmitter"
                 },
                 "component_name": "Name"
@@ -471,12 +477,6 @@
                     }
                 },
                 "component_name": "Transform"
-            },
-            {
-                "component_data": {
-                    "parent": 2
-                },
-                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -544,6 +544,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 5
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "CameraLight"
                 },
                 "component_name": "Name"
@@ -568,12 +574,6 @@
                     }
                 },
                 "component_name": "Transform"
-            },
-            {
-                "component_data": {
-                    "parent": 5
-                },
-                "component_name": "Parent"
             },
             {
                 "component_data": {

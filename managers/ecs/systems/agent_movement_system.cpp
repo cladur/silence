@@ -88,8 +88,13 @@ void AgentMovementSystem::update(World &world, float dt) {
 		auto camera_right = camera_pivot_tf.get_global_right();
 
 		glm::vec3 acc_direction = { 0, 0, 0 };
-		acc_direction += input_manager.get_axis("agent_move_backward", "agent_move_forward") * camera_forward;
-		acc_direction += input_manager.get_axis("agent_move_left", "agent_move_right") * -camera_right;
+		if(agent_data.gamepad >= 0) {
+			acc_direction += input_manager.get_axis("agent_move_backward", "agent_move_forward", agent_data.gamepad) * camera_forward;
+			acc_direction += input_manager.get_axis("agent_move_left", "agent_move_right", agent_data.gamepad) * -camera_right;
+		} else {
+			acc_direction += input_manager.get_axis("agent_move_backward", "agent_move_forward") * camera_forward;
+			acc_direction += input_manager.get_axis("agent_move_left", "agent_move_right") * -camera_right;
+		}
 
 		if (*CVarSystem::get()->get_int_cvar("debug_camera.use")) {
 			acc_direction = glm::vec3(0.0f, 0.0f, 0.0f);

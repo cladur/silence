@@ -239,15 +239,22 @@ void input_setup() {
 	input_manager.add_key_to_action("move_down", InputKey::Q);
 	input_manager.add_action("move_faster");
 	input_manager.add_key_to_action("move_faster", InputKey::LEFT_SHIFT);
+
 	input_manager.add_action("agent_interact");
 	input_manager.add_key_to_action("agent_interact", InputKey::E);
-	input_manager.add_key_to_action("agent_interact", InputKey::GAMEPAD_BUTTON_A);
+	input_manager.add_key_to_action("agent_interact", InputKey::GAMEPAD_BUTTON_X);
+
+	input_manager.add_action("agent_attack");
+	input_manager.add_key_to_action("agent_attack", InputKey::MOUSE_LEFT);
+	input_manager.add_key_to_action("agent_attack", InputKey::GAMEPAD_BUTTON_X);
 
 	input_manager.add_action("control_camera");
 	input_manager.add_key_to_action("control_camera", InputKey::MOUSE_RIGHT);
 
 	input_manager.add_action("agent_zoom_camera");
 	input_manager.add_key_to_action("agent_zoom_camera", InputKey::MOUSE_RIGHT);
+	input_manager.add_key_to_action("agent_zoom_camera", InputKey::GAMEPAD_LEFT_TRIGGER);
+	input_manager.add_key_to_action("agent_zoom_camera", InputKey::GAMEPAD_RIGHT_TRIGGER);
 
 	input_manager.add_action("hacker_zoom_camera");
 	input_manager.add_key_to_action("hacker_zoom_camera", InputKey::GAMEPAD_LEFT_TRIGGER);
@@ -255,22 +262,44 @@ void input_setup() {
 
 	input_manager.add_action("agent_move_forward");
 	input_manager.add_key_to_action("agent_move_forward", InputKey::W);
+	input_manager.add_key_to_action("agent_move_forward", InputKey::GAMEPAD_LEFT_STICK_Y_POSITIVE);
+
 
 	input_manager.add_action("agent_move_backward");
 	input_manager.add_key_to_action("agent_move_backward", InputKey::S);
+	input_manager.add_key_to_action("agent_move_backward", InputKey::GAMEPAD_LEFT_STICK_Y_NEGATIVE);
+
 
 	input_manager.add_action("agent_move_left");
 	input_manager.add_key_to_action("agent_move_left", InputKey::A);
+	input_manager.add_key_to_action("agent_move_left", InputKey::GAMEPAD_LEFT_STICK_X_NEGATIVE);
+
 
 	input_manager.add_action("agent_move_right");
 	input_manager.add_key_to_action("agent_move_right", InputKey::D);
+	input_manager.add_key_to_action("agent_move_right", InputKey::GAMEPAD_LEFT_STICK_X_POSITIVE);
+
+	input_manager.add_action("agent_look_up");
+	input_manager.add_key_to_action("agent_look_up", InputKey::GAMEPAD_RIGHT_STICK_Y_POSITIVE);
+
+	input_manager.add_action("agent_look_down");
+	input_manager.add_key_to_action("agent_look_down", InputKey::GAMEPAD_RIGHT_STICK_Y_NEGATIVE);
+
+	input_manager.add_action("agent_look_left");
+	input_manager.add_key_to_action("agent_look_left", InputKey::GAMEPAD_RIGHT_STICK_X_NEGATIVE);
+
+	input_manager.add_action("agent_look_right");
+	input_manager.add_key_to_action("agent_look_right", InputKey::GAMEPAD_RIGHT_STICK_X_POSITIVE);
 
 	input_manager.add_action("agent_crouch");
 	input_manager.add_key_to_action("agent_crouch", InputKey::C);
 	input_manager.add_key_to_action("agent_crouch", InputKey::LEFT_CONTROL);
+	input_manager.add_key_to_action("agent_crouch", InputKey::GAMEPAD_BUTTON_B);
 
 	input_manager.add_action("agent_climb");
 	input_manager.add_key_to_action("agent_climb", InputKey::SPACE);
+	input_manager.add_key_to_action("agent_climb", InputKey::GAMEPAD_BUTTON_A);
+
 
 	//add actions to arrows
 	input_manager.add_action("hacker_move_forward");
