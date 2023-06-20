@@ -104,6 +104,7 @@ bool HackerSystem::shoot_raycast(
 		ui_button_hint->text = "";
 		ui_interaction_text->text = words[0];
 	}
+
 	float size = 0.6f - (words[0].size() / 10.0f);
 	ui_button_hint->size = glm::vec2(size);
 
@@ -342,10 +343,9 @@ void HackerSystem::update(World &world, float dt) {
 
 		// ZOOMING LOGIC
 		bool zoom_triggered = false;
-		if(hacker_data.gamepad >= 0) {
+		if (hacker_data.gamepad >= 0) {
 			zoom_triggered = input_manager.is_action_pressed("hacker_zoom_camera", hacker_data.gamepad);
-		}
-		else {
+		} else {
 			zoom_triggered = input_manager.is_action_pressed("hacker_zoom_camera");
 		}
 		if (zoom_triggered) {
@@ -382,23 +382,21 @@ void HackerSystem::update(World &world, float dt) {
 		}
 
 		bool exit_triggered = false;
-		if(hacker_data.gamepad >= 0) {
+		if (hacker_data.gamepad >= 0) {
 			exit_triggered = input_manager.is_action_just_pressed("hacker_exit_camera", hacker_data.gamepad);
-		}
-		else {
+		} else {
 			exit_triggered = input_manager.is_action_just_pressed("hacker_exit_camera");
 		}
-		
+
 		if (exit_triggered) {
 			go_back_to_scorpion(world, hacker_data);
 		}
 
 		auto mouse_delta = glm::vec2(0.0f);
-		if(hacker_data.gamepad >= 0) {
-			mouse_delta.x = input_manager.get_axis("hacker_look_left", "hacker_look_right",hacker_data.gamepad);
-			mouse_delta.y = input_manager.get_axis("hacker_look_up", "hacker_look_down", hacker_data.gamepad);	
-		}
-		else {
+		if (hacker_data.gamepad >= 0) {
+			mouse_delta.x = input_manager.get_axis("hacker_look_left", "hacker_look_right", hacker_data.gamepad);
+			mouse_delta.y = input_manager.get_axis("hacker_look_up", "hacker_look_down", hacker_data.gamepad);
+		} else {
 			mouse_delta.x = input_manager.get_axis("hacker_look_left", "hacker_look_right");
 			mouse_delta.y = input_manager.get_axis("hacker_look_up", "hacker_look_down");
 		}
@@ -485,11 +483,10 @@ void HackerSystem::update(World &world, float dt) {
 
 		// for the UI sake we need to shoot the raycast every time to know if we're even hovering over anything.
 		bool triggered = false;
-		if(hacker_data.gamepad >= 0) {
+		if (hacker_data.gamepad >= 0) {
 			triggered = input_manager.is_action_just_pressed("hacker_interact", hacker_data.gamepad);
-		}
-		else {
-			triggered =  input_manager.is_action_just_pressed("hacker_interact");
+		} else {
+			triggered = input_manager.is_action_just_pressed("hacker_interact");
 		}
 
 		shoot_raycast(camera_tf, world, hacker_data, dt, triggered, real_camera_forward);
