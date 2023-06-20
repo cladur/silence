@@ -54,6 +54,10 @@ void MainMenuSystem::update(World &world, float dt) {
 			menu.back_button_root->display = false;
 		}
 
+		if (menu.quit_button->clicked()) {
+			glfwSetWindowShouldClose(DisplayManager::get().window, GLFW_TRUE);
+		}
+
 		if (menu.plus_button->clicked()) {
 			float volume;
 
@@ -166,6 +170,7 @@ void MainMenuSystem::init_ui(MainMenu &menu) {
 		menu.volume_meter[i] = &ui.add_ui_image(ui_name, "square_" + std::to_string(i));
 		menu.volume_meter[i]->position = glm::vec3(-200.0f + 40.0f * i, 0.0f, 0.0f);
 		menu.volume_meter[i]->size = glm::vec2(25.0f, 25.0f);
+		menu.volume_meter[i]->texture = Handle<Texture>(-1);
 
 		ui.add_to_root(ui_name, "square_" + std::to_string(i), "options_root");
 	}
@@ -175,6 +180,8 @@ void MainMenuSystem::init_ui(MainMenu &menu) {
 	menu.plus_button->size = glm::vec2(50.0f, 50.0f);
 	menu.plus_button->text = "+";
 	menu.plus_button->texture = rm.load_texture(asset_path("button_unlit_square.ktx2").c_str());
+	menu.plus_button->centered_x = true;
+	menu.plus_button->centered_y = true;
 	menu.plus_button->hover_texture = rm.load_texture(asset_path("button_lit_square.ktx2").c_str());
 
 	ui.add_to_root(ui_name, "plus_button", "options_root");
@@ -183,6 +190,8 @@ void MainMenuSystem::init_ui(MainMenu &menu) {
 	menu.minus_button->position = glm::vec3(-275.0f, 0.0f, 0.0f);
 	menu.minus_button->size = glm::vec2(50.0f, 50.0f);
 	menu.minus_button->text = "-";
+	menu.minus_button->centered_x = true;
+	menu.minus_button->centered_y = true;
 	menu.minus_button->texture = rm.load_texture(asset_path("button_unlit_square.ktx2").c_str());
 	menu.minus_button->hover_texture = rm.load_texture(asset_path("button_lit_square.ktx2").c_str());
 
