@@ -737,7 +737,21 @@ void Inspector::show_light() {
 		ImGui::Text("Intensity");
 		ImGui::TableSetColumnIndex(1);
 		ImGui::SetNextItemWidth(-FLT_MIN);
-		ImGui::DragFloat("##Intensity", &light.intensity, 0.01f, 0.0f, 100.0f);
+		ImGui::DragFloat("##Intensity", &light.intensity, 4.0f, 0.0f, 2000.0f);
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Radius");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		ImGui::DragFloat("##Radius", &light.radius, 0.4f, 0.0f, 100.0f);
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Blend Distance");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		ImGui::DragFloat("##Blend Distance", &light.blend_distance, 0.1f, 0.0f, 20.0f);
 
 		ImGui::TableNextRow();
 		ImGui::TableSetColumnIndex(0);
