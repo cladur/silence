@@ -10,6 +10,14 @@ AutoCVarInt cvar_use_ao("render.use_ao", "use ambient occlusion", 1, CVarFlags::
 AutoCVarInt cvar_use_fog("render.use_fog", "use simple linear fog", 1, CVarFlags::EditCheckbox);
 AutoCVarFloat cvar_fog_min("render.fog_min", "fog min distance", 40.0f, CVarFlags::EditFloatDrag);
 AutoCVarFloat cvar_fog_max("render.fog_max", "fog max distance", 300.0f, CVarFlags::EditFloatDrag);
+AutoCVarInt cvar_volumetric_steps(
+		"render.volumetric_steps", "Set steps of volumetric calculation", 10, CVarFlags::EditFloatDrag);
+AutoCVarFloat cvar_volumetric_scattering(
+		"render.volumetric_scattering", "Set volumetric scattering value", 0.7f, CVarFlags::EditFloatDrag);
+AutoCVarFloat cvar_volumetric_bias_x(
+		"render.volumetric_bias_x", "Volumetric bias value to avoid acne", 0.0000001f, CVarFlags::EditFloatDrag);
+AutoCVarFloat cvar_volumetric_bias_y(
+		"render.volumetric_bias_y", "Volumetric bias value to avoid acne", 0.0000005f, CVarFlags::EditFloatDrag);
 AutoCVarFloat cvar_bias_min("render.light_bias_min", "Spot light bias min", 0.00000001f, CVarFlags::EditFloatDrag);
 AutoCVarFloat cvar_bias_max("render.light_bias_max", "Spot light bias max", 0.0000000001f, CVarFlags::EditFloatDrag);
 AutoCVarFloat cvar_ambient_strength(
@@ -75,6 +83,7 @@ void MaterialLight::bind_resources(RenderScene &scene) {
 	shader.set_int("gAoRoughMetal", 3);
 	shader.set_int("shadowMap", 4);
 	shader.set_int("depthMap", 5);
+	shader.set_int("gDepth", 6);
 	shader.set_float("far_plane", scene.shadow_buffer.far);
 
 	glActiveTexture(GL_TEXTURE0);
@@ -85,6 +94,8 @@ void MaterialLight::bind_resources(RenderScene &scene) {
 	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.albedo_texture_id);
 	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.ao_rough_metal_texture_id);
+	glActiveTexture(GL_TEXTURE6);
+	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.depth_texture_id);
 }
 
 void MaterialLight::bind_instance_resources(ModelInstance &instance, Transform &transform) {
@@ -137,6 +148,11 @@ void MaterialLight::bind_light_resources(Light &light, Transform &transform) {
 				glBindTexture(GL_TEXTURE_2D, light.shadow_map_id);
 				shader.set_mat4("light_space", light.light_space);
 				shader.set_vec2("spot_bias", glm::vec2(cvar_bias_min.get(), cvar_bias_max.get()));
+				shader.set_int("num_steps", cvar_volumetric_steps.get());
+				shader.set_int("cast_volumetric", light.cast_volumetric);
+				shader.set_float("scattering", cvar_volumetric_scattering.get());
+				shader.set_vec2(
+						"volumetric_bias", glm::vec2(cvar_volumetric_bias_x.get(), cvar_volumetric_bias_y.get()));
 			}
 			break;
 		default:

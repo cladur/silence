@@ -746,6 +746,13 @@ void Inspector::show_light() {
 
 		ImGui::TableNextRow();
 		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Cast volumetric");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		ImGui::Checkbox("##Cast volumetric", &light.cast_volumetric);
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
 		ImGui::Text("Is On");
 		ImGui::TableSetColumnIndex(1);
 		ImGui::SetNextItemWidth(-FLT_MIN);
