@@ -1,6 +1,5 @@
 #ifndef SILENCE_PHYSICS_MANAGER_H
 #define SILENCE_PHYSICS_MANAGER_H
-
 class World;
 struct ColliderSphere;
 struct ColliderCapsule;
@@ -9,6 +8,7 @@ struct ColliderOBB;
 struct Transform;
 struct RigidBody;
 struct ColliderTag;
+struct AgentData;
 
 struct Ray {
 	glm::vec3 origin;

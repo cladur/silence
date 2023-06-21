@@ -363,7 +363,7 @@ void AgentSystem::update(World &world, float dt) {
 				float obstacle_height = 1.4f - info.distance;
 				auto &hit_transform = world.get_component<Transform>(info.entity);
 
-				dd.draw_sphere(hit_transform.get_global_position(), 0.1f, glm::vec3(1.0f, 0.0f, 0.0f));
+				//dd.draw_sphere(hit_transform.get_global_position(), 0.1f, glm::vec3(1.0f, 0.0f, 0.0f));
 
 				glm::vec4 view_pos_non_normalized = world.get_parent_scene()->get_render_scene().left_view *
 						glm::vec4(hit_transform.get_global_position(), 1.0f);
@@ -379,6 +379,8 @@ void AgentSystem::update(World &world, float dt) {
 					ui_button_hint->text = climb_button;
 					if (agent_data.gamepad < 0) {
 						ui_button_hint->size = glm::vec2(0.3f);
+					} else {
+						ui_button_hint->size = glm::vec2(0.6f);
 					}
 
 					ui_interaction_text->text = "Jump";
@@ -393,7 +395,7 @@ void AgentSystem::update(World &world, float dt) {
 						climb_triggered = input_manager.is_action_just_pressed("agent_climb");
 					}
 					if (climb_triggered) {
-						dd.draw_arrow(ray.origin, end, { 1.0f, 0.0f, 0.0f });
+						//dd.draw_arrow(ray.origin, end, { 1.0f, 0.0f, 0.0f });
 						audio.play_one_shot_3d(jump_event, transform);
 
 						auto animation_handle =
@@ -523,17 +525,14 @@ void AgentSystem::update(World &world, float dt) {
 				}
 
 				//Agent attack
-				//ray.origin = transform.get_global_position() + glm::vec3(0.0f, 1.0f, 0.0f);
-				//ray.ignore_list.emplace_back(entity);
 				Ray ray = {};
 				ray.direction = model_tf.get_forward();
 				ray.origin = transform.get_global_position() + glm::vec3(0.0f, 1.0f, 0.0f);
 				ray.ignore_list.emplace_back(entity);
 				ray.length = 3.0f;
-
-				glm::vec3 end = ray.origin + ray.direction;
 				HitInfo info;
-				world.get_parent_scene()->get_render_scene().debug_draw.draw_arrow(ray.origin, end, { 255, 0, 0 });
+				//glm::vec3 end = ray.origin + ray.direction;
+				//world.get_parent_scene()->get_render_scene().debug_draw.draw_arrow(ray.origin, end, { 255, 0, 0 });
 				if (CollisionSystem::ray_cast_layer(world, ray, info)) {
 					if (info.distance < cvar_agent_attack_range.get()) {
 						if (world.has_component<EnemyData>(info.entity)) {
@@ -652,7 +651,7 @@ void AgentSystem::update(World &world, float dt) {
 				ray.direction = -transform.get_up();
 				glm::vec3 end = ray.origin + ray.direction;
 				HitInfo info;
-				dd.draw_arrow(ray.origin, end, { 1.0f, 0.0f, 0.0f });
+				//dd.draw_arrow(ray.origin, end, { 1.0f, 0.0f, 0.0f });
 				if (CollisionSystem::ray_cast_layer(world, ray, info)) {
 					transform.set_position(info.point + glm::vec3{ 0.0f, 0.2f, 0.0f });
 					transform.update_global_model_matrix();
