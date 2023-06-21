@@ -8,6 +8,7 @@
 #include "input/input_manager.h"
 #include "render/render_manager.h"
 
+#include "animation/animation_manager.h"
 #include "audio/adaptive_music_manager.h"
 #include "gameplay/gameplay_manager.h"
 #include "imgui.h"
@@ -108,9 +109,9 @@ void Engine::update(float dt) {
 	// Update
 	custom_update(dt);
 
-	for (auto &scene : scenes) {
-		scene->world.update(dt);
-		scene->update(dt);
+	if (scenes.size() != 0) {
+		get_active_scene().world.update(dt);
+		get_active_scene().update(dt);
 	}
 
 	ParticleManager::get().update(dt);
@@ -118,6 +119,32 @@ void Engine::update(float dt) {
 	input_manager.process_input();
 
 	render_manager.draw();
+
+	if (scene_change_request.first) {
+
+		scene_change_request.first = false;
+		if (scene_change_request.second != "MainMenu") {
+
+			AnimationManager::get().animation_map.clear();
+			RenderManager::get().render_scenes.pop_back();
+			scenes.pop_back();
+			UIManager::get().reset_scenes();
+
+			GameplayManager::get().game_state = GameState::GAME;
+
+			create_scene(scene_change_request.second);
+			scenes[active_scene]->register_game_systems();
+			scenes[0]->load_from_file("resources/scenes/level_3_10.scn");
+			set_active_scene(scene_change_request.second);
+
+			GameplayManager::get().startup(&*scenes[0]);
+
+			DisplayManager::get().capture_mouse(true);
+			UIManager::get().set_render_scene(&get_active_scene().get_render_scene());
+			CVarSystem::get()->set_int_cvar("render.splitscreen", 1);
+		}
+		scene_change_request.second = "";
+	}
 }
 
 void Engine::create_scene(const std::string &name) {
@@ -144,6 +171,11 @@ void Engine::set_active_scene(const std::string &name) {
 	active_scene = get_scene_index(name);
 	RenderManager::get().displayed_scene = scenes[active_scene]->render_scene_idx;
 	GameplayManager::get().startup(&get_active_scene()); // dunno where to put this honestly.
+
+	GameplayManager::get().set_engine(this);
+	AnimationManager::get().animation_map.clear();
+	GameplayManager::get().get_agent_system()->reset();
+	GameplayManager::get().get_hacker_system()->reset();
 }
 
 Scene &Engine::get_active_scene() {

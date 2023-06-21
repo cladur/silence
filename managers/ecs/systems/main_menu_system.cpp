@@ -4,6 +4,7 @@
 #include <display/display_manager.h>
 #include <gameplay/gameplay_manager.h>
 #include <render/transparent_elements/ui_manager.h>
+#include <engine/scene.h>
 
 void MainMenuSystem::startup(World &world) {
 	Signature whitelist;
@@ -33,6 +34,13 @@ void MainMenuSystem::update(World &world, float dt) {
 			} else {
 				menu.volume_meter[i]->color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 			}
+		}
+
+		if (menu.play_button->clicked()) {
+			SPDLOG_INFO("Play button clicked");
+			gp.change_scene("Level");
+			UIManager::get().deactivate_ui_scene(ui_name);
+			break;
 		}
 
 		if (menu.options_button->clicked()) {
@@ -196,4 +204,8 @@ void MainMenuSystem::init_ui(MainMenu &menu) {
 	menu.minus_button->hover_texture = rm.load_texture(asset_path("button_lit_square.ktx2").c_str());
 
 	ui.add_to_root(ui_name, "minus_button", "options_root");
+}
+
+MainMenuSystem::~MainMenuSystem() {
+	UIManager::get().delete_ui_scene(ui_name);
 }

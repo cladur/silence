@@ -6,6 +6,7 @@
 
 struct Scene;
 class World;
+class Engine;
 
 enum class GameState {
 	MAIN_MENU,
@@ -21,6 +22,8 @@ class GameplayManager {
 	uint32_t enemies_near_player = 0;
 	std::vector<uint32_t> enemy_entities;
 	std::vector<float> detection_levels;
+
+	Engine *engine = nullptr;
 
 	std::shared_ptr<AgentSystem> agent_system = nullptr;
 	std::shared_ptr<HackerSystem> hacker_system = nullptr;
@@ -58,7 +61,8 @@ public:
 	float get_highest_detection() const;
 	uint32_t get_enemies_near_player() const;
 
-	uint32_t get_menu_camera(Scene *scene) const;
+	void set_engine(Engine *engine);
+	void change_scene(std::string scene_name);
 };
 
 #endif //SILENCE_GAMEPLAY_MANAGER_H
