@@ -11,6 +11,8 @@ build_xcode
 .cache
 CMakeFiles
 build
+build_debug
+build_release
 
 # SPIRV files
 *.spv
