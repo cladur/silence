@@ -13,7 +13,6 @@ struct AgentData {
 	bool is_crouching = false;
 	bool is_climbing = false;
 	bool locked_movement = false;
-	bool collided = false;
 
 	void serialize_json(nlohmann::json &serialized_scene) {
 		nlohmann::json::object_t serialized_component;

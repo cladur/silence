@@ -866,12 +866,6 @@ void PhysicsManager::make_shift(World &world, Entity e1, Entity e2, const glm::v
 		RigidBody b1{};
 		RigidBody &b2 = world.get_component<RigidBody>(e2);
 		physical_shift(t1, t2, b1, b2, is_movable1, is_movable2, offset);
-	} else if (world.has_component<AgentData>(e1)) {
-		AgentData &agent_data = world.get_component<AgentData>(e1);
-		agent_shift(t1, t2, agent_data, is_movable1, is_movable2, offset);
-	} else if (world.has_component<AgentData>(e2)) {
-		AgentData &agent_data = world.get_component<AgentData>(e2);
-		agent_shift(t2, t1, agent_data, is_movable2, is_movable1, -offset);
 	} else {
 		non_physical_shift(t1, t2, is_movable1, is_movable2, offset);
 	}
@@ -922,22 +916,6 @@ void PhysicsManager::physical_shift(Transform &t1, Transform &t2, RigidBody &b1,
 	} else {
 		t2.add_position(-offset);
 		b2.velocity -= velocity_projection2;
-	}
-}
-
-void PhysicsManager::agent_shift(Transform &t1, Transform &t2, AgentData &agent_data, bool is_movable1,
-		bool is_movable2, const glm::vec3 &offset) {
-	if (is_movable2) {
-		const float slide_speed = 0.5f;
-		// Value defining how fast the body will move other body
-		// 1 means that the bodies has same speed while pushing
-		t1.add_position(offset * slide_speed);
-		t2.add_position(-offset * (1.0f - slide_speed));
-	} else {
-		if (offset.y <= get_epsilon()) {
-			agent_data.collided = true;
-		}
-		t1.add_position(offset);
 	}
 }
 

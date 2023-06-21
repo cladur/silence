@@ -118,8 +118,6 @@ public:
 	void non_physical_shift(Transform &t1, Transform &t2, bool is_movable1, bool is_movable2, const glm::vec3 &offset);
 	void physical_shift(Transform &t1, Transform &t2, RigidBody &b1, RigidBody &b2, bool is_movable1, bool is_movable2,
 			const glm::vec3 &offset);
-	void agent_shift(Transform &t1, Transform &t2, AgentData &agent_data, bool is_movable1, bool is_movable2,
-			const glm::vec3 &offset);
 
 	//Return entities that collide with specified sphere with specified layer
 	std::vector<Entity> overlap_sphere(World &world, const ColliderSphere &sphere, const std::string &layer_name);
