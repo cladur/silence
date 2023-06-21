@@ -134,7 +134,7 @@ void Engine::update(float dt) {
 
 			create_scene(scene_change_request.second);
 			scenes[active_scene]->register_game_systems();
-			scenes[0]->load_from_file("resources/scenes/level_3_10.scn");
+			scenes[0]->load_from_file("resources/scenes/level_3_11.scn");
 			set_active_scene(scene_change_request.second);
 
 			GameplayManager::get().startup(&*scenes[0]);

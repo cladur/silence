@@ -153,13 +153,6 @@ public:
 	}
 
 	void update(float dt) {
-		// display sizes of all system vectors
-//		 SPDLOG_INFO("PrePreAnimation: {}", pre_pre_animation_systems.size());
-//		 SPDLOG_INFO("PreAnimation: {}", pre_animation_systems.size());
-//		 SPDLOG_INFO("DuringAnimation: {}", during_animation_systems.size());
-//		 SPDLOG_INFO("PostAnimation: {}", post_animation_systems.size());
-//		 SPDLOG_INFO("DuringPhysics: {}", during_physics_systems.size());
-//		 SPDLOG_INFO("PostPhysics: {}", post_physics_systems.size());
 		for (auto &system : pre_pre_animation_systems) {
 			system->update(*this, dt);
 		}

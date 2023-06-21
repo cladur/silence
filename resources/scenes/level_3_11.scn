@@ -45,6 +45,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 70
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "Camera"
                 },
                 "component_name": "Name"
@@ -72,12 +78,6 @@
             },
             {
                 "component_data": {
-                    "parent": 70
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "fov": 70.0,
                     "right_side": false
                 },
@@ -91,10 +91,9 @@
         "components": [
             {
                 "component_data": {
-                    "animation_name": "enemy/enemy_ANIM_GLTF/enemy_walk_with_gun.anim",
-                    "ticks_per_second": 1000.0
+                    "parent": 13
                 },
-                "component_name": "AnimationInstance"
+                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -133,15 +132,24 @@
             },
             {
                 "component_data": {
-                    "parent": 13
+                    "animation_name": "enemy/enemy_ANIM_GLTF/enemy_walk_with_gun.anim",
+                    "ticks_per_second": 1000.0
                 },
-                "component_name": "Parent"
+                "component_name": "AnimationInstance"
             },
             {
                 "component_data": {
                     "layer_name": "taggable"
                 },
                 "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {
+                    "path_parent": 73,
+                    "rotation_speed": 4.599999904632568,
+                    "speed": 1.0
+                },
+                "component_name": "EnemyPath"
             },
             {
                 "component_data": {
@@ -158,14 +166,6 @@
                     }
                 },
                 "component_name": "ColliderCapsule"
-            },
-            {
-                "component_data": {
-                    "path_parent": 73,
-                    "rotation_speed": 4.599999904632568,
-                    "speed": 1.0
-                },
-                "component_name": "EnemyPath"
             },
             {
                 "component_data": {},
@@ -202,10 +202,9 @@
         "components": [
             {
                 "component_data": {
-                    "animation_name": "agent/agent_ANIM_GLTF/agent_idle.anim",
-                    "ticks_per_second": 1000.0
+                    "parent": 46
                 },
-                "component_name": "AnimationInstance"
+                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -244,9 +243,10 @@
             },
             {
                 "component_data": {
-                    "parent": 46
+                    "animation_name": "agent/agent_ANIM_GLTF/agent_idle.anim",
+                    "ticks_per_second": 1000.0
                 },
-                "component_name": "Parent"
+                "component_name": "AnimationInstance"
             },
             {
                 "component_data": {
@@ -514,6 +514,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 102
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "Agent Controller"
                 },
                 "component_name": "Name"
@@ -551,25 +557,9 @@
             },
             {
                 "component_data": {
-                    "parent": 102
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "layer_name": "default"
                 },
                 "component_name": "ColliderTag"
-            },
-            {
-                "component_data": {
-                    "camera": 3,
-                    "camera_pivot": 47,
-                    "camera_pivot_target": 120,
-                    "model": 6,
-                    "spring_arm": 70
-                },
-                "component_name": "AgentData"
             },
             {
                 "component_data": {
@@ -586,6 +576,16 @@
                     }
                 },
                 "component_name": "ColliderCapsule"
+            },
+            {
+                "component_data": {
+                    "camera": 3,
+                    "camera_pivot": 47,
+                    "camera_pivot_target": 120,
+                    "model": 6,
+                    "spring_arm": 70
+                },
+                "component_name": "AgentData"
             }
         ],
         "entity": 46,
@@ -593,6 +593,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 102
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Camera Pivot"
@@ -628,12 +634,6 @@
                     "children_count": 1
                 },
                 "component_name": "Children"
-            },
-            {
-                "component_data": {
-                    "parent": 102
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 47,
@@ -641,6 +641,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 49
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Floor"
@@ -670,19 +676,13 @@
             },
             {
                 "component_data": {
-                    "parent": 49
+                    "layer_name": "default"
                 },
-                "component_name": "Parent"
+                "component_name": "ColliderTag"
             },
             {
                 "component_data": {},
                 "component_name": "StaticTag"
-            },
-            {
-                "component_data": {
-                    "layer_name": "default"
-                },
-                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -779,15 +779,6 @@
             },
             {
                 "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "items/contener/contener.mdl",
-                    "scale_uv_with_transform": true
-                },
-                "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
                     "acceleration": {
                         "x": 0.0,
                         "y": 0.0,
@@ -803,14 +794,23 @@
                 "component_name": "RigidBody"
             },
             {
-                "component_data": {},
-                "component_name": "StaticTag"
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/contener/contener.mdl",
+                    "scale_uv_with_transform": true
+                },
+                "component_name": "ModelInstance"
             },
             {
                 "component_data": {
                     "layer_name": "obstacle"
                 },
                 "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {},
+                "component_name": "StaticTag"
             },
             {
                 "component_data": {
@@ -835,9 +835,24 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 119
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "Hacker Controller"
                 },
                 "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "camera": 54,
+                    "camera_pivot": 57,
+                    "model": 56,
+                    "scorpion_camera_transform": 58
+                },
+                "component_name": "HackerData"
             },
             {
                 "component_data": {
@@ -848,9 +863,9 @@
                         "z": 0.0
                     },
                     "position": {
-                        "x": 19.23345184326172,
-                        "y": 4.369769096374512,
-                        "z": 29.7236270904541
+                        "x": -0.8455294370651245,
+                        "y": 0.23073658347129822,
+                        "z": 0.8491369485855103
                     },
                     "scale": {
                         "x": 1.0,
@@ -872,12 +887,6 @@
             },
             {
                 "component_data": {
-                    "parent": 119
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "layer_name": "default"
                 },
                 "component_name": "ColliderTag"
@@ -892,15 +901,6 @@
                     "radius": 0.4000000059604645
                 },
                 "component_name": "ColliderSphere"
-            },
-            {
-                "component_data": {
-                    "camera": 54,
-                    "camera_pivot": 57,
-                    "model": 56,
-                    "scorpion_camera_transform": 58
-                },
-                "component_name": "HackerData"
             }
         ],
         "entity": 55,
@@ -910,10 +910,9 @@
         "components": [
             {
                 "component_data": {
-                    "animation_name": "scorpion/scorpion_ANIM_GLTF/scorpion_idle.anim",
-                    "ticks_per_second": 5000.0
+                    "parent": 55
                 },
-                "component_name": "AnimationInstance"
+                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -952,9 +951,10 @@
             },
             {
                 "component_data": {
-                    "parent": 55
+                    "animation_name": "scorpion/scorpion_ANIM_GLTF/scorpion_idle.anim",
+                    "ticks_per_second": 5000.0
                 },
-                "component_name": "Parent"
+                "component_name": "AnimationInstance"
             },
             {
                 "component_data": {
@@ -975,6 +975,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 55
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "CameraPivot"
@@ -1010,12 +1016,6 @@
                     "children_count": 1
                 },
                 "component_name": "Children"
-            },
-            {
-                "component_data": {
-                    "parent": 55
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 57,
@@ -1023,6 +1023,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 57
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "ScorpionCameraTransform"
@@ -1049,12 +1055,6 @@
                     }
                 },
                 "component_name": "Transform"
-            },
-            {
-                "component_data": {
-                    "parent": 57
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 58,
@@ -1062,6 +1062,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 119
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Hacker Camera"
@@ -1091,12 +1097,6 @@
             },
             {
                 "component_data": {
-                    "parent": 119
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "fov": 70.0,
                     "right_side": true
                 },
@@ -1108,6 +1108,19 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 102
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "bone_name": "RightHand",
+                    "holder": 6
+                },
+                "component_name": "Attachment"
+            },
             {
                 "component_data": {
                     "name": "Knife"
@@ -1143,19 +1156,6 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 102
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "bone_name": "RightHand",
-                    "holder": 6
-                },
-                "component_name": "Attachment"
             }
         ],
         "entity": 59,
@@ -1163,26 +1163,6 @@
     },
     {
         "components": [
-            {
-                "component_data": {
-                    "cable_parent": 110,
-                    "can_interact": true,
-                    "enemy_entity": 0,
-                    "enemy_entity2": 0,
-                    "interaction": 2,
-                    "interaction_target": 61,
-                    "interaction_target_2": 0,
-                    "interaction_target_3": 0,
-                    "interaction_target_4": 0,
-                    "interaction_target_5": 0,
-                    "interaction_text": "X Use",
-                    "is_on": false,
-                    "lever": 0,
-                    "single_use": false,
-                    "type": 2
-                },
-                "component_name": "Interactable"
-            },
             {
                 "component_data": {
                     "name": "Platform Switch 01"
@@ -1220,14 +1200,14 @@
                 "component_name": "ModelInstance"
             },
             {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
-            {
                 "component_data": {
                     "layer_name": "taggable"
                 },
                 "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {},
+                "component_name": "StaticTag"
             },
             {
                 "component_data": {
@@ -1243,6 +1223,26 @@
                     }
                 },
                 "component_name": "ColliderAABB"
+            },
+            {
+                "component_data": {
+                    "cable_parent": 110,
+                    "can_interact": true,
+                    "enemy_entity": 0,
+                    "enemy_entity2": 0,
+                    "interaction": 2,
+                    "interaction_target": 61,
+                    "interaction_target_2": 0,
+                    "interaction_target_3": 0,
+                    "interaction_target_4": 0,
+                    "interaction_target_5": 0,
+                    "interaction_text": "X Use",
+                    "is_on": false,
+                    "lever": 0,
+                    "single_use": false,
+                    "type": 2
+                },
+                "component_name": "Interactable"
             },
             {
                 "component_data": {
@@ -1310,14 +1310,14 @@
                 "component_name": "ModelInstance"
             },
             {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
-            {
                 "component_data": {
                     "layer_name": "default"
                 },
                 "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {},
+                "component_name": "StaticTag"
             },
             {
                 "component_data": {
@@ -1359,6 +1359,19 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 13
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "bone_name": "Gun",
+                    "holder": 5
+                },
+                "component_name": "Attachment"
+            },
+            {
+                "component_data": {
                     "name": "Gun"
                 },
                 "component_name": "Name"
@@ -1392,19 +1405,6 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 13
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "bone_name": "Gun",
-                    "holder": 5
-                },
-                "component_name": "Attachment"
             }
         ],
         "entity": 64,
@@ -1414,23 +1414,9 @@
         "components": [
             {
                 "component_data": {
-                    "cable_parent": 0,
-                    "can_interact": true,
-                    "enemy_entity": 0,
-                    "enemy_entity2": 0,
-                    "interaction": 3,
-                    "interaction_target": 66,
-                    "interaction_target_2": 0,
-                    "interaction_target_3": 0,
-                    "interaction_target_4": 0,
-                    "interaction_target_5": 0,
-                    "interaction_text": "X Explode",
-                    "is_on": false,
-                    "lever": 0,
-                    "single_use": false,
-                    "type": 2
+                    "parent": 16
                 },
-                "component_name": "Interactable"
+                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -1461,15 +1447,6 @@
             },
             {
                 "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "items/electric_box_2/electric_box_2.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
                     "children": [
                         113,
                         114
@@ -1480,26 +1457,22 @@
             },
             {
                 "component_data": {
-                    "parent": 16
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/electric_box_2/electric_box_2.mdl",
+                    "scale_uv_with_transform": false
                 },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
-            {
-                "component_data": {
-                    "event_path": "SFX/electricity/electric_hum",
-                    "is_3d": true
-                },
-                "component_name": "FMODEmitter"
+                "component_name": "ModelInstance"
             },
             {
                 "component_data": {
                     "layer_name": "taggable"
                 },
                 "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {},
+                "component_name": "StaticTag"
             },
             {
                 "component_data": {
@@ -1515,6 +1488,64 @@
                     }
                 },
                 "component_name": "ColliderAABB"
+            },
+            {
+                "component_data": {
+                    "cable_parent": 0,
+                    "can_interact": true,
+                    "enemy_entity": 0,
+                    "enemy_entity2": 0,
+                    "interaction": 3,
+                    "interaction_target": 66,
+                    "interaction_target_2": 0,
+                    "interaction_target_3": 0,
+                    "interaction_target_4": 0,
+                    "interaction_target_5": 0,
+                    "interaction_text": "X Explode",
+                    "is_on": false,
+                    "lever": 0,
+                    "single_use": false,
+                    "type": 2
+                },
+                "component_name": "Interactable"
+            },
+            {
+                "component_data": {
+                    "distraction_radius": 15.0,
+                    "distraction_time": 2.0,
+                    "explosion_radius": 4.0
+                },
+                "component_name": "ExplodingBox"
+            },
+            {
+                "component_data": {
+                    "event_path": "SFX/electricity/electric_hum",
+                    "is_3d": true
+                },
+                "component_name": "FMODEmitter"
+            },
+            {
+                "component_data": {
+                    "tag_position": {
+                        "x": 0.0,
+                        "y": 0.20000000298023224,
+                        "z": 0.800000011920929
+                    }
+                },
+                "component_name": "Taggable"
+            },
+            {
+                "component_data": {
+                    "highlight_color": {
+                        "b": 0.0,
+                        "g": 0.0,
+                        "r": 1.0
+                    },
+                    "highlight_power": 0.029999999329447746,
+                    "highlighted": "twoja misja trwa",
+                    "target": 3
+                },
+                "component_name": "Highlight"
             },
             {
                 "component_data": {
@@ -1573,37 +1604,6 @@
                     ]
                 },
                 "component_name": "ParticleEmitter"
-            },
-            {
-                "component_data": {
-                    "distraction_radius": 15.0,
-                    "distraction_time": 2.0,
-                    "explosion_radius": 4.0
-                },
-                "component_name": "ExplodingBox"
-            },
-            {
-                "component_data": {
-                    "tag_position": {
-                        "x": 0.0,
-                        "y": 0.20000000298023224,
-                        "z": 0.800000011920929
-                    }
-                },
-                "component_name": "Taggable"
-            },
-            {
-                "component_data": {
-                    "highlight_color": {
-                        "b": 0.0,
-                        "g": 0.0,
-                        "r": 1.0
-                    },
-                    "highlight_power": 0.029999999329447746,
-                    "highlighted": "twoja misja trwa",
-                    "target": 3
-                },
-                "component_name": "Highlight"
             }
         ],
         "entity": 66,
@@ -1611,6 +1611,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 42
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "1st Exploding Light"
@@ -1640,12 +1646,6 @@
             },
             {
                 "component_data": {
-                    "parent": 42
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "blend_distance": 1.0,
                     "cast_shadow": false,
                     "color": {
@@ -1668,6 +1668,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 47
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "SpringArm"
@@ -1703,12 +1709,6 @@
                     "children_count": 1
                 },
                 "component_name": "Children"
-            },
-            {
-                "component_data": {
-                    "parent": 47
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 70,
@@ -1716,6 +1716,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 46
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Camera Floor"
@@ -1742,12 +1748,6 @@
                     }
                 },
                 "component_name": "Transform"
-            },
-            {
-                "component_data": {
-                    "parent": 46
-                },
-                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -1790,6 +1790,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 13
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "EnemyPathParent"
                 },
                 "component_name": "Name"
@@ -1826,12 +1832,6 @@
                 "component_name": "Children"
             },
             {
-                "component_data": {
-                    "parent": 13
-                },
-                "component_name": "Parent"
-            },
-            {
                 "component_data": null,
                 "component_name": "PathParent"
             }
@@ -1841,6 +1841,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 73
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "PathNode"
@@ -1867,12 +1873,6 @@
                     }
                 },
                 "component_name": "Transform"
-            },
-            {
-                "component_data": {
-                    "parent": 73
-                },
-                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -1889,6 +1889,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 73
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "PathNode"
                 },
                 "component_name": "Name"
@@ -1913,12 +1919,6 @@
                     }
                 },
                 "component_name": "Transform"
-            },
-            {
-                "component_data": {
-                    "parent": 73
-                },
-                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -1935,6 +1935,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 73
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "PathNode"
                 },
                 "component_name": "Name"
@@ -1959,12 +1965,6 @@
                     }
                 },
                 "component_name": "Transform"
-            },
-            {
-                "component_data": {
-                    "parent": 73
-                },
-                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -1981,6 +1981,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 73
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "PathNode"
                 },
                 "component_name": "Name"
@@ -2005,12 +2011,6 @@
                     }
                 },
                 "component_name": "Transform"
-            },
-            {
-                "component_data": {
-                    "parent": 73
-                },
-                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -2027,6 +2027,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 73
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "PathNode"
                 },
                 "component_name": "Name"
@@ -2051,12 +2057,6 @@
                     }
                 },
                 "component_name": "Transform"
-            },
-            {
-                "component_data": {
-                    "parent": 73
-                },
-                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -2073,6 +2073,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 73
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "PathNode"
                 },
                 "component_name": "Name"
@@ -2100,12 +2106,6 @@
             },
             {
                 "component_data": {
-                    "parent": 73
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "is_patrol_point": false,
                     "patrol_time": 0.0
                 },
@@ -2117,6 +2117,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 73
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "node_patrol"
@@ -2146,12 +2152,6 @@
             },
             {
                 "component_data": {
-                    "parent": 73
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "is_patrol_point": false,
                     "patrol_time": 3.0
                 },
@@ -2163,6 +2163,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 73
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "node"
@@ -2192,12 +2198,6 @@
             },
             {
                 "component_data": {
-                    "parent": 73
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "is_patrol_point": false,
                     "patrol_time": 3.0
                 },
@@ -2209,6 +2209,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -2238,19 +2244,13 @@
             },
             {
                 "component_data": {
-                    "parent": 12
+                    "layer_name": "default"
                 },
-                "component_name": "Parent"
+                "component_name": "ColliderTag"
             },
             {
                 "component_data": {},
                 "component_name": "StaticTag"
-            },
-            {
-                "component_data": {
-                    "layer_name": "default"
-                },
-                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -2287,6 +2287,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "cube_1x1"
                 },
                 "component_name": "Name"
@@ -2314,19 +2320,13 @@
             },
             {
                 "component_data": {
-                    "parent": 12
+                    "layer_name": "obstacle"
                 },
-                "component_name": "Parent"
+                "component_name": "ColliderTag"
             },
             {
                 "component_data": {},
                 "component_name": "StaticTag"
-            },
-            {
-                "component_data": {
-                    "layer_name": "obstacle"
-                },
-                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -2363,6 +2363,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "cube_1x1"
                 },
                 "component_name": "Name"
@@ -2390,19 +2396,13 @@
             },
             {
                 "component_data": {
-                    "parent": 12
+                    "layer_name": "default"
                 },
-                "component_name": "Parent"
+                "component_name": "ColliderTag"
             },
             {
                 "component_data": {},
                 "component_name": "StaticTag"
-            },
-            {
-                "component_data": {
-                    "layer_name": "default"
-                },
-                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -2439,6 +2439,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "cube_1x1"
                 },
                 "component_name": "Name"
@@ -2466,19 +2472,13 @@
             },
             {
                 "component_data": {
-                    "parent": 12
+                    "layer_name": "default"
                 },
-                "component_name": "Parent"
+                "component_name": "ColliderTag"
             },
             {
                 "component_data": {},
                 "component_name": "StaticTag"
-            },
-            {
-                "component_data": {
-                    "layer_name": "default"
-                },
-                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -2558,6 +2558,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 11
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "First"
                 },
                 "component_name": "Name"
@@ -2594,12 +2600,6 @@
                     "children_count": 4
                 },
                 "component_name": "Children"
-            },
-            {
-                "component_data": {
-                    "parent": 11
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 13,
@@ -2607,6 +2607,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -2636,19 +2642,13 @@
             },
             {
                 "component_data": {
-                    "parent": 12
+                    "layer_name": "obstacle"
                 },
-                "component_name": "Parent"
+                "component_name": "ColliderTag"
             },
             {
                 "component_data": {},
                 "component_name": "StaticTag"
-            },
-            {
-                "component_data": {
-                    "layer_name": "obstacle"
-                },
-                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -2685,6 +2685,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "cube_1x1"
                 },
                 "component_name": "Name"
@@ -2712,19 +2718,13 @@
             },
             {
                 "component_data": {
-                    "parent": 12
+                    "layer_name": "obstacle"
                 },
-                "component_name": "Parent"
+                "component_name": "ColliderTag"
             },
             {
                 "component_data": {},
                 "component_name": "StaticTag"
-            },
-            {
-                "component_data": {
-                    "layer_name": "obstacle"
-                },
-                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -2806,6 +2806,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "cube_1x1"
                 },
                 "component_name": "Name"
@@ -2833,19 +2839,13 @@
             },
             {
                 "component_data": {
-                    "parent": 12
+                    "layer_name": "obstacle"
                 },
-                "component_name": "Parent"
+                "component_name": "ColliderTag"
             },
             {
                 "component_data": {},
                 "component_name": "StaticTag"
-            },
-            {
-                "component_data": {
-                    "layer_name": "obstacle"
-                },
-                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -2882,6 +2882,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "cube_1x1"
                 },
                 "component_name": "Name"
@@ -2909,19 +2915,13 @@
             },
             {
                 "component_data": {
-                    "parent": 12
+                    "layer_name": "obstacle"
                 },
-                "component_name": "Parent"
+                "component_name": "ColliderTag"
             },
             {
                 "component_data": {},
                 "component_name": "StaticTag"
-            },
-            {
-                "component_data": {
-                    "layer_name": "obstacle"
-                },
-                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -2958,6 +2958,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "cube_1x1"
                 },
                 "component_name": "Name"
@@ -2985,19 +2991,13 @@
             },
             {
                 "component_data": {
-                    "parent": 12
+                    "layer_name": "obstacle"
                 },
-                "component_name": "Parent"
+                "component_name": "ColliderTag"
             },
             {
                 "component_data": {},
                 "component_name": "StaticTag"
-            },
-            {
-                "component_data": {
-                    "layer_name": "obstacle"
-                },
-                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -3034,6 +3034,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "cube_1x1"
                 },
                 "component_name": "Name"
@@ -3061,19 +3067,13 @@
             },
             {
                 "component_data": {
-                    "parent": 12
+                    "layer_name": "obstacle"
                 },
-                "component_name": "Parent"
+                "component_name": "ColliderTag"
             },
             {
                 "component_data": {},
                 "component_name": "StaticTag"
-            },
-            {
-                "component_data": {
-                    "layer_name": "obstacle"
-                },
-                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -3110,6 +3110,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "cube_1x1"
                 },
                 "component_name": "Name"
@@ -3137,19 +3143,13 @@
             },
             {
                 "component_data": {
-                    "parent": 12
+                    "layer_name": "default"
                 },
-                "component_name": "Parent"
+                "component_name": "ColliderTag"
             },
             {
                 "component_data": {},
                 "component_name": "StaticTag"
-            },
-            {
-                "component_data": {
-                    "layer_name": "default"
-                },
-                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -3186,6 +3186,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "cube_1x1"
                 },
                 "component_name": "Name"
@@ -3219,12 +3225,6 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 22,
@@ -3232,6 +3232,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -3267,12 +3273,6 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 23,
@@ -3280,6 +3280,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 49
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Stairs"
@@ -3309,19 +3315,13 @@
             },
             {
                 "component_data": {
-                    "parent": 49
+                    "layer_name": "default"
                 },
-                "component_name": "Parent"
+                "component_name": "ColliderTag"
             },
             {
                 "component_data": {},
                 "component_name": "StaticTag"
-            },
-            {
-                "component_data": {
-                    "layer_name": "default"
-                },
-                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -3358,6 +3358,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "cube_1x1"
                 },
                 "component_name": "Name"
@@ -3391,12 +3397,6 @@
                     "scale_uv_with_transform": true
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 24,
@@ -3404,6 +3404,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -3439,12 +3445,6 @@
                     "scale_uv_with_transform": true
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 25,
@@ -3452,6 +3452,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 11
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Second"
@@ -3489,12 +3495,6 @@
                     "children_count": 3
                 },
                 "component_name": "Children"
-            },
-            {
-                "component_data": {
-                    "parent": 11
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 32,
@@ -3504,10 +3504,9 @@
         "components": [
             {
                 "component_data": {
-                    "animation_name": "enemy/enemy_ANIM_GLTF/enemy_idle.anim",
-                    "ticks_per_second": 1000.0
+                    "parent": 32
                 },
-                "component_name": "AnimationInstance"
+                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -3546,15 +3545,24 @@
             },
             {
                 "component_data": {
-                    "parent": 32
+                    "animation_name": "enemy/enemy_ANIM_GLTF/enemy_idle.anim",
+                    "ticks_per_second": 1000.0
                 },
-                "component_name": "Parent"
+                "component_name": "AnimationInstance"
             },
             {
                 "component_data": {
                     "layer_name": "taggable"
                 },
                 "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {
+                    "path_parent": 38,
+                    "rotation_speed": 5.0,
+                    "speed": 1.0
+                },
+                "component_name": "EnemyPath"
             },
             {
                 "component_data": {
@@ -3571,14 +3579,6 @@
                     }
                 },
                 "component_name": "ColliderCapsule"
-            },
-            {
-                "component_data": {
-                    "path_parent": 38,
-                    "rotation_speed": 5.0,
-                    "speed": 1.0
-                },
-                "component_name": "EnemyPath"
             },
             {
                 "component_data": {},
@@ -3615,23 +3615,9 @@
         "components": [
             {
                 "component_data": {
-                    "cable_parent": 0,
-                    "can_interact": true,
-                    "enemy_entity": 0,
-                    "enemy_entity2": 0,
-                    "interaction": 3,
-                    "interaction_target": 35,
-                    "interaction_target_2": 0,
-                    "interaction_target_3": 0,
-                    "interaction_target_4": 0,
-                    "interaction_target_5": 0,
-                    "interaction_text": "X Explode",
-                    "is_on": false,
-                    "lever": 0,
-                    "single_use": false,
-                    "type": 2
+                    "parent": 16
                 },
-                "component_name": "Interactable"
+                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -3662,15 +3648,6 @@
             },
             {
                 "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "items/electric_box_2/electric_box_2.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
                     "children": [
                         115,
                         116
@@ -3681,13 +3658,77 @@
             },
             {
                 "component_data": {
-                    "parent": 16
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/electric_box_2/electric_box_2.mdl",
+                    "scale_uv_with_transform": false
                 },
-                "component_name": "Parent"
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
+                    "layer_name": "hacker"
+                },
+                "component_name": "ColliderTag"
             },
             {
                 "component_data": {},
                 "component_name": "StaticTag"
+            },
+            {
+                "component_data": {
+                    "center": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "orientation": {
+                        "0": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                        },
+                        "1": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                        }
+                    },
+                    "range": {
+                        "x": 0.8999999761581421,
+                        "y": 0.4000000059604645,
+                        "z": 0.8999999761581421
+                    }
+                },
+                "component_name": "ColliderOBB"
+            },
+            {
+                "component_data": {
+                    "cable_parent": 0,
+                    "can_interact": true,
+                    "enemy_entity": 0,
+                    "enemy_entity2": 0,
+                    "interaction": 3,
+                    "interaction_target": 35,
+                    "interaction_target_2": 0,
+                    "interaction_target_3": 0,
+                    "interaction_target_4": 0,
+                    "interaction_target_5": 0,
+                    "interaction_text": "X Explode",
+                    "is_on": false,
+                    "lever": 0,
+                    "single_use": false,
+                    "type": 2
+                },
+                "component_name": "Interactable"
+            },
+            {
+                "component_data": {
+                    "distraction_radius": 20.0,
+                    "distraction_time": 2.0,
+                    "explosion_radius": 10.0
+                },
+                "component_name": "ExplodingBox"
             },
             {
                 "component_data": {
@@ -3698,9 +3739,26 @@
             },
             {
                 "component_data": {
-                    "layer_name": "hacker"
+                    "tag_position": {
+                        "x": 0.0,
+                        "y": 0.699999988079071,
+                        "z": -0.11999999731779099
+                    }
                 },
-                "component_name": "ColliderTag"
+                "component_name": "Taggable"
+            },
+            {
+                "component_data": {
+                    "highlight_color": {
+                        "b": 0.0,
+                        "g": 0.0,
+                        "r": 1.0
+                    },
+                    "highlight_power": 0.029999999329447746,
+                    "highlighted": "twoja misja trwa",
+                    "target": 3
+                },
+                "component_name": "Highlight"
             },
             {
                 "component_data": {
@@ -3759,64 +3817,6 @@
                     ]
                 },
                 "component_name": "ParticleEmitter"
-            },
-            {
-                "component_data": {
-                    "center": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    "orientation": {
-                        "0": {
-                            "x": 0.0,
-                            "y": 0.0,
-                            "z": 0.0
-                        },
-                        "1": {
-                            "x": 0.0,
-                            "y": 0.0,
-                            "z": 0.0
-                        }
-                    },
-                    "range": {
-                        "x": 0.8999999761581421,
-                        "y": 0.4000000059604645,
-                        "z": 0.8999999761581421
-                    }
-                },
-                "component_name": "ColliderOBB"
-            },
-            {
-                "component_data": {
-                    "distraction_radius": 20.0,
-                    "distraction_time": 2.0,
-                    "explosion_radius": 10.0
-                },
-                "component_name": "ExplodingBox"
-            },
-            {
-                "component_data": {
-                    "tag_position": {
-                        "x": 0.0,
-                        "y": 0.699999988079071,
-                        "z": -0.11999999731779099
-                    }
-                },
-                "component_name": "Taggable"
-            },
-            {
-                "component_data": {
-                    "highlight_color": {
-                        "b": 0.0,
-                        "g": 0.0,
-                        "r": 1.0
-                    },
-                    "highlight_power": 0.029999999329447746,
-                    "highlighted": "twoja misja trwa",
-                    "target": 3
-                },
-                "component_name": "Highlight"
             }
         ],
         "entity": 35,
@@ -3824,6 +3824,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -3859,12 +3865,6 @@
                     "scale_uv_with_transform": true
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 36,
@@ -3872,6 +3872,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 32
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Enemy Path Parent"
@@ -3909,12 +3915,6 @@
                 "component_name": "Children"
             },
             {
-                "component_data": {
-                    "parent": 32
-                },
-                "component_name": "Parent"
-            },
-            {
                 "component_data": null,
                 "component_name": "PathParent"
             }
@@ -3924,6 +3924,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 38
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "orientation": {
@@ -3947,12 +3953,6 @@
             },
             {
                 "component_data": {
-                    "parent": 38
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "is_patrol_point": false,
                     "patrol_time": 0.0
                 },
@@ -3964,6 +3964,19 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 32
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "bone_name": "Gun",
+                    "holder": 34
+                },
+                "component_name": "Attachment"
+            },
             {
                 "component_data": {
                     "name": "Gun"
@@ -3999,19 +4012,6 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 32
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "bone_name": "Gun",
-                    "holder": 34
-                },
-                "component_name": "Attachment"
             }
         ],
         "entity": 33,
@@ -4019,6 +4019,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -4057,19 +4063,13 @@
             },
             {
                 "component_data": {
-                    "parent": 12
+                    "layer_name": "default"
                 },
-                "component_name": "Parent"
+                "component_name": "ColliderTag"
             },
             {
                 "component_data": {},
                 "component_name": "StaticTag"
-            },
-            {
-                "component_data": {
-                    "layer_name": "default"
-                },
-                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -4104,6 +4104,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -4142,19 +4148,13 @@
             },
             {
                 "component_data": {
-                    "parent": 12
+                    "layer_name": "default"
                 },
-                "component_name": "Parent"
+                "component_name": "ColliderTag"
             },
             {
                 "component_data": {},
                 "component_name": "StaticTag"
-            },
-            {
-                "component_data": {
-                    "layer_name": "default"
-                },
-                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -4226,14 +4226,14 @@
                 "component_name": "ModelInstance"
             },
             {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
-            {
                 "component_data": {
                     "layer_name": "obstacle"
                 },
                 "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {},
+                "component_name": "StaticTag"
             },
             {
                 "component_data": {
@@ -4312,6 +4312,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 42
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "Spot_2"
                 },
                 "component_name": "Name"
@@ -4339,12 +4345,6 @@
             },
             {
                 "component_data": {
-                    "parent": 42
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "blend_distance": 1.0,
                     "cast_shadow": false,
                     "color": {
@@ -4367,6 +4367,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 42
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Spot_3"
@@ -4396,12 +4402,6 @@
             },
             {
                 "component_data": {
-                    "parent": 42
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "blend_distance": 1.0,
                     "cast_shadow": false,
                     "color": {
@@ -4424,6 +4424,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 42
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Spot_4"
@@ -4453,12 +4459,6 @@
             },
             {
                 "component_data": {
-                    "parent": 42
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "blend_distance": 1.0,
                     "cast_shadow": true,
                     "color": {
@@ -4481,6 +4481,19 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 13
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "bone_name": "Gun",
+                    "holder": 5
+                },
+                "component_name": "Attachment"
+            },
             {
                 "component_data": {
                     "name": "Gun Light"
@@ -4510,12 +4523,6 @@
             },
             {
                 "component_data": {
-                    "parent": 13
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "blend_distance": 1.0,
                     "cast_shadow": false,
                     "color": {
@@ -4531,13 +4538,6 @@
                     "type": 2
                 },
                 "component_name": "Light"
-            },
-            {
-                "component_data": {
-                    "bone_name": "Gun",
-                    "holder": 5
-                },
-                "component_name": "Attachment"
             }
         ],
         "entity": 82,
@@ -4545,6 +4545,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 42
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Spot_4"
@@ -4574,12 +4580,6 @@
             },
             {
                 "component_data": {
-                    "parent": 42
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "blend_distance": 2.299999952316284,
                     "cast_shadow": false,
                     "color": {
@@ -4602,6 +4602,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 42
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "1st Switch Light"
@@ -4628,12 +4634,6 @@
                     }
                 },
                 "component_name": "Transform"
-            },
-            {
-                "component_data": {
-                    "parent": 42
-                },
-                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -4696,14 +4696,14 @@
                 "component_name": "ModelInstance"
             },
             {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
-            {
                 "component_data": {
                     "layer_name": "obstacle"
                 },
                 "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {},
+                "component_name": "StaticTag"
             },
             {
                 "component_data": {
@@ -4740,23 +4740,9 @@
         "components": [
             {
                 "component_data": {
-                    "cable_parent": 105,
-                    "can_interact": true,
-                    "enemy_entity": 0,
-                    "enemy_entity2": 0,
-                    "interaction": 2,
-                    "interaction_target": 91,
-                    "interaction_target_2": 92,
-                    "interaction_target_3": 90,
-                    "interaction_target_4": 80,
-                    "interaction_target_5": 0,
-                    "interaction_text": "E Use",
-                    "is_on": false,
-                    "lever": 0,
-                    "single_use": false,
-                    "type": 1
+                    "parent": 16
                 },
-                "component_name": "Interactable"
+                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -4796,19 +4782,13 @@
             },
             {
                 "component_data": {
-                    "parent": 16
+                    "layer_name": "taggable"
                 },
-                "component_name": "Parent"
+                "component_name": "ColliderTag"
             },
             {
                 "component_data": {},
                 "component_name": "StaticTag"
-            },
-            {
-                "component_data": {
-                    "layer_name": "taggable"
-                },
-                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -4824,6 +4804,26 @@
                     }
                 },
                 "component_name": "ColliderAABB"
+            },
+            {
+                "component_data": {
+                    "cable_parent": 105,
+                    "can_interact": true,
+                    "enemy_entity": 0,
+                    "enemy_entity2": 0,
+                    "interaction": 2,
+                    "interaction_target": 91,
+                    "interaction_target_2": 92,
+                    "interaction_target_3": 90,
+                    "interaction_target_4": 80,
+                    "interaction_target_5": 0,
+                    "interaction_text": "E Use",
+                    "is_on": false,
+                    "lever": 0,
+                    "single_use": false,
+                    "type": 1
+                },
+                "component_name": "Interactable"
             },
             {
                 "component_data": {
@@ -4856,6 +4856,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 42
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "Spot_First_Agent_button"
                 },
                 "component_name": "Name"
@@ -4883,12 +4889,6 @@
             },
             {
                 "component_data": {
-                    "parent": 42
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "blend_distance": 1.0,
                     "cast_shadow": false,
                     "color": {
@@ -4911,6 +4911,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 7
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Start_Blockade"
@@ -4940,15 +4946,6 @@
             },
             {
                 "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "items/wooden_box/wooden_box.mdl",
-                    "scale_uv_with_transform": true
-                },
-                "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
                     "acceleration": {
                         "x": 0.0,
                         "y": 0.0,
@@ -4965,19 +4962,22 @@
             },
             {
                 "component_data": {
-                    "parent": 7
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/wooden_box/wooden_box.mdl",
+                    "scale_uv_with_transform": true
                 },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {},
-                "component_name": "StaticTag"
+                "component_name": "ModelInstance"
             },
             {
                 "component_data": {
                     "layer_name": "obstacle"
                 },
                 "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {},
+                "component_name": "StaticTag"
             },
             {
                 "component_data": {
@@ -5019,6 +5019,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 7
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "Start_Blockade2"
                 },
                 "component_name": "Name"
@@ -5046,15 +5052,6 @@
             },
             {
                 "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "items/wooden_box/wooden_box.mdl",
-                    "scale_uv_with_transform": true
-                },
-                "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
                     "acceleration": {
                         "x": 0.0,
                         "y": 0.0,
@@ -5071,19 +5068,22 @@
             },
             {
                 "component_data": {
-                    "parent": 7
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/wooden_box/wooden_box.mdl",
+                    "scale_uv_with_transform": true
                 },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {},
-                "component_name": "StaticTag"
+                "component_name": "ModelInstance"
             },
             {
                 "component_data": {
                     "layer_name": "obstacle"
                 },
                 "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {},
+                "component_name": "StaticTag"
             },
             {
                 "component_data": {
@@ -5125,6 +5125,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 7
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "Start_Blockade3"
                 },
                 "component_name": "Name"
@@ -5152,15 +5158,6 @@
             },
             {
                 "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "items/wooden_box/wooden_box.mdl",
-                    "scale_uv_with_transform": true
-                },
-                "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
                     "acceleration": {
                         "x": 0.0,
                         "y": 0.0,
@@ -5177,19 +5174,22 @@
             },
             {
                 "component_data": {
-                    "parent": 7
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/wooden_box/wooden_box.mdl",
+                    "scale_uv_with_transform": true
                 },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {},
-                "component_name": "StaticTag"
+                "component_name": "ModelInstance"
             },
             {
                 "component_data": {
                     "layer_name": "obstacle"
                 },
                 "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {},
+                "component_name": "StaticTag"
             },
             {
                 "component_data": {
@@ -5231,6 +5231,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 7
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "Start_Blockade4"
                 },
                 "component_name": "Name"
@@ -5258,15 +5264,6 @@
             },
             {
                 "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "items/wooden_box/wooden_box.mdl",
-                    "scale_uv_with_transform": true
-                },
-                "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
                     "acceleration": {
                         "x": 0.0,
                         "y": 0.0,
@@ -5283,19 +5280,22 @@
             },
             {
                 "component_data": {
-                    "parent": 7
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/wooden_box/wooden_box.mdl",
+                    "scale_uv_with_transform": true
                 },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {},
-                "component_name": "StaticTag"
+                "component_name": "ModelInstance"
             },
             {
                 "component_data": {
                     "layer_name": "obstacle"
                 },
                 "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {},
+                "component_name": "StaticTag"
             },
             {
                 "component_data": {
@@ -5337,6 +5337,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 7
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "Wall"
                 },
                 "component_name": "Name"
@@ -5373,19 +5379,13 @@
             },
             {
                 "component_data": {
-                    "parent": 7
+                    "layer_name": "obstacle"
                 },
-                "component_name": "Parent"
+                "component_name": "ColliderTag"
             },
             {
                 "component_data": {},
                 "component_name": "StaticTag"
-            },
-            {
-                "component_data": {
-                    "layer_name": "obstacle"
-                },
-                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -5408,6 +5408,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 7
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Wall2"
@@ -5446,19 +5452,13 @@
             },
             {
                 "component_data": {
-                    "parent": 7
+                    "layer_name": "obstacle"
                 },
-                "component_name": "Parent"
+                "component_name": "ColliderTag"
             },
             {
                 "component_data": {},
                 "component_name": "StaticTag"
-            },
-            {
-                "component_data": {
-                    "layer_name": "obstacle"
-                },
-                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -5481,6 +5481,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 7
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Wall3"
@@ -5519,19 +5525,13 @@
             },
             {
                 "component_data": {
-                    "parent": 7
+                    "layer_name": "obstacle"
                 },
-                "component_name": "Parent"
+                "component_name": "ColliderTag"
             },
             {
                 "component_data": {},
                 "component_name": "StaticTag"
-            },
-            {
-                "component_data": {
-                    "layer_name": "obstacle"
-                },
-                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -5554,6 +5554,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 7
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Wall4"
@@ -5592,19 +5598,13 @@
             },
             {
                 "component_data": {
-                    "parent": 7
+                    "layer_name": "obstacle"
                 },
-                "component_name": "Parent"
+                "component_name": "ColliderTag"
             },
             {
                 "component_data": {},
                 "component_name": "StaticTag"
-            },
-            {
-                "component_data": {
-                    "layer_name": "obstacle"
-                },
-                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -5627,6 +5627,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 42
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Spot_5"
@@ -5656,12 +5662,6 @@
             },
             {
                 "component_data": {
-                    "parent": 42
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "blend_distance": 0.3700000047683716,
                     "cast_shadow": false,
                     "color": {
@@ -5684,6 +5684,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 42
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Spot_6"
@@ -5710,12 +5716,6 @@
                     }
                 },
                 "component_name": "Transform"
-            },
-            {
-                "component_data": {
-                    "parent": 42
-                },
-                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -5834,6 +5834,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "cube_1x1"
                 },
                 "component_name": "Name"
@@ -5867,12 +5873,6 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 98,
@@ -5880,6 +5880,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -5915,12 +5921,6 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 99,
@@ -5928,6 +5928,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 42
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Spot_4"
@@ -5954,12 +5960,6 @@
                     }
                 },
                 "component_name": "Transform"
-            },
-            {
-                "component_data": {
-                    "parent": 42
-                },
-                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -6030,6 +6030,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 50
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "CablesFirstDoors"
                 },
                 "component_name": "Name"
@@ -6069,12 +6075,6 @@
             },
             {
                 "component_data": {
-                    "parent": 50
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "highlighted_on_off": true,
                     "off_color": {
                         "b": 0.040219925343990326,
@@ -6096,6 +6096,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 105
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "cable1"
@@ -6134,12 +6140,6 @@
             },
             {
                 "component_data": {
-                    "parent": 105
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "highlight_color": {
                         "b": 0.040219925343990326,
                         "g": 0.040219925343990326,
@@ -6157,6 +6157,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 105
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "cable2"
@@ -6195,12 +6201,6 @@
             },
             {
                 "component_data": {
-                    "parent": 105
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "highlight_color": {
                         "b": 0.040219925343990326,
                         "g": 0.040219925343990326,
@@ -6218,6 +6218,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 105
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "cable3"
@@ -6256,12 +6262,6 @@
             },
             {
                 "component_data": {
-                    "parent": 105
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "highlight_color": {
                         "b": 0.040219925343990326,
                         "g": 0.040219925343990326,
@@ -6279,6 +6279,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 105
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "cable4"
@@ -6317,12 +6323,6 @@
             },
             {
                 "component_data": {
-                    "parent": 105
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "highlight_color": {
                         "b": 0.040219925343990326,
                         "g": 0.040219925343990326,
@@ -6340,6 +6340,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 50
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "CablesFirstPlatform"
@@ -6378,12 +6384,6 @@
             },
             {
                 "component_data": {
-                    "parent": 50
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "highlighted_on_off": true,
                     "off_color": {
                         "b": 0.0,
@@ -6405,6 +6405,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 110
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "cable1"
@@ -6443,12 +6449,6 @@
             },
             {
                 "component_data": {
-                    "parent": 110
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "highlight_color": {
                         "b": 0.0,
                         "g": 0.0,
@@ -6466,6 +6466,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 66
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "electricity_particles"
@@ -6492,12 +6498,6 @@
                     }
                 },
                 "component_name": "Transform"
-            },
-            {
-                "component_data": {
-                    "parent": 66
-                },
-                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -6565,6 +6565,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 66
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "electricity_particles2"
                 },
                 "component_name": "Name"
@@ -6589,12 +6595,6 @@
                     }
                 },
                 "component_name": "Transform"
-            },
-            {
-                "component_data": {
-                    "parent": 66
-                },
-                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -6662,6 +6662,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 35
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "electricity_particles"
                 },
                 "component_name": "Name"
@@ -6686,12 +6692,6 @@
                     }
                 },
                 "component_name": "Transform"
-            },
-            {
-                "component_data": {
-                    "parent": 35
-                },
-                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -6759,6 +6759,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 35
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "electricity_particles2"
                 },
                 "component_name": "Name"
@@ -6783,12 +6789,6 @@
                     }
                 },
                 "component_name": "Transform"
-            },
-            {
-                "component_data": {
-                    "parent": 35
-                },
-                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -6936,10 +6936,9 @@
         "components": [
             {
                 "component_data": {
-                    "animation_name": "enemy/enemy_ANIM_GLTF/enemy_idle.anim",
-                    "ticks_per_second": 1000.0
+                    "parent": 118
                 },
-                "component_name": "AnimationInstance"
+                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -6978,15 +6977,24 @@
             },
             {
                 "component_data": {
-                    "parent": 118
+                    "animation_name": "enemy/enemy_ANIM_GLTF/enemy_idle.anim",
+                    "ticks_per_second": 1000.0
                 },
-                "component_name": "Parent"
+                "component_name": "AnimationInstance"
             },
             {
                 "component_data": {
                     "layer_name": "taggable"
                 },
                 "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {
+                    "path_parent": 72,
+                    "rotation_speed": 4.599999904632568,
+                    "speed": 1.0
+                },
+                "component_name": "EnemyPath"
             },
             {
                 "component_data": {
@@ -7003,14 +7011,6 @@
                     }
                 },
                 "component_name": "ColliderCapsule"
-            },
-            {
-                "component_data": {
-                    "path_parent": 72,
-                    "rotation_speed": 4.599999904632568,
-                    "speed": 1.0
-                },
-                "component_name": "EnemyPath"
             },
             {
                 "component_data": {},
@@ -7045,6 +7045,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 118
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Path Parent"
@@ -7083,12 +7089,6 @@
                 "component_name": "Children"
             },
             {
-                "component_data": {
-                    "parent": 118
-                },
-                "component_name": "Parent"
-            },
-            {
                 "component_data": null,
                 "component_name": "PathParent"
             }
@@ -7098,6 +7098,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 72
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Path Node 1"
@@ -7127,12 +7133,6 @@
             },
             {
                 "component_data": {
-                    "parent": 72
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "is_patrol_point": false,
                     "patrol_time": 3.0
                 },
@@ -7144,6 +7144,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 72
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Path Node 2"
@@ -7170,12 +7176,6 @@
                     }
                 },
                 "component_name": "Transform"
-            },
-            {
-                "component_data": {
-                    "parent": 72
-                },
-                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -7278,6 +7278,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 101
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "Agent"
                 },
                 "component_name": "Name"
@@ -7314,12 +7320,6 @@
                     "children_count": 4
                 },
                 "component_name": "Children"
-            },
-            {
-                "component_data": {
-                    "parent": 101
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 102,
@@ -7327,6 +7327,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 101
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Hacker"
@@ -7363,12 +7369,6 @@
                     "children_count": 2
                 },
                 "component_name": "Children"
-            },
-            {
-                "component_data": {
-                    "parent": 101
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 119,
@@ -7376,6 +7376,19 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 102
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "bone_name": "Spine1",
+                    "holder": 6
+                },
+                "component_name": "Attachment"
+            },
             {
                 "component_data": {
                     "name": "Camera Pivot Target"
@@ -7402,19 +7415,6 @@
                     }
                 },
                 "component_name": "Transform"
-            },
-            {
-                "component_data": {
-                    "parent": 102
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "bone_name": "Spine1",
-                    "holder": 6
-                },
-                "component_name": "Attachment"
             }
         ],
         "entity": 120,
@@ -7464,6 +7464,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "Wooden Box"
                 },
                 "component_name": "Name"
@@ -7500,19 +7506,13 @@
             },
             {
                 "component_data": {
-                    "parent": 12
+                    "layer_name": "default"
                 },
-                "component_name": "Parent"
+                "component_name": "ColliderTag"
             },
             {
                 "component_data": {},
                 "component_name": "StaticTag"
-            },
-            {
-                "component_data": {
-                    "layer_name": "default"
-                },
-                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -7547,6 +7547,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Wooden Box"
@@ -7585,19 +7591,13 @@
             },
             {
                 "component_data": {
-                    "parent": 12
+                    "layer_name": "default"
                 },
-                "component_name": "Parent"
+                "component_name": "ColliderTag"
             },
             {
                 "component_data": {},
                 "component_name": "StaticTag"
-            },
-            {
-                "component_data": {
-                    "layer_name": "default"
-                },
-                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -7634,6 +7634,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "Wooden Box"
                 },
                 "component_name": "Name"
@@ -7667,12 +7673,6 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 133,
@@ -7680,6 +7680,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Metal box"
@@ -7718,19 +7724,13 @@
             },
             {
                 "component_data": {
-                    "parent": 12
+                    "layer_name": "obstacle"
                 },
-                "component_name": "Parent"
+                "component_name": "ColliderTag"
             },
             {
                 "component_data": {},
                 "component_name": "StaticTag"
-            },
-            {
-                "component_data": {
-                    "layer_name": "obstacle"
-                },
-                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -7767,6 +7767,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "cube_1x1"
                 },
                 "component_name": "Name"
@@ -7800,12 +7806,6 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 138,
@@ -7842,15 +7842,6 @@
             },
             {
                 "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "items/contener/contener.mdl",
-                    "scale_uv_with_transform": true
-                },
-                "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
                     "acceleration": {
                         "x": 0.0,
                         "y": 0.0,
@@ -7866,14 +7857,23 @@
                 "component_name": "RigidBody"
             },
             {
-                "component_data": {},
-                "component_name": "StaticTag"
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/contener/contener.mdl",
+                    "scale_uv_with_transform": true
+                },
+                "component_name": "ModelInstance"
             },
             {
                 "component_data": {
                     "layer_name": "obstacle"
                 },
                 "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {},
+                "component_name": "StaticTag"
             },
             {
                 "component_data": {
@@ -7908,6 +7908,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Metal box"
@@ -7946,19 +7952,13 @@
             },
             {
                 "component_data": {
-                    "parent": 12
+                    "layer_name": "obstacle"
                 },
-                "component_name": "Parent"
+                "component_name": "ColliderTag"
             },
             {
                 "component_data": {},
                 "component_name": "StaticTag"
-            },
-            {
-                "component_data": {
-                    "layer_name": "obstacle"
-                },
-                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -7993,6 +7993,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Metal box"
@@ -8031,19 +8037,13 @@
             },
             {
                 "component_data": {
-                    "parent": 12
+                    "layer_name": "obstacle"
                 },
-                "component_name": "Parent"
+                "component_name": "ColliderTag"
             },
             {
                 "component_data": {},
                 "component_name": "StaticTag"
-            },
-            {
-                "component_data": {
-                    "layer_name": "obstacle"
-                },
-                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -8080,6 +8080,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "Metal box"
                 },
                 "component_name": "Name"
@@ -8113,12 +8119,6 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 142,
@@ -8126,6 +8126,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -8161,12 +8167,6 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 143,
@@ -8174,6 +8174,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -8209,12 +8215,6 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 144,
@@ -8222,6 +8222,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -8257,12 +8263,6 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 145,
@@ -8270,6 +8270,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -8305,12 +8311,6 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 146,
@@ -8318,6 +8318,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -8353,12 +8359,6 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 147,
@@ -8366,6 +8366,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -8401,12 +8407,6 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 148,
@@ -8414,6 +8414,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -8449,12 +8455,6 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 149,
@@ -8462,6 +8462,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -8497,12 +8503,6 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 150,
@@ -8510,6 +8510,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -8545,12 +8551,6 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 151,
@@ -8558,6 +8558,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -8593,12 +8599,6 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 152,
@@ -8606,6 +8606,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -8641,12 +8647,6 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 153,
@@ -8654,6 +8654,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -8689,12 +8695,6 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 154,
@@ -8702,6 +8702,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Wooden Box"
@@ -8737,12 +8743,6 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 157,
@@ -8750,6 +8750,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Wooden Box"
@@ -8785,12 +8791,6 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 158,
@@ -8798,6 +8798,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Wooden Box"
@@ -8833,12 +8839,6 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 159,
@@ -8846,6 +8846,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -8881,12 +8887,6 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 160,
@@ -8894,6 +8894,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -8923,19 +8929,13 @@
             },
             {
                 "component_data": {
-                    "parent": 12
+                    "layer_name": "obstacle"
                 },
-                "component_name": "Parent"
+                "component_name": "ColliderTag"
             },
             {
                 "component_data": {},
                 "component_name": "StaticTag"
-            },
-            {
-                "component_data": {
-                    "layer_name": "obstacle"
-                },
-                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -8972,6 +8972,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 49
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "Stairs"
                 },
                 "component_name": "Name"
@@ -8999,19 +9005,13 @@
             },
             {
                 "component_data": {
-                    "parent": 49
+                    "layer_name": "default"
                 },
-                "component_name": "Parent"
+                "component_name": "ColliderTag"
             },
             {
                 "component_data": {},
                 "component_name": "StaticTag"
-            },
-            {
-                "component_data": {
-                    "layer_name": "default"
-                },
-                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -9048,6 +9048,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 49
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "Stairs"
                 },
                 "component_name": "Name"
@@ -9075,19 +9081,13 @@
             },
             {
                 "component_data": {
-                    "parent": 49
+                    "layer_name": "default"
                 },
-                "component_name": "Parent"
+                "component_name": "ColliderTag"
             },
             {
                 "component_data": {},
                 "component_name": "StaticTag"
-            },
-            {
-                "component_data": {
-                    "layer_name": "default"
-                },
-                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -9124,6 +9124,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "cube_1x1"
                 },
                 "component_name": "Name"
@@ -9157,12 +9163,6 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 165,
@@ -9170,6 +9170,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -9205,12 +9211,6 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 166,
@@ -9218,6 +9218,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -9253,12 +9259,6 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 167,
@@ -9266,6 +9266,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -9301,12 +9307,6 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 168,
@@ -9314,6 +9314,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -9352,19 +9358,13 @@
             },
             {
                 "component_data": {
-                    "parent": 12
+                    "layer_name": "default"
                 },
-                "component_name": "Parent"
+                "component_name": "ColliderTag"
             },
             {
                 "component_data": {},
                 "component_name": "StaticTag"
-            },
-            {
-                "component_data": {
-                    "layer_name": "default"
-                },
-                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -9387,6 +9387,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Wooden Box"
@@ -9425,19 +9431,13 @@
             },
             {
                 "component_data": {
-                    "parent": 12
+                    "layer_name": "default"
                 },
-                "component_name": "Parent"
+                "component_name": "ColliderTag"
             },
             {
                 "component_data": {},
                 "component_name": "StaticTag"
-            },
-            {
-                "component_data": {
-                    "layer_name": "default"
-                },
-                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -9474,6 +9474,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "cube_1x1"
                 },
                 "component_name": "Name"
@@ -9501,19 +9507,13 @@
             },
             {
                 "component_data": {
-                    "parent": 12
+                    "layer_name": "obstacle"
                 },
-                "component_name": "Parent"
+                "component_name": "ColliderTag"
             },
             {
                 "component_data": {},
                 "component_name": "StaticTag"
-            },
-            {
-                "component_data": {
-                    "layer_name": "obstacle"
-                },
-                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -9550,6 +9550,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "cube_1x1"
                 },
                 "component_name": "Name"
@@ -9577,19 +9583,13 @@
             },
             {
                 "component_data": {
-                    "parent": 12
+                    "layer_name": "obstacle"
                 },
-                "component_name": "Parent"
+                "component_name": "ColliderTag"
             },
             {
                 "component_data": {},
                 "component_name": "StaticTag"
-            },
-            {
-                "component_data": {
-                    "layer_name": "obstacle"
-                },
-                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -9626,6 +9626,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "Wooden Box"
                 },
                 "component_name": "Name"
@@ -9659,12 +9665,6 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 173,
@@ -9672,6 +9672,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Wooden Box"
@@ -9707,12 +9713,6 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 174,
@@ -9722,23 +9722,9 @@
         "components": [
             {
                 "component_data": {
-                    "cable_parent": 0,
-                    "can_interact": true,
-                    "enemy_entity": 0,
-                    "enemy_entity2": 0,
-                    "interaction": 3,
-                    "interaction_target": 66,
-                    "interaction_target_2": 0,
-                    "interaction_target_3": 0,
-                    "interaction_target_4": 0,
-                    "interaction_target_5": 0,
-                    "interaction_text": "X Explode",
-                    "is_on": false,
-                    "lever": 0,
-                    "single_use": false,
-                    "type": 2
+                    "parent": 16
                 },
-                "component_name": "Interactable"
+                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -9769,15 +9755,6 @@
             },
             {
                 "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "items/electric_box_2/electric_box_2.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
                     "children": [
                         113,
                         114
@@ -9788,26 +9765,22 @@
             },
             {
                 "component_data": {
-                    "parent": 16
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/electric_box_2/electric_box_2.mdl",
+                    "scale_uv_with_transform": false
                 },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
-            {
-                "component_data": {
-                    "event_path": "SFX/electricity/electric_hum",
-                    "is_3d": true
-                },
-                "component_name": "FMODEmitter"
+                "component_name": "ModelInstance"
             },
             {
                 "component_data": {
                     "layer_name": "taggable"
                 },
                 "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {},
+                "component_name": "StaticTag"
             },
             {
                 "component_data": {
@@ -9823,6 +9796,64 @@
                     }
                 },
                 "component_name": "ColliderAABB"
+            },
+            {
+                "component_data": {
+                    "cable_parent": 0,
+                    "can_interact": true,
+                    "enemy_entity": 0,
+                    "enemy_entity2": 0,
+                    "interaction": 3,
+                    "interaction_target": 66,
+                    "interaction_target_2": 0,
+                    "interaction_target_3": 0,
+                    "interaction_target_4": 0,
+                    "interaction_target_5": 0,
+                    "interaction_text": "X Explode",
+                    "is_on": false,
+                    "lever": 0,
+                    "single_use": false,
+                    "type": 2
+                },
+                "component_name": "Interactable"
+            },
+            {
+                "component_data": {
+                    "distraction_radius": 15.0,
+                    "distraction_time": 2.0,
+                    "explosion_radius": 4.0
+                },
+                "component_name": "ExplodingBox"
+            },
+            {
+                "component_data": {
+                    "event_path": "SFX/electricity/electric_hum",
+                    "is_3d": true
+                },
+                "component_name": "FMODEmitter"
+            },
+            {
+                "component_data": {
+                    "tag_position": {
+                        "x": 0.0,
+                        "y": 0.20000000298023224,
+                        "z": 0.800000011920929
+                    }
+                },
+                "component_name": "Taggable"
+            },
+            {
+                "component_data": {
+                    "highlight_color": {
+                        "b": 0.0,
+                        "g": 0.0,
+                        "r": 1.0
+                    },
+                    "highlight_power": 0.029999999329447746,
+                    "highlighted": "twoja misja trwa",
+                    "target": 3
+                },
+                "component_name": "Highlight"
             },
             {
                 "component_data": {
@@ -9881,37 +9912,6 @@
                     ]
                 },
                 "component_name": "ParticleEmitter"
-            },
-            {
-                "component_data": {
-                    "distraction_radius": 15.0,
-                    "distraction_time": 2.0,
-                    "explosion_radius": 4.0
-                },
-                "component_name": "ExplodingBox"
-            },
-            {
-                "component_data": {
-                    "tag_position": {
-                        "x": 0.0,
-                        "y": 0.20000000298023224,
-                        "z": 0.800000011920929
-                    }
-                },
-                "component_name": "Taggable"
-            },
-            {
-                "component_data": {
-                    "highlight_color": {
-                        "b": 0.0,
-                        "g": 0.0,
-                        "r": 1.0
-                    },
-                    "highlight_power": 0.029999999329447746,
-                    "highlighted": "twoja misja trwa",
-                    "target": 3
-                },
-                "component_name": "Highlight"
             }
         ],
         "entity": 175,
@@ -9919,6 +9919,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -9957,19 +9963,13 @@
             },
             {
                 "component_data": {
-                    "parent": 12
+                    "layer_name": "default"
                 },
-                "component_name": "Parent"
+                "component_name": "ColliderTag"
             },
             {
                 "component_data": {},
                 "component_name": "StaticTag"
-            },
-            {
-                "component_data": {
-                    "layer_name": "default"
-                },
-                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -10004,6 +10004,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -10042,19 +10048,13 @@
             },
             {
                 "component_data": {
-                    "parent": 12
+                    "layer_name": "default"
                 },
-                "component_name": "Parent"
+                "component_name": "ColliderTag"
             },
             {
                 "component_data": {},
                 "component_name": "StaticTag"
-            },
-            {
-                "component_data": {
-                    "layer_name": "default"
-                },
-                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -10091,6 +10091,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "cube_1x1"
                 },
                 "component_name": "Name"
@@ -10124,12 +10130,6 @@
                     "scale_uv_with_transform": true
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 178,
@@ -10137,6 +10137,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -10172,12 +10178,6 @@
                     "scale_uv_with_transform": true
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 179,
@@ -10185,6 +10185,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -10220,12 +10226,6 @@
                     "scale_uv_with_transform": true
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 180,
@@ -10233,6 +10233,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -10268,12 +10274,6 @@
                     "scale_uv_with_transform": true
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 181,
@@ -10281,6 +10281,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -10316,12 +10322,6 @@
                     "scale_uv_with_transform": true
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 183,
@@ -10329,6 +10329,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -10364,12 +10370,6 @@
                     "scale_uv_with_transform": true
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 184,
@@ -10377,6 +10377,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 42
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Spot_5"
@@ -10406,12 +10412,6 @@
             },
             {
                 "component_data": {
-                    "parent": 42
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "blend_distance": 1.0,
                     "cast_shadow": false,
                     "color": {
@@ -10434,6 +10434,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Wooden Box"
@@ -10469,12 +10475,6 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 187,
@@ -10517,6 +10517,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "cube_1x1"
                 },
                 "component_name": "Name"
@@ -10553,19 +10559,13 @@
             },
             {
                 "component_data": {
-                    "parent": 12
+                    "layer_name": "default"
                 },
-                "component_name": "Parent"
+                "component_name": "ColliderTag"
             },
             {
                 "component_data": {},
                 "component_name": "StaticTag"
-            },
-            {
-                "component_data": {
-                    "layer_name": "default"
-                },
-                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -10600,6 +10600,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -10638,19 +10644,13 @@
             },
             {
                 "component_data": {
-                    "parent": 12
+                    "layer_name": "default"
                 },
-                "component_name": "Parent"
+                "component_name": "ColliderTag"
             },
             {
                 "component_data": {},
                 "component_name": "StaticTag"
-            },
-            {
-                "component_data": {
-                    "layer_name": "default"
-                },
-                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -10685,6 +10685,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -10723,19 +10729,13 @@
             },
             {
                 "component_data": {
-                    "parent": 12
+                    "layer_name": "default"
                 },
-                "component_name": "Parent"
+                "component_name": "ColliderTag"
             },
             {
                 "component_data": {},
                 "component_name": "StaticTag"
-            },
-            {
-                "component_data": {
-                    "layer_name": "default"
-                },
-                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -10772,6 +10772,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "Container"
                 },
                 "component_name": "Name"
@@ -10799,15 +10805,6 @@
             },
             {
                 "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "items/contener/contener.mdl",
-                    "scale_uv_with_transform": true
-                },
-                "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
                     "acceleration": {
                         "x": 0.0,
                         "y": 0.0,
@@ -10824,19 +10821,22 @@
             },
             {
                 "component_data": {
-                    "parent": 12
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/contener/contener.mdl",
+                    "scale_uv_with_transform": true
                 },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {},
-                "component_name": "StaticTag"
+                "component_name": "ModelInstance"
             },
             {
                 "component_data": {
                     "layer_name": "obstacle"
                 },
                 "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {},
+                "component_name": "StaticTag"
             },
             {
                 "component_data": {
@@ -10873,6 +10873,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 42
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "Spot_5"
                 },
                 "component_name": "Name"
@@ -10900,12 +10906,6 @@
             },
             {
                 "component_data": {
-                    "parent": 42
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "blend_distance": 1.0,
                     "cast_shadow": false,
                     "color": {
@@ -10928,6 +10928,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 42
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Spot_5"
@@ -10957,12 +10963,6 @@
             },
             {
                 "component_data": {
-                    "parent": 42
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "blend_distance": 1.0,
                     "cast_shadow": false,
                     "color": {
@@ -10985,6 +10985,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 42
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Spot_5"
@@ -11014,12 +11020,6 @@
             },
             {
                 "component_data": {
-                    "parent": 42
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "blend_distance": 1.0,
                     "cast_shadow": false,
                     "color": {
@@ -11042,6 +11042,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Wooden Box"
@@ -11077,12 +11083,6 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 205,
@@ -11090,6 +11090,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Wooden Box"
@@ -11125,12 +11131,6 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 206,
@@ -11138,6 +11138,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Wooden Box"
@@ -11173,12 +11179,6 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 207,
@@ -11186,6 +11186,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Wooden Box"
@@ -11221,12 +11227,6 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 208,
@@ -11234,6 +11234,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Wooden Box"
@@ -11269,12 +11275,6 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 209,
@@ -11282,6 +11282,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -11317,12 +11323,6 @@
                     "scale_uv_with_transform": true
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 210,
@@ -11330,6 +11330,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -11365,12 +11371,6 @@
                     "scale_uv_with_transform": true
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 211,
@@ -11378,6 +11378,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -11413,12 +11419,6 @@
                     "scale_uv_with_transform": true
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 212,
@@ -11426,6 +11426,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -11461,12 +11467,6 @@
                     "scale_uv_with_transform": true
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 213,
@@ -11474,6 +11474,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -11509,12 +11515,6 @@
                     "scale_uv_with_transform": true
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 214,
@@ -11522,6 +11522,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -11557,12 +11563,6 @@
                     "scale_uv_with_transform": true
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 215,
@@ -11570,6 +11570,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -11605,12 +11611,6 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 216,
@@ -11618,6 +11618,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -11653,12 +11659,6 @@
                     "scale_uv_with_transform": true
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 217,
@@ -11666,6 +11666,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -11701,12 +11707,6 @@
                     "scale_uv_with_transform": true
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 218,
@@ -11714,6 +11714,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -11749,12 +11755,6 @@
                     "scale_uv_with_transform": true
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 219,
@@ -11762,6 +11762,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Wooden Box"
@@ -11797,12 +11803,6 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 221,
@@ -11810,6 +11810,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Wooden Box"
@@ -11848,19 +11854,13 @@
             },
             {
                 "component_data": {
-                    "parent": 12
+                    "layer_name": "default"
                 },
-                "component_name": "Parent"
+                "component_name": "ColliderTag"
             },
             {
                 "component_data": {},
                 "component_name": "StaticTag"
-            },
-            {
-                "component_data": {
-                    "layer_name": "default"
-                },
-                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -11895,6 +11895,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Wooden Box"
@@ -11933,19 +11939,13 @@
             },
             {
                 "component_data": {
-                    "parent": 12
+                    "layer_name": "default"
                 },
-                "component_name": "Parent"
+                "component_name": "ColliderTag"
             },
             {
                 "component_data": {},
                 "component_name": "StaticTag"
-            },
-            {
-                "component_data": {
-                    "layer_name": "default"
-                },
-                "component_name": "ColliderTag"
             },
             {
                 "component_data": {
@@ -11982,6 +11982,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 42
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "1st Exploding Light"
                 },
                 "component_name": "Name"
@@ -12009,12 +12015,6 @@
             },
             {
                 "component_data": {
-                    "parent": 42
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "blend_distance": 1.0,
                     "cast_shadow": false,
                     "color": {
@@ -12037,6 +12037,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Wooden Box"
@@ -12072,12 +12078,6 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 28,
@@ -12085,6 +12085,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "cube_1x1"
@@ -12120,12 +12126,6 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 29,
@@ -12133,6 +12133,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Container"
@@ -12162,15 +12168,6 @@
             },
             {
                 "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "items/fence/fence_chain.mdl",
-                    "scale_uv_with_transform": true
-                },
-                "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
                     "acceleration": {
                         "x": 0.0,
                         "y": 0.0,
@@ -12187,9 +12184,12 @@
             },
             {
                 "component_data": {
-                    "parent": 12
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/fence/fence_chain.mdl",
+                    "scale_uv_with_transform": true
                 },
-                "component_name": "Parent"
+                "component_name": "ModelInstance"
             }
         ],
         "entity": 31,
@@ -12197,6 +12197,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Container"
@@ -12226,15 +12232,6 @@
             },
             {
                 "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "items/fence/fence_chain.mdl",
-                    "scale_uv_with_transform": true
-                },
-                "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
                     "acceleration": {
                         "x": 0.0,
                         "y": 0.0,
@@ -12251,9 +12248,12 @@
             },
             {
                 "component_data": {
-                    "parent": 12
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/fence/fence_chain.mdl",
+                    "scale_uv_with_transform": true
                 },
-                "component_name": "Parent"
+                "component_name": "ModelInstance"
             }
         ],
         "entity": 37,
@@ -12261,6 +12261,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Container"
@@ -12290,15 +12296,6 @@
             },
             {
                 "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "items/fence/fence_chain.mdl",
-                    "scale_uv_with_transform": true
-                },
-                "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
                     "acceleration": {
                         "x": 0.0,
                         "y": 0.0,
@@ -12315,9 +12312,12 @@
             },
             {
                 "component_data": {
-                    "parent": 12
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/fence/fence_chain.mdl",
+                    "scale_uv_with_transform": true
                 },
-                "component_name": "Parent"
+                "component_name": "ModelInstance"
             }
         ],
         "entity": 45,
@@ -12325,6 +12325,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Container"
@@ -12354,15 +12360,6 @@
             },
             {
                 "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "items/fence/fence_chain.mdl",
-                    "scale_uv_with_transform": true
-                },
-                "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
                     "acceleration": {
                         "x": 0.0,
                         "y": 0.0,
@@ -12379,9 +12376,12 @@
             },
             {
                 "component_data": {
-                    "parent": 12
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/fence/fence_chain.mdl",
+                    "scale_uv_with_transform": true
                 },
-                "component_name": "Parent"
+                "component_name": "ModelInstance"
             }
         ],
         "entity": 83,
@@ -12389,6 +12389,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Container"
@@ -12418,15 +12424,6 @@
             },
             {
                 "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "items/fence/fence_chain.mdl",
-                    "scale_uv_with_transform": true
-                },
-                "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
                     "acceleration": {
                         "x": 0.0,
                         "y": 0.0,
@@ -12443,9 +12440,12 @@
             },
             {
                 "component_data": {
-                    "parent": 12
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/fence/fence_chain.mdl",
+                    "scale_uv_with_transform": true
                 },
-                "component_name": "Parent"
+                "component_name": "ModelInstance"
             }
         ],
         "entity": 111,
@@ -12453,6 +12453,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Container"
@@ -12482,15 +12488,6 @@
             },
             {
                 "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "items/fence/fence_poles.mdl",
-                    "scale_uv_with_transform": true
-                },
-                "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
                     "acceleration": {
                         "x": 0.0,
                         "y": 0.0,
@@ -12507,9 +12504,12 @@
             },
             {
                 "component_data": {
-                    "parent": 12
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/fence/fence_poles.mdl",
+                    "scale_uv_with_transform": true
                 },
-                "component_name": "Parent"
+                "component_name": "ModelInstance"
             }
         ],
         "entity": 130,
@@ -12517,6 +12517,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Container"
@@ -12546,15 +12552,6 @@
             },
             {
                 "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "items/fence/fence_poles.mdl",
-                    "scale_uv_with_transform": true
-                },
-                "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
                     "acceleration": {
                         "x": 0.0,
                         "y": 0.0,
@@ -12571,9 +12568,12 @@
             },
             {
                 "component_data": {
-                    "parent": 12
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/fence/fence_poles.mdl",
+                    "scale_uv_with_transform": true
                 },
-                "component_name": "Parent"
+                "component_name": "ModelInstance"
             }
         ],
         "entity": 135,
@@ -12581,6 +12581,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Container"
@@ -12610,15 +12616,6 @@
             },
             {
                 "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "items/fence/fence_poles.mdl",
-                    "scale_uv_with_transform": true
-                },
-                "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
                     "acceleration": {
                         "x": 0.0,
                         "y": 0.0,
@@ -12635,9 +12632,12 @@
             },
             {
                 "component_data": {
-                    "parent": 12
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/fence/fence_poles.mdl",
+                    "scale_uv_with_transform": true
                 },
-                "component_name": "Parent"
+                "component_name": "ModelInstance"
             }
         ],
         "entity": 136,
@@ -12645,6 +12645,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Container"
@@ -12674,15 +12680,6 @@
             },
             {
                 "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "items/fence/fence_poles.mdl",
-                    "scale_uv_with_transform": true
-                },
-                "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
                     "acceleration": {
                         "x": 0.0,
                         "y": 0.0,
@@ -12699,9 +12696,12 @@
             },
             {
                 "component_data": {
-                    "parent": 12
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/fence/fence_poles.mdl",
+                    "scale_uv_with_transform": true
                 },
-                "component_name": "Parent"
+                "component_name": "ModelInstance"
             }
         ],
         "entity": 137,
@@ -12709,6 +12709,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Container"
@@ -12738,15 +12744,6 @@
             },
             {
                 "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "items/fence/fence_poles.mdl",
-                    "scale_uv_with_transform": true
-                },
-                "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
                     "acceleration": {
                         "x": 0.0,
                         "y": 0.0,
@@ -12763,9 +12760,12 @@
             },
             {
                 "component_data": {
-                    "parent": 12
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/fence/fence_poles.mdl",
+                    "scale_uv_with_transform": true
                 },
-                "component_name": "Parent"
+                "component_name": "ModelInstance"
             }
         ],
         "entity": 155,
@@ -12773,6 +12773,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 12
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Wooden Box"
@@ -12808,12 +12814,6 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 12
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 156,
@@ -12995,26 +12995,6 @@
         "components": [
             {
                 "component_data": {
-                    "cable_parent": 0,
-                    "can_interact": true,
-                    "enemy_entity": 0,
-                    "enemy_entity2": 0,
-                    "interaction": 1,
-                    "interaction_target": 0,
-                    "interaction_target_2": 0,
-                    "interaction_target_3": 0,
-                    "interaction_target_4": 0,
-                    "interaction_target_5": 0,
-                    "interaction_text": "aaa",
-                    "is_on": false,
-                    "lever": 0,
-                    "single_use": false,
-                    "type": 2
-                },
-                "component_name": "Interactable"
-            },
-            {
-                "component_data": {
                     "name": "DetectionCamera"
                 },
                 "component_name": "Name"
@@ -13052,14 +13032,14 @@
                 "component_name": "Children"
             },
             {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
-            {
                 "component_data": {
                     "layer_name": "taggable"
                 },
                 "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {},
+                "component_name": "StaticTag"
             },
             {
                 "component_data": {
@@ -13075,6 +13055,26 @@
                     }
                 },
                 "component_name": "ColliderAABB"
+            },
+            {
+                "component_data": {
+                    "cable_parent": 0,
+                    "can_interact": true,
+                    "enemy_entity": 0,
+                    "enemy_entity2": 0,
+                    "interaction": 1,
+                    "interaction_target": 0,
+                    "interaction_target_2": 0,
+                    "interaction_target_3": 0,
+                    "interaction_target_4": 0,
+                    "interaction_target_5": 0,
+                    "interaction_text": "aaa",
+                    "is_on": false,
+                    "lever": 0,
+                    "single_use": false,
+                    "type": 2
+                },
+                "component_name": "Interactable"
             },
             {
                 "component_data": {
@@ -13140,6 +13140,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 195
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "CameraPart1"
                 },
                 "component_name": "Name"
@@ -13173,12 +13179,6 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 195
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 204,
@@ -13186,6 +13186,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 195
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "CameraPart2"
@@ -13221,12 +13227,6 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 195
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 220,
@@ -13234,6 +13234,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 195
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "MainCameraPart"
@@ -13263,15 +13269,6 @@
             },
             {
                 "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "items/camera/camera_1.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
                     "children": [
                         228
                     ],
@@ -13281,9 +13278,12 @@
             },
             {
                 "component_data": {
-                    "parent": 195
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/camera/camera_1.mdl",
+                    "scale_uv_with_transform": false
                 },
-                "component_name": "Parent"
+                "component_name": "ModelInstance"
             }
         ],
         "entity": 224,
@@ -13291,6 +13291,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 228
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "CameraParticles"
@@ -13327,12 +13333,6 @@
                     "children_count": 2
                 },
                 "component_name": "Children"
-            },
-            {
-                "component_data": {
-                    "parent": 228
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 225,
@@ -13340,6 +13340,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 225
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "FirstEmitter"
@@ -13366,12 +13372,6 @@
                     }
                 },
                 "component_name": "Transform"
-            },
-            {
-                "component_data": {
-                    "parent": 225
-                },
-                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -13439,6 +13439,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 225
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "SecondEmitter"
                 },
                 "component_name": "Name"
@@ -13463,12 +13469,6 @@
                     }
                 },
                 "component_name": "Transform"
-            },
-            {
-                "component_data": {
-                    "parent": 225
-                },
-                "component_name": "Parent"
             },
             {
                 "component_data": {
@@ -13536,6 +13536,12 @@
         "components": [
             {
                 "component_data": {
+                    "parent": 224
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "name": "CameraLight"
                 },
                 "component_name": "Name"
@@ -13569,12 +13575,6 @@
                     "children_count": 1
                 },
                 "component_name": "Children"
-            },
-            {
-                "component_data": {
-                    "parent": 224
-                },
-                "component_name": "Parent"
             },
             {
                 "component_data": {
