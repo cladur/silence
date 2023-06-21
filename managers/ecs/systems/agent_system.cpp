@@ -148,12 +148,11 @@ void AgentSystem::update(World &world, float dt) {
 		std::string climb_button;
 		std::string interact_button;
 		std::string attack_button;
-		if (agent_data.gamepad >=0) {
+		if (agent_data.gamepad >= 0) {
 			climb_button = "A";
 			interact_button = "X";
 			attack_button = "X";
-		}
-		else {
+		} else {
 			climb_button = "Space";
 			interact_button = "E";
 			attack_button = "LMB";
@@ -177,10 +176,9 @@ void AgentSystem::update(World &world, float dt) {
 
 		//TODO: replace hard coded values with one derived from collider
 		bool crouch_triggered = false;
-		if(agent_data.gamepad > -1) {
+		if (agent_data.gamepad > -1) {
 			crouch_triggered = input_manager.is_action_just_pressed("agent_crouch", agent_data.gamepad);
-		}
-		else {
+		} else {
 			crouch_triggered = input_manager.is_action_just_pressed("agent_crouch");
 		}
 
@@ -296,12 +294,11 @@ void AgentSystem::update(World &world, float dt) {
 		if (*CVarSystem::get()->get_int_cvar("game.controlling_agent") &&
 				!*CVarSystem::get()->get_int_cvar("debug_camera.use")) {
 			auto mouse_delta = glm::vec2(0.0f);
-			if(agent_data.gamepad >= 0) {
-				mouse_delta.x = input_manager.get_axis("agent_look_left", "agent_look_right",agent_data.gamepad);
+			if (agent_data.gamepad >= 0) {
+				mouse_delta.x = input_manager.get_axis("agent_look_left", "agent_look_right", agent_data.gamepad);
 				mouse_delta.y = input_manager.get_axis("agent_look_up", "agent_look_down", agent_data.gamepad);
 				mouse_delta *= 20.0;
-			}
-			else {
+			} else {
 				mouse_delta = input_manager.get_mouse_delta();
 			}
 
@@ -380,20 +377,19 @@ void AgentSystem::update(World &world, float dt) {
 					interaction_sprite->position.y = 50.0f + (0.15f * render_extent.y * view_pos.y / abs(view_pos.z));
 					interaction_sprite->display = true;
 					ui_button_hint->text = climb_button;
-					if(agent_data.gamepad < 0) {
+					if (agent_data.gamepad < 0) {
 						ui_button_hint->size = glm::vec2(0.3f);
 					}
-					
+
 					ui_interaction_text->text = "Jump";
 					if (interaction_sprite->position.x > render_extent.x / 2.0f - 100.f) {
 						interaction_sprite->position.x = render_extent.x / 2.0f - 100.0f;
 					}
 
 					bool climb_triggered = false;
-					if(agent_data.gamepad > -1) {
+					if (agent_data.gamepad > -1) {
 						climb_triggered = input_manager.is_action_just_pressed("agent_climb", agent_data.gamepad);
-					}
-					else {
+					} else {
 						climb_triggered = input_manager.is_action_just_pressed("agent_climb");
 					}
 					if (climb_triggered) {
@@ -417,12 +413,11 @@ void AgentSystem::update(World &world, float dt) {
 			if (!is_climbing) {
 				//Agent interaction
 				bool interaction_triggered = false;
-					if(agent_data.gamepad > -1) {
-						interaction_triggered = input_manager.is_action_just_pressed("agent_interact", agent_data.gamepad);
-					}
-					else {
-						interaction_triggered = input_manager.is_action_just_pressed("agent_interact");
-					}
+				if (agent_data.gamepad > -1) {
+					interaction_triggered = input_manager.is_action_just_pressed("agent_interact", agent_data.gamepad);
+				} else {
+					interaction_triggered = input_manager.is_action_just_pressed("agent_interact");
+				}
 				ColliderSphere sphere{};
 				sphere.radius = cvar_agent_interaction_range.get();
 				sphere.center = model_tf.get_global_position() + glm::vec3{ 0.0f, 1.0f, 0.0f };
@@ -560,7 +555,7 @@ void AgentSystem::update(World &world, float dt) {
 										50.0f + (0.15f * render_extent.y * view_pos.y / abs(view_pos.z));
 								interaction_sprite->display = true;
 								ui_button_hint->text = attack_button;
-								if(agent_data.gamepad < 0) {
+								if (agent_data.gamepad < 0) {
 									ui_button_hint->size = glm::vec2(0.4f);
 								}
 								ui_interaction_text->text = "Kill";
@@ -569,12 +564,11 @@ void AgentSystem::update(World &world, float dt) {
 									interaction_sprite->position.x = render_extent.x / 2.0f - 125.0f;
 								}
 
-
 								bool attack_triggered = false;
-								if(agent_data.gamepad > -1) {
-									attack_triggered = input_manager.is_action_just_pressed("agent_attack", agent_data.gamepad);
-								}
-								else {
+								if (agent_data.gamepad > -1) {
+									attack_triggered =
+											input_manager.is_action_just_pressed("agent_attack", agent_data.gamepad);
+								} else {
 									attack_triggered = input_manager.is_action_just_pressed("agent_attack");
 								}
 								if (attack_triggered) {
@@ -603,10 +597,9 @@ void AgentSystem::update(World &world, float dt) {
 
 		// ZOOMING LOGIC
 		bool zoom_triggered = false;
-		if(agent_data.gamepad > -1) {
+		if (agent_data.gamepad > -1) {
 			zoom_triggered = input_manager.is_action_pressed("agent_zoom_camera", agent_data.gamepad);
-		}
-		else {
+		} else {
 			zoom_triggered = input_manager.is_action_pressed("agent_zoom_camera");
 		}
 		if (zoom_triggered) {
