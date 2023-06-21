@@ -7,7 +7,9 @@ add_executable(${GAME_NAME}
         menu_test.cpp
         menu_test.h)
 
-# Define the link libraries
+find_package(OpenMP)
+
 target_link_libraries(${GAME_NAME} PRIVATE
         silence_engine
+        OpenMP::OpenMP_CXX
         )

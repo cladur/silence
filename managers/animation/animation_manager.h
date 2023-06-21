@@ -13,7 +13,6 @@ struct AnimData {
 	SkinnedModelInstance *model;
 	Pose local_pose;
 	Pose model_pose;
-	//	float blend_time_ms = 400.0f;
 	bool has_changed = false;
 };
 
@@ -23,7 +22,7 @@ public:
 	AnimationManager(const AnimationManager &) = delete;
 
 	void update_pose(AnimData &data, float dt);
-	void change_animation(Entity entity, const std::string &new_animation_name);
+	void change_animation(Entity entity, const std::string &new_animation_name, float dt = 0.0f);
 
 	void local_to_model(AnimData &data);
 

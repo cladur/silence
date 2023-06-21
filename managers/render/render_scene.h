@@ -18,6 +18,10 @@ struct RenderScene {
 	glm::mat4 view;
 	glm::vec3 camera_pos;
 
+	glm::mat4 left_projection;
+	glm::mat4 left_view;
+	glm::vec3 left_camera_pos;
+
 	DebugCamera debug_camera;
 	Transform left_camera_transform;
 	Camera left_camera_params;
@@ -36,6 +40,11 @@ struct RenderScene {
 	AOBlurPass ssao_blur_pass;
 	CombinationPass combination_pass;
 	BloomPass bloom_pass;
+	ShadowPass shadow_pass;
+	MousePickPass mouse_pick_pass;
+	ParticlePass particle_pass;
+	HighlightPass highlight_pass;
+	DecalPass decal_pass;
 
 	Framebuffer render_framebuffer;
 	Framebuffer final_framebuffer;
@@ -44,8 +53,20 @@ struct RenderScene {
 	SSAOBuffer ssao_buffer;
 	CombinationBuffer combination_buffer;
 	BloomBuffer bloom_buffer;
+	ShadowBuffer shadow_buffer;
 	SkyboxBuffer skybox_buffer;
+	ParticleBuffer particle_buffer;
+	HighlightBuffer highlight_buffer;
+
+	// render extent that does not change whether we're in splitscreen or not
+	glm::vec2 full_render_extent;
+
 	glm::vec2 render_extent;
+
+	glm::vec2 camera_near_far;
+
+	// Editor only
+	MousePickFramebuffer mouse_pick_framebuffer;
 
 	DebugDraw debug_draw;
 
@@ -54,17 +75,24 @@ struct RenderScene {
 	std::vector<LightDrawCommand> light_draw_commands;
 	std::vector<DrawCommand> draw_commands;
 	std::vector<SkinnedDrawCommand> skinned_draw_commands;
+	std::vector<DecalDrawCommand> decal_draw_commands;
 
 	bool draw_skybox = false;
+	bool editor_mode = false;
 
 	void startup();
 	void draw_viewport(bool right_side = false);
-	void draw();
+	void draw(bool editor_mode = false);
 	void resize_framebuffer(uint32_t width, uint32_t height);
 
-	void queue_draw(ModelInstance *model_instance, Transform *transform);
-	void queue_skinned_draw(SkinnedModelInstance *model_instance, Transform *transform);
+	void queue_draw(
+			ModelInstance *model_instance, Transform *transform, Entity entity, HighlightData highlight_data = {});
+	void queue_skinned_draw(
+			SkinnedModelInstance *model_instance, Transform *transform, Entity entity, HighlightData highlight_data);
 	void queue_light_draw(Light *light, Transform *transform);
+	void queue_decal_draw(Decal *decal, Transform *transform);
+
+	Entity get_entity_at_mouse_position(float x, float y) const;
 };
 
 #endif //SILENCE_RENDER_SCENE_H

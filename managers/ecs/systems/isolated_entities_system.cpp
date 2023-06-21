@@ -9,12 +9,14 @@ void IsolatedEntitiesSystem::startup(World &world) {
 	Signature whitelist;
 	blacklist.set(world.get_component_type<Children>());
 	blacklist.set(world.get_component_type<Parent>());
+	blacklist.set(world.get_component_type<Attachment>());
 	whitelist.set(world.get_component_type<Transform>());
 
 	world.set_system_component_blacklist<IsolatedEntitiesSystem>(blacklist);
 	world.set_system_component_whitelist<IsolatedEntitiesSystem>(whitelist);
 }
 void IsolatedEntitiesSystem::update(World &world, float dt) {
+	ZoneScopedN("IsolatedEntitiesSystem::update");
 	for (auto const &entity : entities) {
 		world.get_component<Transform>(entity).update_global_model_matrix();
 	}

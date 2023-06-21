@@ -7,6 +7,7 @@
 #include <glm/geometric.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
+#include <glm/gtx/quaternion.hpp>
 
 struct Transform {
 private:
@@ -121,13 +122,17 @@ public:
 	}
 
 	[[nodiscard]] glm::vec3 get_global_position() const {
-		return glm::vec3(global_model_matrix[3]);
+		return global_model_matrix[3];
 	}
 	[[nodiscard]] glm::vec3 get_global_euler_rot() const {
-		return glm::eulerAngles(glm::quat_cast(global_model_matrix));
+		return glm::eulerAngles(get_global_orientation());
 	}
 	[[nodiscard]] glm::quat get_global_orientation() const {
-		return glm::quat_cast(global_model_matrix);
+		glm::vec4 temp4;
+		glm::vec3 temp3;
+		glm::quat orient;
+		glm::decompose(global_model_matrix, temp3, orient, temp3, temp3, temp4);
+		return orient;
 	}
 
 	[[nodiscard]] glm::vec3 get_global_scale() const {
@@ -200,6 +205,19 @@ public:
 		this->changed = true;
 	}
 
+	// Returns true if the rotation is finished
+	[[nodiscard]] bool lerp_rotation_towards(float target_angle, glm::vec3 axis, float dt) {
+		glm::quat target_quat = glm::angleAxis(glm::radians(target_angle), axis);
+		set_orientation(glm::slerp(orientation, target_quat, dt * 5.0f));
+
+		if (glm::length(orientation - target_quat) < 0.01f) {
+			orientation = target_quat;
+			return true;
+		}
+
+		return false;
+	}
+
 	void set_orientation(const glm::quat &new_orientation) {
 		this->orientation = glm::normalize(new_orientation);
 		this->changed = true;
@@ -241,7 +259,7 @@ public:
 
 	void calculate_local_model_matrix() {
 		// translation * rotation * scale (also known as TRS matrix)
-		this->local_model_matrix = glm::translate(glm::mat4(1.0f), position) * glm::mat4_cast(orientation) *
+		this->local_model_matrix = glm::translate(glm::mat4(1.0f), position) * glm::toMat4(orientation) *
 				glm::scale(glm::mat4(1.0f), scale);
 
 		changed = false;

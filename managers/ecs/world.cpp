@@ -1,13 +1,20 @@
 #include "world.h"
 
+#include "assets/material_asset.h"
+#include "assets/model_asset.h"
+#include "assets/skinned_model_asset.h"
 #include "component_visitor.h"
 #include "components/children_component.h"
 #include "components/parent_component.h"
+#include "ecs/component_visitor.h"
 #include "resource/resource_manager.h"
 #include "serialization.h"
 #include <spdlog/spdlog.h>
 
+#include <common/TracyColor.hpp>
+#include <common/TracyQueue.hpp>
 #include <future>
+#include <tracy/tracy.hpp>
 #include <vector>
 
 void World::startup() {
@@ -129,7 +136,7 @@ void World::serialize_entity_json(nlohmann::json &json, Entity entity, bool is_a
 	component_manager->serialize_entity(json["components"], entity);
 }
 
-void World::deserialize_entity_json(nlohmann::json &json, std::vector<Entity> &entities) {
+Entity World::deserialize_entity_json(nlohmann::json &json, std::vector<Entity> &entities) {
 	Entity serialized_entity = json["entity"];
 	serialized_entity = serialized_entity == 0 ? create_entity() : create_entity(serialized_entity);
 	entities.push_back(serialized_entity);
@@ -143,30 +150,114 @@ void World::deserialize_entity_json(nlohmann::json &json, std::vector<Entity> &e
 		auto component_data = map[component_id](component["component_data"]);
 		ComponentVisitor::visit(*this, serialized_entity, component_data);
 	}
+
+	return serialized_entity;
 }
 
 void World::deserialize_entities_json(nlohmann::json &json, std::vector<Entity> &entities) {
+	ZoneScopedN("World::deserialize_entities_json");
 	ResourceManager &resource_manager = ResourceManager::get();
 	std::set<std::string> assets_to_load;
-	for (auto &array_entity : json) {
-		for (auto &component : array_entity["components"]) {
-			std::string component_name = component["component_name"];
-			int component_id = component_ids[component_name];
-			if (component_id == component_ids["ModelInstance"]) {
-				std::string model_path = component["component_data"]["model_name"];
-				assets_to_load.insert(model_path);
+	std::set<std::string> skinned_assets_to_load;
+	std::set<std::string> ktx_paths;
+
+	{
+		ZoneScopedN("preloading stuff to load");
+		for (auto &array_entity : json) {
+			for (auto &component : array_entity["components"]) {
+				std::string component_name = component["component_name"];
+				int component_id = component_ids[component_name];
+				if (component_id == component_ids["ModelInstance"]) {
+					std::string model_path = component["component_data"]["model_name"];
+					assets_to_load.insert(model_path);
+				} else if (component_id == component_ids["SkinnedModelInstance"]) {
+					std::string model_path = component["component_data"]["model_name"];
+					skinned_assets_to_load.insert(model_path);
+				}
+			}
+		}
+
+		ktx_paths.insert("resources/assets_export/cubemaps/venice_sunset/environment_map.ktx2");
+		ktx_paths.insert("resources/assets_export/cubemaps/venice_sunset/irradiance_map.ktx2");
+		ktx_paths.insert("resources/assets_export/cubemaps/venice_sunset/prefilter_map.ktx2");
+		ktx_paths.insert("resources/assets_export/cubemaps/venice_sunset/brdf_lut.ktx2");
+
+		struct NodeMesh {
+			std::string material_path;
+			std::string mesh_path;
+		};
+
+		for (int i = 0; i < assets_to_load.size() + skinned_assets_to_load.size(); i++) {
+			std::string asset;
+			if (i >= assets_to_load.size()) {
+				asset = *std::next(skinned_assets_to_load.begin(), i - assets_to_load.size());
+			} else {
+				asset = *std::next(assets_to_load.begin(), i);
+			}
+			//auto asset = *std::next(assets_to_load.begin(), i);
+			assets::AssetFile file;
+			bool loaded = assets::load_binary_file(asset_path(asset).c_str(), file);
+			std::vector<std::string> paths;
+			if (i >= assets_to_load.size()) {
+				assets::SkinnedModelInfo model = assets::read_skinned_model_info(&file);
+				for (const auto &pair : model.node_meshes) {
+					paths.push_back(pair.second.material_path);
+				}
+			} else {
+				assets::ModelInfo model = assets::read_model_info(&file);
+				for (const auto &pair : model.node_meshes) {
+					paths.push_back(pair.second.material_path);
+				}
+			}
+
+			for (auto &path : paths) {
+				auto material_name = path.c_str();
+				assets::AssetFile material_file;
+				loaded = assets::load_binary_file(asset_path(material_name).c_str(), material_file);
+				assets::MaterialInfo material = assets::read_material_info(&material_file);
+				ktx_paths.insert(asset_path(material.textures["baseColor"]));
+				ktx_paths.insert(asset_path(material.textures["normals"]));
+				ktx_paths.insert(asset_path(material.textures["metallicRoughness"]));
+				ktx_paths.insert(asset_path(material.textures["emissive"]));
 			}
 		}
 	}
 
-	std::vector<std::future<void>> futures = {};
-	futures.reserve(assets_to_load.size());
-	for (auto &asset : assets_to_load) {
-		futures.emplace_back(std::async(std::launch::deferred,
-				[&resource_manager, &asset] { resource_manager.load_model(asset_path(asset).c_str()); }));
+	{
+		ZoneScopedN("transcoding ktx textures");
+
+		SPDLOG_INFO("Transcoding ktx textures");
+
+		ktx_texture_transcode_fmt_e tf = KTX_TTF_RGBA32;
+		GLenum format = Texture::get_supported_compressed_format();
+
+		if (format == GL_COMPRESSED_RGBA_BPTC_UNORM) {
+			tf = KTX_TTF_BC7_RGBA;
+		} else if (format == GL_COMPRESSED_RGBA_S3TC_DXT5_EXT) {
+			tf = KTX_TTF_BC3_RGBA;
+		}
+
+//count time for loading ktx
+#pragma omp parallel for
+		for (int i = 0; i < ktx_paths.size(); i++) {
+			int64_t thread = omp_get_thread_num();
+			ktxTexture2 *ktx = nullptr;
+			std::string ktx_path;
+#pragma omp critical
+			{ ktx_path = *std::next(ktx_paths.begin(), i); }
+			ktxTexture2_CreateFromNamedFile(ktx_path.c_str(), KTX_TEXTURE_CREATE_NO_FLAGS, &ktx);
+
+			if (ktx) {
+				ktxTexture2_TranscodeBasis(ktx, tf, 0);
+			}
+			std::pair<std::string, ktxTexture2 *> pair = std::make_pair(ktx_path, ktx);
+#pragma omp critical
+			{ Texture::ktx_textures.insert(pair); }
+		}
 	}
-	for (auto &f : futures) {
-		f.wait();
+
+	for (auto &asset : assets_to_load) {
+		resource_manager.load_model(asset_path(asset).c_str());
 	}
 
 	for (auto &array_entity : json) {
@@ -200,4 +291,101 @@ int World::get_registered_components() {
 
 Scene *World::get_parent_scene() {
 	return parent_scene;
+}
+
+void World::update_name(std::vector<Entity> &entities, Entity &new_entity_id) {
+	std::string entity_name;
+	int name_counter = 0;
+
+	if (has_component<Name>(new_entity_id)) {
+		auto &name = get_component<Name>(new_entity_id);
+		name.name = name.name + std::to_string(name_counter);
+		entity_name = get_component<Name>(new_entity_id).name;
+	}
+
+	bool good_name = false;
+
+	while (!good_name) {
+		good_name = true;
+		for (auto entity : entities) {
+			if (entity == new_entity_id) {
+				continue;
+			}
+
+			if (has_component<Name>(entity)) {
+				if (get_component<Name>(entity).name == entity_name) {
+					good_name = false;
+					auto &name = get_component<Name>(new_entity_id);
+					// remove all integers from the end of the name
+					name.name.erase(
+							std::find_if(name.name.rbegin(), name.name.rend(), [](int ch) { return !std::isdigit(ch); })
+									.base(),
+							name.name.end());
+					name.name = name.name + std::to_string(++name_counter);
+					break;
+				}
+			}
+		}
+	}
+}
+void World::deserialize_prefab(nlohmann::json &json, std::vector<Entity> &entities) {
+	int number_of_entities = json.size();
+
+	if (number_of_entities == 0) {
+		return;
+	}
+
+	if (number_of_entities == 1) {
+		json.back()["entity"] = 0;
+		deserialize_entity_json(json.back(), entities);
+		return;
+	}
+
+	std::unordered_map<Entity, Entity> prefab_id_to_entity_id_map;
+	std::vector<Entity> entity_ids;
+	entity_ids.resize(number_of_entities);
+	int i = 0;
+	Entity new_entity_id = 0;
+
+	for (auto entity_json : json) {
+		Entity serialized_entity = entity_json["entity"];
+		entity_json["entity"] = 0;
+		new_entity_id = deserialize_entity_json(entity_json, entities);
+		entity_ids[i++] = new_entity_id;
+		prefab_id_to_entity_id_map[serialized_entity] = new_entity_id;
+	}
+
+	for (auto entity_id : entity_ids) {
+		update_parent(entity_id, prefab_id_to_entity_id_map);
+		update_children(entity_id, prefab_id_to_entity_id_map);
+		ComponentVisitor::update_ids(*this, entity_id, prefab_id_to_entity_id_map);
+		//update_name(entities, new_entity_id);
+	}
+}
+
+void World::update_children(Entity entity, const std::unordered_map<Entity, Entity> &id_map) {
+	if (!has_component<Children>(entity)) {
+		return;
+	}
+
+	auto &children = get_component<Children>(entity);
+	for (auto &child : children.children) {
+		if (child == 0) {
+			return;
+		}
+		Entity new_id = id_map.at(child);
+		child = new_id;
+	}
+	SPDLOG_INFO("Children: {}", children.children[0]);
+}
+void World::update_parent(Entity entity, const std::unordered_map<Entity, Entity> &id_map) {
+	if (!has_component<Parent>(entity)) {
+		return;
+	}
+
+	auto &parent = get_component<Parent>(entity);
+	if (parent.parent != 0) {
+		Entity new_id = id_map.at(parent.parent);
+		parent.parent = new_id;
+	}
 }

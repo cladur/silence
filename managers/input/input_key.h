@@ -37,6 +37,7 @@ enum class InputKey {
 	ENTER,
 	ESCAPE,
 	BACKSPACE,
+	DELETE,
 	TAB,
 	LEFT_CONTROL,
 	RIGHT_CONTROL,
@@ -206,6 +207,8 @@ static InputKey glfw_key_to_input_key(int key) {
 			return InputKey::ESCAPE;
 		case GLFW_KEY_BACKSPACE:
 			return InputKey::BACKSPACE;
+		case GLFW_KEY_DELETE:
+			return InputKey::DELETE;
 		case GLFW_KEY_TAB:
 			return InputKey::TAB;
 		case GLFW_KEY_LEFT_CONTROL:

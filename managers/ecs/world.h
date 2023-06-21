@@ -9,56 +9,13 @@
 #include <memory>
 #include <type_traits>
 
-enum UpdateOrder {
-	EcsOnLoad,
-	EcsPostLoad,
-	EcsPreUpdate,
-	EcsOnUpdate,
-	EcsOnValidate,
-	EcsPostUpdate,
-	EcsPreStore,
-	EcsOnStore
-};
-
-template <typename T> class SortedVector {
-private:
-	std::vector<T> elements;
-	std::vector<UpdateOrder> priorities;
-	std::map<UpdateOrder, int> elements_per_phase;
-
-public:
-	void add(T element, UpdateOrder priority) {
-		int index = 0;
-		for (int i = 0; i < priority; i++) {
-			index += elements_per_phase[static_cast<UpdateOrder>(i)];
-		}
-		elements_per_phase[priority]++;
-		elements.insert(elements.begin() + index, element);
-		priorities.insert(priorities.begin() + index, priority);
-	}
-
-	T get(int index) {
-		return elements[index];
-	}
-
-	T operator[](int index) {
-		return elements[index];
-	}
-
-	std::vector<T>::iterator begin() {
-		return elements.begin();
-	}
-
-	// Add a method to get the end iterator
-	std::vector<T>::iterator end() {
-		return elements.end();
-	}
-
-	void print_values() {
-		for (int i = 0; i < elements.size(); i++) {
-			SPDLOG_WARN("Prio: {}", priorities[i]);
-		}
-	}
+enum class UpdateOrder {
+	PrePreAnimation,
+	PreAnimation,
+	DuringAnimation,
+	PostAnimation,
+	DuringPhysics,
+	PostPhysics,
 };
 
 struct Scene;
@@ -78,7 +35,15 @@ private:
 	std::vector<std::string> component_names;
 	std::unordered_map<std::string, int> component_ids;
 	int registered_components = 0;
-	SortedVector<std::shared_ptr<BaseSystem>> systems;
+	std::vector<std::shared_ptr<BaseSystem>> pre_pre_animation_systems;
+	std::vector<std::shared_ptr<BaseSystem>> pre_animation_systems;
+	std::vector<std::shared_ptr<BaseSystem>> during_animation_systems;
+	std::vector<std::shared_ptr<BaseSystem>> post_animation_systems;
+	std::vector<std::shared_ptr<BaseSystem>> during_physics_systems;
+	std::vector<std::shared_ptr<BaseSystem>> post_physics_systems;
+
+	void update_children(Entity entity, const std::unordered_map<Entity, Entity> &id_map);
+	void update_parent(Entity entity, const std::unordered_map<Entity, Entity> &id_map);
 
 public:
 	Scene *parent_scene;
@@ -160,15 +125,66 @@ public:
 	}
 
 	// System methods
-	template <typename T> void register_system(UpdateOrder priority = UpdateOrder::EcsOnUpdate) {
+	template <typename T> std::shared_ptr<T> register_system(UpdateOrder priority = UpdateOrder::PreAnimation) {
 		auto system = system_manager->register_system<T>();
 		system->startup(*this);
-		//systems.emplace_back(std::move(system));
-		systems.add(std::move(system), priority);
+
+		switch (priority) {
+			case UpdateOrder::PrePreAnimation:
+				pre_pre_animation_systems.emplace_back(system);
+				break;
+			case UpdateOrder::PreAnimation:
+				pre_animation_systems.emplace_back(system);
+				break;
+			case UpdateOrder::DuringAnimation:
+				during_animation_systems.emplace_back(system);
+				break;
+			case UpdateOrder::PostAnimation:
+				post_animation_systems.emplace_back(system);
+				break;
+			case UpdateOrder::DuringPhysics:
+				during_physics_systems.emplace_back(system);
+				break;
+			case UpdateOrder::PostPhysics:
+				post_physics_systems.emplace_back(system);
+				break;
+		}
+		return system;
 	}
 
 	void update(float dt) {
-		for (auto &system : systems) {
+		for (auto &system : pre_pre_animation_systems) {
+			system->update(*this, dt);
+		}
+
+		for (auto &system : pre_animation_systems) {
+			system->update(*this, dt);
+		}
+
+		for (auto &system : during_animation_systems) {
+			system->update(*this, dt);
+		}
+
+		for (auto &system : post_animation_systems) {
+			system->update(*this, dt);
+		}
+
+		float fixed_dt = 1 / 50.0f;
+
+		float frame_time = dt;
+
+		// Semi-fixed timestep
+		// Physics will be updated either with fixed_dt or dt, whichever is smaller
+		// In case of fixed_dt, the update will be called multiple times
+		while (frame_time > 0.0f) {
+			float delta_time = std::min(frame_time, fixed_dt);
+			for (auto &system : during_physics_systems) {
+				system->update(*this, delta_time);
+			}
+			frame_time -= delta_time;
+		}
+
+		for (auto &system : post_physics_systems) {
 			system->update(*this, dt);
 		}
 	}
@@ -187,7 +203,10 @@ public:
 		// if typename starts with struct, remove it
 		if (type_name.substr(0, 7) == "struct ") {
 			type_name.erase(0, 7);
+		} else if (type_name.substr(0, 6) == "class ") {
+			type_name.erase(0, 6);
 		}
+
 		// Remove number prefix from type name
 		while (type_name[0] >= '0' && type_name[0] <= '9') {
 			type_name.erase(0, 1);
@@ -202,8 +221,10 @@ public:
 	bool has_child(Entity parent, Entity child);
 	bool reparent(Entity new_parent, Entity child, bool keep_transform = false);
 	void serialize_entity_json(nlohmann::json &json, Entity entity, bool is_archetype = false);
-	void deserialize_entity_json(nlohmann::json &json, std::vector<Entity> &entities);
+	Entity deserialize_entity_json(nlohmann::json &json, std::vector<Entity> &entities);
 	void deserialize_entities_json(nlohmann::json &json, std::vector<Entity> &entities);
+	void update_name(std::vector<Entity> &entities, Entity &new_entity_id);
+	void deserialize_prefab(nlohmann::json &json, std::vector<Entity> &entities);
 	void print_components();
 
 	void add_component(Entity entity, int component_id);

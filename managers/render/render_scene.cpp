@@ -6,6 +6,7 @@
 #include "render/transparent_elements/ui_manager.h"
 #include "render_manager.h"
 #include <glad/glad.h>
+#include <render/transparent_elements/particle_manager.h>
 
 AutoCVarFloat cvar_draw_distance_near("render.draw_distance.near", "Near distance cull", 0.001f);
 AutoCVarFloat cvar_draw_distance_far("render.draw_distance.far", "Far distance cull", 5000);
@@ -17,7 +18,7 @@ AutoCVarInt cvar_debug_camera_use("debug_camera.use", "Use debug camera", 1, CVa
 
 // SSAO Params
 AutoCVarInt cvar_ssao("render.ssao", "Use SSAO", 1, CVarFlags::EditCheckbox);
-AutoCVarFloat cvar_ssao_radius("render.ssao.radius", "SSAO radius", 0.5f);
+AutoCVarFloat cvar_ssao_radius("render.ssao.radius", "SSAO radius", 0.24f);
 AutoCVarFloat cvar_ssao_bias("render.ssao.bias", "SSAO bias", 0.04f);
 AutoCVarInt cvar_ao_blur("render.ssao_blur", "Should SSAO be blurred", 1, CVarFlags::EditCheckbox);
 
@@ -33,6 +34,11 @@ void RenderScene::startup() {
 	combination_pass.startup();
 	default_pass = &pbr_pass;
 	bloom_pass.startup();
+	shadow_pass.startup();
+	mouse_pick_pass.startup();
+	particle_pass.startup();
+	highlight_pass.startup();
+	decal_pass.startup();
 
 	// Size of the viewport doesn't matter here, it will be resized either way
 	render_extent = glm::vec2(100, 100);
@@ -42,8 +48,12 @@ void RenderScene::startup() {
 	ssao_buffer.startup(render_extent.x, render_extent.y);
 	pbr_buffer.startup(render_extent.x, render_extent.y);
 	bloom_buffer.startup(render_extent.x, render_extent.y, 5);
+	shadow_buffer.startup(1024, 1024, 0.0001f, 25.0f);
 	combination_buffer.startup(render_extent.x, render_extent.y);
 	skybox_buffer.startup(render_extent.x, render_extent.y);
+	mouse_pick_framebuffer.startup(render_extent.x, render_extent.y);
+	particle_buffer.startup(render_extent.x, render_extent.y);
+	highlight_buffer.startup(render_extent.x, render_extent.y);
 
 	debug_draw.startup();
 	transparent_pass.startup();
@@ -53,12 +63,33 @@ void RenderScene::startup() {
 	debug_camera.pitch = -20.0f;
 	debug_camera.update_camera_vectors();
 	UIManager::get().set_render_scene(this);
+	auto &ui = UIManager::get();
+
+	ui.create_ui_scene("frame_scene");
+	ui.activate_ui_scene("frame_scene");
+	auto &anchor = ui.add_ui_anchor("frame_scene", "anchor");
+	anchor.is_screen_space = true;
+	anchor.is_billboard = false;
+	anchor.x = 0.05f;
+	anchor.y = 0.95f;
+	anchor.display = true;
+	ui.add_as_root("frame_scene", "anchor");
+	auto &fps = ui.add_ui_text("frame_scene", "fps");
+	fps.is_screen_space = true;
+	fps.is_billboard = false;
+	fps.text = "FPS: 0 (0 ms)";
+	fps.position = glm::vec3(0.25f, 0.75f, 0.0f);
+	fps.size = glm::vec2(1.0f, 1.0f);
+	fps.display = true;
+	ui.add_to_root("frame_scene", "fps", "anchor");
 }
 
 void RenderScene::draw_viewport(bool right_side) {
+	ZoneScopedN("RenderScene::draw_viewport");
+
 	glDepthMask(GL_TRUE);
-	g_buffer.bind();
 	glViewport(0, 0, (int)render_extent.x, (int)render_extent.y);
+	g_buffer.bind();
 
 	// Clear the screen
 	glad_glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -87,22 +118,48 @@ void RenderScene::draw_viewport(bool right_side) {
 				cvar_draw_distance_far.get());
 		view = glm::inverse(camera_transform.get_global_model_matrix());
 		camera_pos = camera_transform.get_global_position();
+		if (!right_side) {
+			left_projection = projection;
+			left_view = view;
+			left_camera_pos = camera_pos;
+		}
 	}
-
-	UIManager::get().set_render_scene(this);
-	UIManager::get().draw();
-
-	// Enable depth testing
-	glEnable(GL_DEPTH_TEST);
 
 	g_buffer_pass.draw(*this);
 
+	glDisable(GL_BLEND);
+	glDepthMask(GL_FALSE);
+	decal_pass.draw(*this);
+	glDepthMask(GL_TRUE);
+
+	// HIGHLIGHT PASS
+	highlight_buffer.bind();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glDepthMask(GL_FALSE);
+
+	// all the see-through highlights
+	highlight_pass.draw_xray(*this, right_side);
+
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, g_buffer.framebuffer_id);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, highlight_buffer.framebuffer_id); // write to default framebuffer
+	glBlitFramebuffer(0, 0, render_extent.x, render_extent.y, 0, 0, render_extent.x, render_extent.y,
+			GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+
+	glDepthFunc(GL_LEQUAL);
+
+	// all the normal highlights
+	highlight_pass.draw_normal(*this, right_side);
+
+	glDepthMask(GL_TRUE);
+
 	pbr_buffer.bind();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glDisable(GL_CULL_FACE);
 	pbr_pass.draw(*this);
 
-	glEnable(GL_CULL_FACE);
 	glDisable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
 	glCullFace(GL_FRONT);
 	glEnable(GL_BLEND);
 	glBlendEquation(GL_FUNC_ADD);
@@ -147,12 +204,46 @@ void RenderScene::draw_viewport(bool right_side) {
 	skybox_pass.draw(*this);
 	glDepthFunc(GL_LESS);
 
+	particle_buffer.bind();
+	// need to clear alpha channel
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, particle_buffer.framebuffer_id);
+	glBlitFramebuffer(0, 0, render_extent.x, render_extent.y, 0, 0, render_extent.x, render_extent.y,
+			GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glBlendEquation(GL_FUNC_ADD);
+
+	glDepthMask(GL_FALSE);
+	particle_pass.draw(*this, right_side);
+
+	glDepthMask(GL_TRUE);
+
 	combination_buffer.bind();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glDepthMask(GL_FALSE);
 
 	combination_pass.draw(*this);
+
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, g_buffer.framebuffer_id);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, combination_buffer.framebuffer_id); // write to default framebuffer
+	// blit to default framebuffer. Note that this may or may not work as the internal formats of both the FBO and
+	// default framebuffer have to match. the internal formats are implementation defined. This works on all of my
+	// systems, but if it doesn't on yours you'll likely have to write to the depth buffer in another shader stage (or
+	// somehow see to match the default framebuffer's internal format with the FBO's internal format).
+	glBlitFramebuffer(0, 0, render_extent.x, render_extent.y, 0, 0, render_extent.x, render_extent.y,
+			GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+
+	glDepthMask(GL_TRUE);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	transparent_pass.draw_worldspace(*this);
+	glDisable(GL_BLEND);
+	glDepthMask(GL_FALSE);
 
 	bloom_buffer.bind();
 	bloom_pass.draw(*this);
@@ -173,15 +264,17 @@ void RenderScene::draw_viewport(bool right_side) {
 
 	debug_draw.draw();
 
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	// ui needs to go last, later to be a different render target
-	// sprite_draw.draw();
-	transparent_pass.draw(*this);
-	glDisable(GL_BLEND);
+	if (editor_mode) {
+		mouse_pick_framebuffer.bind();
+		glad_glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		mouse_pick_pass.draw(*this);
+		debug_draw.draw_mouse_pick();
+	}
 }
 
-void RenderScene::draw() {
+void RenderScene::draw(bool editor_mode) {
+	ZoneScopedN("RenderScene::draw");
 	static bool was_splitscreen = cvar_splitscreen.get();
 	static bool was_debug_camera = cvar_debug_camera_use.get();
 	if (was_splitscreen != cvar_splitscreen.get() || was_debug_camera != cvar_debug_camera_use.get()) {
@@ -191,20 +284,42 @@ void RenderScene::draw() {
 		resize_framebuffer(window_extent.x, window_extent.y);
 	}
 
+	camera_near_far = glm::vec2(cvar_draw_distance_near.get(), cvar_draw_distance_far.get());
+
+	UIManager::get().set_render_scene(this);
+	UIManager::get().draw();
+
+	transparent_pass.sort_objects(*this);
+
+	highlight_pass.sort_highlights(*this);
+
+	// Draw shadow maps
+	glViewport(0, 0, (int)shadow_buffer.shadow_width, (int)shadow_buffer.shadow_height);
+	shadow_buffer.bind();
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+	shadow_pass.draw(*this);
+	glCullFace(GL_FRONT);
+
 	if (cvar_splitscreen.get() && !cvar_debug_camera_use.get()) {
-		draw_viewport(false);
+		draw_viewport(false); // agent
+		{
+			ZoneScopedN("RenderScene::draw");
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, render_framebuffer.framebuffer_id);
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, final_framebuffer.framebuffer_id);
+			glBlitFramebuffer(0, 0, render_extent.x, render_extent.y, 0, 0, render_extent.x, render_extent.y,
+					GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		}
 
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, render_framebuffer.framebuffer_id);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, final_framebuffer.framebuffer_id);
-		glBlitFramebuffer(0, 0, render_extent.x, render_extent.y, 0, 0, render_extent.x, render_extent.y,
-				GL_COLOR_BUFFER_BIT, GL_NEAREST);
-
-		draw_viewport(true);
-
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, render_framebuffer.framebuffer_id);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, final_framebuffer.framebuffer_id);
-		glBlitFramebuffer(0, 0, render_extent.x, render_extent.y, render_extent.x, 0, 2 * render_extent.x,
-				render_extent.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		draw_viewport(true); // hacker
+		{
+			ZoneScopedN("RenderScene::blit");
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, render_framebuffer.framebuffer_id);
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, final_framebuffer.framebuffer_id);
+			glBlitFramebuffer(0, 0, render_extent.x, render_extent.y, render_extent.x, 0, 2 * render_extent.x,
+					render_extent.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		}
 	} else {
 		int *controlling_agent = CVarSystem::get()->get_int_cvar("game.controlling_agent");
 		bool right_side = false;
@@ -213,22 +328,47 @@ void RenderScene::draw() {
 		}
 		draw_viewport(right_side);
 
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, render_framebuffer.framebuffer_id);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, final_framebuffer.framebuffer_id);
-		glBlitFramebuffer(0, 0, render_extent.x, render_extent.y, 0, 0, render_extent.x, render_extent.y,
-				GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		{
+			ZoneScopedN("RenderScene::blit");
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, render_framebuffer.framebuffer_id);
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, final_framebuffer.framebuffer_id);
+			glBlitFramebuffer(0, 0, render_extent.x, render_extent.y, 0, 0, render_extent.x, render_extent.y,
+					GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		}
 	}
+
+	auto &fps = UIManager::get().get_ui_text("frame_scene", "fps");
+	fps.text = std::to_string((int)ImGui::GetIO().Framerate);
+
+	highlight_pass.clear();
+
+	glViewport(0, 0, full_render_extent.x, full_render_extent.y);
+	final_framebuffer.bind();
+	// i assume nothing else that needs depth info will be drawn after UI.
+	glClear(GL_DEPTH_BUFFER_BIT);
+
+	glEnable(GL_BLEND);
+	glDepthMask(GL_FALSE);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	transparent_pass.draw_screenspace(*this);
+
+	glDisable(GL_BLEND);
+	glDepthMask(GL_TRUE);
 
 	draw_commands.clear();
 #ifdef WIN32
 	skinned_draw_commands.clear();
 #endif
 	light_draw_commands.clear();
+	decal_draw_commands.clear();
 	debug_draw.vertices.clear();
+	debug_draw.mouse_pick_vertices.clear();
 }
 
 void RenderScene::resize_framebuffer(uint32_t width, uint32_t height) {
 	final_framebuffer.resize(width, height);
+	full_render_extent = glm::vec2(width, height);
 
 	if (cvar_splitscreen.get() && !cvar_debug_camera_use.get()) {
 		width /= 2;
@@ -241,22 +381,31 @@ void RenderScene::resize_framebuffer(uint32_t width, uint32_t height) {
 	bloom_buffer.resize(width, height);
 	combination_buffer.resize(width, height);
 	skybox_buffer.resize(width, height);
+	mouse_pick_framebuffer.resize(width, height);
+	particle_buffer.resize(width, height);
+	highlight_buffer.resize(width, height);
 
 	render_extent = glm::vec2(width, height);
 }
 
-void RenderScene::queue_draw(ModelInstance *model_instance, Transform *transform) {
+void RenderScene::queue_draw(
+		ModelInstance *model_instance, Transform *transform, Entity entity, HighlightData highlight_data) {
 	DrawCommand draw_command = {};
 	draw_command.model_instance = model_instance;
 	draw_command.transform = transform;
+	draw_command.entity = entity;
+	draw_command.highlight_data = highlight_data;
 
 	draw_commands.push_back(draw_command);
 }
 
-void RenderScene::queue_skinned_draw(SkinnedModelInstance *model_instance, Transform *transform) {
+void RenderScene::queue_skinned_draw(
+		SkinnedModelInstance *model_instance, Transform *transform, Entity entity, HighlightData highlight_data) {
 	SkinnedDrawCommand draw_command = {};
 	draw_command.model_instance = model_instance;
 	draw_command.transform = transform;
+	draw_command.entity = entity;
+	draw_command.highlight_data = highlight_data;
 
 #ifdef WIN32
 	skinned_draw_commands.push_back(draw_command);
@@ -269,4 +418,24 @@ void RenderScene::queue_light_draw(Light *light, Transform *transform) {
 	draw_command.transform = transform;
 
 	light_draw_commands.push_back(draw_command);
+}
+
+Entity RenderScene::get_entity_at_mouse_position(float x, float y) const {
+	Entity entity = 0;
+	// Invert y
+	y = render_extent.y - y;
+	// Get entity id from mouse_pick_framebuffer.texture_id texture
+	glBindFramebuffer(GL_FRAMEBUFFER, mouse_pick_framebuffer.framebuffer_id);
+	glReadBuffer(GL_COLOR_ATTACHMENT0);
+	glReadPixels(x, y, 1, 1, GL_RED_INTEGER, GL_UNSIGNED_INT, &entity);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	return entity;
+}
+
+void RenderScene::queue_decal_draw(Decal *decal, Transform *transform) {
+	DecalDrawCommand draw_command = {};
+	draw_command.decal = decal;
+	draw_command.transform = transform;
+
+	decal_draw_commands.push_back(draw_command);
 }

@@ -6,7 +6,7 @@ UIText::UIText(glm::vec3 position, float scale, const std::string &text, const s
 	this->position = position;
 	this->size = glm::vec2(scale, scale);
 	this->text = text;
-	this->texture_name = font_name;
+	this->font_name = font_name;
 }
 
 void UIText::draw() {
@@ -16,7 +16,7 @@ void UIText::draw() {
 	if (text.empty()) {
 		return;
 	}
-	UIManager::get().text_draw.draw_text(text, is_screen_space, position, color, size.x, texture_name, centered_x, centered_y,
+	UIManager::get().text_draw.draw_text(text, is_screen_space, position, color, size.x, font_name, centered_x, centered_y,
 	 		glm::vec3(0.0f), is_billboard);
 
 	for (auto &child : children) {
@@ -31,7 +31,7 @@ void UIText::draw(glm::vec3 parent_position, glm::vec2 parent_size) {
 	if (text.empty()) {
 		return;
 	}
-	UIManager::get().text_draw.draw_text(text, is_screen_space, position + parent_position, color, size.x, texture_name, centered_x,
+	UIManager::get().text_draw.draw_text(text, is_screen_space, position + parent_position, color, size.x, font_name, centered_x,
 	 		centered_y, glm::vec3(0.0f), is_billboard);
 
 	for (auto &child : children) {

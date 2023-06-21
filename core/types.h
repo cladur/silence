@@ -12,11 +12,13 @@ std::string shader_path(std::string_view path);
 using Entity = std::uint32_t;
 // ComponentType = id
 using ComponentType = std::uint8_t;
-const ComponentType MAX_COMPONENTS = 32;
+const ComponentType MAX_COMPONENTS = 64;
 
 using Signature = std::bitset<MAX_COMPONENTS>;
 const Entity MAX_ENTITIES = 5000;
 const Entity MAX_CHILDREN = 255;
+
+enum class DetectionTarget { AGENT, HACKER, NONE };
 
 // Serialization help
 

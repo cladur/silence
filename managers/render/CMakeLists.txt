@@ -20,7 +20,6 @@ add_library(${RENDER_MANAGER_NAME} STATIC
         debug/debug_draw.cpp debug/debug_draw.h
         transparent_elements/transparent_object.h
         transparent_elements/text/text_draw.cpp transparent_elements/text/text_draw.h
-        transparent_elements/ui/sprite_manager.cpp transparent_elements/ui/sprite_manager.h
         transparent_elements/ui/sprite_draw.cpp transparent_elements/ui/sprite_draw.h
         transparent_elements/ui_manager.cpp transparent_elements/ui_manager.h
         transparent_elements/ui/ui_elements/ui_slider.cpp transparent_elements/ui/ui_elements/ui_slider.h
@@ -39,13 +38,16 @@ add_library(${RENDER_MANAGER_NAME} STATIC
         common/mesh_bounding_sphere.cpp common/mesh_bounding_sphere.h
         ecs/skinned_render_system.cpp ecs/skinned_render_system.h
         ecs/light_render_system.cpp ecs/light_render_system.h
-        )
+        ecs/billboard_component.h
+        ecs/billboard_system.h ecs/billboard_system.cpp
+        ecs/particle_render_system.cpp ecs/particle_render_system.h transparent_elements/particle_manager.cpp transparent_elements/particle_manager.h transparent_elements/particle_data.h ecs/decal_system.cpp ecs/decal_system.h)
 
 # Include directories
 target_include_directories(${RENDER_MANAGER_NAME} PUBLIC ${MANAGER_DIR})
 
 # Link libraries
 find_package(glad CONFIG REQUIRED)
+find_package(OpenMP)
 
 target_link_libraries(${RENDER_MANAGER_NAME}
         PUBLIC
@@ -54,6 +56,7 @@ target_link_libraries(${RENDER_MANAGER_NAME}
         PRIVATE
         silence_input_manager
         silence_audio_manager
+        OpenMP::OpenMP_CXX
 
         silence_common
         silence_core

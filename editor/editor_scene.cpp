@@ -2,8 +2,8 @@
 #include "engine/scene.h"
 
 #include "display/display_manager.h"
-#include "ecs/systems/collision_system.h"
 #include "input/input_manager.h"
+#include "managers/physics/ecs/collision_system.h"
 #include "physics/physics_manager.h"
 
 #include "editor.h"
@@ -38,39 +38,6 @@ EditorScene::EditorScene(SceneType type) {
 void EditorScene::update(float dt) {
 	Scene::update(dt);
 
-	// BSP Vizualization, for now it's left in here, but could be moved to system in the future
-	//
-	//	bsp_tree = CollisionSystem::build_tree(world, entities, 10);
-	//
-	//	BSPNode *node = bsp_tree.get();
-	//	std::vector<BSPNode> nodes;
-	//	while (node != nullptr) {
-	//		nodes.push_back(*node);
-	//		if (node->front != nullptr) {
-	//			node = node->front.get();
-	//		} else if (node->back != nullptr) {
-	//			node = node->back.get();
-	//		} else {
-	//			node = nullptr;
-	//		}
-	//	}
-	//
-	//	for (auto &node : nodes) {
-	//		// calculate rotation from normal
-	//		glm::vec3 up = glm::vec3(0.0f, 0.0f, 1.0f);
-	//		glm::vec3 axis = glm::cross(up, node.plane.normal);
-	//		float angle = glm::acos(glm::dot(up, node.plane.normal));
-	//		glm::quat rotation = glm::angleAxis(angle, axis);
-	//
-	//		if (node.front || node.back) {
-	//			SPDLOG_INFO("normal {}", glm::to_string(node.plane.normal));
-	//			SPDLOG_INFO("point {}", glm::to_string(node.plane.point));
-	//			SPDLOG_INFO("entities {}", node.entities.size());
-	//			get_render_scene().debug_draw.draw_box(
-	//					node.plane.point, rotation, glm::vec3(20.0f, 20.0f, 0.1f), glm::vec3(1.0f, 0.0f, 0.0f));
-	//		}
-	//	}
-
 	InputManager &input_manager = InputManager::get();
 	DisplayManager &display_manager = DisplayManager::get();
 
@@ -87,6 +54,7 @@ void EditorScene::update(float dt) {
 			Ray ray{};
 			ray.origin = get_render_scene().debug_camera.get_position();
 			ray.direction = glm::normalize(get_render_scene().debug_camera.get_front());
+			ray.length = 10.0f;
 			glm::vec3 end = ray.origin + ray.direction * 1000.0f;
 			get_render_scene().debug_draw.draw_arrow(ray.origin, end);
 			HitInfo info;
@@ -106,6 +74,31 @@ void EditorScene::update(float dt) {
 		controlling_camera = false;
 		Editor::get()->controlling_camera = false;
 		display_manager.capture_mouse(false);
+	}
+}
+
+void EditorScene::duplicate_selected_entity() {
+	if (selected_entity == 0) {
+		return;
+	}
+
+	Entity parent = 0;
+	if (world.has_component<Parent>(selected_entity)) {
+		parent = world.get_component<Parent>(selected_entity).parent;
+	}
+
+	nlohmann::json scene_json = nlohmann::json::array();
+	scene_json.push_back(nlohmann::json::object());
+	world.serialize_entity_json(scene_json.back(), selected_entity);
+
+	scene_json.back()["entity"] = 0;
+
+	world.deserialize_entity_json(scene_json.back(), entities);
+
+	selected_entity = entities.back();
+
+	if (parent) {
+		world.add_child(parent, selected_entity);
 	}
 }
 

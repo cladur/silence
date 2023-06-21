@@ -6,25 +6,42 @@
 #include "components/camera_component.h"
 #include "components/children_component.h"
 #include "components/collider_aabb.h"
+#include "components/collider_capsule.h"
 #include "components/collider_obb.h"
 #include "components/collider_sphere.h"
 #include "components/collider_tag_component.h"
+#include "components/decal_component.h"
+#include "components/detection_camera_component.h"
+#include "components/enemy_data_component.h"
 #include "components/enemy_path_component.h"
+#include "components/exploding_box_component.h"
 #include "components/fmod_listener_component.h"
 #include "components/hacker_data_component.h"
+#include "components/highlight_component.h"
 #include "components/interactable_component.h"
 #include "components/light_component.h"
+#include "components/light_switcher_component.h"
 #include "components/name_component.h"
 #include "components/parent_component.h"
 #include "components/platform_component.h"
 #include "components/rigidbody_component.h"
+#include "components/rotator_component.h"
 #include "components/static_tag_component.h"
 #include "components/transform_component.h"
 
 
+#include "components/cable_parent_component.h"
+#include "components/particle_emitter_component.h"
+#include "components/path_node_component.h"
+#include "components/path_parent_component.h"
+#include "components/taggable_component.h"
+#include "core/components/exploding_box_component.h"
+#include "core/components/fmod_emitter_component.h"
+#include "core/components/light_switcher_component.h"
 #include "managers/animation/ecs/animation_instance.h"
 #include "managers/render/ecs/model_instance.h"
 #include "managers/render/ecs/skinned_model_instance.h"
+#include "render/ecs/billboard_component.h"
 
 namespace serialization {
 
@@ -39,8 +56,10 @@ concept Deserializable = requires(T t, nlohmann::json &j) {
 };
 
 typedef std::variant<Children, Parent, Transform, RigidBody, FmodListener, Camera, ModelInstance, AnimationInstance,
-		SkinnedModelInstance, Name, ColliderTag, StaticTag, ColliderSphere, ColliderAABB, ColliderOBB, Light, AgentData,
-		HackerData, EnemyPath, Interactable, Attachment, Platform>
+		SkinnedModelInstance, Name, ColliderTag, StaticTag, ColliderSphere, ColliderAABB, ColliderOBB, ColliderCapsule,
+		Light, AgentData, HackerData, EnemyPath, EnemyData, Interactable, Attachment, Platform, ExplodingBox, Billboard,
+		PathNode, PathParent, Taggable, FMODEmitter, Highlight, ParticleEmitter, DetectionCamera, CableParent, Rotator,
+		LightSwitcher, Decal>
 		variant_type;
 
 template <typename T>

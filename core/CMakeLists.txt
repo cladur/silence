@@ -11,9 +11,8 @@ add_library(${CORE_LIB_NAME} STATIC
         components/parent_component.h
         components/children_component.h
         components/fmod_listener_component.h
-        state_machine/states/state.h
-        state_machine/states/test_state.cpp state_machine/states/test_state.h
-        state_machine/state_machine.cpp state_machine/state_machine.h
+        ../managers/ai/state_machine/state.h
+        ../managers/ai/state_machine/state_machine.cpp ../managers/ai/state_machine/state_machine.h
         behavior_tree/tree_node.h
         behavior_tree/leaf_node.h
         behavior_tree/composite_node.h
@@ -34,12 +33,22 @@ add_library(${CORE_LIB_NAME} STATIC
         components/collider_aabb.h
         components/collider_sphere.h
         components/collider_obb.h
-        components/collider_sphere.h
-        components/collider_obb.h
+        components/collider_capsule.h
         components/enemy_path_component.h
         components/interactable_component.h
-        cvars/cvars.cpp
-        cvars/cvars.h components/attachment_component.h)
+        cvars/cvars.cpp cvars/cvars.h
+        components/attachment_component.h
+        components/enemy_data_component.h
+        components/platform_component.h
+        components/exploding_box_component.h
+        components/path_node_component.h
+        components/path_parent_component.h
+        components/path_node_component.h
+        components/taggable_component.h
+        components/fmod_emitter_component.h
+        components/particle_emitter_component.h
+        components/decal_component.h
+        components/cable_parent_component.h)
 
 target_include_directories(${CORE_LIB_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 
@@ -51,6 +60,7 @@ find_package(imgui CONFIG REQUIRED)
 find_package(magic_enum CONFIG REQUIRED)
 find_package(Tracy CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
+find_package(OpenMP)
 
 target_link_libraries(${COMMON_LIB_NAME} INTERFACE
         spdlog::spdlog spdlog::spdlog_header_only
@@ -59,9 +69,14 @@ target_link_libraries(${COMMON_LIB_NAME} INTERFACE
         magic_enum::magic_enum
         Tracy::TracyClient
         nlohmann_json::nlohmann_json
+        OpenMP::OpenMP_CXX
         )
 
-target_link_libraries(${CORE_LIB_NAME} PRIVATE
+target_link_libraries(${CORE_LIB_NAME}
+        PUBLIC
+        # TODO: Remove these dependencies
+        fmod
+        PRIVATE
         ${COMMON_LIB_NAME}
         )
 

@@ -52,7 +52,10 @@
     {
       "name": "tracy",
       "version>=": "0.9.0#3",
-      "$comment": "    # this is heuristically generated, and may not be correct\n\n    find_package(Tracy CONFIG REQUIRED)\n\n    target_link_libraries(main PRIVATE Tracy::TracyClient)\n"
+      "$comment": "    # this is heuristically generated, and may not be correct\n\n    find_package(Tracy CONFIG REQUIRED)\n\n    target_link_libraries(main PRIVATE Tracy::TracyClient)\n",
+      "features": [
+        "on-demand"
+      ]
     },
     {
       "name": "freetype",

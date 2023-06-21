@@ -64,8 +64,17 @@ void default_mappings() {
 	input_manager.add_action("clear_selection");
 	input_manager.add_key_to_action("clear_selection", InputKey::ESCAPE);
 
+	input_manager.add_action("control_modifier");
+	input_manager.add_key_to_action("control_modifier", InputKey::LEFT_CONTROL);
+
+	input_manager.add_action("duplicate");
+	input_manager.add_key_to_action("duplicate", InputKey::D);
+
 	input_manager.add_action("delete");
-	input_manager.add_key_to_action("delete", InputKey::BACKSPACE);
+	input_manager.add_key_to_action("delete", InputKey::DELETE);
+
+	input_manager.add_action("hacker_exit_camera");
+	input_manager.add_key_to_action("hacker_exit_camera", InputKey::TAB);
 }
 
 void bootleg_unity_theme() {
@@ -178,6 +187,7 @@ Editor *Editor::get() {
 
 void Editor::startup() {
 	Engine::startup();
+	RenderManager::get().editor_mode = true;
 
 	// Additional setup
 	default_mappings();
@@ -249,6 +259,16 @@ void Editor::custom_update(float dt) {
 		if (input_manager.is_action_just_pressed("clear_selection")) {
 			auto editor_scene = dynamic_cast<EditorScene *>(scenes[active_scene].get());
 			get_editor_scene(active_scene).selected_entity = 0;
+		}
+	}
+
+	if (!controlling_camera) {
+		if (input_manager.is_action_pressed("control_modifier") && input_manager.is_action_just_pressed("duplicate")) {
+			get_active_scene().duplicate_selected_entity();
+		}
+
+		if (input_manager.is_action_pressed("delete")) {
+			get_active_scene().entity_deletion_queue.push(get_active_scene().selected_entity);
 		}
 	}
 
@@ -325,6 +345,7 @@ void Editor::custom_update(float dt) {
 void Editor::create_scene(const std::string &name) {
 	create_scene(name, SceneType::GameScene);
 }
+
 void Editor::create_scene(const std::string &name, SceneType type, const std::string &path) {
 	auto scene = std::make_unique<EditorScene>(type);
 	scene->name = name;
@@ -332,17 +353,21 @@ void Editor::create_scene(const std::string &name, SceneType type, const std::st
 	// Create RenderScene for scene
 	RenderManager &render_manager = RenderManager::get();
 	scene->render_scene_idx = render_manager.create_render_scene();
+	if (type == SceneType::Prefab) {
+		render_manager.render_scenes[scene->render_scene_idx].skybox_pass.skybox.load_from_directory(
+				asset_path("cubemaps/venice_sunset"));
+	}
 
 	Entity entity;
 
 	if (!path.empty()) {
 		std::ifstream file(path);
-		nlohmann::json serialized_scene;
-		file >> serialized_scene;
-		serialized_scene.back()["entity"] = 0;
+		nlohmann::json serialized_scene = nlohmann::json::parse(file);
+		file.close();
+		//		file >> serialized_scene;
+		//		serialized_scene.back()["entity"] = 0;
 		scene->world.deserialize_entities_json(serialized_scene, scene->entities);
 		scenes.push_back(std::move(scene));
-		file.close();
 		return;
 	}
 

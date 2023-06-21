@@ -8,6 +8,8 @@
 #include "imgui_impl_opengl3.h"
 #include "render/render_scene.h"
 #include <glad/glad.h>
+#include <tracy/tracy.hpp>
+
 #define IMGUI_DEFINE_MATH_OPERATORS
 
 #define ASSET_PATH "resources/assets_export/"
@@ -62,12 +64,13 @@ uint32_t RenderManager::create_render_scene() {
 	static int scene_count = 0;
 	RenderScene render_scene;
 	render_scene.startup();
+	render_scene.editor_mode = editor_mode;
 	render_scenes.push_back(render_scene);
 	return render_scenes.size() - 1;
 }
 
 void RenderManager::draw() {
-	ZoneScopedNC("RenderManager::draw", tracy::Color::BlueViolet);
+	ZoneNamedNC(Zone1, "RenderManager::draw", tracy::Color::BlueViolet, true);
 	DisplayManager &display_manager = DisplayManager::get();
 	glm::vec2 window_extent = display_manager.get_framebuffer_size();
 
@@ -77,34 +80,43 @@ void RenderManager::draw() {
 	//		render_framebuffer.resize(window_extent.x, window_extent.y);
 	//	}
 
-	for (RenderScene &scene : render_scenes) {
-		scene.draw();
+	{
+		ZoneNamedNC(Zone2, "RenderManager::draw::Scene", tracy::Color::Blue4, true);
+		for (RenderScene &scene : render_scenes) {
+			scene.draw();
+		}
 	}
 
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	{
+		ZoneNamedNC(Zone3, "RenderManager::draw::Rest", tracy::Color::Blue3, true);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	glad_glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glad_glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	// blit scene's framebuffer to the default framebuffer
-	if (displayed_scene != -1) {
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, render_scenes[displayed_scene].final_framebuffer.framebuffer_id);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-		glBlitFramebuffer(0, 0, window_extent.x, window_extent.y, 0, 0, window_extent.x, window_extent.y,
-				GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		// blit scene's framebuffer to the default framebuffer
+		if (displayed_scene != -1) {
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, render_scenes[displayed_scene].final_framebuffer.framebuffer_id);
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+			glBlitFramebuffer(0, 0, window_extent.x, window_extent.y, 0, 0, window_extent.x, window_extent.y,
+					GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		}
+
+		{
+			ZoneNamedNC(Zone4, "RenderManager::draw::ImGuiAndSwap", tracy::Color::Blue2, true);
+			// IMGUI
+			ImGui::Render();
+			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+			// Update and Render additional Platform Windows
+			if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+				GLFWwindow *backup_current_context = glfwGetCurrentContext();
+				ImGui::UpdatePlatformWindows();
+				ImGui::RenderPlatformWindowsDefault();
+				glfwMakeContextCurrent(backup_current_context);
+			}
+
+			glfwSwapBuffers(display_manager.window);
+		}
 	}
-
-	// IMGUI
-	ImGui::Render();
-	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-	// Update and Render additional Platform Windows
-	if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
-		GLFWwindow *backup_current_context = glfwGetCurrentContext();
-		ImGui::UpdatePlatformWindows();
-		ImGui::RenderPlatformWindowsDefault();
-		glfwMakeContextCurrent(backup_current_context);
-	}
-
-	glfwSwapBuffers(display_manager.window);
 }

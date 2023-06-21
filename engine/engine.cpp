@@ -1,5 +1,7 @@
 #include "engine.h"
 
+#include "assets/material_asset.h"
+#include "assets/model_asset.h"
 #include "audio/audio_manager.h"
 #include "display/display_manager.h"
 #include "font/font_manager.h"
@@ -7,11 +9,16 @@
 #include "render/render_manager.h"
 
 #include "audio/adaptive_music_manager.h"
+#include "gameplay/gameplay_manager.h"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 #include "physics/physics_manager.h"
+#include "render/transparent_elements/particle_manager.h"
 #include "render/transparent_elements/ui_manager.h"
+#include <string>
+
+AutoCVarInt cvar_force_20_fps("engine.force_20_fps", "force 20 fps", 0, CVarFlags::EditCheckbox);
 
 void Engine::startup() {
 	// Managers
@@ -21,12 +28,11 @@ void Engine::startup() {
 	RenderManager::get().startup();
 	FontManager::get().startup();
 	AudioManager::get().startup();
-	AdaptiveMusicManager::get().startup("adaptive_music_test");
-	// Uncomment if you want music
-	// AdaptiveMusicManager::get().play();
+	AdaptiveMusicManager::get().startup("AdaptiveMusic/Music_1");
 	UIManager::get();
+	ParticleManager::get().startup();
 
-	FontManager::get().load_font("resources/fonts/PoltawskiNowy.ttf", 48, "PoltawskiNowy");
+	FontManager::get().load_font("resources/fonts/MODENINE.TTF", 48, "F25");
 }
 
 void Engine::shutdown() {
@@ -38,6 +44,7 @@ void Engine::shutdown() {
 	RenderManager::get().shutdown();
 	InputManager::get().shutdown();
 	DisplayManager::get().shutdown();
+	ParticleManager::get().shutdown();
 }
 
 void Engine::run() {
@@ -52,6 +59,22 @@ void Engine::run() {
 		update(dt);
 
 		auto stop_time = std::chrono::high_resolution_clock::now();
+
+		{
+			ZoneScopedNC("Sleep", tracy::Color::Blue);
+			while (std::chrono::duration<float, std::chrono::seconds::period>(stop_time - start_time).count() <
+					target_frame_time) {
+				stop_time = std::chrono::high_resolution_clock::now();
+			}
+		}
+
+		if (cvar_force_20_fps.get()) {
+			float target_frame_time = 1.0f / 20.0f;
+			while (std::chrono::duration<float, std::chrono::seconds::period>(stop_time - start_time).count() <
+					target_frame_time) {
+				stop_time = std::chrono::high_resolution_clock::now();
+			}
+		}
 
 		dt = std::chrono::duration<float, std::chrono::seconds::period>(stop_time - start_time).count();
 
@@ -83,7 +106,6 @@ void Engine::update(float dt) {
 	}
 
 	// Update
-
 	custom_update(dt);
 
 	for (auto &scene : scenes) {
@@ -91,7 +113,7 @@ void Engine::update(float dt) {
 		scene->update(dt);
 	}
 
-	AudioManager::get().update();
+	ParticleManager::get().update(dt);
 
 	input_manager.process_input();
 
@@ -121,6 +143,7 @@ uint32_t Engine::get_scene_index(const std::string &name) {
 void Engine::set_active_scene(const std::string &name) {
 	active_scene = get_scene_index(name);
 	RenderManager::get().displayed_scene = scenes[active_scene]->render_scene_idx;
+	GameplayManager::get().startup(&get_active_scene()); // dunno where to put this honestly.
 }
 
 Scene &Engine::get_active_scene() {

@@ -94,7 +94,10 @@ void Shader::load_from_files(
 }
 
 void Shader::use() {
-	glUseProgram(id);
+	if (active_shader_id != id) {
+		glUseProgram(id);
+		active_shader_id = id;
+	}
 }
 
 void Shader::set_bool(const std::string &name, bool value) const {
@@ -103,6 +106,10 @@ void Shader::set_bool(const std::string &name, bool value) const {
 // ------------------------------------------------------------------------
 void Shader::set_int(const std::string &name, int value) const {
 	glUniform1i(glGetUniformLocation(id, name.c_str()), value);
+}
+// ------------------------------------------------------------------------
+void Shader::set_uint(const std::string &name, unsigned int value) const {
+	glUniform1ui(glGetUniformLocation(id, name.c_str()), value);
 }
 // ------------------------------------------------------------------------
 void Shader::set_float(const std::string &name, float value) const {
