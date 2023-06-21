@@ -1,6 +1,5 @@
 #ifndef SILENCE_PHYSICS_MANAGER_H
 #define SILENCE_PHYSICS_MANAGER_H
-
 class World;
 struct ColliderSphere;
 struct ColliderCapsule;
@@ -9,6 +8,7 @@ struct ColliderOBB;
 struct Transform;
 struct RigidBody;
 struct ColliderTag;
+struct AgentData;
 
 struct Ray {
 	glm::vec3 origin;
@@ -117,6 +117,8 @@ public:
 	void make_shift(World &world, Entity e1, Entity e2, const glm::vec3 &offset);
 	void non_physical_shift(Transform &t1, Transform &t2, bool is_movable1, bool is_movable2, const glm::vec3 &offset);
 	void physical_shift(Transform &t1, Transform &t2, RigidBody &b1, RigidBody &b2, bool is_movable1, bool is_movable2,
+			const glm::vec3 &offset);
+	void agent_shift(Transform &t1, Transform &t2, AgentData &agent_data, bool is_movable1, bool is_movable2,
 			const glm::vec3 &offset);
 
 	//Return entities that collide with specified sphere with specified layer
