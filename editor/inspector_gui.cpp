@@ -615,7 +615,7 @@ void Inspector::show_collidertag() {
 		const auto &map = physics_manager.get_layers_map();
 		float available_width = ImGui::GetContentRegionAvail().x;
 		ImGui::BeginTable("Collider Tag", 2);
-		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+		ImGui::TableSetupColumn("##Collider Tag", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
 		ImGui::TableNextRow();
 		ImGui::TableSetColumnIndex(0);
 		ImGui::Text("Layer");
@@ -634,6 +634,12 @@ void Inspector::show_collidertag() {
 			}
 			ImGui::EndCombo();
 		}
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Is active");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		ImGui::Checkbox("##Is active", &tag.is_active);
 
 		ImGui::EndTable();
 	}
