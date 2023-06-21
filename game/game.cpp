@@ -264,16 +264,13 @@ void input_setup() {
 	input_manager.add_key_to_action("agent_move_forward", InputKey::W);
 	input_manager.add_key_to_action("agent_move_forward", InputKey::GAMEPAD_LEFT_STICK_Y_POSITIVE);
 
-
 	input_manager.add_action("agent_move_backward");
 	input_manager.add_key_to_action("agent_move_backward", InputKey::S);
 	input_manager.add_key_to_action("agent_move_backward", InputKey::GAMEPAD_LEFT_STICK_Y_NEGATIVE);
 
-
 	input_manager.add_action("agent_move_left");
 	input_manager.add_key_to_action("agent_move_left", InputKey::A);
 	input_manager.add_key_to_action("agent_move_left", InputKey::GAMEPAD_LEFT_STICK_X_NEGATIVE);
-
 
 	input_manager.add_action("agent_move_right");
 	input_manager.add_key_to_action("agent_move_right", InputKey::D);
@@ -299,7 +296,6 @@ void input_setup() {
 	input_manager.add_action("agent_climb");
 	input_manager.add_key_to_action("agent_climb", InputKey::SPACE);
 	input_manager.add_key_to_action("agent_climb", InputKey::GAMEPAD_BUTTON_A);
-
 
 	//add actions to arrows
 	input_manager.add_action("hacker_move_forward");
@@ -502,9 +498,20 @@ void Game::custom_update(float dt) {
 
 	if (input_manager.is_action_just_pressed("reload_scene")) {
 		AnimationManager::get().animation_map.clear();
-		GameplayManager::get().get_agent_system()->reset();
-		GameplayManager::get().get_hacker_system()->reset();
-		get_active_scene().load_from_file("resources/scenes/level_3_7.scn");
+		RenderManager::get().render_scenes.pop_back();
+		scenes.pop_back();
+		UIManager::get().reset_scenes();
+
+		create_scene("Main");
+
+		scenes[0]->register_game_systems();
+		scenes[0]->load_from_file("resources/scenes/level_3_10.scn");
+		GameplayManager::get().startup(&*scenes[0]);
+		GameplayManager::get().get_agent_system()->get_ui_elements();
+		GameplayManager::get().get_hacker_system()->get_ui_elements();
+		UIManager::get().set_render_scene(&get_active_scene().get_render_scene());
+
+		set_active_scene("Main");
 	}
 
 	AudioManager::get().update(get_active_scene());

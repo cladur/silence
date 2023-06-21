@@ -9,6 +9,9 @@ struct Ray;
 struct HitInfo;
 
 class CollisionSystem : public BaseSystem {
+private:
+	bool first = true;
+
 public:
 	void startup(World &world) override;
 	void update(World &world, float dt) override;
