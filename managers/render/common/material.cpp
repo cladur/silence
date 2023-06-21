@@ -92,21 +92,22 @@ void MaterialLight::bind_instance_resources(ModelInstance &instance, Transform &
 
 void MaterialLight::bind_light_resources(Light &light, Transform &transform) {
 	float threshold = *CVarSystem::get()->get_float_cvar("render.light_threshold");
-	float radius = light.intensity * std::sqrtf(1.0f / threshold);
+	// float radius = light.intensity * std::sqrtf(1.0f / threshold);
 
 	const glm::mat4 &global_model = transform.get_global_model_matrix();
 	glm::mat4 model;
 	if (light.type == LightType::SPOT_LIGHT) {
-		float cone_scale = light.intensity * glm::tan(glm::radians(light.outer_cutoff + light.cutoff)) /
-				(float)glm::tan(glm::radians(17.5f));
-		model = glm::scale(global_model, glm::vec3(cone_scale, cone_scale, light.intensity));
+		float cone_scale = light.radius * glm::tan(glm::radians(light.outer_cutoff + light.cutoff));
+		model = glm::scale(global_model, glm::vec3(cone_scale, cone_scale, light.radius));
 	} else {
-		model = global_model * glm::scale(glm::mat4(1.0f), glm::vec3(radius));
+		model = global_model * glm::scale(glm::mat4(1.0f), glm::vec3(light.radius));
 	}
 	shader.use();
 	shader.set_mat4("model", model);
 	shader.set_vec3("light_color", light.color);
 	shader.set_float("light_intensity", light.intensity);
+	shader.set_float("light_radius", light.radius);
+	shader.set_float("light_blend_distance", light.blend_distance);
 	shader.set_int("type", (int)light.type);
 	shader.set_bool("cast_shadow", light.cast_shadow);
 	switch (light.type) {

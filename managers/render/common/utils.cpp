@@ -211,9 +211,8 @@ void render_cone() {
 		unsigned int vbo;
 		glGenBuffers(1, &vbo);
 
-		float threshold = *CVarSystem::get()->get_float_cvar("render.light_threshold");
-		float length = std::sqrtf(1.0f / threshold);
-		float cone_radius = length * (float)tan(glm::radians(17.5f));
+		float length = 1.0f;
+		float cone_radius = 1.0f;
 		int sides = 32;
 
 		const float PI = 3.14159265359f;

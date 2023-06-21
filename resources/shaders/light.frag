@@ -16,6 +16,8 @@ uniform vec3 light_position;
 uniform vec3 light_direction;
 uniform vec3 light_color;
 uniform float light_intensity;
+uniform float light_blend_distance;
+uniform float light_radius;
 uniform float cutoff;
 uniform float outer_cutoff;
 uniform int type;
@@ -29,6 +31,21 @@ uniform vec3 camPos;
 
 const float PI = 3.14159265359;
 vec4 world_light_space;
+
+float get_light_edge_blend(float distance) {
+    float a = light_radius;
+    float b = light_radius - light_blend_distance;
+
+    
+    // Value from 0 to 1, where 0 is at the edge of the light and 1 is at light_radius - blend_distance
+    float blend_x = (1.0 / (b - a)) * (distance - a);
+
+    blend_x = clamp(blend_x, 0.0, 1.0);
+
+    float blend = smoothstep(0.0, 1.0, blend_x);
+
+    return blend;
+}
 
 // ----------------------------------------------------------------------------
 float DistributionGGX(vec3 N, vec3 H, float roughness)
@@ -187,7 +204,8 @@ void CalcPointLight(vec3 world_pos, vec3 normal, vec3 view_pos, vec3 F0, float r
 
     float distance = length(light_position - world_pos);
     float attenuation = 1.0 / (distance * distance);
-    vec3 radiance = light_intensity * light_color * attenuation;
+
+    vec3 radiance = get_light_edge_blend(distance) * light_intensity * light_color * attenuation;
 
     float NDF = DistributionGGX(normal, halfway_dir, roughness);
     float G = GeometrySmith(normal, view_pos, light_dir, roughness);
@@ -223,7 +241,7 @@ void CalcSpotLight(vec3 world_pos, vec3 normal, vec3 view_pos, vec3 F0, float ro
 
     float distance = length(light_position - world_pos);
     float attenuation = 1.0 / (distance * distance);
-    vec3 radiance = intensity * light_intensity * light_color * attenuation;
+    vec3 radiance =  intensity * light_intensity * light_color * attenuation;
 
     float NDF = DistributionGGX(normal, halfway_dir, roughness);
     float G = GeometrySmith(normal, view_pos, light_dir, roughness);
