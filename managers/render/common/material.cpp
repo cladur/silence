@@ -10,8 +10,8 @@ AutoCVarInt cvar_use_ao("render.use_ao", "use ambient occlusion", 1, CVarFlags::
 AutoCVarInt cvar_use_fog("render.use_fog", "use simple linear fog", 1, CVarFlags::EditCheckbox);
 AutoCVarFloat cvar_fog_min("render.fog_min", "fog min distance", 40.0f, CVarFlags::EditFloatDrag);
 AutoCVarFloat cvar_fog_max("render.fog_max", "fog max distance", 300.0f, CVarFlags::EditFloatDrag);
-AutoCVarFloat cvar_bias_min("render.light_bias_min", "Spot light bias min", 0.00000001f, CVarFlags::EditFloatDrag);
-AutoCVarFloat cvar_bias_max("render.light_bias_max", "Spot light bias max", 0.0000000001f, CVarFlags::EditFloatDrag);
+AutoCVarFloat cvar_bias_min("render.light_bias_min", "Spot light bias min", 0.0000001f);
+AutoCVarFloat cvar_bias_max("render.light_bias_max", "Spot light bias max", 0.00000002f);
 AutoCVarFloat cvar_ambient_strength(
 		"render.ambient_strength", "how much light from skymap to use", 1.0f, CVarFlags::EditFloatDrag);
 
