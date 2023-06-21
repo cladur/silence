@@ -201,13 +201,12 @@ std::shared_ptr<BSPNode> CollisionSystem::build_tree(World &world, std::vector<E
 	// we need to filter get only statics to build the tree
 	std::set<Entity> statics;
 	for (auto &entity : world_entities) {
-		bool has_static_tag = world.has_component<StaticTag>(entity);
-		bool has_platform_tag = world.has_component<Platform>(entity);
-		bool has_collider_tag = world.has_component<ColliderTag>(entity);
-		if (has_static_tag && has_collider_tag && has_platform_tag) {
-			auto platform = world.get_component<Platform>(entity);
-			if (!platform.is_door) {
-				continue;
+		if (world.has_component<StaticTag>(entity)) {
+			if (world.has_component<Platform>(entity)) {
+				auto platform = world.get_component<Platform>(entity);
+				if (!platform.is_door) {
+					continue;
+				}
 			}
 			statics.insert(entity);
 		}
