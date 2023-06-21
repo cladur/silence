@@ -119,8 +119,14 @@ public:
 	void physical_shift(Transform &t1, Transform &t2, RigidBody &b1, RigidBody &b2, bool is_movable1, bool is_movable2,
 			const glm::vec3 &offset);
 
-	//Return entities that collide with specified sphere with specified layer
+	//Return entities that collide with specified sphere with specified layer, it ignores inactive colliders
 	std::vector<Entity> overlap_sphere(World &world, const ColliderSphere &sphere, const std::string &layer_name);
+
+	// Return vector of players that collide with given cube it includes inactive colliders
+	std::vector<Entity> overlap_cube_checkpoint(World &world, const ColliderOBB &obb);
+
+	// Return vector of trigger(specified by Jan) objects that collide with given cube, it includes inactive colliders
+	std::vector<Entity> overlap_cube_trigger(World &world, const ColliderOBB &obb);
 
 	// returns true, point and normal if ray intersect with sphere
 	bool intersect_ray_sphere(const Ray &ray, const ColliderSphere &sphere, HitInfo &result);
