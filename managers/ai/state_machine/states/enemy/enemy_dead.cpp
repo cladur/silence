@@ -3,11 +3,11 @@
 #include "components/enemy_data_component.h"
 #include "components/enemy_path_component.h"
 #include "components/transform_component.h"
+#include "enemy_utils.h"
 #include "engine/scene.h"
 #include "managers/ecs/world.h"
 #include "managers/render/render_scene.h"
 #include <animation/animation_manager.h>
-#include "enemy_utils.h"
 
 void EnemyDead::startup(StateMachine *machine, std::string name) {
 	SPDLOG_INFO("EnemyDead::startup");
@@ -49,6 +49,9 @@ void EnemyDead::update(World *world, uint32_t entity_id, float dt) {
 
 	AudioManager::get().play_one_shot_3d(enemy_data.death_event, transform);
 
+	if (world->has_component<ColliderTag>(entity_id)) {
+		world->get_component<ColliderTag>(entity_id).is_active = false;
+	}
 	enemy_data.is_dead = true;
 }
 

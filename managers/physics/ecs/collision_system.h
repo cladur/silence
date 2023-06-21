@@ -30,7 +30,7 @@ public:
 	static void log_tree(BSPNode *node);
 
 	// Cast ray that collide with first intersected collider excluding layers conditions
-	static bool ray_cast(World &world, const Ray &ray, HitInfo &result);
+	[[deprecated("Use ray_cast_layer instead")]] static bool ray_cast(World &world, const Ray &ray, HitInfo &result);
 	// Cast ray that collide with first intersected collider including ray layer conditions
 	static bool ray_cast_layer(World &world, const Ray &ray, HitInfo &result);
 };
