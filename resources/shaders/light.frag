@@ -241,7 +241,7 @@ void CalcSpotLight(vec3 world_pos, vec3 normal, vec3 view_pos, vec3 F0, float ro
 
     float distance = length(light_position - world_pos);
     float attenuation = 1.0 / (distance * distance);
-    vec3 radiance =  intensity * light_intensity * light_color * attenuation;
+    vec3 radiance = intensity * light_intensity * light_color * attenuation;
 
     float NDF = DistributionGGX(normal, halfway_dir, roughness);
     float G = GeometrySmith(normal, view_pos, light_dir, roughness);

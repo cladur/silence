@@ -505,7 +505,7 @@ void Game::custom_update(float dt) {
 		create_scene("Main");
 
 		scenes[0]->register_game_systems();
-		scenes[0]->load_from_file("resources/scenes/level_3_11.scn");
+		scenes[0]->load_from_file("resources/scenes/level_3_12.scn");
 		GameplayManager::get().startup(&*scenes[0]);
 		UIManager::get().set_render_scene(&get_active_scene().get_render_scene());
 
