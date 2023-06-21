@@ -226,6 +226,8 @@ void World::deserialize_entities_json(nlohmann::json &json, std::vector<Entity> 
 	{
 		ZoneScopedN("transcoding ktx textures");
 
+		SPDLOG_INFO("Transcoding ktx textures");
+
 		ktx_texture_transcode_fmt_e tf = KTX_TTF_RGBA32;
 		GLenum format = Texture::get_supported_compressed_format();
 
