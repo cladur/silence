@@ -144,6 +144,7 @@ void Scene::register_main_systems() {
 }
 
 void Scene::register_game_systems() {
+	ZoneScopedN("Scene::register_game_systems");
 	// Physics
 	world.register_system<PhysicsSystem>();
 	world.register_system<CollisionSystem>();
@@ -205,6 +206,7 @@ void Scene::save_to_file(const std::string &path) {
 }
 
 void Scene::load_from_file(const std::string &path) {
+	ZoneScopedN("Scene::load_from_file");
 	if (path.empty()) {
 		SPDLOG_ERROR("Wrong path: ", path, " should not be empty");
 		assert(false);
