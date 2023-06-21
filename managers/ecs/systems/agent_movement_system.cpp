@@ -85,9 +85,11 @@ void AgentMovementSystem::update(World &world, float dt) {
 		auto camera_right = camera_pivot_tf.get_global_right();
 
 		glm::vec3 acc_direction = { 0, 0, 0 };
-		if(agent_data.gamepad >= 0) {
-			acc_direction += input_manager.get_axis("agent_move_backward", "agent_move_forward", agent_data.gamepad) * camera_forward;
-			acc_direction += input_manager.get_axis("agent_move_left", "agent_move_right", agent_data.gamepad) * -camera_right;
+		if (agent_data.gamepad >= 0) {
+			acc_direction += input_manager.get_axis("agent_move_backward", "agent_move_forward", agent_data.gamepad) *
+					camera_forward;
+			acc_direction +=
+					input_manager.get_axis("agent_move_left", "agent_move_right", agent_data.gamepad) * -camera_right;
 		} else {
 			acc_direction += input_manager.get_axis("agent_move_backward", "agent_move_forward") * camera_forward;
 			acc_direction += input_manager.get_axis("agent_move_left", "agent_move_right") * -camera_right;
@@ -108,13 +110,12 @@ void AgentMovementSystem::update(World &world, float dt) {
 
 		glm::vec3 velocity = move_ground(acc_direction, previous_velocity, acceleration, dt);
 
-		//SPDLOG_INFO(animation_instance.ticks_per_second);
 		transform.add_position(glm::vec3(velocity.x, 0.0, velocity.z) * dt);
 
 		static glm::vec3 last_position = transform.position;
 
 		// Lerp model_tf towards movement direction
-		glm::vec3 delta_position = transform.position - last_position;
+		glm::vec3 delta_position = acc_direction; //transform.position - last_position;
 		delta_position.y = 0.0f;
 		if (glm::length2(delta_position) > physics_manager.get_epsilon()) {
 			glm::vec3 direction = glm::normalize(delta_position);
