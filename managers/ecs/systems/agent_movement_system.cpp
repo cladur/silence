@@ -108,13 +108,11 @@ void AgentMovementSystem::update(World &world, float dt) {
 			acceleration *= cvar_agent_crouch_slowdown.get();
 		}
 
-		glm::vec3 velocity = move_ground(acc_direction, previous_velocity, acceleration, dt);
-
 		if (agent_data.collided == true) {
 			previous_velocity = { 0.0f, 0.0f, 0.0f };
-			velocity = { 0.0f, 0.0f, 0.0f };
 			agent_data.collided = false;
 		}
+		glm::vec3 velocity = move_ground(acc_direction, previous_velocity, acceleration, dt);
 
 		transform.add_position(glm::vec3(velocity.x, 0.0, velocity.z) * dt);
 

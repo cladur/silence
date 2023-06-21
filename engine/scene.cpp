@@ -131,8 +131,8 @@ void Scene::register_main_systems() {
 	world.register_system<DecalSystem>(UpdateOrder::PostPhysics);
 
 	// Transform
-	world.register_system<IsolatedEntitiesSystem>(UpdateOrder::PrePreAnimation);
-	world.register_system<RootParentSystem>(UpdateOrder::PrePreAnimation);
+	world.register_system<IsolatedEntitiesSystem>(UpdateOrder::DuringPhysics);
+	world.register_system<RootParentSystem>(UpdateOrder::DuringPhysics);
 	world.register_system<AttachmentSystem>(UpdateOrder::PostAnimation);
 	world.register_system<CableSystem>(UpdateOrder::PreAnimation);
 }
