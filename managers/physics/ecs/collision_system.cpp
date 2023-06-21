@@ -28,7 +28,6 @@ void CollisionSystem::update(World &world, float dt) {
 
 	// HACK: We're building the BSP tree here at the last moment, because colliders get their positions / orientations /
 	// scales from the global matrices, which are only updated after the first iteration of the transform ECS systems
-	static bool first = true;
 	if (first) {
 		first = false;
 		world.get_parent_scene()->bsp_tree = CollisionSystem::build_tree(world, world.get_parent_scene()->entities, 10);

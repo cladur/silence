@@ -40,6 +40,7 @@ public:
 
 	static UIManager &get();
 	void startup();
+	void reset_scenes();
 	void set_render_scene(RenderScene *render_scene);
 	void create_ui_scene(const std::string &scene_name);
 	void delete_ui_scene(const std::string &scene_name);
