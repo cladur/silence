@@ -145,6 +145,7 @@ void CollisionSystem::resolve_bsp_collision(World &world, BSPNode *node, Entity 
 	if (force) {
 		resolve_bsp_collision(world, node->front.get(), entity, force);
 		resolve_bsp_collision(world, node->back.get(), entity, force);
+		return;
 	}
 
 	if (node->back == nullptr && node->front == nullptr) {
@@ -187,7 +188,7 @@ void CollisionSystem::resolve_bsp_collision(World &world, BSPNode *node, Entity 
 	if (side == Side::FRONT) {
 		resolve_bsp_collision(world, node->front.get(), entity);
 	} else if (side == Side::BACK) {
-		resolve_bsp_collision(world, node->back.get(), entity, force);
+		resolve_bsp_collision(world, node->back.get(), entity);
 	} else {
 		resolve_bsp_collision(world, node->front.get(), entity, true);
 		resolve_bsp_collision(world, node->back.get(), entity, true);
