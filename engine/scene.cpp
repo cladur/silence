@@ -3,6 +3,7 @@
 #include "components/exploding_box_component.h"
 #include "display/display_manager.h"
 #include "ecs/systems/detection_camera_system.h"
+#include "ecs/systems/dialogue_system.h"
 #include "ecs/systems/hacker_movement_system.h"
 #include "ecs/systems/interactable_system.h"
 #include "ecs/systems/light_switcher_system.h"
@@ -159,6 +160,7 @@ void Scene::register_game_systems() {
 
 	world.register_system<LightSwitcherSystem>();
 	world.register_system<RotatorSystem>();
+	world.register_system<DialogueSystem>();
 
 	GameplayManager::get().set_agent_system(agent_system);
 	GameplayManager::get().set_hacker_system(hacker_system);
