@@ -695,6 +695,10 @@ void MaterialDecal::bind_resources(RenderScene &scene) {
 	shader.set_int("source_normal", 1);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.normal_texture_id);
+
+	shader.set_int("source_ao_rough_metal", 2);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.ao_rough_metal_texture_id);
 }
 
 void MaterialDecal::bind_instance_resources(ModelInstance &instance, Transform &transform) {
@@ -715,9 +719,7 @@ void MaterialDecal::bind_decal_resources(Decal &decal, Transform &transform) {
 	const glm::mat4 &decal_view_proj = decal_projection * decal_view;
 	shader.set_mat4("decal_view_proj", decal_view_proj);
 	shader.set_mat4("decal_inv_view_proj", glm::inverse(decal_view_proj));
-
 	const Texture &albedo = resource_manager.get_texture(decal.albedo);
-	const Texture &normal = resource_manager.get_texture(decal.normal);
 	glm::vec2 aspect_ratio;
 	if (albedo.width > albedo.height) {
 		aspect_ratio.x = 1.0f;
@@ -726,12 +728,27 @@ void MaterialDecal::bind_decal_resources(Decal &decal, Transform &transform) {
 		aspect_ratio.x = float(albedo.height) / float(albedo.width);
 		aspect_ratio.y = 1.0f;
 	}
-	shader.set_vec2("aspect_ratio", aspect_ratio);
 	shader.set_vec4("color", decal.color);
-	shader.set_int("decal_albedo", 2);
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, albedo.id);
-	shader.set_int("decal_normal", 3);
+	shader.set_vec2("aspect_ratio", aspect_ratio);
+
+	shader.set_int("has_normal", decal.has_normal);
+	shader.set_int("has_ao", decal.has_ao);
+	shader.set_int("has_roughness", decal.has_roughness);
+	shader.set_int("has_metalness", decal.has_metalness);
+
+	shader.set_int("decal_albedo", 3);
 	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D, normal.id);
+	glBindTexture(GL_TEXTURE_2D, albedo.id);
+	if (decal.has_normal) {
+		const Texture &normal = resource_manager.get_texture(decal.normal);
+		shader.set_int("decal_normal", 4);
+		glActiveTexture(GL_TEXTURE4);
+		glBindTexture(GL_TEXTURE_2D, normal.id);
+	}
+	if (decal.has_ao || decal.has_roughness || decal.has_metalness) {
+		const Texture &ao_rough_metal = resource_manager.get_texture(decal.ao_rough_metal);
+		shader.set_int("decal_ao_rough_metal", 5);
+		glActiveTexture(GL_TEXTURE5);
+		glBindTexture(GL_TEXTURE_2D, ao_rough_metal.id);
+	}
 }
