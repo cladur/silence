@@ -36,6 +36,7 @@ add_library(${ECS_MANAGER_NAME} STATIC
 
 target_include_directories(${ECS_MANAGER_NAME} PUBLIC ${MANAGER_DIR})
 
+find_package(OpenMP)
 
 target_link_libraries(${ECS_MANAGER_NAME}
         PUBLIC
@@ -43,4 +44,5 @@ target_link_libraries(${ECS_MANAGER_NAME}
         PRIVATE
         silence_core
         silence_common
+        OpenMP::OpenMP_CXX
         )

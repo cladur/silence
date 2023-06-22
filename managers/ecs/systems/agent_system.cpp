@@ -220,7 +220,7 @@ void AgentSystem::update(World &world, float dt) {
 		// camera_pivot_tf.set_position(
 		// 		glm::mix(camera_pivot_tf.get_global_position(), camera_pivot_target_tf.get_global_position(), 0.1f));
 
-		if (speed > 0.01f && !agent_data.locked_movement) {
+		if (speed > dt && !agent_data.locked_movement) {
 			if (is_crouching) {
 				if (animation_instance.animation_handle.id !=
 						resource_manager.get_animation_handle("agent/agent_ANIM_GLTF/agent_crouch.anim").id) {
