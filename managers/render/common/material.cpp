@@ -18,8 +18,8 @@ AutoCVarFloat cvar_volumetric_bias_x(
 		"render.volumetric_bias_x", "Volumetric bias value to avoid acne", 0.0000001f, CVarFlags::EditFloatDrag);
 AutoCVarFloat cvar_volumetric_bias_y(
 		"render.volumetric_bias_y", "Volumetric bias value to avoid acne", 0.0000005f, CVarFlags::EditFloatDrag);
-AutoCVarFloat cvar_bias_min("render.light_bias_min", "Spot light bias min", 0.00000001f, CVarFlags::EditFloatDrag);
-AutoCVarFloat cvar_bias_max("render.light_bias_max", "Spot light bias max", 0.0000000001f, CVarFlags::EditFloatDrag);
+AutoCVarFloat cvar_bias_min("render.light_bias_min", "Spot light bias min", 0.0000001f);
+AutoCVarFloat cvar_bias_max("render.light_bias_max", "Spot light bias max", 0.00000002f);
 AutoCVarFloat cvar_ambient_strength(
 		"render.ambient_strength", "how much light from skymap to use", 1.0f, CVarFlags::EditFloatDrag);
 
@@ -103,21 +103,22 @@ void MaterialLight::bind_instance_resources(ModelInstance &instance, Transform &
 
 void MaterialLight::bind_light_resources(Light &light, Transform &transform) {
 	float threshold = *CVarSystem::get()->get_float_cvar("render.light_threshold");
-	float radius = light.intensity * std::sqrtf(1.0f / threshold);
+	// float radius = light.intensity * std::sqrtf(1.0f / threshold);
 
 	const glm::mat4 &global_model = transform.get_global_model_matrix();
 	glm::mat4 model;
 	if (light.type == LightType::SPOT_LIGHT) {
-		float cone_scale = light.intensity * glm::tan(glm::radians(light.outer_cutoff + light.cutoff)) /
-				(float)glm::tan(glm::radians(17.5f));
-		model = glm::scale(global_model, glm::vec3(cone_scale, cone_scale, light.intensity));
+		float cone_scale = light.radius * glm::tan(glm::radians(light.outer_cutoff + light.cutoff));
+		model = glm::scale(global_model, glm::vec3(cone_scale, cone_scale, light.radius));
 	} else {
-		model = global_model * glm::scale(glm::mat4(1.0f), glm::vec3(radius));
+		model = global_model * glm::scale(glm::mat4(1.0f), glm::vec3(light.radius));
 	}
 	shader.use();
 	shader.set_mat4("model", model);
 	shader.set_vec3("light_color", light.color);
 	shader.set_float("light_intensity", light.intensity);
+	shader.set_float("light_radius", light.radius);
+	shader.set_float("light_blend_distance", light.blend_distance);
 	shader.set_int("type", (int)light.type);
 	shader.set_bool("cast_shadow", light.cast_shadow);
 	switch (light.type) {
@@ -710,6 +711,10 @@ void MaterialDecal::bind_resources(RenderScene &scene) {
 	shader.set_int("source_normal", 1);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.normal_texture_id);
+
+	shader.set_int("source_ao_rough_metal", 2);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.ao_rough_metal_texture_id);
 }
 
 void MaterialDecal::bind_instance_resources(ModelInstance &instance, Transform &transform) {
@@ -730,9 +735,7 @@ void MaterialDecal::bind_decal_resources(Decal &decal, Transform &transform) {
 	const glm::mat4 &decal_view_proj = decal_projection * decal_view;
 	shader.set_mat4("decal_view_proj", decal_view_proj);
 	shader.set_mat4("decal_inv_view_proj", glm::inverse(decal_view_proj));
-
 	const Texture &albedo = resource_manager.get_texture(decal.albedo);
-	const Texture &normal = resource_manager.get_texture(decal.normal);
 	glm::vec2 aspect_ratio;
 	if (albedo.width > albedo.height) {
 		aspect_ratio.x = 1.0f;
@@ -741,12 +744,27 @@ void MaterialDecal::bind_decal_resources(Decal &decal, Transform &transform) {
 		aspect_ratio.x = float(albedo.height) / float(albedo.width);
 		aspect_ratio.y = 1.0f;
 	}
-	shader.set_vec2("aspect_ratio", aspect_ratio);
 	shader.set_vec4("color", decal.color);
-	shader.set_int("decal_albedo", 2);
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, albedo.id);
-	shader.set_int("decal_normal", 3);
+	shader.set_vec2("aspect_ratio", aspect_ratio);
+
+	shader.set_int("has_normal", decal.has_normal);
+	shader.set_int("has_ao", decal.has_ao);
+	shader.set_int("has_roughness", decal.has_roughness);
+	shader.set_int("has_metalness", decal.has_metalness);
+
+	shader.set_int("decal_albedo", 3);
 	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D, normal.id);
+	glBindTexture(GL_TEXTURE_2D, albedo.id);
+	if (decal.has_normal) {
+		const Texture &normal = resource_manager.get_texture(decal.normal);
+		shader.set_int("decal_normal", 4);
+		glActiveTexture(GL_TEXTURE4);
+		glBindTexture(GL_TEXTURE_2D, normal.id);
+	}
+	if (decal.has_ao || decal.has_roughness || decal.has_metalness) {
+		const Texture &ao_rough_metal = resource_manager.get_texture(decal.ao_rough_metal);
+		shader.set_int("decal_ao_rough_metal", 5);
+		glActiveTexture(GL_TEXTURE5);
+		glBindTexture(GL_TEXTURE_2D, ao_rough_metal.id);
+	}
 }
