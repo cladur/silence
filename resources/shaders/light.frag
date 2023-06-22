@@ -289,7 +289,7 @@ void CalcSpotLight(vec3 world_pos, vec3 normal, vec3 view_pos, vec3 F0, float ro
     vec3 volumetric = vec3(0.0);
     if (cast_volumetric) {
         float depth_test = texture(gDepth, tex_coords).r;
-        volumetric = true ? calculate_volume(world_pos, light_dir, tex_coords) : vec3(0.0f);
+        volumetric = depth_test < world_pos.z ? calculate_volume(world_pos, light_dir, tex_coords) : vec3(0.0f);
     }
     vec3 specular_light = (specular * radiance * NdotL) * (1.0f - shadow) + volumetric;
 

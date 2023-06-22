@@ -77,6 +77,7 @@ void MaterialLight::bind_resources(RenderScene &scene) {
 	shader.set_mat4("view", scene.view);
 	shader.set_vec3("camPos", scene.camera_pos);
 	shader.set_vec2("screen_dimensions", scene.render_extent);
+	shader.set_float("far_plane", scene.shadow_buffer.far);
 	shader.set_int("gPosition", 0);
 	shader.set_int("gNormal", 1);
 	shader.set_int("gAlbedo", 2);
@@ -84,7 +85,6 @@ void MaterialLight::bind_resources(RenderScene &scene) {
 	shader.set_int("shadowMap", 4);
 	shader.set_int("depthMap", 5);
 	shader.set_int("gDepth", 6);
-	shader.set_float("far_plane", scene.shadow_buffer.far);
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.position_texture_id);
@@ -148,11 +148,11 @@ void MaterialLight::bind_light_resources(Light &light, Transform &transform) {
 				glBindTexture(GL_TEXTURE_2D, light.shadow_map_id);
 				shader.set_mat4("light_space", light.light_space);
 				shader.set_vec2("spot_bias", glm::vec2(cvar_bias_min.get(), cvar_bias_max.get()));
-				shader.set_int("num_steps", cvar_volumetric_steps.get());
-				shader.set_int("cast_volumetric", light.cast_volumetric);
-				shader.set_float("scattering", cvar_volumetric_scattering.get());
 				shader.set_vec2(
 						"volumetric_bias", glm::vec2(cvar_volumetric_bias_x.get(), cvar_volumetric_bias_y.get()));
+				shader.set_float("scattering", cvar_volumetric_scattering.get());
+				shader.set_int("num_steps", cvar_volumetric_steps.get());
+				shader.set_int("cast_volumetric", light.cast_volumetric);
 			}
 			break;
 		default:
