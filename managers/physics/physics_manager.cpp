@@ -1,6 +1,7 @@
 #include "physics_manager.h"
 #include "ecs/world.h"
 #include "engine/scene.h"
+#include "gameplay/gameplay_manager.h"
 
 // Most times we cannot compare float value to 0, than we epsilon
 AutoCVarFloat cvar_epsilon("physics.epsilon", "float error value", glm::epsilon<float>(), CVarFlags::EditFloatDrag);
@@ -1188,7 +1189,7 @@ std::vector<Entity> PhysicsManager::overlap_sphere(
 		World &world, const ColliderSphere &sphere, const std::string &layer_name) {
 	std::vector<Entity> entities = world.get_parent_scene()->entities;
 	std::vector<Entity> result;
-	// Reserve for optimization I didn't expect that more than 20 enemies will be in range
+	// Reserve for optimization I didn't expect that more than 32 enemies will be in range
 	result.reserve(32);
 
 	for (auto entity : entities) {
@@ -1197,7 +1198,7 @@ std::vector<Entity> PhysicsManager::overlap_sphere(
 		}
 
 		auto &tag = world.get_component<ColliderTag>(entity);
-		if (!are_layers_collide(layer_name, tag.layer_name)) {
+		if (!world.get_component<ColliderTag>(entity).is_active || !are_layers_collide(layer_name, tag.layer_name)) {
 			continue;
 		}
 		const Transform &transform = world.get_component<Transform>(entity);
@@ -1232,6 +1233,91 @@ std::vector<Entity> PhysicsManager::overlap_sphere(
 			c.end = position + c.end * scale;
 			c.radius *= scale.x;
 			if (glm::length2(is_overlap(c, sphere)) > 0.0f) {
+				result.push_back(entity);
+			}
+		}
+	}
+	return result;
+}
+
+std::vector<Entity> PhysicsManager::overlap_cube_checkpoint(World &world, const ColliderOBB &obb) {
+	std::vector<Entity> result;
+	result.reserve(2);
+
+	auto &gameplay_manager = GameplayManager::get();
+	Entity agent = gameplay_manager.get_agent_entity();
+	Entity hacker = gameplay_manager.get_hacker_entity();
+
+	if (world.has_component<ColliderSphere>(hacker)) {
+		const Transform &transform = world.get_component<Transform>(hacker);
+		ColliderSphere c = world.get_component<ColliderSphere>(hacker);
+		c.center = transform.get_global_position() + c.center * transform.get_global_scale();
+		c.radius *= transform.get_global_scale().x;
+		if (glm::length2(is_overlap(obb, c)) > 0.0f) {
+			result.push_back(hacker);
+		}
+	}
+
+	if (world.has_component<ColliderCapsule>(agent)) {
+		const Transform &transform = world.get_component<Transform>(agent);
+		ColliderCapsule c = world.get_component<ColliderCapsule>(agent);
+		c.start = transform.get_global_position() + c.start * transform.get_global_scale();
+		c.end = transform.get_global_position() + c.end * transform.get_global_scale();
+		c.radius *= transform.get_global_scale().x;
+		if (glm::length2(is_overlap(c, obb)) > 0.0f) {
+			result.push_back(agent);
+		}
+	}
+
+	return result;
+}
+
+std::vector<Entity> PhysicsManager::overlap_cube_trigger(World &world, const ColliderOBB &obb) {
+	std::vector<Entity> entities = world.get_parent_scene()->entities;
+	std::vector<Entity> result;
+	result.reserve(64);
+
+	for (auto entity : entities) {
+		bool is_trigger_target = world.has_component<EnemyData>(entity) || world.has_component<Highlight>(entity) ||
+				world.has_component<Interactable>(entity) || world.has_component<Platform>(entity) ||
+				world.has_component<Taggable>(entity);
+		if (!is_trigger_target || !world.has_component<ColliderTag>(entity)) {
+			continue;
+		}
+
+		auto &tag = world.get_component<ColliderTag>(entity);
+		const Transform &transform = world.get_component<Transform>(entity);
+		const glm::vec3 &position = transform.get_global_position();
+		const glm::vec3 &scale = transform.get_global_scale();
+		HitInfo info;
+		info.entity = entity;
+		if (world.has_component<ColliderAABB>(entity)) {
+			ColliderAABB c = world.get_component<ColliderAABB>(entity);
+			c.center = position + c.center * scale;
+			c.range *= scale;
+			if (glm::length2(is_overlap(obb, c)) > 0.0f) {
+				result.push_back(entity);
+			}
+		} else if (world.has_component<ColliderOBB>(entity)) {
+			ColliderOBB c = world.get_component<ColliderOBB>(entity);
+			c.center = position + c.get_orientation_matrix() * c.center * scale;
+			c.range *= scale;
+			if (glm::length2(is_overlap(obb, c)) > 0.0f) {
+				result.push_back(entity);
+			}
+		} else if (world.has_component<ColliderSphere>(entity)) {
+			ColliderSphere c = world.get_component<ColliderSphere>(entity);
+			c.center = position + c.center * scale;
+			c.radius *= scale.x;
+			if (glm::length2(is_overlap(obb, c)) > 0.0f) {
+				result.push_back(entity);
+			}
+		} else if (world.has_component<ColliderCapsule>(entity)) {
+			ColliderCapsule c = world.get_component<ColliderCapsule>(entity);
+			c.start = position + c.start * scale;
+			c.end = position + c.end * scale;
+			c.radius *= scale.x;
+			if (glm::length2(is_overlap(c, obb)) > 0.0f) {
 				result.push_back(entity);
 			}
 		}

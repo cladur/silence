@@ -37,7 +37,9 @@ void CollisionSystem::update(World &world, float dt) {
 
 	BSPNode *root = world.get_parent_scene()->bsp_tree.get();
 	for (const Entity entity : entities) {
-		resolve_bsp_collision(world, root, entity);
+		if (world.get_component<ColliderTag>(entity).is_active) {
+			resolve_bsp_collision(world, root, entity);
+		}
 	}
 }
 
@@ -48,6 +50,9 @@ void CollisionSystem::resolve_collision_dynamic(World &world) {
 	CollisionFlag first, second;
 	for (auto it1 = entities.begin(); it1 != entities.end(); ++it1) {
 		Entity e1 = std::ref(*it1);
+		if (!world.get_component<ColliderTag>(e1).is_active) {
+			continue;
+		}
 		if (world.has_component<ColliderOBB>(e1)) {
 			first = CollisionFlag::FIRST_OBB;
 		} else if (world.has_component<ColliderAABB>(e1)) {
@@ -62,6 +67,9 @@ void CollisionSystem::resolve_collision_dynamic(World &world) {
 		}
 		for (auto it2 = std::next(it1); it2 != entities.end(); ++it2) {
 			Entity e2 = std::ref(*it2);
+			if (!world.get_component<ColliderTag>(e2).is_active) {
+				continue;
+			}
 
 			if (world.has_component<ColliderOBB>(e2)) {
 				second = CollisionFlag::SECOND_OBB;
@@ -145,6 +153,7 @@ void CollisionSystem::resolve_bsp_collision(World &world, BSPNode *node, Entity 
 	if (force) {
 		resolve_bsp_collision(world, node->front.get(), entity, force);
 		resolve_bsp_collision(world, node->back.get(), entity, force);
+		return;
 	}
 
 	if (node->back == nullptr && node->front == nullptr) {
@@ -185,7 +194,7 @@ void CollisionSystem::resolve_bsp_collision(World &world, BSPNode *node, Entity 
 	}
 
 	if (side == Side::FRONT) {
-		resolve_bsp_collision(world, node->front.get(), entity);
+		resolve_bsp_collision(world, node->front.get(), entity, force);
 	} else if (side == Side::BACK) {
 		resolve_bsp_collision(world, node->back.get(), entity, force);
 	} else {
@@ -640,7 +649,7 @@ bool CollisionSystem::ray_cast_layer(World &world, const Ray &ray, HitInfo &resu
 		}
 
 		const ColliderTag &tag = world.get_component<ColliderTag>(entity);
-		if (!physics_manager.are_layers_collide(ray.layer_name, tag.layer_name)) {
+		if (!tag.is_active || !physics_manager.are_layers_collide(ray.layer_name, tag.layer_name)) {
 			continue;
 		}
 

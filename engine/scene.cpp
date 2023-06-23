@@ -131,8 +131,8 @@ void Scene::register_main_systems() {
 	world.register_system<DecalSystem>(UpdateOrder::PostPhysics);
 
 	// Transform
-	world.register_system<IsolatedEntitiesSystem>(UpdateOrder::PrePreAnimation);
-	world.register_system<RootParentSystem>(UpdateOrder::PrePreAnimation);
+	world.register_system<IsolatedEntitiesSystem>(UpdateOrder::DuringPhysics);
+	world.register_system<RootParentSystem>(UpdateOrder::DuringPhysics);
 	world.register_system<AttachmentSystem>(UpdateOrder::PostAnimation);
 	world.register_system<CableSystem>(UpdateOrder::PreAnimation);
 }
@@ -141,13 +141,13 @@ void Scene::register_game_systems() {
 	ZoneScopedN("Scene::register_game_systems");
 	// Physics
 	world.register_system<PhysicsSystem>();
-	world.register_system<CollisionSystem>();
 
 	// Agents
 	auto agent_system = world.register_system<AgentSystem>();
 	world.register_system<AgentMovementSystem>(UpdateOrder::DuringPhysics);
 	auto hacker_system = world.register_system<HackerSystem>();
 	world.register_system<HackerMovementSystem>(UpdateOrder::DuringPhysics);
+	world.register_system<CollisionSystem>(UpdateOrder::DuringPhysics);
 	world.register_system<EnemySystem>(UpdateOrder::PostAnimation);
 	world.register_system<TaggableSystem>();
 	//world.register_system<EnemyPathing>();

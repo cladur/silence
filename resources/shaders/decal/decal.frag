@@ -1,6 +1,7 @@
 #version 330 core
 layout (location = 1) out vec4 gNormal;
 layout (location = 2) out vec4 gAlbedo;
+layout (location = 3) out vec4 gAoRoughMetal;
 
 in vec4 view_pos;
 in vec4 clip_pos;
@@ -8,13 +9,19 @@ in vec2 uv;
 // source is gBuffer
 uniform sampler2D source_position;
 uniform sampler2D source_normal;
+uniform sampler2D source_ao_rough_metal;
 uniform sampler2D decal_normal;
 uniform sampler2D decal_albedo;
+uniform sampler2D decal_ao_rough_metal;
 
-uniform vec4 color;
-uniform vec2 aspect_ratio;
 uniform mat4 decal_view_proj;
 uniform mat4 inv_view;
+uniform vec4 color;
+uniform vec2 aspect_ratio;
+uniform bool has_normal;
+uniform bool has_ao;
+uniform bool has_roughness;
+uniform bool has_metalness;
 
 
 vec3 getNormalFromMap(vec2 texture_coords, vec3 surface_normal)
@@ -65,7 +72,39 @@ void main()
 
     gAlbedo = albedo;
 
-    vec3 ViewNorm = texture(source_normal, depth_uv).rgb;
-    vec3 world_norm = (inv_view * vec4(ViewNorm, 1.0)).xyz;
-    gNormal = vec4(getNormalFromMap(decal_uv, world_norm), 1.0);
+    if (has_normal)
+    {
+        vec3 ViewNorm = texture(source_normal, depth_uv).rgb;
+        vec3 world_norm = (decal_view_proj * inv_view * vec4(ViewNorm, 1.0)).xyz;
+        gNormal = vec4(getNormalFromMap(decal_uv, world_norm), 1.0);
+    } else {
+        vec3 ViewNorm = texture(source_normal, depth_uv).rgb;
+        gNormal = vec4(ViewNorm, 1.0);
+    }
+    vec3 ao_metallic_roughness;
+    bool has_any = has_ao || has_roughness || has_metalness;
+    if (has_any)
+    {
+        ao_metallic_roughness = texture(decal_ao_rough_metal, decal_uv).rgb;
+    }
+    vec3 s_ao_metallic_roughness = texture(source_ao_rough_metal, depth_uv).rgb;
+    float ao;
+    if (has_ao) {
+        ao = ao_metallic_roughness.r;
+    } else {
+        ao = s_ao_metallic_roughness.r;
+    }
+    float roughness;
+    if (has_roughness) {
+        roughness = ao_metallic_roughness.g;
+    } else {
+        roughness = s_ao_metallic_roughness.g;
+    }
+    float metalness;
+    if (has_metalness) {
+        metalness = ao_metallic_roughness.b;
+    } else {
+        metalness = s_ao_metallic_roughness.b;
+    }
+    gAoRoughMetal = vec4(ao, roughness, metalness, 1.0);
 }

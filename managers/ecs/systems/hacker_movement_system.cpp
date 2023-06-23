@@ -7,19 +7,19 @@
 #include "physics/physics_manager.h"
 #include <audio/audio_manager.h>
 
-AutoCVarFloat cvar_hacker_acc_ground("hacker.acc_ground", "acceleration on ground ", 0.4f, CVarFlags::EditCheckbox);
+AutoCVarFloat cvar_hacker_acc_ground("hacker.acc_ground", "acceleration on ground ", 32.0f, CVarFlags::EditCheckbox);
 
 AutoCVarFloat cvar_hacker_minimal_animation_speed(
 		"hacker.minimal_animation_speed", "minimal walking animation speed ", 3500.0f, CVarFlags::EditCheckbox);
 
-AutoCVarFloat cvar_hacker_velocity_animation_speed_multiplier("hacker.velocity_animation_speed_multiplier",
-		"glm::length(velocity) * this", 400000.0f, CVarFlags::EditCheckbox);
+AutoCVarFloat cvar_hacker_velocity_animation_speed_multiplier(
+		"hacker.velocity_animation_speed_multiplier", "glm::length(velocity) * this", 6000.0f, CVarFlags::EditCheckbox);
 
 AutoCVarFloat cvar_hacker_idle_animation_tickrate(
 		"hacker.idle_animation_tickrate", "Idle animation tickrate", 1500.0f, CVarFlags::EditCheckbox);
 
 AutoCVarFloat cvar_hacker_max_vel_ground(
-		"hacker.max_vel_ground", "maximum velocity on ground ", 2.0f, CVarFlags::EditCheckbox);
+		"hacker.max_vel_ground", "maximum velocity on ground ", 3.0f, CVarFlags::EditCheckbox);
 
 AutoCVarFloat cvar_hacker_friction_ground(
 		"hacker.friction_ground", "friction on ground", 8.0f, CVarFlags::EditCheckbox);
@@ -56,13 +56,15 @@ void HackerMovementSystem::update(World &world, float dt) {
 
 		glm::vec3 acc_direction = { 0, 0, 0 };
 		if (!is_on_camera) {
-
-			if(hacker_data.gamepad >= 0) {
-			acc_direction += input_manager.get_axis("hacker_move_backward", "hacker_move_forward", hacker_data.gamepad) * camera_forward;
-			acc_direction += input_manager.get_axis("hacker_move_left", "hacker_move_right", hacker_data.gamepad) * -camera_right;
+			if (hacker_data.gamepad >= 0) {
+				acc_direction +=
+						input_manager.get_axis("hacker_move_backward", "hacker_move_forward", hacker_data.gamepad) *
+						camera_forward;
+				acc_direction += input_manager.get_axis("hacker_move_left", "hacker_move_right", hacker_data.gamepad) *
+						-camera_right;
 			} else {
-			acc_direction += input_manager.get_axis("hacker_move_backward", "hacker_move_forward") * camera_forward;
-			acc_direction += input_manager.get_axis("hacker_move_left", "hacker_move_right") * -camera_right;
+				acc_direction += input_manager.get_axis("hacker_move_backward", "hacker_move_forward") * camera_forward;
+				acc_direction += input_manager.get_axis("hacker_move_left", "hacker_move_right") * -camera_right;
 			}
 		}
 
@@ -75,6 +77,9 @@ void HackerMovementSystem::update(World &world, float dt) {
 		}
 
 		glm::vec3 velocity = move_ground(acc_direction, previous_velocity, dt);
+
+		transform.add_position(glm::vec3(velocity.x, 0.0, velocity.z) * dt);
+
 		if (glm::dot(velocity, velocity) > physics_manager.get_epsilon()) {
 			if (animation_instance.animation_handle.id !=
 					resource_manager.get_animation_handle("scorpion/scorpion_ANIM_GLTF/scorpion_walk.anim").id) {
@@ -104,7 +109,6 @@ void HackerMovementSystem::update(World &world, float dt) {
 			}
 			animation_instance.ticks_per_second = new_animation_speed;
 		}
-		transform.add_position(glm::vec3(velocity.x, 0.0, velocity.z));
 
 		static glm::vec3 last_position = transform.position;
 
@@ -112,7 +116,7 @@ void HackerMovementSystem::update(World &world, float dt) {
 		glm::vec3 delta_position = transform.position - last_position;
 
 		delta_position.y = 0.0f;
-		if (glm::length2(delta_position) > 0.001f) {
+		if (glm::length2(delta_position) > physics_manager.get_epsilon()) {
 			glm::vec3 direction = glm::normalize(delta_position);
 			glm::vec3 forward =
 					glm::normalize(glm::vec3(model_tf.get_global_forward().x, 0.0f, model_tf.get_global_forward().z));

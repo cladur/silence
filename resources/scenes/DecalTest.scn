@@ -17,7 +17,7 @@
                     },
                     "position": {
                         "x": 0.0,
-                        "y": 0.0,
+                        "y": -1.6683101654052734,
                         "z": 0.0
                     },
                     "scale": {
@@ -32,7 +32,7 @@
                 "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
-                    "model_name": "items/wooden_box/wooden_box.mdl",
+                    "model_name": "items/planes/bricks.mdl",
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
@@ -58,9 +58,9 @@
                         "z": 0.0
                     },
                     "position": {
-                        "x": 0.0,
-                        "y": 1.0820589065551758,
-                        "z": 0.0
+                        "x": 0.1526969075202942,
+                        "y": -1.8476030826568604,
+                        "z": 0.13906553387641907
                     },
                     "scale": {
                         "x": 5.0,
@@ -72,13 +72,24 @@
             },
             {
                 "component_data": {
-                    "albedo": "Decal_test/Decal_14_glossiness-1K.ktx2",
-                    "normal": "Decal_test/Decal_14_normal-1K.ktx2"
+                    "albedo": "items/planes/tex/bricks_Base_color.ktx2",
+                    "ao_rough_metal": "items/planes/tex/bricks_Metallic_png-bricks_Roughness_png.ktx2",
+                    "color": {
+                        "a": 1.0,
+                        "b": 1.0,
+                        "g": 1.0,
+                        "r": 1.0
+                    },
+                    "has_ao": true,
+                    "has_metalness": true,
+                    "has_normal": true,
+                    "has_roughness": true,
+                    "normal": "items/planes/tex/bricks_Normal.ktx2"
                 },
                 "component_name": "Decal"
             }
         ],
         "entity": 2,
-        "signature": "0000000000000000000000000000001000000000000000000000000000000011"
+        "signature": "0000000000000000000000000001000000000000000000000000000000000011"
     }
 ]
