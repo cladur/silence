@@ -1859,6 +1859,13 @@ void Inspector::show_decal() {
 		if (decal.has_normal) {
 			ImGui::TableNextRow();
 			ImGui::TableSetColumnIndex(0);
+			ImGui::Text("Use face normal");
+			ImGui::TableSetColumnIndex(1);
+			ImGui::SetNextItemWidth(-FLT_MIN);
+			ImGui::Checkbox("##Use face normal", &decal.use_face_normal);
+			
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex(0);
 			ImGui::Text("Normal");
 			ImGui::TableSetColumnIndex(1);
 			ImGui::SetNextItemWidth(-FLT_MIN);

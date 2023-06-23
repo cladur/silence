@@ -729,9 +729,11 @@ void MaterialDecal::bind_decal_resources(Decal &decal, Transform &transform) {
 		aspect_ratio.y = 1.0f;
 	}
 	shader.set_vec4("color", decal.color);
+	shader.set_vec3("face_normal", glm::normalize(projector_offset));
 	shader.set_vec2("aspect_ratio", aspect_ratio);
 
 	shader.set_int("has_normal", decal.has_normal);
+	shader.set_int("use_face_normal", decal.use_face_normal);
 	shader.set_int("has_ao", decal.has_ao);
 	shader.set_int("has_roughness", decal.has_roughness);
 	shader.set_int("has_metalness", decal.has_metalness);
