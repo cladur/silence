@@ -39,7 +39,7 @@ void LightRenderSystem::update(World &world, float dt) {
 		if (!debug_draw_enabled) {
 			continue;
 		}
-		const glm::vec3 &position = transform.get_position();
+		const glm::vec3 &position = transform.get_global_position();
 		const glm::quat &orientation = transform.get_global_orientation();
 		const glm::vec3 &direction = glm::normalize(orientation * glm::vec3(0.0f, 0.0f, -1.0f));
 

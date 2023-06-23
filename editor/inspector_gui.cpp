@@ -759,17 +759,27 @@ void Inspector::show_light() {
 
 		ImGui::TableNextRow();
 		ImGui::TableSetColumnIndex(0);
-		ImGui::Text("Cast shadow");
-		ImGui::TableSetColumnIndex(1);
-		ImGui::SetNextItemWidth(-FLT_MIN);
-		ImGui::Checkbox("##Cast shadow", &light.cast_shadow);
-
-		ImGui::TableNextRow();
-		ImGui::TableSetColumnIndex(0);
 		ImGui::Text("Is On");
 		ImGui::TableSetColumnIndex(1);
 		ImGui::SetNextItemWidth(-FLT_MIN);
 		ImGui::Checkbox("##Is On", &light.is_on);
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Cast shadow");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		ImGui::Checkbox("##Cast shadow", &light.cast_shadow);
+		if (light.cast_shadow) {
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex(0);
+			ImGui::Text("Cast volumetric");
+			ImGui::TableSetColumnIndex(1);
+			ImGui::SetNextItemWidth(-FLT_MIN);
+			ImGui::Checkbox("##Cast volumetric", &light.cast_volumetric);
+		} else {
+			light.cast_volumetric = false;
+		}
 
 		if (light.type == LightType::SPOT_LIGHT) {
 			ImGui::TableNextRow();

@@ -14,6 +14,7 @@ public:
 	float radius = 5.0f;
 	float blend_distance = 1.0f;
 	bool cast_shadow = false;
+	bool cast_volumetric = false;
 	bool is_on = true;
 	// Do not serialize this
 	glm::mat4 light_space; // required for dir light shadow
@@ -32,6 +33,7 @@ public:
 		serialized_component["outer_cutoff"] = outer_cutoff;
 		serialized_component["type"] = type;
 		serialized_component["cast_shadow"] = cast_shadow;
+		serialized_component["cast_volumetric"] = cast_volumetric;
 		serialized_component["is_on"] = is_on;
 		serialized_scene.push_back(nlohmann::json::object());
 		serialized_scene.back()["component_data"] = serialized_component;
@@ -73,6 +75,12 @@ public:
 			cast_shadow = serialized_component["cast_shadow"];
 		} else {
 			cast_shadow = false;
+		}
+
+		if (serialized_component.contains("cast_volumetric")) {
+			cast_volumetric = serialized_component["cast_volumetric"];
+		} else {
+			cast_volumetric = false;
 		}
 
 		if (serialized_component.contains("is_on")) {
