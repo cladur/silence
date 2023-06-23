@@ -19,6 +19,7 @@
 #include <string>
 
 AutoCVarInt cvar_force_20_fps("engine.force_20_fps", "force 20 fps", 0, CVarFlags::EditCheckbox);
+AutoCVarInt cvar_uncapped_fps("engine.uncap_fps", "don't limit fps to screen refresh rate", 0, CVarFlags::EditCheckbox);
 
 void Engine::startup() {
 	// Managers
@@ -60,11 +61,13 @@ void Engine::run() {
 
 		auto stop_time = std::chrono::high_resolution_clock::now();
 
-		{
-			ZoneScopedNC("Sleep", tracy::Color::Blue);
-			while (std::chrono::duration<float, std::chrono::seconds::period>(stop_time - start_time).count() <
-					target_frame_time) {
-				stop_time = std::chrono::high_resolution_clock::now();
+		if (!cvar_uncapped_fps.get()) {
+			{
+				ZoneScopedNC("Sleep", tracy::Color::Blue);
+				while (std::chrono::duration<float, std::chrono::seconds::period>(stop_time - start_time).count() <
+						target_frame_time) {
+					stop_time = std::chrono::high_resolution_clock::now();
+				}
 			}
 		}
 
