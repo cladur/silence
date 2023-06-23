@@ -9,15 +9,6 @@
             },
             {
                 "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "items/planes/bricks.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": 0.0,
@@ -36,6 +27,15 @@
                     }
                 },
                 "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/planes/bricks.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
             }
         ],
         "entity": 1,
@@ -52,39 +52,40 @@
             {
                 "component_data": {
                     "orientation": {
-                        "w": 1.0,
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
+                        "w": 0.001046809135004878,
+                        "x": -0.0009863803861662745,
+                        "y": 0.9999989867210388,
+                        "z": -6.356449011946097e-05
                     },
                     "position": {
-                        "x": 0.052352577447891235,
-                        "y": -1.8483245372772217,
-                        "z": -0.9150664806365967
+                        "x": 8.3347749710083,
+                        "y": -1.84806489944458,
+                        "z": -1.5278865098953247
                     },
                     "scale": {
-                        "x": 4.106500148773193,
-                        "y": 0.8212980031967163,
-                        "z": 4.106498718261719
+                        "x": 3.594359874725342,
+                        "y": 0.6406124830245972,
+                        "z": 3.202995538711548
                     }
                 },
                 "component_name": "Transform"
             },
             {
                 "component_data": {
-                    "albedo": "Decals/Switch/switch_Base_color-switch_Opacity.ktx2",
-                    "ao_rough_metal": "Decals/Switch/switch_Metallic-switch_Roughness.ktx2",
+                    "albedo": "Decals/Patch/patch_Base_color-patch_Opacity.ktx2",
+                    "ao_rough_metal": "Decals/Patch/patch_Metallic-patch_Roughness.ktx2",
                     "color": {
                         "a": 1.0,
-                        "b": 1.0,
-                        "g": 1.0,
-                        "r": 1.0
+                        "b": 0.28409093618392944,
+                        "g": 0.28409093618392944,
+                        "r": 0.28409093618392944
                     },
-                    "has_ao": true,
-                    "has_metalness": true,
-                    "has_normal": true,
-                    "has_roughness": true,
-                    "normal": "Decals/Switch/switch_Normal_DirectX.ktx2"
+                    "has_ao": false,
+                    "has_metalness": false,
+                    "has_normal": false,
+                    "has_roughness": false,
+                    "normal": "Decals/Patch/patch_Normal_DirectX.ktx2",
+                    "use_face_normal": false
                 },
                 "component_name": "Decal"
             }
@@ -136,5 +137,109 @@
         ],
         "entity": 3,
         "signature": "0000000000000000000000000000000000000000000000010000000000000010"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "Decal"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.001046820543706417,
+                        "x": -0.0009864101884886622,
+                        "y": 0.999998927116394,
+                        "z": -6.356446101563051e-05
+                    },
+                    "position": {
+                        "x": 3.8262135982513428,
+                        "y": -1.8475693464279175,
+                        "z": 3.077359437942505
+                    },
+                    "scale": {
+                        "x": 9.949685096740723,
+                        "y": 0.6406124830245972,
+                        "z": 3.8581271171569824
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "albedo": "Decals/Patch/patch_Base_color-patch_Opacity.ktx2",
+                    "ao_rough_metal": "Decals/Patch/patch_Metallic-patch_Roughness.ktx2",
+                    "color": {
+                        "a": 1.0,
+                        "b": 0.38029441237449646,
+                        "g": 0.38029441237449646,
+                        "r": 0.4318181872367859
+                    },
+                    "has_ao": false,
+                    "has_metalness": false,
+                    "has_normal": false,
+                    "has_roughness": false,
+                    "normal": "Decals/Patch/patch_Normal_DirectX.ktx2",
+                    "use_face_normal": false
+                },
+                "component_name": "Decal"
+            }
+        ],
+        "entity": 4,
+        "signature": "0000000000000000000000000001000000000000000000000000000000000011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "Decal"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.0010468380060046911,
+                        "x": -0.000986432540230453,
+                        "y": 0.9999989867210388,
+                        "z": -6.356462108669803e-05
+                    },
+                    "position": {
+                        "x": 3.6243090629577637,
+                        "y": -1.8475743532180786,
+                        "z": -1.9156687259674072
+                    },
+                    "scale": {
+                        "x": 2.2000529766082764,
+                        "y": 1.4093472957611084,
+                        "z": 2.200000286102295
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "albedo": "Decals/Switch/switch_Base_color-switch_Opacity.ktx2",
+                    "ao_rough_metal": "Decals/Switch/switch_Metallic-switch_Roughness.ktx2",
+                    "color": {
+                        "a": 1.0,
+                        "b": 0.38029441237449646,
+                        "g": 0.38029441237449646,
+                        "r": 0.4318181872367859
+                    },
+                    "has_ao": false,
+                    "has_metalness": true,
+                    "has_normal": true,
+                    "has_roughness": true,
+                    "normal": "Decals/Switch/switch_Normal_DirectX.ktx2",
+                    "use_face_normal": true
+                },
+                "component_name": "Decal"
+            }
+        ],
+        "entity": 5,
+        "signature": "0000000000000000000000000001000000000000000000000000000000000011"
     }
 ]
