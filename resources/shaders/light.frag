@@ -7,7 +7,6 @@ uniform sampler2D gPosition;
 uniform sampler2D gNormal;
 uniform sampler2D gAlbedo;
 uniform sampler2D gAoRoughMetal;
-uniform sampler2D gDepth;
 uniform sampler2D shadowMap;
 uniform samplerCube depthMap;
 
@@ -45,7 +44,6 @@ float get_light_edge_blend(float distance) {
     float a = light_radius;
     float b = light_radius - light_blend_distance;
 
-    
     // Value from 0 to 1, where 0 is at the edge of the light and 1 is at light_radius - blend_distance
     float blend_x = (1.0 / (b - a)) * (distance - a);
 
@@ -178,13 +176,13 @@ float ShadowCalculation(vec3 normal, vec3 light_dir)
     return shadow;
 }
 // ----------------------------------------------------------------------------
-float calcScattering(float cosTheta)
+float CalcScattering(float cosTheta)
 {
     float scattering2 = scattering * scattering;
     return (1.0f - scattering2) / (4.0f * PI * pow(1.0f + scattering2 - 2.0f * scattering * cosTheta, 1.5f));
 }
 // ----------------------------------------------------------------------------
-vec3 calculate_volume(vec3 world_pos, vec3 light_dir, vec2 tex_coords)
+vec3 CalcVolume(vec3 world_pos, vec3 light_dir, vec2 tex_coords)
 {
     vec3 ray_vector = world_pos - camPos;
     float ray_length = length(ray_vector);
@@ -204,16 +202,16 @@ vec3 calculate_volume(vec3 world_pos, vec3 light_dir, vec2 tex_coords)
         float bias = max(volumetric_bias.x * d, volumetric_bias.y);
         if (depth > lightSpacePosPostW.z + bias)
         {
-            volumetric += calcScattering(d) * light_color;
+            volumetric += CalcScattering(d);
         }
         position += step;
     }
 
-    return clamp(volumetric / float(num_steps), 0.0, 1.0);
+    return volumetric / float(num_steps);
 }
 
 // ----------------------------------------------------------------------------
-void CalcDirLight(vec3 normal, vec3 view_pos, vec3 F0, float roughness, float metalness, vec3 albedo)
+void CalcDirLight(vec3 world_pos, vec3 normal, vec3 view_pos, vec3 F0, float roughness, float metalness, vec3 albedo, vec2 tex_coords)
 {
     vec3 light_dir = normalize(-light_direction);
     vec3 halfway_dir = normalize(light_dir + view_pos);
@@ -233,9 +231,10 @@ void CalcDirLight(vec3 normal, vec3 view_pos, vec3 F0, float roughness, float me
     kD *= 1.0 - metalness;
 
     float shadow = cast_shadow ? ShadowCalculation(normal, light_dir) : 0.0f;
-
     vec3 diffuse_light = (kD * albedo / PI) * light_color * light_intensity * NdotL * (1.0f - shadow);
-    vec3 specular_light = specular * light_color * light_intensity * NdotL * (1.0f - shadow);
+
+    vec3 volumetric = cast_volumetric ? CalcVolume(world_pos, light_dir, tex_coords) : vec3(0.0f);
+    vec3 specular_light = specular * light_color * light_intensity * NdotL * (1.0f - shadow) + volumetric * light_color;
 
     Diffuse = vec4(diffuse_light, 0.0);
     Specular = vec4(specular_light, 0.0);
@@ -304,12 +303,8 @@ void CalcSpotLight(vec3 world_pos, vec3 normal, vec3 view_pos, vec3 F0, float ro
     float shadow = cast_shadow ? ShadowCalculation(normal, light_dir) : 0.0f;
     vec3 diffuse_light = (kD * albedo / PI) * radiance * NdotL * (1.0f - shadow);
 
-    vec3 volumetric = vec3(0.0);
-    if (cast_volumetric) {
-        float depth_test = texture(gDepth, tex_coords).r;
-        volumetric = depth_test < world_pos.z ? calculate_volume(world_pos, light_dir, tex_coords) : vec3(0.0f);
-    }
-    vec3 specular_light = (specular * radiance * NdotL) * (1.0f - shadow) + volumetric;
+    vec3 volumetric = cast_volumetric ? CalcVolume(world_pos, light_dir, tex_coords) : vec3(0.0f);
+    vec3 specular_light = (specular * radiance * NdotL) * (1.0f - shadow) + volumetric * radiance;
 
     Diffuse = vec4(diffuse_light, 0.0);
     Specular = vec4(specular_light, 0.0);
@@ -343,7 +338,7 @@ void main()
         CalcPointLight(WorldPos, N, V, F0, roughness, metallic, albedo);
     } else if (type == 1) {
         world_light_space = light_space * vec4(WorldPos, 1.0);
-        CalcDirLight(N, V, F0, roughness, metallic, albedo);
+        CalcDirLight(WorldPos, N, V, F0, roughness, metallic, albedo, TexCoords);
     } else if (type == 2) {
         world_light_space = light_space * vec4(WorldPos, 1.0);
         CalcSpotLight(WorldPos, N, V, F0, roughness, metallic, albedo, TexCoords);
