@@ -25,23 +25,29 @@ static const float footstep_up_threshold = 0.1f;
 static std::string left_foot_bone = "heel.02.L";
 static std::string right_foot_bone = "heel.02.R";
 
-inline glm::vec2 transform_to_screen(const glm::vec3& position, const RenderScene &scene) {
+inline glm::vec2 transform_to_screen(const glm::vec3& position, const RenderScene &scene, bool is_right) {
 	// Model-View-Projection transformation
 	glm::vec2 render_extent = scene.render_extent;
 
-	glm::mat4 mvpMatrix = scene.left_projection * scene.left_view;
+	glm::mat4 mvp;
+
+	if (is_right) {
+		mvp = scene.projection * scene.view;
+	} else {
+		mvp = scene.left_projection * scene.left_view;
+	}
 
 	// Transform position to clip space
-	glm::vec4 clipSpacePosition = mvpMatrix * glm::vec4(position, 1.0f);
+	glm::vec4 clip_space = mvp * glm::vec4(position, 1.0f);
 
 	// Perspective divide to bring position to normalized device coordinates (NDC)
-	glm::vec3 ndcSpacePosition = glm::vec3(clipSpacePosition) / clipSpacePosition.w;
+	glm::vec3 ndcSpacePosition = glm::vec3(clip_space) / clip_space.w;
 
 	// Convert NDC to screen space coordinates
-	float screenX = (ndcSpacePosition.x) * (render_extent.x / 2.0f);
-	float screenY = (ndcSpacePosition.y) * (render_extent.y / 2.0f);
+	float x = (ndcSpacePosition.x) * (render_extent.x / 2.0f);
+	float y = (ndcSpacePosition.y) * (render_extent.y / 2.0f);
 
-	return glm::vec2(screenX, screenY);
+	return glm::vec2(x, y);
 }
 
 inline void handle_detection(World *world, uint32_t enemy_entity, Transform &transform, glm::vec3 forward,
@@ -403,7 +409,7 @@ inline void update_detection_slider(uint32_t entity_id, Transform &transform, En
 	agent_slider.is_screen_space = true;
 	agent_slider.is_billboard = false;
 
-	agent_slider.position = glm::vec3(transform_to_screen(transform.get_global_position(), scene),0.0f);
+	agent_slider.position = glm::vec3(transform_to_screen(transform.get_global_position(), scene, false),0.0f);
 	agent_slider.position.x -= window_size.x / 2.0f;
 	agent_slider.position.y -= window_size.y / 2.0f;
 
@@ -421,7 +427,7 @@ inline void update_detection_slider(uint32_t entity_id, Transform &transform, En
 	hacker_slider.is_screen_space = true;
 	hacker_slider.is_billboard = false;
 
-	hacker_slider.position = glm::vec3(transform_to_screen(transform.get_global_position(), scene),0.0f);
+	hacker_slider.position = glm::vec3(transform_to_screen(transform.get_global_position(), scene, true),0.0f);
 
 	hacker_slider.position.x -= window_size.x / 2.0f;
 	hacker_slider.position.y -= window_size.y / 2.0f;

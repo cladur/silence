@@ -372,13 +372,11 @@ void AgentSystem::update(World &world, float dt) {
 				glm::vec4 view_pos_non_normalized = world.get_parent_scene()->get_render_scene().left_view *
 						glm::vec4(hit_transform.get_global_position(), 1.0f);
 
-
-
 				glm::vec3 view_pos = glm::vec3(view_pos_non_normalized) / view_pos_non_normalized.w;
 
 				if (obstacle_height > 0.5f && obstacle_height < 0.7f) {
 
-					glm::vec2 screen_pos = enemy_utils::transform_to_screen(info.point, world.get_parent_scene()->get_render_scene());
+					glm::vec2 screen_pos = enemy_utils::transform_to_screen(info.point, world.get_parent_scene()->get_render_scene(), false);
 
 					interaction_sprite->position.x = screen_pos.x + 150.0f;
 					interaction_sprite->position.y = screen_pos.y + 100.0f;
@@ -479,7 +477,7 @@ void AgentSystem::update(World &world, float dt) {
 						}
 						auto &hit_transform = world.get_component<Transform>(closest_interactable);
 
-						glm::vec2 screen_pos = enemy_utils::transform_to_screen(hit_transform.get_global_position(), world.get_parent_scene()->get_render_scene());
+						glm::vec2 screen_pos = enemy_utils::transform_to_screen(hit_transform.get_global_position(), world.get_parent_scene()->get_render_scene(), false);
 
 						interaction_sprite->position.x = screen_pos.x + 150.0f;
 						interaction_sprite->position.y = screen_pos.y + 100.0f;
@@ -561,8 +559,7 @@ void AgentSystem::update(World &world, float dt) {
 							if (behind_enemy && enemy.state_machine.get_current_state() != "dying") {
 								//TODO: pull out knife or other indicator that agent can attack
 
-
-								glm::vec2 screen_pos = enemy_utils::transform_to_screen(enemy_tf.get_global_position() + glm::vec3(0.0f, 1.3f, 0.0f), world.get_parent_scene()->get_render_scene());
+								glm::vec2 screen_pos = enemy_utils::transform_to_screen(enemy_tf.get_global_position() + glm::vec3(0.0f, 1.3f, 0.0f), world.get_parent_scene()->get_render_scene(), false);
 
 								interaction_sprite->position.x = screen_pos.x + 150.0f;
 								interaction_sprite->position.y = screen_pos.y + 100.0f;
