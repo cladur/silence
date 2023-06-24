@@ -36,6 +36,8 @@ struct EnemyData {
 
 	bool is_dead = false;
 
+	glm::vec2 detection_slider_default_size = glm::vec2(15.0f, 75.0f);
+
 	void serialize_json(nlohmann::json &serialized_scene) {
 		nlohmann::json::object_t serialized_component;
 		serialized_scene.push_back(nlohmann::json::object());

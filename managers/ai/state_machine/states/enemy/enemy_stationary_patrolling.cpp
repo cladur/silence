@@ -35,7 +35,7 @@ void EnemyStationaryPatrolling::update(World *world, uint32_t entity_id, float d
 
 	enemy_utils::handle_detection(world, entity_id, transform, transform.get_global_forward(), enemy_data, dt, &dd);
 
-	enemy_utils::update_detection_slider(entity_id, transform, enemy_data, world->get_parent_scene()->get_render_scene());
+	enemy_utils::update_detection_slider(entity_id, transform, enemy_data, world->get_parent_scene()->get_render_scene(), world->get_parent_scene());
 
 	enemy_utils::handle_highlight(entity_id, world);
 

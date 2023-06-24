@@ -78,25 +78,42 @@ void EnemySystem::update(World &world, float dt) {
 			}
 
 			ui.create_ui_scene(std::to_string(entity) + "_detection");
+
+			auto &agent_anchor = ui.add_ui_anchor(std::to_string(entity) + "_detection", "agent_anchor");
+			agent_anchor.x = 0.25f;
+			agent_anchor.y = 0.5f;
+			agent_anchor.is_screen_space = true;
+			agent_anchor.display = true;
+
+			ui.add_as_root(std::to_string(entity) + "_detection", "agent_anchor");
+
+			auto &hacker_anchor = ui.add_ui_anchor(std::to_string(entity) + "_detection", "hacker_anchor");
+			hacker_anchor.x = 0.75f;
+			hacker_anchor.y = 0.5f;
+			hacker_anchor.is_screen_space = true;
+			hacker_anchor.display = true;
+
+			ui.add_as_root(std::to_string(entity) + "_detection", "hacker_anchor");
+
 			auto &agent_slider = ui.add_ui_slider(std::to_string(entity) + "_detection", "agent_detection_slider");
 			agent_slider.position = glm::vec3(0.0f, 0.0f, 0.0f);
 			agent_slider.is_billboard = false;
 			agent_slider.is_screen_space = true;
-			agent_slider.size = glm::vec2(50.0f, 50.0f);
+			agent_slider.size = ed.detection_slider_default_size;
 			agent_slider.slider_alignment = SliderAlignment::BOTTOM_TO_TOP;
 			agent_slider.color = glm::vec4(1.0f);
 
-			ui.add_as_root(std::to_string(entity) + "_detection", "agent_detection_slider");
+			ui.add_to_root(std::to_string(entity) + "_detection", "agent_detection_slider", "agent_anchor");
 
 			auto &hacker_slider = ui.add_ui_slider(std::to_string(entity) + "_detection", "hacker_detection_slider");
 			hacker_slider.position = glm::vec3(0.0f, 0.0f, 0.0f);
 			hacker_slider.is_billboard = false;
 			hacker_slider.is_screen_space = true;
-			hacker_slider.size = glm::vec2(50.0f, 50.0f);
+			hacker_slider.size = ed.detection_slider_default_size;
 			hacker_slider.slider_alignment = SliderAlignment::BOTTOM_TO_TOP;
 			hacker_slider.color = glm::vec4(1.0f);
 
-			ui.add_as_root(std::to_string(entity) + "_detection", "hacker_detection_slider");
+			ui.add_to_root(std::to_string(entity) + "_detection", "hacker_detection_slider", "hacker_anchor");
 
 			ui.activate_ui_scene(std::to_string(entity) + "_detection");
 

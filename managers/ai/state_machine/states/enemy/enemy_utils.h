@@ -401,19 +401,21 @@ inline void handle_detection_camera(World *world, uint32_t enemy_entity, Transfo
 	GameplayManager::get().add_detection_level(detection_camera.detection_level);
 }
 
-inline void update_detection_slider(uint32_t entity_id, Transform &transform, EnemyData &enemy_data, RenderScene &scene) {
+inline void update_detection_slider(uint32_t entity_id, Transform &transform, EnemyData &enemy_data, RenderScene &r_scene, Scene *scene) {
 	auto &agent_slider = UIManager::get().get_ui_slider(std::to_string(entity_id) + "_detection", "agent_detection_slider");
 	auto &hacker_slider = UIManager::get().get_ui_slider(std::to_string(entity_id) + "_detection", "hacker_detection_slider");
-	auto &window_size = scene.render_extent;
+	auto &window_size = r_scene.render_extent;
+	auto agent_pos = GameplayManager::get().get_agent_position(scene);
+	auto hacker_pos = GameplayManager::get().get_hacker_position(scene);
+
+	auto distance_to_agent = glm::clamp(glm::distance(transform.get_global_position(), agent_pos), 1.0f, 100.0f);
+	auto distance_to_hacker = glm::clamp(glm::distance(transform.get_global_position(), hacker_pos), 1.0f, 100.0f);
 
 	agent_slider.is_screen_space = true;
 	agent_slider.is_billboard = false;
 
-	agent_slider.position = glm::vec3(transform_to_screen(transform.get_global_position(), scene, false),0.0f);
-	agent_slider.position.x -= window_size.x / 2.0f;
-	agent_slider.position.y -= window_size.y / 2.0f;
-
-//	std::cout << "agent slider pos: " << agent_slider.position.x << ", " << agent_slider.position.y << std::endl;
+	agent_slider.position = glm::vec3(transform_to_screen(transform.get_global_position() + glm::vec3(0.0f, 2.3f, 0.0f), r_scene, false),0.0f);
+	agent_slider.size = enemy_data.detection_slider_default_size / 3.0f + enemy_data.detection_slider_default_size / (distance_to_agent * 0.5f);
 
 	if (enemy_data.detection_level < 0.001f) {
 		agent_slider.display = false;
@@ -427,11 +429,8 @@ inline void update_detection_slider(uint32_t entity_id, Transform &transform, En
 	hacker_slider.is_screen_space = true;
 	hacker_slider.is_billboard = false;
 
-	hacker_slider.position = glm::vec3(transform_to_screen(transform.get_global_position(), scene, true),0.0f);
-
-	hacker_slider.position.x -= window_size.x / 2.0f;
-	hacker_slider.position.y -= window_size.y / 2.0f;
-
+	hacker_slider.position = glm::vec3(transform_to_screen(transform.get_global_position() + glm::vec3(0.0f, 2.3f, 0.0f), r_scene, true),0.0f);
+	hacker_slider.size = enemy_data.detection_slider_default_size / 3.0f + enemy_data.detection_slider_default_size / (distance_to_hacker * 0.5f);
 	if (enemy_data.detection_level < 0.001f) {
 		hacker_slider.display = false;
 	} else {
