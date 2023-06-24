@@ -402,8 +402,11 @@ inline void handle_detection_camera(World *world, uint32_t enemy_entity, Transfo
 }
 
 inline void update_detection_slider(uint32_t entity_id, Transform &transform, EnemyData &enemy_data, RenderScene &r_scene, Scene *scene) {
-	auto &agent_slider = UIManager::get().get_ui_slider(std::to_string(entity_id) + "_detection", "agent_detection_slider");
-	auto &hacker_slider = UIManager::get().get_ui_slider(std::to_string(entity_id) + "_detection", "hacker_detection_slider");
+	auto &agent_detection_outline = UIManager::get().get_ui_image(std::to_string(entity_id) + "_detection", "agent_detection_outline");
+	auto &hacker_detection_outline = UIManager::get().get_ui_image(std::to_string(entity_id) + "_detection", "hacker_detection_outline");
+	auto &agent_detection_fill = UIManager::get().get_ui_image(std::to_string(entity_id) + "_detection", "agent_detection_fill");
+	auto &hacker_detection_fill = UIManager::get().get_ui_image(std::to_string(entity_id) + "_detection", "hacker_detection_fill");
+
 	auto &window_size = r_scene.render_extent;
 	auto agent_pos = GameplayManager::get().get_agent_position(scene);
 	auto hacker_pos = GameplayManager::get().get_hacker_position(scene);
@@ -411,39 +414,61 @@ inline void update_detection_slider(uint32_t entity_id, Transform &transform, En
 	auto distance_to_agent = glm::clamp(glm::distance(transform.get_global_position(), agent_pos), 1.0f, 100.0f);
 	auto distance_to_hacker = glm::clamp(glm::distance(transform.get_global_position(), hacker_pos), 1.0f, 100.0f);
 
-	agent_slider.is_screen_space = true;
-	agent_slider.is_billboard = false;
+	agent_detection_outline.is_screen_space = true;
+	agent_detection_outline.is_billboard = false;
 
-	agent_slider.position = glm::vec3(transform_to_screen(transform.get_global_position() + glm::vec3(0.0f, 0.5f, 0.0f), r_scene, false),0.0f);
-	agent_slider.size = enemy_data.detection_slider_default_size / 3.0f + enemy_data.detection_slider_default_size / (distance_to_agent);
+	agent_detection_fill.is_screen_space = true;
+	agent_detection_fill.is_billboard = false;
+
+	auto agent_detection_pos = transform_to_screen(transform.get_global_position() + glm::vec3(0.0f, 2.0f, 0.0f), r_scene, false);
+	agent_detection_outline.position = glm::vec3(agent_detection_pos,0.1f);
+	agent_detection_fill.position = glm::vec3(agent_detection_pos + glm::vec2(0.0f, 1.0f),0.0f);
+
+	agent_detection_outline.size = enemy_data.detection_slider_default_size / 3.0f + enemy_data.detection_slider_default_size / (distance_to_agent);
+	agent_detection_fill.size = glm::lerp(glm::vec2(0.0f), agent_detection_outline.size * 0.90f, enemy_data.detection_level);
+	agent_detection_fill.color = glm::lerp(glm::vec4(1.0f), glm::vec4(1.0f, 0.0f, 0.0f, 0.5f), enemy_data.detection_level);
 
 	if (enemy_data.detection_level < 0.001f) {
-		agent_slider.display = false;
+		agent_detection_outline.display = false;
+		agent_detection_fill.display = false;
 	} else {
-		agent_slider.display = true;
+		agent_detection_outline.display = true;
+		agent_detection_fill.display = true;
 	}
-	agent_slider.value = enemy_data.detection_level;
-	agent_slider.color = glm::lerp(glm::vec4(1.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), agent_slider.value);
 
-	//repeat for hacker
-	hacker_slider.is_screen_space = true;
-	hacker_slider.is_billboard = false;
+	hacker_detection_outline.is_screen_space = true;
+	hacker_detection_outline.is_billboard = false;
 
-	hacker_slider.position = glm::vec3(transform_to_screen(transform.get_global_position() + glm::vec3(0.0f, 0.5f, 0.0f), r_scene, true),0.0f);
-	hacker_slider.size = enemy_data.detection_slider_default_size / 3.0f + enemy_data.detection_slider_default_size / (distance_to_hacker);
+	hacker_detection_fill.is_screen_space = true;
+	hacker_detection_fill.is_billboard = false;
+
+	auto hacker_detection_pos = transform_to_screen(transform.get_global_position() + glm::vec3(0.0f, 2.0f, 0.0f), r_scene, true);
+	hacker_detection_outline.position = glm::vec3(hacker_detection_pos,0.1f);
+	hacker_detection_fill.position = glm::vec3(hacker_detection_pos + glm::vec2(0.0f, 1.0f),0.0f);
+
+	hacker_detection_outline.size = enemy_data.detection_slider_default_size / 3.0f + enemy_data.detection_slider_default_size / (distance_to_hacker);
+	hacker_detection_fill.size = glm::lerp(glm::vec2(0.0f), hacker_detection_outline.size * 0.90f, enemy_data.detection_level);
+	hacker_detection_fill.color = glm::lerp(glm::vec4(1.0f), glm::vec4(1.0f, 0.0f, 0.0f, 0.5f), enemy_data.detection_level);
+
 	if (enemy_data.detection_level < 0.001f) {
-		hacker_slider.display = false;
+		hacker_detection_outline.display = false;
+		hacker_detection_fill.display = false;
 	} else {
-		hacker_slider.display = true;
+		hacker_detection_outline.display = true;
+		hacker_detection_fill.display = true;
 	}
-	hacker_slider.value = enemy_data.detection_level;
-	hacker_slider.color = glm::lerp(glm::vec4(1.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), hacker_slider.value);
 }
 
 inline void update_detection_slider_camera(
 		uint32_t entity_id, Transform &transform, DetectionCamera &detection_camera, RenderScene &r_scene, Scene *scene) {
-	auto &agent_slider = UIManager::get().get_ui_slider(std::to_string(entity_id) + "_detection", "agent_detection_slider");
-	auto &hacker_slider = UIManager::get().get_ui_slider(std::to_string(entity_id) + "_detection", "hacker_detection_slider");
+	//auto &agent_slider = UIManager::get().get_ui_slider(std::to_string(entity_id) + "_detection", "agent_detection_slider");
+	//auto &hacker_slider = UIManager::get().get_ui_slider(std::to_string(entity_id) + "_detection", "hacker_detection_slider");
+
+	auto &agent_detection_outline = UIManager::get().get_ui_image(std::to_string(entity_id) + "_detection", "agent_detection_outline");
+	auto &hacker_detection_outline = UIManager::get().get_ui_image(std::to_string(entity_id) + "_detection", "hacker_detection_outline");
+	auto &agent_detection_fill = UIManager::get().get_ui_image(std::to_string(entity_id) + "_detection", "agent_detection_fill");
+	auto &hacker_detection_fill = UIManager::get().get_ui_image(std::to_string(entity_id) + "_detection", "hacker_detection_fill");
+
 	auto &window_size = r_scene.render_extent;
 	auto agent_pos = GameplayManager::get().get_agent_position(scene);
 	auto hacker_pos = GameplayManager::get().get_hacker_position(scene);
@@ -451,33 +476,49 @@ inline void update_detection_slider_camera(
 	auto distance_to_agent = glm::clamp(glm::distance(transform.get_global_position(), agent_pos), 1.0f, 100.0f);
 	auto distance_to_hacker = glm::clamp(glm::distance(transform.get_global_position(), hacker_pos), 1.0f, 100.0f);
 
-	agent_slider.is_screen_space = true;
-	agent_slider.is_billboard = false;
+	agent_detection_outline.is_screen_space = true;
+	agent_detection_outline.is_billboard = false;
 
-	agent_slider.position = glm::vec3(transform_to_screen(transform.get_global_position() + glm::vec3(0.0f, 0.9f, 0.0f), r_scene, false),0.0f);
-	agent_slider.size = detection_camera.default_detection_slider_size / 3.0f + detection_camera.default_detection_slider_size / (distance_to_agent);
+	agent_detection_fill.is_screen_space = true;
+	agent_detection_fill.is_billboard = false;
+
+	auto agent_detection_pos = transform_to_screen(transform.get_global_position() + glm::vec3(0.0f, 0.5f, 0.0f), r_scene, false);
+	agent_detection_outline.position = glm::vec3(agent_detection_pos,0.1f);
+	agent_detection_fill.position = glm::vec3(agent_detection_pos + glm::vec2(0.0f, 1.0f),0.0f);
+
+	agent_detection_outline.size = detection_camera.default_detection_slider_size / 3.0f + detection_camera.default_detection_slider_size / (distance_to_agent);
+	agent_detection_fill.size = glm::lerp(glm::vec2(0.0f), agent_detection_outline.size * 0.90f, detection_camera.detection_level);
+	agent_detection_fill.color = glm::lerp(glm::vec4(1.0f), glm::vec4(1.0f, 0.0f, 0.0f, 0.5f), detection_camera.detection_level);
 
 	if (detection_camera.detection_level < 0.001f) {
-		agent_slider.display = false;
+		agent_detection_outline.display = false;
+		agent_detection_fill.display = false;
 	} else {
-		agent_slider.display = true;
+		agent_detection_outline.display = true;
+		agent_detection_fill.display = true;
 	}
-	agent_slider.value = detection_camera.detection_level;
-	agent_slider.color = glm::lerp(glm::vec4(1.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), agent_slider.value);
 
-	//repeat for hacker
-	hacker_slider.is_screen_space = true;
-	hacker_slider.is_billboard = false;
+	hacker_detection_outline.is_screen_space = true;
+	hacker_detection_outline.is_billboard = false;
 
-	hacker_slider.position = glm::vec3(transform_to_screen(transform.get_global_position() + glm::vec3(0.0f, 0.9f, 0.0f), r_scene, true),0.0f);
-	hacker_slider.size = detection_camera.default_detection_slider_size / 3.0f + detection_camera.default_detection_slider_size / (distance_to_hacker);
+	hacker_detection_fill.is_screen_space = true;
+	hacker_detection_fill.is_billboard = false;
+
+	auto hacker_detection_pos = transform_to_screen(transform.get_global_position() + glm::vec3(0.0f, 0.5f, 0.0f), r_scene, true);
+	hacker_detection_outline.position = glm::vec3(hacker_detection_pos,0.1f);
+	hacker_detection_fill.position = glm::vec3(hacker_detection_pos + glm::vec2(0.0f, 1.0f),0.0f);
+
+	hacker_detection_outline.size = detection_camera.default_detection_slider_size / 3.0f + detection_camera.default_detection_slider_size / (distance_to_hacker);
+	hacker_detection_fill.size = glm::lerp(glm::vec2(0.0f), hacker_detection_outline.size * 0.90f, detection_camera.detection_level);
+	hacker_detection_fill.color = glm::lerp(glm::vec4(1.0f), glm::vec4(1.0f, 0.0f, 0.0f, 0.5f), detection_camera.detection_level);
+
 	if (detection_camera.detection_level < 0.001f) {
-		hacker_slider.display = false;
+		hacker_detection_outline.display = false;
+		hacker_detection_fill.display = false;
 	} else {
-		hacker_slider.display = true;
+		hacker_detection_outline.display = true;
+		hacker_detection_fill.display = true;
 	}
-	hacker_slider.value = detection_camera.detection_level;
-	hacker_slider.color = glm::lerp(glm::vec4(1.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), hacker_slider.value);
 }
 
 inline uint32_t find_closest_node(World *world, glm::vec3 &position, Children &path) {

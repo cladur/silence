@@ -73,6 +73,8 @@ void DetectionCameraSystem::update(World &world, float dt) {
 		}
 
 		if (detection_camera.first_frame) {
+			auto &rm = ResourceManager::get();
+
 			detection_camera.first_frame = false;
 			auto &ui = UIManager::get();
 			ui.create_ui_scene(std::to_string(entity) + "_detection");
@@ -90,23 +92,43 @@ void DetectionCameraSystem::update(World &world, float dt) {
 			hacker_anchor.is_screen_space = true;
 			hacker_anchor.display = true;
 			ui.add_as_root(std::to_string(entity) + "_detection", "hacker_anchor");
-			auto &agent_slider = ui.add_ui_slider(std::to_string(entity) + "_detection", "agent_detection_slider");
-			agent_slider.position = glm::vec3(0.0f, 0.0f, 0.0f);
-			agent_slider.is_billboard = false;
-			agent_slider.is_screen_space = true;
-			agent_slider.size = glm::vec2(15.0f, 75.0f);
-			agent_slider.slider_alignment = SliderAlignment::BOTTOM_TO_TOP;
-			agent_slider.color = glm::vec4(1.0f);
-			ui.add_to_root(std::to_string(entity) + "_detection", "agent_detection_slider", "agent_anchor");
-			auto &hacker_slider = ui.add_ui_slider(std::to_string(entity) + "_detection", "hacker_detection_slider");
-			hacker_slider.position = glm::vec3(0.0f, 0.0f, 0.0f);
-			hacker_slider.is_billboard = false;
-			hacker_slider.is_screen_space = true;
-			hacker_slider.size = glm::vec2(15.0f, 75.0f);
-			hacker_slider.slider_alignment = SliderAlignment::BOTTOM_TO_TOP;
-			hacker_slider.color = glm::vec4(1.0f);
-			ui.add_to_root(std::to_string(entity) + "_detection", "hacker_detection_slider", "hacker_anchor");
 
+			auto &agent_detection_outline = ui.add_ui_image(std::to_string(entity) + "_detection",
+															 "agent_detection_outline");
+			agent_detection_outline.position = glm::vec3(0.0f, 0.0f, 0.0f);
+			agent_detection_outline.is_billboard = false;
+			agent_detection_outline.is_screen_space = true;
+			agent_detection_outline.size = glm::vec2(50.0f, 50.0f);
+			agent_detection_outline.color = glm::vec4(1.0f);
+			agent_detection_outline.texture = rm.load_texture(asset_path("detection_triangle_outline.ktx2").c_str());
+			ui.add_to_root(std::to_string(entity) + "_detection", "agent_detection_outline", "agent_anchor");
+			auto &hacker_detection_outline = ui.add_ui_image(std::to_string(entity) + "_detection",
+															  "hacker_detection_outline");
+			hacker_detection_outline.position = glm::vec3(0.0f, 0.0f, 0.0f);
+			hacker_detection_outline.is_billboard = false;
+			hacker_detection_outline.is_screen_space = true;
+			hacker_detection_outline.size = glm::vec2(50.0f, 50.0f);
+			hacker_detection_outline.color = glm::vec4(1.0f);
+			hacker_detection_outline.texture = rm.load_texture(asset_path("detection_triangle_outline.ktx2").c_str());
+			ui.add_to_root(std::to_string(entity) + "_detection", "hacker_detection_outline", "hacker_anchor");
+			auto &agent_detection_fill = ui.add_ui_image(std::to_string(entity) + "_detection",
+														  "agent_detection_fill");
+			agent_detection_fill.position = glm::vec3(0.0f, 0.0f, 0.0f);
+			agent_detection_fill.is_billboard = false;
+			agent_detection_fill.is_screen_space = true;
+			agent_detection_fill.size = glm::vec2(0.0f, 0.0f);
+			agent_detection_fill.color = glm::vec4(1.0f);
+			agent_detection_fill.texture = rm.load_texture(asset_path("detection_triangle_fill.ktx2").c_str());
+			ui.add_to_root(std::to_string(entity) + "_detection", "agent_detection_fill", "agent_anchor");
+			auto &hacker_detection_fill = ui.add_ui_image(std::to_string(entity) + "_detection",
+														   "hacker_detection_fill");
+			hacker_detection_fill.position = glm::vec3(0.0f, 0.0f, 0.0f);
+			hacker_detection_fill.is_billboard = false;
+			hacker_detection_fill.is_screen_space = true;
+			hacker_detection_fill.size = glm::vec2(0.0f, 0.0f);
+			hacker_detection_fill.color = glm::vec4(1.0f);
+			hacker_detection_fill.texture = rm.load_texture(asset_path("detection_triangle_fill.ktx2").c_str());
+			ui.add_to_root(std::to_string(entity) + "_detection", "hacker_detection_fill", "hacker_anchor");
 
 			detection_camera.starting_orientation =
 					world.get_component<Transform>(detection_camera.camera_model).get_orientation();
