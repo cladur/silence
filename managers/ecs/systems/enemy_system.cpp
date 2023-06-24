@@ -78,16 +78,26 @@ void EnemySystem::update(World &world, float dt) {
 			}
 
 			ui.create_ui_scene(std::to_string(entity) + "_detection");
-			auto &slider = ui.add_ui_slider(std::to_string(entity) + "_detection", "detection_slider");
-			slider.position = glm::vec3(0.0f, 2.0f, 0.0f);
-			slider.is_billboard = true;
-			slider.is_screen_space = false;
-			slider.size = glm::vec2(0.1f, 0.5f);
-			slider.slider_alignment = SliderAlignment::BOTTOM_TO_TOP;
-			slider.color = glm::vec4(1.0f);
+			auto &agent_slider = ui.add_ui_slider(std::to_string(entity) + "_detection", "agent_detection_slider");
+			agent_slider.position = glm::vec3(0.0f, 0.0f, 0.0f);
+			agent_slider.is_billboard = false;
+			agent_slider.is_screen_space = true;
+			agent_slider.size = glm::vec2(50.0f, 50.0f);
+			agent_slider.slider_alignment = SliderAlignment::BOTTOM_TO_TOP;
+			agent_slider.color = glm::vec4(1.0f);
 
-			//ui.add_ui_slider(std::to_string(entity) + "_detection", "detection_slider");
-			ui.add_as_root(std::to_string(entity) + "_detection", "detection_slider");
+			ui.add_as_root(std::to_string(entity) + "_detection", "agent_detection_slider");
+
+			auto &hacker_slider = ui.add_ui_slider(std::to_string(entity) + "_detection", "hacker_detection_slider");
+			hacker_slider.position = glm::vec3(0.0f, 0.0f, 0.0f);
+			hacker_slider.is_billboard = false;
+			hacker_slider.is_screen_space = true;
+			hacker_slider.size = glm::vec2(50.0f, 50.0f);
+			hacker_slider.slider_alignment = SliderAlignment::BOTTOM_TO_TOP;
+			hacker_slider.color = glm::vec4(1.0f);
+
+			ui.add_as_root(std::to_string(entity) + "_detection", "hacker_detection_slider");
+
 			ui.activate_ui_scene(std::to_string(entity) + "_detection");
 
 			auto &tag = ui.add_ui_image(std::to_string(entity) + "_detection", "tag");

@@ -25,6 +25,25 @@ static const float footstep_up_threshold = 0.1f;
 static std::string left_foot_bone = "heel.02.L";
 static std::string right_foot_bone = "heel.02.R";
 
+inline glm::vec2 transform_to_screen(const glm::vec3& position, const RenderScene &scene) {
+	// Model-View-Projection transformation
+	glm::vec2 render_extent = scene.render_extent;
+
+	glm::mat4 mvpMatrix = scene.left_projection * scene.left_view;
+
+	// Transform position to clip space
+	glm::vec4 clipSpacePosition = mvpMatrix * glm::vec4(position, 1.0f);
+
+	// Perspective divide to bring position to normalized device coordinates (NDC)
+	glm::vec3 ndcSpacePosition = glm::vec3(clipSpacePosition) / clipSpacePosition.w;
+
+	// Convert NDC to screen space coordinates
+	float screenX = (ndcSpacePosition.x) * (render_extent.x / 2.0f);
+	float screenY = (ndcSpacePosition.y) * (render_extent.y / 2.0f);
+
+	return glm::vec2(screenX, screenY);
+}
+
 inline void handle_detection(World *world, uint32_t enemy_entity, Transform &transform, glm::vec3 forward,
 		EnemyData &enemy_data, float &dt, DebugDraw *dd = nullptr) {
 	// cvar stuff
@@ -376,17 +395,44 @@ inline void handle_detection_camera(World *world, uint32_t enemy_entity, Transfo
 	GameplayManager::get().add_detection_level(detection_camera.detection_level);
 }
 
-inline void update_detection_slider(uint32_t entity_id, Transform &transform, EnemyData &enemy_data) {
-	auto &slider = UIManager::get().get_ui_slider(std::to_string(entity_id) + "_detection", "detection_slider");
+inline void update_detection_slider(uint32_t entity_id, Transform &transform, EnemyData &enemy_data, RenderScene &scene) {
+	auto &agent_slider = UIManager::get().get_ui_slider(std::to_string(entity_id) + "_detection", "agent_detection_slider");
+	auto &hacker_slider = UIManager::get().get_ui_slider(std::to_string(entity_id) + "_detection", "hacker_detection_slider");
+	auto &window_size = scene.render_extent;
+
+	agent_slider.is_screen_space = true;
+	agent_slider.is_billboard = false;
+
+	agent_slider.position = glm::vec3(transform_to_screen(transform.get_global_position(), scene),0.0f);
+	agent_slider.position.x -= window_size.x / 2.0f;
+	agent_slider.position.y -= window_size.y / 2.0f;
+
+//	std::cout << "agent slider pos: " << agent_slider.position.x << ", " << agent_slider.position.y << std::endl;
+
 	if (enemy_data.detection_level < 0.001f) {
-		slider.display = false;
+		agent_slider.display = false;
 	} else {
-		slider.display = true;
+		agent_slider.display = true;
 	}
-	slider.value = enemy_data.detection_level;
-	// lerp from white to red
-	slider.color = glm::lerp(glm::vec4(1.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), slider.value);
-	slider.position = transform.get_global_position() + glm::vec3(0.0f, 2.5f, 0.0f);
+	agent_slider.value = enemy_data.detection_level;
+	agent_slider.color = glm::lerp(glm::vec4(1.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), agent_slider.value);
+
+	//repeat for hacker
+	hacker_slider.is_screen_space = true;
+	hacker_slider.is_billboard = false;
+
+	hacker_slider.position = glm::vec3(transform_to_screen(transform.get_global_position(), scene),0.0f);
+
+	hacker_slider.position.x -= window_size.x / 2.0f;
+	hacker_slider.position.y -= window_size.y / 2.0f;
+
+	if (enemy_data.detection_level < 0.001f) {
+		hacker_slider.display = false;
+	} else {
+		hacker_slider.display = true;
+	}
+	hacker_slider.value = enemy_data.detection_level;
+	hacker_slider.color = glm::lerp(glm::vec4(1.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), hacker_slider.value);
 }
 
 inline void update_detection_slider_camera(
