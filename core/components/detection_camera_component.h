@@ -20,6 +20,8 @@ struct DetectionCamera {
 	Entity camera_light = 0;
 	Entity camera_model = 0;
 
+	glm::vec2 default_detection_slider_size = glm::vec2(20.0f, 80.0f);
+
 	DetectionCamera() = default;
 
 	void serialize_json(nlohmann::json &serialized_scene) {

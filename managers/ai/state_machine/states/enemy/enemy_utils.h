@@ -414,8 +414,8 @@ inline void update_detection_slider(uint32_t entity_id, Transform &transform, En
 	agent_slider.is_screen_space = true;
 	agent_slider.is_billboard = false;
 
-	agent_slider.position = glm::vec3(transform_to_screen(transform.get_global_position() + glm::vec3(0.0f, 2.3f, 0.0f), r_scene, false),0.0f);
-	agent_slider.size = enemy_data.detection_slider_default_size / 3.0f + enemy_data.detection_slider_default_size / (distance_to_agent * 0.5f);
+	agent_slider.position = glm::vec3(transform_to_screen(transform.get_global_position() + glm::vec3(0.0f, 0.5f, 0.0f), r_scene, false),0.0f);
+	agent_slider.size = enemy_data.detection_slider_default_size / 3.0f + enemy_data.detection_slider_default_size / (distance_to_agent);
 
 	if (enemy_data.detection_level < 0.001f) {
 		agent_slider.display = false;
@@ -429,8 +429,8 @@ inline void update_detection_slider(uint32_t entity_id, Transform &transform, En
 	hacker_slider.is_screen_space = true;
 	hacker_slider.is_billboard = false;
 
-	hacker_slider.position = glm::vec3(transform_to_screen(transform.get_global_position() + glm::vec3(0.0f, 2.3f, 0.0f), r_scene, true),0.0f);
-	hacker_slider.size = enemy_data.detection_slider_default_size / 3.0f + enemy_data.detection_slider_default_size / (distance_to_hacker * 0.5f);
+	hacker_slider.position = glm::vec3(transform_to_screen(transform.get_global_position() + glm::vec3(0.0f, 0.5f, 0.0f), r_scene, true),0.0f);
+	hacker_slider.size = enemy_data.detection_slider_default_size / 3.0f + enemy_data.detection_slider_default_size / (distance_to_hacker);
 	if (enemy_data.detection_level < 0.001f) {
 		hacker_slider.display = false;
 	} else {
@@ -441,17 +441,43 @@ inline void update_detection_slider(uint32_t entity_id, Transform &transform, En
 }
 
 inline void update_detection_slider_camera(
-		uint32_t entity_id, Transform &transform, DetectionCamera &detection_camera) {
-	auto &slider = UIManager::get().get_ui_slider(std::to_string(entity_id) + "_detection", "detection_slider");
+		uint32_t entity_id, Transform &transform, DetectionCamera &detection_camera, RenderScene &r_scene, Scene *scene) {
+	auto &agent_slider = UIManager::get().get_ui_slider(std::to_string(entity_id) + "_detection", "agent_detection_slider");
+	auto &hacker_slider = UIManager::get().get_ui_slider(std::to_string(entity_id) + "_detection", "hacker_detection_slider");
+	auto &window_size = r_scene.render_extent;
+	auto agent_pos = GameplayManager::get().get_agent_position(scene);
+	auto hacker_pos = GameplayManager::get().get_hacker_position(scene);
+
+	auto distance_to_agent = glm::clamp(glm::distance(transform.get_global_position(), agent_pos), 1.0f, 100.0f);
+	auto distance_to_hacker = glm::clamp(glm::distance(transform.get_global_position(), hacker_pos), 1.0f, 100.0f);
+
+	agent_slider.is_screen_space = true;
+	agent_slider.is_billboard = false;
+
+	agent_slider.position = glm::vec3(transform_to_screen(transform.get_global_position() + glm::vec3(0.0f, 0.9f, 0.0f), r_scene, false),0.0f);
+	agent_slider.size = detection_camera.default_detection_slider_size / 3.0f + detection_camera.default_detection_slider_size / (distance_to_agent);
+
 	if (detection_camera.detection_level < 0.001f) {
-		slider.display = false;
+		agent_slider.display = false;
 	} else {
-		slider.display = true;
+		agent_slider.display = true;
 	}
-	slider.value = detection_camera.detection_level;
-	// lerp from white to red
-	slider.color = glm::lerp(glm::vec4(1.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), slider.value);
-	slider.position = transform.get_global_position() + glm::vec3(0.0f, 2.5f, 0.0f);
+	agent_slider.value = detection_camera.detection_level;
+	agent_slider.color = glm::lerp(glm::vec4(1.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), agent_slider.value);
+
+	//repeat for hacker
+	hacker_slider.is_screen_space = true;
+	hacker_slider.is_billboard = false;
+
+	hacker_slider.position = glm::vec3(transform_to_screen(transform.get_global_position() + glm::vec3(0.0f, 0.9f, 0.0f), r_scene, true),0.0f);
+	hacker_slider.size = detection_camera.default_detection_slider_size / 3.0f + detection_camera.default_detection_slider_size / (distance_to_hacker);
+	if (detection_camera.detection_level < 0.001f) {
+		hacker_slider.display = false;
+	} else {
+		hacker_slider.display = true;
+	}
+	hacker_slider.value = detection_camera.detection_level;
+	hacker_slider.color = glm::lerp(glm::vec4(1.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), hacker_slider.value);
 }
 
 inline uint32_t find_closest_node(World *world, glm::vec3 &position, Children &path) {

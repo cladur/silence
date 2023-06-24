@@ -209,9 +209,9 @@ UIText &UIManager::get_ui_text(const std::string &scene_name, const std::string 
 	return scenes[scene_name].texts[text_name];
 }
 
-UISlider &UIManager::get_ui_slider(const std::string &scene_name, const std::string &lider_name) {
-	if (scenes[scene_name].sliders.find(lider_name) == scenes[scene_name].sliders.end()) {
-		SPDLOG_WARN("Ui slider {} not found in scene {}", lider_name, scene_name);
+UISlider &UIManager::get_ui_slider(const std::string &scene_name, const std::string &slider_name) {
+	if (scenes[scene_name].sliders.find(slider_name) == scenes[scene_name].sliders.end()) {
+		SPDLOG_WARN("Ui slider {} not found in scene {}", slider_name, scene_name);
 	}
-	return scenes[scene_name].sliders[lider_name];
+	return scenes[scene_name].sliders[slider_name];
 }
