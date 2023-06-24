@@ -299,33 +299,7 @@ void World::update_name(std::vector<Entity> &entities, Entity &new_entity_id) {
 
 	if (has_component<Name>(new_entity_id)) {
 		auto &name = get_component<Name>(new_entity_id);
-		name.name = name.name + std::to_string(name_counter);
-		entity_name = get_component<Name>(new_entity_id).name;
-	}
-
-	bool good_name = false;
-
-	while (!good_name) {
-		good_name = true;
-		for (auto entity : entities) {
-			if (entity == new_entity_id) {
-				continue;
-			}
-
-			if (has_component<Name>(entity)) {
-				if (get_component<Name>(entity).name == entity_name) {
-					good_name = false;
-					auto &name = get_component<Name>(new_entity_id);
-					// remove all integers from the end of the name
-					name.name.erase(
-							std::find_if(name.name.rbegin(), name.name.rend(), [](int ch) { return !std::isdigit(ch); })
-									.base(),
-							name.name.end());
-					name.name = name.name + std::to_string(++name_counter);
-					break;
-				}
-			}
-		}
+		name.name = name.name + " " + std::to_string(new_entity_id);
 	}
 }
 void World::deserialize_prefab(nlohmann::json &json, std::vector<Entity> &entities) {
@@ -353,13 +327,13 @@ void World::deserialize_prefab(nlohmann::json &json, std::vector<Entity> &entiti
 		new_entity_id = deserialize_entity_json(entity_json, entities);
 		entity_ids[i++] = new_entity_id;
 		prefab_id_to_entity_id_map[serialized_entity] = new_entity_id;
+		update_name(entities, new_entity_id);
 	}
 
 	for (auto entity_id : entity_ids) {
 		update_parent(entity_id, prefab_id_to_entity_id_map);
 		update_children(entity_id, prefab_id_to_entity_id_map);
 		ComponentVisitor::update_ids(*this, entity_id, prefab_id_to_entity_id_map);
-		//update_name(entities, new_entity_id);
 	}
 }
 
