@@ -264,6 +264,29 @@ void World::deserialize_entities_json(nlohmann::json &json, std::vector<Entity> 
 		deserialize_entity_json(array_entity, entities);
 	}
 }
+
+void World::deserialize_selected_entities_json(nlohmann::json &json, std::unordered_set<Entity> &selected_entities) {
+	ZoneScopedN("World::deserialize_selected_entities_json");
+	ResourceManager &resource_manager = ResourceManager::get();
+
+	for (auto &entity_json : json) {
+		// deserialize_entity_json(array_entity, entities);
+
+		Entity entity = entity_json["entity"];
+
+		if (selected_entities.count(entity) > 0) {
+			serialization::IdToClassConstructor map = SceneManager::get_class_map();
+
+			for (auto &component : entity_json["components"]) {
+				std::string component_name = component["component_name"];
+				int component_id = component_ids[component_name];
+				auto component_data = map[component_id](component["component_data"]);
+				ComponentVisitor::visit(*this, entity, component_data);
+			}
+		}
+	}
+}
+
 Signature World::get_entity_signature(Entity entity) {
 	return entity_manager->get_signature(entity);
 }

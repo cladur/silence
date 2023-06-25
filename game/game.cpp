@@ -347,6 +347,9 @@ void input_setup() {
 	input_manager.add_action("reload_scene");
 	input_manager.add_key_to_action("reload_scene", InputKey::F4);
 
+	input_manager.add_action("load_checkpoint");
+	input_manager.add_key_to_action("load_checkpoint", InputKey::F5);
+
 	input_manager.add_action("hacker_exit_camera");
 	input_manager.add_key_to_action("hacker_exit_camera", InputKey::TAB);
 	input_manager.add_key_to_action("hacker_exit_camera", InputKey::GAMEPAD_BUTTON_B);
