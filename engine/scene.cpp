@@ -30,8 +30,10 @@
 #include "ecs/systems/agent_movement_system.h"
 #include "ecs/systems/agent_system.h"
 #include "ecs/systems/cable_system.h"
+#include "ecs/systems/checkpoint_collider_draw.h"
 #include "ecs/systems/checkpoint_system.h"
 #include "ecs/systems/collider_draw.h"
+#include "ecs/systems/dialogue_collider_draw.h"
 #include "ecs/systems/enemy_path_draw_system.h"
 #include "ecs/systems/enemy_pathing.h"
 #include "ecs/systems/enemy_system.h"
@@ -132,6 +134,8 @@ void Scene::register_main_systems() {
 	// Render stuff
 	world.register_system<RenderSystem>(UpdateOrder::PostPhysics);
 	world.register_system<SkinnedRenderSystem>(UpdateOrder::PostPhysics);
+	world.register_system<CheckpointColliderDrawSystem>(UpdateOrder::PostPhysics);
+	world.register_system<DialogueColliderDrawSystem>(UpdateOrder::PostPhysics);
 	world.register_system<ColliderDrawSystem>(UpdateOrder::PostPhysics);
 	world.register_system<FrustumDrawSystem>(UpdateOrder::PostPhysics);
 	world.register_system<LightRenderSystem>(UpdateOrder::PostPhysics);
