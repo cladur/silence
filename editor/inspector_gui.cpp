@@ -387,6 +387,13 @@ void Inspector::show_modelinstance() {
 
 		ImGui::TableNextRow();
 		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("UV Flip Y");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		ImGui::Checkbox("##UV Flip Y", &modelinstance.flip_uv_y);
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
 		ImGui::Text("Cast shadow");
 		ImGui::TableSetColumnIndex(1);
 		ImGui::SetNextItemWidth(-FLT_MIN);

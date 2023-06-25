@@ -10,6 +10,7 @@ struct ModelInstance {
 	MaterialType material_type = MaterialType::Default;
 	bool in_shadow_pass = true;
 	bool scale_uv_with_transform = false;
+	bool flip_uv_y = false;
 
 	glm::vec2 uv_scale = glm::vec2(1.0f, 1.0f);
 

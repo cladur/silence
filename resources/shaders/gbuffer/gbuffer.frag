@@ -19,20 +19,23 @@ uniform bool has_ao_map;
 uniform bool has_normal_map;
 uniform bool has_emissive_map;
 
+uniform mat4 view;
+
 uniform vec2 uv_scale;
+uniform bool flip_uv_y;
 
 // ----------------------------------------------------------------------------
 // Easy trick to get tangent-normals to world-space to keep PBR code simplified.
 // Don't worry if you don't get what's going on; you generally want to do normal 
 // mapping the usual way for performance anyways; I do plan make a note of this 
 // technique somewhere later in the normal mapping tutorial.
-vec3 getNormalFromMap(vec2 texutre_coords)
+vec3 getNormalFromMap(vec3 WorldPos, vec2 texture_coords)
 {
 
-    vec3 tangentNormal = texture(normal_map, texutre_coords).xyz * 2.0 - 1.0;
+    vec3 tangentNormal = texture(normal_map, texture_coords).xyz * 2.0 - 1.0;
 
-    vec3 Q1 = dFdx(ViewPos);
-    vec3 Q2 = dFdy(ViewPos);
+    vec3 Q1 = dFdx(WorldPos);
+    vec3 Q2 = dFdy(WorldPos);
     vec2 st1 = dFdx(TexCoords);
     vec2 st2 = dFdy(TexCoords);
 
@@ -47,7 +50,16 @@ vec3 getNormalFromMap(vec2 texutre_coords)
 // ----------------------------------------------------------------------------
 void main()
 {
-    vec2 texture_coords = vec2(TexCoords.x * uv_scale.x, TexCoords.y * uv_scale.y);
+    // Calculate WorldPos from ViewPos
+    vec4 clipPos = vec4(ViewPos, 1.0);
+    vec4 ndcPos = clipPos / clipPos.w;
+    vec3 WorldPos = (inverse(view) * ndcPos).xyz;
+
+    float uv_y = TexCoords.y;
+    if (flip_uv_y) {
+        uv_y = 1.0 - TexCoords.y;
+    }
+    vec2 texture_coords = vec2(TexCoords.x * uv_scale.x, uv_y * uv_scale.y);
     vec4 color = texture(albedo_map, texture_coords);
     vec3 albedo = pow(color.rgb, vec3(2.2));
     if (color.a < 0.05f)
@@ -59,7 +71,7 @@ void main()
     float metallic = ao_metallic_roughness.b;
     vec3 normal = normalize(Normal);
     if (has_normal_map) {
-        normal = getNormalFromMap(texture_coords);
+        normal = getNormalFromMap(WorldPos, texture_coords);
     }
 
     float ao = 1.0;
