@@ -38,15 +38,42 @@
                 "component_name": "Children"
             },
             {
+                "component_data": {},
+                "component_name": "StaticTag"
+            },
+            {
+                "component_data": {
+                    "is_active": true,
+                    "layer_name": "obstacle"
+                },
+                "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {
+                    "center": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "range": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                },
+                "component_name": "ColliderAABB"
+            },
+            {
                 "component_data": {
                     "faces_parent": 2,
-                    "model_name": "items/planes/bricks.mdl"
+                    "model_name": "items/planes/bricks.mdl",
+                    "scale_uv": true
                 },
                 "component_name": "WallCube"
             }
         ],
         "entity": 1,
-        "signature": "0000000000000000000000000010000000000000000000000000000000010011"
+        "signature": "0000000000000000000000000010000000000000000000000010110000010011"
     },
     {
         "components": [
@@ -132,6 +159,12 @@
             },
             {
                 "component_data": {
+                    "parent": 2
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "items/planes/bricks.mdl",
@@ -142,12 +175,6 @@
                     }
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 2
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 3,
@@ -184,6 +211,12 @@
             },
             {
                 "component_data": {
+                    "parent": 2
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "items/planes/bricks.mdl",
@@ -194,12 +227,6 @@
                     }
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 2
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 4,
@@ -236,6 +263,12 @@
             },
             {
                 "component_data": {
+                    "parent": 2
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "items/planes/bricks.mdl",
@@ -246,12 +279,6 @@
                     }
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 2
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 5,
@@ -288,6 +315,12 @@
             },
             {
                 "component_data": {
+                    "parent": 2
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "items/planes/bricks.mdl",
@@ -298,12 +331,6 @@
                     }
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 2
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 6,
@@ -340,6 +367,12 @@
             },
             {
                 "component_data": {
+                    "parent": 2
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "items/planes/bricks.mdl",
@@ -350,12 +383,6 @@
                     }
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 2
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 7,
@@ -392,6 +419,12 @@
             },
             {
                 "component_data": {
+                    "parent": 2
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
                     "in_shadow_pass": true,
                     "material_type": 0,
                     "model_name": "items/planes/bricks.mdl",
@@ -402,12 +435,6 @@
                     }
                 },
                 "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "parent": 2
-                },
-                "component_name": "Parent"
             }
         ],
         "entity": 8,
