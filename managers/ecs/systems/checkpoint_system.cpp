@@ -17,8 +17,6 @@
 #include <gameplay/gameplay_manager.h>
 #include <render/transparent_elements/ui_manager.h>
 
-Checkpoint *current_checkpoint = nullptr;
-
 void recursive_children(Entity entity, World &world, std::unordered_set<Entity> &entities_to_reset) {
 	if (!world.has_component<Children>(entity)) {
 		return;
