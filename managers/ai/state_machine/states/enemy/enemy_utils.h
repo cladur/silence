@@ -249,6 +249,7 @@ inline void handle_detection(World *world, uint32_t enemy_entity, Transform &tra
 		new_hacker_flash_color.a = glm::max(new_hacker_flash_color.a, 0.0f);
 		agent_screen_flash.color = new_agent_flash_color;
 		hacker_screen_flash.color = new_hacker_flash_color;
+
 		if (new_agent_flash_color.a <= 0.001f) {
 			agent_screen_flash.display = false;
 		}
@@ -379,9 +380,14 @@ inline void handle_detection_camera(World *world, uint32_t enemy_entity, Transfo
 
 	if (can_see_player || can_see_hacker) {
 		detection_camera.is_detecting = true;
-		// if noone was detected past frame, play sound
+
+		auto &agent_screen_flash = UIManager::get().get_ui_image(std::to_string(enemy_entity) + "_detection", "agent_detection_screen_flash");
+		auto &hacker_screen_flash = UIManager::get().get_ui_image(std::to_string(enemy_entity) + "_detection", "hacker_detection_screen_flash");
+
+		bool prev_none = false;
 		if (detection_camera.detection_target == DetectionTarget::NONE) {
 			AudioManager::get().play_one_shot_2d(EventReference("SFX/Enemies/first_time_detect"));
+			prev_none = true;
 		}
 
 		// Agent has priority over hacker, because he is bigger and humanoid.
@@ -394,17 +400,36 @@ inline void handle_detection_camera(World *world, uint32_t enemy_entity, Transfo
 			case DetectionTarget::AGENT: {
 				detection_speed = glm::mix(min_speed, max_speed, agent_distance_ratio);
 				detection_change *= GameplayManager::get().get_agent_crouch() ? crouch_mod : 1.0f;
+				if (prev_none) {
+					agent_screen_flash.display = true;
+					agent_screen_flash.size = world->get_parent_scene()->get_render_scene().render_extent;
+					agent_screen_flash.color = glm::vec4(1.0f, 1.0f, 1.0f, 0.5f);
+				}
 				break;
 			}
 			case DetectionTarget::HACKER: {
 				detection_speed = glm::mix(min_speed, max_speed, hacker_distance_ratio);
 				detection_change *= hacker_mod;
+				if (prev_none) {
+					hacker_screen_flash.display = true;
+					hacker_screen_flash.size = world->get_parent_scene()->get_render_scene().render_extent;
+					hacker_screen_flash.color = glm::vec4(1.0f, 1.0f, 1.0f, 0.5f);
+				}
 				break;
 			}
 			default: {
 				break;
 			}
 		}
+
+		auto new_agent_flash_color = agent_screen_flash.color;
+		auto new_hacker_flash_color = hacker_screen_flash.color;
+		new_agent_flash_color.a -= dt * 3.0f;
+		new_hacker_flash_color.a -= dt * 3.0f;
+		new_agent_flash_color.a = glm::max(new_agent_flash_color.a, 0.0f);
+		new_hacker_flash_color.a = glm::max(new_hacker_flash_color.a, 0.0f);
+		agent_screen_flash.color = new_agent_flash_color;
+		hacker_screen_flash.color = new_hacker_flash_color;
 
 		if (!detection_camera.is_playing) {
 			AudioManager::get().play_local(detection_camera.detection_event);
