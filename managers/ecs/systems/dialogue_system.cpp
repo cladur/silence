@@ -28,10 +28,6 @@ struct Dialogue {
 	std::vector<Sentence> sentences;
 };
 
-float dialogue_timer = 0.0f;
-int current_dialogue_id = -1;
-int current_sentence_id = 0;
-
 // TODO: Populate this with actual dialogue
 static std::unordered_map<int, Dialogue> dialogues = {
 	{ 0,
@@ -63,8 +59,18 @@ void DialogueSystem::startup(World &world) {
 	world.set_system_component_blacklist<DialogueSystem>(blacklist);
 
 	auto &rm = ResourceManager::get();
+}
 
-	if (GameplayManager::get().first_start) {
+void DialogueSystem::update(World &world, float dt) {
+	ZoneScopedN("DialogueSystem::update");
+	InputManager &input_manager = InputManager::get();
+	AnimationManager &animation_manager = AnimationManager::get();
+	ResourceManager &resource_manager = ResourceManager::get();
+	PhysicsManager &physics_manager = PhysicsManager::get();
+
+	if (first_frame) {
+		first_frame = false;
+
 		ui_name = "dialogue_ui";
 
 		auto &ui = UIManager::get();
@@ -101,14 +107,6 @@ void DialogueSystem::startup(World &world) {
 
 		ui.add_to_root(ui_name, "dialogue_text2", "root_anchor");
 	}
-}
-
-void DialogueSystem::update(World &world, float dt) {
-	ZoneScopedN("DialogueSystem::update");
-	InputManager &input_manager = InputManager::get();
-	AnimationManager &animation_manager = AnimationManager::get();
-	ResourceManager &resource_manager = ResourceManager::get();
-	PhysicsManager &physics_manager = PhysicsManager::get();
 
 	// Wait for global matrices of transforms to be updated
 	if (world.get_parent_scene()->frame_number == 0) {

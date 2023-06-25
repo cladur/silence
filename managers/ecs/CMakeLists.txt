@@ -11,7 +11,10 @@ add_library(${ECS_MANAGER_NAME} STATIC
         systems/isolated_entities_system.cpp systems/isolated_entities_system.h
         systems/root_parent_system.cpp systems/root_parent_system.h
         component_visitor.h
+        systems/checkpoint_system.cpp systems/checkpoint_system.h
         systems/dialogue_system.cpp systems/dialogue_system.h
+        systems/checkpoint_collider_draw.cpp systems/checkpoint_collider_draw.h
+        systems/dialogue_collider_draw.cpp systems/dialogue_collider_draw.h
         systems/collider_draw.cpp systems/collider_draw.h
         systems/agent_system.cpp systems/agent_system.h
         systems/agent_movement_system.cpp systems/agent_movement_system.h

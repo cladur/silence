@@ -1,5 +1,6 @@
 #include "inspector_gui.h"
 #include "components/agent_data_component.h"
+#include "components/checkpoint_component.h"
 #include "components/collider_aabb.h"
 #include "components/collider_sphere.h"
 #include "components/collider_tag_component.h"
@@ -90,6 +91,7 @@ void Inspector::show_components() {
 	SHOW_COMPONENT(LightSwitcher, show_light_switcher);
 	SHOW_COMPONENT(WallCube, show_wall_cube);
 	SHOW_COMPONENT(DialogueTrigger, show_dialogue_trigger);
+	SHOW_COMPONENT(Checkpoint, show_checkpoint);
 
 	for (int i = 0; i < remove_component_queue.size(); i++) {
 		auto [entity, component_to_remove] = remove_component_queue.front();
@@ -2138,6 +2140,82 @@ void Inspector::show_dialogue_trigger() {
 	}
 }
 
+void Inspector::show_checkpoint() {
+	auto &checkpoint = world->get_component<Checkpoint>(selected_entity);
+
+	if (ImGui::CollapsingHeader("Checkpoint", tree_flags)) {
+		if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+			ImGui::OpenPopup("CheckpointContextMenu");
+		}
+		if (ImGui::BeginPopup("CheckpointContextMenu")) {
+			remove_component_menu_item<Checkpoint>();
+			ImGui::EndPopup();
+		}
+
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("Checkpoint", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Player Collider");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::InputInt("", (int *)&checkpoint.player_collider, 0, 0);
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
+				Entity payload_entity = *(Entity *)payload->Data;
+				checkpoint.player_collider = payload_entity;
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Enemy / Interactable Collider");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::InputInt("", (int *)&checkpoint.enemy_collider, 0, 0);
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
+				Entity payload_entity = *(Entity *)payload->Data;
+				checkpoint.enemy_collider = payload_entity;
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Agent Spawn Position");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::InputInt("", (int *)&checkpoint.agent_spawn_pos, 0, 0);
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
+				Entity payload_entity = *(Entity *)payload->Data;
+				checkpoint.agent_spawn_pos = payload_entity;
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Hacker Spawn Position");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::InputInt("", (int *)&checkpoint.hacker_spawn_pos, 0, 0);
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
+				Entity payload_entity = *(Entity *)payload->Data;
+				checkpoint.hacker_spawn_pos = payload_entity;
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+		ImGui::EndTable();
+	}
+}
+
 bool Inspector::show_vec2(
 		const char *label, glm::vec2 &vec2, float speed, float reset_value, float min_value, float max_value) {
 	bool changed = false;
@@ -2322,6 +2400,7 @@ void Inspector::show_add_component() {
 			SHOW_ADD_COMPONENT(Decal);
 			SHOW_ADD_COMPONENT(WallCube);
 			SHOW_ADD_COMPONENT(DialogueTrigger);
+			SHOW_ADD_COMPONENT(Checkpoint);
 
 			ImGui::EndPopup();
 		}

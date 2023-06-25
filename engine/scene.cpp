@@ -23,13 +23,17 @@
 #include "animation/ecs/attachment_system.h"
 #include "audio/audio_manager.h"
 #include "audio/ecs/fmod_emitter_system.h"
+#include "components/checkpoint_component.h"
 #include "components/dialogue_trigger_component.h"
 #include "components/fmod_emitter_component.h"
 #include "components/taggable_component.h"
 #include "ecs/systems/agent_movement_system.h"
 #include "ecs/systems/agent_system.h"
 #include "ecs/systems/cable_system.h"
+#include "ecs/systems/checkpoint_collider_draw.h"
+#include "ecs/systems/checkpoint_system.h"
 #include "ecs/systems/collider_draw.h"
+#include "ecs/systems/dialogue_collider_draw.h"
 #include "ecs/systems/enemy_path_draw_system.h"
 #include "ecs/systems/enemy_pathing.h"
 #include "ecs/systems/enemy_system.h"
@@ -49,6 +53,7 @@
 #include "render/ecs/particle_render_system.h"
 #include "render/ecs/render_system.h"
 #include "render/ecs/skinned_render_system.h"
+
 
 #define COLLISION_TEST_ENTITY 4
 
@@ -99,6 +104,7 @@ Scene::Scene() {
 		world.register_component<Decal>();
 		world.register_component<WallCube>();
 		world.register_component<DialogueTrigger>();
+		world.register_component<Checkpoint>();
 	}
 	// Components
 	{ register_main_systems(); }
@@ -128,6 +134,8 @@ void Scene::register_main_systems() {
 	// Render stuff
 	world.register_system<RenderSystem>(UpdateOrder::PostPhysics);
 	world.register_system<SkinnedRenderSystem>(UpdateOrder::PostPhysics);
+	world.register_system<CheckpointColliderDrawSystem>(UpdateOrder::PostPhysics);
+	world.register_system<DialogueColliderDrawSystem>(UpdateOrder::PostPhysics);
 	world.register_system<ColliderDrawSystem>(UpdateOrder::PostPhysics);
 	world.register_system<FrustumDrawSystem>(UpdateOrder::PostPhysics);
 	world.register_system<LightRenderSystem>(UpdateOrder::PostPhysics);
@@ -167,6 +175,7 @@ void Scene::register_game_systems() {
 	world.register_system<LightSwitcherSystem>();
 	world.register_system<RotatorSystem>();
 	world.register_system<DialogueSystem>();
+	world.register_system<CheckpointSystem>();
 
 	GameplayManager::get().set_agent_system(agent_system);
 	GameplayManager::get().set_hacker_system(hacker_system);

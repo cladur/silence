@@ -50,11 +50,15 @@ void AgentSystem::startup(World &world) {
 	whitelist.set(world.get_component_type<AgentData>());
 
 	world.set_system_component_whitelist<AgentSystem>(whitelist);
+}
+
+void AgentSystem::update(World &world, float dt) {
+	ZoneScopedN("AgentSystem::update");
 
 	auto &rm = ResourceManager::get();
 	auto dot_tex = rm.load_texture(asset_path("dot.ktx2").c_str());
 
-	if (GameplayManager::get().first_start) {
+	if (first_frame) {
 		ui_name = "agent_ui";
 
 		auto &ui = UIManager::get();
@@ -111,10 +115,7 @@ void AgentSystem::startup(World &world) {
 		jump_event = EventReference("Agent/jump");
 		stab_event = EventReference("Agent/stab");
 	}
-}
 
-void AgentSystem::update(World &world, float dt) {
-	ZoneScopedN("AgentSystem::update");
 	InputManager &input_manager = InputManager::get();
 	AnimationManager &animation_manager = AnimationManager::get();
 	ResourceManager &resource_manager = ResourceManager::get();

@@ -223,6 +223,7 @@ public:
 	void serialize_entity_json(nlohmann::json &json, Entity entity, bool is_archetype = false);
 	Entity deserialize_entity_json(nlohmann::json &json, std::vector<Entity> &entities);
 	void deserialize_entities_json(nlohmann::json &json, std::vector<Entity> &entities);
+	void deserialize_selected_entities_json(nlohmann::json &json, std::unordered_set<Entity> &selected_entities);
 	void update_name(std::vector<Entity> &entities, Entity &new_entity_id);
 	Entity deserialize_prefab(nlohmann::json &json, std::vector<Entity> &entities);
 	void print_components();

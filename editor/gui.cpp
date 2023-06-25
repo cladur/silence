@@ -1,5 +1,6 @@
 #include "ecs/world.h"
 #include "editor.h"
+#include "editor/IconsMaterialDesign.h"
 #include "editor/editor_scene.h"
 #include "input/input_manager.h"
 #include "physics/physics_manager.h"
@@ -525,10 +526,6 @@ void Editor::imgui_viewport(EditorScene &scene, uint32_t scene_index) {
 
 	ImVec4 active_color = ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive);
 
-	if (ImGui::Button(ICON_MD_ADS_CLICK)) {
-	}
-	ImGui::SameLine();
-
 	int push_count = 0;
 	if (current_gizmo_operation == ImGuizmo::TRANSLATE) {
 		ImGui::PushStyleColor(ImGuiCol_Button, active_color);
@@ -601,6 +598,28 @@ void Editor::imgui_viewport(EditorScene &scene, uint32_t scene_index) {
 		ImGui::InputFloat("Translation", &translation_snap, 0.1f);
 		ImGui::InputFloat("Rotation", &rotation_snap, 0.1f);
 		ImGui::InputFloat("Scale (%)", &scale_snap, 0.1f);
+		ImGui::EndPopup();
+	}
+	ImGui::PopStyleVar();
+
+	if (ImGui::Button(ICON_MD_LAYERS)) {
+		ImGui::OpenPopup("Layers");
+	}
+	ImGui::SameLine();
+
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 8));
+	if (ImGui::BeginPopup("Layers")) {
+		ImGui::Checkbox("Lights", (bool *)CVarSystem::get()->get_int_cvar("debug_draw.lights.draw"));
+		ImGui::Checkbox("Collisions", (bool *)CVarSystem::get()->get_int_cvar("debug_draw.collision.draw"));
+		ImGui::Checkbox("Checkpoints", (bool *)CVarSystem::get()->get_int_cvar("debug_draw.checkpoint_colliders.draw"));
+		ImGui::Checkbox(
+				"Dialogue Triggers", (bool *)CVarSystem::get()->get_int_cvar("debug_draw.dialogue_colliders.draw"));
+		ImGui::Checkbox("Decals", (bool *)CVarSystem::get()->get_int_cvar("debug_draw.decals"));
+		ImGui::Checkbox("Frustum", (bool *)CVarSystem::get()->get_int_cvar("debug_draw.frustum.draw"));
+		if (*(bool *)CVarSystem::get()->get_int_cvar("debug_draw.frustum.draw")) {
+			ImGui::Checkbox("Frustum Real Far Value",
+					(bool *)CVarSystem::get()->get_int_cvar("debug_draw.frustum.real_far_value"));
+		}
 		ImGui::EndPopup();
 	}
 	ImGui::PopStyleVar();
