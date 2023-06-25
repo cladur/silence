@@ -273,16 +273,33 @@ void Editor::custom_update(float dt) {
 		if (input_manager.is_action_pressed("control_modifier") &&
 				input_manager.is_action_just_pressed("duplicate_wall_cube")) {
 			auto &scene = get_active_scene();
+			auto &world = scene.world;
 			auto &entities = scene.entities;
+			auto selected_entity = scene.selected_entity;
 			std::ifstream file("resources/prefabs/Walls/WallCube.pfb");
 			nlohmann::json json;
 			file >> json;
 			SPDLOG_CRITICAL(json.dump(2));
-			auto root_entity = scene.world.deserialize_prefab(json, entities);
-			auto selected_entity = scene.selected_entity;
+			auto root_entity = world.deserialize_prefab(json, entities);
+
+			if (world.has_component<Parent>(selected_entity)) {
+				auto &selected_parent_component = world.get_component<Parent>(selected_entity);
+				auto selected_parent = selected_parent_component.parent;
+
+				if (world.has_component<Parent>(root_entity)) {
+					auto &root_parent = world.get_component<Parent>(root_entity);
+					root_parent.parent = selected_parent;
+				} else {
+					world.add_component(root_entity, Parent{ selected_parent });
+				}
+
+				auto &selected_parent_children = world.get_component<Children>(selected_parent);
+				world.add_child(selected_parent, root_entity);
+			}
+
 			if (selected_entity != 0 && root_entity != 0) {
-				auto transform = scene.world.get_component<Transform>(selected_entity);
-				auto &new_transform = scene.world.get_component<Transform>(root_entity);
+				auto transform = world.get_component<Transform>(selected_entity);
+				auto &new_transform = world.get_component<Transform>(root_entity);
 				new_transform = transform;
 				file.close();
 				scene.selected_entity = root_entity;
