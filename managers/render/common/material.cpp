@@ -309,13 +309,13 @@ void MaterialGBuffer::bind_skinned_resources(RenderScene &scene) {
 
 void MaterialGBuffer::bind_instance_resources(ModelInstance &instance, Transform &transform) {
 	shader.set_mat4("model", transform.get_global_model_matrix());
+	shader.set_bool("flip_uv_y", instance.flip_uv_y);
 	if (!instance.scale_uv_with_transform) {
 		shader.set_vec2("uv_scale", glm::vec2(1.0f));
 		return;
 	}
 	glm::vec2 uv_scale = instance.uv_scale == glm::vec2(1.0f) ? transform.get_global_scale() : instance.uv_scale;
 	shader.set_vec2("uv_scale", uv_scale);
-	shader.set_bool("flip_uv_y", instance.flip_uv_y);
 }
 
 void MaterialGBuffer::bind_mesh_resources(Mesh &mesh) {
