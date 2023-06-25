@@ -1,0 +1,416 @@
+[
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "Cube"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 1.0,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "children": [
+                        2
+                    ],
+                    "children_count": 1
+                },
+                "component_name": "Children"
+            },
+            {
+                "component_data": {
+                    "faces_parent": 2,
+                    "model_name": "items/planes/bricks.mdl"
+                },
+                "component_name": "WallCube"
+            }
+        ],
+        "entity": 1,
+        "signature": "0000000000000000000000000010000000000000000000000000000000010011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "Faces parent"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 1.0,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "parent": 1
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "children": [
+                        3,
+                        4,
+                        5,
+                        6,
+                        7,
+                        8
+                    ],
+                    "children_count": 6
+                },
+                "component_name": "Children"
+            }
+        ],
+        "entity": 2,
+        "signature": "0000000000000000000000000000000000000000000000000000000000011011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "L"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.5000861287117004,
+                        "x": -0.4999137818813324,
+                        "y": -0.4999134838581085,
+                        "z": -0.5000865459442139
+                    },
+                    "position": {
+                        "x": 1.0,
+                        "y": -7.152556804612686e-07,
+                        "z": 8.940696005765858e-08
+                    },
+                    "scale": {
+                        "x": 0.9999996423721313,
+                        "y": 0.9999998807907104,
+                        "z": 0.9999995827674866
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/planes/bricks.mdl",
+                    "scale_uv_with_transform": true,
+                    "uv_scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
+                    "parent": 2
+                },
+                "component_name": "Parent"
+            }
+        ],
+        "entity": 3,
+        "signature": "0000000000000000000000000000000000000000000000000000000000101011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "R"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.4999999403953552,
+                        "x": -0.49982717633247375,
+                        "y": 0.5000002384185791,
+                        "z": 0.5001726150512695
+                    },
+                    "position": {
+                        "x": -1.0,
+                        "y": 2.980232238769531e-07,
+                        "z": 0.0003457367420196533
+                    },
+                    "scale": {
+                        "x": 1.000000238418579,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/planes/bricks.mdl",
+                    "scale_uv_with_transform": true,
+                    "uv_scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
+                    "parent": 2
+                },
+                "component_name": "Parent"
+            }
+        ],
+        "entity": 4,
+        "signature": "0000000000000000000000000000000000000000000000000000000000101011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "U"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 1.0,
+                        "x": 0.000171921361470595,
+                        "y": 0.00017228930664714426,
+                        "z": -0.00017224994371645153
+                    },
+                    "position": {
+                        "x": -0.0003446503251325339,
+                        "y": 0.9999920725822449,
+                        "z": 0.00034519258770160377
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 0.9999917149543762,
+                        "z": 1.0
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/planes/bricks.mdl",
+                    "scale_uv_with_transform": true,
+                    "uv_scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
+                    "parent": 2
+                },
+                "component_name": "Parent"
+            }
+        ],
+        "entity": 5,
+        "signature": "0000000000000000000000000000000000000000000000000000000000101011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "D"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": -0.00017190637299790978,
+                        "x": 1.0,
+                        "y": -0.00017213290266226977,
+                        "z": -4.17310820921557e-06
+                    },
+                    "position": {
+                        "x": 0.0003444701142143458,
+                        "y": -0.9999971985816956,
+                        "z": -0.00034484342904761434
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 0.9999893307685852,
+                        "z": 1.0
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/planes/bricks.mdl",
+                    "scale_uv_with_transform": true,
+                    "uv_scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
+                    "parent": 2
+                },
+                "component_name": "Parent"
+            }
+        ],
+        "entity": 6,
+        "signature": "0000000000000000000000000000000000000000000000000000000000101011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "F"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.7069838643074036,
+                        "x": -0.7072296738624573,
+                        "y": -4.766814163303934e-05,
+                        "z": 5.4102292779134586e-05
+                    },
+                    "position": {
+                        "x": 9.52836580836447e-06,
+                        "y": -0.00034493207931518555,
+                        "z": -1.0
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 0.9999943375587463,
+                        "z": 1.0
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/planes/bricks.mdl",
+                    "scale_uv_with_transform": true,
+                    "uv_scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
+                    "parent": 2
+                },
+                "component_name": "Parent"
+            }
+        ],
+        "entity": 7,
+        "signature": "0000000000000000000000000000000000000000000000000000000000101011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "B"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": -0.00034869948285631835,
+                        "x": 2.676646545296535e-06,
+                        "y": 0.707228422164917,
+                        "z": 0.7069850564002991
+                    },
+                    "position": {
+                        "x": -9.055060218088329e-06,
+                        "y": 0.00034421682357788086,
+                        "z": 0.9975577592849731
+                    },
+                    "scale": {
+                        "x": 0.9999964833259583,
+                        "y": 0.9999935030937195,
+                        "z": 0.9999932646751404
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/planes/bricks.mdl",
+                    "scale_uv_with_transform": true,
+                    "uv_scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
+                    "parent": 2
+                },
+                "component_name": "Parent"
+            }
+        ],
+        "entity": 8,
+        "signature": "0000000000000000000000000000000000000000000000000000000000101011"
+    }
+]

@@ -556,7 +556,6 @@ void ParticlePass::draw(RenderScene &scene, bool right_camera) {
 		j = 0;
 		for (auto &particle : particle_pair_data.first) {
 			if (particle.active) {
-
 				float distance_to_camera = 1.0f + glm::distance(cam_pos, particle.position);
 				float distance_compensation = distance_to_camera * cvar_particle_distance_compensation.get();
 				if (distance_compensation > cvar_max_distance_compensation.get()) {

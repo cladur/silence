@@ -8,6 +8,7 @@ struct Decal {
 	Handle<Texture> normal;
 	Handle<Texture> ao_rough_metal;
 	bool has_normal = false;
+	bool use_face_normal = false;
 	bool has_ao = false;
 	bool has_roughness = false;
 	bool has_metalness = false;
@@ -24,6 +25,7 @@ struct Decal {
 		serialized_component["color"]["b"] = color.b;
 		serialized_component["color"]["a"] = color.a;
 		serialized_component["has_normal"] = has_normal;
+		serialized_component["use_face_normal"] = use_face_normal;
 		serialized_component["has_ao"] = has_ao;
 		serialized_component["has_roughness"] = has_roughness;
 		serialized_component["has_metalness"] = has_metalness;
@@ -60,6 +62,11 @@ struct Decal {
 			has_normal = serialized_component["has_normal"];
 		} else {
 			has_normal = false;
+		}
+		if (serialized_component.contains("use_face_normal")) {
+			use_face_normal = serialized_component["use_face_normal"];
+		} else {
+			use_face_normal = false;
 		}
 		if (serialized_component.contains("has_ao")) {
 			has_ao = serialized_component["has_ao"];

@@ -1,6 +1,7 @@
 #include "scene.h"
 #include "animation/ecs/animation_instance.h"
 #include "components/exploding_box_component.h"
+#include "components/wall_cube_component.h"
 #include "display/display_manager.h"
 #include "ecs/systems/detection_camera_system.h"
 #include "ecs/systems/dialogue_system.h"
@@ -9,6 +10,7 @@
 #include "ecs/systems/light_switcher_system.h"
 #include "ecs/systems/platform_system.h"
 #include "ecs/systems/rotator_system.h"
+#include "ecs/systems/wall_cube_system.h"
 #include "ecs/world.h"
 #include "editor/editor.h"
 #include "managers/animation/ecs/animation_instance.h"
@@ -94,6 +96,7 @@ Scene::Scene() {
 		world.register_component<Rotator>();
 		world.register_component<LightSwitcher>();
 		world.register_component<Decal>();
+		world.register_component<WallCube>();
 	}
 	// Components
 	{ register_main_systems(); }
@@ -130,6 +133,7 @@ void Scene::register_main_systems() {
 	world.register_system<BillboardSystem>(UpdateOrder::PostPhysics);
 	world.register_system<ParticleRenderSystem>(UpdateOrder::PostPhysics);
 	world.register_system<DecalSystem>(UpdateOrder::PostPhysics);
+	world.register_system<WallCubeSystem>(UpdateOrder::PostPhysics);
 
 	// Transform
 	world.register_system<IsolatedEntitiesSystem>(UpdateOrder::DuringPhysics);

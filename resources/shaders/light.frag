@@ -9,34 +9,41 @@ uniform sampler2D gAlbedo;
 uniform sampler2D gAoRoughMetal;
 uniform sampler2D shadowMap;
 uniform samplerCube depthMap;
-uniform float far_plane;
 
+uniform mat4 view;
+uniform mat4 light_space;
 // lights
 uniform vec3 light_position;
 uniform vec3 light_direction;
 uniform vec3 light_color;
+uniform vec3 camPos;
+uniform vec2 screen_dimensions;
+uniform vec2 spot_bias;
+uniform vec2 volumetric_bias;
 uniform float light_intensity;
 uniform float light_blend_distance;
 uniform float light_radius;
 uniform float cutoff;
 uniform float outer_cutoff;
+uniform float far_plane;
+uniform float scattering;
+uniform int num_steps;
 uniform int type;
 uniform bool cast_shadow;
-uniform mat4 light_space;
+uniform bool cast_volumetric;
 
-uniform vec2 screen_dimensions;
-uniform vec2 spot_bias;
-uniform mat4 view;
-uniform vec3 camPos;
-
-const float PI = 3.14159265359;
+const mat4 DITHER_PATTERN = mat4
+(vec4(0.0f, 0.5f, 0.125f, 0.625f),
+ vec4(0.75f, 0.22f, 0.875f, 0.375f),
+ vec4(0.1875f, 0.6875f, 0.0625f, 0.5625f),
+ vec4(0.9375f, 0.4375f, 0.8125f, 0.3125f));
 vec4 world_light_space;
+const float PI = 3.14159265359;
 
 float get_light_edge_blend(float distance) {
     float a = light_radius;
     float b = light_radius - light_blend_distance;
 
-    
     // Value from 0 to 1, where 0 is at the edge of the light and 1 is at light_radius - blend_distance
     float blend_x = (1.0 / (b - a)) * (distance - a);
 
@@ -99,7 +106,7 @@ vec2 CalcTexCoord()
     return gl_FragCoord.xy / screen_dimensions;
 }
 // ----------------------------------------------------------------------------
-vec3 gridSamplingDisk[20] = vec3[]
+const vec3 gridSamplingDisk[20] = vec3[]
 (
     vec3(1.0f, 1.0f, 1.0f), vec3(1.0f, -1.0f, 1.0f), vec3(-1.0f, -1.0f, 1.0f), vec3(-1.0f, 1.0f, 1.0f),
     vec3(1.0f, 1.0f, -1.0f), vec3(1.0f, -1.0f, -1.0f), vec3(-1.0f, -1.0f, -1.0f), vec3(-1.0f, 1.0f, -1.0f),
@@ -169,7 +176,42 @@ float ShadowCalculation(vec3 normal, vec3 light_dir)
     return shadow;
 }
 // ----------------------------------------------------------------------------
-void CalcDirLight(vec3 normal, vec3 view_pos, vec3 F0, float roughness, float metalness, vec3 albedo)
+float CalcScattering(float cosTheta)
+{
+    float scattering2 = scattering * scattering;
+    return (1.0f - scattering2) / (4.0f * PI * pow(1.0f + scattering2 - 2.0f * scattering * cosTheta, 1.5f));
+}
+// ----------------------------------------------------------------------------
+vec3 CalcVolume(vec3 world_pos, vec3 light_dir, vec2 tex_coords)
+{
+    vec3 ray_vector = world_pos - camPos;
+    float ray_length = length(ray_vector);
+    vec3 ray_dir = ray_vector / ray_length;
+    float step_size = ray_length / float(num_steps);
+    vec3 step = ray_dir * step_size;
+
+    vec3 position = camPos;
+    position += step * DITHER_PATTERN[int(tex_coords.x * screen_dimensions.x) % 4][int(tex_coords.y * screen_dimensions.y) % 4];
+    vec3 volumetric = vec3(0.0f);
+    for (int i = 0; i < num_steps; ++i)
+    {
+        vec4 lightSpacePos = light_space * vec4(position, 1.0f);
+        vec3 lightSpacePosPostW = lightSpacePos.xyz / lightSpacePos.w * 0.5f + 0.5f;
+        float depth = texture(shadowMap, lightSpacePosPostW.xy).r;
+        float d = dot(ray_dir, light_dir);
+        float bias = max(volumetric_bias.x * d, volumetric_bias.y);
+        if (depth > lightSpacePosPostW.z + bias)
+        {
+            volumetric += CalcScattering(d);
+        }
+        position += step;
+    }
+
+    return volumetric / float(num_steps);
+}
+
+// ----------------------------------------------------------------------------
+void CalcDirLight(vec3 world_pos, vec3 normal, vec3 view_pos, vec3 F0, float roughness, float metalness, vec3 albedo, vec2 tex_coords)
 {
     vec3 light_dir = normalize(-light_direction);
     vec3 halfway_dir = normalize(light_dir + view_pos);
@@ -189,9 +231,10 @@ void CalcDirLight(vec3 normal, vec3 view_pos, vec3 F0, float roughness, float me
     kD *= 1.0 - metalness;
 
     float shadow = cast_shadow ? ShadowCalculation(normal, light_dir) : 0.0f;
-
     vec3 diffuse_light = (kD * albedo / PI) * light_color * light_intensity * NdotL * (1.0f - shadow);
-    vec3 specular_light = specular * light_color * light_intensity * NdotL * (1.0f - shadow);
+
+    vec3 volumetric = cast_volumetric ? CalcVolume(world_pos, light_dir, tex_coords) : vec3(0.0f);
+    vec3 specular_light = specular * light_color * light_intensity * NdotL * (1.0f - shadow) + volumetric * light_color;
 
     Diffuse = vec4(diffuse_light, 0.0);
     Specular = vec4(specular_light, 0.0);
@@ -230,7 +273,7 @@ void CalcPointLight(vec3 world_pos, vec3 normal, vec3 view_pos, vec3 F0, float r
     Specular = vec4(specular_light, 0.0);
 }
 // ----------------------------------------------------------------------------
-void CalcSpotLight(vec3 world_pos, vec3 normal, vec3 view_pos, vec3 F0, float roughness, float metalness, vec3 albedo)
+void CalcSpotLight(vec3 world_pos, vec3 normal, vec3 view_pos, vec3 F0, float roughness, float metalness, vec3 albedo, vec2 tex_coords)
 {
     vec3 light_dir = normalize(light_position - world_pos);
     vec3 halfway_dir = normalize(view_pos + light_dir);
@@ -258,9 +301,10 @@ void CalcSpotLight(vec3 world_pos, vec3 normal, vec3 view_pos, vec3 F0, float ro
     kD *= 1.0 - metalness;
 
     float shadow = cast_shadow ? ShadowCalculation(normal, light_dir) : 0.0f;
-
     vec3 diffuse_light = (kD * albedo / PI) * radiance * NdotL * (1.0f - shadow);
-    vec3 specular_light = (specular * radiance * NdotL) * (1.0f - shadow);
+
+    vec3 volumetric = cast_volumetric ? CalcVolume(world_pos, light_dir, tex_coords) : vec3(0.0f);
+    vec3 specular_light = (specular * radiance * NdotL) * (1.0f - shadow) + volumetric * radiance;
 
     Diffuse = vec4(diffuse_light, 0.0);
     Specular = vec4(specular_light, 0.0);
@@ -294,9 +338,9 @@ void main()
         CalcPointLight(WorldPos, N, V, F0, roughness, metallic, albedo);
     } else if (type == 1) {
         world_light_space = light_space * vec4(WorldPos, 1.0);
-        CalcDirLight(N, V, F0, roughness, metallic, albedo);
+        CalcDirLight(WorldPos, N, V, F0, roughness, metallic, albedo, TexCoords);
     } else if (type == 2) {
         world_light_space = light_space * vec4(WorldPos, 1.0);
-        CalcSpotLight(WorldPos, N, V, F0, roughness, metallic, albedo);
+        CalcSpotLight(WorldPos, N, V, F0, roughness, metallic, albedo, TexCoords);
     }
 }

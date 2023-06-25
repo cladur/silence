@@ -10,6 +10,14 @@ AutoCVarInt cvar_use_ao("render.use_ao", "use ambient occlusion", 1, CVarFlags::
 AutoCVarInt cvar_use_fog("render.use_fog", "use simple linear fog", 1, CVarFlags::EditCheckbox);
 AutoCVarFloat cvar_fog_min("render.fog_min", "fog min distance", 40.0f, CVarFlags::EditFloatDrag);
 AutoCVarFloat cvar_fog_max("render.fog_max", "fog max distance", 300.0f, CVarFlags::EditFloatDrag);
+AutoCVarInt cvar_volumetric_steps(
+		"render.volumetric_steps", "Set steps of volumetric calculation", 10, CVarFlags::EditFloatDrag);
+AutoCVarFloat cvar_volumetric_scattering(
+		"render.volumetric_scattering", "Set volumetric scattering value", 0.7f, CVarFlags::EditFloatDrag);
+AutoCVarFloat cvar_volumetric_bias_x(
+		"render.volumetric_bias_x", "Volumetric bias value to avoid acne", 0.0000001f, CVarFlags::EditFloatDrag);
+AutoCVarFloat cvar_volumetric_bias_y(
+		"render.volumetric_bias_y", "Volumetric bias value to avoid acne", 0.0000005f, CVarFlags::EditFloatDrag);
 AutoCVarFloat cvar_bias_min("render.light_bias_min", "Spot light bias min", 0.0000001f);
 AutoCVarFloat cvar_bias_max("render.light_bias_max", "Spot light bias max", 0.00000002f);
 AutoCVarFloat cvar_ambient_strength(
@@ -69,13 +77,14 @@ void MaterialLight::bind_resources(RenderScene &scene) {
 	shader.set_mat4("view", scene.view);
 	shader.set_vec3("camPos", scene.camera_pos);
 	shader.set_vec2("screen_dimensions", scene.render_extent);
+	shader.set_float("far_plane", scene.shadow_buffer.far);
 	shader.set_int("gPosition", 0);
 	shader.set_int("gNormal", 1);
 	shader.set_int("gAlbedo", 2);
 	shader.set_int("gAoRoughMetal", 3);
 	shader.set_int("shadowMap", 4);
 	shader.set_int("depthMap", 5);
-	shader.set_float("far_plane", scene.shadow_buffer.far);
+	shader.set_int("gDepth", 6);
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.position_texture_id);
@@ -85,6 +94,8 @@ void MaterialLight::bind_resources(RenderScene &scene) {
 	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.albedo_texture_id);
 	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.ao_rough_metal_texture_id);
+	glActiveTexture(GL_TEXTURE6);
+	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.depth_texture_id);
 }
 
 void MaterialLight::bind_instance_resources(ModelInstance &instance, Transform &transform) {
@@ -110,6 +121,7 @@ void MaterialLight::bind_light_resources(Light &light, Transform &transform) {
 	shader.set_float("light_blend_distance", light.blend_distance);
 	shader.set_int("type", (int)light.type);
 	shader.set_bool("cast_shadow", light.cast_shadow);
+	shader.set_bool("cast_volumetric", light.cast_volumetric);
 	switch (light.type) {
 		case LightType::POINT_LIGHT:
 			shader.set_vec3("light_position", transform.get_global_position());
@@ -126,6 +138,13 @@ void MaterialLight::bind_light_resources(Light &light, Transform &transform) {
 				glBindTexture(GL_TEXTURE_2D, light.shadow_map_id);
 				shader.set_mat4("light_space", light.light_space);
 			}
+			if (light.cast_volumetric) {
+				shader.set_vec2("spot_bias", glm::vec2(cvar_bias_min.get(), cvar_bias_max.get()));
+				shader.set_vec2(
+						"volumetric_bias", glm::vec2(cvar_volumetric_bias_x.get(), cvar_volumetric_bias_y.get()));
+				shader.set_float("scattering", cvar_volumetric_scattering.get());
+				shader.set_int("num_steps", cvar_volumetric_steps.get());
+			}
 			break;
 		case LightType::SPOT_LIGHT:
 			shader.set_vec3("light_position", transform.get_global_position());
@@ -137,7 +156,13 @@ void MaterialLight::bind_light_resources(Light &light, Transform &transform) {
 				glActiveTexture(GL_TEXTURE4);
 				glBindTexture(GL_TEXTURE_2D, light.shadow_map_id);
 				shader.set_mat4("light_space", light.light_space);
+			}
+			if (light.cast_volumetric) {
 				shader.set_vec2("spot_bias", glm::vec2(cvar_bias_min.get(), cvar_bias_max.get()));
+				shader.set_vec2(
+						"volumetric_bias", glm::vec2(cvar_volumetric_bias_x.get(), cvar_volumetric_bias_y.get()));
+				shader.set_float("scattering", cvar_volumetric_scattering.get());
+				shader.set_int("num_steps", cvar_volumetric_steps.get());
 			}
 			break;
 		default:
@@ -284,7 +309,11 @@ void MaterialGBuffer::bind_skinned_resources(RenderScene &scene) {
 
 void MaterialGBuffer::bind_instance_resources(ModelInstance &instance, Transform &transform) {
 	shader.set_mat4("model", transform.get_global_model_matrix());
-	glm::vec2 uv_scale = instance.scale_uv_with_transform ? transform.get_global_scale() : glm::vec2(1.0f);
+	if (!instance.scale_uv_with_transform) {
+		shader.set_vec2("uv_scale", glm::vec2(1.0f));
+		return;
+	}
+	glm::vec2 uv_scale = instance.uv_scale == glm::vec2(1.0f) ? transform.get_global_scale() : instance.uv_scale;
 	shader.set_vec2("uv_scale", uv_scale);
 }
 
@@ -729,9 +758,11 @@ void MaterialDecal::bind_decal_resources(Decal &decal, Transform &transform) {
 		aspect_ratio.y = 1.0f;
 	}
 	shader.set_vec4("color", decal.color);
+	shader.set_vec3("face_normal", glm::normalize(projector_offset));
 	shader.set_vec2("aspect_ratio", aspect_ratio);
 
 	shader.set_int("has_normal", decal.has_normal);
+	shader.set_int("use_face_normal", decal.use_face_normal);
 	shader.set_int("has_ao", decal.has_ao);
 	shader.set_int("has_roughness", decal.has_roughness);
 	shader.set_int("has_metalness", decal.has_metalness);

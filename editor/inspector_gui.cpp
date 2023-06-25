@@ -87,6 +87,7 @@ void Inspector::show_components() {
 	SHOW_COMPONENT(CableParent, show_cable_parent);
 	SHOW_COMPONENT(Rotator, show_rotator);
 	SHOW_COMPONENT(LightSwitcher, show_light_switcher);
+	SHOW_COMPONENT(WallCube, show_wall_cube);
 
 	for (int i = 0; i < remove_component_queue.size(); i++) {
 		auto [entity, component_to_remove] = remove_component_queue.front();
@@ -759,17 +760,27 @@ void Inspector::show_light() {
 
 		ImGui::TableNextRow();
 		ImGui::TableSetColumnIndex(0);
-		ImGui::Text("Cast shadow");
-		ImGui::TableSetColumnIndex(1);
-		ImGui::SetNextItemWidth(-FLT_MIN);
-		ImGui::Checkbox("##Cast shadow", &light.cast_shadow);
-
-		ImGui::TableNextRow();
-		ImGui::TableSetColumnIndex(0);
 		ImGui::Text("Is On");
 		ImGui::TableSetColumnIndex(1);
 		ImGui::SetNextItemWidth(-FLT_MIN);
 		ImGui::Checkbox("##Is On", &light.is_on);
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Cast shadow");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		ImGui::Checkbox("##Cast shadow", &light.cast_shadow);
+		if (light.cast_shadow) {
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex(0);
+			ImGui::Text("Cast volumetric");
+			ImGui::TableSetColumnIndex(1);
+			ImGui::SetNextItemWidth(-FLT_MIN);
+			ImGui::Checkbox("##Cast volumetric", &light.cast_volumetric);
+		} else {
+			light.cast_volumetric = false;
+		}
 
 		if (light.type == LightType::SPOT_LIGHT) {
 			ImGui::TableNextRow();
@@ -1859,6 +1870,13 @@ void Inspector::show_decal() {
 		if (decal.has_normal) {
 			ImGui::TableNextRow();
 			ImGui::TableSetColumnIndex(0);
+			ImGui::Text("Use face normal");
+			ImGui::TableSetColumnIndex(1);
+			ImGui::SetNextItemWidth(-FLT_MIN);
+			ImGui::Checkbox("##Use face normal", &decal.use_face_normal);
+
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex(0);
 			ImGui::Text("Normal");
 			ImGui::TableSetColumnIndex(1);
 			ImGui::SetNextItemWidth(-FLT_MIN);
@@ -1986,6 +2004,101 @@ void Inspector::show_decal() {
 		ImGui::TableSetColumnIndex(1);
 		ImGui::SetNextItemWidth(-FLT_MIN);
 		ImGui::ColorPicker4("##Color", (float *)&decal.color);
+		ImGui::EndTable();
+	}
+}
+
+void Inspector::show_wall_cube() {
+	auto &wall_cube = world->get_component<WallCube>(selected_entity);
+	auto &models = resource_manager.get_models();
+
+	if (ImGui::CollapsingHeader("Wall cube", tree_flags)) {
+		if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+			ImGui::OpenPopup("WallCubeContextMenu");
+		}
+		if (ImGui::BeginPopup("WallCubeContextMenu")) {
+			remove_component_menu_item<WallCube>();
+			ImGui::EndPopup();
+		}
+
+		std::string name = resource_manager.get_model(wall_cube.model_handle).name;
+		std::size_t last_slash_pos = name.find_last_of("/\\");
+
+		if (last_slash_pos != std::string::npos) {
+			name = name.substr(last_slash_pos + 1);
+			std::size_t dot_pos = name.find_last_of('.');
+			if (dot_pos != std::string::npos) {
+				name = name.substr(0, dot_pos);
+			}
+		}
+
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("Wall cube", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Model");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		if (ImGui::BeginCombo("##Model", name.c_str())) {
+			for (const auto &model : models) {
+				bool is_selected = (wall_cube.model_handle.id == resource_manager.get_model_handle(model.name).id);
+				std::string model_name = model.name;
+				std::size_t model_slash_pos = model_name.find_last_of("/\\");
+
+				if (model_slash_pos != std::string::npos) {
+					model_name = model_name.substr(model_slash_pos + 1);
+					std::size_t model_dot_pos = model_name.find_last_of('.');
+					if (model_dot_pos != std::string::npos) {
+						model_name = model_name.substr(0, model_dot_pos);
+					}
+				}
+				if (ImGui::Selectable(model_name.c_str(), is_selected)) {
+					Handle<Model> new_handle = resource_manager.get_model_handle(model.name);
+					wall_cube.model_handle = new_handle;
+				}
+				if (is_selected) {
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+			ImGui::EndCombo();
+		}
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_MODEL_PATH")) {
+				std::string payload_n = *(const std::string *)payload->Data;
+				std::string search_string = "\\";
+				std::string replace_string = "/";
+
+				size_t pos = payload_n.find(search_string);
+				while (pos != std::string::npos) {
+					payload_n.replace(pos, search_string.length(), replace_string);
+					pos = payload_n.find(search_string, pos + replace_string.length());
+				}
+				resource_manager.load_model(payload_n.c_str());
+				wall_cube.model_handle = resource_manager.get_model_handle(payload_n);
+			}
+
+			ImGui::EndDragDropTarget();
+		}
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Faces parent");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::InputInt("", (int *)&wall_cube.faces_parent, 0, 0);
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
+				Entity payload_entity = *(Entity *)payload->Data;
+				wall_cube.faces_parent = payload_entity;
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+		show_checkbox("Scale UV", wall_cube.scale_uv);
+
 		ImGui::EndTable();
 	}
 }
@@ -2172,6 +2285,7 @@ void Inspector::show_add_component() {
 			SHOW_ADD_COMPONENT(Rotator);
 			SHOW_ADD_COMPONENT(LightSwitcher);
 			SHOW_ADD_COMPONENT(Decal);
+			SHOW_ADD_COMPONENT(WallCube);
 
 			ImGui::EndPopup();
 		}

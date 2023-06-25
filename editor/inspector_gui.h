@@ -52,6 +52,7 @@ private:
 	void show_rotator();
 	void show_light_switcher();
 	void show_decal();
+	void show_wall_cube();
 
 	static bool show_vec2(const char *label, glm::vec2 &vec2, float speed = 0.1f, float reset_value = 0.0f,
 			float min_value = 100.0f, float max_value = 100.0f);

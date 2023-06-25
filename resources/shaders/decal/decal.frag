@@ -17,8 +17,10 @@ uniform sampler2D decal_ao_rough_metal;
 uniform mat4 decal_view_proj;
 uniform mat4 inv_view;
 uniform vec4 color;
+uniform vec3 face_normal;
 uniform vec2 aspect_ratio;
 uniform bool has_normal;
+uniform bool use_face_normal;
 uniform bool has_ao;
 uniform bool has_roughness;
 uniform bool has_metalness;
@@ -74,9 +76,16 @@ void main()
 
     if (has_normal)
     {
-        vec3 ViewNorm = texture(source_normal, depth_uv).rgb;
-        vec3 world_norm = (decal_view_proj * inv_view * vec4(ViewNorm, 1.0)).xyz;
-        gNormal = vec4(getNormalFromMap(decal_uv, world_norm), 1.0);
+        vec3 surface_normal;
+        if (use_face_normal)
+        {
+            surface_normal = face_normal;
+        }
+        else
+        {
+            surface_normal = texture(source_normal, depth_uv).rgb;
+        }
+        gNormal = vec4(getNormalFromMap(decal_uv, surface_normal), 1.0);
     } else {
         vec3 ViewNorm = texture(source_normal, depth_uv).rgb;
         gNormal = vec4(ViewNorm, 1.0);

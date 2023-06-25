@@ -11,6 +11,8 @@ struct ModelInstance {
 	bool in_shadow_pass = true;
 	bool scale_uv_with_transform = false;
 
+	glm::vec2 uv_scale = glm::vec2(1.0f, 1.0f);
+
 	ModelInstance();
 	explicit ModelInstance(
 			const char *path, MaterialType material_type = MaterialType::Default, bool scale_uv_with_transform = true);
