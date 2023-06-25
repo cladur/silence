@@ -1,0 +1,291 @@
+[
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "Stairs"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "children": [
+                        2,
+                        5,
+                        6
+                    ],
+                    "children_count": 3
+                },
+                "component_name": "Children"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.0,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "flip_uv_y": false,
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/stairs/stairs.mdl",
+                    "scale_uv_with_transform": false,
+                    "uv_scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                },
+                "component_name": "ModelInstance"
+            }
+        ],
+        "entity": 1,
+        "signature": "0000000000000000000000000000000000000000000000000000000000110011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "Collider Stairs"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.9481826424598694,
+                        "x": -0.31772580742836,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 0.0,
+                        "y": 1.044066071510315,
+                        "z": 1.4071294069290161
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 0.9999998807907104,
+                        "z": 0.9999998807907104
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "parent": 1
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {},
+                "component_name": "StaticTag"
+            },
+            {
+                "component_data": {
+                    "is_active": true,
+                    "layer_name": "obstacle"
+                },
+                "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {
+                    "center": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "orientation": {
+                        "0": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                        },
+                        "1": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                        }
+                    },
+                    "range": {
+                        "x": 1.0,
+                        "y": 0.14000000059604645,
+                        "z": 1.7000000476837158
+                    }
+                },
+                "component_name": "ColliderOBB"
+            }
+        ],
+        "entity": 2,
+        "signature": "0000000000000000000000000000000000000000000000001000110000001011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "Collider Stairs Left"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.9481826424598694,
+                        "x": -0.31772580742836,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 1.0,
+                        "y": 1.399999976158142,
+                        "z": 1.149999976158142
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 0.9999998807907104,
+                        "z": 0.9999998807907104
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "parent": 1
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {},
+                "component_name": "StaticTag"
+            },
+            {
+                "component_data": {
+                    "is_active": true,
+                    "layer_name": "obstacle"
+                },
+                "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {
+                    "center": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "orientation": {
+                        "0": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                        },
+                        "1": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                        }
+                    },
+                    "range": {
+                        "x": 0.10000000149011612,
+                        "y": 0.30000001192092896,
+                        "z": 1.7000000476837158
+                    }
+                },
+                "component_name": "ColliderOBB"
+            }
+        ],
+        "entity": 5,
+        "signature": "0000000000000000000000000000000000000000000000001000110000001011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "Collider Stairs Right"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.9481826424598694,
+                        "x": -0.31772580742836,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": -1.0,
+                        "y": 1.399999976158142,
+                        "z": 1.149999976158142
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 0.9999998807907104,
+                        "z": 0.9999998807907104
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "parent": 1
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {},
+                "component_name": "StaticTag"
+            },
+            {
+                "component_data": {
+                    "is_active": true,
+                    "layer_name": "obstacle"
+                },
+                "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {
+                    "center": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "orientation": {
+                        "0": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                        },
+                        "1": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                        }
+                    },
+                    "range": {
+                        "x": 0.10000000149011612,
+                        "y": 0.30000001192092896,
+                        "z": 1.7000000476837158
+                    }
+                },
+                "component_name": "ColliderOBB"
+            }
+        ],
+        "entity": 6,
+        "signature": "0000000000000000000000000000000000000000000000001000110000001011"
+    }
+]
