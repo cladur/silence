@@ -26,6 +26,9 @@ struct EnemyData {
 	bool left_foot_can_play = false;
 	bool right_foot_can_play = false;
 
+	bool is_detecting_agent = false;
+	bool is_detecting_hacker = false;
+
 	EventReference footsteps_event;
 	EventReference death_event;
 

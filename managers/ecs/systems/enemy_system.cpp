@@ -130,6 +130,28 @@ void EnemySystem::update(World &world, float dt) {
 			hacker_detection_fill.texture = rm.load_texture(asset_path("detection_triangle_fill.ktx2").c_str());
 			ui.add_to_root(std::to_string(entity) + "_detection", "hacker_detection_fill", "hacker_anchor");
 
+			auto &agent_detection_screen_flash = ui.add_ui_image(std::to_string(entity) + "_detection",
+					"agent_detection_screen_flash");
+			agent_detection_screen_flash.position = glm::vec3(0.0f, 0.0f, 0.0f);
+			agent_detection_screen_flash.is_billboard = false;
+			agent_detection_screen_flash.is_screen_space = true;
+			agent_detection_screen_flash.size = glm::vec2(1.0f, 1.0f);
+			agent_detection_screen_flash.color = glm::vec4(1.0f);
+			agent_detection_screen_flash.texture = rm.load_texture(asset_path("detection_overlay.ktx2").c_str());
+			agent_detection_screen_flash.display = false;
+			ui.add_to_root(std::to_string(entity) + "_detection", "agent_detection_screen_flash", "agent_anchor");
+
+			auto &hacker_detection_screen_flash = ui.add_ui_image(std::to_string(entity) + "_detection",
+					"hacker_detection_screen_flash");
+			hacker_detection_screen_flash.position = glm::vec3(0.0f, 0.0f, 0.0f);
+			hacker_detection_screen_flash.is_billboard = false;
+			hacker_detection_screen_flash.is_screen_space = true;
+			hacker_detection_screen_flash.size = glm::vec2(1.0f, 1.0f);
+			hacker_detection_screen_flash.color = glm::vec4(1.0f);
+			hacker_detection_screen_flash.texture = rm.load_texture(asset_path("detection_overlay.ktx2").c_str());
+			hacker_detection_screen_flash.display = false;
+			ui.add_to_root(std::to_string(entity) + "_detection", "hacker_detection_screen_flash", "hacker_anchor");
+
 
 			auto &tag = ui.add_ui_image(std::to_string(entity) + "_detection", "tag");
 			tag.position = glm::vec3(0.0f, 1.6f, 0.0f);
