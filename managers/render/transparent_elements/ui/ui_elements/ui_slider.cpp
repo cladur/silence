@@ -36,8 +36,8 @@ void UISlider::draw() {
 				break;
 		}
 
-		ui_manager.sprite_draw.draw_colored(new_position + glm::vec3(0.0f, 0.0f, 0.01f), new_size, color, is_screen_space, alignment);
-		ui_manager.sprite_draw.draw_colored(position, size, glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), is_screen_space, alignment);
+		ui_manager.sprite_draw.draw_colored(new_position + glm::vec3(0.0f, 0.0f, 0.01f), new_size, color, is_screen_space, 0.0f, alignment);
+		ui_manager.sprite_draw.draw_colored(position, size, glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), is_screen_space, 0.0f, alignment);
 	} else {
 		ui_manager.sprite_draw.draw_slider_billboard(
 				position,
@@ -98,6 +98,7 @@ void UISlider::draw(glm::vec3 parent_position, glm::vec2 parent_size) {
 			new_size,
 			color,
 			is_screen_space,
+			0.0f,
 			Alignment::NONE);
 	// THE BACKGROUND BAR
 	ui_manager.sprite_draw.draw_colored(
@@ -105,6 +106,7 @@ void UISlider::draw(glm::vec3 parent_position, glm::vec2 parent_size) {
 			size,
 			glm::vec4(0.0f, 0.0f, 0.0f, 1.0f),
 			is_screen_space,
+			0.0f,
 			Alignment::NONE);
 
 	for (auto& child : children) {
