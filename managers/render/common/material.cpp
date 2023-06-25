@@ -315,6 +315,7 @@ void MaterialGBuffer::bind_instance_resources(ModelInstance &instance, Transform
 	}
 	glm::vec2 uv_scale = instance.uv_scale == glm::vec2(1.0f) ? transform.get_global_scale() : instance.uv_scale;
 	shader.set_vec2("uv_scale", uv_scale);
+	shader.set_bool("flip_uv_y", instance.flip_uv_y);
 }
 
 void MaterialGBuffer::bind_mesh_resources(Mesh &mesh) {
