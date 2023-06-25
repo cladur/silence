@@ -4,6 +4,7 @@
 #include "components/collider_sphere.h"
 #include "components/collider_tag_component.h"
 #include "components/detection_camera_component.h"
+#include "components/dialogue_trigger_component.h"
 #include "components/enemy_data_component.h"
 #include "components/exploding_box_component.h"
 #include "components/fmod_listener_component.h"
@@ -88,6 +89,7 @@ void Inspector::show_components() {
 	SHOW_COMPONENT(Rotator, show_rotator);
 	SHOW_COMPONENT(LightSwitcher, show_light_switcher);
 	SHOW_COMPONENT(WallCube, show_wall_cube);
+	SHOW_COMPONENT(DialogueTrigger, show_dialogue_trigger);
 
 	for (int i = 0; i < remove_component_queue.size(); i++) {
 		auto [entity, component_to_remove] = remove_component_queue.front();
@@ -2103,6 +2105,32 @@ void Inspector::show_wall_cube() {
 	}
 }
 
+void Inspector::show_dialogue_trigger() {
+	auto &dialogue_trigger = world->get_component<DialogueTrigger>(selected_entity);
+
+	if (ImGui::CollapsingHeader("Dialogue Trigger", tree_flags)) {
+		if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+			ImGui::OpenPopup("DialogueTriggerContextMenu");
+		}
+		if (ImGui::BeginPopup("DialogueTriggerContextMenu")) {
+			remove_component_menu_item<DialogueTrigger>();
+			ImGui::EndPopup();
+		}
+
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("Dialogue Trigger", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Dialogue ID");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::InputInt("", (int *)&dialogue_trigger.dialogue_id, 0, 0);
+
+		ImGui::EndTable();
+	}
+}
+
 bool Inspector::show_vec2(
 		const char *label, glm::vec2 &vec2, float speed, float reset_value, float min_value, float max_value) {
 	bool changed = false;
@@ -2286,6 +2314,7 @@ void Inspector::show_add_component() {
 			SHOW_ADD_COMPONENT(LightSwitcher);
 			SHOW_ADD_COMPONENT(Decal);
 			SHOW_ADD_COMPONENT(WallCube);
+			SHOW_ADD_COMPONENT(DialogueTrigger);
 
 			ImGui::EndPopup();
 		}

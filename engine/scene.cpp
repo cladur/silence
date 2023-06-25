@@ -23,6 +23,7 @@
 #include "animation/ecs/attachment_system.h"
 #include "audio/audio_manager.h"
 #include "audio/ecs/fmod_emitter_system.h"
+#include "components/dialogue_trigger_component.h"
 #include "components/fmod_emitter_component.h"
 #include "components/taggable_component.h"
 #include "ecs/systems/agent_movement_system.h"
@@ -97,6 +98,7 @@ Scene::Scene() {
 		world.register_component<LightSwitcher>();
 		world.register_component<Decal>();
 		world.register_component<WallCube>();
+		world.register_component<DialogueTrigger>();
 	}
 	// Components
 	{ register_main_systems(); }

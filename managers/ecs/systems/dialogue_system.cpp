@@ -18,12 +18,42 @@
 #include <gameplay/gameplay_manager.h>
 #include <render/transparent_elements/ui_manager.h>
 
+struct Sentence {
+	std::string text;
+	std::string audio;
+	float duration;
+};
+
+struct Dialogue {
+	std::vector<Sentence> sentences;
+};
+
+float dialogue_timer = 0.0f;
+int current_dialogue_id = -1;
+int current_sentence_id = 0;
+
+// TODO: Populate this with actual dialogue
+static std::unordered_map<int, Dialogue> dialogues = {
+	{ 0,
+			{ { { "DIALOGUE 0 - Hello, I am the hacker. I will be your guide.", "hacker_intro", 3.0f },
+					{ "You are in a simulation. You must escape.", "hacker_intro2", 3.0f },
+					{ "You must find the exit.", "hacker_intro3", 3.0f }, { "Good luck.", "hacker_intro4", 3.0f } } } },
+	{ 1,
+			{ { { "DIALOGUE 1 - Hello, I am the hacker. I will be your guide.", "hacker_intro", 3.0f },
+					{ "You are in a simulation. You must escape.", "hacker_intro2", 3.0f },
+					{ "You must find the exit.", "hacker_intro3", 3.0f }, { "Good luck.", "hacker_intro4", 3.0f } } } },
+	{ 2,
+			{ { { "DIALOGUE 2 - Hello, I am the hacker. I will be your guide.", "hacker_intro", 3.0f },
+					{ "You are in a simulation. You must escape.", "hacker_intro2", 3.0f },
+					{ "You must find the exit.", "hacker_intro3", 3.0f }, { "Good luck.", "hacker_intro4", 3.0f } } } },
+};
+
 void DialogueSystem::startup(World &world) {
 	Signature blacklist;
 	Signature whitelist;
 
 	whitelist.set(world.get_component_type<Transform>());
-	whitelist.set(world.get_component_type<Name>());
+	whitelist.set(world.get_component_type<DialogueTrigger>());
 	whitelist.set(world.get_component_type<ColliderOBB>());
 
 	blacklist.set(world.get_component_type<StaticTag>());
@@ -80,10 +110,47 @@ void DialogueSystem::update(World &world, float dt) {
 	ResourceManager &resource_manager = ResourceManager::get();
 	PhysicsManager &physics_manager = PhysicsManager::get();
 
+	// Wait for global matrices of transforms to be updated
+	if (world.get_parent_scene()->frame_number == 0) {
+		return;
+	}
+
+	dialogue_timer += dt;
+
+	if (current_dialogue_id != -1) {
+		auto &dialogue = dialogues[current_dialogue_id];
+
+		for (int i = current_sentence_id; i < dialogue.sentences.size(); i++) {
+			auto &sentence = dialogue.sentences[i];
+			if (dialogue_timer < sentence.duration) {
+				break;
+			}
+			current_sentence_id++;
+			dialogue_timer -= sentence.duration;
+		}
+
+		if (current_sentence_id >= dialogue.sentences.size()) {
+			current_dialogue_id = -1;
+			current_sentence_id = 0;
+			dialogue_timer = 0.0f;
+
+			ui_dialogue_text->text = "";
+			ui_dialogue_text2->text = "";
+		} else {
+			auto &sentence = dialogue.sentences[current_sentence_id];
+
+			ui_dialogue_text->text = sentence.text;
+		}
+	}
+
 	for (const Entity entity : entities) {
 		auto &transform = world.get_component<Transform>(entity);
-		auto &name = world.get_component<Name>(entity);
+		auto &dialogue_trigger = world.get_component<DialogueTrigger>(entity);
 		auto &collider = world.get_component<ColliderOBB>(entity);
+
+		if (dialogue_trigger.triggered) {
+			continue;
+		}
 
 		ColliderOBB c = {};
 
@@ -94,10 +161,18 @@ void DialogueSystem::update(World &world, float dt) {
 
 		auto vec = PhysicsManager::get().overlap_cube_checkpoint(world, c);
 
-		SPDLOG_INFO("{}: {}", name.name, vec.size());
 		if (!vec.empty()) {
-			ui_dialogue_text->text = "Example dialogue text here,";
-			ui_dialogue_text2->text = "lorem epsum dolor sit amet.";
+			if (!dialogues.contains(dialogue_trigger.dialogue_id)) {
+				SPDLOG_WARN("Dialogue {} does not exist", dialogue_trigger.dialogue_id);
+				continue;
+			}
+
+			SPDLOG_INFO("Dialogue triggered: {}", dialogue_trigger.dialogue_id);
+
+			dialogue_trigger.triggered = true;
+			dialogue_timer = 0.0f;
+			current_dialogue_id = dialogue_trigger.dialogue_id;
+			current_sentence_id = 0;
 		}
 	}
 }

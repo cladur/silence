@@ -121,6 +121,10 @@ void Engine::update(float dt) {
 	input_manager.process_input();
 
 	render_manager.draw();
+
+	for (auto &scene : scenes) {
+		scene->frame_number++;
+	}
 }
 
 void Engine::create_scene(const std::string &name) {

@@ -35,6 +35,7 @@
 #include "components/path_node_component.h"
 #include "components/path_parent_component.h"
 #include "components/taggable_component.h"
+#include "core/components/dialogue_trigger_component.h"
 #include "core/components/exploding_box_component.h"
 #include "core/components/fmod_emitter_component.h"
 #include "core/components/light_switcher_component.h"
@@ -59,7 +60,7 @@ typedef std::variant<Children, Parent, Transform, RigidBody, FmodListener, Camer
 		SkinnedModelInstance, Name, ColliderTag, StaticTag, ColliderSphere, ColliderAABB, ColliderOBB, ColliderCapsule,
 		Light, AgentData, HackerData, EnemyPath, EnemyData, Interactable, Attachment, Platform, ExplodingBox, Billboard,
 		PathNode, PathParent, Taggable, FMODEmitter, Highlight, ParticleEmitter, DetectionCamera, CableParent, Rotator,
-		LightSwitcher, Decal, WallCube>
+		LightSwitcher, Decal, WallCube, DialogueTrigger>
 		variant_type;
 
 template <typename T>
