@@ -38,6 +38,14 @@
                 "component_name": "Children"
             },
             {
+                "component_data": {
+                    "faces_parent": 2,
+                    "model_name": "items/planes/bricks.mdl",
+                    "scale_uv": true
+                },
+                "component_name": "WallCube"
+            },
+            {
                 "component_data": {},
                 "component_name": "StaticTag"
             },
@@ -52,7 +60,7 @@
                 "component_data": {
                     "center": {
                         "x": 0.0,
-                        "y": 0.0,
+                        "y": 1.0,
                         "z": 0.0
                     },
                     "range": {
@@ -62,14 +70,6 @@
                     }
                 },
                 "component_name": "ColliderAABB"
-            },
-            {
-                "component_data": {
-                    "faces_parent": 2,
-                    "model_name": "items/planes/bricks.mdl",
-                    "scale_uv": true
-                },
-                "component_name": "WallCube"
             }
         ],
         "entity": 1,
@@ -77,6 +77,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 1
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "Faces parent"
@@ -106,12 +112,6 @@
             },
             {
                 "component_data": {
-                    "parent": 1
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "children": [
                         3,
                         4,
@@ -130,6 +130,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 2
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "L"
@@ -159,12 +165,6 @@
             },
             {
                 "component_data": {
-                    "parent": 2
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "flip_uv_y": true,
                     "in_shadow_pass": true,
                     "material_type": 0,
@@ -183,6 +183,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 2
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "R"
@@ -212,12 +218,6 @@
             },
             {
                 "component_data": {
-                    "parent": 2
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "flip_uv_y": true,
                     "in_shadow_pass": true,
                     "material_type": 0,
@@ -236,6 +236,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 2
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "U"
@@ -265,12 +271,6 @@
             },
             {
                 "component_data": {
-                    "parent": 2
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "flip_uv_y": true,
                     "in_shadow_pass": true,
                     "material_type": 0,
@@ -289,6 +289,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 2
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "D"
@@ -318,12 +324,6 @@
             },
             {
                 "component_data": {
-                    "parent": 2
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "flip_uv_y": true,
                     "in_shadow_pass": true,
                     "material_type": 0,
@@ -342,6 +342,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 2
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "F"
@@ -371,12 +377,6 @@
             },
             {
                 "component_data": {
-                    "parent": 2
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
                     "flip_uv_y": true,
                     "in_shadow_pass": true,
                     "material_type": 0,
@@ -395,6 +395,12 @@
     },
     {
         "components": [
+            {
+                "component_data": {
+                    "parent": 2
+                },
+                "component_name": "Parent"
+            },
             {
                 "component_data": {
                     "name": "B"
@@ -421,12 +427,6 @@
                     }
                 },
                 "component_name": "Transform"
-            },
-            {
-                "component_data": {
-                    "parent": 2
-                },
-                "component_name": "Parent"
             },
             {
                 "component_data": {
