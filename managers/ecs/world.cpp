@@ -346,6 +346,7 @@ Entity World::deserialize_prefab(nlohmann::json &json, std::vector<Entity> &enti
 		ComponentVisitor::update_ids(*this, entity_id, prefab_id_to_entity_id_map);
 	}
 
+	first = true;
 	return root_entity;
 }
 

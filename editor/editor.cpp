@@ -277,13 +277,16 @@ void Editor::custom_update(float dt) {
 			std::ifstream file("resources/prefabs/Walls/WallCube.pfb");
 			nlohmann::json json;
 			file >> json;
+			SPDLOG_CRITICAL(json.dump(2));
 			auto root_entity = scene.world.deserialize_prefab(json, entities);
 			auto selected_entity = scene.selected_entity;
-			auto transform = scene.world.get_component<Transform>(selected_entity);
-			auto &new_transform = scene.world.get_component<Transform>(root_entity);
-			new_transform = transform;
-			file.close();
-			scene.selected_entity = root_entity;
+			if (selected_entity != 0 && root_entity != 0) {
+				auto transform = scene.world.get_component<Transform>(selected_entity);
+				auto &new_transform = scene.world.get_component<Transform>(root_entity);
+				new_transform = transform;
+				file.close();
+				scene.selected_entity = root_entity;
+			}
 		}
 
 		if (input_manager.is_action_pressed("delete")) {
