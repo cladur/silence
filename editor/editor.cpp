@@ -70,6 +70,9 @@ void default_mappings() {
 	input_manager.add_action("duplicate");
 	input_manager.add_key_to_action("duplicate", InputKey::D);
 
+	input_manager.add_action("duplicate_wall_cube");
+	input_manager.add_key_to_action("duplicate_wall_cube", InputKey::F);
+
 	input_manager.add_action("delete");
 	input_manager.add_key_to_action("delete", InputKey::DELETE);
 
@@ -265,6 +268,22 @@ void Editor::custom_update(float dt) {
 	if (!controlling_camera) {
 		if (input_manager.is_action_pressed("control_modifier") && input_manager.is_action_just_pressed("duplicate")) {
 			get_active_scene().duplicate_selected_entity();
+		}
+
+		if (input_manager.is_action_pressed("control_modifier") &&
+				input_manager.is_action_just_pressed("duplicate_wall_cube")) {
+			auto &scene = get_active_scene();
+			auto &entities = scene.entities;
+			std::ifstream file("resources/prefabs/Walls/WallCube.pfb");
+			nlohmann::json json;
+			file >> json;
+			auto root_entity = scene.world.deserialize_prefab(json, entities);
+			auto selected_entity = scene.selected_entity;
+			auto transform = scene.world.get_component<Transform>(selected_entity);
+			auto &new_transform = scene.world.get_component<Transform>(root_entity);
+			new_transform = transform;
+			file.close();
+			scene.selected_entity = root_entity;
 		}
 
 		if (input_manager.is_action_pressed("delete")) {

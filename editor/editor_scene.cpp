@@ -69,7 +69,9 @@ void EditorScene::duplicate_selected_entity() {
 	scene_json.push_back(nlohmann::json::object());
 	world.serialize_entity_json(scene_json.back(), selected_entity);
 
-	scene_json.back()["entity"] = 0;
+	for (auto &entity_json : scene_json) {
+		entity_json["entity"] = 0;
+	}
 
 	world.deserialize_entity_json(scene_json.back(), entities);
 
