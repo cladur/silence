@@ -50,12 +50,12 @@ void EnemyStationaryPatrolling::update(World *world, uint32_t entity_id, float d
 			state_machine->set_state("patrolling");
 		}
 
-		if (enemy_data.detection_level > 0.3f) {
+		if (enemy_data.detection_level > 0.4f) {
 			enemy_path.next_position = (enemy_path.next_position + 1) % path.children_count;
 			state_machine->set_state("looking");
 		}
 	} else {
-		if (enemy_data.detection_level > 0.3f) {
+		if (enemy_data.detection_level > 0.4f) {
 			state_machine->set_state("looking");
 		}
 	}

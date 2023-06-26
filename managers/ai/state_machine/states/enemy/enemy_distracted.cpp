@@ -103,7 +103,7 @@ void EnemyDistracted::update(World *world, uint32_t entity_id, float dt) {
 		state_machine->set_state("patrolling");
 	}
 
-	if (enemy_data.detection_level > 0.5f) {
+	if (enemy_data.detection_level > 0.4f) {
 		state_machine->set_state("looking");
 	}
 	first_frame = false;

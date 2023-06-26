@@ -97,7 +97,7 @@ void EnemyFullyAware::update(World *world, uint32_t entity_id, float dt) {
 
 	enemy_utils::handle_highlight(entity_id, world);
 
-	if (enemy_data.detection_level < 0.5f) {
+	if (enemy_data.detection_level < 0.6f) {
 		state_machine->set_state("looking");
 	}
 }

@@ -482,11 +482,18 @@ inline void update_detection_slider(uint32_t entity_id, Transform &transform, En
 	agent_detection_fill.position = glm::vec3(agent_detection_pos + glm::vec2(0.0f, 1.0f),0.0f);
 
 	agent_detection_outline.size = enemy_data.detection_slider_default_size / 2.5f + enemy_data.detection_slider_default_size / (distance_to_agent);
-	agent_detection_fill.size = glm::lerp(glm::vec2(0.0f), agent_detection_outline.size * 0.90f, enemy_data.detection_level);
-	if (enemy_data.detection_level < 0.5f) {
-		agent_detection_fill.color = glm::lerp(glm::vec4(1.0f), glm::vec4(1.0f, 1.0f, 0.0f, 0.5f), enemy_data.detection_level * 2.0f);
-	} else {
-		agent_detection_fill.color = glm::lerp(glm::vec4(1.0f, 1.0f, 0.0f, 0.5f), glm::vec4(1.0f, 0.0f, 0.0f, 0.5f), enemy_data.detection_level * 2.0f - 1.0f);
+	agent_detection_fill.size = glm::lerp(glm::vec2(0.0f), agent_detection_outline.size * 0.95f, enemy_data.detection_level);
+	if (enemy_data.detection_level < 0.4f) {
+		agent_detection_fill.color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+		agent_detection_outline.color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+	} else if (enemy_data.detection_level >= 0.4f) {
+		agent_detection_fill.color = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
+		agent_detection_outline.color = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
+	}
+
+	if (enemy_data.detection_level >= 0.99f) {
+		agent_detection_fill.color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+		agent_detection_outline.color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
 	}
 
 	auto agent_pos_no_y = agent_pos;
@@ -543,11 +550,19 @@ inline void update_detection_slider(uint32_t entity_id, Transform &transform, En
 	hacker_detection_fill.position = glm::vec3(hacker_detection_pos + glm::vec2(0.0f, 1.0f),0.0f);
 
 	hacker_detection_outline.size = enemy_data.detection_slider_default_size / 2.5f + enemy_data.detection_slider_default_size / (distance_to_hacker);
-	hacker_detection_fill.size = glm::lerp(glm::vec2(0.0f), hacker_detection_outline.size * 0.90f, enemy_data.detection_level);
-	if (enemy_data.detection_level < 0.5f) {
-		hacker_detection_fill.color = glm::lerp(glm::vec4(1.0f), glm::vec4(1.0f, 1.0f, 0.0f, 0.5f), enemy_data.detection_level * 2.0f);
-	} else {
-		hacker_detection_fill.color = glm::lerp(glm::vec4(1.0f, 1.0f, 0.0f, 0.5f), glm::vec4(1.0f, 0.0f, 0.0f, 0.5f), enemy_data.detection_level * 2.0f - 1.0f);
+	hacker_detection_fill.size = glm::lerp(glm::vec2(0.0f), hacker_detection_outline.size * 0.95f, enemy_data.detection_level);
+
+	if (enemy_data.detection_level < 0.4f) {
+		hacker_detection_fill.color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+		hacker_detection_outline.color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+	} else if (enemy_data.detection_level >= 0.4f) {
+		hacker_detection_fill.color = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
+		hacker_detection_outline.color = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
+	}
+
+	if (enemy_data.detection_level >= 0.99f) {
+		hacker_detection_fill.color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+		hacker_detection_outline.color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
 	}
 
 	auto hacker_pos_no_y = hacker_pos;
@@ -622,11 +637,19 @@ inline void update_detection_slider_camera(
 	agent_detection_fill.position = glm::vec3(agent_detection_pos + glm::vec2(0.0f, 1.0f),0.0f);
 
 	agent_detection_outline.size = detection_camera.default_detection_slider_size / 2.5f + detection_camera.default_detection_slider_size / (distance_to_agent);
-	agent_detection_fill.size = glm::lerp(glm::vec2(0.0f), agent_detection_outline.size * 0.90f, detection_camera.detection_level);
+	agent_detection_fill.size = glm::lerp(glm::vec2(0.0f), agent_detection_outline.size * 0.95f, detection_camera.detection_level);
 	if (detection_camera.detection_level < 0.5f) {
-		agent_detection_fill.color = glm::lerp(glm::vec4(1.0f), glm::vec4(1.0f, 1.0f, 0.0f, 0.5f), detection_camera.detection_level * 2.0f);
-	} else {
-		agent_detection_fill.color = glm::lerp(glm::vec4(1.0f, 1.0f, 0.0f, 0.5f), glm::vec4(1.0f, 0.0f, 0.0f, 0.5f), detection_camera.detection_level * 2.0f - 1.0f);
+		// todo sound
+		agent_detection_fill.color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+		agent_detection_outline.color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+	} else if (detection_camera.detection_level >= 0.5f) {
+		agent_detection_fill.color = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
+		agent_detection_outline.color = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
+	}
+
+	if (detection_camera.detection_level >= 0.99f) {
+		agent_detection_fill.color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+		agent_detection_outline.color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
 	}
 
 	auto agent_pos_no_y = agent_pos;
@@ -683,11 +706,17 @@ inline void update_detection_slider_camera(
 	hacker_detection_fill.position = glm::vec3(hacker_detection_pos + glm::vec2(0.0f, 1.0f),0.0f);
 
 	hacker_detection_outline.size = detection_camera.default_detection_slider_size / 2.5f + detection_camera.default_detection_slider_size / (distance_to_hacker);
-	hacker_detection_fill.size = glm::lerp(glm::vec2(0.0f), hacker_detection_outline.size * 0.90f, detection_camera.detection_level);
+	hacker_detection_fill.size = glm::lerp(glm::vec2(0.0f), hacker_detection_outline.size * 0.95f, detection_camera.detection_level);
 	if (detection_camera.detection_level < 0.5f) {
-		hacker_detection_fill.color = glm::lerp(glm::vec4(1.0f), glm::vec4(1.0f, 1.0f, 0.0f, 0.5f), detection_camera.detection_level * 2.0f);
-	} else {
-		hacker_detection_fill.color = glm::lerp(glm::vec4(1.0f, 1.0f, 0.0f, 0.5f), glm::vec4(1.0f, 0.0f, 0.0f, 0.5f), detection_camera.detection_level * 2.0f - 1.0f);
+		hacker_detection_fill.color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+		hacker_detection_outline.color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+	} else if (detection_camera.detection_level >= 0.5f) {
+		hacker_detection_fill.color = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
+		hacker_detection_outline.color = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
+	}
+	if (detection_camera.detection_level >= 0.99f) {
+		hacker_detection_fill.color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+		hacker_detection_outline.color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
 	}
 
 	auto hacker_pos_no_y = hacker_pos;

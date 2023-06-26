@@ -104,7 +104,7 @@ void EnemyPatrolling::update(World *world, uint32_t entity_id, float dt) {
 
 	enemy_utils::handle_highlight(entity_id, world);
 
-	if (enemy_data.detection_level > 0.3f) {
+	if (enemy_data.detection_level > 0.4f) {
 		state_machine->set_state("looking");
 	}
 }
