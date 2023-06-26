@@ -225,7 +225,7 @@ public:
 	void deserialize_entities_json(nlohmann::json &json, std::vector<Entity> &entities);
 	void deserialize_selected_entities_json(nlohmann::json &json, std::unordered_set<Entity> &selected_entities);
 	void update_name(std::vector<Entity> &entities, Entity &new_entity_id);
-	void deserialize_prefab(nlohmann::json &json, std::vector<Entity> &entities);
+	Entity deserialize_prefab(nlohmann::json &json, std::vector<Entity> &entities);
 	void print_components();
 
 	void add_component(Entity entity, int component_id);
