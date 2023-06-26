@@ -16,7 +16,7 @@ void UIImage::draw() {
 	{
 		ui_manager.sprite_draw.draw_sprite_billboard(position, size, color, texture, billboard_z_offset, use_camera_right);
 	} else {
-		ui_manager.sprite_draw.draw_sprite(position, size, color, texture, is_screen_space, alignment);
+		ui_manager.sprite_draw.draw_sprite(position, size, color, texture, is_screen_space, 0.0f, alignment);
 	}
 
 	for (auto& child : children) {
@@ -31,9 +31,9 @@ void UIImage::draw(glm::vec3 parent_position, glm::vec2 parent_size) {
 	new_pos.z += 0.01f;
 
 	if (ResourceManager::get().get_texture_name(texture).empty()) {
-		ui_manager.sprite_draw.draw_colored(new_pos, size, color, is_screen_space, alignment);
+		ui_manager.sprite_draw.draw_colored(new_pos, size, color, is_screen_space, rotation, alignment);
 	} else {
-		ui_manager.sprite_draw.draw_sprite(new_pos, size, color, texture, is_screen_space, Alignment::NONE);
+		ui_manager.sprite_draw.draw_sprite(new_pos, size, color, texture, is_screen_space, rotation, Alignment::NONE);
 	}
 
 	for (auto& child : children) {

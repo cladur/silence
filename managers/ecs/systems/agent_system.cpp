@@ -14,6 +14,7 @@
 
 #include "input/input_manager.h"
 #include "resource/resource_manager.h"
+#include <ai/state_machine/states/enemy/enemy_utils.h>
 #include <audio/audio_manager.h>
 #include <gameplay/gameplay_manager.h>
 #include <render/transparent_elements/ui_manager.h>
@@ -120,6 +121,9 @@ void AgentSystem::update(World &world, float dt) {
 	AnimationManager &animation_manager = AnimationManager::get();
 	ResourceManager &resource_manager = ResourceManager::get();
 	PhysicsManager &physics_manager = PhysicsManager::get();
+
+	glm::vec2 render_extent = world.get_parent_scene()->get_render_scene().render_extent;
+
 	for (const Entity entity : entities) {
 		auto &transform = world.get_component<Transform>(entity);
 		auto &agent_data = world.get_component<AgentData>(entity);
@@ -369,13 +373,14 @@ void AgentSystem::update(World &world, float dt) {
 				glm::vec4 view_pos_non_normalized = world.get_parent_scene()->get_render_scene().left_view *
 						glm::vec4(hit_transform.get_global_position(), 1.0f);
 
-				glm::vec2 render_extent = world.get_parent_scene()->get_render_scene().render_extent;
-
 				glm::vec3 view_pos = glm::vec3(view_pos_non_normalized) / view_pos_non_normalized.w;
 
 				if (obstacle_height > 0.5f && obstacle_height < 0.7f) {
-					interaction_sprite->position.x = 75.0f + (0.15f * render_extent.x * view_pos.x / abs(view_pos.z));
-					interaction_sprite->position.y = 50.0f + (0.15f * render_extent.y * view_pos.y / abs(view_pos.z));
+					glm::vec2 screen_pos = enemy_utils::transform_to_screen(
+							info.point, world.get_parent_scene()->get_render_scene(), false);
+
+					interaction_sprite->position.x = screen_pos.x + 150.0f;
+					interaction_sprite->position.y = screen_pos.y + 100.0f;
 					interaction_sprite->display = true;
 					ui_button_hint->text = climb_button;
 					if (agent_data.gamepad < 0) {
@@ -385,8 +390,17 @@ void AgentSystem::update(World &world, float dt) {
 					}
 
 					ui_interaction_text->text = "Jump";
-					if (interaction_sprite->position.x > render_extent.x / 2.0f - 100.f) {
-						interaction_sprite->position.x = render_extent.x / 2.0f - 100.0f;
+					if (interaction_sprite->position.x > render_extent.x / 2.0f - 130.f) {
+						interaction_sprite->position.x = render_extent.x / 2.0f - 130.0f;
+					}
+					if (interaction_sprite->position.y > render_extent.y / 2.0f - 40.f) {
+						interaction_sprite->position.y = render_extent.y / 2.0f - 40.0f;
+					}
+					if (interaction_sprite->position.x < -render_extent.x / 2.0f + 130.f) {
+						interaction_sprite->position.x = -render_extent.x / 2.0f + 130.0f;
+					}
+					if (interaction_sprite->position.y < -render_extent.y / 2.0f + 40.f) {
+						interaction_sprite->position.y = -render_extent.y / 2.0f + 40.0f;
 					}
 
 					bool climb_triggered = false;
@@ -464,17 +478,11 @@ void AgentSystem::update(World &world, float dt) {
 						}
 						auto &hit_transform = world.get_component<Transform>(closest_interactable);
 
-						glm::vec4 view_pos_non_normalized = world.get_parent_scene()->get_render_scene().left_view *
-								glm::vec4(hit_transform.get_global_position(), 1.0f);
+						glm::vec2 screen_pos = enemy_utils::transform_to_screen(hit_transform.get_global_position(),
+								world.get_parent_scene()->get_render_scene(), false);
 
-						glm::vec2 render_extent = world.get_parent_scene()->get_render_scene().render_extent;
-
-						glm::vec3 view_pos = glm::vec3(view_pos_non_normalized) / view_pos_non_normalized.w;
-
-						interaction_sprite->position.x =
-								75.0f + (0.15f * render_extent.x * view_pos.x / abs(view_pos.z));
-						interaction_sprite->position.y =
-								50.0f + (0.15f * render_extent.y * view_pos.y / abs(view_pos.z));
+						interaction_sprite->position.x = screen_pos.x + 96.0f;
+						interaction_sprite->position.y = screen_pos.y + 0.0f;
 						interaction_sprite->display = true;
 
 						// take interactable.interaction_text and splt it by space
@@ -497,8 +505,17 @@ void AgentSystem::update(World &world, float dt) {
 						float size = 0.6f - (words[0].size() / 10.0f);
 						ui_button_hint->size = glm::vec2(size);
 
-						if (interaction_sprite->position.x > render_extent.x / 2.0f - 125.f) {
-							interaction_sprite->position.x = render_extent.x / 2.0f - 125.0f;
+						if (interaction_sprite->position.x > render_extent.x / 2.0f - 130.f) {
+							interaction_sprite->position.x = render_extent.x / 2.0f - 130.0f;
+						}
+						if (interaction_sprite->position.y > render_extent.y / 2.0f - 40.f) {
+							interaction_sprite->position.y = render_extent.y / 2.0f - 40.0f;
+						}
+						if (interaction_sprite->position.x < -render_extent.x / 2.0f + 130.f) {
+							interaction_sprite->position.x = -render_extent.x / 2.0f + 130.0f;
+						}
+						if (interaction_sprite->position.y < -render_extent.y / 2.0f + 40.f) {
+							interaction_sprite->position.y = -render_extent.y / 2.0f + 40.0f;
 						}
 
 						if (interaction_triggered) {
@@ -544,15 +561,12 @@ void AgentSystem::update(World &world, float dt) {
 							if (behind_enemy && enemy.state_machine.get_current_state() != "dying") {
 								//TODO: pull out knife or other indicator that agent can attack
 
-								glm::vec4 view_pos_non_normalized = world.get_parent_scene()->get_render_scene().view *
-										glm::vec4(enemy_tf.get_global_position() + glm::vec3(0.0f, 1.2f, 0.0f), 1.0f);
-								glm::vec2 render_extent = world.get_parent_scene()->get_render_scene().render_extent;
-								glm::vec3 view_pos = glm::vec3(view_pos_non_normalized) / view_pos_non_normalized.w;
+								glm::vec2 screen_pos = enemy_utils::transform_to_screen(
+										enemy_tf.get_global_position() + glm::vec3(0.0f, 1.3f, 0.0f),
+										world.get_parent_scene()->get_render_scene(), false);
 
-								interaction_sprite->position.x =
-										75.0f + (0.15f * render_extent.x * view_pos.x / abs(view_pos.z));
-								interaction_sprite->position.y =
-										50.0f + (0.15f * render_extent.y * view_pos.y / abs(view_pos.z));
+								interaction_sprite->position.x = screen_pos.x + 150.0f;
+								interaction_sprite->position.y = screen_pos.y + 100.0f;
 								interaction_sprite->display = true;
 								ui_button_hint->text = attack_button;
 								if (agent_data.gamepad < 0) {
@@ -560,8 +574,17 @@ void AgentSystem::update(World &world, float dt) {
 								}
 								ui_interaction_text->text = "Kill";
 								interaction_sprite->color = glm::vec4(1.0f, 0.4f, 0.4f, 0.6f);
-								if (interaction_sprite->position.x > render_extent.x / 2.0f - 125.f) {
-									interaction_sprite->position.x = render_extent.x / 2.0f - 125.0f;
+								if (interaction_sprite->position.x > render_extent.x / 2.0f - 130.f) {
+									interaction_sprite->position.x = render_extent.x / 2.0f - 130.0f;
+								}
+								if (interaction_sprite->position.y > render_extent.y / 2.0f - 40.f) {
+									interaction_sprite->position.y = render_extent.y / 2.0f - 40.0f;
+								}
+								if (interaction_sprite->position.x < -render_extent.x / 2.0f + 130.f) {
+									interaction_sprite->position.x = -render_extent.x / 2.0f + 130.0f;
+								}
+								if (interaction_sprite->position.y < -render_extent.y / 2.0f + 40.f) {
+									interaction_sprite->position.y = -render_extent.y / 2.0f + 40.0f;
 								}
 
 								bool attack_triggered = false;

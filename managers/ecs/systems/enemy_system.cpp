@@ -78,17 +78,80 @@ void EnemySystem::update(World &world, float dt) {
 			}
 
 			ui.create_ui_scene(std::to_string(entity) + "_detection");
-			auto &slider = ui.add_ui_slider(std::to_string(entity) + "_detection", "detection_slider");
-			slider.position = glm::vec3(0.0f, 2.0f, 0.0f);
-			slider.is_billboard = true;
-			slider.is_screen_space = false;
-			slider.size = glm::vec2(0.1f, 0.5f);
-			slider.slider_alignment = SliderAlignment::BOTTOM_TO_TOP;
-			slider.color = glm::vec4(1.0f);
-
-			//ui.add_ui_slider(std::to_string(entity) + "_detection", "detection_slider");
-			ui.add_as_root(std::to_string(entity) + "_detection", "detection_slider");
 			ui.activate_ui_scene(std::to_string(entity) + "_detection");
+
+			auto &agent_anchor = ui.add_ui_anchor(std::to_string(entity) + "_detection", "agent_anchor");
+			agent_anchor.x = 0.25f;
+			agent_anchor.y = 0.5f;
+			agent_anchor.is_screen_space = true;
+			agent_anchor.display = true;
+			ui.add_as_root(std::to_string(entity) + "_detection", "agent_anchor");
+			auto &hacker_anchor = ui.add_ui_anchor(std::to_string(entity) + "_detection", "hacker_anchor");
+			hacker_anchor.x = 0.75f;
+			hacker_anchor.y = 0.5f;
+			hacker_anchor.is_screen_space = true;
+			hacker_anchor.display = true;
+			ui.add_as_root(std::to_string(entity) + "_detection", "hacker_anchor");
+
+			auto &agent_detection_outline = ui.add_ui_image(std::to_string(entity) + "_detection",
+					"agent_detection_outline");
+			agent_detection_outline.position = glm::vec3(0.0f, 0.0f, 0.0f);
+			agent_detection_outline.is_billboard = false;
+			agent_detection_outline.is_screen_space = true;
+			agent_detection_outline.size = glm::vec2(50.0f, 50.0f);
+			agent_detection_outline.color = glm::vec4(1.0f);
+			agent_detection_outline.texture = rm.load_texture(asset_path("detection_triangle_outline_white.ktx2").c_str());
+			ui.add_to_root(std::to_string(entity) + "_detection", "agent_detection_outline", "agent_anchor");
+			auto &hacker_detection_outline = ui.add_ui_image(std::to_string(entity) + "_detection",
+					"hacker_detection_outline");
+			hacker_detection_outline.position = glm::vec3(0.0f, 0.0f, 0.0f);
+			hacker_detection_outline.is_billboard = false;
+			hacker_detection_outline.is_screen_space = true;
+			hacker_detection_outline.size = glm::vec2(50.0f, 50.0f);
+			hacker_detection_outline.color = glm::vec4(1.0f);
+			hacker_detection_outline.texture = rm.load_texture(asset_path("detection_triangle_outline_white.ktx2").c_str());
+			ui.add_to_root(std::to_string(entity) + "_detection", "hacker_detection_outline", "hacker_anchor");
+			auto &agent_detection_fill = ui.add_ui_image(std::to_string(entity) + "_detection",
+					"agent_detection_fill");
+			agent_detection_fill.position = glm::vec3(0.0f, 0.0f, 0.0f);
+			agent_detection_fill.is_billboard = false;
+			agent_detection_fill.is_screen_space = true;
+			agent_detection_fill.size = glm::vec2(0.0f, 0.0f);
+			agent_detection_fill.color = glm::vec4(1.0f);
+			agent_detection_fill.texture = rm.load_texture(asset_path("detection_triangle_fill.ktx2").c_str());
+			ui.add_to_root(std::to_string(entity) + "_detection", "agent_detection_fill", "agent_anchor");
+			auto &hacker_detection_fill = ui.add_ui_image(std::to_string(entity) + "_detection",
+					"hacker_detection_fill");
+			hacker_detection_fill.position = glm::vec3(0.0f, 0.0f, 0.0f);
+			hacker_detection_fill.is_billboard = false;
+			hacker_detection_fill.is_screen_space = true;
+			hacker_detection_fill.size = glm::vec2(0.0f, 0.0f);
+			hacker_detection_fill.color = glm::vec4(1.0f);
+			hacker_detection_fill.texture = rm.load_texture(asset_path("detection_triangle_fill.ktx2").c_str());
+			ui.add_to_root(std::to_string(entity) + "_detection", "hacker_detection_fill", "hacker_anchor");
+
+			auto &agent_detection_screen_flash = ui.add_ui_image(std::to_string(entity) + "_detection",
+					"agent_detection_screen_flash");
+			agent_detection_screen_flash.position = glm::vec3(0.0f, 0.0f, 0.0f);
+			agent_detection_screen_flash.is_billboard = false;
+			agent_detection_screen_flash.is_screen_space = true;
+			agent_detection_screen_flash.size = glm::vec2(1.0f, 1.0f);
+			agent_detection_screen_flash.color = glm::vec4(1.0f);
+			agent_detection_screen_flash.texture = rm.load_texture(asset_path("detection_overlay.ktx2").c_str());
+			agent_detection_screen_flash.display = false;
+			ui.add_to_root(std::to_string(entity) + "_detection", "agent_detection_screen_flash", "agent_anchor");
+
+			auto &hacker_detection_screen_flash = ui.add_ui_image(std::to_string(entity) + "_detection",
+					"hacker_detection_screen_flash");
+			hacker_detection_screen_flash.position = glm::vec3(0.0f, 0.0f, 0.0f);
+			hacker_detection_screen_flash.is_billboard = false;
+			hacker_detection_screen_flash.is_screen_space = true;
+			hacker_detection_screen_flash.size = glm::vec2(1.0f, 1.0f);
+			hacker_detection_screen_flash.color = glm::vec4(1.0f);
+			hacker_detection_screen_flash.texture = rm.load_texture(asset_path("detection_overlay.ktx2").c_str());
+			hacker_detection_screen_flash.display = false;
+			ui.add_to_root(std::to_string(entity) + "_detection", "hacker_detection_screen_flash", "hacker_anchor");
+
 
 			auto &tag = ui.add_ui_image(std::to_string(entity) + "_detection", "tag");
 			tag.position = glm::vec3(0.0f, 1.6f, 0.0f);

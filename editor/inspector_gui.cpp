@@ -2134,7 +2134,11 @@ void Inspector::show_dialogue_trigger() {
 		ImGui::TableSetColumnIndex(0);
 		ImGui::Text("Dialogue ID");
 		ImGui::TableSetColumnIndex(1);
-		ImGui::InputInt("", (int *)&dialogue_trigger.dialogue_id, 0, 0);
+
+		char text[128];
+		strcpy_s(text, dialogue_trigger.dialogue_id.c_str());
+		ImGui::InputText("", text, 128);
+		dialogue_trigger.dialogue_id = text;
 
 		ImGui::EndTable();
 	}

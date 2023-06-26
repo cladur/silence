@@ -1,5 +1,6 @@
 #include "ecs/systems/dialogue_system.h"
 #include "agent_system.h"
+#include "audio/event_reference.h"
 #include "components/agent_data_component.h"
 #include "components/collider_obb.h"
 #include "components/static_tag_component.h"
@@ -18,31 +19,16 @@
 #include <gameplay/gameplay_manager.h>
 #include <render/transparent_elements/ui_manager.h>
 
-struct Sentence {
-	std::string text;
-	std::string audio;
-	float duration;
-};
+void set_sentence_duration(Sentence &sentence) {
+	FMOD::Studio::EventDescription *description;
+	sentence.audio->getDescription(&description);
+	int length = 0;
+	description->getLength(&length);
+	sentence.duration = length / 1000.0f;
+}
 
-struct Dialogue {
-	std::vector<Sentence> sentences;
-};
-
-// TODO: Populate this with actual dialogue
-static std::unordered_map<int, Dialogue> dialogues = {
-	{ 0,
-			{ { { "DIALOGUE 0 - Hello, I am the hacker. I will be your guide.", "hacker_intro", 3.0f },
-					{ "You are in a simulation. You must escape.", "hacker_intro2", 3.0f },
-					{ "You must find the exit.", "hacker_intro3", 3.0f }, { "Good luck.", "hacker_intro4", 3.0f } } } },
-	{ 1,
-			{ { { "DIALOGUE 1 - Hello, I am the hacker. I will be your guide.", "hacker_intro", 3.0f },
-					{ "You are in a simulation. You must escape.", "hacker_intro2", 3.0f },
-					{ "You must find the exit.", "hacker_intro3", 3.0f }, { "Good luck.", "hacker_intro4", 3.0f } } } },
-	{ 2,
-			{ { { "DIALOGUE 2 - Hello, I am the hacker. I will be your guide.", "hacker_intro", 3.0f },
-					{ "You are in a simulation. You must escape.", "hacker_intro2", 3.0f },
-					{ "You must find the exit.", "hacker_intro3", 3.0f }, { "Good luck.", "hacker_intro4", 3.0f } } } },
-};
+#define SENTENCE(text1, text2, audio)                                                                                  \
+	{ text1, text2, AudioManager::get().create_event_instance(audio), 1.0f }
 
 void DialogueSystem::startup(World &world) {
 	Signature blacklist;
@@ -58,7 +44,29 @@ void DialogueSystem::startup(World &world) {
 	world.set_system_component_whitelist<DialogueSystem>(whitelist);
 	world.set_system_component_blacklist<DialogueSystem>(blacklist);
 
-	auto &rm = ResourceManager::get();
+	// TODO: Populate this with actual dialogue
+
+	// Maksymalnie 60 znaków na tekst!!!
+
+	dialogues["intro"] = { {
+			SENTENCE("Mateusz: Ciebie Urgota teorytycznie.", "Ooo, ooo, to prosze.", "dialogue1"),
+			SENTENCE("Maciek: Nagrywac... Co, nagrywac mnie bedziesz?", "", "dialogue2"),
+			SENTENCE("laka maka fa", "", "dialogue2"),
+			SENTENCE("haha", "hihi", "dialogue2"),
+	} };
+
+	dialogues["intro2"] = { {
+			SENTENCE("Mateusz: Ciebie Urgota teorytycznie.", "Ooo, ooo, to prosze.", "dialogue1"),
+			SENTENCE("Maciek: Nagrywac... Co, nagrywac mnie bedziesz?", "", "dialogue2"),
+			SENTENCE("laka maka fa", "", "dialogue2"),
+			SENTENCE("haha", "hihi", "dialogue2"),
+	} };
+
+	for (auto &dialogue : dialogues) {
+		for (auto &sentence : dialogue.second.sentences) {
+			set_sentence_duration(sentence);
+		}
+	}
 }
 
 void DialogueSystem::update(World &world, float dt) {
@@ -115,7 +123,7 @@ void DialogueSystem::update(World &world, float dt) {
 
 	dialogue_timer += dt;
 
-	if (current_dialogue_id != -1) {
+	if (!current_dialogue_id.empty()) {
 		auto &dialogue = dialogues[current_dialogue_id];
 
 		for (int i = current_sentence_id; i < dialogue.sentences.size(); i++) {
@@ -137,7 +145,19 @@ void DialogueSystem::update(World &world, float dt) {
 		} else {
 			auto &sentence = dialogue.sentences[current_sentence_id];
 
+			FMOD_STUDIO_PLAYBACK_STATE state;
+			sentence.audio->getPlaybackState(&state);
+
+			// SPDLOG_INFO("State: {}", state);
+
+			if (!sentence.played) {
+				sentence.played = true;
+				SPDLOG_INFO("Playing audio {}", sentence.text);
+				sentence.audio->start();
+			}
+
 			ui_dialogue_text->text = sentence.text;
+			ui_dialogue_text2->text = sentence.text2;
 		}
 	}
 

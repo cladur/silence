@@ -2,7 +2,7 @@
 #define SILENCE_DIALOGUE_TRIGGER_COMPONENT_H
 
 struct DialogueTrigger {
-	int dialogue_id = 0;
+	std::string dialogue_id;
 	bool triggered = false;
 
 	void serialize_json(nlohmann::json &serialized_scene) {
