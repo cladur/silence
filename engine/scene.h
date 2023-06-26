@@ -12,6 +12,8 @@ struct Scene {
 	std::string path;
 	bool is_prefab;
 
+	uint32_t frame_number = 0;
+
 	World world;
 
 	std::vector<Entity> entities;

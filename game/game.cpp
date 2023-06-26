@@ -347,6 +347,9 @@ void input_setup() {
 	input_manager.add_action("reload_scene");
 	input_manager.add_key_to_action("reload_scene", InputKey::F4);
 
+	input_manager.add_action("load_checkpoint");
+	input_manager.add_key_to_action("load_checkpoint", InputKey::F5);
+
 	input_manager.add_action("hacker_exit_camera");
 	input_manager.add_key_to_action("hacker_exit_camera", InputKey::TAB);
 	input_manager.add_key_to_action("hacker_exit_camera", InputKey::GAMEPAD_BUTTON_B);
@@ -508,6 +511,7 @@ void Game::custom_update(float dt) {
 		scenes[0]->load_from_file("resources/scenes/level_3_12.scn");
 		GameplayManager::get().startup(&*scenes[0]);
 		UIManager::get().set_render_scene(&get_active_scene().get_render_scene());
+		scenes[0]->get_render_scene().resize_framebuffer(framebuffer_size.x, framebuffer_size.y);
 
 		set_active_scene("Main");
 	}

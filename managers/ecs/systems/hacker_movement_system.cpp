@@ -126,7 +126,7 @@ void HackerMovementSystem::update(World &world, float dt) {
 		}
 
 		Ray ray{};
-		ray.origin = transform.get_global_position() + glm::vec3(0.0f, 1.0f, 0.0f);
+		ray.origin = transform.get_global_position();
 		ray.ignore_list.emplace_back(entity);
 		ray.layer_name = "default";
 		ray.direction = -transform.get_up();

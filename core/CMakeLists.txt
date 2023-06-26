@@ -41,6 +41,8 @@ add_library(${CORE_LIB_NAME} STATIC
         components/enemy_data_component.h
         components/platform_component.h
         components/exploding_box_component.h
+        components/checkpoint_component.h
+        components/dialogue_trigger_component.h
         components/path_node_component.h
         components/path_parent_component.h
         components/path_node_component.h

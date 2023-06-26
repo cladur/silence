@@ -2,6 +2,7 @@
 #define SILENCE_COMPONENT_VISITOR_H
 
 #include "components/enemy_path_component.h"
+#include "components/wall_cube_component.h"
 #include "types.h"
 #include "world.h"
 #include <unordered_map>
@@ -50,6 +51,17 @@ private:
 		detection_camera.camera_model = update_id(detection_camera.camera_model, id_map);
 	}
 
+	static void update_wall_cube_ids(WallCube &wall_cube, const std::unordered_map<Entity, Entity> &id_map) {
+		wall_cube.faces_parent = update_id(wall_cube.faces_parent, id_map);
+	}
+
+	static void update_checkpoint_ids(Checkpoint &checkpoint, const std::unordered_map<Entity, Entity> &id_map) {
+		checkpoint.player_collider = update_id(checkpoint.player_collider, id_map);
+		checkpoint.enemy_collider = update_id(checkpoint.enemy_collider, id_map);
+		checkpoint.agent_spawn_pos = update_id(checkpoint.agent_spawn_pos, id_map);
+		checkpoint.hacker_spawn_pos = update_id(checkpoint.hacker_spawn_pos, id_map);
+	}
+
 public:
 	static void visit(World &world, Entity entity, serialization::variant_type &variant) {
 		// std::visit pass type to component in lambda from variant
@@ -87,6 +99,15 @@ public:
 		if (world.has_component<DetectionCamera>(entity)) {
 			auto &detection_camera = world.get_component<DetectionCamera>(entity);
 			update_detection_camera_ids(detection_camera, id_map);
+		}
+
+		if (world.has_component<WallCube>(entity)) {
+			auto &wall_cube = world.get_component<WallCube>(entity);
+			update_wall_cube_ids(wall_cube, id_map);
+		}
+		if (world.has_component<Checkpoint>(entity)) {
+			auto &checkpoint = world.get_component<Checkpoint>(entity);
+			update_checkpoint_ids(checkpoint, id_map);
 		}
 	}
 };

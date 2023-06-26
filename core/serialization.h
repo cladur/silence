@@ -4,6 +4,7 @@
 #include "components/agent_data_component.h"
 #include "components/attachment_component.h"
 #include "components/camera_component.h"
+#include "components/checkpoint_component.h"
 #include "components/children_component.h"
 #include "components/collider_aabb.h"
 #include "components/collider_capsule.h"
@@ -28,6 +29,7 @@
 #include "components/rotator_component.h"
 #include "components/static_tag_component.h"
 #include "components/transform_component.h"
+#include "components/wall_cube_component.h"
 
 
 #include "components/cable_parent_component.h"
@@ -35,6 +37,7 @@
 #include "components/path_node_component.h"
 #include "components/path_parent_component.h"
 #include "components/taggable_component.h"
+#include "core/components/dialogue_trigger_component.h"
 #include "core/components/exploding_box_component.h"
 #include "core/components/fmod_emitter_component.h"
 #include "core/components/light_switcher_component.h"
@@ -59,7 +62,7 @@ typedef std::variant<Children, Parent, Transform, RigidBody, FmodListener, Camer
 		SkinnedModelInstance, Name, ColliderTag, StaticTag, ColliderSphere, ColliderAABB, ColliderOBB, ColliderCapsule,
 		Light, AgentData, HackerData, EnemyPath, EnemyData, Interactable, Attachment, Platform, ExplodingBox, Billboard,
 		PathNode, PathParent, Taggable, FMODEmitter, Highlight, ParticleEmitter, DetectionCamera, CableParent, Rotator,
-		LightSwitcher, Decal>
+		LightSwitcher, Decal, WallCube, DialogueTrigger, Checkpoint>
 		variant_type;
 
 template <typename T>
