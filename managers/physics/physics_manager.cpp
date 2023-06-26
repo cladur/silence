@@ -1216,6 +1216,7 @@ std::vector<Entity> PhysicsManager::overlap_sphere(
 			}
 		} else if (world.has_component<ColliderOBB>(entity)) {
 			ColliderOBB c = world.get_component<ColliderOBB>(entity);
+			c.set_orientation(transform.get_global_orientation());
 			c.center = position + c.get_orientation_matrix() * c.center * scale;
 			c.range *= scale;
 			if (glm::length2(is_overlap(c, sphere)) > 0.0f) {

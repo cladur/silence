@@ -126,8 +126,6 @@ bool HackerSystem::shoot_raycast(
 		interaction_sprite->position.y = -render_extent.y / 2.0f + 40.0f;
 	}
 
-
-
 	if (world.has_component<Highlight>(hit_entity)) {
 		auto &highlight = world.get_component<Highlight>(hit_entity);
 		highlight.highlighted = true;
