@@ -27,7 +27,7 @@
 
 AutoCVarFloat cvar_agent_interaction_range("agent.interaction_range", "range of interaction", 1.0f);
 
-AutoCVarFloat cvar_agent_attack_range("agent.attack_range", "range of attack", 1.5f);
+AutoCVarFloat cvar_agent_attack_range("agent.attack_range", "range of attack", 0.75f);
 
 AutoCVarFloat cvar_agent_attack_angle("agent.attack_angle", "angle of attack", 70.0f);
 
@@ -181,6 +181,7 @@ void AgentSystem::update(World &world, float dt) {
 
 		if (animation_timer >= cvar_agent_lock_time.get() && !is_climbing) {
 			agent_data.locked_movement = false;
+			is_interacting = false;
 		}
 
 		//TODO: replace hard coded values with one derived from collider
@@ -226,8 +227,6 @@ void AgentSystem::update(World &world, float dt) {
 
 		camera_pivot_tf.position.y =
 				glm::lerp(camera_pivot_height, target_height, cvar_agent_camera_height_lerp.get() * dt);
-		// camera_pivot_tf.set_position(
-		// 		glm::mix(camera_pivot_tf.get_global_position(), camera_pivot_target_tf.get_global_position(), 0.1f));
 
 		if (speed > dt && !agent_data.locked_movement) {
 			if (is_crouching) {
@@ -414,7 +413,6 @@ void AgentSystem::update(World &world, float dt) {
 						climb_triggered = input_manager.is_action_just_pressed("agent_climb");
 					}
 					if (climb_triggered) {
-						//dd.draw_arrow(ray.origin, end, { 1.0f, 0.0f, 0.0f });
 						audio.play_one_shot_3d(jump_event, transform);
 
 						auto animation_handle =
@@ -443,7 +441,6 @@ void AgentSystem::update(World &world, float dt) {
 				sphere.radius = cvar_agent_interaction_range.get();
 				sphere.center = model_tf.get_global_position() + glm::vec3{ 0.0f, 1.0f, 0.0f };
 				auto colliders = PhysicsManager::get().overlap_sphere(world, sphere, "agent");
-				// dd.draw_sphere(sphere.center, sphere.radius);
 				if (!colliders.empty()) {
 					Entity closest_interactable;
 					float min_distance = cvar_agent_interaction_range.get() + 1.0f;
@@ -547,74 +544,110 @@ void AgentSystem::update(World &world, float dt) {
 				}
 
 				//Agent attack
-				Ray ray = {};
-				ray.direction = model_tf.get_forward();
-				ray.origin = transform.get_global_position() + glm::vec3(0.0f, 1.0f, 0.0f);
-				ray.ignore_list.emplace_back(entity);
-				ray.length = 3.0f;
-				HitInfo info;
-				//glm::vec3 end = ray.origin + ray.direction;
-				//world.get_parent_scene()->get_render_scene().debug_draw.draw_arrow(ray.origin, end, { 255, 0, 0 });
-				if (CollisionSystem::ray_cast_layer(world, ray, info)) {
-					if (info.distance < cvar_agent_attack_range.get()) {
-						if (world.has_component<EnemyData>(info.entity)) {
-							auto &enemy = world.get_component<EnemyData>(info.entity);
-							auto &enemy_tf = world.get_component<Transform>(info.entity);
-							bool behind_enemy = glm::dot(enemy_tf.get_forward(), model_tf.get_forward()) >
-									glm::cos(glm::radians(cvar_agent_attack_angle.get()));
-							if (behind_enemy && enemy.state_machine.get_current_state() != "dying") {
-								//TODO: pull out knife or other indicator that agent can attack
-
-								glm::vec2 screen_pos = enemy_utils::transform_to_screen(
-										enemy_tf.get_global_position() + glm::vec3(0.0f, 1.3f, 0.0f),
-										world.get_parent_scene()->get_render_scene(), false);
-
-								interaction_sprite->position.x = screen_pos.x + 150.0f;
-								interaction_sprite->position.y = screen_pos.y + 100.0f;
-								interaction_sprite->display = true;
-								ui_button_hint->text = attack_button;
-								if (agent_data.gamepad < 0) {
-									ui_button_hint->size = glm::vec2(0.4f);
-								}
-								ui_interaction_text->text = "Kill";
-								interaction_sprite->color = glm::vec4(1.0f, 0.4f, 0.4f, 0.6f);
-								if (interaction_sprite->position.x > render_extent.x / 2.0f - 130.f) {
-									interaction_sprite->position.x = render_extent.x / 2.0f - 130.0f;
-								}
-								if (interaction_sprite->position.y > render_extent.y / 2.0f - 40.f) {
-									interaction_sprite->position.y = render_extent.y / 2.0f - 40.0f;
-								}
-								if (interaction_sprite->position.x < -render_extent.x / 2.0f + 130.f) {
-									interaction_sprite->position.x = -render_extent.x / 2.0f + 130.0f;
-								}
-								if (interaction_sprite->position.y < -render_extent.y / 2.0f + 40.f) {
-									interaction_sprite->position.y = -render_extent.y / 2.0f + 40.0f;
-								}
-
-								bool attack_triggered = false;
-								if (agent_data.gamepad > -1) {
-									attack_triggered =
-											input_manager.is_action_just_pressed("agent_attack", agent_data.gamepad);
-								} else {
-									attack_triggered = input_manager.is_action_just_pressed("agent_attack");
-								}
-								if (attack_triggered) {
-									auto animation_handle = resource_manager.get_animation_handle(
-											"agent/agent_ANIM_GLTF/agent_stab.anim");
-									if (animation_instance.animation_handle.id != animation_handle.id) {
-										animation_instance.ticks_per_second = 1000.f;
-										animation_timer = 0;
-										agent_data.locked_movement = true;
-										animation_manager.change_animation(
-												agent_data.model, "agent/agent_ANIM_GLTF/agent_stab.anim");
+				bool attack_triggered = false;
+				if (agent_data.gamepad > -1) {
+					attack_triggered = input_manager.is_action_just_pressed("agent_attack", agent_data.gamepad);
+				} else {
+					attack_triggered = input_manager.is_action_just_pressed("agent_attack");
+				}
+				ColliderSphere attack_sphere{};
+				attack_sphere.radius = cvar_agent_attack_range.get();
+				attack_sphere.center = model_tf.get_global_position() + glm::vec3{ 0.0f, 1.0f, 0.0f } +
+						(model_tf.get_global_forward() * 0.5f);
+				auto enemy_colliders = PhysicsManager::get().overlap_sphere(world, attack_sphere, "default");
+				//dd.draw_sphere(attack_sphere.center, attack_sphere.radius);
+				if (!enemy_colliders.empty()) {
+					Entity closest_enemy;
+					float min_distance = cvar_agent_attack_range.get() + 1.0f;
+					bool enemy_found = false;
+					for (Entity found_entity : enemy_colliders) {
+						if (world.has_component<EnemyData>(found_entity)) {
+							auto &enemy_transform = world.get_component<Transform>(found_entity);
+							auto &enemy_data = world.get_component<EnemyData>(found_entity);
+							if ((glm::distance(attack_sphere.center, enemy_transform.get_global_position())) <
+									min_distance) {
+								Ray ray{};
+								ray.layer_name = "default";
+								ray.ignore_list.emplace_back(entity);
+								ray.origin = attack_sphere.center;
+								ray.direction = glm::vec3{ enemy_transform.get_global_position().x, 0.0f,
+									enemy_transform.get_global_position().z } -
+										glm::vec3{ attack_sphere.center.x, 0.0f, attack_sphere.center.z };
+								ray.length = cvar_agent_attack_range.get();
+								HitInfo info;
+								glm::vec3 end = ray.origin + ray.direction;
+								//dd.draw_arrow(ray.origin, end);
+								CollisionSystem::ray_cast_layer(world, ray, info);
+								bool behind_enemy = glm::dot(enemy_transform.get_forward(), ray.direction) >
+										glm::cos(glm::radians(cvar_agent_attack_angle.get()));
+								if (behind_enemy) {
+									if (info.entity == found_entity) {
+										enemy_found = true;
+										closest_enemy = found_entity;
+										min_distance = glm::distance(attack_sphere.center, transform.position);
 									}
-									enemy.state_machine.set_state("dying");
-
-									Transform stab_sound_tf = transform;
-									stab_sound_tf.position.y += 1.0f;
-									stab_sound_tf.position += transform.get_forward() * 1.0f;
-									audio.play_one_shot_3d(stab_event, stab_sound_tf);
 								}
+							}
+						}
+					}
+
+					if (enemy_found) {
+						auto &enemy = world.get_component<EnemyData>(closest_enemy);
+						auto &enemy_tf = world.get_component<Transform>(closest_enemy);
+						bool behind_enemy = glm::dot(enemy_tf.get_forward(), model_tf.get_forward()) >
+								glm::cos(glm::radians(cvar_agent_attack_angle.get()));
+						if (behind_enemy) {
+							glm::vec2 screen_pos = enemy_utils::transform_to_screen(
+									enemy_tf.get_global_position() + glm::vec3(0.0f, 1.3f, 0.0f),
+									world.get_parent_scene()->get_render_scene(), false);
+
+							interaction_sprite->position.x = screen_pos.x + 150.0f;
+							interaction_sprite->position.y = screen_pos.y + 100.0f;
+							interaction_sprite->display = true;
+							ui_button_hint->text = attack_button;
+							if (agent_data.gamepad < 0) {
+								ui_button_hint->size = glm::vec2(0.4f);
+							}
+							ui_interaction_text->text = "Kill";
+							interaction_sprite->color = glm::vec4(1.0f, 0.4f, 0.4f, 0.6f);
+							if (interaction_sprite->position.x > render_extent.x / 2.0f - 130.f) {
+								interaction_sprite->position.x = render_extent.x / 2.0f - 130.0f;
+							}
+							if (interaction_sprite->position.y > render_extent.y / 2.0f - 40.f) {
+								interaction_sprite->position.y = render_extent.y / 2.0f - 40.0f;
+							}
+							if (interaction_sprite->position.x < -render_extent.x / 2.0f + 130.f) {
+								interaction_sprite->position.x = -render_extent.x / 2.0f + 130.0f;
+							}
+							if (interaction_sprite->position.y < -render_extent.y / 2.0f + 40.f) {
+								interaction_sprite->position.y = -render_extent.y / 2.0f + 40.0f;
+							}
+
+							if (attack_triggered) {
+								auto animation_handle =
+										resource_manager.get_animation_handle("agent/agent_ANIM_GLTF/agent_stab.anim");
+								if (animation_instance.animation_handle.id != animation_handle.id) {
+									auto &enemy_tf = world.get_component<Transform>(closest_enemy);
+									auto model_position = model_tf.get_global_position();
+									glm::vec3 direction = model_position - enemy_tf.get_global_position();
+									direction.y = 0.0f;
+									direction = glm::normalize(direction);
+
+									target_orientation = glm::quatLookAt(direction, glm::vec3(0.0f, 1.0f, 0.0f));
+									is_interacting = true;
+
+									animation_instance.ticks_per_second = 1000.f;
+									animation_timer = 0;
+									agent_data.locked_movement = true;
+									animation_manager.change_animation(
+											agent_data.model, "agent/agent_ANIM_GLTF/agent_stab.anim");
+								}
+								enemy.state_machine.set_state("dying");
+
+								Transform stab_sound_tf = transform;
+								stab_sound_tf.position.y += 1.0f;
+								stab_sound_tf.position += transform.get_forward() * 1.0f;
+								audio.play_one_shot_3d(stab_event, stab_sound_tf);
 							}
 						}
 					}
