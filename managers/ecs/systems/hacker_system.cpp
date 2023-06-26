@@ -22,6 +22,8 @@
 AutoCVarFloat cvar_hacker_camera_sensitivity(
 		"settings.hacker_camera_sensitivity", "camera sensitivity", 0.1f, CVarFlags::EditCheckbox);
 
+AutoCVarFloat cvar_hacker_camera_back("hacker.cam_back", "distance of camera from player", -1.5f);
+
 AutoCVarFloat cvar_hacker_camera_max_rotation_x(
 		"hacker.hacker_camera_max_rotation_x", "camera max rotation X in degrees", 75.0f, CVarFlags::EditCheckbox);
 
@@ -316,6 +318,8 @@ void HackerSystem::update(World &world, float dt) {
 		if (first_frame) {
 			default_fov = camera.fov;
 			first_frame = false;
+			camera_pivot_tf.set_orientation(glm::quat(1, 0, 0, 0));
+			//scorpion_camera_tf.set_euler_rot(glm::vec3{ 0.0f, 3.14f, 0.0f });
 			starting_camera_pivot_orientation = camera_pivot_tf.get_global_orientation();
 		}
 
@@ -326,6 +330,7 @@ void HackerSystem::update(World &world, float dt) {
 
 		if (!is_on_camera) {
 			camera_tf.set_position(scorpion_camera_tf.get_global_position());
+			camera_tf.set_orientation(scorpion_camera_tf.get_global_orientation());
 		}
 
 		auto &dd = world.get_parent_scene()->get_render_scene().debug_draw;
@@ -336,20 +341,6 @@ void HackerSystem::update(World &world, float dt) {
 		camera_forward.y = 0.0f;
 		camera_forward = glm::normalize(camera_forward);
 		auto camera_right = camera_pivot_tf.get_global_right();
-
-		static int counter = 0;
-		static bool text_set = false;
-		if (counter++ % 20) {
-			if (transform.position.z > 9.5f) {
-				if (!text_set) {
-					main_text->text = "Twoja misja trwa...";
-					text_set = true;
-					counter = 0;
-				} else if (counter > 300) {
-					main_text->text = "";
-				}
-			}
-		}
 
 		// ZOOMING LOGIC
 		bool zoom_triggered = false;
@@ -427,48 +418,35 @@ void HackerSystem::update(World &world, float dt) {
 
 		// CAMERA ROTATION LOGIC
 		if (!is_on_camera) {
-			auto starting_rotation_x_camera_pivot = current_rotation_x_camera_pivot;
-			float max_rotation_x = cvar_hacker_max_rotation_x.get() * 0.017f;
-			float min_rotation_x = cvar_hacker_min_rotation_x.get() * 0.017f;
+			float def_cam_z = cvar_hacker_camera_back.get();
 
-			current_rotation_x_camera_pivot -= mouse_delta.y * camera_sensitivity * dt;
-
-			if (current_rotation_x_camera_pivot < max_rotation_x && current_rotation_x_camera_pivot > min_rotation_x &&
-					current_rotation_x_camera == 0.0f) {
-				camera_pivot_tf.add_euler_rot(glm::vec3(mouse_delta.y, 0.0f, 0.0f) * camera_sensitivity * dt);
-				camera_tf.set_orientation(scorpion_camera_tf.get_global_orientation());
-				current_rotation_x_camera_pivot =
-						glm::clamp(current_rotation_x_camera_pivot, min_rotation_x, max_rotation_x);
-			} else if (current_rotation_x_camera_pivot > 0.0f) {
-				current_rotation_x_camera_pivot += mouse_delta.y * camera_sensitivity * dt;
-				auto starting_rotation = current_rotation_x_camera;
-				current_rotation_x_camera -= mouse_delta.y * camera_sensitivity * dt;
-				float max_rotation_x_camera = max_rotation_x * 2.0f;
-				float min_rotation_x_camera = 0.0f;
-
-				if (current_rotation_x_camera < max_rotation_x_camera) {
-					camera_tf.add_euler_rot(glm::vec3(-mouse_delta.y, 0.0f, 0.0f) * camera_sensitivity * dt);
-				} else {
-					current_rotation_x_camera = max_rotation_x_camera;
-					auto difference = starting_rotation - current_rotation_x_camera;
-					camera_tf.add_euler_rot(glm::vec3(-difference, 0.0f, 0.0f) * camera_sensitivity * dt);
-				}
-
-				camera_tf.add_global_euler_rot(glm::vec3(0.0f, -mouse_delta.x, 0.0f) * camera_sensitivity * dt);
-
-				if (starting_rotation * current_rotation_x_camera < 0.0f || abs(current_rotation_x_camera) < 0.01f) {
-					current_rotation_x_camera = 0.0f;
-				}
-			} else if (current_rotation_x_camera_pivot < 0.0f) {
-				if (current_rotation_x_camera_pivot < min_rotation_x) {
-					current_rotation_x_camera_pivot = min_rotation_x;
-					auto difference = starting_rotation_x_camera_pivot - current_rotation_x_camera_pivot;
-					camera_pivot_tf.add_euler_rot(glm::vec3(difference, 0.0f, 0.0f));
-					camera_tf.set_orientation(scorpion_camera_tf.get_global_orientation());
-				}
+			float rotation_y = mouse_delta.y * cvar_hacker_camera_sensitivity.get() * dt * camera_sens_modifier;
+			if (current_rotation_x_camera_pivot + rotation_y > -1.4f &&
+					current_rotation_x_camera_pivot + rotation_y < 1.4f) {
+				current_rotation_x_camera_pivot += rotation_y;
+				camera_pivot_tf.add_euler_rot(glm::vec3(rotation_y, 0.0f, 0.0f));
 			}
 
-			camera_pivot_tf.add_global_euler_rot(glm::vec3(0.0f, -mouse_delta.x, 0.0f) * camera_sensitivity * dt);
+			camera_pivot_tf.add_global_euler_rot(glm::vec3(0.0f, -mouse_delta.x, 0.0f) *
+					cvar_hacker_camera_sensitivity.get() * dt * camera_sens_modifier);
+
+			//check how far behind camera can be
+			Ray ray{};
+			ray.layer_name = "obstacle";
+			ray.ignore_list.emplace_back(entity);
+			ray.origin = camera_pivot_tf.get_global_position();
+			ray.direction = -camera_pivot_tf.get_global_forward();
+			HitInfo info;
+			if (CollisionSystem::ray_cast_layer(world, ray, info)) {
+				if (info.distance < -def_cam_z + 0.1) {
+					scorpion_camera_tf.set_position({ 0.0f, 0.0f, -info.distance / 1.4f });
+				} else {
+					scorpion_camera_tf.set_position({ 0.0f, 0.0f, def_cam_z });
+				}
+			} else {
+				scorpion_camera_tf.set_position({ 0.0f, 0.0f, def_cam_z });
+			}
+
 		} else {
 			float new_rotation_x = current_rotation_x + (-mouse_delta.x * camera_sensitivity * dt);
 			float new_rotation_y = current_rotation_y + (-mouse_delta.y * camera_sensitivity * dt);
