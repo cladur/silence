@@ -2,7 +2,19 @@
 #define SILENCE_DIALOGUE_SYSTEM_H
 
 #include "base_system.h"
+#include "fmod_studio.hpp"
 #include <render/transparent_elements/ui/ui_elements/ui_text.h>
+
+struct Sentence {
+	std::string text;
+	FMOD::Studio::EventInstance *audio;
+	float duration;
+	bool played = false;
+};
+
+struct Dialogue {
+	std::vector<Sentence> sentences;
+};
 
 class DialogueSystem : public BaseSystem {
 private:
@@ -11,6 +23,8 @@ private:
 	UIText *ui_dialogue_text2;
 
 	bool first_frame = true;
+
+	std::unordered_map<int, Dialogue> dialogues;
 
 	float dialogue_timer = 0.0f;
 	int current_dialogue_id = -1;

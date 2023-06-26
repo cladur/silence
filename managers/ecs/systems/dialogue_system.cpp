@@ -1,5 +1,6 @@
 #include "ecs/systems/dialogue_system.h"
 #include "agent_system.h"
+#include "audio/event_reference.h"
 #include "components/agent_data_component.h"
 #include "components/collider_obb.h"
 #include "components/static_tag_component.h"
@@ -18,31 +19,13 @@
 #include <gameplay/gameplay_manager.h>
 #include <render/transparent_elements/ui_manager.h>
 
-struct Sentence {
-	std::string text;
-	std::string audio;
-	float duration;
-};
-
-struct Dialogue {
-	std::vector<Sentence> sentences;
-};
-
-// TODO: Populate this with actual dialogue
-static std::unordered_map<int, Dialogue> dialogues = {
-	{ 0,
-			{ { { "DIALOGUE 0 - Hello, I am the hacker. I will be your guide.", "hacker_intro", 3.0f },
-					{ "You are in a simulation. You must escape.", "hacker_intro2", 3.0f },
-					{ "You must find the exit.", "hacker_intro3", 3.0f }, { "Good luck.", "hacker_intro4", 3.0f } } } },
-	{ 1,
-			{ { { "DIALOGUE 1 - Hello, I am the hacker. I will be your guide.", "hacker_intro", 3.0f },
-					{ "You are in a simulation. You must escape.", "hacker_intro2", 3.0f },
-					{ "You must find the exit.", "hacker_intro3", 3.0f }, { "Good luck.", "hacker_intro4", 3.0f } } } },
-	{ 2,
-			{ { { "DIALOGUE 2 - Hello, I am the hacker. I will be your guide.", "hacker_intro", 3.0f },
-					{ "You are in a simulation. You must escape.", "hacker_intro2", 3.0f },
-					{ "You must find the exit.", "hacker_intro3", 3.0f }, { "Good luck.", "hacker_intro4", 3.0f } } } },
-};
+void set_sentence_duration(Sentence &sentence) {
+	FMOD::Studio::EventDescription *description;
+	sentence.audio->getDescription(&description);
+	int length = 0;
+	description->getLength(&length);
+	sentence.duration = length / 1000.0f;
+}
 
 void DialogueSystem::startup(World &world) {
 	Signature blacklist;
@@ -58,7 +41,23 @@ void DialogueSystem::startup(World &world) {
 	world.set_system_component_whitelist<DialogueSystem>(whitelist);
 	world.set_system_component_blacklist<DialogueSystem>(blacklist);
 
-	auto &rm = ResourceManager::get();
+	// TODO: Populate this with actual dialogue
+	Sentence sentence = { "Sentence 1. Hello, I am the hacker. I will be your guide.",
+		AudioManager::get().create_event_instance("Agent/footstep"), 3.0f };
+	Sentence sentence2 = { "Sentence 2. - Hello, I am the hacker. I will be your guide.",
+		AudioManager::get().create_event_instance("Agent/footstep"), 3.0f };
+
+	Dialogue dialogue;
+	dialogue.sentences.push_back(sentence);
+	dialogue.sentences.push_back(sentence2);
+
+	dialogues[0] = dialogue;
+
+	for (auto &dialogue : dialogues) {
+		for (auto &sentence : dialogue.second.sentences) {
+			set_sentence_duration(sentence);
+		}
+	}
 }
 
 void DialogueSystem::update(World &world, float dt) {
@@ -136,6 +135,17 @@ void DialogueSystem::update(World &world, float dt) {
 			ui_dialogue_text2->text = "";
 		} else {
 			auto &sentence = dialogue.sentences[current_sentence_id];
+
+			FMOD_STUDIO_PLAYBACK_STATE state;
+			sentence.audio->getPlaybackState(&state);
+
+			// SPDLOG_INFO("State: {}", state);
+
+			if (!sentence.played) {
+				sentence.played = true;
+				SPDLOG_INFO("Playing audio {}", sentence.text);
+				sentence.audio->start();
+			}
 
 			ui_dialogue_text->text = sentence.text;
 		}
