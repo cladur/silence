@@ -27,6 +27,9 @@ void set_sentence_duration(Sentence &sentence) {
 	sentence.duration = length / 1000.0f;
 }
 
+#define SENTENCE(text1, text2, audio)                                                                                  \
+	{ text1, text2, AudioManager::get().create_event_instance(audio), 1.0f }
+
 void DialogueSystem::startup(World &world) {
 	Signature blacklist;
 	Signature whitelist;
@@ -42,16 +45,22 @@ void DialogueSystem::startup(World &world) {
 	world.set_system_component_blacklist<DialogueSystem>(blacklist);
 
 	// TODO: Populate this with actual dialogue
-	Sentence sentence = { "Sentence 1. Hello, I am the hacker. I will be your guide.",
-		AudioManager::get().create_event_instance("dialogue1"), 3.0f };
-	Sentence sentence2 = { "Sentence 2. - Hello, I am the hacker. I will be your guide.",
-		AudioManager::get().create_event_instance("dialogue2"), 3.0f };
 
-	Dialogue dialogue;
-	dialogue.sentences.push_back(sentence);
-	dialogue.sentences.push_back(sentence2);
+	// Maksymalnie 60 znaków na tekst!!!
 
-	dialogues[0] = dialogue;
+	dialogues["intro"] = { {
+			SENTENCE("Mateusz: Ciebie Urgota teorytycznie.", "Ooo, ooo, to prosze.", "dialogue1"),
+			SENTENCE("Maciek: Nagrywac... Co, nagrywac mnie bedziesz?", "", "dialogue2"),
+			SENTENCE("laka maka fa", "", "dialogue2"),
+			SENTENCE("haha", "hihi", "dialogue2"),
+	} };
+
+	dialogues["intro2"] = { {
+			SENTENCE("Mateusz: Ciebie Urgota teorytycznie.", "Ooo, ooo, to prosze.", "dialogue1"),
+			SENTENCE("Maciek: Nagrywac... Co, nagrywac mnie bedziesz?", "", "dialogue2"),
+			SENTENCE("laka maka fa", "", "dialogue2"),
+			SENTENCE("haha", "hihi", "dialogue2"),
+	} };
 
 	for (auto &dialogue : dialogues) {
 		for (auto &sentence : dialogue.second.sentences) {
@@ -114,7 +123,7 @@ void DialogueSystem::update(World &world, float dt) {
 
 	dialogue_timer += dt;
 
-	if (current_dialogue_id != -1) {
+	if (!current_dialogue_id.empty()) {
 		auto &dialogue = dialogues[current_dialogue_id];
 
 		for (int i = current_sentence_id; i < dialogue.sentences.size(); i++) {
@@ -148,6 +157,7 @@ void DialogueSystem::update(World &world, float dt) {
 			}
 
 			ui_dialogue_text->text = sentence.text;
+			ui_dialogue_text2->text = sentence.text2;
 		}
 	}
 

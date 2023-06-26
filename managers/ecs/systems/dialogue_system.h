@@ -7,6 +7,7 @@
 
 struct Sentence {
 	std::string text;
+	std::string text2;
 	FMOD::Studio::EventInstance *audio;
 	float duration;
 	bool played = false;
@@ -24,10 +25,10 @@ private:
 
 	bool first_frame = true;
 
-	std::unordered_map<int, Dialogue> dialogues;
+	std::unordered_map<std::string, Dialogue> dialogues;
 
 	float dialogue_timer = 0.0f;
-	int current_dialogue_id = -1;
+	std::string current_dialogue_id;
 	int current_sentence_id = 0;
 
 public:
