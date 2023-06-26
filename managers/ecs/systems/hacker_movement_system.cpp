@@ -55,7 +55,9 @@ void HackerMovementSystem::update(World &world, float dt) {
 		auto &animation_instance = world.get_component<AnimationInstance>(hacker_data.model);
 
 		bool is_on_camera = hacker_data.is_on_camera;
-		glm::vec3 camera_forward = -camera_tf.get_global_forward();
+		auto camera_forward = camera_pivot_tf.get_global_forward();
+		camera_forward.y = 0.0f;
+		camera_forward = glm::normalize(camera_forward);
 		auto camera_right = camera_pivot_tf.get_global_right();
 
 		glm::vec3 acc_direction = { 0, 0, 0 };
@@ -76,7 +78,7 @@ void HackerMovementSystem::update(World &world, float dt) {
 			acc_direction = glm::vec3(0.0f);
 		}
 
-		if (glm::length(acc_direction) > 0.0f) {
+		if (glm::length(acc_direction) > 1) {
 			acc_direction = glm::normalize(acc_direction);
 		}
 
