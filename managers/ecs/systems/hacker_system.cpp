@@ -319,7 +319,6 @@ void HackerSystem::update(World &world, float dt) {
 			default_fov = camera.fov;
 			first_frame = false;
 			camera_pivot_tf.set_orientation(glm::quat(1, 0, 0, 0));
-			//scorpion_camera_tf.set_euler_rot(glm::vec3{ 0.0f, 3.14f, 0.0f });
 			starting_camera_pivot_orientation = camera_pivot_tf.get_global_orientation();
 		}
 
@@ -360,7 +359,6 @@ void HackerSystem::update(World &world, float dt) {
 			tag_ray.direction = -camera_tf.get_global_forward();
 			tag_ray.ignore_list.emplace_back(entity);
 			tag_ray.layer_name = "hacker";
-			//			tag_ray.ignore_layers.emplace_back("camera");
 
 			HitInfo info = {};
 			if (CollisionSystem::ray_cast_layer(world, tag_ray, info)) {
