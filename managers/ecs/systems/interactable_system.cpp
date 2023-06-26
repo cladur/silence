@@ -11,7 +11,9 @@
 #include "fmod_errors.h"
 #include "physics/ecs/physics_system.h"
 #include "physics/physics_manager.h"
+#include <ai/state_machine/states/enemy/enemy_utils.h>
 #include <audio/audio_manager.h>
+#include <gameplay/gameplay_manager.h>
 #include <render/transparent_elements/ui_manager.h>
 #include <spdlog/spdlog.h>
 #include <glm/fwd.hpp>
@@ -34,6 +36,8 @@ void draw_explosion_radius(World &world, glm::vec3 centre, float radius, glm::ve
 	dd.draw_sphere(centre, radius, color);
 }
 
+static const std::string ui_name = "ui_interaction_scene";
+
 void InteractableSystem::startup(World &world) {
 	Signature signature;
 	signature.set(world.get_component_type<Interactable>());
@@ -41,6 +45,10 @@ void InteractableSystem::startup(World &world) {
 
 	explostion_event = EventReference("SFX/Explosions/electric_box");
 	electric_interaction_event = EventReference("SFX/Interactions/electric_interaction");
+
+	auto &ui = UIManager::get();
+	ui.create_ui_scene(ui_name);
+	ui.activate_ui_scene(ui_name);
 }
 
 void InteractableSystem::rotate_handle(World &world, float &dt, Interactable &interactable) {
@@ -61,8 +69,14 @@ void InteractableSystem::switch_lights(World &world, Interactable &interactable)
 }
 
 void InteractableSystem::update(World &world, float dt) {
-	for (auto const &entity : entities) {
+	auto &ui = UIManager::get();
+	for (const Entity entity : entities) {
 		auto &interactable = world.get_component<Interactable>(entity);
+		auto &transform = world.get_component<Transform>(entity);
+		Highlight *highlight = nullptr;
+		if (world.has_component<Highlight>(entity)) {
+			highlight = &world.get_component<Highlight>(entity);
+		}
 		if (interactable.interaction == Interaction::Exploding &&
 				*CVarSystem::get()->get_int_cvar("debug_draw.collision.draw")) {
 			auto box = world.get_component<ExplodingBox>(interactable.interaction_targets[0]);
@@ -94,6 +108,126 @@ void InteractableSystem::update(World &world, float dt) {
 			if (interactable.cable_parent != 0) {
 				auto &cable = world.get_component<CableParent>(interactable.cable_parent);
 				cable.state = interactable.is_on ? CableState::ON : CableState::OFF;
+			}
+
+			auto &interaction_root = ui.add_ui_anchor(ui_name, std::to_string(entity) + "_ui_interaction_root");
+			interaction_root.display = true;
+			interaction_root.is_screen_space = true;
+			interaction_root.is_billboard = false;
+			if (interactable.type == InteractionType::Hacker) {
+				interaction_root.x = 0.75f;
+				interaction_root.y = 0.5f;
+			} else {
+				interaction_root.x = 0.25f;
+				interaction_root.y = 0.5f;
+			}
+			ui.add_as_root(ui_name, std::to_string(entity) + "_ui_interaction_root");
+
+
+			auto &interaction_sprite = ui.add_ui_image(ui_name, std::to_string(entity) + "_ui_interaction_sprite");
+			interaction_sprite.display = false;
+			interaction_sprite.is_billboard = false;
+			interaction_sprite.is_screen_space = true;
+			interaction_sprite.position = glm::vec3(0.0f);
+			interaction_sprite.size = glm::vec2(256.0f);
+			interaction_sprite.texture = ResourceManager::get().load_texture(asset_path("interaction_highlight.ktx2").c_str());
+			interaction_sprite.color = glm::vec4(1.0f, 1.0f, 1.0f, 0.4f);
+			ui.add_to_root(ui_name, std::to_string(entity) + "_ui_interaction_sprite", std::to_string(entity) + "_ui_interaction_root");
+		}
+
+		if (interactable.can_interact) {
+			glm::vec2 render_extent = world.get_parent_scene()->get_render_scene().render_extent;
+			glm::vec3 player_cam_pos;
+			auto &interaction_sprite = ui.get_ui_image(ui_name, std::to_string(entity) + "_ui_interaction_sprite");
+			//auto interaction_type = magic_enum::enum_name(interactable.type);
+			if (interactable.type == InteractionType::Agent) {
+				uint32_t camera_entity = GameplayManager::get().get_agent_camera(world.get_parent_scene());
+				player_cam_pos = world.get_component<Transform>(camera_entity).get_global_position();
+				Ray ray;
+				ray.origin = player_cam_pos;
+				ray.direction = glm::normalize(transform.get_global_position() - player_cam_pos);
+				ray.layer_name = "agent";
+				ray.length = *CVarSystem::get()->get_float_cvar("agent.interaction_range") * 15.0f;
+				ray.ignore_list.emplace_back(camera_entity);
+				HitInfo info;
+				if (CollisionSystem::ray_cast_layer(world,ray,info) && world.has_component<Interactable>(info.entity)) {
+					auto cam_forward = world.get_component<Transform>(camera_entity).get_global_forward();
+					auto cam_forward_xz_proj = glm::normalize(glm::vec3(cam_forward.x, 0.0f, cam_forward.z));
+
+					auto direction_xz = glm::normalize(glm::vec3(ray.direction.x, 0.0f, ray.direction.z));
+					auto angle = glm::degrees(glm::acos(glm::dot(direction_xz, cam_forward_xz_proj)));
+
+					glm::vec2 screen_pos = enemy_utils::transform_to_screen(
+							transform.get_global_position(),world.get_parent_scene()->get_render_scene(),false);
+					screen_pos.x += 96.0f;
+					interaction_sprite.position = glm::vec3(screen_pos, 0.0f);
+					interaction_sprite.display = true;
+
+					if (interaction_sprite.position.x > render_extent.x / 2.0f + 64.0f) {
+						interaction_sprite.display = false;
+					} else if (interaction_sprite.position.x < -render_extent.x / 2.0f + 130.f) {
+						interaction_sprite.display = false;
+					}
+					if (interaction_sprite.position.y > render_extent.y / 2.0f - 40.f) {
+						interaction_sprite.display = false;
+					} else if (interaction_sprite.position.y < -render_extent.y / 2.0f + 40.f) {
+						interaction_sprite.display = false;
+					}
+
+					if (angle < 90.0f) {
+						interaction_sprite.display = false;
+					}
+				} else {
+					interaction_sprite.display = false;
+				}
+			} else { // type == HACKER
+				uint32_t camera_entity = GameplayManager::get().get_hacker_camera(world.get_parent_scene());
+				player_cam_pos = world.get_component<Transform>(camera_entity).get_global_position();
+				Ray ray;
+				ray.origin = player_cam_pos;
+				ray.direction = glm::normalize(transform.get_global_position() - player_cam_pos);
+				ray.layer_name = "hacker";
+				ray.length = *CVarSystem::get()->get_float_cvar("hacker.range");
+				ray.ignore_list.emplace_back(camera_entity);
+				HitInfo info;
+
+				if (CollisionSystem::ray_cast_layer(world,ray,info) && world.has_component<Interactable>(info.entity)) {
+					auto cam_forward = world.get_component<Transform>(camera_entity).get_global_forward();
+					auto cam_forward_xz_proj = glm::normalize(glm::vec3(cam_forward.x, 0.0f, cam_forward.z));
+
+					auto direction_xz = glm::normalize(glm::vec3(ray.direction.x, 0.0f, ray.direction.z));
+					auto angle = glm::degrees(glm::acos(glm::dot(direction_xz, cam_forward_xz_proj)));
+
+					glm::vec2 screen_pos = enemy_utils::transform_to_screen(
+							transform.get_global_position(),world.get_parent_scene()->get_render_scene(),true);
+					screen_pos.x += 96.0f;
+					interaction_sprite.position = glm::vec3(screen_pos, 0.0f);
+					interaction_sprite.display = true;
+
+					if (interaction_sprite.position.x > render_extent.x / 2.0f + 130.f) {
+						interaction_sprite.display = false;
+					} else if (interaction_sprite.position.x < -render_extent.x / 2.0f + 130.f) {
+						interaction_sprite.display = false;
+					}
+
+					if (interaction_sprite.position.y > render_extent.y / 2.0f - 40.f) {
+						interaction_sprite.display = false;
+					} else if (interaction_sprite.position.y < -render_extent.y / 2.0f + 40.f) {
+						interaction_sprite.display = false;
+					}
+
+					if (angle < 90.0f) {
+						interaction_sprite.display = false;
+					}
+				} else {
+					interaction_sprite.display = false;
+				}
+			}
+
+			if (highlight != nullptr) {
+				if (highlight->highlighted) {
+					interaction_sprite.display = false;
+				}
 			}
 		}
 
