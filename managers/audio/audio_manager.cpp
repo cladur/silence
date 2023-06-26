@@ -36,7 +36,7 @@ void AudioManager::startup() {
 void AudioManager::update(Scene &scene) {
 	ZoneScopedNC("AudioManager::update", 0xcacaca);
 	FMOD_CHECK(system->update());
-	static bool audio_enabled = cvar_enable_audio.get();
+	static bool audio_enabled = !cvar_enable_audio.get();
 
 	if (audio_enabled != cvar_enable_audio.get()) {
 		audio_enabled = cvar_enable_audio.get();
