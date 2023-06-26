@@ -11,6 +11,7 @@
 #include "ecs/systems/platform_system.h"
 #include "ecs/systems/rotator_system.h"
 #include "ecs/systems/wall_cube_system.h"
+#include "components/main_menu_component.h"
 #include "ecs/world.h"
 #include "editor/editor.h"
 #include "managers/animation/ecs/animation_instance.h"
@@ -35,6 +36,7 @@
 #include "ecs/systems/collider_draw.h"
 #include "ecs/systems/dialogue_collider_draw.h"
 #include "ecs/systems/enemy_path_draw_system.h"
+#include "ecs/systems/main_menu_system.h"
 #include "ecs/systems/enemy_pathing.h"
 #include "ecs/systems/enemy_system.h"
 #include "ecs/systems/hacker_system.h"
@@ -105,6 +107,7 @@ Scene::Scene() {
 		world.register_component<WallCube>();
 		world.register_component<DialogueTrigger>();
 		world.register_component<Checkpoint>();
+		world.register_component<MainMenu>();
 	}
 	// Components
 	{ register_main_systems(); }
@@ -176,6 +179,7 @@ void Scene::register_game_systems() {
 	world.register_system<RotatorSystem>();
 	world.register_system<DialogueSystem>();
 	world.register_system<CheckpointSystem>();
+	world.register_system<MainMenuSystem>(UpdateOrder::PrePreAnimation);
 
 	GameplayManager::get().set_agent_system(agent_system);
 	GameplayManager::get().set_hacker_system(hacker_system);
