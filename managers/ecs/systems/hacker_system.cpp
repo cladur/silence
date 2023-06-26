@@ -18,6 +18,7 @@
 #include <glm/common.hpp>
 #include <glm/fwd.hpp>
 #include <glm/geometric.hpp>
+#include <gameplay/gameplay_manager.h>
 
 AutoCVarFloat cvar_hacker_camera_sensitivity(
 		"settings.hacker_camera_sensitivity", "camera sensitivity", 0.1f, CVarFlags::EditCheckbox);
@@ -231,6 +232,10 @@ void HackerSystem::startup(World &world) {
 
 	ui_name = "hacker_ui";
 
+	if (GameplayManager::get().game_state == GameState::MAIN_MENU) {
+		return;
+	}
+
 	auto &rm = ResourceManager::get();
 	auto crosshair_tex = rm.load_texture(asset_path("crosshair.ktx2").c_str());
 
@@ -300,6 +305,9 @@ void HackerSystem::startup(World &world) {
 
 void HackerSystem::update(World &world, float dt) {
 	ZoneScopedN("HackerSystem::update");
+	if (GameplayManager::get().game_state == GameState::MAIN_MENU) {
+		return;
+	}
 	InputManager &input_manager = InputManager::get();
 	AnimationManager &animation_manager = AnimationManager::get();
 	ResourceManager &resource_manager = ResourceManager::get();

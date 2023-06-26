@@ -17,6 +17,7 @@
 #include "render/transparent_elements/particle_manager.h"
 #include "render/transparent_elements/ui_manager.h"
 #include <string>
+#include "animation/animation_manager.h"
 
 AutoCVarInt cvar_force_20_fps("engine.force_20_fps", "force 20 fps", 0, CVarFlags::EditCheckbox);
 AutoCVarInt cvar_uncapped_fps("engine.uncap_fps", "don't limit fps to screen refresh rate", 0, CVarFlags::EditCheckbox);
@@ -111,9 +112,9 @@ void Engine::update(float dt) {
 	// Update
 	custom_update(dt);
 
-	for (auto &scene : scenes) {
-		scene->world.update(dt);
-		scene->update(dt);
+	if (scenes.size() != 0) {
+		get_active_scene().world.update(dt);
+		get_active_scene().update(dt);
 	}
 
 	ParticleManager::get().update(dt);
@@ -121,6 +122,31 @@ void Engine::update(float dt) {
 	input_manager.process_input();
 
 	render_manager.draw();
+
+	if (scene_change_request.first) {
+
+		scene_change_request.first = false;
+		if (scene_change_request.second != "MainMenu") {
+
+			AnimationManager::get().animation_map.clear();
+			RenderManager::get().render_scenes.pop_back();
+			scenes.pop_back();
+			UIManager::get().reset_scenes();
+
+			GameplayManager::get().game_state = GameState::GAME;
+
+			create_scene(scene_change_request.second);
+			scenes[0]->register_game_systems();
+			scenes[0]->load_from_file("resources/scenes/level_3_12.scn");
+			GameplayManager::get().startup(&*scenes[0]);
+			UIManager::get().set_render_scene(&get_active_scene().get_render_scene());
+			set_active_scene(scene_change_request.second);
+
+			DisplayManager::get().capture_mouse(true);
+			CVarSystem::get()->set_int_cvar("render.splitscreen", 1);
+		}
+		scene_change_request.second = "";
+	}
 
 	for (auto &scene : scenes) {
 		scene->frame_number++;
@@ -151,6 +177,11 @@ void Engine::set_active_scene(const std::string &name) {
 	active_scene = get_scene_index(name);
 	RenderManager::get().displayed_scene = scenes[active_scene]->render_scene_idx;
 	GameplayManager::get().startup(&get_active_scene()); // dunno where to put this honestly.
+
+	GameplayManager::get().set_engine(this);
+	AnimationManager::get().animation_map.clear();
+	GameplayManager::get().get_agent_system()->reset();
+	GameplayManager::get().get_hacker_system()->reset();
 }
 
 Scene &Engine::get_active_scene() {
