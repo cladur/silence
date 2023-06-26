@@ -6,7 +6,7 @@ const uint32_t VERTEX_COUNT = 4;
 const uint32_t INDEX_COUNT = 6;
 
 TransparentObject SpriteDraw::default_vertex_data(const glm::vec3 &position, const glm::vec2 &size,
-		float sprite_x_size, float sprite_y_size, const glm::vec3 &color, bool is_screen_space, Alignment alignment) {
+		float sprite_x_size, float sprite_y_size, const glm::vec3 &color, bool is_screen_space, float rotation, Alignment alignment) {
 	TransparentObject sprite = {};
 	sprite.position = position;
 	sprite.vertices.resize(4);
@@ -74,10 +74,24 @@ TransparentObject SpriteDraw::default_vertex_data(const glm::vec3 &position, con
 	float h = size.y / 2.0f * sprite_y_aspect;
 
 	//update the vertices
-	sprite.vertices[0] = { { x - w, y + h, z }, color, { 0.0f, 0.0f }, is_screen_space }; // 0
-	sprite.vertices[1] = { { x - w, y - h, z }, color, { 0.0f, 1.0f }, is_screen_space }; // 1
-	sprite.vertices[2] = { { x + w, y - h, z }, color, { 1.0f, 1.0f }, is_screen_space }; // 2
-	sprite.vertices[3] = { { x + w, y + h, z }, color, { 1.0f, 0.0f }, is_screen_space }; // 3
+	sprite.vertices[0] = { {- w, + h, 0 }, color, { 0.0f, 0.0f }, is_screen_space }; // 0
+	sprite.vertices[1] = { {- w, - h, 0 }, color, { 0.0f, 1.0f }, is_screen_space }; // 1
+	sprite.vertices[2] = { {+ w, - h, 0 }, color, { 1.0f, 1.0f }, is_screen_space }; // 2
+	sprite.vertices[3] = { {+ w, + h, 0 }, color, { 1.0f, 0.0f }, is_screen_space }; // 3
+
+	// rotate the vertices
+	if (rotation != 0.0f) {
+		glm::mat4 rotation_matrix = glm::rotate(glm::mat4(1.0f), glm::radians(rotation), glm::vec3(0.0f, 0.0f, 1.0f));
+
+		for (auto &vertex : sprite.vertices) {
+			vertex.position = rotation_matrix * glm::vec4(vertex.position, 1.0f);
+		}
+	}
+
+	sprite.vertices[0].position += glm::vec3(x,y, z);
+	sprite.vertices[1].position += glm::vec3(x,y, z);
+	sprite.vertices[2].position += glm::vec3(x,y, z);
+	sprite.vertices[3].position += glm::vec3(x,y, z);
 
 	//update the indices
 	uint32_t index = 0;
@@ -92,20 +106,20 @@ TransparentObject SpriteDraw::default_vertex_data(const glm::vec3 &position, con
 }
 
 void SpriteDraw::draw_colored(const glm::vec3 &position, const glm::vec2 &size, const glm::vec4 &color,
-		bool is_screen_space, Alignment alignment) {
-	TransparentObject sprite = default_vertex_data(position, size, 1.0f, 1.0f, color, is_screen_space, alignment);
+		bool is_screen_space, float rotation, Alignment alignment) {
+	TransparentObject sprite = default_vertex_data(position, size, 1.0f, 1.0f, color, is_screen_space, rotation, alignment);
 	sprite.alpha = color.a;
 
 	r_scene->transparent_objects.push_back(sprite);
 }
 
 void SpriteDraw::draw_sprite(const glm::vec3 &position, const glm::vec2 &size, const glm::vec4 &color,
-		const Handle<Texture> texture, bool is_screen_space, Alignment alignment) {
+		const Handle<Texture> texture, bool is_screen_space, float rotation, Alignment alignment) {
 	auto &rm = ResourceManager::get();
 	Texture t = rm.get_texture(texture);
 
 	TransparentObject sprite =
-			default_vertex_data(position, size, (float)t.width, (float)t.height, color, is_screen_space, alignment);
+			default_vertex_data(position, size, (float)t.width, (float)t.height, color, is_screen_space, rotation, alignment);
 	sprite.texture_name = rm.get_texture_name(texture);
 	sprite.alpha = color.a;
 
@@ -118,7 +132,7 @@ void SpriteDraw::draw_sprite_billboard(
 	Texture t = rm.get_texture(texture);
 
 	TransparentObject sprite = default_vertex_data(
-			glm::vec3(0.0f), size, (float)t.width, (float)t.height, color, false, Alignment::NONE);
+			glm::vec3(0.0f), size, (float)t.width, (float)t.height, color, false, 0.0f, Alignment::NONE);
 
 	sprite.texture_name = rm.get_texture_name(texture);
 	sprite.billboard = true;
@@ -133,7 +147,7 @@ void SpriteDraw::draw_sprite_billboard(
 
 void SpriteDraw::draw_colored_billboard(const glm::vec3 &position, const glm::vec2 &size, const glm::vec4 &color) {
 	TransparentObject sprite =
-			default_vertex_data(glm::vec3(0.0f), size, 1.0f, 1.0f, color, false, Alignment::NONE);
+			default_vertex_data(glm::vec3(0.0f), size, 1.0f, 1.0f, color, false, 0.0f, Alignment::NONE);
 
 	sprite.billboard = true;
 	sprite.size = size / 2.0f;
@@ -219,7 +233,7 @@ void SpriteDraw::draw_sprite_scene(RenderScene *scene, const glm::vec3 &position
 	Texture t = rm.get_texture(texture);
 
 	TransparentObject sprite =
-			default_vertex_data(position, size, (float)t.width, (float)t.height, color, is_screen_space, alignment);
+			default_vertex_data(position, size, (float)t.width, (float)t.height, color, is_screen_space, 0.0f,  alignment);
 	sprite.texture_name= rm.get_texture_name(texture);;
 	sprite.alpha = color.a;
 
