@@ -26,7 +26,7 @@ void UIAnchor::draw() {
 
 	if (draw_anchor) {
 		ui_manager.sprite_draw.draw_sprite(
-				position, glm::vec2(66.0f, 66.0f), color, texture, is_screen_space, alignment);
+				position, glm::vec2(66.0f, 66.0f), color, texture, is_screen_space, 0.0f, alignment);
 	}
 
 	for (auto &child : children) {
@@ -54,7 +54,7 @@ void UIAnchor::draw(glm::vec3 parent_position, glm::vec2 parent_size) {
 	glm::vec3 new_pos =
 			parent_position - glm::vec3(parent_size / 2.0f, 0.0f) + glm::vec3(d_size.x * x, d_size.y * y, 0.01f);
 
-	ui_manager.sprite_draw.draw_sprite(new_pos, size, color, texture, is_screen_space, alignment);
+	ui_manager.sprite_draw.draw_sprite(new_pos, size, color, texture, is_screen_space, 0.0f, alignment);
 
 	for (auto &child : children) {
 		child->parent_position = new_pos;

@@ -35,7 +35,7 @@ void EnemyStationaryPatrolling::update(World *world, uint32_t entity_id, float d
 
 	enemy_utils::handle_detection(world, entity_id, transform, transform.get_global_forward(), enemy_data, dt, &dd);
 
-	enemy_utils::update_detection_slider(entity_id, transform, enemy_data);
+	enemy_utils::update_detection_slider(entity_id, transform, enemy_data, world->get_parent_scene()->get_render_scene(), world->get_parent_scene());
 
 	enemy_utils::handle_highlight(entity_id, world);
 
@@ -50,12 +50,12 @@ void EnemyStationaryPatrolling::update(World *world, uint32_t entity_id, float d
 			state_machine->set_state("patrolling");
 		}
 
-		if (enemy_data.detection_level > 0.3f) {
+		if (enemy_data.detection_level > 0.4f) {
 			enemy_path.next_position = (enemy_path.next_position + 1) % path.children_count;
 			state_machine->set_state("looking");
 		}
 	} else {
-		if (enemy_data.detection_level > 0.3f) {
+		if (enemy_data.detection_level > 0.4f) {
 			state_machine->set_state("looking");
 		}
 	}

@@ -23,6 +23,7 @@ struct TransparentObject {
 	glm::vec2 size;
 	glm::vec3 position;
 	glm::mat4 transform;
+	float rotation = 0.0f;
 	bool billboard = false;
 	bool use_camera_right = false;
 	float billboard_z_offset = 0.0f;
