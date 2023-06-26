@@ -6,6 +6,7 @@
 #include "managers/physics/ecs/collision_system.h"
 #include "physics/physics_manager.h"
 #include <audio/audio_manager.h>
+#include <gameplay/gameplay_manager.h>
 
 AutoCVarFloat cvar_hacker_acc_ground("hacker.acc_ground", "acceleration on ground ", 32.0f, CVarFlags::EditCheckbox);
 
@@ -37,6 +38,9 @@ void HackerMovementSystem::startup(World &world) {
 
 void HackerMovementSystem::update(World &world, float dt) {
 	ZoneScopedN("HackerSystem::update");
+	if (GameplayManager::get().game_state == GameState::MAIN_MENU) {
+		return;
+	}
 	InputManager &input_manager = InputManager::get();
 	AnimationManager &animation_manager = AnimationManager::get();
 	ResourceManager &resource_manager = ResourceManager::get();

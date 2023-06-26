@@ -6,6 +6,12 @@
 
 struct Scene;
 class World;
+class Engine;
+
+enum class GameState {
+	MAIN_MENU,
+	GAME,
+};
 
 class GameplayManager {
 	bool disabled = true;
@@ -17,12 +23,16 @@ class GameplayManager {
 	std::vector<uint32_t> enemy_entities;
 	std::vector<float> detection_levels;
 
+	Engine *engine = nullptr;
+
 	std::shared_ptr<AgentSystem> agent_system = nullptr;
 	std::shared_ptr<HackerSystem> hacker_system = nullptr;
 
 public:
 	static std::default_random_engine random_generator;
 	static GameplayManager &get();
+
+	GameState game_state = GameState::MAIN_MENU;
 
 	bool first_start = true;
 	void startup(Scene *scene);
@@ -50,6 +60,9 @@ public:
 	uint32_t get_hacker_camera(Scene *scene) const;
 	float get_highest_detection() const;
 	uint32_t get_enemies_near_player() const;
+
+	void set_engine(Engine *engine);
+	void change_scene(std::string scene_name);
 };
 
 #endif //SILENCE_GAMEPLAY_MANAGER_H

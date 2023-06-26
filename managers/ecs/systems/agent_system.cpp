@@ -56,6 +56,10 @@ void AgentSystem::startup(World &world) {
 void AgentSystem::update(World &world, float dt) {
 	ZoneScopedN("AgentSystem::update");
 
+	if (GameplayManager::get().game_state == GameState::MAIN_MENU) {
+		return;
+	}
+
 	auto &rm = ResourceManager::get();
 	auto dot_tex = rm.load_texture(asset_path("dot.ktx2").c_str());
 
