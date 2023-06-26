@@ -75,10 +75,11 @@ bool HackerSystem::shoot_raycast(
 
 	glm::vec2 render_extent = world.get_parent_scene()->get_render_scene().render_extent;
 
-	glm::vec2 screen_pos = enemy_utils::transform_to_screen(hit_transform.get_global_position(), world.get_parent_scene()->get_render_scene(), true);
+	glm::vec2 screen_pos = enemy_utils::transform_to_screen(
+			hit_transform.get_global_position(), world.get_parent_scene()->get_render_scene(), true);
 
-	interaction_sprite->position.x = screen_pos.x + 120.0f + 100.0f / glm::distance(transform.get_global_position(), hit_transform.get_global_position());
-	interaction_sprite->position.y = screen_pos.y + 50.0f + 75.0f / glm::distance(transform.get_global_position(), hit_transform.get_global_position());;
+	interaction_sprite->position.x = screen_pos.x + 96.0f;
+	interaction_sprite->position.y = screen_pos.y + 0.0f;
 	interaction_sprite->display = true;
 
 	// take interactable.interaction_text and splt it by space
