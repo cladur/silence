@@ -43,9 +43,9 @@ void DialogueSystem::startup(World &world) {
 
 	// TODO: Populate this with actual dialogue
 	Sentence sentence = { "Sentence 1. Hello, I am the hacker. I will be your guide.",
-		AudioManager::get().create_event_instance("Agent/footstep"), 3.0f };
+		AudioManager::get().create_event_instance("dialogue1"), 3.0f };
 	Sentence sentence2 = { "Sentence 2. - Hello, I am the hacker. I will be your guide.",
-		AudioManager::get().create_event_instance("Agent/footstep"), 3.0f };
+		AudioManager::get().create_event_instance("dialogue2"), 3.0f };
 
 	Dialogue dialogue;
 	dialogue.sentences.push_back(sentence);
