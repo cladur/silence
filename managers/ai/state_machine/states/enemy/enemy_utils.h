@@ -586,7 +586,6 @@ inline void update_detection_slider(uint32_t entity_id, Transform &transform, En
 		if (cross.y > 0.0f) {
 			angle = -angle;
 		}
-
 		hacker_detection_fill.rotation = angle;
 		hacker_detection_outline.rotation = angle;
 
@@ -668,8 +667,7 @@ inline void update_detection_slider_camera(
 			agent_detection_outline.position.x < -window_size.x / 2.0f ||
 			agent_detection_outline.position.y < -window_size.y / 2.0f ||
 			angle > 90.0f
-	) {
-		// check if rotation should be more than 180 degrees
+		) {
 		auto cross = glm::cross(dir, cam_forward_xz_proj);
 		if (cross.y > 0.0f) {
 			angle = -angle;
@@ -681,7 +679,7 @@ inline void update_detection_slider_camera(
 		move_vec = glm::rotateZ(move_vec, glm::radians(angle));
 
 		agent_detection_outline.position = move_vec * detection_camera.radial_detection_offset + glm::vec3(0.0f, 0.0f, 0.1f);
-		agent_detection_fill.position = move_vec * detection_camera.radial_detection_offset + 2.0f;
+		agent_detection_fill.position = move_vec * (detection_camera.radial_detection_offset + 2.0f);
 	} else {
 		agent_detection_fill.rotation = 0.0f;
 		agent_detection_outline.rotation = 0.0f;
@@ -701,10 +699,6 @@ inline void update_detection_slider_camera(
 	hacker_detection_fill.is_screen_space = true;
 	hacker_detection_fill.is_billboard = false;
 
-	auto hacker_detection_pos = transform_to_screen(transform.get_global_position() + glm::vec3(0.0f, 0.5f, 0.0f), r_scene, true);
-	hacker_detection_outline.position = glm::vec3(hacker_detection_pos,0.1f);
-	hacker_detection_fill.position = glm::vec3(hacker_detection_pos + glm::vec2(0.0f, 1.0f),0.0f);
-
 	hacker_detection_outline.size = detection_camera.default_detection_slider_size / 2.5f + detection_camera.default_detection_slider_size / (distance_to_hacker);
 	hacker_detection_fill.size = glm::lerp(glm::vec2(0.0f), hacker_detection_outline.size * 0.95f, detection_camera.detection_level);
 	if (detection_camera.detection_level < 0.5f) {
@@ -718,6 +712,10 @@ inline void update_detection_slider_camera(
 		hacker_detection_fill.color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
 		hacker_detection_outline.color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
 	}
+
+	auto hacker_detection_pos = transform_to_screen(transform.get_global_position() + glm::vec3(0.0f, 0.5f, 0.0f), r_scene, true);
+	hacker_detection_outline.position = glm::vec3(hacker_detection_pos,0.1f);
+	hacker_detection_fill.position = glm::vec3(hacker_detection_pos + glm::vec2(0.0f, 1.0f),0.0f);
 
 	auto hacker_pos_no_y = hacker_pos;
 	hacker_pos_no_y.y = 0.0f;
@@ -748,7 +746,7 @@ inline void update_detection_slider_camera(
 		move_vec = glm::rotateZ(move_vec, glm::radians(angle));
 
 		hacker_detection_outline.position = move_vec * detection_camera.radial_detection_offset + glm::vec3(0.0f, 0.0f, 0.1f);
-		hacker_detection_fill.position = move_vec * detection_camera.radial_detection_offset + 2.0f;
+		hacker_detection_fill.position = move_vec * (detection_camera.radial_detection_offset + 2.0f);
 	} else {
 		hacker_detection_fill.rotation = 0.0f;
 		hacker_detection_outline.rotation = 0.0f;
@@ -760,6 +758,13 @@ inline void update_detection_slider_camera(
 	} else {
 		hacker_detection_outline.display = true;
 		hacker_detection_fill.display = true;
+	}
+
+	if (detection_camera.detection_level > 0.01f) {
+		std::cout << "outline (display): " << hacker_detection_outline.display << ", fill (display): " << hacker_detection_fill.display << std::endl;
+		std::cout << "outline (position): " << glm::to_string(hacker_detection_outline.position) << ", fill (position): " << glm::to_string(hacker_detection_fill.position) << std::endl;
+		std::cout << "outline (size): " << glm::to_string(hacker_detection_outline.size) << ", fill (size): " << glm::to_string(hacker_detection_fill.size) << std::endl;
+		std::cout << "outline (color): " << glm::to_string(hacker_detection_outline.color) << ", fill (color): " << glm::to_string(hacker_detection_fill.color) << std::endl;
 	}
 }
 

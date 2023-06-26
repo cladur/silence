@@ -39,14 +39,17 @@ AutoCVarInt cvar_hacker_on_keyboard(
 
 AutoCVarFloat cvar_viewspace_offset("hacker.viewspace_offset", "offset from viewspace", 0.5f, CVarFlags::EditFloatDrag);
 
+AutoCVarFloat cvar_hacker_range("hacker.range", "range of hacker", 30.0f, CVarFlags::EditFloatDrag);
+
 bool HackerSystem::shoot_raycast(
 		Transform &transform, World &world, HackerData &hacker_data, float dt, bool trigger, glm::vec3 direction) {
 	Ray ray;
 	ray.origin = transform.get_global_position();
 	ray.direction = direction;
 	ray.layer_name = "hacker";
+	ray.length = cvar_hacker_range.get();
 	ray.ignore_list.emplace_back(current_camera_entity);
-	glm::vec3 end = ray.origin + direction * 10.0f;
+	//glm::vec3 end = ray.origin + direction * 10.0f;
 	HitInfo info;
 	bool hit = CollisionSystem::ray_cast_layer(world, ray, info);
 
@@ -111,16 +114,17 @@ bool HackerSystem::shoot_raycast(
 
 	if (interaction_sprite->position.x > render_extent.x / 2.0f - 130.f) {
 		interaction_sprite->position.x = render_extent.x / 2.0f - 130.0f;
-	}
-	if (interaction_sprite->position.y > render_extent.y / 2.0f - 40.f) {
-		interaction_sprite->position.y = render_extent.y / 2.0f - 40.0f;
-	}
-	if (interaction_sprite->position.x < -render_extent.x / 2.0f + 130.f) {
+	} else if (interaction_sprite->position.x < -render_extent.x / 2.0f + 130.f) {
 		interaction_sprite->position.x = -render_extent.x / 2.0f + 130.0f;
 	}
-	if (interaction_sprite->position.y < -render_extent.y / 2.0f + 40.f) {
+
+	if (interaction_sprite->position.y > render_extent.y / 2.0f - 40.f) {
+		interaction_sprite->position.y = render_extent.y / 2.0f - 40.0f;
+	} else if (interaction_sprite->position.y < -render_extent.y / 2.0f + 40.f) {
 		interaction_sprite->position.y = -render_extent.y / 2.0f + 40.0f;
 	}
+
+
 
 	if (world.has_component<Highlight>(hit_entity)) {
 		auto &highlight = world.get_component<Highlight>(hit_entity);
