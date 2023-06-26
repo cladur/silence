@@ -26,9 +26,6 @@ struct EnemyData {
 	bool left_foot_can_play = false;
 	bool right_foot_can_play = false;
 
-	bool is_detecting_agent = false;
-	bool is_detecting_hacker = false;
-
 	EventReference footsteps_event;
 	EventReference death_event;
 
@@ -40,6 +37,7 @@ struct EnemyData {
 	bool is_dead = false;
 
 	glm::vec2 detection_slider_default_size = glm::vec2(160.0f, 160.0f);
+	float radial_detection_offset = 45.0f;
 
 	void serialize_json(nlohmann::json &serialized_scene) {
 		nlohmann::json::object_t serialized_component;

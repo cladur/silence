@@ -100,7 +100,7 @@ void EnemySystem::update(World &world, float dt) {
 			agent_detection_outline.is_screen_space = true;
 			agent_detection_outline.size = glm::vec2(50.0f, 50.0f);
 			agent_detection_outline.color = glm::vec4(1.0f);
-			agent_detection_outline.texture = rm.load_texture(asset_path("detection_triangle_outline.ktx2").c_str());
+			agent_detection_outline.texture = rm.load_texture(asset_path("detection_triangle_outline_white.ktx2").c_str());
 			ui.add_to_root(std::to_string(entity) + "_detection", "agent_detection_outline", "agent_anchor");
 			auto &hacker_detection_outline = ui.add_ui_image(std::to_string(entity) + "_detection",
 					"hacker_detection_outline");
@@ -109,7 +109,7 @@ void EnemySystem::update(World &world, float dt) {
 			hacker_detection_outline.is_screen_space = true;
 			hacker_detection_outline.size = glm::vec2(50.0f, 50.0f);
 			hacker_detection_outline.color = glm::vec4(1.0f);
-			hacker_detection_outline.texture = rm.load_texture(asset_path("detection_triangle_outline.ktx2").c_str());
+			hacker_detection_outline.texture = rm.load_texture(asset_path("detection_triangle_outline_white.ktx2").c_str());
 			ui.add_to_root(std::to_string(entity) + "_detection", "hacker_detection_outline", "hacker_anchor");
 			auto &agent_detection_fill = ui.add_ui_image(std::to_string(entity) + "_detection",
 					"agent_detection_fill");

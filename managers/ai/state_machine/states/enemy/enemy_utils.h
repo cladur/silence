@@ -436,7 +436,7 @@ inline void handle_detection_camera(World *world, uint32_t enemy_entity, Transfo
 			detection_camera.is_playing = true;
 		}
 
-		FMOD_3D_ATTRIBUTES attributes = AudioManager::get().to_3d_attributes(transform);
+		FMOD_3D_ATTRIBUTES attributes = AudioManager::to_3d_attributes(transform);
 		detection_camera.detection_event->set3DAttributes(&attributes);
 
 		detection_change *= detection_speed;
@@ -483,7 +483,11 @@ inline void update_detection_slider(uint32_t entity_id, Transform &transform, En
 
 	agent_detection_outline.size = enemy_data.detection_slider_default_size / 2.5f + enemy_data.detection_slider_default_size / (distance_to_agent);
 	agent_detection_fill.size = glm::lerp(glm::vec2(0.0f), agent_detection_outline.size * 0.90f, enemy_data.detection_level);
-	agent_detection_fill.color = glm::lerp(glm::vec4(1.0f), glm::vec4(1.0f, 0.0f, 0.0f, 0.5f), enemy_data.detection_level);
+	if (enemy_data.detection_level < 0.5f) {
+		agent_detection_fill.color = glm::lerp(glm::vec4(1.0f), glm::vec4(1.0f, 1.0f, 0.0f, 0.5f), enemy_data.detection_level * 2.0f);
+	} else {
+		agent_detection_fill.color = glm::lerp(glm::vec4(1.0f, 1.0f, 0.0f, 0.5f), glm::vec4(1.0f, 0.0f, 0.0f, 0.5f), enemy_data.detection_level * 2.0f - 1.0f);
+	}
 
 	auto agent_pos_no_y = agent_pos;
 	agent_pos_no_y.y = 0.0f;
@@ -513,8 +517,8 @@ inline void update_detection_slider(uint32_t entity_id, Transform &transform, En
 		auto move_vec = glm::vec3(0.0f, 1.0f, 0.0f);
 		move_vec = glm::rotateZ(move_vec, glm::radians(angle));
 
-		agent_detection_outline.position = move_vec * 20.0f + glm::vec3(0.0f, 0.0f, 0.1f);
-		agent_detection_fill.position = move_vec * 22.0f;
+		agent_detection_outline.position = move_vec * enemy_data.radial_detection_offset + glm::vec3(0.0f, 0.0f, 0.1f);
+		agent_detection_fill.position = move_vec * (enemy_data.radial_detection_offset + 2.0f);
 	} else {
 		agent_detection_fill.rotation = 0.0f;
 		agent_detection_outline.rotation = 0.0f;
@@ -540,7 +544,11 @@ inline void update_detection_slider(uint32_t entity_id, Transform &transform, En
 
 	hacker_detection_outline.size = enemy_data.detection_slider_default_size / 2.5f + enemy_data.detection_slider_default_size / (distance_to_hacker);
 	hacker_detection_fill.size = glm::lerp(glm::vec2(0.0f), hacker_detection_outline.size * 0.90f, enemy_data.detection_level);
-	hacker_detection_fill.color = glm::lerp(glm::vec4(1.0f), glm::vec4(1.0f, 0.0f, 0.0f, 0.5f), enemy_data.detection_level);
+	if (enemy_data.detection_level < 0.5f) {
+		hacker_detection_fill.color = glm::lerp(glm::vec4(1.0f), glm::vec4(1.0f, 1.0f, 0.0f, 0.5f), enemy_data.detection_level * 2.0f);
+	} else {
+		hacker_detection_fill.color = glm::lerp(glm::vec4(1.0f, 1.0f, 0.0f, 0.5f), glm::vec4(1.0f, 0.0f, 0.0f, 0.5f), enemy_data.detection_level * 2.0f - 1.0f);
+	}
 
 	auto hacker_pos_no_y = hacker_pos;
 	hacker_pos_no_y.y = 0.0f;
@@ -570,8 +578,8 @@ inline void update_detection_slider(uint32_t entity_id, Transform &transform, En
 		auto move_vec = glm::vec3(0.0f, 1.0f, 0.0f);
 		move_vec = glm::rotateZ(move_vec, glm::radians(angle));
 
-		hacker_detection_outline.position = move_vec * 20.0f + glm::vec3(0.0f, 0.0f, 0.1f);
-		hacker_detection_fill.position = move_vec * 22.0f;
+		hacker_detection_outline.position = move_vec * enemy_data.radial_detection_offset + glm::vec3(0.0f, 0.0f, 0.1f);
+		hacker_detection_fill.position = move_vec * (enemy_data.radial_detection_offset + 2.0f);
 	} else {
 		hacker_detection_fill.rotation = 0.0f;
 		hacker_detection_outline.rotation = 0.0f;
@@ -615,7 +623,11 @@ inline void update_detection_slider_camera(
 
 	agent_detection_outline.size = detection_camera.default_detection_slider_size / 2.5f + detection_camera.default_detection_slider_size / (distance_to_agent);
 	agent_detection_fill.size = glm::lerp(glm::vec2(0.0f), agent_detection_outline.size * 0.90f, detection_camera.detection_level);
-	agent_detection_fill.color = glm::lerp(glm::vec4(1.0f), glm::vec4(1.0f, 0.0f, 0.0f, 0.5f), detection_camera.detection_level);
+	if (detection_camera.detection_level < 0.5f) {
+		agent_detection_fill.color = glm::lerp(glm::vec4(1.0f), glm::vec4(1.0f, 1.0f, 0.0f, 0.5f), detection_camera.detection_level * 2.0f);
+	} else {
+		agent_detection_fill.color = glm::lerp(glm::vec4(1.0f, 1.0f, 0.0f, 0.5f), glm::vec4(1.0f, 0.0f, 0.0f, 0.5f), detection_camera.detection_level * 2.0f - 1.0f);
+	}
 
 	auto agent_pos_no_y = agent_pos;
 	agent_pos_no_y.y = 0.0f;
@@ -645,8 +657,8 @@ inline void update_detection_slider_camera(
 		auto move_vec = glm::vec3(0.0f, 1.0f, 0.0f);
 		move_vec = glm::rotateZ(move_vec, glm::radians(angle));
 
-		agent_detection_outline.position = move_vec * 20.0f + glm::vec3(0.0f, 0.0f, 0.1f);
-		agent_detection_fill.position = move_vec * 22.0f;
+		agent_detection_outline.position = move_vec * detection_camera.radial_detection_offset + glm::vec3(0.0f, 0.0f, 0.1f);
+		agent_detection_fill.position = move_vec * detection_camera.radial_detection_offset + 2.0f;
 	} else {
 		agent_detection_fill.rotation = 0.0f;
 		agent_detection_outline.rotation = 0.0f;
@@ -672,7 +684,11 @@ inline void update_detection_slider_camera(
 
 	hacker_detection_outline.size = detection_camera.default_detection_slider_size / 2.5f + detection_camera.default_detection_slider_size / (distance_to_hacker);
 	hacker_detection_fill.size = glm::lerp(glm::vec2(0.0f), hacker_detection_outline.size * 0.90f, detection_camera.detection_level);
-	hacker_detection_fill.color = glm::lerp(glm::vec4(1.0f), glm::vec4(1.0f, 0.0f, 0.0f, 0.5f), detection_camera.detection_level);
+	if (detection_camera.detection_level < 0.5f) {
+		hacker_detection_fill.color = glm::lerp(glm::vec4(1.0f), glm::vec4(1.0f, 1.0f, 0.0f, 0.5f), detection_camera.detection_level * 2.0f);
+	} else {
+		hacker_detection_fill.color = glm::lerp(glm::vec4(1.0f, 1.0f, 0.0f, 0.5f), glm::vec4(1.0f, 0.0f, 0.0f, 0.5f), detection_camera.detection_level * 2.0f - 1.0f);
+	}
 
 	auto hacker_pos_no_y = hacker_pos;
 	hacker_pos_no_y.y = 0.0f;
@@ -702,8 +718,8 @@ inline void update_detection_slider_camera(
 		auto move_vec = glm::vec3(0.0f, 1.0f, 0.0f);
 		move_vec = glm::rotateZ(move_vec, glm::radians(angle));
 
-		hacker_detection_outline.position = move_vec * 20.0f + glm::vec3(0.0f, 0.0f, 0.1f);
-		hacker_detection_fill.position = move_vec * 22.0f;
+		hacker_detection_outline.position = move_vec * detection_camera.radial_detection_offset + glm::vec3(0.0f, 0.0f, 0.1f);
+		hacker_detection_fill.position = move_vec * detection_camera.radial_detection_offset + 2.0f;
 	} else {
 		hacker_detection_fill.rotation = 0.0f;
 		hacker_detection_outline.rotation = 0.0f;
