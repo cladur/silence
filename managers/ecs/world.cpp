@@ -325,17 +325,19 @@ void World::update_name(std::vector<Entity> &entities, Entity &new_entity_id) {
 		name.name = name.name + " " + std::to_string(new_entity_id);
 	}
 }
-void World::deserialize_prefab(nlohmann::json &json, std::vector<Entity> &entities) {
+Entity World::deserialize_prefab(nlohmann::json &json, std::vector<Entity> &entities) {
 	int number_of_entities = json.size();
+	Entity root_entity = 0;
 
 	if (number_of_entities == 0) {
-		return;
+		return 0;
 	}
 
 	if (number_of_entities == 1) {
 		json.back()["entity"] = 0;
 		deserialize_entity_json(json.back(), entities);
-		return;
+		root_entity = entities.back();
+		return root_entity;
 	}
 
 	std::unordered_map<Entity, Entity> prefab_id_to_entity_id_map;
@@ -344,10 +346,18 @@ void World::deserialize_prefab(nlohmann::json &json, std::vector<Entity> &entiti
 	int i = 0;
 	Entity new_entity_id = 0;
 
+	static bool first = true;
+
 	for (auto entity_json : json) {
 		Entity serialized_entity = entity_json["entity"];
 		entity_json["entity"] = 0;
 		new_entity_id = deserialize_entity_json(entity_json, entities);
+
+		if (first) {
+			root_entity = new_entity_id;
+			first = false;
+		}
+
 		entity_ids[i++] = new_entity_id;
 		prefab_id_to_entity_id_map[serialized_entity] = new_entity_id;
 		update_name(entities, new_entity_id);
@@ -358,6 +368,9 @@ void World::deserialize_prefab(nlohmann::json &json, std::vector<Entity> &entiti
 		update_children(entity_id, prefab_id_to_entity_id_map);
 		ComponentVisitor::update_ids(*this, entity_id, prefab_id_to_entity_id_map);
 	}
+
+	first = true;
+	return root_entity;
 }
 
 void World::update_children(Entity entity, const std::unordered_map<Entity, Entity> &id_map) {
