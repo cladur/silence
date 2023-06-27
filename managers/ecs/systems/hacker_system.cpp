@@ -13,12 +13,12 @@
 #include "resource/resource_manager.h"
 #include <ai/state_machine/states/enemy/enemy_utils.h>
 #include <audio/audio_manager.h>
+#include <gameplay/gameplay_manager.h>
 #include <render/transparent_elements/ui_manager.h>
 #include <spdlog/spdlog.h>
 #include <glm/common.hpp>
 #include <glm/fwd.hpp>
 #include <glm/geometric.hpp>
-#include <gameplay/gameplay_manager.h>
 
 AutoCVarFloat cvar_hacker_camera_sensitivity(
 		"settings.hacker_camera_sensitivity", "camera sensitivity", 0.1f, CVarFlags::EditCheckbox);
@@ -98,7 +98,7 @@ bool HackerSystem::shoot_raycast(
 		words.push_back(word);
 	}
 
-	if (words.size() != 1) {
+	if (!words.empty()) {
 		ui_button_hint->text = words[0];
 		if (words.size() > 2) {
 			for (int i = 1; i < words.size(); i++) {
@@ -107,13 +107,13 @@ bool HackerSystem::shoot_raycast(
 		} else {
 			ui_interaction_text->text = words[1];
 		}
+
+		float size = 0.6f - (words[0].size() / 10.0f);
+		ui_button_hint->size = glm::vec2(size);
 	} else {
 		ui_button_hint->text = "";
-		ui_interaction_text->text = words[0];
+		ui_interaction_text->text = "";
 	}
-
-	float size = 0.6f - (words[0].size() / 10.0f);
-	ui_button_hint->size = glm::vec2(size);
 
 	if (interaction_sprite->position.x > render_extent.x / 2.0f - 130.f) {
 		interaction_sprite->position.x = render_extent.x / 2.0f - 130.0f;

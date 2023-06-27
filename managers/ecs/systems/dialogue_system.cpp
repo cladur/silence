@@ -48,16 +48,29 @@ void DialogueSystem::startup(World &world) {
 
 	// Maksymalnie 60 znaków na tekst!!!
 
-	dialogues["intro"] = { {
-			SENTENCE("Mateusz: Ciebie Urgota teorytycznie.", "Ooo, ooo, to prosze.", "dialogue1"),
-			SENTENCE("Maciek: Nagrywac... Co, nagrywac mnie bedziesz?", "", "dialogue2"),
+	// clang-format off
+	dialogues["tut_intro"] = { {
+			SENTENCE("Command: Hello, Hans and ScorpIO. This is your captain speaking.", "", "dialogue2"),
+			SENTENCE("Command: A few days ago, we've got reports of an unregulated", "construction of a combat robot by a military tech company Tech-Mil.", "dialogue2"),
+			SENTENCE("Command: According to our sources they've been", "working on it in secret for the last 3 years.", "dialogue2"),
+			SENTENCE("Command: Your mission is to infiltrate their military base,", "and find out how big of a threat is this robot.", "dialogue2"),
+			SENTENCE("Command: It's just the two of you out there.", "We cannot provide you with any backup.", "dialogue2"),
+			SENTENCE("Command: That's why it's crucial that you do not get caught.", "You need to stay out of sight of the cameras and enemies.", "dialogue2"),
 	} };
 
-	dialogues["intro2"] = { {
-			SENTENCE("Mateusz: Ciebie Urgota teorytycznie.", "Ooo, ooo, to prosze.", "dialogue1"),
-			SENTENCE("Maciek: Nagrywac... Co, nagrywac mnie bedziesz?", "", "dialogue2"),
+	dialogues["tut_marking"] = { {
+			SENTENCE("Command: You can hold the LEFT TRIGGER to zoom in.", "", "dialogue1"),
+			SENTENCE("Command: While zoomed in, try to focus on", "objects of interest in order to mark them.", "dialogue2"),
+			SENTENCE("Command: Try marking some enemies to the left of you.", "", "dialogue2"),
+			SENTENCE("Command: It's worth noting that", "marked enemies can be seen through walls.", "dialogue2"),
+			SENTENCE("Command: Once you're done, head to the next room.", "", "dialogue2"),
 	} };
 
+	dialogues["tut_climbing_vent"] = { {
+			SENTENCE("Command: Hans, as a human, there's no need to", "explain that you can climb onto stuff.", "dialogue1"),
+			SENTENCE("Command: As for you ScorpIO...", "You'll need to find a way to squeeze in.", "dialogue2"),
+	} };
+	//clang-format on
 	for (auto &dialogue : dialogues) {
 		for (auto &sentence : dialogue.second.sentences) {
 			set_sentence_duration(sentence);
