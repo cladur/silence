@@ -28,17 +28,18 @@ void CollisionSystem::update(World &world, float dt) {
 
 	// HACK: We're building the BSP tree here at the last moment, because colliders get their positions / orientations /
 	// scales from the global matrices, which are only updated after the first iteration of the transform ECS systems
-	static bool first = true;
 	if (first) {
 		first = false;
-		world.get_parent_scene()->bsp_tree = CollisionSystem::build_tree(world, world.get_parent_scene()->entities, 5);
+		world.get_parent_scene()->bsp_tree = CollisionSystem::build_tree(world, world.get_parent_scene()->entities, 10);
 	}
 
 	resolve_collision_dynamic(world);
 
 	BSPNode *root = world.get_parent_scene()->bsp_tree.get();
 	for (const Entity entity : entities) {
-		resolve_bsp_collision(world, root, entity);
+		if (world.get_component<ColliderTag>(entity).is_active) {
+			resolve_bsp_collision(world, root, entity);
+		}
 	}
 }
 
@@ -49,6 +50,9 @@ void CollisionSystem::resolve_collision_dynamic(World &world) {
 	CollisionFlag first, second;
 	for (auto it1 = entities.begin(); it1 != entities.end(); ++it1) {
 		Entity e1 = std::ref(*it1);
+		if (!world.get_component<ColliderTag>(e1).is_active) {
+			continue;
+		}
 		if (world.has_component<ColliderOBB>(e1)) {
 			first = CollisionFlag::FIRST_OBB;
 		} else if (world.has_component<ColliderAABB>(e1)) {
@@ -63,6 +67,9 @@ void CollisionSystem::resolve_collision_dynamic(World &world) {
 		}
 		for (auto it2 = std::next(it1); it2 != entities.end(); ++it2) {
 			Entity e2 = std::ref(*it2);
+			if (!world.get_component<ColliderTag>(e2).is_active) {
+				continue;
+			}
 
 			if (world.has_component<ColliderOBB>(e2)) {
 				second = CollisionFlag::SECOND_OBB;
@@ -143,13 +150,14 @@ void CollisionSystem::resolve_bsp_collision(World &world, BSPNode *node, Entity 
 	//Every node contains entities that intersects with it or if node is a leaf
 	PhysicsManager::get().resolve_collision(world, entity, node->entities);
 
-	if (node->back == nullptr && node->front == nullptr) {
-		return;
-	}
-
 	if (force) {
 		resolve_bsp_collision(world, node->front.get(), entity, force);
 		resolve_bsp_collision(world, node->back.get(), entity, force);
+		return;
+	}
+
+	if (node->back == nullptr && node->front == nullptr) {
+		return;
 	}
 
 	Side side;
@@ -186,7 +194,7 @@ void CollisionSystem::resolve_bsp_collision(World &world, BSPNode *node, Entity 
 	}
 
 	if (side == Side::FRONT) {
-		resolve_bsp_collision(world, node->front.get(), entity);
+		resolve_bsp_collision(world, node->front.get(), entity, force);
 	} else if (side == Side::BACK) {
 		resolve_bsp_collision(world, node->back.get(), entity, force);
 	} else {
@@ -202,7 +210,13 @@ std::shared_ptr<BSPNode> CollisionSystem::build_tree(World &world, std::vector<E
 	// we need to filter get only statics to build the tree
 	std::set<Entity> statics;
 	for (auto &entity : world_entities) {
-		if (world.has_component<StaticTag>(entity) && !world.has_component<Platform>(entity)) {
+		if (world.has_component<StaticTag>(entity)) {
+			if (world.has_component<Platform>(entity)) {
+				auto platform = world.get_component<Platform>(entity);
+				if (!platform.is_door) {
+					continue;
+				}
+			}
 			statics.insert(entity);
 		}
 	}
@@ -298,6 +312,11 @@ void CollisionSystem::process_node(World &world, const std::set<Entity> &objects
 		}
 	}
 
+	if (current.size() == objects.size() || front.size() == objects.size() || back.size() == objects.size()) {
+		node->entities = objects;
+		return;
+	}
+
 	node->entities = current;
 
 	node->front = std::make_shared<BSPNode>();
@@ -324,10 +343,10 @@ Plane CollisionSystem::calculate_plane(World &world, const std::set<Entity> &col
 			plane.point += position + aabb.center * scale;
 		} else if (world.has_component<ColliderSphere>(collider)) {
 			ColliderSphere &sphere = world.get_component<ColliderSphere>(collider);
-			plane.point += position + sphere.center * scale.x;
+			plane.point += position + sphere.center * scale;
 		} else if (world.has_component<ColliderOBB>(collider)) {
 			ColliderOBB &obb = world.get_component<ColliderOBB>(collider);
-			const glm::vec3 &orientation = t.get_global_scale();
+			const glm::quat &orientation = t.get_global_orientation();
 			plane.point += position + orientation * (obb.center * scale);
 		} else if (world.has_component<ColliderCapsule>(collider)) {
 			ColliderCapsule &capsule = world.get_component<ColliderCapsule>(collider);
@@ -562,12 +581,14 @@ bool CollisionSystem::ray_cast(World &world, const Ray &ray, HitInfo &result) {
 
 	bool does_hit = false;
 	for (auto entity : entities) {
-		if (std::find(ray.ignore_list.begin(), ray.ignore_list.end(), entity) != ray.ignore_list.end()) {
-			continue;
-		}
 		if (!world.has_component<ColliderTag>(entity) || !world.has_component<Transform>(entity)) {
 			continue;
 		}
+
+		if (std::find(ray.ignore_list.begin(), ray.ignore_list.end(), entity) != ray.ignore_list.end()) {
+			continue;
+		}
+
 		const Transform &transform = world.get_component<Transform>(entity);
 		const glm::vec3 &position = transform.get_global_position();
 		const glm::vec3 &scale = transform.get_global_scale();
@@ -616,6 +637,8 @@ bool CollisionSystem::ray_cast_layer(World &world, const Ray &ray, HitInfo &resu
 	std::vector<Entity> entities = world.get_parent_scene()->entities;
 
 	bool does_hit = false;
+	bool result_set = false;
+
 	for (auto entity : entities) {
 		if (!world.has_component<ColliderTag>(entity) || !world.has_component<Transform>(entity)) {
 			continue;
@@ -625,13 +648,15 @@ bool CollisionSystem::ray_cast_layer(World &world, const Ray &ray, HitInfo &resu
 			continue;
 		}
 
-		auto &tag = world.get_component<ColliderTag>(entity);
-		if (!physics_manager.are_layers_collide(ray.layer_name, tag.layer_name)) {
+		const ColliderTag &tag = world.get_component<ColliderTag>(entity);
+		if (!tag.is_active || !physics_manager.are_layers_collide(ray.layer_name, tag.layer_name)) {
 			continue;
 		}
+
 		const Transform &transform = world.get_component<Transform>(entity);
 		const glm::vec3 &position = transform.get_global_position();
 		const glm::vec3 &scale = transform.get_global_scale();
+
 		HitInfo info;
 		info.entity = entity;
 		if (world.has_component<ColliderAABB>(entity)) {
@@ -643,7 +668,9 @@ bool CollisionSystem::ray_cast_layer(World &world, const Ray &ray, HitInfo &resu
 			}
 		} else if (world.has_component<ColliderOBB>(entity)) {
 			ColliderOBB c = world.get_component<ColliderOBB>(entity);
-			c.center = position + c.get_orientation_matrix() * (c.center * scale);
+			const glm::quat &orientation = transform.get_global_orientation();
+			c.set_orientation(orientation);
+			c.center = position + orientation * (c.center * scale);
 			c.range *= scale;
 			if (physics_manager.intersect_ray_obb(ray, c, info)) {
 				does_hit = true;
@@ -667,7 +694,8 @@ bool CollisionSystem::ray_cast_layer(World &world, const Ray &ray, HitInfo &resu
 
 		if (info.distance < result.distance) {
 			result = info;
+			result_set = true;
 		}
 	}
-	return does_hit;
+	return does_hit && result_set;
 }

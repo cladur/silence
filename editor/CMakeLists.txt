@@ -8,9 +8,12 @@ add_executable(${EDITOR_NAME}
         inspector_gui.cpp inspector_gui.h
         )
 
+find_package(OpenMP)
+
 # Define the link libraries
 target_link_libraries(${EDITOR_NAME} PRIVATE
         silence_engine
         nfd
         imguizmo
+        OpenMP::OpenMP_CXX
         )

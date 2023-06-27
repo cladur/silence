@@ -1,0 +1,317 @@
+[
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "Exploding Box"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.0,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "children": [
+                        2
+                    ],
+                    "children_count": 1
+                },
+                "component_name": "Children"
+            }
+        ],
+        "entity": 1,
+        "signature": "0000000000000000000000000000000000000000000000000000000000010011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "highlight_color": {
+                        "b": 0.0,
+                        "g": 0.0,
+                        "r": 1.0
+                    },
+                    "highlight_power": 0.30000001192092896,
+                    "highlighted": "twoja misja trwa",
+                    "target": 3
+                },
+                "component_name": "Highlight"
+            },
+            {
+                "component_data": {
+                    "distraction_radius": 15.0,
+                    "distraction_time": 2.0,
+                    "explosion_radius": 4.0
+                },
+                "component_name": "ExplodingBox"
+            },
+            {
+                "component_data": {
+                    "name": "ExplodingBox"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.707106351852417,
+                        "x": -0.7071071267127991,
+                        "y": 0.00017308870155829936,
+                        "z": 0.00017295805446337909
+                    },
+                    "position": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "scale": {
+                        "x": 0.9999999403953552,
+                        "y": 0.9999909996986389,
+                        "z": 0.9999878406524658
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "children": [
+                        4,
+                        3
+                    ],
+                    "children_count": 2
+                },
+                "component_name": "Children"
+            },
+            {
+                "component_data": {
+                    "parent": 1
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/electric_box_2/electric_box_2.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {},
+                "component_name": "StaticTag"
+            },
+            {
+                "component_data": {
+                    "cable_parent": 0,
+                    "can_interact": true,
+                    "interaction": 3,
+                    "interaction_target": 2,
+                    "interaction_target_2": 0,
+                    "interaction_target_3": 0,
+                    "interaction_target_4": 0,
+                    "interaction_target_5": 0,
+                    "interaction_text": "[X] Explode",
+                    "single_use": true,
+                    "type": 2
+                },
+                "component_name": "Interactable"
+            },
+            {
+                "component_data": {
+                    "layer_name": "taggable"
+                },
+                "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {
+                    "center": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": -0.10000000149011612
+                    },
+                    "range": {
+                        "x": 0.6000000238418579,
+                        "y": 0.699999988079071,
+                        "z": 0.30000001192092896
+                    }
+                },
+                "component_name": "ColliderAABB"
+            },
+            {
+                "component_data": {
+                    "event_path": "SFX/electricity/electric_hum",
+                    "is_3d": true
+                },
+                "component_name": "FMODEmitter"
+            },
+            {
+                "component_data": {
+                    "color_begin": [
+                        1.0,
+                        0.2980392277240753,
+                        0.21568627655506134,
+                        1.0
+                    ],
+                    "color_end": [
+                        1.0,
+                        1.0,
+                        1.0,
+                        0.0
+                    ],
+                    "color_transition": 2,
+                    "is_billboard": true,
+                    "is_one_shot": true,
+                    "is_textured": true,
+                    "lifetime": 1.5,
+                    "one_shot_duration": 0.10000000149011612,
+                    "position": [
+                        0.0,
+                        0.699999988079071,
+                        0.0
+                    ],
+                    "position_variance": [
+                        1.0,
+                        2.299999952316284,
+                        0.800000011920929
+                    ],
+                    "rate": 34.5,
+                    "rotation_begin": 0.0,
+                    "rotation_end": 0.0,
+                    "rotation_transition": 0,
+                    "rotation_variance": 0.0,
+                    "size_begin": 4.5,
+                    "size_end": 7.800000190734863,
+                    "size_transition": 0,
+                    "texture_name": "smoke.ktx2",
+                    "velocity_begin": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "velocity_end": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "velocity_transition": 0,
+                    "velocity_variance": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
+                },
+                "component_name": "ParticleEmitter"
+            },
+            {
+                "component_data": {
+                    "tag_position": {
+                        "x": 0.0,
+                        "y": 0.20000000298023224,
+                        "z": 0.800000011920929
+                    }
+                },
+                "component_name": "Taggable"
+            }
+        ],
+        "entity": 2,
+        "signature": "0000000000000000000000000000000011110000100100000010110000111011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "ElectricityParticles2"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 1.0,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "parent": 2
+                },
+                "component_name": "Parent"
+            }
+        ],
+        "entity": 3,
+        "signature": "0000000000000000000000000000000000000000000000000000000000001011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "ElectricityParticles1"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 1.0,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "parent": 2
+                },
+                "component_name": "Parent"
+            }
+        ],
+        "entity": 4,
+        "signature": "0000000000000000000000000000000000000000000000000000000000001011"
+    }
+]

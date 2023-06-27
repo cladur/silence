@@ -11,12 +11,12 @@ private:
 public:
 	std::string text;
 	std::string font_name;
-	glm::vec3 text_color = glm::vec3(1.0f);
+	glm::vec4 text_color = glm::vec4(1.0f);
 	float text_scale = 1.0f;
 	bool centered_x = true;
 	bool centered_y = true;
 	bool active = true;
-	std::string hover_texture_name;
+	Handle<Texture> hover_texture;
 
 	EventReference hover_event;
 	EventReference click_event;
@@ -27,7 +27,7 @@ public:
 			glm::vec2 size,
 			const std::string& text,
 			const std::string& font_name,
-			const std::string &texture_name,
+			Handle<Texture> texture,
 			const std::string &hover_sound_name = "",
 			const std::string &click_sound_name = "");
 

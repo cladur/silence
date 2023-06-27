@@ -9,6 +9,9 @@ struct Ray;
 struct HitInfo;
 
 class CollisionSystem : public BaseSystem {
+private:
+	bool first = true;
+
 public:
 	void startup(World &world) override;
 	void update(World &world, float dt) override;
@@ -26,7 +29,9 @@ public:
 	static Side process_collider(const Plane &plane, const class ColliderCapsule &collider);
 	static void log_tree(BSPNode *node);
 
-	static bool ray_cast(World &world, const Ray &ray, HitInfo &result);
+	// Cast ray that collide with first intersected collider excluding layers conditions
+	[[deprecated("Use ray_cast_layer instead")]] static bool ray_cast(World &world, const Ray &ray, HitInfo &result);
+	// Cast ray that collide with first intersected collider including ray layer conditions
 	static bool ray_cast_layer(World &world, const Ray &ray, HitInfo &result);
 };
 

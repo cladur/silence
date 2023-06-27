@@ -9,16 +9,16 @@ const uint32_t MAX_INDEX_COUNT = 6 * MAX_CHARACTERS;
 
 void TextDraw::draw_text_2d(const std::string &text, const glm::vec2 &position, const glm::vec3 &color, float scale,
 		std::string font_name, bool center_x, bool center_y) {
-	draw_text(text, true, glm::vec3(position, 0.0f), color, scale, font_name);
+	draw_text(text, true, glm::vec3(position, 0.0f), glm::vec4(color, 1.0f), scale, font_name);
 }
 
 void TextDraw::draw_text_3d(const std::string &text, const glm::vec3 &position, const glm::vec3 &color, float scale,
 		std::string font_name, bool center_x, bool center_y) {
-	draw_text(text, false, position, color, scale, font_name, center_x, center_y);
+	draw_text(text, false, position, glm::vec4(color, 1.0f), scale, font_name, center_x, center_y);
 }
 
 void TextDraw::draw_text(const std::string &text, bool is_screen_space, const glm::vec3 &position,
-		const glm::vec3 &color, float scale, std::string font_name, bool center_x, bool center_y,
+		const glm::vec4 &color, float scale, std::string font_name, bool center_x, bool center_y,
 		const glm::vec3 &rotation, bool billboard) {
 	auto font_manager = FontManager::get();
 
@@ -149,6 +149,7 @@ void TextDraw::draw_text(const std::string &text, bool is_screen_space, const gl
 	object.billboard = billboard;
 	object.size = text_size / 2.0f;
 	object.position = position;
+	object.alpha = color.a;
 
 	r_scene->transparent_objects.push_back(object);
 }

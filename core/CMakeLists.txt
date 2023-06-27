@@ -40,7 +40,17 @@ add_library(${CORE_LIB_NAME} STATIC
         components/attachment_component.h
         components/enemy_data_component.h
         components/platform_component.h
-        components/exploding_box_component.h)
+        components/exploding_box_component.h
+        components/checkpoint_component.h
+        components/dialogue_trigger_component.h
+        components/path_node_component.h
+        components/path_parent_component.h
+        components/path_node_component.h
+        components/taggable_component.h
+        components/fmod_emitter_component.h
+        components/particle_emitter_component.h
+        components/decal_component.h
+        components/cable_parent_component.h components/main_menu_component.h)
 
 target_include_directories(${CORE_LIB_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 
@@ -64,7 +74,11 @@ target_link_libraries(${COMMON_LIB_NAME} INTERFACE
         OpenMP::OpenMP_CXX
         )
 
-target_link_libraries(${CORE_LIB_NAME} PRIVATE
+target_link_libraries(${CORE_LIB_NAME}
+        PUBLIC
+        # TODO: Remove these dependencies
+        fmod
+        PRIVATE
         ${COMMON_LIB_NAME}
         )
 

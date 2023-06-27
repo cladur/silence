@@ -3,11 +3,11 @@
 #include "components/enemy_data_component.h"
 #include "components/enemy_path_component.h"
 #include "components/transform_component.h"
+#include "enemy_utils.h"
 #include "engine/scene.h"
 #include "managers/ecs/world.h"
 #include "managers/render/render_scene.h"
 #include <animation/animation_manager.h>
-#include "enemy_utils.h"
 
 void EnemyPatrolling::startup(StateMachine *machine, std::string name) {
 	SPDLOG_INFO("EnemyPatrolling::startup");
@@ -25,12 +25,16 @@ void EnemyPatrolling::update(World *world, uint32_t entity_id, float dt) {
 	ResourceManager &res = ResourceManager::get();
 	auto &anim = world->get_component<AnimationInstance>(entity_id);
 	auto &enemy_path = world->get_component<EnemyPath>(entity_id);
+
+	auto &path = world->get_component<Children>(enemy_path.path_parent);
+
 	auto &enemy_data = world->get_component<EnemyData>(entity_id);
 	auto &dd = world->get_parent_scene()->get_render_scene().debug_draw;
 
-	if (enemy_path.path.size() == 0 || enemy_path.path.size() == 1) {
-		enemy_path.patrol_cooldown = 100.0f;
-		state_machine->set_state("stationary_patrolling");
+	if (first_frame_after_other_state) {
+		first_frame_after_other_state = false;
+		enemy_path.first_rotation_frame = true;
+		enemy_path.is_rotating = true;
 	}
 
 	// change animation
@@ -38,27 +42,32 @@ void EnemyPatrolling::update(World *world, uint32_t entity_id, float dt) {
 		animation_manager.change_animation(entity_id, "enemy/enemy_ANIM_GLTF/enemy_walk_with_gun.anim");
 	}
 
-	glm::vec3 current_position = transform.position;
-	glm::vec3 target_position = enemy_path.path[enemy_path.next_position];
+	glm::vec3 current_position = transform.get_global_position();
+	glm::vec3 target_position =
+			world->get_component<Transform>(path.children[enemy_path.next_position]).get_global_position();
 
 	// get index of previous node
-	int idx = ((enemy_path.next_position - 1) % (int)enemy_path.path.size() == -1)
-			? enemy_path.path.size() - 1
-			: (enemy_path.next_position - 1) % enemy_path.path.size();
-	enemy_path.prev_position = enemy_path.path[idx];
+	int idx = ((enemy_path.next_position - 1) % (int)path.children_count == -1)
+			? path.children_count - 1
+			: (enemy_path.next_position - 1) % path.children_count;
 
-	// move towards the next node. If already there, change target to next node
+	auto &next_node = world->get_component<PathNode>(path.children[enemy_path.next_position]);
+	auto &prev_node = world->get_component<PathNode>(path.children[idx]);
+
+	enemy_path.prev_position = world->get_component<Transform>(path.children[idx]).get_global_position();
+
+	// move the entity towards the next node
 	if (glm::distance(current_position, target_position) > 0.1f) {
 		transform.add_position(glm::normalize(target_position - current_position) * enemy_path.speed * dt);
-
+		enemy_utils::handle_footsteps(entity_id, transform, enemy_data, dt);
 		// if the point is a patrol point, switch state
-	} else if (enemy_path.patrol_points[enemy_path.next_position].second) {
-		enemy_path.patrol_cooldown = enemy_path.patrol_points[enemy_path.next_position].first;
+	} else if (next_node.is_patrol_point) {
+		enemy_path.patrol_cooldown = next_node.patrol_time;
 		enemy_data.state_machine.set_state("stationary_patrolling");
 
 		// if the node is not patrol node, just move to the next node
 	} else {
-		enemy_path.next_position = (enemy_path.next_position + 1) % enemy_path.path.size();
+		enemy_path.next_position = (enemy_path.next_position + 1) % path.children_count;
 	}
 
 	// this huge if just means "when near a node on either side" start rotating
@@ -74,7 +83,13 @@ void EnemyPatrolling::update(World *world, uint32_t entity_id, float dt) {
 
 	// smoothly rotate the entity to face the next node
 	if (enemy_path.is_rotating) {
-		enemy_utils::look_at(enemy_path, transform, target_position, dt);
+		glm::vec3 direction = transform.get_global_position() - target_position;
+		direction.y = 0.0f;
+		direction = glm::normalize(direction);
+
+		glm::quat target_orientation = glm::quatLookAt(direction, glm::vec3(0.0f, 1.0f, 0.0f));
+
+		transform.set_orientation(glm::slerp(transform.get_orientation(), target_orientation, 5.0f * dt));
 	}
 
 	// if the entity is facing the next node, stop rotating
@@ -83,11 +98,13 @@ void EnemyPatrolling::update(World *world, uint32_t entity_id, float dt) {
 		enemy_path.is_rotating = false;
 	}
 
-	enemy_utils::handle_detection(world, transform, enemy_data, dt, &dd);
+	enemy_utils::handle_detection(world, entity_id, transform, transform.get_global_forward(), enemy_data, dt, &dd);
 
-	enemy_utils::update_detection_slider(entity_id, transform, enemy_data);
+	enemy_utils::update_detection_slider(entity_id, transform, enemy_data, world->get_parent_scene()->get_render_scene(), world->get_parent_scene());
 
-	if (enemy_data.detection_level > 0.3f) {
+	enemy_utils::handle_highlight(entity_id, world);
+
+	if (enemy_data.detection_level > 0.4f) {
 		state_machine->set_state("looking");
 	}
 }

@@ -11,6 +11,7 @@ void RootParentSystem::startup(World &world) {
 	whitelist.set(world.get_component_type<Children>());
 
 	blacklist.set(world.get_component_type<Parent>());
+
 	world.set_system_component_whitelist<RootParentSystem>(whitelist);
 	world.set_system_component_blacklist<RootParentSystem>(blacklist);
 }
@@ -31,6 +32,12 @@ void RootParentSystem::update_children(
 
 	for (int i = 0; i < children.children_count; i++) {
 		Entity child = children.children[i];
+
+		// Skip children that are attached to a bone, AttachmentSystem handles those
+		if (world.has_component<Attachment>(child)) {
+			continue;
+		}
+
 		auto &child_transform = world.get_component<Transform>(child);
 
 		child_transform.update_global_model_matrix(parent_model);

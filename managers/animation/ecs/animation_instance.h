@@ -5,11 +5,12 @@
 #include "render/common/animation.h"
 #include "render/common/material.h"
 
-class AnimationInstance {
+struct AnimationInstance {
 public:
 	Handle<Animation> animation_handle;
 	float current_time = 0.0f;
 	float ticks_per_second = 1000;
+	float blend_time_ms = 700.0f;
 	bool is_looping = true;
 	bool is_freeze = false;
 

@@ -152,7 +152,7 @@ void DebugDraw::draw_cone(const glm::vec3 &from, const glm::vec3 &to, float radi
 
 		new_point = to + radius * (cos(current_step) * v1 + sin(current_step) * v2);
 
-		draw_line(from, new_point, color);
+		draw_line(from, new_point, color, entity);
 
 		old_point = new_point;
 	}
@@ -183,12 +183,12 @@ void DebugDraw::draw_cone(const glm::vec3 &from, const glm::vec3 &to, float leng
 
 		new_point = end_point + radius * (cos(current_step) * v1 + sin(current_step) * v2);
 
-		draw_line(from, new_point, color);
+		draw_line(from, new_point, color, entity);
 
 		old_point = new_point;
 	}
 
-	draw_circle(end_point, normalized_direction, radius, color, entity, num_of_segments);
+	draw_circle(end_point, normalized_direction, radius, color, entity, 16);
 }
 
 void DebugDraw::draw_circle(const glm::vec3 &center, const glm::vec3 direction, float radius, const glm::vec3 &color,

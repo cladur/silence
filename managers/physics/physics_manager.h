@@ -1,6 +1,5 @@
 #ifndef SILENCE_PHYSICS_MANAGER_H
 #define SILENCE_PHYSICS_MANAGER_H
-
 class World;
 struct ColliderSphere;
 struct ColliderCapsule;
@@ -9,17 +8,15 @@ struct ColliderOBB;
 struct Transform;
 struct RigidBody;
 struct ColliderTag;
+struct AgentData;
 
 struct Ray {
 	glm::vec3 origin;
 	glm::vec3 direction;
+	// Almost infinite, FLT_MAX not working with capsule
+	float length = 694202137.8f;
 	std::string layer_name = "default";
 	std::vector<Entity> ignore_list;
-};
-
-struct Segment {
-	glm::vec3 start;
-	glm::vec3 end;
 };
 
 struct HitInfo {
@@ -122,8 +119,14 @@ public:
 	void physical_shift(Transform &t1, Transform &t2, RigidBody &b1, RigidBody &b2, bool is_movable1, bool is_movable2,
 			const glm::vec3 &offset);
 
-	//Return entities that collide with specified sphere with specified layer
+	//Return entities that collide with specified sphere with specified layer, it ignores inactive colliders
 	std::vector<Entity> overlap_sphere(World &world, const ColliderSphere &sphere, const std::string &layer_name);
+
+	// Return vector of players that collide with given cube it includes inactive colliders
+	std::vector<Entity> overlap_cube_checkpoint(World &world, const ColliderOBB &obb);
+
+	// Return vector of trigger(specified by Jan) objects that collide with given cube, it includes inactive colliders
+	std::vector<Entity> overlap_cube_trigger(World &world, const ColliderOBB &obb);
 
 	// returns true, point and normal if ray intersect with sphere
 	bool intersect_ray_sphere(const Ray &ray, const ColliderSphere &sphere, HitInfo &result);
@@ -134,18 +137,12 @@ public:
 	// returns true, point and normal if ray intersect with capsule
 	bool intersect_ray_capsule(const Ray &ray, const ColliderCapsule &capsule, HitInfo &result);
 
-	// returns true, point and normal if segment intersect with capsule
-	bool intersect_segment_capsule(const Segment &segment, const ColliderCapsule &capsule, HitInfo &result);
-
 	void add_collision_layer(const std::string &layer_name);
 	void remove_collision_layer(const std::string &layer_name);
 	void set_layers_no_collision(const std::string &layer1, const std::string &layer2);
 	void set_layers_collision(const std::string &layer1, const std::string &layer2);
 	bool are_layers_collide(const std::string &layer1, const std::string &layer2);
 	const std::unordered_map<std::string, std::unordered_set<std::string>> &get_layers_map();
-
-	// Support function that returns the AABB vertex with index n
-	glm::vec3 corner(const ColliderAABB &b, int32_t n);
 
 private:
 	// layers map that contains data about which layer does not collide with which ones

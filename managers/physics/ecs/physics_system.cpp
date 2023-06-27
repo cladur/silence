@@ -31,7 +31,7 @@ void PhysicsSystem::update(World &world, float dt) {
 		auto &rigid_body = world.get_component<RigidBody>(entity);
 		auto &transform = world.get_component<Transform>(entity);
 
-		if (rigid_body.mass < epsilon) {
+		if (rigid_body.mass <= epsilon) {
 			SPDLOG_WARN("Object has value of mass near 0");
 		}
 

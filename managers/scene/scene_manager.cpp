@@ -7,6 +7,7 @@
 
 void SceneManager::load_scene_from_json_file(
 		World &world, nlohmann::json &scene_json, const std::string &scene_name, std::vector<Entity> &entities) {
+	ZoneScopedN("SceneManager::load_scene_from_json_file");
 	entities.clear();
 	world.deserialize_entities_json(scene_json, entities);
 }

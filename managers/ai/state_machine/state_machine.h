@@ -28,6 +28,15 @@ public:
 	void set_state(std::string state_name);
 	void shutdown();
 
+	template<typename T> T *get_state() {
+		for (auto state : states) {
+			if (dynamic_cast<T *>(state) != nullptr) {
+				return dynamic_cast<T *>(state);
+			}
+		}
+		return nullptr;
+	}
+
 	std::string get_current_state();
 };
 

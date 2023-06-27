@@ -9,11 +9,14 @@ struct Texture {
 	uint32_t width;
 	uint32_t height;
 	uint32_t channels;
+	std::string name;
 
 	static std::map<std::string, ktxTexture2 *> ktx_textures;
 	//static std::set<std::string> ktx_paths;
 
-	void load_from_asset(const std::string &path, bool pregenerated_mipmaps = false, bool linear = true, bool repeat = true);
+	static GLenum get_supported_compressed_format();
+
+	void load_from_asset(const std::string &path, bool pregenerated_mipmaps = false, bool repeat = true);
 };
 
 #endif // SILENCE_TEXTURE_H

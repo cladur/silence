@@ -1,5 +1,7 @@
 #include "framebuffer.h"
 #include "render/common/framebuffer.h"
+#include <components/light_component.h>
+#include <components/transform_component.h>
 #include <glad/glad.h>
 
 void Framebuffer::startup(uint32_t width, uint32_t height) {
@@ -80,10 +82,17 @@ void GBuffer::startup(uint32_t width, uint32_t height) {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); // magnification filter
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, ao_rough_metal_texture_id, 0);
 
+	glGenTextures(1, &depth_texture_id);
+	glBindTexture(GL_TEXTURE_2D, depth_texture_id);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // minification filter
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); // magnification filter
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, GL_TEXTURE_2D, depth_texture_id, 0);
+
 	// - tell OpenGL which color attachments we'll use (of this framebuffer) for rendering
-	uint32_t attachments[4] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2,
-		GL_COLOR_ATTACHMENT3 };
-	glDrawBuffers(4, attachments);
+	uint32_t attachments[5] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3,
+		GL_COLOR_ATTACHMENT4 };
+	glDrawBuffers(5, attachments);
 
 	glGenRenderbuffers(1, &rbo_id);
 	glBindRenderbuffer(GL_RENDERBUFFER, rbo_id);
@@ -110,6 +119,8 @@ void GBuffer::resize(uint32_t width, uint32_t height) {
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 	glBindTexture(GL_TEXTURE_2D, ao_rough_metal_texture_id);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+	glBindTexture(GL_TEXTURE_2D, depth_texture_id);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
 
 	glBindRenderbuffer(GL_RENDERBUFFER, rbo_id);
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
@@ -341,6 +352,85 @@ void SkyboxBuffer::resize(uint32_t width, uint32_t height) {
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
 }
 
+void ShadowBuffer::startup(uint32_t width, uint32_t height, float near_plane, float far_plane) {
+	shadow_width = width;
+	shadow_height = height;
+	near = near_plane;
+	far = far_plane;
+	const float size = 20.0f;
+	orthographic_projection = glm::ortho(-size, size, -size, size, near_plane, far_plane);
+	float aspect = (float)shadow_width / (float)shadow_height;
+	perspective_projection = glm::perspective(glm::radians(90.0f), aspect, near, far);
+	glGenFramebuffers(1, &framebuffer_id);
+}
+
+void ShadowBuffer::bind() {
+	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer_id);
+}
+
+void ShadowBuffer::generate_shadow_texture(Light &light) {
+	if (light.shadow_map_id == 0) {
+		glDeleteTextures(1, &light.shadow_map_id);
+	}
+
+	glGenTextures(1, &light.shadow_map_id);
+	if (light.type == LightType::DIRECTIONAL_LIGHT || light.type == LightType::SPOT_LIGHT) {
+		glBindTexture(GL_TEXTURE_2D, light.shadow_map_id);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, shadow_width, shadow_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT,
+				NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+		glm::vec4 border_color(1.0f);
+		glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, &border_color[0]);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, light.shadow_map_id, 0);
+	} else if (light.type == LightType::POINT_LIGHT) {
+		glBindTexture(GL_TEXTURE_CUBE_MAP, light.shadow_map_id);
+		for (unsigned int i = 0; i < 6; ++i) {
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, shadow_width, shadow_height, 0,
+					GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+		}
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+		glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, light.shadow_map_id, 0);
+	}
+	light.shadow_type = light.type;
+
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
+}
+
+void ShadowBuffer::setup_light_space(Light &light, Transform &transform) {
+	const glm::vec3 &position = transform.get_global_position();
+
+	if (light.type == LightType::DIRECTIONAL_LIGHT) {
+		const glm::vec3 &direction = glm::normalize(transform.get_global_orientation() * glm::vec3(0.0f, 0.0f, -1.0f));
+		light_spaces[0] =
+				orthographic_projection * glm::lookAt(position, position + direction, glm::vec3(0.0, 1.0, 0.0));
+		light.light_space = light_spaces[0];
+	} else if (light.type == LightType::SPOT_LIGHT) {
+		const glm::vec3 &direction = glm::normalize(transform.get_global_orientation() * glm::vec3(0.0f, 0.0f, -1.0f));
+		light_spaces[0] =
+				perspective_projection * glm::lookAt(position, position + direction, glm::vec3(0.0, 1.0, 0.0));
+		light.light_space = light_spaces[0];
+	} else if (light.type == LightType::POINT_LIGHT) {
+		const glm::vec3 &down = glm::vec3(0.0f, -1.0f, 0.0f);
+		const glm::vec3 &forward = glm::vec3(0.0f, 0.0f, 1.0f);
+		const glm::vec3 &back = glm::vec3(0.0f, 0.0f, -1.0f);
+		light_spaces[0] = perspective_projection * glm::lookAt(position, position + glm::vec3(1.0f, 0.0f, 0.0f), down);
+		light_spaces[1] = perspective_projection * glm::lookAt(position, position + glm::vec3(-1.0f, 0.0f, 0.0f), down);
+		light_spaces[2] =
+				perspective_projection * glm::lookAt(position, position + glm::vec3(0.0f, 1.0f, 0.0f), forward);
+		light_spaces[3] = perspective_projection * glm::lookAt(position, position + down, back);
+		light_spaces[4] = perspective_projection * glm::lookAt(position, position + forward, down);
+		light_spaces[5] = perspective_projection * glm::lookAt(position, position + back, down);
+	}
+}
+
 void MousePickFramebuffer::startup(uint32_t width, uint32_t height) {
 	glGenFramebuffers(1, &framebuffer_id);
 	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer_id);
@@ -372,6 +462,95 @@ void MousePickFramebuffer::bind() {
 void MousePickFramebuffer::resize(uint32_t width, uint32_t height) {
 	glBindTexture(GL_TEXTURE_2D, texture_id);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32UI, width, height, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, nullptr);
+
+	glBindRenderbuffer(GL_RENDERBUFFER, rbo_id);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+}
+
+void ParticleBuffer::startup(uint32_t width, uint32_t height) {
+	glGenFramebuffers(1, &framebuffer_id);
+	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer_id);
+
+	// generate texture
+	glGenTextures(1, &texture_id);
+	glBindTexture(GL_TEXTURE_2D, texture_id);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture_id, 0);
+
+	glDrawBuffer(GL_COLOR_ATTACHMENT0);
+
+	glGenRenderbuffers(1, &rbo_id);
+	glBindRenderbuffer(GL_RENDERBUFFER, rbo_id);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo_id);
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+		SPDLOG_ERROR("ERROR::FRAMEBUFFER:: Framebuffer is not complete!");
+	}
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void ParticleBuffer::bind() {
+	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer_id);
+}
+
+void ParticleBuffer::resize(uint32_t width, uint32_t height) {
+	glBindTexture(GL_TEXTURE_2D, texture_id);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
+
+	glBindRenderbuffer(GL_RENDERBUFFER, rbo_id);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+}
+
+void HighlightBuffer::startup(uint32_t width, uint32_t height) {
+	glGenFramebuffers(1, &framebuffer_id);
+	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer_id);
+
+	// generate texture
+	glGenTextures(1, &texture_id);
+	glBindTexture(GL_TEXTURE_2D, texture_id);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // minification filter
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); // magnification filter
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture_id, 0);
+
+	glGenTextures(1, &depth_texture_id);
+	glBindTexture(GL_TEXTURE_2D, depth_texture_id);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // minification filter
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); // magnification filter
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, depth_texture_id, 0);
+
+	GLuint attachments[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+	glDrawBuffers(2, attachments);
+
+	glGenRenderbuffers(1, &rbo_id);
+	glBindRenderbuffer(GL_RENDERBUFFER, rbo_id);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo_id);
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+		SPDLOG_ERROR("ERROR::FRAMEBUFFER:: HighlightBuffer is not complete!");
+	}
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void HighlightBuffer::bind() {
+	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer_id);
+}
+
+void HighlightBuffer::resize(uint32_t width, uint32_t height) {
+	glBindTexture(GL_TEXTURE_2D, texture_id);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
+
+	glBindTexture(GL_TEXTURE_2D, depth_texture_id);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
 
 	glBindRenderbuffer(GL_RENDERBUFFER, rbo_id);
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);

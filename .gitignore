@@ -7,10 +7,12 @@ cmake-build-debug
 build_xcode
 
 .vs
-.vscode
+.vscode/*
 .cache
 CMakeFiles
 build
+build_debug
+build_release
 
 # SPIRV files
 *.spv
@@ -21,8 +23,9 @@ thirdparty/fmod/api
 thirdparty/fmod/plugins
 
 # Asset files
-*.tx
-*.mesh
-resources/assets_export
 resources/assets_tmp
 *.blend1
+
+
+# Exclude
+!.vscode/cmake-variants.yaml

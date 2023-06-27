@@ -2,6 +2,7 @@
 
 #include "display/display_manager.h"
 #include <GLFW/glfw3.h>
+#include <spdlog/spdlog.h>
 
 InputManager &InputManager::get() {
 	static InputManager instance;
@@ -23,27 +24,27 @@ bool InputManager::is_action_valid(const std::string &action_name) {
 }
 
 inline void InputManager::poll_stick_axis(
-		GLFWgamepadstate &state, int glfw_axis, InputKey positive_key, InputKey negative_key) {
+		GLFWgamepadstate &state, int glfw_axis, InputKey positive_key, InputKey negative_key, int gamepad_id) {
 	float value = state.axes[glfw_axis];
 	if (value > 0.0f) {
-		key_state[positive_key] = value;
-		key_state[negative_key] = 0.0f;
+		gamepad_states[gamepad_id][positive_key] = value;
+		gamepad_states[gamepad_id][negative_key] = 0.0f;
 	} else {
-		key_state[positive_key] = 0.0f;
-		key_state[negative_key] = -value;
+		gamepad_states[gamepad_id][positive_key] = 0.0f;
+		gamepad_states[gamepad_id][negative_key] = -value;
 	}
 
 	float deadzone = 0.25f;
-	if (key_state[positive_key] > deadzone) {
-		key_state[positive_key] = (key_state[positive_key] - deadzone) / (1.0f - deadzone);
+	if (gamepad_states[gamepad_id][positive_key] > deadzone) {
+		gamepad_states[gamepad_id][positive_key] = (gamepad_states[gamepad_id][positive_key] - deadzone) / (1.0f - deadzone);
 	} else {
-		key_state[positive_key] = 0.0f;
+		gamepad_states[gamepad_id][positive_key] = 0.0f;
 	}
 
-	if (key_state[negative_key] > deadzone) {
-		key_state[negative_key] = (key_state[negative_key] - deadzone) / (1.0f - deadzone);
+	if (gamepad_states[gamepad_id][negative_key] > deadzone) {
+		gamepad_states[gamepad_id][negative_key] = (gamepad_states[gamepad_id][negative_key] - deadzone) / (1.0f - deadzone);
 	} else {
-		key_state[negative_key] = 0.0f;
+		gamepad_states[gamepad_id][negative_key] = 0.0f;
 	}
 }
 
@@ -56,25 +57,25 @@ void InputManager::poll_gamepads() {
 			for (int i = 0; i <= GLFW_GAMEPAD_BUTTON_LAST; i++) {
 				InputKey key = glfw_gamepad_button_to_input_key(i);
 				if (state.buttons[i] == GLFW_PRESS) {
-					key_state[key] = 1.0f;
+					gamepad_states[gamepad][key] = 1.0f;
 				} else {
-					key_state[key] = 0.0f;
+					gamepad_states[gamepad][key] = 0.0f;
 				}
 			}
 
 			// Sticks
 			poll_stick_axis(state, GLFW_GAMEPAD_AXIS_LEFT_X, InputKey::GAMEPAD_LEFT_STICK_X_POSITIVE,
-					InputKey::GAMEPAD_LEFT_STICK_X_NEGATIVE);
+					InputKey::GAMEPAD_LEFT_STICK_X_NEGATIVE, gamepad);
 			poll_stick_axis(state, GLFW_GAMEPAD_AXIS_LEFT_Y, InputKey::GAMEPAD_LEFT_STICK_Y_NEGATIVE,
-					InputKey::GAMEPAD_LEFT_STICK_Y_POSITIVE);
+					InputKey::GAMEPAD_LEFT_STICK_Y_POSITIVE, gamepad);
 			poll_stick_axis(state, GLFW_GAMEPAD_AXIS_RIGHT_X, InputKey::GAMEPAD_RIGHT_STICK_X_POSITIVE,
-					InputKey::GAMEPAD_RIGHT_STICK_X_NEGATIVE);
+					InputKey::GAMEPAD_RIGHT_STICK_X_NEGATIVE, gamepad);
 			poll_stick_axis(state, GLFW_GAMEPAD_AXIS_RIGHT_Y, InputKey::GAMEPAD_RIGHT_STICK_Y_NEGATIVE,
-					InputKey::GAMEPAD_RIGHT_STICK_Y_POSITIVE);
+					InputKey::GAMEPAD_RIGHT_STICK_Y_POSITIVE, gamepad);
 
 			// Triggers
-			key_state[InputKey::GAMEPAD_LEFT_TRIGGER] = (state.axes[GLFW_GAMEPAD_AXIS_LEFT_TRIGGER] + 1.0f) * 0.5f;
-			key_state[InputKey::GAMEPAD_RIGHT_TRIGGER] = (state.axes[GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER] + 1.0f) * 0.5f;
+			gamepad_states[gamepad][InputKey::GAMEPAD_LEFT_TRIGGER] = (state.axes[GLFW_GAMEPAD_AXIS_LEFT_TRIGGER] + 1.0f) * 0.5f;
+			gamepad_states[gamepad][InputKey::GAMEPAD_RIGHT_TRIGGER] = (state.axes[GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER] + 1.0f) * 0.5f;
 		}
 	}
 }
@@ -83,15 +84,14 @@ void InputManager::startup() {
 	GLFWwindow *window = DisplayManager::get().window;
 
 	glfwSetWindowUserPointer(window, this);
-	for (int i = GLFW_JOYSTICK_1; i < GLFW_JOYSTICK_16; i++) {
+	for (int i = GLFW_JOYSTICK_1; i <= GLFW_JOYSTICK_LAST; i++) {
+		previous_gamepad_states.emplace_back();
+		gamepad_states.emplace_back();
 		glfwSetJoystickUserPointer(i, this);
 	}
 
 	glfwSetJoystickCallback([](int joystick_id, int event) {
-		auto *input = static_cast<InputManager *>(glfwGetJoystickUserPointer(joystick_id));
-		if (input == nullptr) {
-			return;
-		}
+		auto &input = InputManager::get();
 		switch (event) {
 			case GLFW_CONNECTED: {
 				const char *name = glfwGetJoystickName(joystick_id);
@@ -148,6 +148,15 @@ void InputManager::startup() {
 void InputManager::shutdown() {
 }
 
+bool InputManager::is_gamepad_connected(int gamepad_id) {
+	if(glfwJoystickPresent(gamepad_id)) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
 void InputManager::add_action(const std::string &action_name) {
 	if (actions.contains(action_name)) {
 		SPDLOG_WARN("Action {} already exists", action_name);
@@ -176,6 +185,11 @@ void InputManager::remove_key_from_action(const std::string &action_name, InputK
 void InputManager::process_input() {
 	ZoneScopedNC("InputManager::process_input", 0x87CEFA);
 	previous_key_state = key_state;
+
+	for (int gamepad = GLFW_JOYSTICK_1; gamepad <= GLFW_JOYSTICK_LAST; gamepad++) {
+		previous_gamepad_states[gamepad] = gamepad_states[gamepad];
+	}
+
 	mouse_delta = mouse_position - last_mouse_position;
 	last_mouse_position = mouse_position;
 	poll_gamepads();
@@ -229,6 +243,58 @@ bool InputManager::is_action_pressed(const std::string &action_name) {
 	}
 	return false;
 }
+bool InputManager::is_action_just_pressed(const std::string &action_name, int gamepad_id) {
+	if (!is_action_valid(action_name)) {
+		return false;
+	}
+	auto action = actions[action_name];
+
+	for (auto &key : action.keys) { // NOLINT(readability-use-anyofallof)
+		if (key == InputKey::UNKNOWN) {
+			continue;
+		}
+		if (gamepad_states[gamepad_id][key] > action.deadzone && previous_gamepad_states[gamepad_id][key] < action.deadzone) {
+			return true;
+		}
+	}
+	return false;
+	
+}
+bool InputManager::is_action_just_released(const std::string &action_name, int gamepad_id) {
+	if (!is_action_valid(action_name)) {
+		return false;
+	}
+	auto action = actions[action_name];
+
+	for (auto &key : action.keys) { // NOLINT(readability-use-anyofallof)
+		if (key == InputKey::UNKNOWN) {
+			continue;
+		}
+		if (gamepad_states[gamepad_id][key] < action.deadzone && previous_gamepad_states[gamepad_id][key] > action.deadzone) {
+			return true;
+		}
+	}
+	return false;
+	
+}
+bool InputManager::is_action_pressed(const std::string &action_name, int gamepad_id) {
+	if (!is_action_valid(action_name)) {
+		return false;
+	}
+	auto action = actions[action_name];
+
+	for (auto &key : action.keys) { // NOLINT(readability-use-anyofallof)
+		if (key == InputKey::UNKNOWN) {
+			continue;
+		}
+		if (gamepad_states[gamepad_id][key] > action.deadzone) {
+			return true;
+		}
+	}
+	return false;
+	
+}
+
 glm::vec2 InputManager::get_mouse_position() {
 	return mouse_position;
 }
@@ -258,4 +324,29 @@ float InputManager::get_axis(const std::string &negative_action, const std::stri
 	float negative = get_action_strength(negative_action);
 	float positive = get_action_strength(positive_action);
 	return positive - negative;
+}
+float InputManager::get_action_strength(const std::string &action_name, int gamepad_id) {
+	if (!is_action_valid(action_name)) {
+		return 0.f;
+	}
+
+	auto action = actions[action_name];
+	float strength = 0.f;
+	for (auto &key : action.keys) { // NOLINT(readability-use-anyofallof)
+		if (key == InputKey::UNKNOWN) {
+			continue;
+		}
+		if (gamepad_states[gamepad_id][key] > strength) {
+			strength = gamepad_states[gamepad_id][key];
+		}
+	}
+
+	return strength;
+}
+
+float InputManager::get_axis(const std::string &negative_action, const std::string &positive_action, int gamepad_id) {
+	float negative = get_action_strength(negative_action, gamepad_id);
+	float positive = get_action_strength(positive_action, gamepad_id);
+	return positive - negative;
+	
 }

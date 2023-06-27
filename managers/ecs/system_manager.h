@@ -19,10 +19,12 @@ public:
 		const char *type_name = typeid(T).name();
 
 		assert(systems.find(type_name) == systems.end() && "Registering system more than once.");
-
-		// Create a pointer to the system and return it, so it can be used externally
 		auto system = std::make_shared<T>();
-		systems.insert({ type_name, system });
+
+		if (systems.find(type_name) == systems.end()) {
+			systems.insert({ type_name, system });
+		}
+
 		return system;
 	}
 

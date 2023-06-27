@@ -1,0 +1,19 @@
+buildType:
+  default: debug
+  choices:
+    debug:
+      short: debug
+      long: Add debug information.
+      buildType: Debug
+    release:
+      short: release
+      long: Optimize generated code.
+      buildType: Release
+    relwithdebinfo:
+      short: relwithdebinfo
+      long: Optimize generated code and add debug information.
+      buildType: RelWithDebInfo
+    minsizerel:
+      short: minsizerel
+      long: Optimize generated code and minimize the size.
+      buildType: MinSizeRel

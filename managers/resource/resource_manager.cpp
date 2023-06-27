@@ -3,6 +3,7 @@
 #include <spdlog/spdlog.h>
 
 #define ASSET_PATH "resources/assets_export/"
+#define ASSET_PATH_2 "resources\\assets_export\\"
 
 std::string asset_path(std::string_view path) {
 	return std::string(ASSET_PATH) + std::string(path);
@@ -13,6 +14,12 @@ std::string remove_asset_path(std::string_view path) {
 
 	if (asset_path_pos != std::string::npos) {
 		return std::string(path).substr(asset_path_pos + std::strlen(ASSET_PATH));
+	}
+
+	asset_path_pos = path.find(ASSET_PATH_2);
+
+	if (asset_path_pos != std::string::npos) {
+		return std::string(path).substr(asset_path_pos + std::strlen(ASSET_PATH_2));
 	}
 
 	return std::string(path);
@@ -48,9 +55,10 @@ Handle<Model> ResourceManager::load_model(const char *path) {
 	return handle;
 }
 
-Handle<Texture> ResourceManager::load_texture(const char *path, bool linear, bool repeat) {
+Handle<Texture> ResourceManager::load_texture(const char *path, bool repeat) {
 	std::string name = path;
 	bool found_asset_path = name.find(ASSET_PATH) != std::string::npos;
+	found_asset_path |= name.find(ASSET_PATH_2) != std::string::npos;
 	if (found_asset_path) {
 		name = remove_asset_path(name);
 	}
@@ -59,7 +67,7 @@ Handle<Texture> ResourceManager::load_texture(const char *path, bool linear, boo
 	}
 
 	Texture texture = {};
-	texture.load_from_asset(path, false, linear, repeat);
+	texture.load_from_asset(asset_path(name), false, repeat);
 
 	textures.push_back(texture);
 	Handle<Texture> handle = {};
@@ -75,9 +83,12 @@ Texture &ResourceManager::get_texture(Handle<Texture> handle) {
 
 Handle<Texture> ResourceManager::get_texture_handle(std::string name) {
 	bool found_asset_path = name.find(ASSET_PATH) != std::string::npos;
+	found_asset_path |= name.find(ASSET_PATH_2) != std::string::npos;
+
 	if (found_asset_path) {
 		name = remove_asset_path(name);
 	}
+
 	return name_to_texture[name];
 }
 
@@ -88,6 +99,10 @@ std::string ResourceManager::get_texture_name(Handle<Texture> handle) {
 		}
 	}
 	return "";
+}
+
+std::vector<Texture> &ResourceManager::get_textures() {
+	return textures;
 }
 
 Model &ResourceManager::get_model(Handle<Model> handle) {

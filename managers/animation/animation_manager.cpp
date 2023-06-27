@@ -7,8 +7,6 @@
 #include "resource/resource_manager.h"
 #include <glm/gtx/quaternion.hpp>
 
-AutoCVarFloat cvar_blend_time_ms("animation.blend_time", "blend time in ms", 700.0f, CVarFlags::EditFloatDrag);
-
 AnimationManager &AnimationManager::get() {
 	static AnimationManager instance;
 	return instance;
@@ -33,13 +31,13 @@ void AnimationManager::update_pose(AnimData &data, float dt) {
 		return;
 	}
 
-	if (data.has_changed && cvar_blend_time_ms.get() > 0.0f) {
+	if (data.has_changed && data.animation->blend_time_ms > 0.0f) {
 		Animation &next_animation = resource_manager.get_animation(data.animation->animation_handle);
 		current_time = fmod(current_time, next_animation.get_duration());
 		Pose next_pose;
 		next_animation.sample(data, next_pose);
 
-		float alpha = current_time / cvar_blend_time_ms.get();
+		float alpha = current_time / data.animation->blend_time_ms;
 		blend_poses(data.local_pose, next_pose, data.local_pose, std::min(calculate_uniform_s(alpha), 1.0f));
 
 		if (alpha >= 1.0f) {
@@ -59,7 +57,7 @@ void AnimationManager::local_to_model(AnimData &data) {
 
 	Rig &rig = model.rig;
 
-	std::vector<Xform> &local_matrices = data.local_pose.xforms;
+	const std::vector<Xform> &local_matrices = data.local_pose.xforms;
 	data.model_pose.xforms.resize(data.local_pose.xforms.size());
 	std::vector<Xform> &global_matrices = data.model_pose.xforms;
 
@@ -78,6 +76,9 @@ void AnimationManager::model_to_final(AnimData &data) {
 	SkinnedModel &model = resource_manager.get_skinned_model(data.model->model_handle);
 
 	Rig &rig = model.rig;
+	if (data.model->bone_matrices.size() < MAX_BONE_COUNT) {
+		data.model->bone_matrices.resize(MAX_BONE_COUNT);
+	}
 
 	std::vector<Xform> &global_matrices = data.model_pose.xforms;
 
@@ -92,7 +93,7 @@ void AnimationManager::model_to_final(AnimData &data) {
 	}
 }
 
-void AnimationManager::change_animation(Entity entity, const std::string &new_animation_name) {
+void AnimationManager::change_animation(Entity entity, const std::string &new_animation_name, float dt) {
 	const auto &item = animation_map.find(entity);
 	if (item == animation_map.end()) {
 		SPDLOG_WARN("Entity {} not found in map.", entity);
@@ -102,6 +103,9 @@ void AnimationManager::change_animation(Entity entity, const std::string &new_an
 	ResourceManager &resource_manager = ResourceManager::get();
 
 	AnimData &entity_data = item->second;
+	if (dt > 0.0f) {
+		update_pose(entity_data, dt);
+	}
 	entity_data.animation->animation_handle = resource_manager.get_animation_handle(new_animation_name);
 	entity_data.animation->current_time = 0.0f;
 	entity_data.has_changed = true;
@@ -131,7 +135,8 @@ glm::mat4 AnimationManager::get_bone_transform(Entity holder, std::string &bone_
 	AnimData &data = animation_map[holder];
 	SkinnedModel &model = resource_manager.get_skinned_model(data.model->model_handle);
 
-	for (int32_t i = 0; i < data.model_pose.xforms.size(); ++i) {
+	int32_t size = std::min(model.rig.names.size(), data.model_pose.xforms.size());
+	for (int32_t i = 0; i < size; ++i) {
 		if (model.rig.names[i] == bone_name) {
 			return glm::mat4(data.model_pose.xforms[i]);
 		}

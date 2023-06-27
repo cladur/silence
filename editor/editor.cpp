@@ -64,14 +64,20 @@ void default_mappings() {
 	input_manager.add_action("clear_selection");
 	input_manager.add_key_to_action("clear_selection", InputKey::ESCAPE);
 
-	input_manager.add_action("delete");
-	input_manager.add_key_to_action("delete", InputKey::BACKSPACE);
-
 	input_manager.add_action("control_modifier");
 	input_manager.add_key_to_action("control_modifier", InputKey::LEFT_CONTROL);
 
 	input_manager.add_action("duplicate");
 	input_manager.add_key_to_action("duplicate", InputKey::D);
+
+	input_manager.add_action("duplicate_wall_cube");
+	input_manager.add_key_to_action("duplicate_wall_cube", InputKey::F);
+
+	input_manager.add_action("delete");
+	input_manager.add_key_to_action("delete", InputKey::DELETE);
+
+	input_manager.add_action("hacker_exit_camera");
+	input_manager.add_key_to_action("hacker_exit_camera", InputKey::TAB);
 }
 
 void bootleg_unity_theme() {
@@ -184,6 +190,7 @@ Editor *Editor::get() {
 
 void Editor::startup() {
 	Engine::startup();
+	RenderManager::get().editor_mode = true;
 
 	// Additional setup
 	default_mappings();
@@ -262,6 +269,46 @@ void Editor::custom_update(float dt) {
 		if (input_manager.is_action_pressed("control_modifier") && input_manager.is_action_just_pressed("duplicate")) {
 			get_active_scene().duplicate_selected_entity();
 		}
+
+		if (input_manager.is_action_pressed("control_modifier") &&
+				input_manager.is_action_just_pressed("duplicate_wall_cube")) {
+			auto &scene = get_active_scene();
+			auto &world = scene.world;
+			auto &entities = scene.entities;
+			auto selected_entity = scene.selected_entity;
+			std::ifstream file("resources/prefabs/Walls/WallCube.pfb");
+			nlohmann::json json;
+			file >> json;
+			SPDLOG_CRITICAL(json.dump(2));
+			auto root_entity = world.deserialize_prefab(json, entities);
+
+			if (world.has_component<Parent>(selected_entity)) {
+				auto &selected_parent_component = world.get_component<Parent>(selected_entity);
+				auto selected_parent = selected_parent_component.parent;
+
+				if (world.has_component<Parent>(root_entity)) {
+					auto &root_parent = world.get_component<Parent>(root_entity);
+					root_parent.parent = selected_parent;
+				} else {
+					world.add_component(root_entity, Parent{ selected_parent });
+				}
+
+				auto &selected_parent_children = world.get_component<Children>(selected_parent);
+				world.add_child(selected_parent, root_entity);
+			}
+
+			if (selected_entity != 0 && root_entity != 0) {
+				auto transform = world.get_component<Transform>(selected_entity);
+				auto &new_transform = world.get_component<Transform>(root_entity);
+				new_transform = transform;
+				file.close();
+				scene.selected_entity = root_entity;
+			}
+		}
+
+		if (input_manager.is_action_pressed("delete")) {
+			get_active_scene().entity_deletion_queue.push(get_active_scene().selected_entity);
+		}
 	}
 
 	if (show_cvar_editor) {
@@ -337,6 +384,7 @@ void Editor::custom_update(float dt) {
 void Editor::create_scene(const std::string &name) {
 	create_scene(name, SceneType::GameScene);
 }
+
 void Editor::create_scene(const std::string &name, SceneType type, const std::string &path) {
 	auto scene = std::make_unique<EditorScene>(type);
 	scene->name = name;
@@ -344,17 +392,21 @@ void Editor::create_scene(const std::string &name, SceneType type, const std::st
 	// Create RenderScene for scene
 	RenderManager &render_manager = RenderManager::get();
 	scene->render_scene_idx = render_manager.create_render_scene();
+	if (type == SceneType::Prefab) {
+		render_manager.render_scenes[scene->render_scene_idx].skybox_pass.skybox.load_from_directory(
+				asset_path("cubemaps/venice_sunset"));
+	}
 
 	Entity entity;
 
 	if (!path.empty()) {
 		std::ifstream file(path);
-		nlohmann::json serialized_scene;
-		file >> serialized_scene;
-		serialized_scene.back()["entity"] = 0;
+		nlohmann::json serialized_scene = nlohmann::json::parse(file);
+		file.close();
+		//		file >> serialized_scene;
+		//		serialized_scene.back()["entity"] = 0;
 		scene->world.deserialize_entities_json(serialized_scene, scene->entities);
 		scenes.push_back(std::move(scene));
-		file.close();
 		return;
 	}
 

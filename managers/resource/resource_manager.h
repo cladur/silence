@@ -32,7 +32,7 @@ public:
 	void shutdown();
 
 	Handle<Model> load_model(const char *path);
-	Handle<Texture> load_texture(const char *path, bool linear = true, bool repeat = true);
+	Handle<Texture> load_texture(const char *path, bool repeat = true);
 
 	Model &get_model(Handle<Model> handle);
 	Handle<Model> get_model_handle(std::string name);
@@ -41,6 +41,7 @@ public:
 	Texture &get_texture(Handle<Texture> handle);
 	Handle<Texture> get_texture_handle(std::string name);
 	std::string get_texture_name(Handle<Texture> handle);
+	std::vector<Texture> &get_textures();
 
 	Handle<Animation> load_animation(const char *path);
 	Animation &get_animation(Handle<Animation> handle);

@@ -1,5 +1,6 @@
 #include "ecs/world.h"
 #include "editor.h"
+#include "editor/IconsMaterialDesign.h"
 #include "editor/editor_scene.h"
 #include "input/input_manager.h"
 #include "physics/physics_manager.h"
@@ -18,6 +19,7 @@
 
 #include "IconsMaterialDesign.h"
 #include "ImGuizmo.h"
+#include "animation/animation_manager.h"
 #include "nfd.h"
 
 void Editor::imgui_menu_bar() {
@@ -112,11 +114,10 @@ void Editor::imgui_menu_bar() {
 						EditorScene &active_scene = get_active_scene();
 						bool is_prefab = active_scene.type == SceneType::Prefab;
 						if (!is_prefab) {
-							nlohmann::json entity_json;
+							nlohmann::json prefab_json;
 							std::ifstream file(out_path);
-							file >> entity_json;
-							entity_json.back()["entity"] = 0;
-							active_scene.world.deserialize_entity_json(entity_json.back(), active_scene.entities);
+							file >> prefab_json;
+							active_scene.world.deserialize_prefab(prefab_json, active_scene.entities);
 							file.close();
 						} else {
 							SPDLOG_WARN("Can't load prototype into archetype scene");
@@ -242,6 +243,10 @@ void Editor::display_entity(EditorScene &scene, Entity entity, const std::string
 			scene.entity_deletion_queue.push(entity);
 		}
 
+		if (ImGui::MenuItem("Remove Entity and Children")) {
+			remove_entity_and_children(scene, entity);
+		}
+
 		ImGui::EndPopup();
 	}
 
@@ -267,6 +272,27 @@ void Editor::display_entity(EditorScene &scene, Entity entity, const std::string
 	}
 }
 
+void Editor::remove_entity_and_children(EditorScene &editor_scene, Entity entity) {
+	auto &world = editor_scene.world;
+	std::vector<Entity> entities_to_delete;
+
+	entities_to_delete.push_back(entity);
+
+	while (!entities_to_delete.empty()) {
+		Entity current_entity = entities_to_delete.back();
+		entities_to_delete.pop_back();
+
+		if (world.has_component<Children>(current_entity)) {
+			auto children = world.get_component<Children>(current_entity);
+			for (int i = 0; i < children.children_count; i++) {
+				entities_to_delete.push_back(children.children[i]);
+			}
+		}
+
+		editor_scene.entity_deletion_queue.push(current_entity);
+	}
+}
+
 void Editor::imgui_scene(EditorScene &scene) {
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 	ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(0, 0));
@@ -280,8 +306,8 @@ void Editor::imgui_scene(EditorScene &scene) {
 	ImGui::SetCursorPos(cursor_pos);
 
 	// ADD ENTITY BUTTON
-	bool add_entity_button = !(scene.type == SceneType::Prefab) || scene.entities.empty();
-	if (add_entity_button && ImGui::Button(ICON_MD_ADD, ImVec2(20, 20))) {
+	//bool add_entity_button = !(scene.type == SceneType::Prefab) || scene.entities.empty();
+	if (ImGui::Button(ICON_MD_ADD, ImVec2(20, 20))) {
 		ImGui::OpenPopup("Add Entity");
 	}
 
@@ -352,10 +378,10 @@ void Editor::imgui_scene(EditorScene &scene) {
 			World &world = scene.world;
 			std::ifstream file(prot_path);
 			if (file.is_open()) {
-				nlohmann::json prototype_json;
-				file >> prototype_json;
-				world.deserialize_entity_json(prototype_json, scene.entities);
-				SPDLOG_INFO("Added prototype");
+				nlohmann::json prefab_json;
+				file >> prefab_json;
+				world.deserialize_prefab(prefab_json, scene.entities);
+				file.close();
 			} else {
 				SPDLOG_ERROR("Failed to open {} prototype file", prot_path);
 			}
@@ -426,11 +452,10 @@ void Editor::imgui_viewport(EditorScene &scene, uint32_t scene_index) {
 		if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_PREFAB_PATH")) {
 			const std::string payload_n = *(const std::string *)payload->Data;
 			if (scene.type == SceneType::GameScene) {
-				nlohmann::json serialized_prototype;
+				nlohmann::json prefab_json;
 				std::ifstream file(payload_n);
-				file >> serialized_prototype;
-				serialized_prototype.back()["entity"] = 0;
-				scene.world.deserialize_entity_json(serialized_prototype.back(), scene.entities);
+				file >> prefab_json;
+				scene.world.deserialize_prefab(prefab_json, scene.entities);
 				file.close();
 			} else {
 				SPDLOG_WARN("Can't add prefab to scene type other than GameScene");
@@ -481,6 +506,14 @@ void Editor::imgui_viewport(EditorScene &scene, uint32_t scene_index) {
 				auto &parent_transform = scene.world.get_component<Transform>(parent.parent);
 				parent_matrix = glm::inverse(parent_transform.get_global_model_matrix());
 			}
+			if (scene.world.has_component<Attachment>(scene.selected_entity)) {
+				AnimationManager &animation_manager = AnimationManager::get();
+				auto &attachment = scene.world.get_component<Attachment>(scene.selected_entity);
+				auto &holder_transform = scene.world.get_component<Transform>(attachment.holder);
+				const glm::mat4 &bone_matrix =
+						animation_manager.get_bone_transform(attachment.holder, attachment.bone_name);
+				parent_matrix = glm::inverse(holder_transform.get_global_model_matrix() * bone_matrix);
+			}
 			glm::decompose(parent_matrix * temp_matrix, transform.scale, transform.orientation, transform.position,
 					skew, perspective);
 			transform.set_changed(true);
@@ -492,10 +525,6 @@ void Editor::imgui_viewport(EditorScene &scene, uint32_t scene_index) {
 	ImGui::SetCursorPos(viewport_start);
 
 	ImVec4 active_color = ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive);
-
-	if (ImGui::Button(ICON_MD_ADS_CLICK)) {
-	}
-	ImGui::SameLine();
 
 	int push_count = 0;
 	if (current_gizmo_operation == ImGuizmo::TRANSLATE) {
@@ -569,6 +598,28 @@ void Editor::imgui_viewport(EditorScene &scene, uint32_t scene_index) {
 		ImGui::InputFloat("Translation", &translation_snap, 0.1f);
 		ImGui::InputFloat("Rotation", &rotation_snap, 0.1f);
 		ImGui::InputFloat("Scale (%)", &scale_snap, 0.1f);
+		ImGui::EndPopup();
+	}
+	ImGui::PopStyleVar();
+
+	if (ImGui::Button(ICON_MD_LAYERS)) {
+		ImGui::OpenPopup("Layers");
+	}
+	ImGui::SameLine();
+
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 8));
+	if (ImGui::BeginPopup("Layers")) {
+		ImGui::Checkbox("Lights", (bool *)CVarSystem::get()->get_int_cvar("debug_draw.lights.draw"));
+		ImGui::Checkbox("Collisions", (bool *)CVarSystem::get()->get_int_cvar("debug_draw.collision.draw"));
+		ImGui::Checkbox("Checkpoints", (bool *)CVarSystem::get()->get_int_cvar("debug_draw.checkpoint_colliders.draw"));
+		ImGui::Checkbox(
+				"Dialogue Triggers", (bool *)CVarSystem::get()->get_int_cvar("debug_draw.dialogue_colliders.draw"));
+		ImGui::Checkbox("Decals", (bool *)CVarSystem::get()->get_int_cvar("debug_draw.decals"));
+		ImGui::Checkbox("Frustum", (bool *)CVarSystem::get()->get_int_cvar("debug_draw.frustum.draw"));
+		if (*(bool *)CVarSystem::get()->get_int_cvar("debug_draw.frustum.draw")) {
+			ImGui::Checkbox("Frustum Real Far Value",
+					(bool *)CVarSystem::get()->get_int_cvar("debug_draw.frustum.real_far_value"));
+		}
 		ImGui::EndPopup();
 	}
 	ImGui::PopStyleVar();
@@ -704,7 +755,6 @@ void Editor::imgui_content_browser() {
 		if (ImGui::BeginDragDropSource()) {
 			if (extension == ".pfb") {
 				drag_and_drop_path = entry.path().string();
-				SPDLOG_INFO("{}", drag_and_drop_path);
 				// Set payload to carry the index of our item (could be anything)
 				ImGui::SetDragDropPayload("DND_PREFAB_PATH", &drag_and_drop_path, sizeof(std::string));
 
@@ -734,6 +784,11 @@ void Editor::imgui_content_browser() {
 
 				// Display preview (could be anything, e.g. when dragging an image we could decide to display
 				// the filename and a small preview of the image, etc.)
+				ImGui::Text("%s", label.c_str());
+			} else if (extension == ".ktx2") {
+				drag_and_drop_path = entry.path().string();
+
+				ImGui::SetDragDropPayload("DND_TEXTURE_PATH", &drag_and_drop_path, sizeof(std::string));
 				ImGui::Text("%s", label.c_str());
 			}
 			ImGui::EndDragDropSource();
@@ -774,12 +829,10 @@ void Editor::imgui_content_browser() {
 						EditorScene &active_scene = get_active_scene();
 						bool is_prefab = active_scene.type == SceneType::Prefab;
 						if (!is_prefab) {
-							nlohmann::json entity_json;
+							nlohmann::json prefab_json;
 							std::ifstream file(entry.path());
-							file >> entity_json;
-							entity_json.back()["entity"] = 0;
-							SPDLOG_WARN(entity_json.dump(1));
-							active_scene.world.deserialize_entity_json(entity_json.back(), active_scene.entities);
+							file >> prefab_json;
+							active_scene.world.deserialize_prefab(prefab_json, active_scene.entities);
 							file.close();
 						} else {
 							SPDLOG_WARN("Can't load prototype into archetype scene");

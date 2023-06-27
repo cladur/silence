@@ -66,7 +66,8 @@ bool convert_image(const fs::path &input, const fs::path &output) {
 		hq_params = "--encode uastc --uastc_quality 2 --uastc_rdo_l 1.0 --uastc_rdo_d 32768 --zcmp 16";
 	}
 
-	auto result = system(fmt::format("toktx --t2 {} {} {}", params, output.string(), input.string()).c_str());
+	auto result =
+			system(fmt::format("toktx --t2 --genmipmap {} {} {}", params, output.string(), input.string()).c_str());
 
 	SPDLOG_INFO("Converted image {} ", input.string());
 
@@ -1261,7 +1262,8 @@ int main(int argc, char *argv[]) {
 		auto input = fmt::format(
 				"{} {} {} {} {} {}", px.string(), nx.string(), py.string(), ny.string(), pz.string(), nz.string());
 
-		auto result = system(fmt::format("toktx --encode uastc --cubemap {} {}", output.string(), input).c_str());
+		auto result =
+				system(fmt::format("toktx --encode uastc --genmipmap --cubemap {} {}", output.string(), input).c_str());
 	}
 
 	//convert skyboxes
@@ -1288,7 +1290,8 @@ int main(int argc, char *argv[]) {
 		std::string input = fmt::format(
 				"{} {} {} {} {} {}", px.string(), nx.string(), py.string(), ny.string(), pz.string(), nz.string());
 
-		auto result = system(fmt::format("toktx --encode uastc --cubemap {} {}", output.string(), input).c_str());
+		auto result =
+				system(fmt::format("toktx --encode uastc --genmipmap --cubemap {} {}", output.string(), input).c_str());
 
 		// Create prefilter map texture
 		output = p.path() / "prefilter_map.ktx2";
@@ -1322,7 +1325,8 @@ int main(int argc, char *argv[]) {
 
 		auto brdf_input = tmp_dir / "brdf_lut.png";
 
-		result = system(fmt::format("toktx --encode uastc {} {}", output.string(), brdf_input.string()).c_str());
+		result = system(
+				fmt::format("toktx --encode uastc --genmipmap {} {}", output.string(), brdf_input.string()).c_str());
 	}
 
 	for (auto &f : futures) {
