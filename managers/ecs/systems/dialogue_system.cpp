@@ -70,6 +70,21 @@ void DialogueSystem::startup(World &world) {
 			SENTENCE("Command: Hans, as a human, there's no need to", "explain that you can climb onto stuff.", "dialogue1"),
 			SENTENCE("Command: As for you ScorpIO...", "You'll need to find a way to squeeze in.", "dialogue2"),
 	} };
+
+	dialogues["tut_camera"] = {{
+			SENTENCE("Command: Look out! There's a security camera ahead of you.", "", "dialogue1"),
+			SENTENCE("Command: The red light coming out of it means that it can spot you.", "", "dialogue2"),
+			SENTENCE("Command: ScorpIO, that's where you come in.", "", "dialogue2"),
+			SENTENCE("Command: You can hack it in order to temporarily control it,", "giving both of you a chance to sneak past it.", "dialogue2"),
+	}};
+
+	dialogues["tut_enemies"] = {{
+			SENTENCE("Command: The room ahead of you is full of enemies.", "", "dialogue1"),
+			SENTENCE("Command: While ScorpIO can't do much about them, you Hans can", "use your combat skills to take them out, one by one.", "dialogue2"),
+			SENTENCE("Command: ScorpIO can distract them however, either by running past them or,", "hacking those conveniently placed explosive boxes on the walls.", "dialogue2"),
+	}};
+
+
 	//clang-format on
 	for (auto &dialogue : dialogues) {
 		for (auto &sentence : dialogue.second.sentences) {

@@ -293,6 +293,9 @@ void MaterialGBuffer::bind_skinned_resources(RenderScene &scene) {
 	skinned_shader.set_int("ao_metallic_roughness_map", 2);
 	skinned_shader.set_int("emissive_map", 3);
 
+	skinned_shader.set_vec3("color_tint", glm::vec3(1.0f, 1.0f, 1.0f));
+	skinned_shader.set_float("brightness_offset", 0.0f);
+
 	skinned_shader.set_int("irradiance_map", 5);
 	skinned_shader.set_int("prefilter_map", 6);
 	skinned_shader.set_int("brdf_lut", 7);
@@ -309,6 +312,8 @@ void MaterialGBuffer::bind_skinned_resources(RenderScene &scene) {
 
 void MaterialGBuffer::bind_instance_resources(ModelInstance &instance, Transform &transform) {
 	shader.set_mat4("model", transform.get_global_model_matrix());
+	shader.set_vec3("color_tint", instance.color_tint);
+	shader.set_float("brightness_offset", instance.brightness_offset);
 	shader.set_bool("flip_uv_y", instance.flip_uv_y);
 	if (!instance.scale_uv_with_transform) {
 		shader.set_vec2("uv_scale", glm::vec2(1.0f));

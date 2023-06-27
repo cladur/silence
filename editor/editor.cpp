@@ -225,7 +225,7 @@ void Editor::startup() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
 	stbi_image_free(pixels);
-	SPDLOG_WARN("Editor started up");
+	SPDLOG_INFO("Editor started up");
 }
 
 void Editor::shutdown() {
