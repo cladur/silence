@@ -82,6 +82,9 @@ void Texture::load_from_asset(const std::string &path, bool pregenerated_mipmaps
 	width = ktx_texture->baseWidth;
 	height = ktx_texture->baseHeight;
 
+	float aniso = 0.0f;
+	glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &aniso);
+
 	GLenum target;
 	{
 		ZoneNamedNC(Zone3, "Texture::load_from_asset::OPENGL", tracy::Color::Black, true);
@@ -137,6 +140,7 @@ void Texture::load_from_asset(const std::string &path, bool pregenerated_mipmaps
 		} else {
 			glGenTextures(1, &id);
 			glBindTexture(GL_TEXTURE_2D, id);
+			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, aniso);
 
 			for (unsigned int level = 0; level < ktx_texture->numLevels; level++) {
 				ktx_size_t offset = 0;
