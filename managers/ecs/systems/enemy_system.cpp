@@ -17,6 +17,8 @@ AutoCVarFloat cvar_crouch_detection_modifier(
 AutoCVarFloat cvar_hacker_detection_modifier(
 		"enemy.hacker_detection_modifier", "enemy hacker detection modifier", 0.75f);
 
+AutoCVarFloat cvar_radial_detection_offset = AutoCVarFloat("enemy.slider_radial_detection_offset", "screenspace detection slider offset", 100.0f, CVarFlags::EditFloatDrag);
+
 void EnemySystem::startup(World &world) {
 	Signature blacklist;
 	Signature whitelist;
