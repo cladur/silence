@@ -12,6 +12,7 @@ uniform sampler2D AoRoughMetal;
 uniform sampler2D ViewPos;
 uniform sampler2D Skybox;
 uniform sampler2D Particles;
+uniform sampler2D SSR;
 
 uniform sampler2D Highlights;
 uniform sampler2D HighlightsDepth;
@@ -36,6 +37,7 @@ void main()
     vec4 highlights = texture(Highlights, TexCoords);
     vec4 highlights_depth = texture(HighlightsDepth, TexCoords);
     vec4 depth = texture(Depth, TexCoords);
+    vec4 ssr = texture(SSR, TexCoords);
 
     if (
     albedo == vec3(0.0, 0.0, 0.0) && diffuse == vec3(0.0, 0.0, 0.0) && view_pos.xyz == vec3(0.0, 0.0, 0.0)
@@ -50,6 +52,7 @@ void main()
     }
 
     vec4 color = vec4((albedo * diffuse + specular) * final_ao, 1.0);
+    color = mix(color, ssr, ssr.a);
 
     if (use_fog == 1) {
         vec4 view_pos = view_pos;

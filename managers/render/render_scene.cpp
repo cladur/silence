@@ -39,6 +39,7 @@ void RenderScene::startup() {
 	particle_pass.startup();
 	highlight_pass.startup();
 	decal_pass.startup();
+	ssr_pass.startup();
 
 	// Size of the viewport doesn't matter here, it will be resized either way
 	render_extent = glm::vec2(100, 100);
@@ -54,6 +55,7 @@ void RenderScene::startup() {
 	mouse_pick_framebuffer.startup(render_extent.x, render_extent.y);
 	particle_buffer.startup(render_extent.x, render_extent.y);
 	highlight_buffer.startup(render_extent.x, render_extent.y);
+	ssr_buffer.startup(render_extent.x, render_extent.y);
 
 	debug_draw.startup();
 	transparent_pass.startup();
@@ -180,6 +182,12 @@ void RenderScene::draw_viewport(bool right_side) {
 		ssao_pass.material.bias = cvar_ssao_bias.get();
 		ssao_pass.draw(*this);
 	}
+
+	ssr_buffer.bind();
+	glad_glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	ssr_pass.draw(*this);
 
 	// render_framebuffer.bind();
 	// ssao_blur_pass.material.should_blur = cvar_ao_blur.get();
@@ -386,6 +394,7 @@ void RenderScene::resize_framebuffer(uint32_t width, uint32_t height) {
 	mouse_pick_framebuffer.resize(width, height);
 	particle_buffer.resize(width, height);
 	highlight_buffer.resize(width, height);
+	ssr_buffer.resize(width, height);
 
 	render_extent = glm::vec2(width, height);
 }

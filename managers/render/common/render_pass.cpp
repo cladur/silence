@@ -839,3 +839,13 @@ void DecalPass::draw(RenderScene &scene) {
 		utils::render_cube();
 	}
 }
+
+void SSRPass::startup() {
+	material.startup();
+}
+
+void SSRPass::draw(RenderScene &scene) {
+	ZoneScopedN("SSRPass::draw");
+	material.bind_resources(scene);
+	utils::render_quad();
+}

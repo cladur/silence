@@ -481,6 +481,7 @@ void MaterialCombination::bind_resources(RenderScene &scene) {
 	shader.set_int("Highlights", 8);
 	shader.set_int("HighlightsDepth", 9);
 	shader.set_int("Depth", 10);
+	shader.set_int("SSR", 11);
 
 	shader.set_int("use_ao", cvar_use_ao.get());
 
@@ -510,6 +511,8 @@ void MaterialCombination::bind_resources(RenderScene &scene) {
 	glBindTexture(GL_TEXTURE_2D, scene.highlight_buffer.depth_texture_id);
 	glActiveTexture(GL_TEXTURE10);
 	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.depth_texture_id);
+	glActiveTexture(GL_TEXTURE11);
+	glBindTexture(GL_TEXTURE_2D, scene.ssr_buffer.ssr_texture_id);
 }
 
 void MaterialCombination::bind_instance_resources(ModelInstance &instance, Transform &transform) {
@@ -783,4 +786,22 @@ void MaterialDecal::bind_decal_resources(Decal &decal, Transform &transform) {
 		glActiveTexture(GL_TEXTURE5);
 		glBindTexture(GL_TEXTURE_2D, ao_rough_metal.id);
 	}
+}
+
+void MaterialSSR::startup() {
+	shader.load_from_files(shader_path("SSR/SSR.vert"), shader_path("SSR/SSR.frag"));
+}
+
+void MaterialSSR::bind_resources(RenderScene &scene) {
+	shader.set_mat4("camera_projection", scene.projection);
+	shader.set_int("gPosition", 0);
+	shader.set_int("gNormal", 1);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.position_texture_id);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.normal_texture_id);
+}
+
+void MaterialSSR::bind_instance_resources(ModelInstance &instance, Transform &transform) {
 }
