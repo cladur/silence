@@ -1,4 +1,5 @@
 #include "physics_manager.h"
+#include "components/dialogue_trigger_component.h"
 #include "ecs/world.h"
 #include "engine/scene.h"
 #include "gameplay/gameplay_manager.h"
@@ -1215,6 +1216,7 @@ std::vector<Entity> PhysicsManager::overlap_sphere(
 			}
 		} else if (world.has_component<ColliderOBB>(entity)) {
 			ColliderOBB c = world.get_component<ColliderOBB>(entity);
+			c.set_orientation(transform.get_global_orientation());
 			c.center = position + c.get_orientation_matrix() * c.center * scale;
 			c.range *= scale;
 			if (glm::length2(is_overlap(c, sphere)) > 0.0f) {
@@ -1280,12 +1282,13 @@ std::vector<Entity> PhysicsManager::overlap_cube_trigger(World &world, const Col
 	for (auto entity : entities) {
 		bool is_trigger_target = world.has_component<EnemyData>(entity) || world.has_component<Highlight>(entity) ||
 				world.has_component<Interactable>(entity) || world.has_component<Platform>(entity) ||
-				world.has_component<Taggable>(entity);
-		if (!is_trigger_target || !world.has_component<ColliderTag>(entity)) {
+				world.has_component<Taggable>(entity) || world.has_component<DialogueTrigger>(entity);
+		bool has_collider = world.has_component<ColliderTag>(entity) || world.has_component<ColliderOBB>(entity);
+
+		if (!is_trigger_target || !has_collider) {
 			continue;
 		}
 
-		auto &tag = world.get_component<ColliderTag>(entity);
 		const Transform &transform = world.get_component<Transform>(entity);
 		const glm::vec3 &position = transform.get_global_position();
 		const glm::vec3 &scale = transform.get_global_scale();
@@ -1300,6 +1303,7 @@ std::vector<Entity> PhysicsManager::overlap_cube_trigger(World &world, const Col
 			}
 		} else if (world.has_component<ColliderOBB>(entity)) {
 			ColliderOBB c = world.get_component<ColliderOBB>(entity);
+			c.set_orientation(transform.get_global_orientation());
 			c.center = position + c.get_orientation_matrix() * c.center * scale;
 			c.range *= scale;
 			if (glm::length2(is_overlap(obb, c)) > 0.0f) {

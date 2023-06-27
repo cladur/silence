@@ -30,6 +30,8 @@ struct Interactable {
 
 	bool first_frame = true;
 
+	std::string ui_name = "ui_interaction_scene";
+
 	void serialize_json(nlohmann::json &serialized_scene) {
 		nlohmann::json::object_t serialized_component;
 		serialized_scene.push_back(nlohmann::json::object());

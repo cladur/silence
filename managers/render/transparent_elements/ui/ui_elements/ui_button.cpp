@@ -74,9 +74,9 @@ void UIButton::draw(glm::vec3 parent_position, glm::vec2 parent_size) {
 	}
 
 	if (rm.get_texture_name(texture).empty()) {
-		ui_manager.sprite_draw.draw_colored(position, size, color, is_screen_space);
+		ui_manager.sprite_draw.draw_colored(new_pos, size, color, is_screen_space);
 	} else {
-		ui_manager.sprite_draw.draw_sprite(position, size, color, tex, is_screen_space);
+		ui_manager.sprite_draw.draw_sprite(new_pos, size, color, tex, is_screen_space);
 	}
 
 	if (text.empty()) {

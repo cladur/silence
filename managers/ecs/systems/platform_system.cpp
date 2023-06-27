@@ -17,7 +17,6 @@
 void PlatformSystem::startup(World &world) {
 	Signature whitelist;
 	whitelist.set(world.get_component_type<Platform>());
-
 	world.set_system_component_whitelist<PlatformSystem>(whitelist);
 }
 void PlatformSystem::update(World &world, float dt) {

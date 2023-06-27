@@ -51,15 +51,11 @@ void DialogueSystem::startup(World &world) {
 	dialogues["intro"] = { {
 			SENTENCE("Mateusz: Ciebie Urgota teorytycznie.", "Ooo, ooo, to prosze.", "dialogue1"),
 			SENTENCE("Maciek: Nagrywac... Co, nagrywac mnie bedziesz?", "", "dialogue2"),
-			SENTENCE("laka maka fa", "", "dialogue2"),
-			SENTENCE("haha", "hihi", "dialogue2"),
 	} };
 
 	dialogues["intro2"] = { {
 			SENTENCE("Mateusz: Ciebie Urgota teorytycznie.", "Ooo, ooo, to prosze.", "dialogue1"),
 			SENTENCE("Maciek: Nagrywac... Co, nagrywac mnie bedziesz?", "", "dialogue2"),
-			SENTENCE("laka maka fa", "", "dialogue2"),
-			SENTENCE("haha", "hihi", "dialogue2"),
 	} };
 
 	for (auto &dialogue : dialogues) {
@@ -136,7 +132,7 @@ void DialogueSystem::update(World &world, float dt) {
 		}
 
 		if (current_sentence_id >= dialogue.sentences.size()) {
-			current_dialogue_id = -1;
+			current_dialogue_id = "";
 			current_sentence_id = 0;
 			dialogue_timer = 0.0f;
 
@@ -144,11 +140,6 @@ void DialogueSystem::update(World &world, float dt) {
 			ui_dialogue_text2->text = "";
 		} else {
 			auto &sentence = dialogue.sentences[current_sentence_id];
-
-			FMOD_STUDIO_PLAYBACK_STATE state;
-			sentence.audio->getPlaybackState(&state);
-
-			// SPDLOG_INFO("State: {}", state);
 
 			if (!sentence.played) {
 				sentence.played = true;
@@ -183,6 +174,12 @@ void DialogueSystem::update(World &world, float dt) {
 			if (!dialogues.contains(dialogue_trigger.dialogue_id)) {
 				SPDLOG_WARN("Dialogue {} does not exist", dialogue_trigger.dialogue_id);
 				continue;
+			}
+
+			// Reset all sentences, in case the dialogue is triggered again (e.g. because we reloaded from checkpoint)
+			Dialogue &dialogue = dialogues[dialogue_trigger.dialogue_id];
+			for (auto &sentence : dialogue.sentences) {
+				sentence.played = false;
 			}
 
 			SPDLOG_INFO("Dialogue triggered: {}", dialogue_trigger.dialogue_id);
