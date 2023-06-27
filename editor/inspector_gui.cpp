@@ -647,12 +647,9 @@ void Inspector::show_collidertag() {
 			}
 			ImGui::EndCombo();
 		}
-		ImGui::TableNextRow();
-		ImGui::TableSetColumnIndex(0);
-		ImGui::Text("Is active");
-		ImGui::TableSetColumnIndex(1);
-		ImGui::SetNextItemWidth(-FLT_MIN);
-		ImGui::Checkbox("##Is active", &tag.is_active);
+
+		show_checkbox("Is active", tag.is_active);
+		show_checkbox("Is climbable", tag.is_climbable);
 
 		ImGui::EndTable();
 	}

@@ -370,6 +370,7 @@ void AgentSystem::update(World &world, float dt) {
 			if (CollisionSystem::ray_cast_layer(world, ray, info)) {
 				float obstacle_height = 1.4f - info.distance;
 				auto &hit_transform = world.get_component<Transform>(info.entity);
+				auto &hit_collider_tag = world.get_component<ColliderTag>(info.entity);
 
 				//dd.draw_sphere(hit_transform.get_global_position(), 0.1f, glm::vec3(1.0f, 0.0f, 0.0f));
 
@@ -378,7 +379,7 @@ void AgentSystem::update(World &world, float dt) {
 
 				glm::vec3 view_pos = glm::vec3(view_pos_non_normalized) / view_pos_non_normalized.w;
 
-				if (obstacle_height > 0.57f && obstacle_height < 0.63f) {
+				if (hit_collider_tag.is_climbable && obstacle_height > 0.5f && obstacle_height < 1.0f) {
 					glm::vec2 screen_pos = enemy_utils::transform_to_screen(
 							info.point, world.get_parent_scene()->get_render_scene(), false);
 
