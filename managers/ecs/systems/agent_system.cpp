@@ -375,7 +375,7 @@ void AgentSystem::update(World &world, float dt) {
 
 				glm::vec3 view_pos = glm::vec3(view_pos_non_normalized) / view_pos_non_normalized.w;
 
-				if (obstacle_height > 0.5f && obstacle_height < 0.7f) {
+				if (obstacle_height > 0.57f && obstacle_height < 0.63f) {
 					glm::vec2 screen_pos = enemy_utils::transform_to_screen(
 							info.point, world.get_parent_scene()->get_render_scene(), false);
 
