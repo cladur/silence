@@ -110,7 +110,6 @@ public:
 
 class BloomPass : public RenderPass {
 	Handle<Texture> dirt_texture;
-	Handle<Texture> clut_texture;
 	float dirt_offsets[2];
 
 public:
@@ -167,4 +166,10 @@ public:
 	void draw(RenderScene &scene) override;
 };
 
+class LUTPass : public RenderPass {
+public:
+	MaterialLUT material;
+	void startup() override;
+	void draw(RenderScene &scene) override;
+};
 #endif // SILENCE_RENDER_PASS_H

@@ -188,4 +188,11 @@ public:
 	void bind_decal_resources(struct Decal &decal, Transform &transform);
 };
 
+class MaterialLUT : public Material {
+public:
+	void startup() override;
+	void bind_resources(RenderScene &scene) override;
+	void bind_instance_resources(ModelInstance &instance, Transform &transform) override;
+};
+
 #endif // SILENCE_MATERIAL_H

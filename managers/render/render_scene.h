@@ -45,6 +45,7 @@ struct RenderScene {
 	ParticlePass particle_pass;
 	HighlightPass highlight_pass;
 	DecalPass decal_pass;
+	LUTPass lut_pass;
 
 	Framebuffer render_framebuffer;
 	Framebuffer final_framebuffer;

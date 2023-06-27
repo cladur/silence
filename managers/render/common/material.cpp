@@ -785,3 +785,22 @@ void MaterialDecal::bind_decal_resources(Decal &decal, Transform &transform) {
 		glBindTexture(GL_TEXTURE_2D, ao_rough_metal.id);
 	}
 }
+
+void MaterialLUT::startup() {
+	shader.load_from_files(shader_path("lut.vert"), shader_path("lut.frag"));
+}
+
+void MaterialLUT::bind_resources(RenderScene &scene) {
+	auto &rm = ResourceManager::get();
+	shader.use();
+	shader.set_int("scene", 0);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, scene.final_framebuffer.texture_id);
+	shader.set_int("lut", 1);
+	glActiveTexture(GL_TEXTURE1);
+	const Handle<Texture> &lut = rm.load_texture(asset_path("lut32_default.ktx2").c_str(), false);
+	glBindTexture(GL_TEXTURE_2D, rm.get_texture(lut).id);
+}
+
+void MaterialLUT::bind_instance_resources(ModelInstance &instance, Transform &transform) {
+}

@@ -39,6 +39,7 @@ void RenderScene::startup() {
 	particle_pass.startup();
 	highlight_pass.startup();
 	decal_pass.startup();
+	lut_pass.startup();
 
 	// Size of the viewport doesn't matter here, it will be resized either way
 	render_extent = glm::vec2(100, 100);
@@ -346,6 +347,8 @@ void RenderScene::draw(bool editor_mode) {
 
 	glViewport(0, 0, full_render_extent.x, full_render_extent.y);
 	final_framebuffer.bind();
+
+	lut_pass.draw(*this);
 	// i assume nothing else that needs depth info will be drawn after UI.
 	glClear(GL_DEPTH_BUFFER_BIT);
 
