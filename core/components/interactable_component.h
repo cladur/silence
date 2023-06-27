@@ -3,7 +3,15 @@
 
 #include <array>
 enum class InteractionType { None, Agent, Hacker };
-enum class Interaction { NoInteraction, HackerCameraJump, HackerPlatform, Exploding, LightSwitch, TemporalLightSwitch };
+enum class Interaction {
+	NoInteraction,
+	HackerCameraJump,
+	HackerPlatform,
+	Exploding,
+	LightSwitch,
+	TemporalLightSwitch,
+	SwitchMainDoorLight
+};
 
 struct Interactable {
 	InteractionType type = InteractionType::None;
@@ -15,6 +23,8 @@ struct Interactable {
 
 	Entity enemy_entity = 0;
 	Entity enemy_entity2 = 0;
+
+	Entity main_door = 0;
 
 	bool triggered = false;
 	bool can_interact = true;
@@ -54,6 +64,7 @@ struct Interactable {
 
 		serialized_component["cable_parent"] = cable_parent;
 		serialized_component["lever"] = lever;
+		serialized_component["main_door"] = main_door;
 
 		serialized_scene.back()["component_data"] = serialized_component;
 		serialized_scene.back()["component_name"] = "Interactable";
@@ -133,6 +144,12 @@ struct Interactable {
 			enemy_entity2 = serialized_component["enemy_entity2"];
 		} else {
 			enemy_entity2 = 0;
+		}
+
+		if (serialized_component.contains("main_door")) {
+			main_door = serialized_component["main_door"];
+		} else {
+			main_door = 0;
 		}
 
 		triggered = false;

@@ -123,16 +123,17 @@ void InteractableSystem::update(World &world, float dt) {
 			}
 			ui.add_as_root(ui_name, std::to_string(entity) + "_ui_interaction_root");
 
-
 			auto &interaction_sprite = ui.add_ui_image(ui_name, std::to_string(entity) + "_ui_interaction_sprite");
 			interaction_sprite.display = false;
 			interaction_sprite.is_billboard = false;
 			interaction_sprite.is_screen_space = true;
 			interaction_sprite.position = glm::vec3(0.0f);
 			interaction_sprite.size = glm::vec2(256.0f);
-			interaction_sprite.texture = ResourceManager::get().load_texture(asset_path("interaction_highlight.ktx2").c_str());
+			interaction_sprite.texture =
+					ResourceManager::get().load_texture(asset_path("interaction_highlight.ktx2").c_str());
 			interaction_sprite.color = glm::vec4(1.0f, 1.0f, 1.0f, 0.4f);
-			ui.add_to_root(ui_name, std::to_string(entity) + "_ui_interaction_sprite", std::to_string(entity) + "_ui_interaction_root");
+			ui.add_to_root(ui_name, std::to_string(entity) + "_ui_interaction_sprite",
+					std::to_string(entity) + "_ui_interaction_root");
 		}
 
 		if (interactable.can_interact) {
@@ -150,7 +151,8 @@ void InteractableSystem::update(World &world, float dt) {
 				ray.length = *CVarSystem::get()->get_float_cvar("agent.interaction_range") * 15.0f;
 				ray.ignore_list.emplace_back(camera_entity);
 				HitInfo info;
-				if (CollisionSystem::ray_cast_layer(world,ray,info) && world.has_component<Interactable>(info.entity)) {
+				if (CollisionSystem::ray_cast_layer(world, ray, info) &&
+						world.has_component<Interactable>(info.entity)) {
 					auto cam_forward = world.get_component<Transform>(camera_entity).get_global_forward();
 					auto cam_forward_xz_proj = glm::normalize(glm::vec3(cam_forward.x, 0.0f, cam_forward.z));
 
@@ -158,7 +160,7 @@ void InteractableSystem::update(World &world, float dt) {
 					auto angle = glm::degrees(glm::acos(glm::dot(direction_xz, cam_forward_xz_proj)));
 
 					glm::vec2 screen_pos = enemy_utils::transform_to_screen(
-							transform.get_global_position(),world.get_parent_scene()->get_render_scene(),false);
+							transform.get_global_position(), world.get_parent_scene()->get_render_scene(), false);
 					screen_pos.x += 96.0f;
 					interaction_sprite.position = glm::vec3(screen_pos, 0.0f);
 					interaction_sprite.display = true;
@@ -191,7 +193,8 @@ void InteractableSystem::update(World &world, float dt) {
 				ray.ignore_list.emplace_back(camera_entity);
 				HitInfo info;
 
-				if (CollisionSystem::ray_cast_layer(world,ray,info) && world.has_component<Interactable>(info.entity)) {
+				if (CollisionSystem::ray_cast_layer(world, ray, info) &&
+						world.has_component<Interactable>(info.entity)) {
 					auto cam_forward = world.get_component<Transform>(camera_entity).get_global_forward();
 					auto cam_forward_xz_proj = glm::normalize(glm::vec3(cam_forward.x, 0.0f, cam_forward.z));
 
@@ -199,7 +202,7 @@ void InteractableSystem::update(World &world, float dt) {
 					auto angle = glm::degrees(glm::acos(glm::dot(direction_xz, cam_forward_xz_proj)));
 
 					glm::vec2 screen_pos = enemy_utils::transform_to_screen(
-							transform.get_global_position(),world.get_parent_scene()->get_render_scene(),true);
+							transform.get_global_position(), world.get_parent_scene()->get_render_scene(), true);
 					screen_pos.x += 96.0f;
 					interaction_sprite.position = glm::vec3(screen_pos, 0.0f);
 					interaction_sprite.display = true;
@@ -344,6 +347,28 @@ void InteractableSystem::update(World &world, float dt) {
 					interactable.is_powering_up = true;
 
 					//SPDLOG_INFO("Temporal Light switch triggered");
+				}
+
+				case Interaction::SwitchMainDoorLight: {
+					Entity light_entity = interactable.interaction_targets[0];
+					auto &main_door = world.get_component<MainDoor>(interactable.main_door);
+
+					if (light_entity == 0) {
+						break;
+					}
+
+					auto &light = world.get_component<Light>(light_entity);
+					light.color = glm::vec3(0.0f, 1.0f, 0.0f);
+
+					main_door.number_of_locks_opened++;
+
+					if (main_door.number_of_locks_opened == main_door.number_of_locks) {
+						auto &left_door = world.get_component<Platform>(main_door.left_door);
+						auto &right_door = world.get_component<Platform>(main_door.right_door);
+
+						left_door.is_moving = true;
+						right_door.is_moving = true;
+					}
 				}
 			}
 

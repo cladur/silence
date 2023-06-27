@@ -93,6 +93,7 @@ void Inspector::show_components() {
 	SHOW_COMPONENT(DialogueTrigger, show_dialogue_trigger);
 	SHOW_COMPONENT(Checkpoint, show_checkpoint);
 	SHOW_COMPONENT(MainMenu, show_main_menu);
+	SHOW_COMPONENT(MainDoor, show_main_door);
 
 	for (int i = 0; i < remove_component_queue.size(); i++) {
 		auto [entity, component_to_remove] = remove_component_queue.front();
@@ -2179,6 +2180,60 @@ void Inspector::show_main_menu() {
 	remove_component_popup<MainMenu>();
 }
 
+void Inspector::show_main_door() {
+	auto &main_door = world->get_component<MainDoor>(selected_entity);
+
+	if (ImGui::CollapsingHeader("Main Door", tree_flags)) {
+		if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+			ImGui::OpenPopup("MainDoorContextMenu");
+		}
+		if (ImGui::BeginPopup("MainDoorContextMenu")) {
+			remove_component_menu_item<MainDoor>();
+			ImGui::EndPopup();
+		}
+
+		float available_width = ImGui::GetContentRegionAvail().x;
+		ImGui::BeginTable("Main Door", 2);
+		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("%s", "Number of locks");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::InputInt("##NumberOfLocks", (int *)&main_door.number_of_locks, 0, 0);
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Left door");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::InputInt("##LeftDoor", (int *)&main_door.left_door, 0, 0);
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
+				Entity payload_entity = *(Entity *)payload->Data;
+				main_door.left_door = payload_entity;
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Right door");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::InputInt("##RightDoor", (int *)&main_door.right_door, 0, 0);
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("DND_ENTITY")) {
+				Entity payload_entity = *(Entity *)payload->Data;
+				main_door.right_door = payload_entity;
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+		ImGui::EndTable();
+	}
+}
+
 bool Inspector::show_vec2(
 		const char *label, glm::vec2 &vec2, float speed, float reset_value, float min_value, float max_value) {
 	bool changed = false;
@@ -2365,6 +2420,7 @@ void Inspector::show_add_component() {
 			SHOW_ADD_COMPONENT(DialogueTrigger);
 			SHOW_ADD_COMPONENT(Checkpoint);
 			SHOW_ADD_COMPONENT(MainMenu);
+			SHOW_ADD_COMPONENT(MainDoor);
 
 			ImGui::EndPopup();
 		}
