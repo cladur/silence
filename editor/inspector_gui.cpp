@@ -92,6 +92,7 @@ void Inspector::show_components() {
 	SHOW_COMPONENT(WallCube, show_wall_cube);
 	SHOW_COMPONENT(DialogueTrigger, show_dialogue_trigger);
 	SHOW_COMPONENT(Checkpoint, show_checkpoint);
+	SHOW_COMPONENT(MainMenu, show_main_menu);
 
 	for (int i = 0; i < remove_component_queue.size(); i++) {
 		auto [entity, component_to_remove] = remove_component_queue.front();
@@ -1725,9 +1726,13 @@ void Inspector::show_light_switcher() {
 		ImGui::TableSetupColumn("##Col1", ImGuiTableColumnFlags_WidthFixed, available_width * 0.33f);
 
 		show_float("Turn on time", light_switcher.turn_on_time);
+		light_switcher.turn_on_time = glm::max(light_switcher.turn_on_time, 0.0f);
 		show_float("Turn off time", light_switcher.turn_off_time);
+		light_switcher.turn_off_time = glm::max(light_switcher.turn_off_time, 0.0f);
 		show_float("Turn on variance", light_switcher.turn_on_variance);
+		light_switcher.turn_on_variance = glm::max(light_switcher.turn_on_variance, 0.0f);
 		show_float("Turn off variance", light_switcher.turn_off_variance);
+		light_switcher.turn_off_variance = glm::max(light_switcher.turn_off_variance, 0.0f);
 
 		ImGui::EndTable();
 	}
@@ -2171,6 +2176,12 @@ void Inspector::show_checkpoint() {
 	}
 }
 
+void Inspector::show_main_menu() {
+	ImGui::CollapsingHeader("Main Menu Component");
+
+	remove_component_popup<MainMenu>();
+}
+
 bool Inspector::show_vec2(
 		const char *label, glm::vec2 &vec2, float speed, float reset_value, float min_value, float max_value) {
 	bool changed = false;
@@ -2356,6 +2367,7 @@ void Inspector::show_add_component() {
 			SHOW_ADD_COMPONENT(WallCube);
 			SHOW_ADD_COMPONENT(DialogueTrigger);
 			SHOW_ADD_COMPONENT(Checkpoint);
+			SHOW_ADD_COMPONENT(MainMenu);
 
 			ImGui::EndPopup();
 		}

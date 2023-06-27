@@ -8,6 +8,8 @@ public:
 	bool should_run = true;
 	bool show_cvar_editor = false;
 
+	std::pair<bool, std::string> scene_change_request = { false, "" };
+
 	// Standard engine methods
 	virtual void startup();
 	virtual void shutdown();

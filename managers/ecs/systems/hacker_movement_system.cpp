@@ -6,6 +6,7 @@
 #include "managers/physics/ecs/collision_system.h"
 #include "physics/physics_manager.h"
 #include <audio/audio_manager.h>
+#include <gameplay/gameplay_manager.h>
 
 AutoCVarFloat cvar_hacker_acc_ground("hacker.acc_ground", "acceleration on ground ", 32.0f, CVarFlags::EditCheckbox);
 
@@ -37,6 +38,9 @@ void HackerMovementSystem::startup(World &world) {
 
 void HackerMovementSystem::update(World &world, float dt) {
 	ZoneScopedN("HackerSystem::update");
+	if (GameplayManager::get().game_state == GameState::MAIN_MENU) {
+		return;
+	}
 	InputManager &input_manager = InputManager::get();
 	AnimationManager &animation_manager = AnimationManager::get();
 	ResourceManager &resource_manager = ResourceManager::get();
@@ -51,7 +55,9 @@ void HackerMovementSystem::update(World &world, float dt) {
 		auto &animation_instance = world.get_component<AnimationInstance>(hacker_data.model);
 
 		bool is_on_camera = hacker_data.is_on_camera;
-		glm::vec3 camera_forward = -camera_tf.get_global_forward();
+		auto camera_forward = camera_pivot_tf.get_global_forward();
+		camera_forward.y = 0.0f;
+		camera_forward = glm::normalize(camera_forward);
 		auto camera_right = camera_pivot_tf.get_global_right();
 
 		glm::vec3 acc_direction = { 0, 0, 0 };
@@ -72,7 +78,7 @@ void HackerMovementSystem::update(World &world, float dt) {
 			acc_direction = glm::vec3(0.0f);
 		}
 
-		if (glm::length(acc_direction) > 0.0f) {
+		if (glm::length(acc_direction) > 1) {
 			acc_direction = glm::normalize(acc_direction);
 		}
 

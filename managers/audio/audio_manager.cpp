@@ -36,10 +36,15 @@ void AudioManager::startup() {
 void AudioManager::update(Scene &scene) {
 	ZoneScopedNC("AudioManager::update", 0xcacaca);
 	FMOD_CHECK(system->update());
-	if (!cvar_enable_audio.get()) {
-		master_bus->setVolume(0.0f);
-	} else {
-		master_bus->setVolume(1.0f);
+	static bool audio_enabled = !cvar_enable_audio.get();
+
+	if (audio_enabled != cvar_enable_audio.get()) {
+		audio_enabled = cvar_enable_audio.get();
+		if (!audio_enabled) {
+			master_bus->setVolume(0.0f);
+		} else {
+			master_bus->setVolume(1.0f);
+		}
 	}
 	this->scene = &scene;
 	auto &gm = GameplayManager::get();

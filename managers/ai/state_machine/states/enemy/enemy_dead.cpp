@@ -35,6 +35,21 @@ void EnemyDead::update(World *world, uint32_t entity_id, float dt) {
 	enemy_data.detection_level = 0.0f;
 	GameplayManager::get().add_detection_level(enemy_data.detection_level);
 
+	auto &agent_screen_flash = UIManager::get().get_ui_image(std::to_string(entity_id) + "_detection", "agent_detection_screen_flash");
+	auto &hacker_screen_flash = UIManager::get().get_ui_image(std::to_string(entity_id) + "_detection", "hacker_detection_screen_flash");
+	agent_screen_flash.display = false;
+	hacker_screen_flash.display = false;
+
+	auto &agent_detection_outline = UIManager::get().get_ui_image(std::to_string(entity_id) + "_detection", "agent_detection_outline");
+	auto &hacker_detection_outline = UIManager::get().get_ui_image(std::to_string(entity_id) + "_detection", "hacker_detection_outline");
+	auto &agent_detection_fill = UIManager::get().get_ui_image(std::to_string(entity_id) + "_detection", "agent_detection_fill");
+	auto &hacker_detection_fill = UIManager::get().get_ui_image(std::to_string(entity_id) + "_detection", "hacker_detection_fill");
+
+	agent_detection_outline.display = false;
+	hacker_detection_outline.display = false;
+	agent_detection_fill.display = false;
+	hacker_detection_fill.display = false;
+
 	// change animation
 	if (anim.animation_handle.id != res.get_animation_handle("enemy/enemy_ANIM_GLTF/enemy_death.anim").id) {
 		animation_manager.change_animation(entity_id, "enemy/enemy_ANIM_GLTF/enemy_death.anim");
