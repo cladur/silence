@@ -523,10 +523,10 @@ inline void update_detection_slider(
 	auto angle = glm::degrees(glm::acos(glm::dot(dir, cam_forward_xz_proj)));
 
 	float radial_offset = *CVarSystem::get()->get_float_cvar("enemy.slider_radial_detection_offset");
-	if (agent_detection_outline.position.x > window_size.x / 2.0f ||
-			agent_detection_outline.position.y > window_size.y / 2.0f ||
-			agent_detection_outline.position.x < -window_size.x / 2.0f ||
-			agent_detection_outline.position.y < -window_size.y / 2.0f || angle > 90.0f) {
+	if (agent_detection_outline.position.x + agent_detection_outline.size.x / 3.0f > window_size.x / 2.0f ||
+			agent_detection_outline.position.y + agent_detection_outline.size.x / 2.0f > window_size.y / 2.0f ||
+			agent_detection_outline.position.x + agent_detection_outline.size.x / 3.0f < -window_size.x / 2.0f ||
+			agent_detection_outline.position.y + agent_detection_outline.size.x / 2.0f < -window_size.y / 2.0f || angle > 90.0f) {
 		// check if rotation should be more than 180 degrees
 		auto cross = glm::cross(dir, cam_forward_xz_proj);
 		if (cross.y > 0.0f) {
@@ -593,10 +593,10 @@ inline void update_detection_slider(
 
 	angle = glm::degrees(glm::acos(glm::dot(dir, cam_forward_xz_proj)));
 
-	if (hacker_detection_outline.position.x > window_size.x / 2.0f ||
-			hacker_detection_outline.position.y > window_size.y / 2.0f ||
-			hacker_detection_outline.position.x < -window_size.x / 2.0f ||
-			hacker_detection_outline.position.y < -window_size.y / 2.0f || angle > 90.0f) {
+	if (hacker_detection_outline.position.x + hacker_detection_outline.size.x / 3.0f > window_size.x / 2.0f ||
+			hacker_detection_outline.position.y + hacker_detection_outline.size.x / 2.0f > window_size.y / 2.0f ||
+			hacker_detection_outline.position.x + hacker_detection_outline.size.x / 3.0f < -window_size.x / 2.0f ||
+			hacker_detection_outline.position.y + hacker_detection_outline.size.x / 2.0f < -window_size.y / 2.0f || angle > 90.0f) {
 		auto cross = glm::cross(dir, cam_forward_xz_proj);
 		if (cross.y > 0.0f) {
 			angle = -angle;
@@ -687,10 +687,10 @@ inline void update_detection_slider_camera(uint32_t entity_id, Transform &transf
 
 	float radial_offset = *CVarSystem::get()->get_float_cvar("enemy.slider_radial_detection_offset");
 
-	if (agent_detection_outline.position.x > window_size.x / 2.0f ||
-			agent_detection_outline.position.y > window_size.y / 2.0f ||
-			agent_detection_outline.position.x < -window_size.x / 2.0f ||
-			agent_detection_outline.position.y < -window_size.y / 2.0f || angle > 90.0f) {
+	if (agent_detection_outline.position.x + agent_detection_outline.size.x / 3.0f> window_size.x / 2.0f  ||
+			agent_detection_outline.position.y + agent_detection_outline.size.x / 2.0f > window_size.y / 2.0f ||
+			agent_detection_outline.position.x + agent_detection_outline.size.x / 3.0f< -window_size.x / 2.0f ||
+			agent_detection_outline.position.y + agent_detection_outline.size.x / 2.0f < -window_size.y / 2.0f || angle > 90.0f) {
 		auto cross = glm::cross(dir, cam_forward_xz_proj);
 		if (cross.y > 0.0f) {
 			angle = -angle;
@@ -755,10 +755,10 @@ inline void update_detection_slider_camera(uint32_t entity_id, Transform &transf
 
 	angle = glm::degrees(glm::acos(glm::dot(dir, cam_forward_xz_proj)));
 
-	if (hacker_detection_outline.position.x > window_size.x / 2.0f ||
-			hacker_detection_outline.position.y > window_size.y / 2.0f ||
-			hacker_detection_outline.position.x < -window_size.x / 2.0f ||
-			hacker_detection_outline.position.y < -window_size.y / 2.0f || angle > 90.0f) {
+	if (hacker_detection_outline.position.x + hacker_detection_outline.size.x / 3.0f > window_size.x / 2.0f ||
+			hacker_detection_outline.position.y + hacker_detection_outline.size.x / 2.0f > window_size.y / 2.0f ||
+			hacker_detection_outline.position.x + hacker_detection_outline.size.x / 3.0f < -window_size.x / 2.0f ||
+			hacker_detection_outline.position.y + hacker_detection_outline.size.x / 2.0f < -window_size.y / 2.0f || angle > 90.0f) {
 		auto cross = glm::cross(dir, cam_forward_xz_proj);
 		if (cross.y > 0.0f) {
 			angle = -angle;
