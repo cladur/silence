@@ -73,7 +73,7 @@ void DialogueSystem::startup(World &world) {
 
 	dialogues["tut_camera"] = {{
 		SENTENCE("Command: Look out! There's a security camera ahead of you.", "", "Dialogues/camera/camera_1"),
-		SENTENCE("Command: The red light coming out of it means that it can spot you.", "", "Dialogues/camera/camera_2"),
+		SENTENCE("Command: The orange light coming out of it means that it can spot you.", "", "Dialogues/camera/camera_2"),
 		SENTENCE("ScorpIO: Don't worry, I can take control over it,", "letting both of us sneak past it.", "Dialogues/camera/camera_hacker"),
 	}};
 
@@ -82,6 +82,12 @@ void DialogueSystem::startup(World &world) {
 		SENTENCE("ScorpIO: I'm afraid I don't have the abilities necessary", "for engaging in direct combat.", "Dialogues/enemies/enemy_hacker_1"),
 		SENTENCE("Hans: I'll take them out, while you distract them, okay?", "", "Dialogues/enemies/enemy_agent"),
 		SENTENCE("ScorpIO: Roger that.", "", "Dialogues/enemies/enemy_hacker_2"),
+	}};
+
+	dialogues["tut_closed_door"] = {{
+		SENTENCE("Hans: The door ahead of us is locked.", "How should we proceed?", "Dialogues/enemies/enemy_hacker_2"),
+		SENTENCE("Command: Try looking for switches around it.", "", "Dialogues/enemies/enemy_hacker_2"),
+		SENTENCE("ScorpIO: Maybe we could follow those cables on the walls.", "", "Dialogues/enemies/enemy_hacker_2"),
 	}};
 
 

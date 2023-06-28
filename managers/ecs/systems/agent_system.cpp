@@ -576,7 +576,7 @@ void AgentSystem::update(World &world, float dt) {
 								ray.length = cvar_agent_attack_range.get();
 								HitInfo info;
 								glm::vec3 end = ray.origin + ray.direction;
-								dd.draw_arrow(ray.origin, end);
+								// dd.draw_arrow(ray.origin, end);
 								CollisionSystem::ray_cast_layer(world, ray, info);
 								bool behind_enemy = glm::dot(enemy_transform.get_forward(), ray.direction) >
 										glm::cos(glm::radians(cvar_agent_attack_angle.get()));
