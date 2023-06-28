@@ -23,6 +23,7 @@ uniform float fog_min;
 uniform float fog_max;
 
 uniform bool use_ao;
+uniform bool use_ssr;
 
 void main()
 {
@@ -51,7 +52,9 @@ void main()
         final_ao = 1.0;
     }
 
-    specular = mix(specular, ssr.rgb, ssr.a);
+    if (use_ssr) {
+        specular = mix(specular, ssr.rgb, ssr.a);
+    }
     vec4 color = vec4((albedo * diffuse + specular) * final_ao, 1.0);
 
     if (use_fog == 1) {

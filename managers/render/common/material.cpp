@@ -7,6 +7,7 @@
 #include <spdlog/spdlog.h>
 
 AutoCVarInt cvar_use_ao("render.use_ao", "use ambient occlusion", 1, CVarFlags::EditCheckbox);
+AutoCVarInt cvar_use_ssr("ssr.enable", "use SSR", 1, CVarFlags::EditCheckbox);
 AutoCVarInt cvar_use_fog("render.use_fog", "use simple linear fog", 1, CVarFlags::EditCheckbox);
 AutoCVarFloat cvar_fog_min("render.fog_min", "fog min distance", 40.0f, CVarFlags::EditFloatDrag);
 AutoCVarFloat cvar_fog_max("render.fog_max", "fog max distance", 300.0f, CVarFlags::EditFloatDrag);
@@ -491,6 +492,7 @@ void MaterialCombination::bind_resources(RenderScene &scene) {
 	shader.set_int("SSR", 11);
 
 	shader.set_int("use_ao", cvar_use_ao.get());
+	shader.set_int("use_ssr", cvar_use_ssr.get());
 
 	shader.set_int("use_fog", cvar_use_fog.get());
 	shader.set_float("fog_min", cvar_fog_min.get());
