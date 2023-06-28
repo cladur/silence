@@ -16,6 +16,8 @@ AutoCVarInt cvar_frustum_force_scene_camera("render.frustum.force_scene_camera",
 		CVarFlags::EditCheckbox);
 AutoCVarInt cvar_debug_camera_use("debug_camera.use", "Use debug camera", 1, CVarFlags::EditCheckbox);
 
+AutoCVarInt cvar_debug_draw("debug_draw.draw", "draw any debugs", 0, CVarFlags::EditCheckbox);
+
 // SSAO Params
 AutoCVarInt cvar_ssao("render.ssao", "Use SSAO", 1, CVarFlags::EditCheckbox);
 AutoCVarFloat cvar_ssao_radius("render.ssao.radius", "SSAO radius", 0.24f);
@@ -274,7 +276,9 @@ void RenderScene::draw_viewport(bool right_side) {
 		//debug_draw.draw_line(glm::vec3(-10, 0, i), glm::vec3(10, 0, i), color);
 	}
 
-	debug_draw.draw();
+	if (cvar_debug_draw.get()) {
+		debug_draw.draw();
+	}
 
 	if (editor_mode) {
 		mouse_pick_framebuffer.bind();
