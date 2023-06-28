@@ -34,7 +34,7 @@ public:
 	static std::default_random_engine random_generator;
 	static GameplayManager &get();
 
-	GameState game_state = GameState::GAME;
+	GameState game_state = GameState::MAIN_MENU;
 
 	bool first_start = true;
 	void startup(Scene *scene);

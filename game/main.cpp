@@ -16,10 +16,10 @@ int main() {
 	Game game;
 	game.startup();
 
-	game.create_scene("Main");
+	game.create_scene("MainMenu");
 	game.scenes[0]->register_game_systems();
-	game.scenes[0]->load_from_file("resources/scenes/level_tutorial_0.scn");
-	game.set_active_scene("Main");
+	game.scenes[0]->load_from_file("resources/scenes/main_menu.scn");
+	game.set_active_scene("MainMenu");
 
 	auto end = std::chrono::high_resolution_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();

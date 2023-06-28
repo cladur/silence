@@ -161,7 +161,7 @@ void DialogueSystem::update(World &world, float dt) {
 	}
 
 	// Wait for global matrices of transforms to be updated
-	if (world.get_parent_scene()->frame_number == 0) {
+	if (world.get_parent_scene()->frame_number < 30) {
 		return;
 	}
 

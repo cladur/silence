@@ -81,7 +81,7 @@ void CheckpointSystem::update(World &world, float dt) {
 	PhysicsManager &physics_manager = PhysicsManager::get();
 
 	// Wait for global matrices of transforms to be updated
-	if (world.get_parent_scene()->frame_number == 0) {
+	if (world.get_parent_scene()->frame_number < 100) {
 		return;
 	}
 
