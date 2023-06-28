@@ -1,6 +1,7 @@
 #include "scene.h"
 #include "animation/ecs/animation_instance.h"
 #include "components/exploding_box_component.h"
+#include "components/main_menu_component.h"
 #include "components/wall_cube_component.h"
 #include "display/display_manager.h"
 #include "ecs/systems/detection_camera_system.h"
@@ -11,7 +12,6 @@
 #include "ecs/systems/platform_system.h"
 #include "ecs/systems/rotator_system.h"
 #include "ecs/systems/wall_cube_system.h"
-#include "components/main_menu_component.h"
 #include "ecs/world.h"
 #include "editor/editor.h"
 #include "managers/animation/ecs/animation_instance.h"
@@ -36,12 +36,12 @@
 #include "ecs/systems/collider_draw.h"
 #include "ecs/systems/dialogue_collider_draw.h"
 #include "ecs/systems/enemy_path_draw_system.h"
-#include "ecs/systems/main_menu_system.h"
 #include "ecs/systems/enemy_pathing.h"
 #include "ecs/systems/enemy_system.h"
 #include "ecs/systems/hacker_system.h"
 #include "ecs/systems/highlight_system.h"
 #include "ecs/systems/isolated_entities_system.h"
+#include "ecs/systems/main_menu_system.h"
 #include "ecs/systems/root_parent_system.h"
 #include "ecs/systems/taggable_system.h"
 #include "gameplay/gameplay_manager.h"
@@ -55,7 +55,6 @@
 #include "render/ecs/particle_render_system.h"
 #include "render/ecs/render_system.h"
 #include "render/ecs/skinned_render_system.h"
-
 
 #define COLLISION_TEST_ENTITY 4
 
@@ -167,6 +166,7 @@ void Scene::register_game_systems() {
 	world.register_system<HackerMovementSystem>(UpdateOrder::DuringPhysics);
 	world.register_system<CollisionSystem>(UpdateOrder::DuringPhysics);
 	world.register_system<EnemySystem>(UpdateOrder::PostAnimation);
+	world.register_system<EnemyPathing>(UpdateOrder::PostAnimation);
 	world.register_system<TaggableSystem>();
 	//world.register_system<EnemyPathing>();
 	world.register_system<InteractableSystem>();
