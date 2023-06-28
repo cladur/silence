@@ -569,14 +569,14 @@ void AgentSystem::update(World &world, float dt) {
 								Ray ray{};
 								ray.layer_name = "default";
 								ray.ignore_list.emplace_back(entity);
-								ray.origin = attack_sphere.center;
-								ray.direction = glm::vec3{ enemy_transform.get_global_position().x, 0.0f,
-									enemy_transform.get_global_position().z } -
-										glm::vec3{ attack_sphere.center.x, 0.0f, attack_sphere.center.z };
+								ray.origin = transform.get_global_position() + glm::vec3{ 0.0f, 1.0f, 0.0f };
+								ray.direction = glm::normalize(glm::vec3{ enemy_transform.get_global_position().x, 0.0f,
+																	   enemy_transform.get_global_position().z } -
+										glm::vec3{ ray.origin.x, 0.0f, ray.origin.z });
 								ray.length = cvar_agent_attack_range.get();
 								HitInfo info;
 								glm::vec3 end = ray.origin + ray.direction;
-								//dd.draw_arrow(ray.origin, end);
+								dd.draw_arrow(ray.origin, end);
 								CollisionSystem::ray_cast_layer(world, ray, info);
 								bool behind_enemy = glm::dot(enemy_transform.get_forward(), ray.direction) >
 										glm::cos(glm::radians(cvar_agent_attack_angle.get()));
