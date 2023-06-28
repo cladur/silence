@@ -168,7 +168,7 @@ float ShadowCalculation(vec3 normal, vec3 light_dir)
     }
     shadow /= 9.0f;
 
-    if (projCoords.z > 1.0f)
+    if (projCoords.z > 1.0f && type == 1)
     {
         shadow = 0.0f;
     }
