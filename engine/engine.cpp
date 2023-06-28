@@ -8,6 +8,7 @@
 #include "input/input_manager.h"
 #include "render/render_manager.h"
 
+#include "animation/animation_manager.h"
 #include "audio/adaptive_music_manager.h"
 #include "gameplay/gameplay_manager.h"
 #include "imgui.h"
@@ -17,7 +18,6 @@
 #include "render/transparent_elements/particle_manager.h"
 #include "render/transparent_elements/ui_manager.h"
 #include <string>
-#include "animation/animation_manager.h"
 
 AutoCVarInt cvar_force_20_fps("engine.force_20_fps", "force 20 fps", 0, CVarFlags::EditCheckbox);
 AutoCVarInt cvar_uncapped_fps("engine.uncap_fps", "don't limit fps to screen refresh rate", 0, CVarFlags::EditCheckbox);
@@ -124,10 +124,8 @@ void Engine::update(float dt) {
 	render_manager.draw();
 
 	if (scene_change_request.first) {
-
 		scene_change_request.first = false;
 		if (scene_change_request.second != "MainMenu") {
-
 			AnimationManager::get().animation_map.clear();
 			RenderManager::get().render_scenes.pop_back();
 			scenes.pop_back();
@@ -137,9 +135,13 @@ void Engine::update(float dt) {
 
 			create_scene(scene_change_request.second);
 			scenes[0]->register_game_systems();
-			scenes[0]->load_from_file("resources/scenes/level_3_12.scn");
+			scenes[0]->load_from_file("resources/scenes/" + scene_change_request.second + ".scn");
 			GameplayManager::get().startup(&*scenes[0]);
 			UIManager::get().set_render_scene(&get_active_scene().get_render_scene());
+
+			glm::vec2 framebuffer_size = display_manager.get_framebuffer_size();
+			scenes[0]->get_render_scene().resize_framebuffer(framebuffer_size.x, framebuffer_size.y);
+
 			set_active_scene(scene_change_request.second);
 
 			DisplayManager::get().capture_mouse(true);

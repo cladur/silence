@@ -190,11 +190,13 @@ void RenderScene::draw_viewport(bool right_side) {
 	// ssao_blur_pass.draw(*this);
 	// glBindFramebuffer(GL_READ_FRAMEBUFFER, ssao_buffer.framebuffer_id);
 
-	ssr_buffer.bind();
-	glad_glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	
-	ssr_pass.draw(*this, right_side);
+	if (*CVarSystem::get()->get_int_cvar("ssr.enable")) {
+		ssr_buffer.bind();
+		glad_glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		ssr_pass.draw(*this, right_side);
+	}
 
 	// 2.5. copy content of geometry's depth buffer to default framebuffer's depth buffer
 	// ----------------------------------------------------------------------------------

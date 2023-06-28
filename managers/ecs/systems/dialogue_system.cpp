@@ -211,6 +211,11 @@ void DialogueSystem::update(World &world, float dt) {
 		auto vec = PhysicsManager::get().overlap_cube_checkpoint(world, c);
 
 		if (!vec.empty()) {
+			if (dialogue_trigger.dialogue_id.starts_with("level_")) {
+				GameplayManager::get().change_scene(dialogue_trigger.dialogue_id);
+				continue;
+			}
+
 			if (!dialogues.contains(dialogue_trigger.dialogue_id)) {
 				SPDLOG_WARN("Dialogue {} does not exist", dialogue_trigger.dialogue_id);
 				continue;
