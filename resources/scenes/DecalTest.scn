@@ -3,48 +3,6 @@
         "components": [
             {
                 "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "items/wooden_box/wooden_box.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
-                    "name": "Floor"
-                },
-                "component_name": "Name"
-            },
-            {
-                "component_data": {
-                    "orientation": {
-                        "w": 1.0,
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    "position": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    "scale": {
-                        "x": 10.0,
-                        "y": 1.0,
-                        "z": 10.0
-                    }
-                },
-                "component_name": "Transform"
-            }
-        ],
-        "entity": 1,
-        "signature": "0000000000000000000000000000000000000000000000000000000000100011"
-    },
-    {
-        "components": [
-            {
-                "component_data": {
                     "name": "Decal"
                 },
                 "component_name": "Name"
@@ -52,26 +10,27 @@
             {
                 "component_data": {
                     "orientation": {
-                        "w": 0.9593392014503479,
-                        "x": -0.20594364404678345,
-                        "y": 0.1923205405473709,
-                        "z": 0.016381220892071724
+                        "w": 0.9730114340782166,
+                        "x": -0.21728277206420898,
+                        "y": -0.02172957919538021,
+                        "z": -0.07459694147109985
                     },
                     "position": {
-                        "x": 5.342179298400879,
-                        "y": 5.595942974090576,
-                        "z": 10.759023666381836
+                        "x": 0.2581736445426941,
+                        "y": 8.028470039367676,
+                        "z": 7.213961124420166
                     },
                     "scale": {
-                        "x": 0.9999997615814209,
-                        "y": 0.9999998807907104,
-                        "z": 1.0000001192092896
+                        "x": 0.9999975562095642,
+                        "y": 0.999997079372406,
+                        "z": 0.999996542930603
                     }
                 },
                 "component_name": "Transform"
             },
             {
                 "component_data": {
+                    "blend_distance": 0.0,
                     "cast_shadow": true,
                     "cast_volumetric": true,
                     "color": {
@@ -79,10 +38,11 @@
                         "g": 1.0,
                         "r": 1.0
                     },
-                    "cutoff": 30.0,
-                    "intensity": 300.0,
+                    "cutoff": 17.110000610351563,
+                    "intensity": 2000.0,
                     "is_on": true,
-                    "outer_cutoff": 5.0,
+                    "outer_cutoff": 6.119999885559082,
+                    "radius": 32.400001525878906,
                     "type": 2
                 },
                 "component_name": "Light"
@@ -95,15 +55,6 @@
         "components": [
             {
                 "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "items/wooden_box/wooden_box.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
                     "name": "Floor"
                 },
                 "component_name": "Name"
@@ -117,17 +68,26 @@
                         "z": 0.0
                     },
                     "position": {
-                        "x": 0.0,
-                        "y": 3.511345863342285,
-                        "z": -2.6518867015838623
+                        "x": 0.32192230224609375,
+                        "y": 3.657463312149048,
+                        "z": -1.9823966026306152
                     },
                     "scale": {
                         "x": 1.0,
-                        "y": 0.9999862909317017,
+                        "y": 0.9999691247940063,
                         "z": 10.000020980834961
                     }
                 },
                 "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/wooden_box/wooden_box.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
             }
         ],
         "entity": 3,
@@ -137,15 +97,6 @@
         "components": [
             {
                 "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "items/wooden_box/wooden_box.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
                     "name": "Floor"
                 },
                 "component_name": "Name"
@@ -159,17 +110,26 @@
                         "z": 0.0
                     },
                     "position": {
-                        "x": -1.7731001377105713,
+                        "x": -3.523427963256836,
                         "y": 3.511345863342285,
-                        "z": -0.9160246849060059
+                        "z": -1.7907559871673584
                     },
                     "scale": {
-                        "x": 1.0,
-                        "y": 0.9999765157699585,
+                        "x": 3.3977713584899902,
+                        "y": 0.9999534487724304,
                         "z": 10.000020980834961
                     }
                 },
                 "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/wooden_box/wooden_box.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
             }
         ],
         "entity": 4,
@@ -179,15 +139,6 @@
         "components": [
             {
                 "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "items/wooden_box/wooden_box.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {
                     "name": "Floor"
                 },
                 "component_name": "Name"
@@ -201,24 +152,18 @@
                         "z": 0.0
                     },
                     "position": {
-                        "x": 2.518444061279297,
+                        "x": 3.807044506072998,
                         "y": 3.511345863342285,
-                        "z": -4.252511978149414
+                        "z": -1.7751811742782593
                     },
                     "scale": {
-                        "x": 1.0,
-                        "y": 0.9999809265136719,
+                        "x": 2.64298152923584,
+                        "y": 0.9999569654464722,
                         "z": 10.000020980834961
                     }
                 },
                 "component_name": "Transform"
-            }
-        ],
-        "entity": 5,
-        "signature": "0000000000000000000000000000000000000000000000000000000000100011"
-    },
-    {
-        "components": [
+            },
             {
                 "component_data": {
                     "in_shadow_pass": true,
@@ -227,7 +172,13 @@
                     "scale_uv_with_transform": false
                 },
                 "component_name": "ModelInstance"
-            },
+            }
+        ],
+        "entity": 5,
+        "signature": "0000000000000000000000000000000000000000000000000000000000100011"
+    },
+    {
+        "components": [
             {
                 "component_data": {
                     "name": "Floor"
@@ -244,19 +195,616 @@
                     },
                     "position": {
                         "x": 0.0,
-                        "y": 4.876863956451416,
-                        "z": 0.0
+                        "y": 5.239416122436523,
+                        "z": -1.6220483779907227
                     },
                     "scale": {
                         "x": 10.0,
-                        "y": 1.0,
-                        "z": 10.0
+                        "y": 5.323487758636475,
+                        "z": 0.8027387857437134
                     }
                 },
                 "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/wooden_box/wooden_box.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
             }
         ],
         "entity": 6,
+        "signature": "0000000000000000000000000000000000000000000000000000000000100011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "Floor"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.7069342136383057,
+                        "x": -1.1998067478320396e-31,
+                        "y": 0.7072793245315552,
+                        "z": -1.1992215867442003e-31
+                    },
+                    "position": {
+                        "x": -0.014373689889907837,
+                        "y": 0.6649564504623413,
+                        "z": -1.4614348411560059
+                    },
+                    "scale": {
+                        "x": 0.9999995231628418,
+                        "y": 1.8613717555999756,
+                        "z": 10.000020027160645
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/wooden_box/wooden_box.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            }
+        ],
+        "entity": 10,
+        "signature": "0000000000000000000000000000000000000000000000000000000000100011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "Floor"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 1.0,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": -8.89290714263916,
+                        "y": -2.6327695846557617,
+                        "z": -1.5411887168884277
+                    },
+                    "scale": {
+                        "x": 9.999999046325684,
+                        "y": 12.975204467773438,
+                        "z": 0.8027386665344238
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/wooden_box/wooden_box.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            }
+        ],
+        "entity": 8,
+        "signature": "0000000000000000000000000000000000000000000000000000000000100011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "Floor"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 1.0,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 9.923794746398926,
+                        "y": -2.6327695846557617,
+                        "z": -1.5411887168884277
+                    },
+                    "scale": {
+                        "x": 9.999999046325684,
+                        "y": 12.975204467773438,
+                        "z": 0.8027386665344238
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/wooden_box/wooden_box.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            }
+        ],
+        "entity": 11,
+        "signature": "0000000000000000000000000000000000000000000000000000000000100011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "Floor"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.70710688829422,
+                        "x": 0.0,
+                        "y": -0.7071066498756409,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": -13.400186538696289,
+                        "y": -2.6327695846557617,
+                        "z": -6.806478500366211
+                    },
+                    "scale": {
+                        "x": 9.999789237976074,
+                        "y": 12.975204467773438,
+                        "z": 0.802725613117218
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/wooden_box/wooden_box.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            }
+        ],
+        "entity": 12,
+        "signature": "0000000000000000000000000000000000000000000000000000000000100011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "Floor"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.70710688829422,
+                        "x": 0.0,
+                        "y": -0.7071066498756409,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 13.942978858947754,
+                        "y": -2.6327695846557617,
+                        "z": -6.806478500366211
+                    },
+                    "scale": {
+                        "x": 9.999680519104004,
+                        "y": 12.975204467773438,
+                        "z": 0.8027188181877136
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/wooden_box/wooden_box.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            }
+        ],
+        "entity": 13,
+        "signature": "0000000000000000000000000000000000000000000000000000000000100011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "Floor"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 1.0,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 0.0,
+                        "y": 9.22921371459961,
+                        "z": -6.959428310394287
+                    },
+                    "scale": {
+                        "x": 30.320627212524414,
+                        "y": 1.0,
+                        "z": 10.75207805633545
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/wooden_box/wooden_box.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            }
+        ],
+        "entity": 14,
+        "signature": "0000000000000000000000000000000000000000000000000000000000100011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "Floor"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 1.0,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 0.0,
+                        "y": 0.018079519271850586,
+                        "z": -17.21449089050293
+                    },
+                    "scale": {
+                        "x": 30.320627212524414,
+                        "y": 1.0,
+                        "z": 10.75207805633545
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/wooden_box/wooden_box.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            }
+        ],
+        "entity": 15,
+        "signature": "0000000000000000000000000000000000000000000000000000000000100011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "Floor"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 1.0,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 0.0,
+                        "y": -0.004314303398132324,
+                        "z": -7.0519022941589355
+                    },
+                    "scale": {
+                        "x": 30.320627212524414,
+                        "y": 1.0,
+                        "z": 10.75207805633545
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/wooden_box/wooden_box.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            }
+        ],
+        "entity": 16,
+        "signature": "0000000000000000000000000000000000000000000000000000000000100011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "Floor"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 1.0,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 0.0,
+                        "y": 8.97589111328125,
+                        "z": -17.21449089050293
+                    },
+                    "scale": {
+                        "x": 30.320627212524414,
+                        "y": 1.0,
+                        "z": 10.75207805633545
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/wooden_box/wooden_box.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            }
+        ],
+        "entity": 18,
+        "signature": "0000000000000000000000000000000000000000000000000000000000100011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "Floor"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.70710688829422,
+                        "x": 0.0,
+                        "y": -0.7071066498756409,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 13.942978858947754,
+                        "y": -2.6327695846557617,
+                        "z": -19.833364486694336
+                    },
+                    "scale": {
+                        "x": 9.999592781066895,
+                        "y": 12.975204467773438,
+                        "z": 0.8027133345603943
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/wooden_box/wooden_box.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            }
+        ],
+        "entity": 19,
+        "signature": "0000000000000000000000000000000000000000000000000000000000100011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "Floor"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.70710688829422,
+                        "x": 0.0,
+                        "y": -0.7071066498756409,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": -13.400186538696289,
+                        "y": -2.6327695846557617,
+                        "z": -20.013565063476563
+                    },
+                    "scale": {
+                        "x": 9.99972152709961,
+                        "y": 12.975204467773438,
+                        "z": 0.802721381187439
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/wooden_box/wooden_box.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            }
+        ],
+        "entity": 21,
+        "signature": "0000000000000000000000000000000000000000000000000000000000100011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "Floor"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": -8.344881763377998e-08,
+                        "x": 0.0,
+                        "y": 1.0,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 0.13183379173278809,
+                        "y": -2.6327695846557617,
+                        "z": -21.38711929321289
+                    },
+                    "scale": {
+                        "x": 28.999189376831055,
+                        "y": 12.975203514099121,
+                        "z": 0.8027213215827942
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/wooden_box/wooden_box.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            }
+        ],
+        "entity": 22,
+        "signature": "0000000000000000000000000000000000000000000000000000000000100011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "Floor"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.70710688829422,
+                        "x": 0.0,
+                        "y": -0.7071066498756409,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 14.012709617614746,
+                        "y": 5.400723457336426,
+                        "z": -13.469854354858398
+                    },
+                    "scale": {
+                        "x": 9.99946403503418,
+                        "y": 4.123810768127441,
+                        "z": 0.8027052879333496
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/wooden_box/wooden_box.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            }
+        ],
+        "entity": 23,
+        "signature": "0000000000000000000000000000000000000000000000000000000000100011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "Floor"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.70710688829422,
+                        "x": 0.0,
+                        "y": -0.7071066498756409,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": -13.524833679199219,
+                        "y": 5.680615425109863,
+                        "z": -13.168206214904785
+                    },
+                    "scale": {
+                        "x": 9.999463081359863,
+                        "y": 3.3359031677246094,
+                        "z": 0.8027051687240601
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/wooden_box/wooden_box.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            }
+        ],
+        "entity": 24,
         "signature": "0000000000000000000000000000000000000000000000000000000000100011"
     }
 ]

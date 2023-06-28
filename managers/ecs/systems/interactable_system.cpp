@@ -140,7 +140,6 @@ void InteractableSystem::update(World &world, float dt) {
 			glm::vec2 render_extent = world.get_parent_scene()->get_render_scene().render_extent;
 			glm::vec3 player_cam_pos;
 			auto &interaction_sprite = ui.get_ui_image(ui_name, std::to_string(entity) + "_ui_interaction_sprite");
-			//auto interaction_type = magic_enum::enum_name(interactable.type);
 			if (interactable.type == InteractionType::Agent) {
 				uint32_t camera_entity = GameplayManager::get().get_agent_camera(world.get_parent_scene());
 				player_cam_pos = world.get_component<Transform>(camera_entity).get_global_position();
@@ -278,6 +277,14 @@ void InteractableSystem::update(World &world, float dt) {
 			}
 		}
 
+		if (interactable.interaction == Interaction::HackerPlatform) {
+			auto &platform = world.get_component<Platform>(interactable.interaction_targets[0]);
+			if (platform.is_moving) {
+				interactable.triggered = false;
+				return;
+			}
+		}
+
 		if (interactable.triggered) {
 			interactable.triggered = false;
 
@@ -310,10 +317,10 @@ void InteractableSystem::update(World &world, float dt) {
 							break;
 						}
 						auto &platform = world.get_component<Platform>(current_target);
-						AudioManager::get().play_one_shot_3d(
-								electric_interaction_event, world.get_component<Transform>(entity));
 						if (!platform.is_moving) {
 							platform.is_moving = true;
+							AudioManager::get().play_one_shot_3d(
+									electric_interaction_event, world.get_component<Transform>(entity));
 						}
 						//SPDLOG_INFO("{}", "Hacker platform triggered");
 					}
@@ -345,8 +352,6 @@ void InteractableSystem::update(World &world, float dt) {
 
 					switch_light_temporal(world, lights_to_switch, interactable, dt, enemies_to_blind);
 					interactable.is_powering_up = true;
-
-					//SPDLOG_INFO("Temporal Light switch triggered");
 				}
 
 				case Interaction::SwitchMainDoorLight: {

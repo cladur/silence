@@ -13,11 +13,13 @@ bool MeshBoundingSphere::is_on_or_in_front_of_plane(const FrustumPlane &f_plane)
 
 bool MeshBoundingSphere::is_on_frustum(const Frustum frustum, Transform transform, RenderScene &scene) const {
 	glm::vec3 glob_scale = transform.get_global_scale();
-	glm::vec3 glob_pos = transform.get_global_position();
+
+	glm::vec3 global_center = transform.get_global_model_matrix() * glm::vec4(center, 1.0f);
+
 	float max_scale = std::max(glob_scale.x, std::max(glob_scale.y, glob_scale.z));
-	glm::quat glob_orient = transform.get_global_orientation();
-	glm::vec3 new_center = glob_orient * center;
-	MeshBoundingSphere sphere(new_center + glob_pos, radius * max_scale);
+
+	MeshBoundingSphere sphere(global_center, radius * max_scale);
+
 	if (cvar_draw_bounding_spheres.get()) {
 		scene.debug_draw.draw_sphere(sphere.center, sphere.radius, glm::vec3(1.0f, 0.0f, 0.0f));
 	}

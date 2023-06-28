@@ -201,13 +201,13 @@ inline void handle_detection(World *world, uint32_t enemy_entity, Transform &tra
 		}
 	}
 
+	auto &agent_screen_flash = UIManager::get().get_ui_image(
+			std::to_string(enemy_entity) + "_detection", "agent_detection_screen_flash");
+	auto &hacker_screen_flash = UIManager::get().get_ui_image(
+			std::to_string(enemy_entity) + "_detection", "hacker_detection_screen_flash");
+
 	if (can_see_player || can_see_hacker) {
 		// if noone was detected past frame, play sound
-		auto &agent_screen_flash = UIManager::get().get_ui_image(
-				std::to_string(enemy_entity) + "_detection", "agent_detection_screen_flash");
-		auto &hacker_screen_flash = UIManager::get().get_ui_image(
-				std::to_string(enemy_entity) + "_detection", "hacker_detection_screen_flash");
-
 		bool prev_none = false;
 		if (enemy_data.detection_target == DetectionTarget::NONE) {
 			prev_none = true;
@@ -246,28 +246,28 @@ inline void handle_detection(World *world, uint32_t enemy_entity, Transform &tra
 			}
 		}
 
-		auto new_agent_flash_color = agent_screen_flash.color;
-		auto new_hacker_flash_color = hacker_screen_flash.color;
-		new_agent_flash_color.a -= dt * 3.0f;
-		new_hacker_flash_color.a -= dt * 3.0f;
-		new_agent_flash_color.a = glm::max(new_agent_flash_color.a, 0.0f);
-		new_hacker_flash_color.a = glm::max(new_hacker_flash_color.a, 0.0f);
-		agent_screen_flash.color = new_agent_flash_color;
-		hacker_screen_flash.color = new_hacker_flash_color;
-
-		if (new_agent_flash_color.a <= 0.001f) {
-			agent_screen_flash.display = false;
-		}
-		if (new_hacker_flash_color.a <= 0.001f) {
-			hacker_screen_flash.display = false;
-		}
-
 		detection_change *= detection_speed;
 
 		enemy_data.detection_level += detection_change;
 	} else {
 		enemy_data.detection_target = DetectionTarget::NONE;
 		enemy_data.detection_level -= dt * decrease_rate;
+	}
+
+	auto new_agent_flash_color = agent_screen_flash.color;
+	auto new_hacker_flash_color = hacker_screen_flash.color;
+	new_agent_flash_color.a -= dt * 3.0f;
+	new_hacker_flash_color.a -= dt * 3.0f;
+	new_agent_flash_color.a = glm::max(new_agent_flash_color.a, 0.0f);
+	new_hacker_flash_color.a = glm::max(new_hacker_flash_color.a, 0.0f);
+	agent_screen_flash.color = new_agent_flash_color;
+	hacker_screen_flash.color = new_hacker_flash_color;
+
+	if (new_agent_flash_color.a <= 0.001f) {
+		agent_screen_flash.display = false;
+	}
+	if (new_hacker_flash_color.a <= 0.001f) {
+		hacker_screen_flash.display = false;
 	}
 
 	enemy_data.detection_level = glm::clamp(enemy_data.detection_level, 0.0f, 1.0f);
@@ -383,13 +383,13 @@ inline void handle_detection_camera(World *world, uint32_t enemy_entity, Transfo
 		}
 	}
 
+	auto &agent_screen_flash = UIManager::get().get_ui_image(
+			std::to_string(enemy_entity) + "_detection", "agent_detection_screen_flash");
+	auto &hacker_screen_flash = UIManager::get().get_ui_image(
+			std::to_string(enemy_entity) + "_detection", "hacker_detection_screen_flash");
+
 	if (can_see_player || can_see_hacker) {
 		detection_camera.is_detecting = true;
-
-		auto &agent_screen_flash = UIManager::get().get_ui_image(
-				std::to_string(enemy_entity) + "_detection", "agent_detection_screen_flash");
-		auto &hacker_screen_flash = UIManager::get().get_ui_image(
-				std::to_string(enemy_entity) + "_detection", "hacker_detection_screen_flash");
 
 		bool prev_none = false;
 		if (detection_camera.detection_target == DetectionTarget::NONE) {
@@ -429,15 +429,6 @@ inline void handle_detection_camera(World *world, uint32_t enemy_entity, Transfo
 			}
 		}
 
-		auto new_agent_flash_color = agent_screen_flash.color;
-		auto new_hacker_flash_color = hacker_screen_flash.color;
-		new_agent_flash_color.a -= dt * 3.0f;
-		new_hacker_flash_color.a -= dt * 3.0f;
-		new_agent_flash_color.a = glm::max(new_agent_flash_color.a, 0.0f);
-		new_hacker_flash_color.a = glm::max(new_hacker_flash_color.a, 0.0f);
-		agent_screen_flash.color = new_agent_flash_color;
-		hacker_screen_flash.color = new_hacker_flash_color;
-
 		if (!detection_camera.is_playing) {
 			AudioManager::get().play_local(detection_camera.detection_event);
 			detection_camera.is_playing = true;
@@ -459,6 +450,22 @@ inline void handle_detection_camera(World *world, uint32_t enemy_entity, Transfo
 
 		detection_camera.detection_target = DetectionTarget::NONE;
 		detection_camera.detection_level -= dt * decrease_rate;
+	}
+
+	auto new_agent_flash_color = agent_screen_flash.color;
+	auto new_hacker_flash_color = hacker_screen_flash.color;
+	new_agent_flash_color.a -= dt * 3.0f;
+	new_hacker_flash_color.a -= dt * 3.0f;
+	new_agent_flash_color.a = glm::max(new_agent_flash_color.a, 0.0f);
+	new_hacker_flash_color.a = glm::max(new_hacker_flash_color.a, 0.0f);
+	agent_screen_flash.color = new_agent_flash_color;
+	hacker_screen_flash.color = new_hacker_flash_color;
+
+	if (new_agent_flash_color.a <= 0.001f) {
+		agent_screen_flash.display = false;
+	}
+	if (new_hacker_flash_color.a <= 0.001f) {
+		hacker_screen_flash.display = false;
 	}
 
 	detection_camera.detection_level = glm::clamp(detection_camera.detection_level, 0.0f, 1.0f);

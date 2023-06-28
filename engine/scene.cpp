@@ -168,6 +168,7 @@ void Scene::register_game_systems() {
 	world.register_system<HackerMovementSystem>(UpdateOrder::DuringPhysics);
 	world.register_system<CollisionSystem>(UpdateOrder::DuringPhysics);
 	world.register_system<EnemySystem>(UpdateOrder::PostAnimation);
+	world.register_system<EnemyPathing>(UpdateOrder::PostAnimation);
 	world.register_system<TaggableSystem>();
 	//world.register_system<EnemyPathing>();
 	world.register_system<InteractableSystem>();

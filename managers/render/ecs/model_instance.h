@@ -12,6 +12,9 @@ struct ModelInstance {
 	bool scale_uv_with_transform = false;
 	bool flip_uv_y = false;
 
+	glm::vec3 color_tint = glm::vec3(1.0f, 1.0f, 1.0f);
+	float brightness_offset = 0.0f;
+
 	glm::vec2 uv_scale = glm::vec2(1.0f, 1.0f);
 
 	ModelInstance();
