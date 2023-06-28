@@ -52,6 +52,18 @@ void DetectionCameraSystem::startup(World &world) {
 void DetectionCameraSystem::update(World &world, float dt) {
 	ZoneScopedN("DetectionCameraSystem::update");
 
+	static bool fully_detected = false;
+	static float time = 0.0f;
+	if (fully_detected) {
+		time += dt;
+		if (time > 1.0f) {
+			GameplayManager::get().reset_to_checkpoint(world);
+			fully_detected = false;
+			time = 0.0f;
+			return;
+		}
+	}
+
 	for (auto const &entity : entities) {
 		auto &detection_camera = world.get_component<DetectionCamera>(entity);
 		auto &transform = world.get_component<Transform>(entity);
@@ -63,6 +75,11 @@ void DetectionCameraSystem::update(World &world, float dt) {
 		Children *particle_children = nullptr;
 		ParticleEmitter *particle_1 = nullptr;
 		ParticleEmitter *particle_2 = nullptr;
+
+		if (detection_camera.detection_level > 0.98f) {
+			fully_detected = true;
+			detection_camera.detection_event->setPaused(true);
+		}
 
 		if (detection_camera.particles_parent != 0) {
 			particle_children = &world.get_component<Children>(detection_camera.particles_parent);
@@ -227,7 +244,6 @@ void DetectionCameraSystem::update(World &world, float dt) {
 			particle_2->lifetime = tag.tagged == true ? TAGGED_LIFETIME : DETECTING_LIFETIME;
 			particle_2->velocity_begin = TAGGED_VELOCITY;
 			particle_2->velocity_end = TAGGED_VELOCITY;
-
 		} else {
 			light.color = IDLE_COLOR;
 

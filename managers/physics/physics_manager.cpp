@@ -1282,7 +1282,7 @@ std::vector<Entity> PhysicsManager::overlap_cube_trigger(World &world, const Col
 	for (auto entity : entities) {
 		bool is_trigger_target = world.has_component<EnemyData>(entity) || world.has_component<Highlight>(entity) ||
 				world.has_component<Interactable>(entity) || world.has_component<Platform>(entity) ||
-				world.has_component<Taggable>(entity) || world.has_component<DialogueTrigger>(entity);
+				world.has_component<Taggable>(entity);
 		bool has_collider = world.has_component<ColliderTag>(entity) || world.has_component<ColliderOBB>(entity);
 
 		if (!is_trigger_target || !has_collider) {

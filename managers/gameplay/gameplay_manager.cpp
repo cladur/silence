@@ -1,11 +1,11 @@
 #include "gameplay_manager.h"
-#include <engine/scene.h>
-#include <spdlog/spdlog.h>
 #include "components/hacker_data_component.h"
+#include "gameplay/gameplay_manager.h"
 #include "input/input_key.h"
 #include "input/input_manager.h"
 #include <engine/engine.h>
 #include <engine/scene.h>
+#include <spdlog/spdlog.h>
 
 AutoCVarFloat cv_enemy_near_player_radius(
 		"gameplay.enemy_near_radius", "radius that checks for enemies near player", 15.0f, CVarFlags::EditCheckbox);
@@ -37,25 +37,21 @@ void GameplayManager::update(World &world, float dt) {
 		return;
 	}
 
-	
-	if(InputManager::is_gamepad_connected(0)) {
+	if (InputManager::is_gamepad_connected(0)) {
 		auto &hacker_data = world.get_component<HackerData>(hacker_entity);
 		hacker_data.gamepad = 0;
-	}
-	else {
+	} else {
 		auto &hacker_data = world.get_component<HackerData>(hacker_entity);
 		hacker_data.gamepad = -1;
 	}
 
-	if(InputManager::is_gamepad_connected(1)) {
+	if (InputManager::is_gamepad_connected(1)) {
 		auto &agent_data = world.get_component<AgentData>(agent_entity);
 		agent_data.gamepad = 1;
-	}
-	else {
+	} else {
 		auto &agent_data = world.get_component<AgentData>(agent_entity);
 		agent_data.gamepad = -1;
 	}
-
 
 	//world.get_parent_scene()->get_render_scene().debug_draw.draw_sphere(get_agent_position(world.get_parent_scene()),
 	//cv_enemy_near_player_radius.get(), glm::vec3(1.0f, 1.0f, 0.0f), 32);
@@ -155,4 +151,16 @@ void GameplayManager::set_engine(Engine *engine) {
 
 void GameplayManager::change_scene(std::string scene_name) {
 	engine->scene_change_request = std::make_pair(true, scene_name);
+}
+
+void GameplayManager::set_checkpoint_system(CheckpointSystem *checkpoint_system) {
+	this->checkpoint_system = checkpoint_system;
+}
+
+void GameplayManager::reset_to_checkpoint(World &world) {
+	if (checkpoint_system == nullptr) {
+		SPDLOG_ERROR("checkpoint system not set, unable to reset to checkpoint");
+		return;
+	}
+	this->checkpoint_system->reset(world);
 }

@@ -9,15 +9,16 @@
 AutoCVarFloat cvar_enemy_detection_range("enemy.detection_range", "enemy detection range", 10.0f);
 AutoCVarFloat cvar_enemy_detection_angle("enemy.detection_angle", "enemy detection angle", 90.0f);
 AutoCVarFloat cvar_enemy_min_detection_speed("enemy.min_detection_speed", "enemy min detection speed", 0.1f);
-AutoCVarFloat cvar_enemy_max_detection_speed("enemy.max_detection_speed", "enemy max detection speed", 0.5f);
+AutoCVarFloat cvar_enemy_max_detection_speed("enemy.max_detection_speed", "enemy max detection speed", 0.4f);
 AutoCVarFloat cvar_sphere_detection_radius("enemy.sphere_detection_radius", "enemy sphere detection radius", 2.5f);
 AutoCVarFloat cvar_detection_decrease_speed("enemy.detection_decrease_speed", "enemy detection decrease speed", 0.3f);
 AutoCVarFloat cvar_crouch_detection_modifier(
 		"enemy.crouch_detection_modifier", "enemy crouch detection modifier", 0.5f);
 AutoCVarFloat cvar_hacker_detection_modifier(
-		"enemy.hacker_detection_modifier", "enemy hacker detection modifier", 0.75f);
+		"enemy.hacker_detection_modifier", "enemy hacker detection modifier", 0.6f);
 
-AutoCVarFloat cvar_radial_detection_offset = AutoCVarFloat("enemy.slider_radial_detection_offset", "screenspace detection slider offset", 100.0f, CVarFlags::EditFloatDrag);
+AutoCVarFloat cvar_radial_detection_offset = AutoCVarFloat("enemy.slider_radial_detection_offset",
+		"screenspace detection slider offset", 100.0f, CVarFlags::EditFloatDrag);
 
 void EnemySystem::startup(World &world) {
 	Signature blacklist;
@@ -95,26 +96,27 @@ void EnemySystem::update(World &world, float dt) {
 			hacker_anchor.display = true;
 			ui.add_as_root(std::to_string(entity) + "_detection", "hacker_anchor");
 
-			auto &agent_detection_outline = ui.add_ui_image(std::to_string(entity) + "_detection",
-					"agent_detection_outline");
+			auto &agent_detection_outline =
+					ui.add_ui_image(std::to_string(entity) + "_detection", "agent_detection_outline");
 			agent_detection_outline.position = glm::vec3(0.0f, 0.0f, 0.0f);
 			agent_detection_outline.is_billboard = false;
 			agent_detection_outline.is_screen_space = true;
 			agent_detection_outline.size = glm::vec2(50.0f, 50.0f);
 			agent_detection_outline.color = glm::vec4(1.0f);
-			agent_detection_outline.texture = rm.load_texture(asset_path("detection_triangle_outline_white.ktx2").c_str());
+			agent_detection_outline.texture =
+					rm.load_texture(asset_path("detection_triangle_outline_white.ktx2").c_str());
 			ui.add_to_root(std::to_string(entity) + "_detection", "agent_detection_outline", "agent_anchor");
-			auto &hacker_detection_outline = ui.add_ui_image(std::to_string(entity) + "_detection",
-					"hacker_detection_outline");
+			auto &hacker_detection_outline =
+					ui.add_ui_image(std::to_string(entity) + "_detection", "hacker_detection_outline");
 			hacker_detection_outline.position = glm::vec3(0.0f, 0.0f, 0.0f);
 			hacker_detection_outline.is_billboard = false;
 			hacker_detection_outline.is_screen_space = true;
 			hacker_detection_outline.size = glm::vec2(50.0f, 50.0f);
 			hacker_detection_outline.color = glm::vec4(1.0f);
-			hacker_detection_outline.texture = rm.load_texture(asset_path("detection_triangle_outline_white.ktx2").c_str());
+			hacker_detection_outline.texture =
+					rm.load_texture(asset_path("detection_triangle_outline_white.ktx2").c_str());
 			ui.add_to_root(std::to_string(entity) + "_detection", "hacker_detection_outline", "hacker_anchor");
-			auto &agent_detection_fill = ui.add_ui_image(std::to_string(entity) + "_detection",
-					"agent_detection_fill");
+			auto &agent_detection_fill = ui.add_ui_image(std::to_string(entity) + "_detection", "agent_detection_fill");
 			agent_detection_fill.position = glm::vec3(0.0f, 0.0f, 0.0f);
 			agent_detection_fill.is_billboard = false;
 			agent_detection_fill.is_screen_space = true;
@@ -122,8 +124,8 @@ void EnemySystem::update(World &world, float dt) {
 			agent_detection_fill.color = glm::vec4(1.0f);
 			agent_detection_fill.texture = rm.load_texture(asset_path("detection_triangle_fill.ktx2").c_str());
 			ui.add_to_root(std::to_string(entity) + "_detection", "agent_detection_fill", "agent_anchor");
-			auto &hacker_detection_fill = ui.add_ui_image(std::to_string(entity) + "_detection",
-					"hacker_detection_fill");
+			auto &hacker_detection_fill =
+					ui.add_ui_image(std::to_string(entity) + "_detection", "hacker_detection_fill");
 			hacker_detection_fill.position = glm::vec3(0.0f, 0.0f, 0.0f);
 			hacker_detection_fill.is_billboard = false;
 			hacker_detection_fill.is_screen_space = true;
@@ -132,8 +134,8 @@ void EnemySystem::update(World &world, float dt) {
 			hacker_detection_fill.texture = rm.load_texture(asset_path("detection_triangle_fill.ktx2").c_str());
 			ui.add_to_root(std::to_string(entity) + "_detection", "hacker_detection_fill", "hacker_anchor");
 
-			auto &agent_detection_screen_flash = ui.add_ui_image(std::to_string(entity) + "_detection",
-					"agent_detection_screen_flash");
+			auto &agent_detection_screen_flash =
+					ui.add_ui_image(std::to_string(entity) + "_detection", "agent_detection_screen_flash");
 			agent_detection_screen_flash.position = glm::vec3(0.0f, 0.0f, 0.0f);
 			agent_detection_screen_flash.is_billboard = false;
 			agent_detection_screen_flash.is_screen_space = true;
@@ -143,8 +145,8 @@ void EnemySystem::update(World &world, float dt) {
 			agent_detection_screen_flash.display = false;
 			ui.add_to_root(std::to_string(entity) + "_detection", "agent_detection_screen_flash", "agent_anchor");
 
-			auto &hacker_detection_screen_flash = ui.add_ui_image(std::to_string(entity) + "_detection",
-					"hacker_detection_screen_flash");
+			auto &hacker_detection_screen_flash =
+					ui.add_ui_image(std::to_string(entity) + "_detection", "hacker_detection_screen_flash");
 			hacker_detection_screen_flash.position = glm::vec3(0.0f, 0.0f, 0.0f);
 			hacker_detection_screen_flash.is_billboard = false;
 			hacker_detection_screen_flash.is_screen_space = true;
@@ -153,7 +155,6 @@ void EnemySystem::update(World &world, float dt) {
 			hacker_detection_screen_flash.texture = rm.load_texture(asset_path("detection_overlay.ktx2").c_str());
 			hacker_detection_screen_flash.display = false;
 			ui.add_to_root(std::to_string(entity) + "_detection", "hacker_detection_screen_flash", "hacker_anchor");
-
 
 			auto &tag = ui.add_ui_image(std::to_string(entity) + "_detection", "tag");
 			tag.position = glm::vec3(0.0f, 1.6f, 0.0f);

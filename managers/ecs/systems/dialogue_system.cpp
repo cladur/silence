@@ -91,6 +91,12 @@ void DialogueSystem::startup(World &world) {
 	}};
 
 
+	dialogues["tut_well_done"] = {{
+		SENTENCE("Command: Well done. You should proceed to the next location.", "", "Dialogues/enemies/enemy_hacker_2"),
+	}};
+
+
+
 	//clang-format on
 	for (auto &dialogue : dialogues) {
 		for (auto &sentence : dialogue.second.sentences) {

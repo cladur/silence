@@ -2,6 +2,7 @@
 #define SILENCE_GAMEPLAY_MANAGER_H
 
 #include "ecs/systems/agent_system.h"
+#include "ecs/systems/checkpoint_system.h"
 #include "ecs/systems/hacker_system.h"
 
 struct Scene;
@@ -22,6 +23,7 @@ class GameplayManager {
 	uint32_t enemies_near_player = 0;
 	std::vector<uint32_t> enemy_entities;
 	std::vector<float> detection_levels;
+	CheckpointSystem *checkpoint_system = nullptr;
 
 	Engine *engine = nullptr;
 
@@ -63,6 +65,9 @@ public:
 
 	void set_engine(Engine *engine);
 	void change_scene(std::string scene_name);
+
+	void set_checkpoint_system(CheckpointSystem *checkpoint_system);
+	void reset_to_checkpoint(World &world);
 };
 
 #endif //SILENCE_GAMEPLAY_MANAGER_H

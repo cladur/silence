@@ -27,6 +27,14 @@ void EnemyFullyAware::enter() {
 }
 
 void EnemyFullyAware::update(World *world, uint32_t entity_id, float dt) {
+	static float time = 0.0f;
+	time += dt;
+	if (time > 1.0f) {
+		GameplayManager::get().reset_to_checkpoint(*world);
+		time = 0.0f;
+		return;
+	}
+
 	auto &transform = world->get_component<Transform>(entity_id);
 	AnimationManager &animation_manager = AnimationManager::get();
 	ResourceManager &res = ResourceManager::get();

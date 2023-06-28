@@ -69,6 +69,8 @@ void CheckpointSystem::startup(World &world) {
 	world.set_system_component_blacklist<CheckpointSystem>(blacklist);
 
 	auto &rm = ResourceManager::get();
+
+	GameplayManager::get().set_checkpoint_system(this);
 }
 
 void CheckpointSystem::update(World &world, float dt) {
