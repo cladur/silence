@@ -30,11 +30,13 @@ private:
 	float dialogue_timer = 0.0f;
 	std::string current_dialogue_id;
 	int current_sentence_id = 0;
+	std::queue<std::string> dialogue_queue;
 
 public:
 	~DialogueSystem();
 	void startup(World &world) override;
 	void update(World &world, float dt) override;
+	void play_dialogue();
 
 	void reset();
 };
