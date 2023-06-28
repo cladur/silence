@@ -29,7 +29,7 @@ AutoCVarFloat cvar_hacker_camera_max_rotation_x(
 		"hacker.hacker_camera_max_rotation_x", "camera max rotation X in degrees", 75.0f, CVarFlags::EditCheckbox);
 
 AutoCVarFloat cvar_hacker_camera_max_rotation_y(
-		"hacker.hacker_camera_max_rotation_y", "camera max rotation Y in degrees", 30.0f, CVarFlags::EditCheckbox);
+		"hacker.hacker_camera_max_rotation_y", "camera max rotation Y in degrees", 55.0f, CVarFlags::EditCheckbox);
 
 AutoCVarFloat cvar_hacker_max_rotation_x(
 		"hacker.hacker_max_rotation_x", "max rotation X in degrees", 25.0f, CVarFlags::EditCheckbox);
@@ -160,6 +160,10 @@ bool HackerSystem::shoot_raycast(
 }
 
 bool HackerSystem::jump_to_camera(World &world, HackerData &hacker_data, Entity camera_entity) {
+	if (is_on_camera) {
+		go_back_to_scorpion(world, hacker_data);
+	}
+
 	auto &detection_camera = world.get_component<DetectionCamera>(camera_entity);
 	auto camera_model_entity = detection_camera.camera_model;
 	auto &camera_tf = world.get_component<Transform>(hacker_data.camera);

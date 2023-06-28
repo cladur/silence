@@ -26,7 +26,7 @@ void LightSwitcherSystem::calculate_next_switch(LightSwitcher &light_switcher, b
 	float switch_time;
 	float switch_variance;
 
-	if (light_is_on) {
+	if (!light_is_on) {
 		switch_time = light_switcher.turn_off_time;
 		switch_variance = light_switcher.turn_off_variance;
 	} else {

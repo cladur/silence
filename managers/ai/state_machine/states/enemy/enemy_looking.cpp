@@ -21,8 +21,10 @@ void EnemyLooking::startup(StateMachine *machine, std::string name) {
 }
 
 void EnemyLooking::enter() {
-	first_frame = true;
-	SPDLOG_INFO("EnemyLooking::enter");
+	if (!from_fully_aware) {
+		first_frame = true;
+	}
+	from_fully_aware = false;
 }
 
 void EnemyLooking::update(World *world, uint32_t entity_id, float dt) {
@@ -43,10 +45,12 @@ void EnemyLooking::update(World *world, uint32_t entity_id, float dt) {
 	auto forward = glm::normalize(transform.get_global_forward());
 
 	auto current_no_y = glm::vec3(transform.position.x, 0.0f, transform.position.z);
-	glm::vec3 target_look = enemy_data.detection_target == DetectionTarget::AGENT ? agent_pos_no_y : hacker_pos_no_y;
-	glm::vec3 direction = glm::normalize(target_look - current_no_y);
+	static glm::vec3 target_look;
+	static glm::vec3 direction;
 
 	if (first_frame) {
+		target_look = enemy_data.detection_target == DetectionTarget::AGENT ? agent_pos_no_y : hacker_pos_no_y;
+		direction = glm::normalize(target_look - current_no_y);
 		adjusted_forward = forward;
 		end_forward = glm::rotateY(forward, glm::radians(27.0f));
 		glm::vec3 forward_no_y = glm::normalize(glm::vec3(end_forward.x, 0.0f, end_forward.z));
@@ -70,16 +74,11 @@ void EnemyLooking::update(World *world, uint32_t entity_id, float dt) {
 		adjusted_forward = end_forward;
 	}
 
-	dd.draw_line(
-			transform.position + glm::vec3(0.0f, 1.0f, 0.0f),
-			transform.position + glm::vec3(0.0f, 1.0f, 0.0f) + adjusted_forward,
-			glm::vec3(0.0f, 0.0f, 1.0f));
-	dd.draw_line(
-			transform.position + glm::vec3(0.0f, 1.0f, 0.0f),
-			transform.position + glm::vec3(0.0f, 1.0f, 0.0f) + end_forward,
-			glm::vec3(1.0f, 0.0f, 0.0f));
-	dd.draw_line(
-			transform.position + glm::vec3(0.0f, 1.0f, 0.0f),
+	dd.draw_line(transform.position + glm::vec3(0.0f, 1.0f, 0.0f),
+			transform.position + glm::vec3(0.0f, 1.0f, 0.0f) + adjusted_forward, glm::vec3(0.0f, 0.0f, 1.0f));
+	dd.draw_line(transform.position + glm::vec3(0.0f, 1.0f, 0.0f),
+			transform.position + glm::vec3(0.0f, 1.0f, 0.0f) + end_forward, glm::vec3(1.0f, 0.0f, 0.0f));
+	dd.draw_line(transform.position + glm::vec3(0.0f, 1.0f, 0.0f),
 			transform.position + glm::vec3(0.0f, 1.0f, 0.0f) + glm::normalize(target_look - transform.position),
 			glm::vec3(0.0f, 1.0f, 0.0f));
 
@@ -90,9 +89,10 @@ void EnemyLooking::update(World *world, uint32_t entity_id, float dt) {
 		end_forward = glm::rotateY(end_forward, rotation_end.y * dt * 2.0f);
 	}
 
-	enemy_utils::handle_detection(world, entity_id, transform, adjusted_forward,enemy_data, dt, &dd);
+	enemy_utils::handle_detection(world, entity_id, transform, adjusted_forward, enemy_data, dt, &dd);
 
-	enemy_utils::update_detection_slider(entity_id, transform, enemy_data, world->get_parent_scene()->get_render_scene(), world->get_parent_scene());
+	enemy_utils::update_detection_slider(
+			entity_id, transform, enemy_data, world->get_parent_scene()->get_render_scene(), world->get_parent_scene());
 
 	enemy_utils::handle_highlight(entity_id, world);
 
