@@ -52,7 +52,7 @@ void DialogueSystem::startup(World &world) {
 	dialogues["tut_intro"] = { {
 		SENTENCE("Command: Hello, Hans and ScorpIO. This is your mission operator speaking.", "", "Dialogues/tut/tut_1"),
 		SENTENCE("Command: A few days ago, we got reports of an unregulated", "construction of a combat robot by a military tech company Tech-Mil.", "Dialogues/tut/tut_2"),
-		SENTENCE("Command: According to our sources, they've been", "working on it in secret for the last 3 years.", "Dialogues/tut/tut_3"),
+		// SENTENCE("Command: According to our sources, they've been", "working on it in secret for the last 3 years.", "Dialogues/tut/tut_3"),
 		SENTENCE("Command: Your mission is to infiltrate their military base", "and find out how big of a threat is that robot.", "Dialogues/tut/tut_4"),
 		SENTENCE("Command: It's just the two of you out there.", "We cannot provide you with any backup.", "Dialogues/tut/tut_5"),
 		SENTENCE("Command: That's why it's crucial that you do not get caught.", "You need to stay out of sight of the cameras and enemies.", "Dialogues/tut/tut_6"),
@@ -62,7 +62,7 @@ void DialogueSystem::startup(World &world) {
 		SENTENCE("Command: You can hold the LEFT TRIGGER to zoom in.", "", "Dialogues/tut_mark/mark_1"),
 		SENTENCE("Command: While zoomed in, focus on", "objects of interest in order to mark them.", "Dialogues/tut_mark/mark_2"),
 		SENTENCE("Command: Try marking some enemies to the left of you.", "", "Dialogues/tut_mark/mark_3"),
-		SENTENCE("Command: It's worth noting that", "marked enemies can be seen through walls.", "Dialogues/tut_mark/mark_4"),
+		// SENTENCE("Command: It's worth noting that", "marked enemies can be seen through walls.", "Dialogues/tut_mark/mark_4"),
 		SENTENCE("Command: Once you're done, head to the next room.", "", "Dialogues/tut_mark/mark_5"),
 	} };
 
@@ -86,13 +86,13 @@ void DialogueSystem::startup(World &world) {
 
 	dialogues["tut_closed_door"] = {{
 		SENTENCE("Hans: The door ahead of us is locked.", "How should we proceed?", "Dialogues/doors/doors_agent"),
-		SENTENCE("Command: Try looking for switches around it.", "", "Dialogues/doors/doors_command"),
+		SENTENCE("Command: Try looking for switches connected to it.", "", "Dialogues/doors/doors_command"),
 		SENTENCE("ScorpIO: Maybe we could follow those cables on the walls.", "", "Dialogues/doors/doors_hacker"),
 	}};
 
 
 	dialogues["tut_well_done"] = {{
-		SENTENCE("Command: Well done. You should proceed to the next location.", "", "Dialogues/tut_finished"),
+		SENTENCE("Command: Good job. You should proceed to the next location.", "", "Dialogues/tut_finished"),
 	}};
 
 
