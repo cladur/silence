@@ -171,6 +171,7 @@ public:
 	MaterialSSR material;
 	void startup() override;
 	void draw(RenderScene &scene) override;
+	void draw(RenderScene &scene, bool right_side);
 };
 
 #endif // SILENCE_RENDER_PASS_H

@@ -47,6 +47,7 @@ struct RenderScene {
 	DecalPass decal_pass;
 	SSRPass ssr_pass;
 
+	Framebuffer agent_framebuffer, hacker_framebuffer;
 	Framebuffer render_framebuffer;
 	Framebuffer final_framebuffer;
 	GBuffer g_buffer;

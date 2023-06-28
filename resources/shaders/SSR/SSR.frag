@@ -1,122 +1,182 @@
-#version 330 core
+#version 400 core
 
-uniform mat4 camera_projection;
+uniform sampler2D gAlbedo;
 uniform sampler2D gPosition;
 uniform sampler2D gNormal;
+uniform sampler2D gAoRoughMetal;
+uniform sampler2D gSpecular;
 
-out vec4 ssr_fragment;
+uniform mat4 view;
+uniform mat4 invView;
+uniform mat4 projection;
+uniform mat4 invProjection;
+uniform float falloff;
+uniform float threshold;
 
-void main() {
-    float maxDistance = 8;
-    float resolution = 0.3;
-    int steps = 5;
-    float thickness = 0.5;
+noperspective in vec2 TexCoords;
 
-    vec2 texSize = textureSize(gPosition, 0).xy;
-    vec2 texCoord = gl_FragCoord.xy / texSize;
+layout (location = 0) out vec4 ssr_fragment;
 
-    vec4 uv = vec4(0.0);
+const float step = 0.1;
+const float minRayStep = 0.1;
+const float maxSteps = 30;
+const int numBinarySearchSteps = 5;
 
-    vec4 positionFrom = texture(gPosition, texCoord);
+float Metallic;
 
-    if (positionFrom.w <= 0.0) {
-        ssr_fragment = uv;
+#define Scale vec3(.8, .8, .8)
+#define K 19.19
+
+vec3 PositionFromDepth(float depth);
+
+vec3 BinarySearch(inout vec3 dir, inout vec3 hitCoord, inout float dDepth);
+
+vec4 RayMarch(vec3 dir, inout vec3 hitCoord, out float dDepth);
+
+vec3 fresnelSchlick(float cosTheta, vec3 F0);
+
+vec3 hash(vec3 a);
+
+void main()
+{
+    Metallic = (1.0 - texture2D(gAoRoughMetal, TexCoords).g);
+
+    if (Metallic < threshold)
+    {
+        ssr_fragment = vec4(0.0);
         return;
     }
 
-    vec3 unitPositionFrom = normalize(positionFrom.xyz);
-    vec3 normal = normalize(texture(gNormal, texCoord).xyz);
-    vec3 pivot = normalize(reflect(unitPositionFrom, normal));
+    vec3 viewNormal = vec3(texture2D(gNormal, TexCoords) * invView);
+    vec3 viewPos = textureLod(gPosition, TexCoords, 2).xyz;
+    vec3 albedo = texture(gAlbedo, TexCoords).rgb;
 
-    vec4 positionTo = positionFrom;
+    float spec = texture(gSpecular, TexCoords).r;
 
-    vec4 startView = vec4(positionFrom.xyz + (pivot * 0.0), 1.0);
-    vec4 endView = vec4(positionFrom.xyz + (pivot * maxDistance), 1.0);
+    vec3 F0 = vec3(0.04);
+    F0 = mix(F0, albedo, Metallic);
+    vec3 Fresnel = fresnelSchlick(max(dot(normalize(viewNormal), normalize(viewPos)), 0.0), F0);
 
-    vec4 startFrag = startView;
-    startFrag = camera_projection * startFrag;
-    startFrag.xyz /= startFrag.w;
-    startFrag.xy = startFrag.xy * 0.5 + 0.5;
-    startFrag.xy *= texSize;
+    // Reflection vector
+    vec3 reflected = normalize(reflect(normalize(viewPos), normalize(viewNormal)));
 
-    vec4 endFrag = endView;
-    endFrag = camera_projection * endFrag;
-    endFrag.xyz /= endFrag.w;
-    endFrag.xy = endFrag.xy * 0.5 + 0.5;
-    endFrag.xy *= texSize;
+    vec3 hitPos = viewPos;
+    float dDepth;
 
-    vec2 frag = startFrag.xy;
-    uv.xy = frag / texSize;
+    vec3 wp = vec3(vec4(viewPos, 1.0) * invView);
+    vec3 jitt = mix(vec3(0.0), vec3(hash(wp)), spec);
+    vec4 coords = RayMarch((vec3(jitt) + reflected * max(minRayStep, -viewPos.z)), hitPos, dDepth);
 
-    float deltaX = endFrag.x - startFrag.x;
-    float deltaY = endFrag.y - startFrag.y;
-    float useX = abs(deltaX) >= abs(deltaY) ? 1.0 : 0.0;
-    float delta = mix(abs(deltaY), abs(deltaX), useX) * clamp(resolution, 0.0, 1.0);
-    vec2 increment = vec2(deltaX, deltaY) / max(delta, 0.001);
+    vec2 dCoords = smoothstep(0.2, 0.6, abs(vec2(0.5, 0.5) - coords.xy));
 
-    float search0 = 0;
-    float search1 = 0;
+    float screenEdgefactor = clamp(1.0 - (dCoords.x + dCoords.y), 0.0, 1.0);
 
-    int hit0 = 0;
-    int hit1 = 0;
+    float ReflectionMultiplier = pow(Metallic, falloff) *
+    screenEdgefactor *
+    -reflected.z;
 
-    float viewDistance = startView.y;
-    float depth = thickness;
+    // Get color
+    vec3 SSR = textureLod(gAlbedo, coords.xy, 0).rgb * clamp(ReflectionMultiplier, 0.0, 0.9) * Fresnel;
 
-    float i = 0;
+    ssr_fragment = vec4(SSR, Metallic);
+}
 
-    for (i = 0; i < int(delta); ++i) {
-        frag += increment;
-        uv.xy = frag / texSize;
-        positionTo = texture(gPosition, uv.xy);
+vec3 PositionFromDepth(float depth) {
+    float z = depth * 2.0 - 1.0;
 
-        search1 = mix((frag.y - startFrag.y) / deltaY, (frag.x - startFrag.x) / deltaX, useX);
+    vec4 clipSpacePosition = vec4(TexCoords * 2.0 - 1.0, z, 1.0);
+    vec4 viewSpacePosition = invProjection * clipSpacePosition;
 
-        search1 = clamp(search1, 0.0, 1.0);
+    // Perspective division
+    viewSpacePosition /= viewSpacePosition.w;
 
-        viewDistance = (startView.y * endView.y) / mix(endView.y, startView.y, search1);
-        depth = viewDistance - positionTo.y;
+    return viewSpacePosition.xyz;
+}
 
-        if (depth > 0 && depth < thickness) {
-            hit0 = 1;
-            break;
-        } else {
-            search0 = search1;
-        }
+vec3 BinarySearch(inout vec3 dir, inout vec3 hitCoord, inout float dDepth)
+{
+    float depth;
+
+    vec4 projectedCoord;
+
+    for (int i = 0; i < numBinarySearchSteps; i++)
+    {
+
+        projectedCoord = projection * vec4(hitCoord, 1.0);
+        projectedCoord.xy /= projectedCoord.w;
+        projectedCoord.xy = projectedCoord.xy * 0.5 + 0.5;
+
+        depth = textureLod(gPosition, projectedCoord.xy, 2).z;
+
+
+        dDepth = hitCoord.z - depth;
+
+        dir *= 0.5;
+        if (dDepth > 0.0)
+        hitCoord += dir;
+        else
+        hitCoord -= dir;
     }
 
-    search1 = search0 + ((search1 - search0) / 2.0);
+    projectedCoord = projection * vec4(hitCoord, 1.0);
+    projectedCoord.xy /= projectedCoord.w;
+    projectedCoord.xy = projectedCoord.xy * 0.5 + 0.5;
 
-    steps *= hit0;
+    return vec3(projectedCoord.xy, depth);
+}
 
-    for (i = 0; i < steps; ++i) {
-        frag = mix(startFrag.xy, endFrag.xy, search1);
-        uv.xy = frag / texSize;
-        positionTo = texture(gPosition, uv.xy);
+vec4 RayMarch(vec3 dir, inout vec3 hitCoord, out float dDepth)
+{
 
-        viewDistance = (startView.y * endView.y) / mix(endView.y, startView.y, search1);
-        depth = viewDistance - positionTo.y;
+    dir *= step;
 
-        if (depth > 0 && depth < thickness) {
-            hit1 = 1;
-            search1 = search0 + ((search1 - search0) / 2);
-        } else {
-            float temp = search1;
-            search1 = search1 + ((search1 - search0) / 2);
-            search0 = temp;
+
+    float depth;
+    int steps;
+    vec4 projectedCoord;
+
+
+    for (int i = 0; i < maxSteps; i++)
+    {
+        hitCoord += dir;
+
+        projectedCoord = projection * vec4(hitCoord, 1.0);
+        projectedCoord.xy /= projectedCoord.w;
+        projectedCoord.xy = projectedCoord.xy * 0.5 + 0.5;
+
+        depth = textureLod(gPosition, projectedCoord.xy, 2).z;
+        if (depth > 1000.0)
+        continue;
+
+        dDepth = hitCoord.z - depth;
+
+        if ((dir.z - dDepth) < 1.2)
+        {
+            if (dDepth <= 0.0)
+            {
+                vec4 Result;
+                Result = vec4(BinarySearch(dir, hitCoord, dDepth), 1.0);
+
+                return Result;
+            }
         }
+
+        steps++;
     }
 
-    float visibility = hit1 * positionTo.w
-    * (1.0 - max(dot(-unitPositionFrom, pivot), 0.0))
-    * (1.0 - clamp(depth / thickness, 0.0, 1.0))
-    * (1.0 - clamp(length(positionTo - positionFrom) / maxDistance, 0.0, 1.0))
-    * (uv.x < 0 || uv.x > 1 ? 0 : 1)
-    * (uv.y < 0 || uv.y > 1 ? 0 : 1);
 
-    visibility = clamp(visibility, 0.0, 1.0);
+    return vec4(projectedCoord.xy, depth, 0.0);
+}
 
-    uv.ba = vec2(visibility);
+vec3 fresnelSchlick(float cosTheta, vec3 F0)
+{
+    return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
+}
 
-    ssr_fragment = uv;
+
+vec3 hash(vec3 a)
+{
+    a = fract(a * Scale);
+    a += dot(a, a.yxz + K);
+    return fract((a.xxy + a.yxx) * a.zyx);
 }

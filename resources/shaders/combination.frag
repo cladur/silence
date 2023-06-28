@@ -51,8 +51,8 @@ void main()
         final_ao = 1.0;
     }
 
+    specular = mix(specular, ssr.rgb, ssr.a);
     vec4 color = vec4((albedo * diffuse + specular) * final_ao, 1.0);
-    color = mix(color, ssr, ssr.a);
 
     if (use_fog == 1) {
         vec4 view_pos = view_pos;
