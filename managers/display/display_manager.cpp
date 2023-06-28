@@ -31,10 +31,6 @@ DisplayManager::Status DisplayManager::startup(const std::string &window_name, b
 		return Status::FailedToCreateWindow;
 	}
 
-	if (!glfwVulkanSupported()) {
-		glfwTerminate();
-		return Status::VulkanNotSupported;
-	}
 	return Status::Ok;
 }
 

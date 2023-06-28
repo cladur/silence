@@ -93,6 +93,14 @@ void DialogueSystem::startup(World &world) {
 	}
 }
 
+void DialogueSystem::play_dialogue() {
+	dialogue_timer = 0.0f;
+	current_dialogue_id = dialogue_queue.front();
+	dialogue_queue.pop();
+	current_sentence_id = 0;
+}
+
+
 void DialogueSystem::update(World &world, float dt) {
 	ZoneScopedN("DialogueSystem::update");
 	InputManager &input_manager = InputManager::get();
@@ -160,12 +168,16 @@ void DialogueSystem::update(World &world, float dt) {
 		}
 
 		if (current_sentence_id >= dialogue.sentences.size()) {
-			current_dialogue_id = "";
-			current_sentence_id = 0;
-			dialogue_timer = 0.0f;
+			if (!dialogue_queue.empty()) {
+				play_dialogue();
+			} else {
+				current_dialogue_id = "";
+				current_sentence_id = 0;
+				dialogue_timer = 0.0f;
 
-			ui_dialogue_text->text = "";
-			ui_dialogue_text2->text = "";
+				ui_dialogue_text->text = "";
+				ui_dialogue_text2->text = "";
+			}
 		} else {
 			auto &sentence = dialogue.sentences[current_sentence_id];
 
@@ -213,9 +225,12 @@ void DialogueSystem::update(World &world, float dt) {
 			SPDLOG_INFO("Dialogue triggered: {}", dialogue_trigger.dialogue_id);
 
 			dialogue_trigger.triggered = true;
-			dialogue_timer = 0.0f;
-			current_dialogue_id = dialogue_trigger.dialogue_id;
-			current_sentence_id = 0;
+
+			dialogue_queue.push(dialogue_trigger.dialogue_id);
+
+			if (dialogue_queue.size() == 1 && current_dialogue_id.empty()) {
+				play_dialogue();
+			}
 		}
 	}
 }
