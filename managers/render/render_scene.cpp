@@ -175,11 +175,11 @@ void RenderScene::draw_viewport(bool right_side) {
 	glDisable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
 
-	ssao_buffer.bind();
-	glad_glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 	if (cvar_ssao.get()) {
+		ssao_buffer.bind();
+		glad_glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 		ssao_pass.material.radius = cvar_ssao_radius.get();
 		ssao_pass.material.bias = cvar_ssao_bias.get();
 		ssao_pass.draw(*this);
