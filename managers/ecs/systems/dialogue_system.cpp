@@ -50,26 +50,41 @@ void DialogueSystem::startup(World &world) {
 
 	// clang-format off
 	dialogues["tut_intro"] = { {
-			SENTENCE("Command: Hello, Hans and ScorpIO. This is your captain speaking.", "", "dialogue2"),
-			SENTENCE("Command: A few days ago, we've got reports of an unregulated", "construction of a combat robot by a military tech company Tech-Mil.", "dialogue2"),
-			SENTENCE("Command: According to our sources they've been", "working on it in secret for the last 3 years.", "dialogue2"),
-			SENTENCE("Command: Your mission is to infiltrate their military base,", "and find out how big of a threat is this robot.", "dialogue2"),
-			SENTENCE("Command: It's just the two of you out there.", "We cannot provide you with any backup.", "dialogue2"),
-			SENTENCE("Command: That's why it's crucial that you do not get caught.", "You need to stay out of sight of the cameras and enemies.", "dialogue2"),
+		SENTENCE("Command: Hello, Hans and ScorpIO. This is your mission operator speaking.", "", "Dialogues/tut/tut_1"),
+		SENTENCE("Command: A few days ago, we got reports of an unregulated", "construction of a combat robot by a military tech company Tech-Mil.", "Dialogues/tut/tut_2"),
+		SENTENCE("Command: According to our sources, they've been", "working on it in secret for the last 3 years.", "Dialogues/tut/tut_3"),
+		SENTENCE("Command: Your mission is to infiltrate their military base", "and find out how big of a threat is that robot.", "Dialogues/tut/tut_4"),
+		SENTENCE("Command: It's just the two of you out there.", "We cannot provide you with any backup.", "Dialogues/tut/tut_5"),
+		SENTENCE("Command: That's why it's crucial that you do not get caught.", "You need to stay out of sight of the cameras and enemies.", "Dialogues/tut/tut_6"),
 	} };
 
 	dialogues["tut_marking"] = { {
-			SENTENCE("Command: You can hold the LEFT TRIGGER to zoom in.", "", "dialogue1"),
-			SENTENCE("Command: While zoomed in, try to focus on", "objects of interest in order to mark them.", "dialogue2"),
-			SENTENCE("Command: Try marking some enemies to the left of you.", "", "dialogue2"),
-			SENTENCE("Command: It's worth noting that", "marked enemies can be seen through walls.", "dialogue2"),
-			SENTENCE("Command: Once you're done, head to the next room.", "", "dialogue2"),
+		SENTENCE("Command: You can hold the LEFT TRIGGER to zoom in.", "", "Dialogues/tut_mark/mark_1"),
+		SENTENCE("Command: While zoomed in, focus on", "objects of interest in order to mark them.", "Dialogues/tut_mark/mark_2"),
+		SENTENCE("Command: Try marking some enemies to the left of you.", "", "Dialogues/tut_mark/mark_3"),
+		SENTENCE("Command: It's worth noting that", "marked enemies can be seen through walls.", "Dialogues/tut_mark/mark_4"),
+		SENTENCE("Command: Once you're done, head to the next room.", "", "Dialogues/tut_mark/mark_5"),
 	} };
 
 	dialogues["tut_climbing_vent"] = { {
-			SENTENCE("Command: Hans, as a human, there's no need to", "explain that you can climb onto stuff.", "dialogue1"),
-			SENTENCE("Command: As for you ScorpIO...", "You'll need to find a way to squeeze in.", "dialogue2"),
+		SENTENCE("Hans: I think I can climb on those boxes.", "Do you want me to pick you up?", "Dialogues/climb/agent_climb"),
+		SENTENCE("ScorpIO: No thanks, I can go through that vent.", "", "Dialogues/climb/hacker_climb"),
 	} };
+
+	dialogues["tut_camera"] = {{
+		SENTENCE("Command: Look out! There's a security camera ahead of you.", "", "Dialogues/camera/camera_1"),
+		SENTENCE("Command: The red light coming out of it means that it can spot you.", "", "Dialogues/camera/camera_2"),
+		SENTENCE("ScorpIO: Don't worry, I can take control over it,", "letting both of us sneak past it.", "Dialogues/camera/camera_hacker"),
+	}};
+
+	dialogues["tut_enemies"] = {{
+		SENTENCE("Command: The room ahead of you is full of enemies, watch out.", "", "Dialogues/enemies/enemy"),
+		SENTENCE("ScorpIO: I'm afraid I don't have the abilities necessary", "for engaging in direct combat.", "Dialogues/enemies/enemy_hacker_1"),
+		SENTENCE("Hans: I'll take them out, while you distract them, okay?", "", "Dialogues/enemies/enemy_agent"),
+		SENTENCE("ScorpIO: Roger that.", "", "Dialogues/enemies/enemy_hacker_2"),
+	}};
+
+
 	//clang-format on
 	for (auto &dialogue : dialogues) {
 		for (auto &sentence : dialogue.second.sentences) {
@@ -77,6 +92,14 @@ void DialogueSystem::startup(World &world) {
 		}
 	}
 }
+
+void DialogueSystem::play_dialogue() {
+	dialogue_timer = 0.0f;
+	current_dialogue_id = dialogue_queue.front();
+	dialogue_queue.pop();
+	current_sentence_id = 0;
+}
+
 
 void DialogueSystem::update(World &world, float dt) {
 	ZoneScopedN("DialogueSystem::update");
@@ -145,12 +168,16 @@ void DialogueSystem::update(World &world, float dt) {
 		}
 
 		if (current_sentence_id >= dialogue.sentences.size()) {
-			current_dialogue_id = "";
-			current_sentence_id = 0;
-			dialogue_timer = 0.0f;
+			if (!dialogue_queue.empty()) {
+				play_dialogue();
+			} else {
+				current_dialogue_id = "";
+				current_sentence_id = 0;
+				dialogue_timer = 0.0f;
 
-			ui_dialogue_text->text = "";
-			ui_dialogue_text2->text = "";
+				ui_dialogue_text->text = "";
+				ui_dialogue_text2->text = "";
+			}
 		} else {
 			auto &sentence = dialogue.sentences[current_sentence_id];
 
@@ -184,6 +211,11 @@ void DialogueSystem::update(World &world, float dt) {
 		auto vec = PhysicsManager::get().overlap_cube_checkpoint(world, c);
 
 		if (!vec.empty()) {
+			if (dialogue_trigger.dialogue_id.starts_with("level_")) {
+				GameplayManager::get().change_scene(dialogue_trigger.dialogue_id);
+				continue;
+			}
+
 			if (!dialogues.contains(dialogue_trigger.dialogue_id)) {
 				SPDLOG_WARN("Dialogue {} does not exist", dialogue_trigger.dialogue_id);
 				continue;
@@ -198,9 +230,12 @@ void DialogueSystem::update(World &world, float dt) {
 			SPDLOG_INFO("Dialogue triggered: {}", dialogue_trigger.dialogue_id);
 
 			dialogue_trigger.triggered = true;
-			dialogue_timer = 0.0f;
-			current_dialogue_id = dialogue_trigger.dialogue_id;
-			current_sentence_id = 0;
+
+			dialogue_queue.push(dialogue_trigger.dialogue_id);
+
+			if (dialogue_queue.size() == 1 && current_dialogue_id.empty()) {
+				play_dialogue();
+			}
 		}
 	}
 }

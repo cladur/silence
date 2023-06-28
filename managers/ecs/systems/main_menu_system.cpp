@@ -2,9 +2,10 @@
 #include "ecs/world.h"
 #include <audio/audio_manager.h>
 #include <display/display_manager.h>
+#include <engine/scene.h>
 #include <gameplay/gameplay_manager.h>
 #include <render/transparent_elements/ui_manager.h>
-#include <engine/scene.h>
+
 
 void MainMenuSystem::startup(World &world) {
 	Signature whitelist;
@@ -38,7 +39,7 @@ void MainMenuSystem::update(World &world, float dt) {
 
 		if (menu.play_button->clicked()) {
 			SPDLOG_INFO("Play button clicked");
-			gp.change_scene("Level");
+			gp.change_scene("level_tutorial_0");
 			UIManager::get().deactivate_ui_scene(ui_name);
 			break;
 		}
@@ -82,7 +83,6 @@ void MainMenuSystem::update(World &world, float dt) {
 }
 
 void MainMenuSystem::init_ui(MainMenu &menu) {
-
 	SPDLOG_INFO("Initializing main menu UI");
 	AudioManager::get().get_system()->getBus("bus:/", &menu.master_bus);
 	auto &rm = ResourceManager::get();

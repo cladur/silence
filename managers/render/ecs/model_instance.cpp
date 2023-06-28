@@ -27,6 +27,11 @@ void ModelInstance::serialize_json(nlohmann::json &serialized_scene) {
 	serialized_component["scale_uv_with_transform"] = scale_uv_with_transform;
 	serialized_component["in_shadow_pass"] = in_shadow_pass;
 	serialized_component["flip_uv_y"] = flip_uv_y;
+	serialized_component["color_tint"] = nlohmann::json::object();
+	serialized_component["color_tint"]["x"] = color_tint.x;
+	serialized_component["color_tint"]["y"] = color_tint.y;
+	serialized_component["color_tint"]["z"] = color_tint.z;
+	serialized_component["brightness_offset"] = brightness_offset;
 	serialized_scene.push_back(nlohmann::json::object());
 	serialized_scene.back()["component_data"] = serialized_component;
 	serialized_scene.back()["component_name"] = "ModelInstance";
@@ -52,6 +57,16 @@ void ModelInstance::deserialize_json(nlohmann::json &serialized_component) {
 
 	if (serialized_component.contains("flip_uv_y")) {
 		flip_uv_y = serialized_component["flip_uv_y"];
+	}
+
+	if (serialized_component.contains("color_tint")) {
+		color_tint.x = serialized_component["color_tint"]["x"];
+		color_tint.y = serialized_component["color_tint"]["y"];
+		color_tint.z = serialized_component["color_tint"]["z"];
+	}
+
+	if (serialized_component.contains("brightness_offset")) {
+		brightness_offset = serialized_component["brightness_offset"];
 	}
 
 	// if (serialized_component.contains("uv_scale")) {

@@ -45,7 +45,9 @@ struct RenderScene {
 	ParticlePass particle_pass;
 	HighlightPass highlight_pass;
 	DecalPass decal_pass;
+	SSRPass ssr_pass;
 
+	Framebuffer agent_framebuffer, hacker_framebuffer;
 	Framebuffer render_framebuffer;
 	Framebuffer final_framebuffer;
 	GBuffer g_buffer;
@@ -57,6 +59,7 @@ struct RenderScene {
 	SkyboxBuffer skybox_buffer;
 	ParticleBuffer particle_buffer;
 	HighlightBuffer highlight_buffer;
+	SSRBuffer ssr_buffer;
 
 	// render extent that does not change whether we're in splitscreen or not
 	glm::vec2 full_render_extent;

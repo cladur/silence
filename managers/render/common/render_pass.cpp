@@ -12,7 +12,7 @@ AutoCVarFloat cvar_blur_radius("render.blur_radius", "blur radius", 0.001f, CVar
 AutoCVarInt cvar_use_bloom("render.use_bloom", "use bloom", 1, CVarFlags::EditCheckbox);
 AutoCVarFloat cvar_bloom_strength("render.bloom_strength", "bloom strength", 0.04f, CVarFlags::EditFloatDrag);
 
-AutoCVarFloat cvar_gamma("render.gamma", "gamma", 1.85f, CVarFlags::EditFloatDrag);
+AutoCVarFloat cvar_gamma("render.gamma", "gamma", 2.2f, CVarFlags::EditFloatDrag);
 AutoCVarFloat cvar_dirt_strength("render.dirt_strength", "dirt strength", 0.075f, CVarFlags::EditFloatDrag);
 
 AutoCVarFloat cvar_smooth(
@@ -827,7 +827,6 @@ void HighlightPass::clear() {
 void DecalPass::startup() {
 	material.startup();
 }
-
 void DecalPass::draw(RenderScene &scene) {
 	ZoneScopedN("DecalPass::draw");
 	material.bind_resources(scene);
@@ -838,4 +837,20 @@ void DecalPass::draw(RenderScene &scene) {
 
 		utils::render_cube();
 	}
+}
+
+void SSRPass::startup() {
+	material.startup();
+}
+
+void SSRPass::draw(RenderScene &scene) {
+	ZoneScopedN("SSRPass::draw");
+	material.bind_resources(scene);
+	utils::render_quad();
+}
+
+void SSRPass::draw(RenderScene &scene, bool right_side) {
+	ZoneScopedN("SSRPass::draw");
+	material.bind_resources(scene, right_side);
+	utils::render_quad();
 }

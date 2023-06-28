@@ -24,6 +24,9 @@ uniform mat4 view;
 uniform vec2 uv_scale;
 uniform bool flip_uv_y;
 
+uniform vec3 color_tint;
+uniform float brightness_offset;
+
 // ----------------------------------------------------------------------------
 // Easy trick to get tangent-normals to world-space to keep PBR code simplified.
 // Don't worry if you don't get what's going on; you generally want to do normal 
@@ -61,7 +64,7 @@ void main()
     }
     vec2 texture_coords = vec2(TexCoords.x * uv_scale.x, uv_y * uv_scale.y);
     vec4 color = texture(albedo_map, texture_coords);
-    vec3 albedo = pow(color.rgb, vec3(2.2));
+    vec3 albedo = pow((brightness_offset + color.rgb) * color_tint, vec3(2.2));
     if (color.a < 0.05f)
     {
         discard;

@@ -39,6 +39,7 @@ void RenderScene::startup() {
 	particle_pass.startup();
 	highlight_pass.startup();
 	decal_pass.startup();
+	ssr_pass.startup();
 
 	// Size of the viewport doesn't matter here, it will be resized either way
 	render_extent = glm::vec2(100, 100);
@@ -54,6 +55,9 @@ void RenderScene::startup() {
 	mouse_pick_framebuffer.startup(render_extent.x, render_extent.y);
 	particle_buffer.startup(render_extent.x, render_extent.y);
 	highlight_buffer.startup(render_extent.x, render_extent.y);
+	ssr_buffer.startup(render_extent.x, render_extent.y);
+	agent_framebuffer.startup(render_extent.x, render_extent.y);
+	hacker_framebuffer.startup(render_extent.x, render_extent.y);
 
 	debug_draw.startup();
 	transparent_pass.startup();
@@ -186,6 +190,14 @@ void RenderScene::draw_viewport(bool right_side) {
 	// ssao_blur_pass.draw(*this);
 	// glBindFramebuffer(GL_READ_FRAMEBUFFER, ssao_buffer.framebuffer_id);
 
+	if (*CVarSystem::get()->get_int_cvar("ssr.enable")) {
+		ssr_buffer.bind();
+		glad_glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		ssr_pass.draw(*this, right_side);
+	}
+
 	// 2.5. copy content of geometry's depth buffer to default framebuffer's depth buffer
 	// ----------------------------------------------------------------------------------
 	render_framebuffer.bind();
@@ -312,6 +324,9 @@ void RenderScene::draw(bool editor_mode) {
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, final_framebuffer.framebuffer_id);
 			glBlitFramebuffer(0, 0, render_extent.x, render_extent.y, 0, 0, render_extent.x, render_extent.y,
 					GL_COLOR_BUFFER_BIT, GL_NEAREST);
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, agent_framebuffer.framebuffer_id);
+			glBlitFramebuffer(0, 0, render_extent.x, render_extent.y, 0, 0, render_extent.x, render_extent.y,
+					GL_COLOR_BUFFER_BIT, GL_NEAREST);
 		}
 
 		draw_viewport(true); // hacker
@@ -321,6 +336,9 @@ void RenderScene::draw(bool editor_mode) {
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, final_framebuffer.framebuffer_id);
 			glBlitFramebuffer(0, 0, render_extent.x, render_extent.y, render_extent.x, 0, 2 * render_extent.x,
 					render_extent.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, hacker_framebuffer.framebuffer_id);
+			glBlitFramebuffer(0, 0, render_extent.x, render_extent.y, 0, 0, render_extent.x, render_extent.y,
+					GL_COLOR_BUFFER_BIT, GL_NEAREST);
 		}
 	} else {
 		int *controlling_agent = CVarSystem::get()->get_int_cvar("game.controlling_agent");
@@ -334,6 +352,9 @@ void RenderScene::draw(bool editor_mode) {
 			ZoneScopedN("RenderScene::blit");
 			glBindFramebuffer(GL_READ_FRAMEBUFFER, render_framebuffer.framebuffer_id);
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, final_framebuffer.framebuffer_id);
+			glBlitFramebuffer(0, 0, render_extent.x, render_extent.y, 0, 0, render_extent.x, render_extent.y,
+					GL_COLOR_BUFFER_BIT, GL_NEAREST);
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, agent_framebuffer.framebuffer_id);
 			glBlitFramebuffer(0, 0, render_extent.x, render_extent.y, 0, 0, render_extent.x, render_extent.y,
 					GL_COLOR_BUFFER_BIT, GL_NEAREST);
 		}
@@ -386,6 +407,9 @@ void RenderScene::resize_framebuffer(uint32_t width, uint32_t height) {
 	mouse_pick_framebuffer.resize(width, height);
 	particle_buffer.resize(width, height);
 	highlight_buffer.resize(width, height);
+	ssr_buffer.resize(width, height);
+	agent_framebuffer.resize(width, height);
+	hacker_framebuffer.resize(width, height);
 
 	render_extent = glm::vec2(width, height);
 }
