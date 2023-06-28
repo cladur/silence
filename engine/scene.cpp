@@ -1,6 +1,7 @@
 #include "scene.h"
 #include "animation/ecs/animation_instance.h"
 #include "components/exploding_box_component.h"
+#include "components/main_door_component.h"
 #include "components/main_menu_component.h"
 #include "components/wall_cube_component.h"
 #include "display/display_manager.h"
@@ -107,6 +108,7 @@ Scene::Scene() {
 		world.register_component<DialogueTrigger>();
 		world.register_component<Checkpoint>();
 		world.register_component<MainMenu>();
+		world.register_component<MainDoor>();
 	}
 	// Components
 	{ register_main_systems(); }

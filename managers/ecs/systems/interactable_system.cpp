@@ -353,6 +353,28 @@ void InteractableSystem::update(World &world, float dt) {
 					switch_light_temporal(world, lights_to_switch, interactable, dt, enemies_to_blind);
 					interactable.is_powering_up = true;
 				}
+
+				case Interaction::SwitchMainDoorLight: {
+					Entity light_entity = interactable.interaction_targets[0];
+					auto &main_door = world.get_component<MainDoor>(interactable.main_door);
+
+					if (light_entity == 0) {
+						break;
+					}
+
+					auto &light = world.get_component<Light>(light_entity);
+					light.color = glm::vec3(0.0f, 1.0f, 0.0f);
+
+					main_door.number_of_locks_opened++;
+
+					if (main_door.number_of_locks_opened == main_door.number_of_locks) {
+						auto &left_door = world.get_component<Platform>(main_door.left_door);
+						auto &right_door = world.get_component<Platform>(main_door.right_door);
+
+						left_door.is_moving = true;
+						right_door.is_moving = true;
+					}
+				}
 			}
 
 			if (interactable.single_use) {

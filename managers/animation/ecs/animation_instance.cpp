@@ -20,6 +20,7 @@ AnimationInstance::AnimationInstance() {
 	resource_manager.load_animation(asset_path("enemy/enemy_ANIM_GLTF/enemy_idle.anim").c_str());
 	resource_manager.load_animation(asset_path("enemy/enemy_ANIM_GLTF/enemy_death.anim").c_str());
 	resource_manager.load_animation(asset_path("enemy/enemy_ANIM_GLTF/enemy_down_to_aim.anim").c_str());
+	resource_manager.load_animation(asset_path("enemy/enemy_ANIM_GLTF/enemy_walk_with_gun.anim").c_str());
 }
 
 AnimationInstance::AnimationInstance(const char *path) {

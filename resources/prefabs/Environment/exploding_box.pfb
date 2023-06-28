@@ -9,6 +9,15 @@
             },
             {
                 "component_data": {
+                    "children": [
+                        2
+                    ],
+                    "children_count": 1
+                },
+                "component_name": "Children"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 0.0,
                         "x": 0.0,
@@ -27,15 +36,6 @@
                     }
                 },
                 "component_name": "Transform"
-            },
-            {
-                "component_data": {
-                    "children": [
-                        2
-                    ],
-                    "children_count": 1
-                },
-                "component_name": "Children"
             }
         ],
         "entity": 1,
@@ -45,51 +45,9 @@
         "components": [
             {
                 "component_data": {
-                    "highlight_color": {
-                        "b": 0.0,
-                        "g": 0.0,
-                        "r": 1.0
-                    },
-                    "highlight_power": 0.30000001192092896,
-                    "highlighted": "twoja misja trwa",
-                    "target": 3
-                },
-                "component_name": "Highlight"
-            },
-            {
-                "component_data": {
-                    "distraction_radius": 15.0,
-                    "distraction_time": 2.0,
-                    "explosion_radius": 4.0
-                },
-                "component_name": "ExplodingBox"
-            },
-            {
-                "component_data": {
                     "name": "ExplodingBox"
                 },
                 "component_name": "Name"
-            },
-            {
-                "component_data": {
-                    "orientation": {
-                        "w": 0.707106351852417,
-                        "x": -0.7071071267127991,
-                        "y": 0.00017308870155829936,
-                        "z": 0.00017295805446337909
-                    },
-                    "position": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    "scale": {
-                        "x": 0.9999999403953552,
-                        "y": 0.9999909996986389,
-                        "z": 0.9999878406524658
-                    }
-                },
-                "component_name": "Transform"
             },
             {
                 "component_data": {
@@ -100,69 +58,6 @@
                     "children_count": 2
                 },
                 "component_name": "Children"
-            },
-            {
-                "component_data": {
-                    "parent": 1
-                },
-                "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "in_shadow_pass": true,
-                    "material_type": 0,
-                    "model_name": "items/electric_box_2/electric_box_2.mdl",
-                    "scale_uv_with_transform": false
-                },
-                "component_name": "ModelInstance"
-            },
-            {
-                "component_data": {},
-                "component_name": "StaticTag"
-            },
-            {
-                "component_data": {
-                    "cable_parent": 0,
-                    "can_interact": true,
-                    "interaction": 3,
-                    "interaction_target": 2,
-                    "interaction_target_2": 0,
-                    "interaction_target_3": 0,
-                    "interaction_target_4": 0,
-                    "interaction_target_5": 0,
-                    "interaction_text": "[X] Explode",
-                    "single_use": true,
-                    "type": 2
-                },
-                "component_name": "Interactable"
-            },
-            {
-                "component_data": {
-                    "layer_name": "taggable"
-                },
-                "component_name": "ColliderTag"
-            },
-            {
-                "component_data": {
-                    "center": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": -0.10000000149011612
-                    },
-                    "range": {
-                        "x": 0.6000000238418579,
-                        "y": 0.699999988079071,
-                        "z": 0.30000001192092896
-                    }
-                },
-                "component_name": "ColliderAABB"
-            },
-            {
-                "component_data": {
-                    "event_path": "SFX/electricity/electric_hum",
-                    "is_3d": true
-                },
-                "component_name": "FMODEmitter"
             },
             {
                 "component_data": {
@@ -224,6 +119,116 @@
             },
             {
                 "component_data": {
+                    "orientation": {
+                        "w": 0.707106351852417,
+                        "x": -0.7071071267127991,
+                        "y": 0.00017308870155829936,
+                        "z": 0.00017295805446337909
+                    },
+                    "position": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "scale": {
+                        "x": 0.9999999403953552,
+                        "y": 0.9999909996986389,
+                        "z": 0.9999878406524658
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "highlight_color": {
+                        "b": 0.0,
+                        "g": 0.0,
+                        "r": 1.0
+                    },
+                    "highlight_power": 0.30000001192092896,
+                    "highlighted": "twoja misja trwa",
+                    "target": 3
+                },
+                "component_name": "Highlight"
+            },
+            {
+                "component_data": {
+                    "parent": 1
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "flip_uv_y": false,
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/electric_box_2/electric_box_2.mdl",
+                    "scale_uv_with_transform": false,
+                    "uv_scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {},
+                "component_name": "StaticTag"
+            },
+            {
+                "component_data": {
+                    "is_active": true,
+                    "is_climbable": false,
+                    "layer_name": "taggable"
+                },
+                "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {
+                    "center": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": -0.10000000149011612
+                    },
+                    "range": {
+                        "x": 0.6000000238418579,
+                        "y": 0.699999988079071,
+                        "z": 0.30000001192092896
+                    }
+                },
+                "component_name": "ColliderAABB"
+            },
+            {
+                "component_data": {
+                    "cable_parent": 0,
+                    "can_interact": true,
+                    "enemy_entity": 0,
+                    "enemy_entity2": 0,
+                    "interaction": 3,
+                    "interaction_target": 2,
+                    "interaction_target_2": 0,
+                    "interaction_target_3": 0,
+                    "interaction_target_4": 0,
+                    "interaction_target_5": 0,
+                    "interaction_text": "[X] Explode",
+                    "is_on": false,
+                    "lever": 0,
+                    "main_door": 0,
+                    "single_use": true,
+                    "type": 2
+                },
+                "component_name": "Interactable"
+            },
+            {
+                "component_data": {
+                    "distraction_radius": 15.0,
+                    "distraction_time": 2.0,
+                    "explosion_radius": 4.0
+                },
+                "component_name": "ExplodingBox"
+            },
+            {
+                "component_data": {
                     "tag_position": {
                         "x": 0.0,
                         "y": 0.20000000298023224,
@@ -231,6 +236,13 @@
                     }
                 },
                 "component_name": "Taggable"
+            },
+            {
+                "component_data": {
+                    "event_path": "SFX/electricity/electric_hum",
+                    "is_3d": true
+                },
+                "component_name": "FMODEmitter"
             }
         ],
         "entity": 2,
@@ -246,21 +258,79 @@
             },
             {
                 "component_data": {
+                    "color_begin": [
+                        0.250980406999588,
+                        0.364705890417099,
+                        0.8313725590705872,
+                        1.0
+                    ],
+                    "color_end": [
+                        0.4313725531101227,
+                        0.2705882489681244,
+                        0.35686275362968445,
+                        0.0
+                    ],
+                    "color_transition": 0,
+                    "is_billboard": true,
+                    "is_one_shot": false,
+                    "is_textured": true,
+                    "lifetime": 0.10000000149011612,
+                    "one_shot_duration": 0.5,
+                    "position": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "position_variance": [
+                        0.20000000298023224,
+                        0.0,
+                        0.30000001192092896
+                    ],
+                    "rate": 1.7999999523162842,
+                    "rotation_begin": 0.0,
+                    "rotation_end": 0.0,
+                    "rotation_transition": 0,
+                    "rotation_variance": 121.0999984741211,
+                    "size_begin": 1.7000000476837158,
+                    "size_end": 1.7000000476837158,
+                    "size_transition": 0,
+                    "texture_name": "electricity.ktx2",
+                    "velocity_begin": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "velocity_end": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "velocity_transition": 0,
+                    "velocity_variance": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
+                },
+                "component_name": "ParticleEmitter"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 1.0,
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
+                        "x": 3.542198978578881e-09,
+                        "y": -1.7448053313273704e-07,
+                        "z": 4.482043181042172e-09
                     },
                     "position": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
+                        "x": 0.00015254101890604943,
+                        "y": 0.4000000059604645,
+                        "z": 3.344515846492868e-07
                     },
                     "scale": {
-                        "x": 1.0,
-                        "y": 1.0,
-                        "z": 1.0
+                        "x": 0.9999882578849792,
+                        "y": 0.9999998807907104,
+                        "z": 0.9999969005584717
                     }
                 },
                 "component_name": "Transform"
@@ -273,7 +343,7 @@
             }
         ],
         "entity": 3,
-        "signature": "0000000000000000000000000000000000000000000000000000000000001011"
+        "signature": "0000000000000000000000000000000010000000000000000000000000001011"
     },
     {
         "components": [
@@ -285,21 +355,79 @@
             },
             {
                 "component_data": {
+                    "color_begin": [
+                        0.48235294222831726,
+                        0.5490196347236633,
+                        0.8784313797950745,
+                        1.0
+                    ],
+                    "color_end": [
+                        0.6666666865348816,
+                        0.23137255012989044,
+                        0.5137255191802979,
+                        0.0
+                    ],
+                    "color_transition": 0,
+                    "is_billboard": true,
+                    "is_one_shot": false,
+                    "is_textured": true,
+                    "lifetime": 0.20000000298023224,
+                    "one_shot_duration": 0.5,
+                    "position": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "position_variance": [
+                        0.30000001192092896,
+                        0.0,
+                        0.5
+                    ],
+                    "rate": 1.2999999523162842,
+                    "rotation_begin": 0.0,
+                    "rotation_end": 0.0,
+                    "rotation_transition": 0,
+                    "rotation_variance": 121.0999984741211,
+                    "size_begin": 1.2000000476837158,
+                    "size_end": 1.2000000476837158,
+                    "size_transition": 0,
+                    "texture_name": "electricity.ktx2",
+                    "velocity_begin": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "velocity_end": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "velocity_transition": 0,
+                    "velocity_variance": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
+                },
+                "component_name": "ParticleEmitter"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 1.0,
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
+                        "x": 6.563484694048991e-21,
+                        "y": -1.1275980149605402e-12,
+                        "z": 5.878973752260208e-09
                     },
                     "position": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
+                        "x": 0.000189097088878043,
+                        "y": 0.4000000059604645,
+                        "z": 4.146028231843957e-07
                     },
                     "scale": {
                         "x": 1.0,
                         "y": 1.0,
-                        "z": 1.0
+                        "z": 0.9999879598617554
                     }
                 },
                 "component_name": "Transform"
@@ -312,6 +440,6 @@
             }
         ],
         "entity": 4,
-        "signature": "0000000000000000000000000000000000000000000000000000000000001011"
+        "signature": "0000000000000000000000000000000010000000000000000000000000001011"
     }
 ]

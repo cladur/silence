@@ -1,6 +1,7 @@
 #ifndef SILENCE_COMPONENT_VISITOR_H
 #define SILENCE_COMPONENT_VISITOR_H
 
+#include "components/attachment_component.h"
 #include "components/enemy_path_component.h"
 #include "components/wall_cube_component.h"
 #include "types.h"
@@ -62,6 +63,10 @@ private:
 		checkpoint.hacker_spawn_pos = update_id(checkpoint.hacker_spawn_pos, id_map);
 	}
 
+	static void update_attachment_ids(Attachment &attachment, const std::unordered_map<Entity, Entity> &id_map) {
+		attachment.holder = update_id(attachment.holder, id_map);
+	}
+
 public:
 	static void visit(World &world, Entity entity, serialization::variant_type &variant) {
 		// std::visit pass type to component in lambda from variant
@@ -108,6 +113,10 @@ public:
 		if (world.has_component<Checkpoint>(entity)) {
 			auto &checkpoint = world.get_component<Checkpoint>(entity);
 			update_checkpoint_ids(checkpoint, id_map);
+		}
+		if (world.has_component<Attachment>(entity)) {
+			auto &attachment = world.get_component<Attachment>(entity);
+			update_attachment_ids(attachment, id_map);
 		}
 	}
 };
