@@ -123,23 +123,23 @@ void InteractableSystem::update(World &world, float dt) {
 			}
 			ui.add_as_root(ui_name, std::to_string(entity) + "_ui_interaction_root");
 
-
 			auto &interaction_sprite = ui.add_ui_image(ui_name, std::to_string(entity) + "_ui_interaction_sprite");
 			interaction_sprite.display = false;
 			interaction_sprite.is_billboard = false;
 			interaction_sprite.is_screen_space = true;
 			interaction_sprite.position = glm::vec3(0.0f);
 			interaction_sprite.size = glm::vec2(256.0f);
-			interaction_sprite.texture = ResourceManager::get().load_texture(asset_path("interaction_highlight.ktx2").c_str());
+			interaction_sprite.texture =
+					ResourceManager::get().load_texture(asset_path("interaction_highlight.ktx2").c_str());
 			interaction_sprite.color = glm::vec4(1.0f, 1.0f, 1.0f, 0.4f);
-			ui.add_to_root(ui_name, std::to_string(entity) + "_ui_interaction_sprite", std::to_string(entity) + "_ui_interaction_root");
+			ui.add_to_root(ui_name, std::to_string(entity) + "_ui_interaction_sprite",
+					std::to_string(entity) + "_ui_interaction_root");
 		}
 
 		if (interactable.can_interact) {
 			glm::vec2 render_extent = world.get_parent_scene()->get_render_scene().render_extent;
 			glm::vec3 player_cam_pos;
 			auto &interaction_sprite = ui.get_ui_image(ui_name, std::to_string(entity) + "_ui_interaction_sprite");
-			//auto interaction_type = magic_enum::enum_name(interactable.type);
 			if (interactable.type == InteractionType::Agent) {
 				uint32_t camera_entity = GameplayManager::get().get_agent_camera(world.get_parent_scene());
 				player_cam_pos = world.get_component<Transform>(camera_entity).get_global_position();
@@ -150,7 +150,8 @@ void InteractableSystem::update(World &world, float dt) {
 				ray.length = *CVarSystem::get()->get_float_cvar("agent.interaction_range") * 15.0f;
 				ray.ignore_list.emplace_back(camera_entity);
 				HitInfo info;
-				if (CollisionSystem::ray_cast_layer(world,ray,info) && world.has_component<Interactable>(info.entity)) {
+				if (CollisionSystem::ray_cast_layer(world, ray, info) &&
+						world.has_component<Interactable>(info.entity)) {
 					auto cam_forward = world.get_component<Transform>(camera_entity).get_global_forward();
 					auto cam_forward_xz_proj = glm::normalize(glm::vec3(cam_forward.x, 0.0f, cam_forward.z));
 
@@ -158,7 +159,7 @@ void InteractableSystem::update(World &world, float dt) {
 					auto angle = glm::degrees(glm::acos(glm::dot(direction_xz, cam_forward_xz_proj)));
 
 					glm::vec2 screen_pos = enemy_utils::transform_to_screen(
-							transform.get_global_position(),world.get_parent_scene()->get_render_scene(),false);
+							transform.get_global_position(), world.get_parent_scene()->get_render_scene(), false);
 					screen_pos.x += 96.0f;
 					interaction_sprite.position = glm::vec3(screen_pos, 0.0f);
 					interaction_sprite.display = true;
@@ -191,7 +192,8 @@ void InteractableSystem::update(World &world, float dt) {
 				ray.ignore_list.emplace_back(camera_entity);
 				HitInfo info;
 
-				if (CollisionSystem::ray_cast_layer(world,ray,info) && world.has_component<Interactable>(info.entity)) {
+				if (CollisionSystem::ray_cast_layer(world, ray, info) &&
+						world.has_component<Interactable>(info.entity)) {
 					auto cam_forward = world.get_component<Transform>(camera_entity).get_global_forward();
 					auto cam_forward_xz_proj = glm::normalize(glm::vec3(cam_forward.x, 0.0f, cam_forward.z));
 
@@ -199,7 +201,7 @@ void InteractableSystem::update(World &world, float dt) {
 					auto angle = glm::degrees(glm::acos(glm::dot(direction_xz, cam_forward_xz_proj)));
 
 					glm::vec2 screen_pos = enemy_utils::transform_to_screen(
-							transform.get_global_position(),world.get_parent_scene()->get_render_scene(),true);
+							transform.get_global_position(), world.get_parent_scene()->get_render_scene(), true);
 					screen_pos.x += 96.0f;
 					interaction_sprite.position = glm::vec3(screen_pos, 0.0f);
 					interaction_sprite.display = true;
@@ -275,6 +277,14 @@ void InteractableSystem::update(World &world, float dt) {
 			}
 		}
 
+		if (interactable.interaction == Interaction::HackerPlatform) {
+			auto &platform = world.get_component<Platform>(interactable.interaction_targets[0]);
+			if (platform.is_moving) {
+				interactable.triggered = false;
+				return;
+			}
+		}
+
 		if (interactable.triggered) {
 			interactable.triggered = false;
 
@@ -307,10 +317,10 @@ void InteractableSystem::update(World &world, float dt) {
 							break;
 						}
 						auto &platform = world.get_component<Platform>(current_target);
-						AudioManager::get().play_one_shot_3d(
-								electric_interaction_event, world.get_component<Transform>(entity));
 						if (!platform.is_moving) {
 							platform.is_moving = true;
+							AudioManager::get().play_one_shot_3d(
+									electric_interaction_event, world.get_component<Transform>(entity));
 						}
 						//SPDLOG_INFO("{}", "Hacker platform triggered");
 					}
@@ -342,8 +352,6 @@ void InteractableSystem::update(World &world, float dt) {
 
 					switch_light_temporal(world, lights_to_switch, interactable, dt, enemies_to_blind);
 					interactable.is_powering_up = true;
-
-					//SPDLOG_INFO("Temporal Light switch triggered");
 				}
 			}
 
