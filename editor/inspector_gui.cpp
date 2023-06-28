@@ -381,6 +381,21 @@ void Inspector::show_modelinstance() {
 			}
 			ImGui::EndCombo();
 		}
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Brightness Offset");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		ImGui::SliderFloat("##BrightnessOffset", &modelinstance.brightness_offset, 0.0f, 1.0f);
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::Text("Color Tint");
+		ImGui::TableSetColumnIndex(1);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		ImGui::ColorPicker3("##ColorTint", &modelinstance.color_tint.x);
+
 		ImGui::TableNextRow();
 		ImGui::TableSetColumnIndex(0);
 		ImGui::Text("UV Scale");
