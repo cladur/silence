@@ -340,6 +340,7 @@ void InteractableSystem::update(World &world, float dt) {
 						SPDLOG_INFO("Light switch triggered");
 						switch_light(world, current_light_entity);
 					}
+					break;
 				}
 
 				case Interaction::TemporalLightSwitch: {
@@ -352,6 +353,7 @@ void InteractableSystem::update(World &world, float dt) {
 
 					switch_light_temporal(world, lights_to_switch, interactable, dt, enemies_to_blind);
 					interactable.is_powering_up = true;
+					break;
 				}
 
 				case Interaction::SwitchMainDoorLight: {
@@ -374,6 +376,7 @@ void InteractableSystem::update(World &world, float dt) {
 						left_door.is_moving = true;
 						right_door.is_moving = true;
 					}
+					break;
 				}
 			}
 
