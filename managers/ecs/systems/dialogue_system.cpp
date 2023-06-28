@@ -67,21 +67,21 @@ void DialogueSystem::startup(World &world) {
 	} };
 
 	dialogues["tut_climbing_vent"] = { {
-			SENTENCE("Command: Hans, as a human, there's no need to", "explain that you can climb onto stuff.", "dialogue1"),
-			SENTENCE("Command: As for you ScorpIO...", "Maybe you could squeeze in through that vent?", "dialogue2"),
+			SENTENCE("Hans: I think I can climb on those boxes.", "Do you want me to pick you up?", "dialogue1"),
+			SENTENCE("ScorpIO: No thanks, I can go through that vent.", "", "dialogue2"),
 	} };
 
 	dialogues["tut_camera"] = {{
 			SENTENCE("Command: Look out! There's a security camera ahead of you.", "", "dialogue1"),
 			SENTENCE("Command: The red light coming out of it means that it can spot you.", "", "dialogue2"),
-			SENTENCE("Command: ScorpIO, that's where you come in.", "", "dialogue2"),
-			SENTENCE("Command: You can hack it in order to temporarily control it,", "giving both of you a chance to sneak past it.", "dialogue2"),
+			SENTENCE("ScorpIO: Don't worry, I can take control over it,", "letting both of us sneak past it.", "dialogue2"),
 	}};
 
 	dialogues["tut_enemies"] = {{
-			SENTENCE("Command: The room ahead of you is full of enemies.", "", "dialogue1"),
-			SENTENCE("Command: While ScorpIO can't do much about them, you Hans can", "use your combat skills to take them out, one by one.", "dialogue2"),
-			SENTENCE("Command: However, ScorpIO can still distract them by hacking", "those conveniently placed explosive boxes on the walls.", "dialogue2"),
+			SENTENCE("Command: The room ahead of you is full of enemies, watch out.", "", "dialogue1"),
+			SENTENCE("ScorpIO: I'm afraid I don't have the abilities necessary", "for engaging in direct combat.", "dialogue2"),
+			SENTENCE("Hans: I'll take them out, while you distract them, okay?", "", "dialogue2"),
+			SENTENCE("ScorpIO: Roger that.", "", "dialogue2"),
 	}};
 
 
