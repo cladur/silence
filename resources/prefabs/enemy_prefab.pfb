@@ -51,14 +51,8 @@
             },
             {
                 "component_data": {
-                    "path_parent": 2,
-                    "rotation_speed": 4.599999904632568,
-                    "speed": 1.0
-                },
-                "component_name": "EnemyPath"
-            },
-            {
-                "component_data": {
+                    "is_active": true,
+                    "is_climbable": false,
                     "layer_name": "taggable"
                 },
                 "component_name": "ColliderTag"
@@ -78,6 +72,14 @@
                     }
                 },
                 "component_name": "ColliderCapsule"
+            },
+            {
+                "component_data": {
+                    "path_parent": 2,
+                    "rotation_speed": 4.599999904632568,
+                    "speed": 1.0
+                },
+                "component_name": "EnemyPath"
             },
             {
                 "component_data": {},
@@ -120,6 +122,16 @@
             },
             {
                 "component_data": {
+                    "children": [
+                        3,
+                        4
+                    ],
+                    "children_count": 2
+                },
+                "component_name": "Children"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 1.0,
                         "x": 0.0,
@@ -144,16 +156,6 @@
                     "parent": 5
                 },
                 "component_name": "Parent"
-            },
-            {
-                "component_data": {
-                    "children": [
-                        3,
-                        4
-                    ],
-                    "children_count": 2
-                },
-                "component_name": "Children"
             },
             {
                 "component_data": null,
@@ -265,6 +267,17 @@
             },
             {
                 "component_data": {
+                    "children": [
+                        1,
+                        2,
+                        6
+                    ],
+                    "children_count": 3
+                },
+                "component_name": "Children"
+            },
+            {
+                "component_data": {
                     "orientation": {
                         "w": 0.0,
                         "x": 0.0,
@@ -283,19 +296,69 @@
                     }
                 },
                 "component_name": "Transform"
-            },
-            {
-                "component_data": {
-                    "children": [
-                        1,
-                        2
-                    ],
-                    "children_count": 2
-                },
-                "component_name": "Children"
             }
         ],
         "entity": 5,
         "signature": "0000000000000000000000000000000000000000000000000000000000010011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "Enemy gun"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "flip_uv_y": false,
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/weapon/weapon.mdl",
+                    "scale_uv_with_transform": false,
+                    "uv_scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.40235862135887146,
+                        "x": 0.5659126043319702,
+                        "y": 0.5966427326202393,
+                        "z": 0.4023281931877136
+                    },
+                    "position": {
+                        "x": -0.030563831329345703,
+                        "y": 0.2239702343940735,
+                        "z": -0.053420960903167725
+                    },
+                    "scale": {
+                        "x": 0.9996770024299622,
+                        "y": 0.9997347593307495,
+                        "z": 0.9998340606689453
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "parent": 5
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "bone_name": "Gun",
+                    "holder": 1
+                },
+                "component_name": "Attachment"
+            }
+        ],
+        "entity": 6,
+        "signature": "0000000000000000000000000000000000000000001000000000000000101011"
     }
 ]

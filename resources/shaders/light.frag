@@ -207,7 +207,11 @@ vec3 CalcVolume(vec3 world_pos, vec3 light_dir, vec2 tex_coords)
         position += step;
     }
 
-    return volumetric / float(num_steps);
+    vec3 result = volumetric / float(num_steps);
+
+    result = smoothstep(0, 1, result);
+
+    return result;
 }
 
 // ----------------------------------------------------------------------------

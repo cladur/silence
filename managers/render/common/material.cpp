@@ -14,7 +14,7 @@ AutoCVarFloat cvar_fog_max("render.fog_max", "fog max distance", 300.0f, CVarFla
 AutoCVarInt cvar_volumetric_steps(
 		"render.volumetric_steps", "Set steps of volumetric calculation", 10, CVarFlags::EditFloatDrag);
 AutoCVarFloat cvar_volumetric_scattering(
-		"render.volumetric_scattering", "Set volumetric scattering value", 0.7f, CVarFlags::EditFloatDrag);
+		"render.volumetric_scattering", "Set volumetric scattering value", 0.25f, CVarFlags::EditFloatDrag);
 AutoCVarFloat cvar_volumetric_bias_x(
 		"render.volumetric_bias_x", "Volumetric bias value to avoid acne", 0.0000001f, CVarFlags::EditFloatDrag);
 AutoCVarFloat cvar_volumetric_bias_y(

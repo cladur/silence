@@ -1,0 +1,1210 @@
+[
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "Rack with items"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.0,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "children": [
+                        2,
+                        3
+                    ],
+                    "children_count": 2
+                },
+                "component_name": "Children"
+            },
+            {
+                "component_data": {},
+                "component_name": "StaticTag"
+            },
+            {
+                "component_data": {
+                    "is_active": true,
+                    "is_climbable": false,
+                    "layer_name": "obstacle"
+                },
+                "component_name": "ColliderTag"
+            },
+            {
+                "component_data": {
+                    "center": {
+                        "x": 0.0,
+                        "y": 2.0,
+                        "z": 0.0
+                    },
+                    "orientation": {
+                        "0": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                        },
+                        "1": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                        }
+                    },
+                    "range": {
+                        "x": 1.0,
+                        "y": 2.0,
+                        "z": 2.5
+                    }
+                },
+                "component_name": "ColliderOBB"
+            }
+        ],
+        "entity": 1,
+        "signature": "0000000000000000000000000000000000000000000000001000110000010011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "flip_uv_y": false,
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/rack_01/rack_01.mdl",
+                    "scale_uv_with_transform": false,
+                    "uv_scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
+                    "name": "Rack"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 1
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 1.0,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                },
+                "component_name": "Transform"
+            }
+        ],
+        "entity": 2,
+        "signature": "0000000000000000000000000000000000000000000000000000000000101011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "Items"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 1
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 1.0,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "children": [
+                        4,
+                        5,
+                        6,
+                        7,
+                        8,
+                        9,
+                        10,
+                        11,
+                        12,
+                        13,
+                        14,
+                        15,
+                        16,
+                        17,
+                        18,
+                        19,
+                        20,
+                        21,
+                        22
+                    ],
+                    "children_count": 19
+                },
+                "component_name": "Children"
+            }
+        ],
+        "entity": 3,
+        "signature": "0000000000000000000000000000000000000000000000000000000000011011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "flip_uv_y": false,
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/wooden_box/wooden_box.mdl",
+                    "scale_uv_with_transform": false,
+                    "uv_scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
+                    "name": "Box 4"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 3
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.969139575958252,
+                        "x": 0.0,
+                        "y": 0.24651260673999786,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": -0.29034972190856934,
+                        "y": 1.1290993690490723,
+                        "z": -1.5942213535308838
+                    },
+                    "scale": {
+                        "x": 0.7999998927116394,
+                        "y": 0.7999999523162842,
+                        "z": 0.7999998927116394
+                    }
+                },
+                "component_name": "Transform"
+            }
+        ],
+        "entity": 4,
+        "signature": "0000000000000000000000000000000000000000000000000000000000101011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "flip_uv_y": false,
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/blackbox/blackbox_01.mdl",
+                    "scale_uv_with_transform": false,
+                    "uv_scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
+                    "name": "Box 5"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 3
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.9914448857307434,
+                        "x": 0.0,
+                        "y": -0.13052618503570557,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": -0.08863905072212219,
+                        "y": 1.1290993690490723,
+                        "z": -0.13603663444519043
+                    },
+                    "scale": {
+                        "x": 0.7999999523162842,
+                        "y": 0.7999999523162842,
+                        "z": 0.7999999523162842
+                    }
+                },
+                "component_name": "Transform"
+            }
+        ],
+        "entity": 5,
+        "signature": "0000000000000000000000000000000000000000000000000000000000101011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "flip_uv_y": false,
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/bot_part_07/bot_part_07.mdl",
+                    "scale_uv_with_transform": false,
+                    "uv_scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
+                    "name": "Box 6"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 3
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.9655621647834778,
+                        "x": 0.0,
+                        "y": 0.2601724863052368,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": -0.08863905072212219,
+                        "y": 1.1290993690490723,
+                        "z": 0.9828807711601257
+                    },
+                    "scale": {
+                        "x": 0.8000012636184692,
+                        "y": 0.7999999523162842,
+                        "z": 0.8000011444091797
+                    }
+                },
+                "component_name": "Transform"
+            }
+        ],
+        "entity": 6,
+        "signature": "0000000000000000000000000000000000000000000000000000000000101011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "flip_uv_y": false,
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/ball_02/ball_02.mdl",
+                    "scale_uv_with_transform": false,
+                    "uv_scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
+                    "name": "Box 1"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 3
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.969139575958252,
+                        "x": 0.0,
+                        "y": 0.24651260673999786,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": -0.29034972190856934,
+                        "y": 2.456888198852539,
+                        "z": -1.5942213535308838
+                    },
+                    "scale": {
+                        "x": 0.7999998927116394,
+                        "y": 0.7999999523162842,
+                        "z": 0.7999998927116394
+                    }
+                },
+                "component_name": "Transform"
+            }
+        ],
+        "entity": 7,
+        "signature": "0000000000000000000000000000000000000000000000000000000000101011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "flip_uv_y": false,
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/bot_part_05/bot_part_05.mdl",
+                    "scale_uv_with_transform": false,
+                    "uv_scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
+                    "name": "Box 2"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 3
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.969139575958252,
+                        "x": 0.0,
+                        "y": 0.24651260673999786,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": -0.29034972190856934,
+                        "y": 2.1127891540527344,
+                        "z": -0.31712523102760315
+                    },
+                    "scale": {
+                        "x": 0.7999998927116394,
+                        "y": 0.7999999523162842,
+                        "z": 0.7999998927116394
+                    }
+                },
+                "component_name": "Transform"
+            }
+        ],
+        "entity": 8,
+        "signature": "0000000000000000000000000000000000000000000000000000000000101011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "flip_uv_y": false,
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/bot_part_05/bot_part_05.mdl",
+                    "scale_uv_with_transform": false,
+                    "uv_scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
+                    "name": "Box 2"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 3
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.9882532358169556,
+                        "x": 0.0,
+                        "y": 0.15282490849494934,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": -0.13928817212581635,
+                        "y": 2.1127891540527344,
+                        "z": -0.31712523102760315
+                    },
+                    "scale": {
+                        "x": 0.7999996542930603,
+                        "y": 0.7999999523162842,
+                        "z": 0.7999996542930603
+                    }
+                },
+                "component_name": "Transform"
+            }
+        ],
+        "entity": 9,
+        "signature": "0000000000000000000000000000000000000000000000000000000000101011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "flip_uv_y": false,
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/bot_part_05/bot_part_05.mdl",
+                    "scale_uv_with_transform": false,
+                    "uv_scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
+                    "name": "Box 2"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 3
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.9983031749725342,
+                        "x": 0.0,
+                        "y": 0.05823024734854698,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": -0.0011923164129257202,
+                        "y": 2.1127891540527344,
+                        "z": -0.31712523102760315
+                    },
+                    "scale": {
+                        "x": 0.7999996542930603,
+                        "y": 0.7999999523162842,
+                        "z": 0.7999998331069946
+                    }
+                },
+                "component_name": "Transform"
+            }
+        ],
+        "entity": 10,
+        "signature": "0000000000000000000000000000000000000000000000000000000000101011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "flip_uv_y": false,
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/bot_part_05/bot_part_05.mdl",
+                    "scale_uv_with_transform": false,
+                    "uv_scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
+                    "name": "Box 2"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 3
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.9995949864387512,
+                        "x": 0.0,
+                        "y": -0.028457719832658768,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 0.1424073874950409,
+                        "y": 2.1127891540527344,
+                        "z": -0.31712523102760315
+                    },
+                    "scale": {
+                        "x": 0.7999995350837708,
+                        "y": 0.7999999523162842,
+                        "z": 0.7999997138977051
+                    }
+                },
+                "component_name": "Transform"
+            }
+        ],
+        "entity": 11,
+        "signature": "0000000000000000000000000000000000000000000000000000000000101011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "flip_uv_y": false,
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/bot_part_05/bot_part_05.mdl",
+                    "scale_uv_with_transform": false,
+                    "uv_scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
+                    "name": "Box 2"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 3
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.9972547888755798,
+                        "x": 0.06835959106683731,
+                        "y": -0.028391096740961075,
+                        "z": -0.0019461478805169463
+                    },
+                    "position": {
+                        "x": -0.1691807359457016,
+                        "y": 2.1477460861206055,
+                        "z": -0.3423590660095215
+                    },
+                    "scale": {
+                        "x": 0.7999995946884155,
+                        "y": 0.8000004887580872,
+                        "z": 0.800000011920929
+                    }
+                },
+                "component_name": "Transform"
+            }
+        ],
+        "entity": 12,
+        "signature": "0000000000000000000000000000000000000000000000000000000000101011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "flip_uv_y": false,
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/bot_part_05/bot_part_05.mdl",
+                    "scale_uv_with_transform": false,
+                    "uv_scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
+                    "name": "Box 2"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 3
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.9992931485176086,
+                        "x": -0.024564381688833237,
+                        "y": -0.028449149802327156,
+                        "z": 0.0006993445567786694
+                    },
+                    "position": {
+                        "x": -0.1691807359457016,
+                        "y": 2.1152749061584473,
+                        "z": 1.1400387287139893
+                    },
+                    "scale": {
+                        "x": 0.7999995946884155,
+                        "y": 0.8000028729438782,
+                        "z": 0.7999995946884155
+                    }
+                },
+                "component_name": "Transform"
+            }
+        ],
+        "entity": 13,
+        "signature": "0000000000000000000000000000000000000000000000000000000000101011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "flip_uv_y": false,
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/concrete_block/concrete_block.mdl",
+                    "scale_uv_with_transform": false,
+                    "uv_scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
+                    "name": "Box 2"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 3
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.9992931485176086,
+                        "x": -0.02456435188651085,
+                        "y": -0.028449149802327156,
+                        "z": 0.0006993471761234105
+                    },
+                    "position": {
+                        "x": 0.3632046580314636,
+                        "y": 2.1127777099609375,
+                        "z": 1.1400387287139893
+                    },
+                    "scale": {
+                        "x": 0.7999995946884155,
+                        "y": 0.8000049591064453,
+                        "z": 0.7999995946884155
+                    }
+                },
+                "component_name": "Transform"
+            }
+        ],
+        "entity": 14,
+        "signature": "0000000000000000000000000000000000000000000000000000000000101011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "flip_uv_y": false,
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/small_box_01/small_box_01.mdl",
+                    "scale_uv_with_transform": false,
+                    "uv_scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
+                    "name": "Box 5"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 3
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.9640636444091797,
+                        "x": 0.0,
+                        "y": 0.26567137241363525,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": -0.08863905072212219,
+                        "y": 0.031403809785842896,
+                        "z": -1.653831958770752
+                    },
+                    "scale": {
+                        "x": 2.799999237060547,
+                        "y": 2.799999713897705,
+                        "z": 2.799999237060547
+                    }
+                },
+                "component_name": "Transform"
+            }
+        ],
+        "entity": 15,
+        "signature": "0000000000000000000000000000000000000000000000000000000000101011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "flip_uv_y": false,
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/small_box_02/small_box_02.mdl",
+                    "scale_uv_with_transform": false,
+                    "uv_scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
+                    "name": "Box 5"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 3
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.6062412261962891,
+                        "x": 0.0,
+                        "y": -0.7952808141708374,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": -0.23979270458221436,
+                        "y": 0.031403809785842896,
+                        "z": 0.12777160108089447
+                    },
+                    "scale": {
+                        "x": 2.799994707107544,
+                        "y": 2.799999713897705,
+                        "z": 2.7999966144561768
+                    }
+                },
+                "component_name": "Transform"
+            }
+        ],
+        "entity": 16,
+        "signature": "0000000000000000000000000000000000000000000000000000000000101011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "flip_uv_y": false,
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/small_box_02/small_box_02.mdl",
+                    "scale_uv_with_transform": false,
+                    "uv_scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
+                    "name": "Box 5"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 3
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.5034266710281372,
+                        "x": 0.49646514654159546,
+                        "y": -0.49600788950920105,
+                        "z": 0.504043698310852
+                    },
+                    "position": {
+                        "x": 0.14351025223731995,
+                        "y": 0.500769853591919,
+                        "z": 1.6979718208312988
+                    },
+                    "scale": {
+                        "x": 2.799995183944702,
+                        "y": 2.799997329711914,
+                        "z": 2.8000051975250244
+                    }
+                },
+                "component_name": "Transform"
+            }
+        ],
+        "entity": 17,
+        "signature": "0000000000000000000000000000000000000000000000000000000000101011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "flip_uv_y": false,
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/ball_01/ball_01.mdl",
+                    "scale_uv_with_transform": false,
+                    "uv_scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
+                    "name": "Box 6"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 3
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.9655621647834778,
+                        "x": 0.0,
+                        "y": 0.2601724863052368,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": -0.29190608859062195,
+                        "y": 1.1290993690490723,
+                        "z": 1.8575539588928223
+                    },
+                    "scale": {
+                        "x": 0.8000012636184692,
+                        "y": 0.7999999523162842,
+                        "z": 0.8000011444091797
+                    }
+                },
+                "component_name": "Transform"
+            }
+        ],
+        "entity": 18,
+        "signature": "0000000000000000000000000000000000000000000000000000000000101011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "flip_uv_y": false,
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/cardboard_box/cardboard_box.mdl",
+                    "scale_uv_with_transform": false,
+                    "uv_scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
+                    "name": "Box 2"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 3
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.9995818734169006,
+                        "x": -0.005120149347931147,
+                        "y": -0.02845742180943489,
+                        "z": 0.000145781843457371
+                    },
+                    "position": {
+                        "x": -0.7224048376083374,
+                        "y": 2.1127777099609375,
+                        "z": 1.7654675245285034
+                    },
+                    "scale": {
+                        "x": 1.5199995040893555,
+                        "y": 1.5200096368789673,
+                        "z": 1.51999831199646
+                    }
+                },
+                "component_name": "Transform"
+            }
+        ],
+        "entity": 19,
+        "signature": "0000000000000000000000000000000000000000000000000000000000101011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "flip_uv_y": false,
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/ball_02/ball_02.mdl",
+                    "scale_uv_with_transform": false,
+                    "uv_scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
+                    "name": "Box 1"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 3
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.9635450839996338,
+                        "x": 0.10398302972316742,
+                        "y": 0.24508948624134064,
+                        "z": 0.026449361816048622
+                    },
+                    "position": {
+                        "x": -0.6931219100952148,
+                        "y": 2.3239920139312744,
+                        "z": 1.1568055152893066
+                    },
+                    "scale": {
+                        "x": 0.4799998998641968,
+                        "y": 0.47999992966651917,
+                        "z": 0.47999995946884155
+                    }
+                },
+                "component_name": "Transform"
+            }
+        ],
+        "entity": 20,
+        "signature": "0000000000000000000000000000000000000000000000000000000000101011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "flip_uv_y": false,
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/pallet/pallet.mdl",
+                    "scale_uv_with_transform": false,
+                    "uv_scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
+                    "name": "Box 1"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 3
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.9999221563339233,
+                        "x": 0.0,
+                        "y": -0.012474817223846912,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": -0.1693546175956726,
+                        "y": 3.081855297088623,
+                        "z": 0.11882475018501282
+                    },
+                    "scale": {
+                        "x": 1.3439992666244507,
+                        "y": 2.1041195392608643,
+                        "z": 3.494398593902588
+                    }
+                },
+                "component_name": "Transform"
+            }
+        ],
+        "entity": 21,
+        "signature": "0000000000000000000000000000000000000000000000000000000000101011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "flip_uv_y": false,
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/bot/bot.mdl",
+                    "scale_uv_with_transform": false,
+                    "uv_scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
+                    "name": "Box 1"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "parent": 3
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.9999221563339233,
+                        "x": 0.0,
+                        "y": -0.012474842369556427,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": -0.1693546175956726,
+                        "y": 4.108921051025391,
+                        "z": 0.11882475018501282
+                    },
+                    "scale": {
+                        "x": 0.4031997621059418,
+                        "y": 0.6312358379364014,
+                        "z": 1.0483194589614868
+                    }
+                },
+                "component_name": "Transform"
+            }
+        ],
+        "entity": 22,
+        "signature": "0000000000000000000000000000000000000000000000000000000000101011"
+    }
+]

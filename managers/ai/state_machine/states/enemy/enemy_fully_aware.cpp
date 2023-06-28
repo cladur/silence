@@ -1,5 +1,6 @@
 #include "enemy_fully_aware.h"
 #include "ai/state_machine/state_machine.h"
+#include "ai/state_machine/states/enemy/enemy_looking.h"
 #include "components/enemy_data_component.h"
 #include "components/enemy_path_component.h"
 #include "components/transform_component.h"
@@ -41,7 +42,8 @@ void EnemyFullyAware::update(World *world, uint32_t entity_id, float dt) {
 	auto hacker_pos_no_y = glm::vec3(hacker_pos.x, 0.0f, hacker_pos.z);
 
 	auto current_no_y = glm::vec3(transform.position.x, 0.0f, transform.position.z);
-	glm::vec3 target_no_y = enemy_data.detection_target == DetectionTarget::AGENT ? agent_pos_no_y : hacker_pos_no_y;;
+	glm::vec3 target_no_y = enemy_data.detection_target == DetectionTarget::AGENT ? agent_pos_no_y : hacker_pos_no_y;
+	;
 
 	auto forward = glm::normalize(transform.get_global_forward());
 
@@ -57,7 +59,6 @@ void EnemyFullyAware::update(World *world, uint32_t entity_id, float dt) {
 		first_frame = false;
 	}
 
-
 	if (glm::distance(adjusted_forward, end_forward) > 0.06 && !forward_block) {
 		adjusted_forward = glm::mix(adjusted_forward, end_forward, dt);
 	} else {
@@ -72,16 +73,11 @@ void EnemyFullyAware::update(World *world, uint32_t entity_id, float dt) {
 	glm::vec3 axis = glm::cross(forward_no_y, direction);
 	glm::vec3 rotation_end = (angle * axis);
 
-	dd.draw_line(
-			transform.position + glm::vec3(0.0f, 1.0f, 0.0f),
-			transform.position + glm::vec3(0.0f, 1.0f, 0.0f) + adjusted_forward,
-			glm::vec3(0.0f, 0.0f, 1.0f));
-	dd.draw_line(
-			transform.position + glm::vec3(0.0f, 1.0f, 0.0f),
-			transform.position + glm::vec3(0.0f, 1.0f, 0.0f) + end_forward,
-			glm::vec3(1.0f, 0.0f, 0.0f));
-	dd.draw_line(
-			transform.position + glm::vec3(0.0f, 1.0f, 0.0f),
+	dd.draw_line(transform.position + glm::vec3(0.0f, 1.0f, 0.0f),
+			transform.position + glm::vec3(0.0f, 1.0f, 0.0f) + adjusted_forward, glm::vec3(0.0f, 0.0f, 1.0f));
+	dd.draw_line(transform.position + glm::vec3(0.0f, 1.0f, 0.0f),
+			transform.position + glm::vec3(0.0f, 1.0f, 0.0f) + end_forward, glm::vec3(1.0f, 0.0f, 0.0f));
+	dd.draw_line(transform.position + glm::vec3(0.0f, 1.0f, 0.0f),
 			transform.position + glm::vec3(0.0f, 1.0f, 0.0f) + glm::normalize(target_no_y - transform.position),
 			glm::vec3(0.0f, 1.0f, 0.0f));
 
@@ -93,11 +89,14 @@ void EnemyFullyAware::update(World *world, uint32_t entity_id, float dt) {
 
 	enemy_utils::handle_detection(world, entity_id, transform, adjusted_forward, enemy_data, dt, &dd);
 
-	enemy_utils::update_detection_slider(entity_id, transform, enemy_data, world->get_parent_scene()->get_render_scene(), world->get_parent_scene());
+	enemy_utils::update_detection_slider(
+			entity_id, transform, enemy_data, world->get_parent_scene()->get_render_scene(), world->get_parent_scene());
 
 	enemy_utils::handle_highlight(entity_id, world);
 
 	if (enemy_data.detection_level < 0.6f) {
+		auto *looking = state_machine->get_state<EnemyLooking>();
+		looking->from_fully_aware = true;
 		state_machine->set_state("looking");
 	}
 }

@@ -2,7 +2,7 @@
 
 #include "render/render_manager.h"
 
-const uint32_t MAX_VERTEX_COUNT = 100000;
+const uint32_t MAX_VERTEX_COUNT = 10000000;
 
 void DebugDraw::startup() {
 	glGenVertexArrays(1, &vao);

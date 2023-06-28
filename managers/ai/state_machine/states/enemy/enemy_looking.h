@@ -10,7 +10,10 @@ private:
 	glm::vec3 adjusted_forward;
 	glm::vec3 end_forward;
 	bool forward_block = false;
+
 public:
+	bool from_fully_aware = false;
+
 	EnemyLooking() = default;
 	void startup(StateMachine *machine, std::string name);
 	void enter();
