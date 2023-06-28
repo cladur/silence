@@ -85,14 +85,14 @@ void DialogueSystem::startup(World &world) {
 	}};
 
 	dialogues["tut_closed_door"] = {{
-		SENTENCE("Hans: The door ahead of us is locked.", "How should we proceed?", "Dialogues/enemies/enemy_hacker_2"),
-		SENTENCE("Command: Try looking for switches around it.", "", "Dialogues/enemies/enemy_hacker_2"),
-		SENTENCE("ScorpIO: Maybe we could follow those cables on the walls.", "", "Dialogues/enemies/enemy_hacker_2"),
+		SENTENCE("Hans: The door ahead of us is locked.", "How should we proceed?", "Dialogues/doors/doors_agent"),
+		SENTENCE("Command: Try looking for switches around it.", "", "Dialogues/doors/doors_command"),
+		SENTENCE("ScorpIO: Maybe we could follow those cables on the walls.", "", "Dialogues/doors/doors_hacker"),
 	}};
 
 
 	dialogues["tut_well_done"] = {{
-		SENTENCE("Command: Well done. You should proceed to the next location.", "", "Dialogues/enemies/enemy_hacker_2"),
+		SENTENCE("Command: Well done. You should proceed to the next location.", "", "Dialogues/tut_finished"),
 	}};
 
 
