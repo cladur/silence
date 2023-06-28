@@ -22,8 +22,8 @@ AutoCVarFloat cvar_bias_min("render.light_bias_min", "Spot light bias min", 0.00
 AutoCVarFloat cvar_bias_max("render.light_bias_max", "Spot light bias max", 0.00000002f);
 AutoCVarFloat cvar_ambient_strength(
 		"render.ambient_strength", "how much light from skymap to use", 1.0f, CVarFlags::EditFloatDrag);
-AutoCVarFloat cvar_ssr_falloff("ssr.falloff", "falloff value", 0.5f, CVarFlags::EditFloatDrag);
-AutoCVarFloat cvar_ssr_threshold("ssr.threshold", "threshold value", 0.5f, CVarFlags::EditFloatDrag);
+AutoCVarFloat cvar_ssr_falloff("ssr.falloff", "falloff value", 1.45f, CVarFlags::EditFloatDrag);
+AutoCVarFloat cvar_ssr_threshold("ssr.threshold", "threshold value", 0.1f, CVarFlags::EditFloatDrag);
 
 void MaterialPBR::startup() {
 	shader.load_from_files(shader_path("pbr.vert"), shader_path("pbr.frag"));
