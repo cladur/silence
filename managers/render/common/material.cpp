@@ -22,6 +22,8 @@ AutoCVarFloat cvar_bias_min("render.light_bias_min", "Spot light bias min", 0.00
 AutoCVarFloat cvar_bias_max("render.light_bias_max", "Spot light bias max", 0.00000002f);
 AutoCVarFloat cvar_ambient_strength(
 		"render.ambient_strength", "how much light from skymap to use", 1.0f, CVarFlags::EditFloatDrag);
+AutoCVarFloat cvar_ssr_falloff("ssr.falloff", "falloff value", 0.5f, CVarFlags::EditFloatDrag);
+AutoCVarFloat cvar_ssr_threshold("ssr.threshold", "threshold value", 0.5f, CVarFlags::EditFloatDrag);
 
 void MaterialPBR::startup() {
 	shader.load_from_files(shader_path("pbr.vert"), shader_path("pbr.frag"));
@@ -486,6 +488,7 @@ void MaterialCombination::bind_resources(RenderScene &scene) {
 	shader.set_int("Highlights", 8);
 	shader.set_int("HighlightsDepth", 9);
 	shader.set_int("Depth", 10);
+	shader.set_int("SSR", 11);
 
 	shader.set_int("use_ao", cvar_use_ao.get());
 
@@ -515,6 +518,8 @@ void MaterialCombination::bind_resources(RenderScene &scene) {
 	glBindTexture(GL_TEXTURE_2D, scene.highlight_buffer.depth_texture_id);
 	glActiveTexture(GL_TEXTURE10);
 	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.depth_texture_id);
+	glActiveTexture(GL_TEXTURE11);
+	glBindTexture(GL_TEXTURE_2D, scene.ssr_buffer.ssr_texture_id);
 }
 
 void MaterialCombination::bind_instance_resources(ModelInstance &instance, Transform &transform) {
@@ -788,4 +793,68 @@ void MaterialDecal::bind_decal_resources(Decal &decal, Transform &transform) {
 		glActiveTexture(GL_TEXTURE5);
 		glBindTexture(GL_TEXTURE_2D, ao_rough_metal.id);
 	}
+}
+
+void MaterialSSR::startup() {
+	shader.load_from_files(shader_path("SSR/SSR.vert"), shader_path("SSR/SSR.frag"));
+}
+
+void MaterialSSR::bind_resources(RenderScene &scene) {
+	shader.use();
+	shader.set_mat4("view", scene.view);
+	shader.set_mat4("invView", glm::inverse(scene.view));
+	shader.set_mat4("projection", scene.projection);
+	shader.set_mat4("invProjection", glm::inverse(scene.projection));
+	shader.set_float("falloff", cvar_ssr_falloff.get());
+	shader.set_float("threshold", cvar_ssr_threshold.get());
+
+	shader.set_int("gAlbedo", 0);
+	shader.set_int("gPosition", 1);
+	shader.set_int("gNormal", 2);
+	shader.set_int("gAoRoughMetal", 3);
+	shader.set_int("gSpecular", 4);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, scene.combination_buffer.texture_id);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.position_texture_id);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.normal_texture_id);
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.ao_rough_metal_texture_id);
+	glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_2D, scene.pbr_buffer.specular_texture_id);
+}
+
+void MaterialSSR::bind_instance_resources(ModelInstance &instance, Transform &transform) {
+}
+
+void MaterialSSR::bind_resources(RenderScene &scene, bool right_side) {
+	shader.use();
+	shader.set_mat4("view", scene.view);
+	shader.set_mat4("invView", glm::inverse(scene.view));
+	shader.set_mat4("projection", scene.projection);
+	shader.set_mat4("invProjection", glm::inverse(scene.projection));
+	shader.set_float("falloff", cvar_ssr_falloff.get());
+	shader.set_float("threshold", cvar_ssr_threshold.get());
+
+	shader.set_int("gAlbedo", 0);
+	shader.set_int("gPosition", 1);
+	shader.set_int("gNormal", 2);
+	shader.set_int("gAoRoughMetal", 3);
+	shader.set_int("gSpecular", 4);
+	glActiveTexture(GL_TEXTURE0);
+	if (right_side) {
+		glBindTexture(GL_TEXTURE_2D, scene.hacker_framebuffer.texture_id);
+	} else {
+		glBindTexture(GL_TEXTURE_2D, scene.agent_framebuffer.texture_id);
+	}
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.position_texture_id);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.normal_texture_id);
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, scene.g_buffer.ao_rough_metal_texture_id);
+	glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_2D, scene.pbr_buffer.specular_texture_id);
 }

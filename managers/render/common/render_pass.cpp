@@ -827,7 +827,6 @@ void HighlightPass::clear() {
 void DecalPass::startup() {
 	material.startup();
 }
-
 void DecalPass::draw(RenderScene &scene) {
 	ZoneScopedN("DecalPass::draw");
 	material.bind_resources(scene);
@@ -838,4 +837,20 @@ void DecalPass::draw(RenderScene &scene) {
 
 		utils::render_cube();
 	}
+}
+
+void SSRPass::startup() {
+	material.startup();
+}
+
+void SSRPass::draw(RenderScene &scene) {
+	ZoneScopedN("SSRPass::draw");
+	material.bind_resources(scene);
+	utils::render_quad();
+}
+
+void SSRPass::draw(RenderScene &scene, bool right_side) {
+	ZoneScopedN("SSRPass::draw");
+	material.bind_resources(scene, right_side);
+	utils::render_quad();
 }
