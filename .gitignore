@@ -29,3 +29,4 @@ resources/assets_tmp
 
 # Exclude
 !.vscode/cmake-variants.yaml
+/cmake-build-release/

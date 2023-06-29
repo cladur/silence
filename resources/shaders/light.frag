@@ -11,6 +11,7 @@ uniform sampler2D shadowMap;
 uniform samplerCube depthMap;
 
 uniform mat4 view;
+uniform mat4 inv_view;
 uniform mat4 light_space;
 // lights
 uniform vec3 light_position;
@@ -322,7 +323,7 @@ void main()
     // Calculate WorldPos from ViewPos
     vec4 clipPos = vec4(ViewPos, 1.0);
     vec4 ndcPos = clipPos / clipPos.w;
-    vec3 WorldPos = (inverse(view) * ndcPos).xyz;
+    vec3 WorldPos = (inv_view * ndcPos).xyz;
 
     vec3 albedo = texture(gAlbedo, TexCoords).rgb;
     vec3 ao_metallic_roughness = texture(gAoRoughMetal, TexCoords).rgb;
