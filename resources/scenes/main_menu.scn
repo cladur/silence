@@ -1,0 +1,1050 @@
+[
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "Floor"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 1.0,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "scale": {
+                        "x": 7.0,
+                        "y": 7.0,
+                        "z": 7.0
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/planes/asfalt.mdl",
+                    "scale_uv_with_transform": true
+                },
+                "component_name": "ModelInstance"
+            }
+        ],
+        "entity": 1,
+        "signature": "0000000000000000000000000000000000000000000000000000000000100011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "wall"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.4998779594898224,
+                        "x": 0.5001220703125,
+                        "y": -0.5001220703125,
+                        "z": 0.49987784028053284
+                    },
+                    "position": {
+                        "x": 7.000001907348633,
+                        "y": 4.001476287841797,
+                        "z": -3.031845808029175
+                    },
+                    "scale": {
+                        "x": 4.0,
+                        "y": 4.0,
+                        "z": 4.0
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/planes/paint.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            }
+        ],
+        "entity": 3,
+        "signature": "0000000000000000000000000000000000000000000000000000000000100011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "wall2"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.7069292664527893,
+                        "x": 0.7072842717170715,
+                        "y": 0.0001726272894302383,
+                        "z": -0.00017270359967369586
+                    },
+                    "position": {
+                        "x": 3.0206260681152344,
+                        "y": 4.003411293029785,
+                        "z": -7.002954959869385
+                    },
+                    "scale": {
+                        "x": 4.0,
+                        "y": 4.0,
+                        "z": 4.0
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/planes/paint.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            }
+        ],
+        "entity": 4,
+        "signature": "0000000000000000000000000000000000000000000000000000000000100011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "agent"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.9836807250976563,
+                        "x": 0.0,
+                        "y": -0.17992286384105682,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 2.0103635787963867,
+                        "y": 0.0002441928954795003,
+                        "z": -2.6995136737823486
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "agent/agent.skinmdl"
+                },
+                "component_name": "SkinnedModelInstance"
+            },
+            {
+                "component_data": {
+                    "animation_name": "agent/agent_ANIM_GLTF/agent_idle.anim",
+                    "ticks_per_second": 1000.0
+                },
+                "component_name": "AnimationInstance"
+            },
+            {
+                "component_data": {
+                    "camera": 7,
+                    "camera_pivot": 0,
+                    "camera_pivot_target": 0,
+                    "model": 0,
+                    "spring_arm": 0
+                },
+                "component_name": "AgentData"
+            }
+        ],
+        "entity": 5,
+        "signature": "0000000000000000000000000000000000000000000000100000000011000011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "hacker"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.9955428838729858,
+                        "x": 0.0,
+                        "y": -0.09430968761444092,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 2.4362385272979736,
+                        "y": 0.999515950679779,
+                        "z": -1.5629981756210327
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "scorpion/scorpion.skinmdl"
+                },
+                "component_name": "SkinnedModelInstance"
+            },
+            {
+                "component_data": {
+                    "animation_name": "scorpion/scorpion_ANIM_GLTF/scorpion_idle.anim",
+                    "ticks_per_second": 1000.0
+                },
+                "component_name": "AnimationInstance"
+            },
+            {
+                "component_data": {
+                    "camera": 7,
+                    "camera_pivot": 0,
+                    "model": 0,
+                    "scorpion_camera_transform": 0
+                },
+                "component_name": "HackerData"
+            }
+        ],
+        "entity": 6,
+        "signature": "0000000000000000000000000000000000000000000001000000000011000011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "cam"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "fov": 47.099998474121094,
+                    "right_side": false
+                },
+                "component_name": "Camera"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.9450796842575073,
+                        "x": 0.0,
+                        "y": -0.32684001326560974,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": -0.799571692943573,
+                        "y": 1.6076594591140747,
+                        "z": 0.43352752923965454
+                    },
+                    "scale": {
+                        "x": 0.999999463558197,
+                        "y": 1.0,
+                        "z": 0.999999463558197
+                    }
+                },
+                "component_name": "Transform"
+            }
+        ],
+        "entity": 7,
+        "signature": "0000000000000000000000000000000000000000000000000000001000000011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {},
+                "component_name": "MainMenu"
+            }
+        ],
+        "entity": 8,
+        "signature": "0000000000000000000000000010000000000000000000000000000000000000"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "spider_box"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.9914448857307434,
+                        "x": 0.0,
+                        "y": -0.1305260956287384,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 2.817106246948242,
+                        "y": 9.81902630883269e-05,
+                        "z": -2.1545019149780273
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/metal_box/metal_box.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            }
+        ],
+        "entity": 9,
+        "signature": "0000000000000000000000000000000000000000000000000000000000100011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "children": [
+                        11
+                    ],
+                    "children_count": 1
+                },
+                "component_name": "Children"
+            },
+            {
+                "component_data": {
+                    "name": "electric box"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 1.5805065700646992e-08,
+                        "x": -1.5805065700646992e-08,
+                        "y": 0.70710688829422,
+                        "z": 0.7071066498756409
+                    },
+                    "position": {
+                        "x": 3.972813844680786,
+                        "y": 1.4159876108169556,
+                        "z": -7.022279739379883
+                    },
+                    "scale": {
+                        "x": 1.0000001192092896,
+                        "y": 0.99997878074646,
+                        "z": 0.9999786019325256
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/electric_box_2/electric_box_2.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            },
+            {
+                "component_data": {
+                    "color_begin": [
+                        0.40784314274787903,
+                        0.5647059082984924,
+                        1.0,
+                        1.0
+                    ],
+                    "color_end": [
+                        0.6078431606292725,
+                        0.5921568870544434,
+                        1.0,
+                        0.0
+                    ],
+                    "color_transition": 0,
+                    "is_billboard": true,
+                    "is_one_shot": false,
+                    "is_textured": true,
+                    "lifetime": 0.10000000149011612,
+                    "one_shot_duration": 0.5,
+                    "position": [
+                        0.0,
+                        0.4000000059604645,
+                        0.0
+                    ],
+                    "position_variance": [
+                        0.10000000149011612,
+                        0.20000000298023224,
+                        0.10000000149011612
+                    ],
+                    "rate": 5.0,
+                    "rotation_begin": 0.0,
+                    "rotation_end": 0.0,
+                    "rotation_transition": 0,
+                    "rotation_variance": 180.0,
+                    "size_begin": 1.0,
+                    "size_end": 1.0,
+                    "size_transition": 0,
+                    "texture_name": "electricity.ktx2",
+                    "velocity_begin": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "velocity_end": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "velocity_transition": 0,
+                    "velocity_variance": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
+                },
+                "component_name": "ParticleEmitter"
+            }
+        ],
+        "entity": 10,
+        "signature": "0000000000000000000000000000000010000000000000000000000000110011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "parent": 10
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 1.0,
+                        "x": -2.939510762931781e-31,
+                        "y": 1.8719428134320037e-19,
+                        "z": 1.573852159708622e-12
+                    },
+                    "position": {
+                        "x": -0.19246625900268555,
+                        "y": 0.2553977966308594,
+                        "z": -0.005663394927978516
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "turn_off_time": 0.05000000074505806,
+                    "turn_off_variance": 0.10000000149011612,
+                    "turn_on_time": 0.05000000074505806,
+                    "turn_on_variance": 0.10000000149011612
+                },
+                "component_name": "LightSwitcher"
+            },
+            {
+                "component_data": {
+                    "cast_shadow": true,
+                    "color": {
+                        "b": 0.0,
+                        "g": 0.0,
+                        "r": 1.0
+                    },
+                    "cutoff": 12.5,
+                    "intensity": 2.950000047683716,
+                    "is_on": true,
+                    "outer_cutoff": 5.0,
+                    "type": 0
+                },
+                "component_name": "Light"
+            }
+        ],
+        "entity": 11,
+        "signature": "0000000000000000000000000000100000000000000000010000000000001010"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "pipe"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.7072795629501343,
+                        "x": 0.0,
+                        "y": -0.7069339752197266,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 6.077523231506348,
+                        "y": 0.0003480699670035392,
+                        "z": -6.635932922363281
+                    },
+                    "scale": {
+                        "x": 1.3899996280670166,
+                        "y": 1.3899999856948853,
+                        "z": 1.3899996280670166
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/pipes/pipe_02.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            }
+        ],
+        "entity": 12,
+        "signature": "0000000000000000000000000000000000000000000000000000000000100011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "roof"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": -0.00012218566553201526,
+                        "x": 0.7072793245315552,
+                        "y": 0.00012197108299005777,
+                        "z": 0.7069342136383057
+                    },
+                    "position": {
+                        "x": 3.0738112926483154,
+                        "y": 4.001476287841797,
+                        "z": -3.031845808029175
+                    },
+                    "scale": {
+                        "x": 4.0,
+                        "y": 4.0,
+                        "z": 4.000000476837158
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/planes/paint.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            }
+        ],
+        "entity": 13,
+        "signature": "0000000000000000000000000000000000000000000000000000000000100011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "children": [
+                        15
+                    ],
+                    "children_count": 1
+                },
+                "component_name": "Children"
+            },
+            {
+                "component_data": {
+                    "name": "lamp1"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 7.25216153796282e-08,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 1.0
+                    },
+                    "position": {
+                        "x": 3.965996742248535,
+                        "y": 4.039700508117676,
+                        "z": -3.916576385498047
+                    },
+                    "scale": {
+                        "x": 0.9999996423721313,
+                        "y": 0.9999996423721313,
+                        "z": 1.0
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/lamp_01/lamp_01.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            }
+        ],
+        "entity": 14,
+        "signature": "0000000000000000000000000000000000000000000000000000000000110011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "parent": 14
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 1.0,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": -7.318590178329032e-13
+                    },
+                    "position": {
+                        "x": 0.0,
+                        "y": 0.16455554962158203,
+                        "z": 0.0
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "turn_off_time": 5.400000095367432,
+                    "turn_off_variance": 1.100000023841858,
+                    "turn_on_time": 0.30000001192092896,
+                    "turn_on_variance": 0.6000000238418579
+                },
+                "component_name": "LightSwitcher"
+            },
+            {
+                "component_data": {
+                    "cast_shadow": true,
+                    "color": {
+                        "b": 0.6270043253898621,
+                        "g": 0.8678205609321594,
+                        "r": 0.9597989916801453
+                    },
+                    "cutoff": 12.5,
+                    "intensity": 40.0,
+                    "is_on": false,
+                    "outer_cutoff": 5.0,
+                    "type": 0
+                },
+                "component_name": "Light"
+            }
+        ],
+        "entity": 15,
+        "signature": "0000000000000000000000000000100000000000000000010000000000001010"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "children": [
+                        18
+                    ],
+                    "children_count": 1
+                },
+                "component_name": "Children"
+            },
+            {
+                "component_data": {
+                    "name": "lamp2"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 7.25216153796282e-08,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 1.0
+                    },
+                    "position": {
+                        "x": 0.9659967422485352,
+                        "y": 4.039700508117676,
+                        "z": -3.916576385498047
+                    },
+                    "scale": {
+                        "x": 0.9999996423721313,
+                        "y": 0.9999996423721313,
+                        "z": 1.0
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/lamp_01/lamp_01.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            }
+        ],
+        "entity": 17,
+        "signature": "0000000000000000000000000000000000000000000000000000000000110011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "parent": 17
+                },
+                "component_name": "Parent"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 1.0,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": -9.947598300641403e-13
+                    },
+                    "position": {
+                        "x": -5.7220458984375e-06,
+                        "y": 0.16424083709716797,
+                        "z": 0.0
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "turn_off_time": 3.299999952316284,
+                    "turn_off_variance": 1.2000000476837158,
+                    "turn_on_time": 0.699999988079071,
+                    "turn_on_variance": 0.20000000298023224
+                },
+                "component_name": "LightSwitcher"
+            },
+            {
+                "component_data": {
+                    "cast_shadow": true,
+                    "color": {
+                        "b": 0.5761470198631287,
+                        "g": 0.9123651385307312,
+                        "r": 0.9246231317520142
+                    },
+                    "cutoff": 12.5,
+                    "intensity": 40.0,
+                    "is_on": true,
+                    "outer_cutoff": 5.0,
+                    "type": 0
+                },
+                "component_name": "Light"
+            }
+        ],
+        "entity": 18,
+        "signature": "0000000000000000000000000000100000000000000000010000000000001010"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "box1"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 1.0,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 5.956887245178223,
+                        "y": 9.789856267161667e-05,
+                        "z": -4.667382717132568
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/wooden_box/wooden_box.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            }
+        ],
+        "entity": 19,
+        "signature": "0000000000000000000000000000000000000000000000000000000000100011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "box2"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 1.0,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 6.316954135894775,
+                        "y": 9.789856267161667e-05,
+                        "z": -3.1948461532592773
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/wooden_box/wooden_box.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            }
+        ],
+        "entity": 20,
+        "signature": "0000000000000000000000000000000000000000000000000000000000100011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "box3"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.9677193760871887,
+                        "x": 0.0,
+                        "y": 0.2520301640033722,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 6.208105087280273,
+                        "y": 1.028196930885315,
+                        "z": -3.1857848167419434
+                    },
+                    "scale": {
+                        "x": 0.4800000488758087,
+                        "y": 0.48000001907348633,
+                        "z": 0.4800000488758087
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/wooden_box/wooden_box.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            }
+        ],
+        "entity": 21,
+        "signature": "0000000000000000000000000000000000000000000000000000000000100011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "box4"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.9237860441207886,
+                        "x": -0.3829090893268585,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 6.2671637535095215,
+                        "y": 0.9388145208358765,
+                        "z": -3.7481648921966553
+                    },
+                    "scale": {
+                        "x": 0.48000001907348633,
+                        "y": 0.47999998927116394,
+                        "z": 0.47999998927116394
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/wooden_box/wooden_box.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            }
+        ],
+        "entity": 22,
+        "signature": "0000000000000000000000000000000000000000000000000000000000100011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "name": "electric2"
+                },
+                "component_name": "Name"
+            },
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": -1.0534133565442971e-08,
+                        "x": -1.0539276118493035e-08,
+                        "y": 0.7069340348243713,
+                        "z": 0.7072795033454895
+                    },
+                    "position": {
+                        "x": 0.062016844749450684,
+                        "y": 1.4593288898468018,
+                        "z": -6.99528694152832
+                    },
+                    "scale": {
+                        "x": 1.0000003576278687,
+                        "y": 0.9999997615814209,
+                        "z": 0.999998927116394
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/electric_box/electric_box.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            }
+        ],
+        "entity": 23,
+        "signature": "0000000000000000000000000000000000000000000000000000000000100011"
+    },
+    {
+        "components": [
+            {
+                "component_data": {
+                    "orientation": {
+                        "w": 0.70710688829422,
+                        "x": 0.0,
+                        "y": -0.7071066498756409,
+                        "z": 0.0
+                    },
+                    "position": {
+                        "x": 2.405547618865967,
+                        "y": 0.0,
+                        "z": -6.929262161254883
+                    },
+                    "scale": {
+                        "x": 0.9999890327453613,
+                        "y": 1.0,
+                        "z": 0.9999889731407166
+                    }
+                },
+                "component_name": "Transform"
+            },
+            {
+                "component_data": {
+                    "in_shadow_pass": true,
+                    "material_type": 0,
+                    "model_name": "items/door/door.mdl",
+                    "scale_uv_with_transform": false
+                },
+                "component_name": "ModelInstance"
+            }
+        ],
+        "entity": 24,
+        "signature": "0000000000000000000000000000000000000000000000000000000000100010"
+    }
+]
