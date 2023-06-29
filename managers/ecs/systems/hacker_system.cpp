@@ -42,7 +42,7 @@ AutoCVarInt cvar_hacker_on_keyboard(
 
 AutoCVarFloat cvar_viewspace_offset("hacker.viewspace_offset", "offset from viewspace", 0.5f, CVarFlags::EditFloatDrag);
 
-AutoCVarFloat cvar_hacker_range("hacker.range", "range of hacker", 30.0f, CVarFlags::EditFloatDrag);
+AutoCVarFloat cvar_hacker_range("hacker.range", "range of hacker", 80.0f, CVarFlags::EditFloatDrag);
 
 bool HackerSystem::shoot_raycast(
 		Transform &transform, World &world, HackerData &hacker_data, float dt, bool trigger, glm::vec3 direction) {

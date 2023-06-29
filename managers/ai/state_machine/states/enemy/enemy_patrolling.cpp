@@ -40,7 +40,6 @@ void EnemyPatrolling::update(World *world, uint32_t entity_id, float dt) {
 	// change animation
 	if (anim.animation_handle.id != res.get_animation_handle("enemy/enemy_ANIM_GLTF/enemy_walk_with_gun.anim").id) {
 		animation_manager.change_animation(entity_id, "enemy/enemy_ANIM_GLTF/enemy_walk_with_gun.anim");
-		SPDLOG_CRITICAL("lol");
 	}
 
 	glm::vec3 current_position = transform.get_global_position();
