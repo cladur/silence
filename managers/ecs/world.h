@@ -169,7 +169,7 @@ public:
 			system->update(*this, dt);
 		}
 
-		float fixed_dt = 1 / 50.0f;
+		float fixed_dt = 1 / 30.0f;
 
 		float frame_time = dt;
 

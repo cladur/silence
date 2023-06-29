@@ -13,7 +13,7 @@
 		}                                                                                                              \
 	} while (false)
 
-AutoCVarInt cvar_enable_audio("audio.enabled", "is audio enabled", 0, CVarFlags::EditCheckbox);
+AutoCVarInt cvar_enable_audio("audio.enabled", "is audio enabled", 1, CVarFlags::EditCheckbox);
 
 AudioManager &AudioManager::get() {
 	static AudioManager instance;
@@ -49,12 +49,12 @@ void AudioManager::update(Scene &scene) {
 	this->scene = &scene;
 	auto &gm = GameplayManager::get();
 	auto &agent_tf = scene.world.get_component<Transform>(gm.get_agent_camera(&scene));
-	set_3d_listener_attributes(SILENCE_FMOD_LISTENER_AGENT, agent_tf.get_global_position(),
-			glm::vec3(0.0f), agent_tf.get_global_forward(), agent_tf.get_global_up());
+	set_3d_listener_attributes(SILENCE_FMOD_LISTENER_AGENT, agent_tf.get_global_position(), glm::vec3(0.0f),
+			agent_tf.get_global_forward(), agent_tf.get_global_up());
 
 	auto &hacker_tf = scene.world.get_component<Transform>(gm.get_hacker_camera(&scene));
-	set_3d_listener_attributes(SILENCE_FMOD_LISTENER_HACKER, hacker_tf.get_global_position(),
-			glm::vec3(0.0f), hacker_tf.get_global_forward(), hacker_tf.get_global_up());
+	set_3d_listener_attributes(SILENCE_FMOD_LISTENER_HACKER, hacker_tf.get_global_position(), glm::vec3(0.0f),
+			hacker_tf.get_global_forward(), hacker_tf.get_global_up());
 
 	for (auto *instance : event_instances) {
 		instance->setListenerMask(create_listener_mask(instance));
@@ -247,9 +247,8 @@ std::vector<std::string> AudioManager::get_all_event_paths() {
 
 bool AudioManager::is_valid_event_path(const std::string &path) {
 	std::string full_path = AudioManager::get().event_path_prefix + path;
-	return std::any_of(event_paths.begin(), event_paths.end(), [&full_path](const std::string &event_path) {
-		return event_path == full_path;
-	});
+	return std::any_of(event_paths.begin(), event_paths.end(),
+			[&full_path](const std::string &event_path) { return event_path == full_path; });
 }
 
 FMOD_VECTOR AudioManager::to_fmod_vector(glm::vec3 vector) {
@@ -284,8 +283,7 @@ uint32_t AudioManager::create_listener_mask(FMOD::Studio::EventInstance *instanc
 
 void AudioManager::stop_local(FMOD::Studio::EventInstance *instance) {
 	FMOD_CHECK(instance->stop(FMOD_STUDIO_STOP_ALLOWFADEOUT));
-	event_instances.erase(std::remove(event_instances.begin(), event_instances.end(), instance),
-			event_instances.end());
+	event_instances.erase(std::remove(event_instances.begin(), event_instances.end(), instance), event_instances.end());
 }
 
 void AudioManager::play_one_shot_3d_with_params(const EventReference &event_ref, Transform &transform,
@@ -302,7 +300,7 @@ void AudioManager::play_one_shot_3d_with_params(const EventReference &event_ref,
 	if (rigid_body != nullptr) {
 		attributes.velocity = to_fmod_vector(rigid_body->velocity);
 	} else {
-		attributes.velocity = {0, 0, 0};
+		attributes.velocity = { 0, 0, 0 };
 	}
 	FMOD_CHECK(instance->set3DAttributes(&attributes));
 

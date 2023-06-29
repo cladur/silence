@@ -26,6 +26,8 @@ AutoCVarInt cvar_ao_blur("render.ssao_blur", "Should SSAO be blurred", 1, CVarFl
 
 AutoCVarInt cvar_splitscreen("render.splitscreen", "Splitscreen", 0, CVarFlags::EditCheckbox);
 
+AutoCVarInt cvar_show_fps("fps.enabled", "Show fps", 0, CVarFlags::EditCheckbox);
+
 void RenderScene::startup() {
 	g_buffer_pass.startup();
 	pbr_pass.startup();
@@ -365,7 +367,12 @@ void RenderScene::draw(bool editor_mode) {
 	}
 
 	auto &fps = UIManager::get().get_ui_text("frame_scene", "fps");
-	fps.text = std::to_string((int)ImGui::GetIO().Framerate);
+
+	if (cvar_show_fps.get()) {
+		fps.text = std::to_string((int)ImGui::GetIO().Framerate);
+	} else {
+		fps.text = "";
+	}
 
 	highlight_pass.clear();
 
