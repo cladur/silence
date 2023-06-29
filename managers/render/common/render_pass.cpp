@@ -12,7 +12,7 @@ AutoCVarFloat cvar_blur_radius("render.blur_radius", "blur radius", 0.001f, CVar
 AutoCVarInt cvar_use_bloom("render.use_bloom", "use bloom", 1, CVarFlags::EditCheckbox);
 AutoCVarFloat cvar_bloom_strength("render.bloom_strength", "bloom strength", 0.04f, CVarFlags::EditFloatDrag);
 
-AutoCVarFloat cvar_gamma("render.gamma", "gamma", 2.2f, CVarFlags::EditFloatDrag);
+AutoCVarFloat cvar_gamma("render.gamma", "gamma", 2.0f, CVarFlags::EditFloatDrag);
 AutoCVarFloat cvar_dirt_strength("render.dirt_strength", "dirt strength", 0.075f, CVarFlags::EditFloatDrag);
 
 AutoCVarFloat cvar_smooth(

@@ -223,7 +223,7 @@ void DialogueSystem::update(World &world, float dt) {
 		auto vec = PhysicsManager::get().overlap_cube_checkpoint(world, c);
 
 		if (!vec.empty()) {
-			if (dialogue_trigger.dialogue_id.starts_with("level_")) {
+			if (dialogue_trigger.dialogue_id.starts_with("level_") || dialogue_trigger.dialogue_id.starts_with("main_menu")) {
 				GameplayManager::get().change_scene(dialogue_trigger.dialogue_id);
 				continue;
 			}
