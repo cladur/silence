@@ -78,6 +78,7 @@ void MaterialLight::bind_resources(RenderScene &scene) {
 	shader.use();
 	shader.set_mat4("projection", scene.projection);
 	shader.set_mat4("view", scene.view);
+	shader.set_mat4("inv_view", glm::inverse(scene.view));
 	shader.set_vec3("camPos", scene.camera_pos);
 	shader.set_vec2("screen_dimensions", scene.render_extent);
 	shader.set_float("far_plane", scene.shadow_buffer.far);
@@ -266,6 +267,7 @@ void MaterialGBuffer::startup() {
 void MaterialGBuffer::bind_resources(RenderScene &scene) {
 	shader.use();
 	shader.set_mat4("view", scene.view);
+	shader.set_mat4("inv_view", glm::inverse(scene.view));
 	shader.set_mat4("projection", scene.projection);
 	shader.set_vec3("camPos", scene.camera_pos);
 	shader.set_int("albedo_map", 0);
@@ -290,6 +292,7 @@ void MaterialGBuffer::bind_resources(RenderScene &scene) {
 void MaterialGBuffer::bind_skinned_resources(RenderScene &scene) {
 	skinned_shader.use();
 	skinned_shader.set_mat4("view", scene.view);
+	skinned_shader.set_mat4("inv_view", glm::inverse(scene.view));
 	skinned_shader.set_mat4("projection", scene.projection);
 	skinned_shader.set_int("albedo_map", 0);
 	skinned_shader.set_int("normal_map", 1);

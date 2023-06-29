@@ -20,6 +20,7 @@ uniform bool has_normal_map;
 uniform bool has_emissive_map;
 
 uniform mat4 view;
+uniform mat4 inv_view;
 
 uniform vec2 uv_scale;
 uniform bool flip_uv_y;
@@ -29,8 +30,8 @@ uniform float brightness_offset;
 
 // ----------------------------------------------------------------------------
 // Easy trick to get tangent-normals to world-space to keep PBR code simplified.
-// Don't worry if you don't get what's going on; you generally want to do normal 
-// mapping the usual way for performance anyways; I do plan make a note of this 
+// Don't worry if you don't get what's going on; you generally want to do normal
+// mapping the usual way for performance anyways; I do plan make a note of this
 // technique somewhere later in the normal mapping tutorial.
 vec3 getNormalFromMap(vec3 WorldPos, vec2 texture_coords)
 {
@@ -56,7 +57,7 @@ void main()
     // Calculate WorldPos from ViewPos
     vec4 clipPos = vec4(ViewPos, 1.0);
     vec4 ndcPos = clipPos / clipPos.w;
-    vec3 WorldPos = (inverse(view) * ndcPos).xyz;
+    vec3 WorldPos = (inv_view * ndcPos).xyz;
 
     float uv_y = TexCoords.y;
     if (flip_uv_y) {

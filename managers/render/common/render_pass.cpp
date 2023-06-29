@@ -12,7 +12,7 @@ AutoCVarFloat cvar_blur_radius("render.blur_radius", "blur radius", 0.001f, CVar
 AutoCVarInt cvar_use_bloom("render.use_bloom", "use bloom", 1, CVarFlags::EditCheckbox);
 AutoCVarFloat cvar_bloom_strength("render.bloom_strength", "bloom strength", 0.04f, CVarFlags::EditFloatDrag);
 
-AutoCVarFloat cvar_gamma("render.gamma", "gamma", 2.0f, CVarFlags::EditFloatDrag);
+AutoCVarFloat cvar_gamma("render.gamma", "gamma", 2.2f, CVarFlags::EditFloatDrag);
 AutoCVarFloat cvar_dirt_strength("render.dirt_strength", "dirt strength", 0.075f, CVarFlags::EditFloatDrag);
 
 AutoCVarFloat cvar_smooth(
@@ -512,19 +512,15 @@ void ParticlePass::draw(RenderScene &scene, bool right_camera) {
 
 	auto cam_pos = scene.camera_pos;
 
-	static std::vector<ParticleSSBODataBlock> ssbo_data;
-	ssbo_data.clear();
-	ssbo_data.resize(MAX_PARTICLES_PER_ENTITY);
+	static std::array<ParticleSSBODataBlock, MAX_PARTICLES_PER_ENTITY> ssbo_data;
 
 	// copy the map to a vector of pairs
 	static std::vector<
 			std::pair<Entity, std::pair<std::array<ParticleData, MAX_PARTICLES_PER_ENTITY>, ParticlePerEntityData>>>
 			particles;
-	particles.clear();
-	particles.reserve(pm.particles.size());
-	for (auto &p : pm.particles) {
-		particles.emplace_back(p);
-	}
+	particles = std::vector<
+			std::pair<Entity, std::pair<std::array<ParticleData, MAX_PARTICLES_PER_ENTITY>, ParticlePerEntityData>>>(
+			pm.particles.begin(), pm.particles.end());
 
 	// now SORT the vector by distance to camera so that the farthest particles are drawn first
 	std::sort(particles.begin(), particles.end(), [&cam_pos](auto &a, auto &b) {
