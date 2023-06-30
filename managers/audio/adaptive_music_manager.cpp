@@ -63,6 +63,7 @@ void AdaptiveMusicManager::shutdown() {
 }
 
 void AdaptiveMusicManager::update(float dt) {
+	ZoneScopedN("AdaptiveMusicManager::update");
 	auto &gm = GameplayManager::get();
 	// some made up parameters for controlling the music
 	int enemy_near_count = gm.get_enemies_near_player(); //music_enemy_near_count.get();
@@ -94,8 +95,9 @@ void AdaptiveMusicManager::update(float dt) {
 
 	//	auto &ui = UIManager::get();
 	//	ui.get_ui_text("adaptive_music", "drum_intensity").text = fmt::format("drum_intensity: {:.0f}%", drum_intensity
-	//* 100.0f); 	ui.get_ui_text("adaptive_music", "melodic_intensity").text = fmt::format("melodic_intensity: {:.0f}%",
-	//melodic_intensity * 100.0f); 	ui.get_ui_text("adaptive_music", "detection").text = fmt::format("detection:
+	//* 100.0f); 	ui.get_ui_text("adaptive_music", "melodic_intensity").text = fmt::format("melodic_intensity:
+	//{:.0f}%", melodic_intensity * 100.0f); 	ui.get_ui_text("adaptive_music", "detection").text =
+	//fmt::format("detection:
 	//{:.0f}%", detection_level * 100.0f);
 
 	AudioManager::get().set_global_param_by_name(detection_param, detection_level);

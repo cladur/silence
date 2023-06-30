@@ -13,6 +13,7 @@ void AttachmentSystem::startup(World &world) {
 }
 
 void AttachmentSystem::update(World &world, float dt) {
+	ZoneScopedN("AttachmentSystem::update");
 	AnimationManager &animation_manager = AnimationManager::get();
 
 	for (Entity entity : entities) {

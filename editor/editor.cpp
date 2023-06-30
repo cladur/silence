@@ -233,6 +233,7 @@ void Editor::shutdown() {
 }
 
 void Editor::custom_update(float dt) {
+	ZoneScopedN("Editor::custom_update");
 	InputManager &input_manager = InputManager::get();
 	DisplayManager &display_manager = DisplayManager::get();
 	RenderManager &render_manager = RenderManager::get();

@@ -81,14 +81,14 @@ void RenderManager::draw() {
 	//	}
 
 	{
-		ZoneNamedNC(Zone2, "RenderManager::draw::Scene", tracy::Color::Blue4, true);
+		ZoneNamedNC(Zone2, "RenderManager::DrawScenes", tracy::Color::Blue4, true);
 		for (RenderScene &scene : render_scenes) {
 			scene.draw();
 		}
 	}
 
 	{
-		ZoneNamedNC(Zone3, "RenderManager::draw::Rest", tracy::Color::Blue3, true);
+		ZoneNamedNC(Zone3, "RenderManager::SwapBuffers", tracy::Color::Blue3, true);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 		glad_glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
@@ -103,7 +103,6 @@ void RenderManager::draw() {
 		}
 
 		{
-			ZoneNamedNC(Zone4, "RenderManager::draw::ImGuiAndSwap", tracy::Color::Blue2, true);
 			// IMGUI
 			ImGui::Render();
 			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

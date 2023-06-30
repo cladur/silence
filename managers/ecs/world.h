@@ -153,6 +153,7 @@ public:
 	}
 
 	void update(float dt) {
+		ZoneScopedN("World::update");
 		for (auto &system : pre_pre_animation_systems) {
 			system->update(*this, dt);
 		}

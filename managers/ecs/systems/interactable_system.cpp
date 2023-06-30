@@ -69,6 +69,7 @@ void InteractableSystem::switch_lights(World &world, Interactable &interactable)
 }
 
 void InteractableSystem::update(World &world, float dt) {
+	ZoneScopedN("InteractableSystem::update");
 	auto &ui = UIManager::get();
 	for (const Entity entity : entities) {
 		auto &interactable = world.get_component<Interactable>(entity);

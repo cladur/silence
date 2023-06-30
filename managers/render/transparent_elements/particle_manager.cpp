@@ -7,7 +7,7 @@ float q_lerp(float x) {
 };
 
 // 1 - (1 - x)^3, not true logarithmic but has a similiar curve
-float l_lerp( float x) {
+float l_lerp(float x) {
 	return (float)(1.0f - glm::pow(1.0f - x, 3));
 };
 
@@ -41,11 +41,14 @@ void ParticleManager::shutdown() {
 }
 
 void ParticleManager::update(float dt) {
+	ZoneScopedN("ParticleManager::update");
 	//update all active particles
 	for (auto &entity : particles) {
 		auto &particle_datas = entity.second;
 		for (auto &particle : particle_datas.first) {
-			if (!particle.active) { continue; }
+			if (!particle.active) {
+				continue;
+			}
 
 			particle.lifetime = glm::max(0.0f, particle.lifetime);
 
@@ -56,27 +59,15 @@ void ParticleManager::update(float dt) {
 				switch (particle.velocity_transition_type) {
 					case TransitionType::LINEAR:
 						// linear
-						particle.position += glm::lerp(
-													 particle.velocity_begin,
-													 particle.velocity_end,
-													 x
-													 ) * dt;
+						particle.position += glm::lerp(particle.velocity_begin, particle.velocity_end, x) * dt;
 						break;
 					case TransitionType::QUADRATIC:
 
-						particle.position += glm::lerp(
-													 particle.velocity_begin,
-													 particle.velocity_end,
-													 q_lerp(x)
-															 ) * dt;
+						particle.position += glm::lerp(particle.velocity_begin, particle.velocity_end, q_lerp(x)) * dt;
 						break;
 					case TransitionType::LOGARITHMIC:
 
-						particle.position += glm::lerp(
-													 particle.velocity_begin,
-													 particle.velocity_end,
-													 l_lerp(x)
-															 ) * dt;
+						particle.position += glm::lerp(particle.velocity_begin, particle.velocity_end, l_lerp(x)) * dt;
 						break;
 				}
 
@@ -84,25 +75,13 @@ void ParticleManager::update(float dt) {
 				glm::vec4 col;
 				switch (particle.color_transition_type) {
 					case TransitionType::LINEAR:
-						col = glm::lerp(
-								particle.color_begin,
-								particle.color_end,
-								x
-						);
+						col = glm::lerp(particle.color_begin, particle.color_end, x);
 						break;
 					case TransitionType::QUADRATIC:
-						col = glm::lerp(
-								particle.color_begin,
-								particle.color_end,
-								q_lerp(x)
-						);
+						col = glm::lerp(particle.color_begin, particle.color_end, q_lerp(x));
 						break;
 					case TransitionType::LOGARITHMIC:
-						col = glm::lerp(
-								particle.color_begin,
-								particle.color_end,
-								l_lerp(x)
-						);
+						col = glm::lerp(particle.color_begin, particle.color_end, l_lerp(x));
 						break;
 				}
 				particle.color = col;
@@ -111,25 +90,13 @@ void ParticleManager::update(float dt) {
 				float size;
 				switch (particle.size_transition_type) {
 					case TransitionType::LINEAR:
-						size = glm::lerp(
-								particle.size_begin,
-								particle.size_end,
-								x
-						);
+						size = glm::lerp(particle.size_begin, particle.size_end, x);
 						break;
 					case TransitionType::QUADRATIC:
-						size = glm::lerp(
-								particle.size_begin,
-								particle.size_end,
-								q_lerp(x)
-						);
+						size = glm::lerp(particle.size_begin, particle.size_end, q_lerp(x));
 						break;
 					case TransitionType::LOGARITHMIC:
-						size = glm::lerp(
-								particle.size_begin,
-								particle.size_end,
-								l_lerp(x)
-						);
+						size = glm::lerp(particle.size_begin, particle.size_end, l_lerp(x));
 						break;
 				}
 				particle.size = size;
@@ -137,25 +104,13 @@ void ParticleManager::update(float dt) {
 				float rotation;
 				switch (particle.rotation_transition_type) {
 					case TransitionType::LINEAR:
-						rotation = glm::lerp(
-								particle.rotation_begin,
-								particle.rotation_end,
-								x
-						);
+						rotation = glm::lerp(particle.rotation_begin, particle.rotation_end, x);
 						break;
 					case TransitionType::QUADRATIC:
-						rotation = glm::lerp(
-								particle.rotation_begin,
-								particle.rotation_end,
-								q_lerp(x)
-						);
+						rotation = glm::lerp(particle.rotation_begin, particle.rotation_end, q_lerp(x));
 						break;
 					case TransitionType::LOGARITHMIC:
-						rotation = glm::lerp(
-								particle.rotation_begin,
-								particle.rotation_end,
-								l_lerp(x)
-						);
+						rotation = glm::lerp(particle.rotation_begin, particle.rotation_end, l_lerp(x));
 						break;
 				}
 				particle.rotation = rotation;

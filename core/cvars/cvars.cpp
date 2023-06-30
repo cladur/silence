@@ -335,6 +335,7 @@ void AutoCVarString::set(std::string &&val) {
 }
 
 void CVarSystemImpl::draw_imgui_editor() {
+	ZoneScopedN("CVarSystemImpl::draw_imgui_editor");
 	static std::string search_text;
 
 	ImGui::Begin("CVar Editor");

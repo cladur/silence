@@ -13,7 +13,7 @@ void TaggableSystem::startup(World &world) {
 	ui_name = "taggable_ui";
 	tag_prefix = "taggable_entity_";
 
-	on_tagged = EventReference("SFX/tag"); 
+	on_tagged = EventReference("SFX/tag");
 
 	auto &rm = ResourceManager::get();
 
@@ -30,6 +30,7 @@ void TaggableSystem::startup(World &world) {
 }
 
 void TaggableSystem::update(World &world, float dt) {
+	ZoneScopedN("TaggableSystem::update");
 	auto &rm = ResourceManager::get();
 	auto &ui = UIManager::get();
 
@@ -43,7 +44,7 @@ void TaggableSystem::update(World &world, float dt) {
 			sprite.is_screen_space = false;
 			sprite.is_billboard = true;
 			glm::vec3 glob_pos = tag.tag_position.x * transform.get_right() + tag.tag_position.y * transform.get_up() +
-								 tag.tag_position.z * transform.get_forward();
+					tag.tag_position.z * transform.get_forward();
 			sprite.position = transform.get_global_position() + glob_pos;
 			sprite.texture = tag_texture;
 			sprite.size = glm::vec2(0.25f);
@@ -84,7 +85,6 @@ void TaggableSystem::update(World &world, float dt) {
 				} else {
 					color = glm::mix(non_tagged_color, default_color, x);
 				}
-
 
 				sprite.color = color;
 				tag.tagging = false;

@@ -11,6 +11,7 @@ void AnimationSystem::startup(World &world) {
 }
 
 void AnimationSystem::update(World &world, float dt) {
+	ZoneScopedN("AnimationSystem::update");
 	auto &animation_manager = AnimationManager::get();
 	auto &resource_manager = ResourceManager::get();
 	auto &animation_map = animation_manager.animation_map;
