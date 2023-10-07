@@ -6,9 +6,6 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
-#include "managers/input/input_key.h"
-#include "managers/input/input_manager.h"
-
 class DisplayManager {
 public:
 	enum class Status {
@@ -26,6 +23,8 @@ public:
 
 	Status startup(const std::string &window_name, bool resizable = false);
 	void shutdown();
+
+	void toggle_fullscreen() const;
 
 	void capture_mouse(bool capture) const;
 

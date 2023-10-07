@@ -3,9 +3,7 @@ set(GAME_NAME "silence_game")
 add_executable(${GAME_NAME}
         main.cpp
         game.cpp
-        game.h
-        menu_test.cpp
-        menu_test.h)
+        game.h)
 
 find_package(OpenMP)
 

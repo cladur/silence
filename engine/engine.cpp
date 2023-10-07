@@ -112,7 +112,7 @@ void Engine::update(float dt) {
 	// Update
 	custom_update(dt);
 
-	if (scenes.size() != 0) {
+	if (!scenes.empty()) {
 		get_active_scene().world.update(dt);
 		get_active_scene().update(dt);
 	}

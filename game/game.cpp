@@ -151,78 +151,6 @@ void gui_setup() {
 	SPDLOG_INFO("GUI setup complete");
 }
 
-// didn't know where to put this so i guess here is fine for now
-void ui_update() {
-	auto &ui_manager = UIManager::get();
-	auto &plus_button = ui_manager.get_ui_button("gui_test", "plus_button");
-	auto &minus_button = ui_manager.get_ui_button("gui_test", "minus_button");
-	auto &credits_button = ui_manager.get_ui_button("gui_test", "credits_button");
-	auto &options_button = ui_manager.get_ui_button("gui_test", "options_button");
-	auto &back_button = ui_manager.get_ui_button("gui_test", "back_button");
-
-	auto &credits_root = ui_manager.get_ui_anchor("gui_test", "credits_root");
-	auto &options_root = ui_manager.get_ui_anchor("gui_test", "options_root");
-	auto &back_button_root = ui_manager.get_ui_anchor("gui_test", "back_button_root");
-	auto &root = ui_manager.get_ui_anchor("gui_test", "buttons_anchor");
-	auto &title_root = ui_manager.get_ui_anchor("gui_test", "title_root");
-
-	if (credits_button.clicked()) {
-		credits_root.display = true;
-		root.display = false;
-		title_root.display = false;
-		options_root.display = false;
-
-		back_button_root.display = true;
-	}
-
-	if (options_button.clicked()) {
-		options_root.display = true;
-
-		root.display = false;
-		title_root.display = false;
-		credits_root.display = false;
-
-		back_button_root.display = true;
-	}
-
-	if (back_button.clicked()) {
-		root.display = true;
-		title_root.display = true;
-
-		credits_root.display = false;
-		options_root.display = false;
-
-		back_button_root.display = false;
-	}
-
-	FMOD::Studio::Bus *master_bus;
-	AudioManager::get().get_system()->getBus("bus:/", &master_bus);
-
-	float volume;
-	master_bus->getVolume(&volume);
-	for (int i = 0; i < 10; i++) {
-		auto &volume_meter = ui_manager.get_ui_image("gui_test", "volume_meter_" + std::to_string(i));
-		if ((i / 10.0f) < volume) {
-			volume_meter.color = glm::vec4(1.0f);
-		} else {
-			volume_meter.color = glm::vec4(0.0f);
-		}
-	}
-
-	if (plus_button.clicked()) {
-		float volume;
-
-		master_bus->getVolume(&volume);
-		master_bus->setVolume(std::round(std::clamp(volume + 0.1f, 0.0f, 1.0f) * 10.0f) / 10.0f);
-	}
-
-	if (minus_button.clicked()) {
-		float volume;
-		master_bus->getVolume(&volume);
-		master_bus->setVolume(std::round(std::clamp(volume - 0.1f, 0.0f, 1.0f) * 10.0f) / 10.0f);
-	}
-}
-
 void input_setup() {
 	InputManager &input_manager = InputManager::get();
 	input_manager.add_action("move_forward");
@@ -328,6 +256,9 @@ void input_setup() {
 
 	input_manager.add_action("toggle_debug_mode");
 	input_manager.add_key_to_action("toggle_debug_mode", InputKey::ESCAPE);
+
+	input_manager.add_action("toggle_fullscreen");
+	input_manager.add_key_to_action("toggle_fullscreen", InputKey::F11);
 
 	input_manager.add_action("mouse_left");
 	input_manager.add_key_to_action("mouse_left", InputKey::MOUSE_LEFT);
@@ -448,8 +379,13 @@ void Game::custom_update(float dt) {
 
 		cvar_controlling_agent.set(0);
 	}
+
 	if (input_manager.is_action_just_pressed("toggle_splitscreen")) {
 		CVarSystem::get()->set_int_cvar("render.splitscreen", !*CVarSystem::get()->get_int_cvar("render.splitscreen"));
+	}
+
+	if (input_manager.is_action_just_pressed("toggle_fullscreen")) {
+		display_manager.toggle_fullscreen();
 	}
 
 	// Resize scene's framebuffers if necessary
@@ -475,11 +411,10 @@ void Game::custom_update(float dt) {
 		}
 	}
 
-	//ui_update();
-
 	// get imgui io
 	ImGuiIO &io = ImGui::GetIO();
 	if (in_debug_mode) {
+		// In Debug Mode
 		if (input_manager.is_action_pressed("control_camera") && io.WantCaptureMouse == false) {
 			display_manager.capture_mouse(true);
 			DebugCamera &cam = get_active_scene().get_render_scene().debug_camera;
@@ -487,7 +422,11 @@ void Game::custom_update(float dt) {
 		} else {
 			display_manager.capture_mouse(false);
 		}
+	} else if (get_active_scene().name == "MainMenu") {
+		// In Main Menu
+		display_manager.capture_mouse(false);
 	} else {
+		// In Game (?)
 		display_manager.capture_mouse(true);
 	}
 
@@ -517,38 +456,4 @@ void Game::custom_update(float dt) {
 	}
 
 	AudioManager::get().update(get_active_scene());
-
-	// // BSP Vizualization, for now it's left in here, but could be moved to system in the future
-	// //
-	// // bsp_tree = CollisionSystem::build_tree(world, entities, 10);
-
-	// BSPNode *node = get_active_scene().bsp_tree.get();
-	// std::vector<BSPNode> nodes;
-	// traverse_bsp_tree(node, nodes);
-
-	// ImGui::Begin("BSP Tree");
-
-	// for (auto &node : nodes) {
-	// 	// calculate rotation from normal
-	// 	glm::vec3 up = glm::vec3(0.0f, 0.0f, 1.0f);
-	// 	glm::vec3 axis = glm::cross(up, node.plane.normal);
-	// 	float angle = glm::acos(glm::dot(up, node.plane.normal));
-	// 	glm::quat rotation = glm::angleAxis(angle, axis);
-
-	// 	std::string info = "Node: " + std::to_string(node.entities.size());
-	// 	ImGui::Text("%s", info.c_str());
-
-	// 	if (node.front || node.back) {
-	// 		SPDLOG_INFO("normal {}", glm::to_string(node.plane.normal));
-	// 		SPDLOG_INFO("point {}", glm::to_string(node.plane.point));
-	// 		SPDLOG_INFO("entities {}", node.entities.size());
-	// 		get_active_scene().get_render_scene().debug_draw.draw_box(
-	// 				node.plane.point, rotation, glm::vec3(20.0f, 20.0f, 0.1f), glm::vec3(1.0f, 0.0f, 0.0f));
-	// 		// draw arrow
-	// 		get_active_scene().get_render_scene().debug_draw.draw_arrow(
-	// 				node.plane.point, node.plane.point + node.plane.normal, glm::vec3(1.0f, 0.0f, 0.0f));
-	// 	}
-	// }
-
-	// ImGui::End();
 }
