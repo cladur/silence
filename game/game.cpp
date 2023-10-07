@@ -455,5 +455,18 @@ void Game::custom_update(float dt) {
 		set_active_scene("Main");
 	}
 
+	if (in_debug_mode) {
+		if (ImGui::Begin("Settings")) {
+			ImGui::Text("FPS");
+			ImGui::Checkbox("Show FPS", (bool *)CVarSystem::get()->get_int_cvar("fps.enabled"));
+			ImGui::Checkbox("Uncap FPS", (bool *)CVarSystem::get()->get_int_cvar("engine.uncap_fps"));
+			ImGui::Text("Graphics Settings");
+			ImGui::Checkbox("Screen Space Reflections", (bool *)CVarSystem::get()->get_int_cvar("ssr.enable"));
+			ImGui::Checkbox("Ambient Occlusion", (bool *)CVarSystem::get()->get_int_cvar("render.ssao"));
+			ImGui::Checkbox("Bloom", (bool *)CVarSystem::get()->get_int_cvar("render.use_bloom"));
+			ImGui::End();
+		}
+	}
+
 	AudioManager::get().update(get_active_scene());
 }
