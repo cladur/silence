@@ -12,6 +12,7 @@
 #include "render/transparent_elements/ui_manager.h"
 
 #include "physics/physics_manager.h"
+#include <imgui.h>
 
 AutoCVarInt cvar_controlling_agent("game.controlling_agent", "Controlling agent", 1, CVarFlags::EditCheckbox);
 
@@ -341,6 +342,18 @@ void traverse_bsp_tree(BSPNode *node, std::vector<BSPNode> &nodes) {
 	traverse_bsp_tree(node->back.get(), nodes);
 }
 
+void Game::toggle_debug_mode() {
+	in_debug_mode = !in_debug_mode;
+	CVarSystem::get()->set_int_cvar("debug_draw.frustum.draw", in_debug_mode);
+	CVarSystem::get()->set_int_cvar("debug_camera.use", in_debug_mode);
+	show_cvar_editor = in_debug_mode;
+
+	if (in_debug_mode) {
+		DebugCamera &cam = get_active_scene().get_render_scene().debug_camera;
+		cam.set_transform(get_active_scene().get_render_scene().left_camera_transform);
+	}
+}
+
 void Game::custom_update(float dt) {
 	ZoneScopedN("Custom Update");
 	DisplayManager &display_manager = DisplayManager::get();
@@ -400,15 +413,7 @@ void Game::custom_update(float dt) {
 
 	// Handle camera
 	if (input_manager.is_action_just_pressed("toggle_debug_mode")) {
-		in_debug_mode = !in_debug_mode;
-		CVarSystem::get()->set_int_cvar("debug_draw.frustum.draw", in_debug_mode);
-		CVarSystem::get()->set_int_cvar("debug_camera.use", in_debug_mode);
-		show_cvar_editor = in_debug_mode;
-
-		if (in_debug_mode) {
-			DebugCamera &cam = get_active_scene().get_render_scene().debug_camera;
-			cam.set_transform(get_active_scene().get_render_scene().left_camera_transform);
-		}
+		toggle_debug_mode();
 	}
 
 	// get imgui io
@@ -430,14 +435,6 @@ void Game::custom_update(float dt) {
 		display_manager.capture_mouse(true);
 	}
 
-	// ImGui
-	if (in_debug_mode) {
-		ImGui::Begin("Debug Menu");
-		ImGui::Text("Press ESC to get back to the game");
-		ImGui::Text("%f FPS (%.2f ms)", 1.0f / dt, 1000.0f * dt);
-		ImGui::End();
-	}
-
 	if (input_manager.is_action_just_pressed("reload_scene")) {
 		AnimationManager::get().animation_map.clear();
 		RenderManager::get().render_scenes.pop_back();
@@ -455,15 +452,88 @@ void Game::custom_update(float dt) {
 		set_active_scene("Main");
 	}
 
+	static bool first_benchmarking_frame = true;
+	static bool is_benchmarking = false;
+	static bool benchmark_finished = false;
+	static float benchmark_timer = 0.0f;
+	static float max_frame_time = 0.0f;
+	static float avg_frame_time = 0.0f;
+	static std::vector<float> frame_time_history;
+
+	if (is_benchmarking) {
+		// Skip first frame for the benchmark, because exiting the debug mode causes a spike
+		// (resizing framebuffers and etc.)
+		if (first_benchmarking_frame) {
+			first_benchmarking_frame = false;
+		} else {
+			frame_time_history.push_back(dt * 1000.0f);
+
+			benchmark_timer += dt;
+
+			if (dt * 1000.0f > max_frame_time) {
+				max_frame_time = dt * 1000.0f;
+			}
+
+			if (benchmark_timer > 10.0f) {
+				is_benchmarking = false;
+				benchmark_finished = true;
+				toggle_debug_mode();
+
+				benchmark_timer = 0.0f;
+
+				float sum = 0.0f;
+				for (auto &time : frame_time_history) {
+					sum += time;
+				}
+
+				avg_frame_time = sum / frame_time_history.size();
+			}
+		}
+	}
+
 	if (in_debug_mode) {
 		if (ImGui::Begin("Settings")) {
-			ImGui::Text("FPS");
-			ImGui::Checkbox("Show FPS", (bool *)CVarSystem::get()->get_int_cvar("fps.enabled"));
-			ImGui::Checkbox("Uncap FPS", (bool *)CVarSystem::get()->get_int_cvar("engine.uncap_fps"));
-			ImGui::Text("Graphics Settings");
-			ImGui::Checkbox("Screen Space Reflections", (bool *)CVarSystem::get()->get_int_cvar("ssr.enable"));
-			ImGui::Checkbox("Ambient Occlusion", (bool *)CVarSystem::get()->get_int_cvar("render.ssao"));
-			ImGui::Checkbox("Bloom", (bool *)CVarSystem::get()->get_int_cvar("render.use_bloom"));
+			ImGui::Text("Press ESC to get back to the game");
+
+			ImGui::Spacing();
+
+			if (ImGui::CollapsingHeader("FPS", ImGuiTreeNodeFlags_DefaultOpen)) {
+				ImGui::Checkbox("Show FPS", (bool *)CVarSystem::get()->get_int_cvar("fps.enabled"));
+				ImGui::Checkbox("Uncap FPS", (bool *)CVarSystem::get()->get_int_cvar("engine.uncap_fps"));
+			}
+
+			if (ImGui::CollapsingHeader("Graphics", ImGuiTreeNodeFlags_DefaultOpen)) {
+				ImGui::DragFloat("Gamma", (float *)CVarSystem::get()->get_float_cvar("render.gamma"), 0.05f, -FLT_MAX,
+						+FLT_MAX, "%.3f");
+				ImGui::Checkbox("Screen Space Reflections", (bool *)CVarSystem::get()->get_int_cvar("ssr.enable"));
+				ImGui::Checkbox("Ambient Occlusion", (bool *)CVarSystem::get()->get_int_cvar("render.ssao"));
+				ImGui::Checkbox("Bloom", (bool *)CVarSystem::get()->get_int_cvar("render.use_bloom"));
+				ImGui::End();
+			}
+		}
+	}
+
+	if (in_debug_mode || is_benchmarking) {
+		if (ImGui::Begin("Benchmark Tool")) {
+			ImGui::PlotLines("Frame Time", frame_time_history.data(), frame_time_history.size(), 0, NULL, 4.0f, 40.0f,
+					ImVec2(0, 80));
+
+			if (benchmark_finished) {
+				ImGui::Text("Min Frame Time: %.2f ms (%.0f FPS)", max_frame_time, 1000.0f / max_frame_time);
+				ImGui::Text("Avg Frame Time: %.2f ms (%.0f FPS)", avg_frame_time, 1000.0f / avg_frame_time);
+			}
+
+			if (ImGui::Button("Run Benchmark")) {
+				max_frame_time = 0.0f;
+				avg_frame_time = 0.0f;
+				frame_time_history.clear();
+				frame_time_history.reserve(1000);
+				toggle_debug_mode();
+				is_benchmarking = true;
+				benchmark_finished = false;
+				first_benchmarking_frame = true;
+			}
+
 			ImGui::End();
 		}
 	}

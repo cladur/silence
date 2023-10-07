@@ -7,7 +7,7 @@ class Game : public Engine {
 public:
 	bool in_debug_mode = false;
 
-	//MenuTest menu_test;
+	void toggle_debug_mode();
 
 	void startup() override;
 	void shutdown() override;
