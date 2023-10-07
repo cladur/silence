@@ -18,7 +18,9 @@ DisplayManager::Status DisplayManager::startup(const std::string &window_name, b
 
 	is_window_resizable = resizable;
 	glfwWindowHint(GLFW_RESIZABLE, resizable);
-	window = glfwCreateWindow(1400, 900, window_name.c_str(), nullptr, nullptr);
+	window = glfwCreateWindow(1280, 720, window_name.c_str(), nullptr, nullptr);
+
+	glfwGetWindowPos(window, &default_window_pos[0], &default_window_pos[1]);
 
 	glfwMakeContextCurrent(window);
 
@@ -37,11 +39,14 @@ void DisplayManager::shutdown() {
 
 void DisplayManager::toggle_fullscreen() const {
 	if (glfwGetWindowMonitor(window) == nullptr) {
+		// Fullscreen
 		GLFWmonitor *monitor = glfwGetPrimaryMonitor();
 		const GLFWvidmode *mode = glfwGetVideoMode(monitor);
 		glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
 	} else {
-		glfwSetWindowMonitor(window, nullptr, 0, 0, 1400, 900, get_refresh_rate());
+		// Windowed
+		glfwSetWindowMonitor(
+				window, nullptr, default_window_pos[0], default_window_pos[1], 1280, 720, get_refresh_rate());
 	}
 }
 

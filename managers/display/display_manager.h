@@ -18,6 +18,7 @@ public:
 	GLFWwindow *window;
 
 	bool is_window_resizable;
+	int default_window_pos[2] = { 64, 64 };
 
 	static DisplayManager &get();
 
