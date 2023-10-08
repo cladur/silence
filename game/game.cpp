@@ -458,6 +458,8 @@ void Game::custom_update(float dt) {
 	static float benchmark_timer = 0.0f;
 	static float max_frame_time = 0.0f;
 	static float avg_frame_time = 0.0f;
+	static float one_percent_low = 0.0f;
+	static float zero_point_one_percent_low = 0.0f;
 	static std::vector<float> frame_time_history;
 
 	if (is_benchmarking) {
@@ -485,6 +487,14 @@ void Game::custom_update(float dt) {
 				for (auto &time : frame_time_history) {
 					sum += time;
 				}
+
+				// calculate 1% low
+				//std::sort(frame_time_history.begin(), frame_time_history.end());
+				// sort the vector but convert values to fps from ms
+				std::sort(frame_time_history.begin(), frame_time_history.end(),
+						[](float a, float b) { return 1000.0f / a < 1000.0f / b; });
+				one_percent_low = frame_time_history[(int)(frame_time_history.size() * 0.01f)];
+				zero_point_one_percent_low = frame_time_history[(int)(frame_time_history.size() * 0.001f)];
 
 				avg_frame_time = sum / frame_time_history.size();
 			}
@@ -521,6 +531,9 @@ void Game::custom_update(float dt) {
 			if (benchmark_finished) {
 				ImGui::Text("Min Frame Time: %.2f ms (%.0f FPS)", max_frame_time, 1000.0f / max_frame_time);
 				ImGui::Text("Avg Frame Time: %.2f ms (%.0f FPS)", avg_frame_time, 1000.0f / avg_frame_time);
+				ImGui::Text("1%% Low: %.2f ms (%.0f FPS)", one_percent_low, 1000.0f / one_percent_low);
+				ImGui::Text("0.1%% Low: %.2f ms (%.0f FPS)", zero_point_one_percent_low,
+						1000.0f / zero_point_one_percent_low);
 			}
 
 			if (ImGui::Button("Run Benchmark")) {
