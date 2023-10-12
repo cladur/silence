@@ -17,5 +17,6 @@ xcopy resources\prefabs silence_release\resources\prefabs /E /I /Y
 xcopy resources\scenes silence_release\resources\scenes /E /I /Y
 xcopy resources\shaders silence_release\resources\shaders /E /I /Y
 
-REM Also copy that one libomp dll
+REM Also copy libomp dll's
 xcopy resources\libomp140.x86_64.dll silence_release /E /I /Y
+xcopy resources\libomp.dll silence_release /E /I /Y
