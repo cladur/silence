@@ -50,6 +50,10 @@ void DisplayManager::toggle_fullscreen() const {
 	}
 }
 
+void DisplayManager::set_windowed_full_hd() const {
+	glfwSetWindowMonitor(window, nullptr, default_window_pos[0], default_window_pos[1], 1920, 1080, get_refresh_rate());
+}
+
 void DisplayManager::capture_mouse(bool capture) const {
 	glfwSetInputMode(window, GLFW_CURSOR, capture ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
 }

@@ -513,15 +513,22 @@ void Game::custom_update(float dt) {
 				ImGui::Checkbox("Screen Space Reflections", (bool *)CVarSystem::get()->get_int_cvar("ssr.enable"));
 				ImGui::Checkbox("Ambient Occlusion", (bool *)CVarSystem::get()->get_int_cvar("render.ssao"));
 				ImGui::Checkbox("Bloom", (bool *)CVarSystem::get()->get_int_cvar("render.use_bloom"));
-				ImGui::End();
 			}
+
+			if (ImGui::CollapsingHeader("Helpers", 0)) {
+				if (ImGui::Button("Set Windowed Full HD")) {
+					display_manager.set_windowed_full_hd();
+				}
+			}
+
+			ImGui::End();
 		}
 	}
 
 	if (in_debug_mode || is_benchmarking) {
 		if (ImGui::Begin("Benchmark Tool")) {
-			ImGui::PlotLines("Frame Time", frame_time_history.data(), frame_time_history.size(), 0, NULL, 4.0f, 40.0f,
-					ImVec2(0, 80));
+			ImGui::PlotLines("Frame Time", frame_time_history.data(), frame_time_history.size(), 0, nullptr, 4.0f,
+					40.0f, ImVec2(0, 80));
 
 			if (benchmark_finished) {
 				ImGui::Text("Avg: %.2f ms (%.0f FPS)", avg_frame_time, 1000.0f / avg_frame_time);

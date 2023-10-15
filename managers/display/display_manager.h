@@ -26,6 +26,7 @@ public:
 	void shutdown();
 
 	void toggle_fullscreen() const;
+	void set_windowed_full_hd() const;
 
 	void capture_mouse(bool capture) const;
 
